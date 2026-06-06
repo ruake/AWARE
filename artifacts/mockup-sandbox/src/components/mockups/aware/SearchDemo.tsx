@@ -104,7 +104,7 @@ export function SearchDemo() {
   };
 
   return (
-    <AppLayout activeTab="dashboard">
+    <AppLayout activeTab="search">
       <div className="max-w-[960px] mx-auto space-y-6">
 
         {/* Page header */}

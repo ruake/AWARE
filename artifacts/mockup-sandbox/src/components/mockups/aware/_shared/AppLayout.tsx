@@ -2,14 +2,15 @@ import React from "react";
 import { 
   LayoutDashboard, 
   List, 
-  FileText, 
   GitCompare, 
   Info, 
+  Search,
   Menu, 
   Moon, 
   Sun, 
   ExternalLink 
 } from "lucide-react";
+import { navTo, repo } from "./nav";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -26,11 +27,11 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
   };
 
   const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "runs", label: "Runs", icon: List },
-    { id: "detail", label: "Run Detail", icon: FileText },
-    { id: "compare", label: "Compare", icon: GitCompare },
-    { id: "about", label: "About", icon: Info },
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "Dashboard" },
+    { id: "runs", label: "Runs", icon: List, path: "Runs" },
+    { id: "compare", label: "Compare", icon: GitCompare, path: "Compare" },
+    { id: "search", label: "Search", icon: Search, path: "SearchDemo" },
+    { id: "about", label: "About", icon: Info, path: "About" },
   ];
 
   return (
@@ -53,6 +54,7 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
           {navItems.map((item) => (
             <div 
               key={item.id}
+              onClick={() => navTo(item.path)}
               className={`flex items-center px-4 h-full cursor-pointer text-sm font-medium border-b-2 transition-colors ${
                 activeTab === item.id 
                   ? "border-[var(--gcp-blue)] text-[var(--gcp-blue)]" 
@@ -68,7 +70,7 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
           <button onClick={toggleTheme} className="p-2 text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] rounded-full">
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <a href="#" className="flex items-center gap-1 text-[13px] text-[var(--gcp-blue)] hover:underline">
+          <a href={`${repo}/actions`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[13px] text-[var(--gcp-blue)] hover:underline">
             GitHub Actions <ExternalLink size={14} />
           </a>
           <div className="w-8 h-8 rounded-full bg-[var(--gcp-green)] text-white flex items-center justify-center text-sm font-bold cursor-pointer">
@@ -95,6 +97,7 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
             {navItems.map((item) => (
               <div 
                 key={item.id}
+                onClick={() => navTo(item.path)}
                 className={`flex items-center px-4 py-3 cursor-pointer overflow-hidden whitespace-nowrap ${
                   activeTab === item.id 
                     ? "bg-[var(--gcp-blue-bg)] text-[var(--gcp-blue)]" 

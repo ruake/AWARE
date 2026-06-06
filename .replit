@@ -21,12 +21,19 @@ timeoutMs = 20000
 
 [[ports]]
 localPort = 5173
-externalPort = 5173
+externalPort = 80
+
+[[ports]]
+localPort = 5174
+externalPort = 3000
 
 [[ports]]
 localPort = 8080
-externalPort = 80
+externalPort = 8080
 
 [[ports]]
 localPort = 8081
 externalPort = 8081
+
+[nix]
+packages = ["iproute_mptcp"]

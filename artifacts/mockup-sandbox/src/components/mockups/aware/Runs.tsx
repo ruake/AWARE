@@ -1,21 +1,20 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
+import { RUNS } from "./_shared/data";
+import { navTo, copyToClipboard, repo } from "./_shared/nav";
 import "./_group.css";
-import { Link2, Check, Share2, Copy, ExternalLink } from "lucide-react";
+import { Link2, Check, Share2, Copy, ExternalLink, PlayCircle, Github, X } from "lucide-react";
 
 function CopyLinkBtn({ runId }: { runId: string }) {
   const [copied, setCopied] = React.useState(false);
   const handle = (e: React.MouseEvent) => {
     e.stopPropagation();
+    copyToClipboard(`https://aware.example.com/runs/${runId}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
   return (
-    <button
-      onClick={handle}
-      title={`Copy permalink for ${runId}`}
-      className="opacity-0 group-hover:opacity-100 transition-opacity ml-1.5 text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]"
-    >
+    <button onClick={handle} title={`Copy permalink for ${runId}`} className="opacity-0 group-hover:opacity-100 transition-opacity ml-1.5 text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]">
       {copied ? <Check size={12} className="text-[var(--gcp-green)]" /> : <Link2 size={12} />}
     </button>
   );
@@ -25,50 +24,99 @@ function SlackBtn({ runId }: { runId: string }) {
   const [copied, setCopied] = React.useState(false);
   const handle = (e: React.MouseEvent) => {
     e.stopPropagation();
+    copyToClipboard(`Slack snippet for run ${runId}: https://aware.example.com/runs/${runId}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
   return (
-    <button
-      onClick={handle}
-      title="Copy Slack snippet"
-      className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[#4a154b]"
-    >
+    <button onClick={handle} title="Copy Slack snippet" className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[#4a154b]">
       {copied ? <Check size={12} className="text-[var(--gcp-green)]" /> : <Share2 size={12} />}
     </button>
   );
 }
 
-export function Runs() {
-  const dummyRuns = Array.from({length: 12}).map((_, i) => {
-    const isFail = i === 2 || i === 7;
-    const isPartial = i === 4;
-    const status = isFail ? "FAIL" : isPartial ? "PARTIAL" : "PASS";
-    const statusClass = status === "PASS" ? "gcp-badge-pass" : status === "FAIL" ? "gcp-badge-fail" : "gcp-badge-flaky";
-    const failCount = status === "PASS" ? 0 : status === "FAIL" ? (i === 2 ? 6 : 12) : 3;
-    const passPct = status === "PASS" ? 100 : 100 - Math.floor(failCount / 10);
-    return {
-      id: `run_892_2341.1.0_prod_${1000 + i}`,
-      label: `Prod/Production · PM 892 · EW 2341.1.0`,
-      suite: i % 3 === 0 ? "full_suite" : "geo_gating",
-      target: i % 2 === 0 ? "Prod" : "UAT",
-      status,
-      statusClass,
-      passPct: `${passPct}%`,
-      failures: failCount,
-      duration: `${45 + (i%15)}m`,
-      started: `2026-06-06T14:${String(30 - i).padStart(2,"0")}Z`,
-      pm: "v892",
-      ew: "2341.1.0"
-    };
-  });
+function NewRunModal({ onClose }: { onClose: () => void }) {
+  const [branch, setBranch] = React.useState("main");
+  const [suite, setSuite] = React.useState("full_suite");
+  const [target, setTarget] = React.useState("Prod");
+  const [env, setEnv] = React.useState("Production");
+  const [triggered, setTriggered] = React.useState(false);
 
-  const [shareToast, setShareToast] = React.useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setShareToast(msg);
-    setTimeout(() => setShareToast(null), 2500);
+  const handleTrigger = () => {
+    const workflowUrl = `${repo}/actions/workflows/run-tests.yml`;
+    const params = new URLSearchParams({
+      inputs: JSON.stringify({ branch, suite, target, environment: env }),
+    });
+    copyToClipboard(`${workflowUrl}/dispatches?${params}`);
+    setTriggered(true);
   };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="gcp-card w-[480px] p-5 shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-medium flex items-center gap-2">
+            <PlayCircle size={18} className="text-[var(--gcp-blue)]" /> New Run
+          </h2>
+          <button onClick={onClose} className="text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)]"><X size={18} /></button>
+        </div>
+
+        {triggered ? (
+          <div className="text-center py-6 space-y-3">
+            <Check size={32} className="mx-auto text-[var(--gcp-green)]" />
+            <p className="text-sm font-medium text-[var(--gcp-text)]">Workflow trigger copied to clipboard</p>
+            <p className="text-[12px] text-[var(--gcp-text-secondary)]">Open GitHub Actions to run the workflow:</p>
+            <a href={`${repo}/actions/workflows/run-tests.yml`} target="_blank" rel="noopener noreferrer" className="gcp-button gcp-button-primary inline-flex items-center gap-1.5 text-sm">
+              <Github size={15} /> Open GitHub Actions <ExternalLink size={13} />
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-[var(--gcp-text-secondary)] mb-1">Branch</label>
+              <input value={branch} onChange={e => setBranch(e.target.value)} className="gcp-input w-full font-mono text-sm" placeholder="main" />
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-[var(--gcp-text-secondary)] mb-1">Suite</label>
+              <select value={suite} onChange={e => setSuite(e.target.value)} className="gcp-input w-full text-sm">
+                <option>full_suite</option>
+                <option>geo_gating</option>
+                <option>smoke</option>
+                <option>url_health</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[12px] font-medium text-[var(--gcp-text-secondary)] mb-1">Target</label>
+                <select value={target} onChange={e => setTarget(e.target.value)} className="gcp-input w-full text-sm">
+                  <option>Prod</option>
+                  <option>UAT</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[12px] font-medium text-[var(--gcp-text-secondary)] mb-1">Environment</label>
+                <select value={env} onChange={e => setEnv(e.target.value)} className="gcp-input w-full text-sm">
+                  <option>Production</option>
+                  <option>Staging</option>
+                </select>
+              </div>
+            </div>
+            <div className="pt-2">
+              <button onClick={handleTrigger} className="gcp-button gcp-button-primary w-full flex items-center justify-center gap-1.5 text-sm py-2.5">
+                <Github size={16} /> Trigger via GitHub Actions
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function Runs() {
+  const [shareToast, setShareToast] = React.useState<string | null>(null);
+  const [showNewRun, setShowNewRun] = React.useState(false);
+  const showToast = (msg: string) => { setShareToast(msg); setTimeout(() => setShareToast(null), 2500); };
 
   return (
     <AppLayout activeTab="runs">
@@ -78,25 +126,14 @@ export function Runs() {
         <div className="gcp-card p-4 flex flex-wrap gap-4 items-center">
           <div className="flex gap-2">
             {["All", "PASS", "FAIL", "PARTIAL", "FLAKY"].map(s => (
-              <span key={s} className={`gcp-badge cursor-pointer ${s === 'All' ? 'bg-[var(--gcp-blue)] text-white' : 'bg-[var(--gcp-grey-bg)] text-[var(--gcp-text)]'}`}>{s}</span>
+              <span key={s} onClick={() => showToast(`Filtered by: ${s}`)} className={`gcp-badge cursor-pointer ${s === 'All' ? 'bg-[var(--gcp-blue)] text-white' : 'bg-[var(--gcp-grey-bg)] text-[var(--gcp-text)]'}`}>{s}</span>
             ))}
           </div>
           <div className="h-6 w-px bg-[var(--gcp-grey)]" />
-          <select className="gcp-input">
-            <option>full_suite</option>
-            <option>geo_gating</option>
-            <option>smoke</option>
-            <option>url_health</option>
-          </select>
-          <select className="gcp-input">
-            <option>Prod</option>
-            <option>UAT</option>
-          </select>
-          <select className="gcp-input">
-            <option>Production</option>
-            <option>Staging</option>
-          </select>
-          <input type="date" className="gcp-input" />
+          <select className="gcp-input" onChange={e => showToast(`Suite: ${e.target.value}`)}><option>full_suite</option><option>geo_gating</option><option>smoke</option><option>url_health</option></select>
+          <select className="gcp-input" onChange={e => showToast(`Target: ${e.target.value}`)}><option>Prod</option><option>UAT</option></select>
+          <select className="gcp-input" onChange={e => showToast(`Env: ${e.target.value}`)}><option>Production</option><option>Staging</option></select>
+          <input type="date" className="gcp-input" onChange={e => showToast(`Date: ${e.target.value}`)} />
         </div>
 
         {/* Table Controls */}
@@ -106,14 +143,12 @@ export function Runs() {
             Hover any row to copy its permalink or Slack snippet
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={() => showToast("Current filter state copied as shareable URL")}
-              className="gcp-button text-sm flex items-center gap-1.5"
-            >
-              <Copy size={13} /> Share filtered view
+            <button onClick={() => setShowNewRun(true)} className="gcp-button gcp-button-primary text-sm flex items-center gap-1.5">
+              <PlayCircle size={14} /> New Run
             </button>
-            <button className="gcp-button text-sm">Export CSV</button>
-            <button className="gcp-button text-sm">Export JSON</button>
+            <button onClick={() => { copyToClipboard(window.location.href); showToast("Current filter state URL copied"); }} className="gcp-button text-sm flex items-center gap-1.5"><Copy size={13} /> Share filtered view</button>
+            <button onClick={() => showToast("CSV export started")} className="gcp-button text-sm">Export CSV</button>
+            <button onClick={() => showToast("JSON export started")} className="gcp-button text-sm">Export JSON</button>
           </div>
         </div>
 
@@ -137,54 +172,45 @@ export function Runs() {
               </tr>
             </thead>
             <tbody>
-              {dummyRuns.map((run, i) => (
-                <tr key={run.id} className={`group ${i === 1 ? "bg-[var(--gcp-blue-bg)]" : ""}`}>
-                  <td>
-                    <div className="flex items-center">
-                      <span className="gcp-mono text-[var(--gcp-blue)] hover:underline cursor-pointer text-[12px]">{run.id}</span>
-                      <CopyLinkBtn runId={run.id} />
-                    </div>
-                  </td>
-                  <td className="text-[var(--gcp-text-secondary)] text-[12px]">{run.label}</td>
-                  <td className="text-[12px]">{run.suite}</td>
-                  <td className="text-[12px]">{run.target}</td>
-                  <td><span className={`gcp-badge ${run.statusClass}`}>{run.status}</span></td>
-                  <td className="text-right font-mono text-[12px]">{run.passPct}</td>
-                  <td className="text-right font-mono text-[12px] text-[var(--gcp-red)]">{run.failures > 0 ? run.failures : "-"}</td>
-                  <td className="text-right text-[var(--gcp-text-secondary)] text-[12px]">{run.duration}</td>
-                  <td className="gcp-mono text-[11px]">{run.started}</td>
-                  <td className="gcp-mono text-[12px]">{run.pm}</td>
-                  <td className="gcp-mono text-[12px]">{run.ew}</td>
-                  <td className="text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => showToast(`Permalink copied: /runs/${run.id}`)}
-                        title="Copy permalink"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]"
-                      >
-                        <Link2 size={13} />
-                      </button>
-                      <button
-                        onClick={() => showToast(`Slack snippet copied for ${run.id}`)}
-                        title="Copy Slack snippet"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[#4a154b]"
-                      >
-                        <Share2 size={13} />
-                      </button>
-                      <a href="#" className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]" title="Open in new tab">
-                        <ExternalLink size={13} />
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {RUNS.map((run, i) => {
+                const statusBadge = run.status === "PASS" ? "gcp-badge-pass" : run.status === "FAIL" ? "gcp-badge-fail" : "gcp-badge-flaky";
+                return (
+                  <tr key={run.id} className={`group ${i === 1 ? "bg-[var(--gcp-blue-bg)]" : ""}`}>
+                    <td>
+                      <div className="flex items-center">
+                        <span className="gcp-mono text-[var(--gcp-blue)] hover:underline cursor-pointer text-[12px]" onClick={() => navTo(`RunDetail?runId=${run.id}`)}>
+                          {run.id}
+                        </span>
+                        <CopyLinkBtn runId={run.id} />
+                      </div>
+                    </td>
+                    <td className="text-[var(--gcp-text-secondary)] text-[12px]">{run.label}</td>
+                    <td className="text-[12px]">{run.suite}</td>
+                    <td className="text-[12px]">{run.target}</td>
+                    <td><span className={`gcp-badge ${statusBadge}`}>{run.status}</span></td>
+                    <td className="text-right font-mono text-[12px]">{run.passPct}%</td>
+                    <td className="text-right font-mono text-[12px] text-[var(--gcp-red)]">{run.failures > 0 ? run.failures : "-"}</td>
+                    <td className="text-right text-[var(--gcp-text-secondary)] text-[12px]">{run.duration}</td>
+                    <td className="gcp-mono text-[11px]">{run.started}</td>
+                    <td className="gcp-mono text-[12px]">{run.pm}</td>
+                    <td className="gcp-mono text-[12px]">{run.ew}</td>
+                    <td className="text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button onClick={() => { copyToClipboard(`https://aware.example.com/runs/${run.id}`); showToast("Permalink copied"); }} title="Copy permalink" className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]"><Link2 size={13} /></button>
+                        <button onClick={() => { copyToClipboard(`Slack snippet for run ${run.id}: https://aware.example.com/runs/${run.id}`); showToast("Slack snippet copied"); }} title="Copy Slack snippet" className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[#4a154b]"><Share2 size={13} /></button>
+                        <button onClick={() => window.open(`/preview/aware/RunDetail?runId=${run.id}`, "_blank", "noopener")} title="Open in new tab" className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]"><ExternalLink size={13} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
           <div className="p-4 border-t border-[var(--gcp-grey)] flex justify-between items-center text-sm text-[var(--gcp-text-secondary)]">
             <span>Showing 1–12 of 145 runs</span>
             <div className="flex gap-2">
-              <button className="gcp-button" disabled>&lt; Prev</button>
-              <button className="gcp-button">Next &gt;</button>
+              <button className="gcp-button" disabled onClick={() => showToast("Already on first page")}>&lt; Prev</button>
+              <button className="gcp-button" onClick={() => showToast("Loading next page...")}>Next &gt;</button>
             </div>
           </div>
         </div>
@@ -197,6 +223,9 @@ export function Runs() {
         )}
 
       </div>
+
+      {/* New Run Modal */}
+      {showNewRun && <NewRunModal onClose={() => setShowNewRun(false)} />}
     </AppLayout>
   );
 }

@@ -1,27 +1,109 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
+import { RUNS, DIFF_ROWS, TEST_DETAILS } from "./_shared/data";
+import { copyToClipboard, navTo } from "./_shared/nav";
 import "./_group.css";
-import { Link2, Github, Share2, Copy, Check, ExternalLink, AlertTriangle } from "lucide-react";
+import { Link2, Github, Share2, Copy, Check, AlertTriangle, BarChart3, X, ArrowUpRight } from "lucide-react";
+
+function ComparisonSidePanel({ diff, testId }: { diff: typeof DIFF_ROWS[number]; testId: string }) {
+  const deltaMs = diff.durCand - diff.durBase;
+  const hasDelta = Math.abs(deltaMs) > 20;
+  const stateLabel = diff.state === "regression" ? "Regression" : diff.state === "fixed" ? "Fixed" : diff.state === "duration" ? "Duration Change" : "Unchanged";
+  const stateColor = diff.state === "regression" ? "var(--gcp-red)" : diff.state === "fixed" ? "var(--gcp-green)" : diff.state === "duration" ? "var(--gcp-yellow)" : "var(--gcp-text-secondary)";
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b border-[var(--gcp-grey)] flex items-center justify-between shrink-0">
+        <h3 className="font-medium text-sm flex items-center gap-2"><BarChart3 size={15} className="text-[var(--gcp-blue)]" /> Comparison Detail</h3>
+        <div className="flex items-center gap-2">
+          <button onClick={() => navTo(`TestAnalytics?testId=${testId}`)} className="gcp-button text-[11px] flex items-center gap-1 px-2.5 py-1.5">
+            <BarChart3 size={12} /> View Analytics <ArrowUpRight size={11} />
+          </button>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-auto p-4 space-y-5">
+
+        {/* Test Identity */}
+        <div>
+          <h4 className="text-[13px] font-mono text-[var(--gcp-text)] leading-relaxed">{diff.name}</h4>
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className="px-2 py-0.5 bg-[var(--gcp-surface)] text-[11px] border border-[var(--gcp-grey)] rounded">{diff.category}</span>
+            <span className="text-[11px] text-[var(--gcp-text-secondary)]" style={{ color: stateColor }}>{stateLabel}</span>
+          </div>
+        </div>
+
+        {/* Baseline vs Candidate */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="gcp-card p-3 border-l-4" style={{ borderLeftColor: diff.baseStatus === "PASS" ? "var(--gcp-green)" : "var(--gcp-red)" }}>
+            <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium mb-1">Baseline</div>
+            <div className="flex items-center justify-between">
+              <span className={`gcp-badge ${diff.baseStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{diff.baseStatus}</span>
+              <span className="font-mono text-[12px] text-[var(--gcp-text-secondary)]">{diff.durBase}ms</span>
+            </div>
+          </div>
+          <div className="gcp-card p-3 border-l-4" style={{ borderLeftColor: diff.candStatus === "PASS" ? "var(--gcp-green)" : "var(--gcp-red)" }}>
+            <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium mb-1">Candidate</div>
+            <div className="flex items-center justify-between">
+              <span className={`gcp-badge ${diff.candStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{diff.candStatus}</span>
+              <span className="font-mono text-[12px] text-[var(--gcp-text-secondary)]">{diff.durCand}ms</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Delta */}
+        <div className="gcp-card p-3">
+          <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium mb-1">Delta</div>
+          <div className="flex items-center gap-4">
+            <div>
+              <span className="text-[var(--gcp-text-secondary)] text-[12px]">Status: </span>
+              {diff.baseStatus === diff.candStatus
+                ? <span className="font-medium text-[12px] text-[var(--gcp-text-secondary)]">No change</span>
+                : <span className="font-medium text-[12px]" style={{ color: stateColor }}>
+                    {diff.baseStatus} → {diff.candStatus}
+                  </span>
+              }
+            </div>
+            <div>
+              <span className="text-[var(--gcp-text-secondary)] text-[12px]">Duration: </span>
+              {hasDelta
+                ? <span className={`font-mono text-[12px] font-bold ${deltaMs > 0 ? "text-[var(--gcp-red)]" : "text-[var(--gcp-green)]"}`}>
+                    {deltaMs > 0 ? "+" : ""}{deltaMs}ms
+                  </span>
+                : <span className="font-mono text-[12px] text-[var(--gcp-text-secondary)]">~0ms</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="space-y-2">
+          <button
+            onClick={() => { copyToClipboard(`https://aware.example.com/tests/${diff.id}?baseline=${RUNS[0].id}&candidate=${RUNS[3].id}`); }}
+            className="w-full gcp-button text-[12px] flex items-center justify-center gap-1.5 py-2"
+          >
+            <Link2 size={13} /> Copy permalink
+          </button>
+          <button
+            onClick={() => { copyToClipboard(`GitHub issue for test: ${diff.name}\nBaseline: ${diff.baseStatus} (${diff.durBase}ms)\nCandidate: ${diff.candStatus} (${diff.durCand}ms)`); }}
+            className="w-full gcp-button text-[12px] flex items-center justify-center gap-1.5 py-2"
+          >
+            <Github size={13} /> File GitHub issue
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Compare() {
-  const dummyDiff = Array.from({length: 15}).map((_, i) => {
-    let state = "unchanged";
-    if (i === 1 || i === 4) state = "regression";
-    if (i === 2) state = "fixed";
-    if (i === 5) state = "duration";
-    return {
-      id: `diff_${i}`,
-      name: `Regression Check /path/${i}`,
-      baseStatus: state === "fixed" ? "FAIL" : "PASS",
-      baseClass: state === "fixed" ? "gcp-badge-fail" : "gcp-badge-pass",
-      candStatus: state === "regression" ? "FAIL" : "PASS",
-      candClass: state === "regression" ? "gcp-badge-fail" : "gcp-badge-pass",
-      durBase: 120,
-      durCand: state === "duration" ? 340 : 125,
-      category: "geo-match",
-      state
-    };
-  });
+  const params = new URLSearchParams(window.location.search);
+  const initialBaseline = params.get("baseline") || RUNS[0].id;
+  const initialCandidate = params.get("candidate") || RUNS[3].id;
+
+  const [baseline, setBaseline] = React.useState(initialBaseline);
+  const [candidate, setCandidate] = React.useState(initialCandidate);
+  const [selectedTestId, setSelectedTestId] = React.useState<string | null>(null);
 
   const [shareToast, setShareToast] = React.useState<string | null>(null);
   const [issueFiled, setIssueFiled] = React.useState<string | null>(null);
@@ -29,49 +111,74 @@ export function Compare() {
 
   const fileIssue = (testName: string) => {
     setIssueFiled(testName);
+    copyToClipboard(`GitHub issue for test: ${testName}\nComparison: ${baseline} vs ${candidate}`);
     showToast(`GitHub issue template copied for ${testName}`);
     setTimeout(() => setIssueFiled(null), 3000);
   };
 
+  const swap = () => {
+    setBaseline(candidate);
+    setCandidate(baseline);
+  };
+
+  const runIds = RUNS.map(r => r.id);
+
+  const selectedDiff = selectedTestId
+    ? DIFF_ROWS.find(d => d.id === selectedTestId) ?? null
+    : null;
+
+  const updateBaseline = (val: string) => {
+    setBaseline(val);
+    const url = new URL(window.location.href);
+    url.searchParams.set("baseline", val);
+    window.history.replaceState({}, "", url.toString());
+  };
+
+  const updateCandidate = (val: string) => {
+    setCandidate(val);
+    const url = new URL(window.location.href);
+    url.searchParams.set("candidate", val);
+    window.history.replaceState({}, "", url.toString());
+  };
+
+  const doSwap = () => {
+    setBaseline(candidate);
+    setCandidate(baseline);
+    const url = new URL(window.location.href);
+    url.searchParams.set("baseline", candidate);
+    url.searchParams.set("candidate", baseline);
+    window.history.replaceState({}, "", url.toString());
+  };
+
   return (
     <AppLayout activeTab="compare">
-      <div className="max-w-[1600px] mx-auto space-y-4">
+      <div className="h-[calc(100vh-100px)] flex flex-col max-w-[1600px] mx-auto gap-4">
 
-        {/* Selectors */}
-        <div className="gcp-card p-4 flex items-center justify-between bg-[var(--gcp-surface-hover)]">
+        {/* Selectors (shrink-0) */}
+        <div className="gcp-card p-4 flex items-center justify-between bg-[var(--gcp-surface-hover)] shrink-0">
           <div className="flex-1">
             <label className="block text-xs font-bold text-[var(--gcp-text-secondary)] mb-1 uppercase">Baseline Run</label>
-            <select className="gcp-input w-full font-mono text-sm">
-              <option>run_892_2341.1.0_prod_1000 (PASS 99%)</option>
+            <select className="gcp-input w-full font-mono text-sm" value={baseline} onChange={e => updateBaseline(e.target.value)}>
+              {runIds.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
           <div className="px-8">
-            <button className="gcp-button">⇄ Swap</button>
+            <button className="gcp-button" onClick={doSwap}>⇄ Swap</button>
           </div>
           <div className="flex-1">
             <label className="block text-xs font-bold text-[var(--gcp-text-secondary)] mb-1 uppercase">Candidate Run</label>
-            <select className="gcp-input w-full font-mono text-sm border-[var(--gcp-blue)]">
-              <option>run_893_2341.1.0_prod_1001 (PASS 87%)</option>
+            <select className="gcp-input w-full font-mono text-sm border-[var(--gcp-blue)]" value={candidate} onChange={e => updateCandidate(e.target.value)}>
+              {runIds.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
           <div className="pl-6 flex items-end gap-2 pb-0.5">
-            <button
-              onClick={() => showToast("Comparison permalink copied")}
-              className="gcp-button text-[12px] flex items-center gap-1.5"
-            >
-              <Link2 size={13} /> Copy link
-            </button>
-            <button
-              onClick={() => showToast("Slack comparison summary copied")}
-              className="gcp-button text-[12px] flex items-center gap-1.5"
-            >
-              <Share2 size={13} /> Share
-            </button>
+            <button onClick={() => { copyToClipboard(window.location.href); showToast("Comparison permalink copied"); }} className="gcp-button text-[12px] flex items-center gap-1.5"><Link2 size={13} /> Copy link</button>
+            <button onClick={() => { copyToClipboard(`Comparison summary: ${baseline} vs ${candidate}\nNew failures: 7\nFixed: 12\nStill failing: 3\nDuration regressions: 2`); showToast("Slack comparison summary copied"); }} className="gcp-button text-[12px] flex items-center gap-1.5"><Share2 size={13} /> Share</button>
           </div>
         </div>
 
-        {/* Summary Tiles */}
-        <div className="grid grid-cols-4 gap-4">
+        {/* Summary Tiles (shrink-0) */}
+        <div className="grid grid-cols-4 gap-4 shrink-0">
           <div className="gcp-card p-4 flex justify-between items-center border-l-4 border-l-[var(--gcp-red)]">
             <span className="font-medium text-[var(--gcp-text-secondary)]">New Failures</span>
             <span className="text-2xl font-bold text-[var(--gcp-red)]">+7</span>
@@ -90,100 +197,75 @@ export function Compare() {
           </div>
         </div>
 
-        {/* Regression quick-actions bar */}
-        <div className="flex items-center gap-3 text-[12px] text-[var(--gcp-text-secondary)] bg-[var(--gcp-red-bg)] border border-[var(--gcp-red)] rounded px-4 py-2.5">
+        {/* Regression quick-actions bar (shrink-0) */}
+        <div className="flex items-center gap-3 text-[12px] text-[var(--gcp-text-secondary)] bg-[var(--gcp-red-bg)] border border-[var(--gcp-red)] rounded px-4 py-2.5 shrink-0">
           <AlertTriangle size={14} className="text-[var(--gcp-red)] shrink-0" />
           <span><strong>7 regressions</strong> detected. File GitHub issues or share with your team:</span>
-          <button
-            onClick={() => showToast("Bulk issue template copied — 7 regressions")}
-            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 bg-[var(--gcp-red)] text-white rounded text-[11px] font-medium hover:opacity-90 transition-opacity"
-          >
-            <Github size={12} /> File all as GitHub Issues
-          </button>
-          <button
-            onClick={() => showToast("Regression summary copied as Slack message")}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--gcp-surface)] border border-[var(--gcp-red)] text-[var(--gcp-red)] rounded text-[11px] font-medium hover:bg-[var(--gcp-red-bg)] transition-colors"
-          >
-            <Share2 size={12} /> Share to Slack
-          </button>
-          <button
-            onClick={() => showToast("Full comparison permalink copied")}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--gcp-surface)] border border-[var(--gcp-grey)] text-[var(--gcp-text-secondary)] rounded text-[11px] font-medium hover:bg-[var(--gcp-surface-hover)] transition-colors"
-          >
-            <Copy size={12} /> Copy permalink
-          </button>
+          <button onClick={() => { copyToClipboard(`Bulk regression report\nBaseline: ${baseline}\nCandidate: ${candidate}\n7 regressions detected`); showToast("Bulk issue template copied — 7 regressions"); }} className="ml-auto flex items-center gap-1.5 px-3 py-1.5 bg-[var(--gcp-red)] text-white rounded text-[11px] font-medium hover:opacity-90 transition-opacity"><Github size={12} /> File all as GitHub Issues</button>
+          <button onClick={() => { copyToClipboard(`Regression summary\nBaseline: ${baseline}\nCandidate: ${candidate}\n7 regressions, 12 fixed, 3 still failing, 2 duration regressions`); showToast("Regression summary copied as Slack message"); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--gcp-surface)] border border-[var(--gcp-red)] text-[var(--gcp-red)] rounded text-[11px] font-medium hover:bg-[var(--gcp-red-bg)] transition-colors"><Share2 size={12} /> Share to Slack</button>
+          <button onClick={() => { copyToClipboard(window.location.href); showToast("Full comparison permalink copied"); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--gcp-surface)] border border-[var(--gcp-grey)] text-[var(--gcp-text-secondary)] rounded text-[11px] font-medium hover:bg-[var(--gcp-surface-hover)] transition-colors"><Copy size={12} /> Copy permalink</button>
         </div>
 
-        {/* Filters & Table */}
-        <div className="gcp-card overflow-hidden">
-          <div className="p-3 border-b border-[var(--gcp-grey)] flex gap-4 items-center">
-            <input type="text" placeholder="Search test name..." className="gcp-input flex-1" />
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" defaultChecked /> Show regressions only
-            </label>
-            <span className="text-[11px] text-[var(--gcp-text-secondary)] ml-auto">
-              Hover a row → <Link2 size={10} className="inline" /> permalink · <Github size={10} className="inline" /> issue · <Share2 size={10} className="inline" /> share
-            </span>
+        {/* Main split: table (left) + side panel (right) */}
+        <div className="flex gap-4 flex-1 overflow-hidden">
+
+          {/* Left: Table */}
+          <div className={`flex flex-col gcp-card overflow-hidden ${selectedTestId ? "flex-1" : "w-full"}`}>
+            <div className="p-3 border-b border-[var(--gcp-grey)] flex gap-4 items-center shrink-0">
+              <input type="text" placeholder="Search test name..." className="gcp-input flex-1" />
+              <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" defaultChecked /> Show regressions only</label>
+              <span className="text-[11px] text-[var(--gcp-text-secondary)] ml-auto">Click a row for comparison detail</span>
+            </div>
+            <div className="flex-1 overflow-auto">
+              <table className="gcp-table">
+                <thead className="sticky top-0 bg-[var(--gcp-surface)] z-10">
+                  <tr>
+                    <th>Test Name</th>
+                    <th>Baseline Status</th>
+                    <th>Candidate Status</th>
+                    <th className="text-right">Δ Duration</th>
+                    <th>Category</th>
+                    <th className="w-24 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DIFF_ROWS.map((d, i) => (
+                    <tr key={d.id}
+                      className={`group cursor-pointer ${
+                        d.state === 'regression' ? 'bg-[var(--gcp-red-bg)]' : d.state === 'fixed' ? 'bg-[var(--gcp-green-bg)]' : ''
+                      } ${selectedTestId === d.id ? 'bg-[var(--gcp-blue-bg)] ring-2 ring-inset ring-[var(--gcp-blue)]' : ''}`}
+                      onClick={() => setSelectedTestId(selectedTestId === d.id ? null : d.id)}
+                    >
+                      <td className="font-mono text-xs text-[var(--gcp-blue)] hover:underline font-medium">{d.name}</td>
+                      <td><span className={`gcp-badge ${d.baseStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{d.baseStatus}</span></td>
+                      <td><span className={`gcp-badge ${d.candStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{d.candStatus}</span></td>
+                      <td className="text-right font-mono text-xs">
+                        {d.state === 'duration'
+                          ? <span className="text-[var(--gcp-red)] font-bold">+{d.durCand - d.durBase}ms</span>
+                          : <span className="text-[var(--gcp-text-secondary)]">~0ms</span>}
+                      </td>
+                      <td><span className="px-2 py-1 bg-[var(--gcp-surface)] text-[11px] border border-[var(--gcp-grey)] rounded">{d.category}</span></td>
+                      <td>
+                        <div className="flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={(e) => { e.stopPropagation(); copyToClipboard(`https://aware.example.com/tests/${d.id}?baseline=${baseline}&candidate=${candidate}`); showToast("Permalink copied"); }} title="Copy permalink" className="p-1 text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)] rounded hover:bg-[var(--gcp-blue-bg)] transition-colors"><Link2 size={12} /></button>
+                          <button onClick={(e) => { e.stopPropagation(); fileIssue(d.name); }} title="File GitHub issue" className={`p-1 rounded transition-colors ${issueFiled === d.name ? "text-[var(--gcp-green)]" : "text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)] hover:bg-[var(--gcp-grey-bg)]"}`}>{issueFiled === d.name ? <Check size={12} /> : <Github size={12} />}</button>
+                          <button onClick={(e) => { e.stopPropagation(); copyToClipboard(`Slack: test ${d.name} comparison\nBaseline: ${d.baseStatus} (${d.durBase}ms)\nCandidate: ${d.candStatus} (${d.durCand}ms)\n${baseline} vs ${candidate}`); showToast("Slack snippet copied"); }} title="Share via Slack" className="p-1 text-[var(--gcp-text-secondary)] hover:text-[#4a154b] rounded hover:bg-[var(--gcp-grey-bg)] transition-colors"><Share2 size={12} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <table className="gcp-table">
-            <thead>
-              <tr>
-                <th>Test Name</th>
-                <th>Baseline Status</th>
-                <th>Candidate Status</th>
-                <th className="text-right">Δ Duration</th>
-                <th>Category</th>
-                <th className="w-24 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dummyDiff.map(d => (
-                <tr
-                  key={d.id}
-                  className={`group ${d.state === 'regression' ? 'bg-[var(--gcp-red-bg)]' : d.state === 'fixed' ? 'bg-[var(--gcp-green-bg)]' : ''}`}
-                >
-                  <td className="font-mono text-xs">{d.name}</td>
-                  <td><span className={`gcp-badge ${d.baseClass}`}>{d.baseStatus}</span></td>
-                  <td><span className={`gcp-badge ${d.candClass}`}>{d.candStatus}</span></td>
-                  <td className="text-right font-mono text-xs">
-                    {d.state === 'duration'
-                      ? <span className="text-[var(--gcp-red)] font-bold">+{d.durCand - d.durBase}ms</span>
-                      : <span className="text-[var(--gcp-text-secondary)]">~0ms</span>}
-                  </td>
-                  <td><span className="px-2 py-1 bg-[var(--gcp-surface)] text-[11px] border border-[var(--gcp-grey)] rounded">{d.category}</span></td>
-                  <td>
-                    <div className="flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => showToast(`Permalink copied for ${d.name}`)}
-                        title="Copy permalink"
-                        className="p-1 text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)] rounded hover:bg-[var(--gcp-blue-bg)] transition-colors"
-                      >
-                        <Link2 size={12} />
-                      </button>
-                      <button
-                        onClick={() => fileIssue(d.name)}
-                        title="File GitHub issue"
-                        className={`p-1 rounded transition-colors ${issueFiled === d.name ? "text-[var(--gcp-green)]" : "text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)] hover:bg-[var(--gcp-grey-bg)]"}`}
-                      >
-                        {issueFiled === d.name ? <Check size={12} /> : <Github size={12} />}
-                      </button>
-                      <button
-                        onClick={() => showToast(`Slack snippet copied for ${d.name}`)}
-                        title="Share via Slack"
-                        className="p-1 text-[var(--gcp-text-secondary)] hover:text-[#4a154b] rounded hover:bg-[var(--gcp-grey-bg)] transition-colors"
-                      >
-                        <Share2 size={12} />
-                      </button>
-                      <a href="#" title="Open in new tab" className="p-1 text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)] rounded hover:bg-[var(--gcp-blue-bg)] transition-colors">
-                        <ExternalLink size={12} />
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Right: Side panel */}
+          {selectedDiff && (
+            <div className="w-[35%] gcp-card overflow-hidden shrink-0 bg-[var(--gcp-surface)] border-l-2 border-[var(--gcp-blue)]">
+              <ComparisonSidePanel diff={selectedDiff} testId={selectedTestId!} />
+            </div>
+          )}
+
         </div>
 
         {/* Toast */}

@@ -1,7 +1,8 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
-import { ArrowLeft, ExternalLink, Pin, AlertCircle, CheckCircle2, GitCommit, GitBranch, Github, Code, FileText, AlertTriangle } from "lucide-react";
+import { repo } from "./_shared/nav";
 import "./_group.css";
+import { ArrowLeft, Pin, Github, ExternalLink, FileText, CheckCircle2, AlertTriangle, AlertCircle, GitBranch, GitCommit } from "lucide-react";
 
 export function TestDoc() {
   return (
@@ -286,7 +287,7 @@ export function TestDoc() {
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <a href="#" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline font-bold">a3f9c12</a>
+                          <a href={`${repo}/commits/main`} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline font-bold">a3f9c12</a>
                           <span className="text-xs text-[var(--gcp-text-secondary)]">Jun 5</span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -315,7 +316,7 @@ export function TestDoc() {
                     <div className="flex flex-col gap-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <a href="#" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline">b7e4d01</a>
+                          <a href={`${repo}/commits/main`} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline">b7e4d01</a>
                           <span className="text-xs text-[var(--gcp-text-secondary)]">May 28</span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -336,7 +337,7 @@ export function TestDoc() {
                     <div className="flex flex-col gap-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <a href="#" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline">c1a2b39</a>
+                          <a href={`${repo}/commits/main`} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline">c1a2b39</a>
                           <span className="text-xs text-[var(--gcp-text-secondary)]">May 21</span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -357,7 +358,7 @@ export function TestDoc() {
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <a href="#" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline">d9f3e87</a>
+                          <a href={`${repo}/commits/main`} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline">d9f3e87</a>
                           <span className="text-xs text-[var(--gcp-text-secondary)]">May 14</span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -384,7 +385,7 @@ export function TestDoc() {
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <a href="#" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline">e5c8a11</a>
+                          <a href={`${repo}/commits/main`} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline">e5c8a11</a>
                           <span className="text-xs text-[var(--gcp-text-secondary)]">May 7</span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -410,7 +411,7 @@ export function TestDoc() {
                     <div className="flex flex-col gap-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <a href="#" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline">f2b9d64</a>
+                          <a href={`${repo}/commits/main`} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-[var(--gcp-blue)] hover:underline">f2b9d64</a>
                           <span className="text-xs text-[var(--gcp-text-secondary)]">Apr 1</span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -428,7 +429,7 @@ export function TestDoc() {
                 </div>
                 
                 <div className="pt-4 border-t border-[var(--gcp-grey)] mt-4">
-                  <a href="#" className="text-sm text-[var(--gcp-blue)] hover:underline flex items-center gap-1 justify-center">
+                  <a href={`${repo}/commits/main`} target="_blank" rel="noopener noreferrer" className="text-sm text-[var(--gcp-blue)] hover:underline flex items-center gap-1 justify-center">
                     View full history on GitHub <ExternalLink size={14} />
                   </a>
                 </div>

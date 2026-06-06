@@ -124,7 +124,7 @@ function getPreviewPath(): string | null {
     basePath && pathname.startsWith(basePath)
       ? pathname.slice(basePath.length) || "/"
       : pathname;
-  const match = local.match(/^\/preview\/(.+)$/);
+  const match = local.match(/^\/preview\/([^?]+)/);
   return match ? match[1] : null;
 }
 
