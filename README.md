@@ -1,10 +1,10 @@
-# A.W.A.R.E. — Akamai Web Analytics & Regression Engine
+# A.W.A.K.E. — Akamai Web Analyser & Kit for Evaluations
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**A.W.A.R.E.** is an open-source edge regression observability platform for Akamai CDN configurations. It helps teams make informed release decisions by providing structured, versioned, longitudinal signal correlation across property manager versions, EdgeWorker versions, and test outcomes.
+**A.W.A.K.E.** is an open-source edge regression observability platform for Akamai CDN configurations. It helps teams make informed release decisions by providing structured, versioned, longitudinal signal correlation across property manager versions, EdgeWorker versions, and test outcomes.
 
-Originally designed for Salesforce.com's WWW edge infrastructure, A.W.A.R.E. works with any Akamai property.
+Originally designed for Salesforce.com's WWW edge infrastructure, A.W.A.K.E. works with any Akamai property.
 
 ## Key Features
 

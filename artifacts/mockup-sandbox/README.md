@@ -1,4 +1,4 @@
-# A.W.A.R.E. — Akamai Web Analytics & Regression Engine
+# A.W.A.K.E. — Akamai Web Analyser & Kit for Evaluations
 
 A mockup concept for a cross-target test observability platform. Browse test runs, inspect failing HTTP evidence, compare any two runs side-by-side, and drill into per-test analytics.
 

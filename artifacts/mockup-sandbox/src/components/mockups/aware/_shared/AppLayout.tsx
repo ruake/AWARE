@@ -44,8 +44,8 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
               AW
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-[var(--gcp-text)] leading-tight">A.W.A.R.E.</span>
-              <span className="text-[10px] text-[var(--gcp-text-secondary)] uppercase tracking-wider">Akamai Web Analytics & Regression Engine</span>
+              <span className="font-bold text-[var(--gcp-text)] leading-tight">A.W.A.K.E.</span>
+              <span className="text-[10px] text-[var(--gcp-text-secondary)] uppercase tracking-wider">Akamai Web Analyser & Kit for Evaluations</span>
             </div>
           </div>
         </div>

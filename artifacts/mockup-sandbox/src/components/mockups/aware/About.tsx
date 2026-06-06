@@ -35,9 +35,9 @@ export function About() {
               AW
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-[var(--gcp-text)]">A.W.A.R.E.</h1>
-              <p className="text-[var(--gcp-text-secondary)] text-sm mt-1">
-                Akamai Web Analytics &amp; Regression Engine
+              <h1 className="text-2xl font-bold text-[var(--gcp-text)]">A.W.A.K.E.</h1>
+              <p className="text-lg text-[var(--gcp-text-secondary)]">
+                Akamai Web Analyser &amp; Kit for Evaluations
               </p>
               <p className="text-[var(--gcp-text-secondary)] text-[13px] mt-3 leading-relaxed max-w-[640px]">
                 A mockup concept for a cross-target test observability platform. Browse runs, inspect
