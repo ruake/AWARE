@@ -128,6 +128,64 @@ export const PASS_RATE_DATA: (string | number | Record<string, unknown>)[][] = [
   ]),
 ];
 
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+
+type ColDef = { type: string; role: string; [k: string]: unknown };
+
+export const ENV_PASS_RATE_DATA: (string | number | ColDef)[][] = [
+  ["Day", "Prod/Production", "Prod/Staging", "UAT/Production", "UAT/Staging",
+    { type: "string", role: "tooltip", p: { html: true } }],
+  ...DAYS.slice(0, 10).map((day, d) => {
+    const prodProd = Math.max(70, 100 - d * 2 - (d === 4 ? 18 : 0));
+    const prodStg = Math.max(70, 100 - d * 2 - (d === 4 ? 15 : 0));
+    const uatProd = Math.max(95, 100 - d * 1 - (d === 6 ? 5 : 0));
+    const uatStg = Math.max(92, 100 - d * 1);
+    return [
+      day,
+      prodProd,
+      prodStg,
+      uatProd,
+      uatStg,
+      `<b>${day}</b><br>Prod/Prod: ${prodProd}%<br>Prod/Stg: ${prodStg}%<br>UAT/Prod: ${uatProd}%<br>UAT/Stg: ${uatStg}%`,
+    ] as (string | number)[];
+  }),
+];
+
+export const ENV_SUMMARY = [
+  {
+    label: "Prod/Production",
+    passRate: 87,
+    trend: -4,        // negative = regression
+    failures: 14,
+    color: "#d93025",  // red = regression
+    alert: "PASS RATE DROPPED 4%",
+  },
+  {
+    label: "Prod/Staging",
+    passRate: 92,
+    trend: -2,
+    failures: 6,
+    color: "#f9ab00",
+    alert: null,
+  },
+  {
+    label: "UAT/Production",
+    passRate: 100,
+    trend: 0,
+    failures: 0,
+    color: "#1e8e3e",
+    alert: null,
+  },
+  {
+    label: "UAT/Staging",
+    passRate: 98,
+    trend: -1,
+    failures: 2,
+    color: "#1e8e3e",
+    alert: null,
+  },
+];
+
 export function getTestResultsForRun(runIndex: number): TestResult[] {
   return Array.from({ length: 20 }).map((_, i) => {
     const isFail = i === 3 || i === 8 || (runIndex > 0 && i === 3 + runIndex);
