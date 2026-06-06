@@ -11,7 +11,7 @@ export { ErrorBoundary } from "./ErrorBoundary";
 export { Skeleton, CardSkeleton, TableSkeleton, ChartSkeleton } from "./skeleton";
 
 // Hooks
-export { useRuns, useRunById, useRunIndex, useTestResults, useDiffs, useTestDetails, useEnvSummary, useTestHistory, usePassRateData, useEnvPassRateData, useSyncRuns, useSyncDiffs, useSyncEnvSummary, useSyncTestDetails } from "./hooks";
+export { useRuns, useRunById, useRunIndex, useTestResults, useDiffs, useTestDetails, useEnvSummary, useTestHistory, usePassRateData, useEnvPassRateData, useSyncRuns, useSyncDiffs, useSyncEnvSummary, useSyncTestDetails, useTestCases, useTestCaseById, useTestSuites, useTestSuiteTree, useTestTags, useFilteredTestCases, useCreateTestCase, useUpdateTestCase, useDeleteTestCase, useImportTestCases, useExportTestCases, useSyncTestCases, useSyncTestSuites, useGenerateTestCases, useTestStats, useTestChangelog, useUpdateDocumentation } from "./hooks";
 export { useSyncedUrlState } from "./urlState";
 export { useLiveStatus } from "./useLiveStatus";
 
@@ -19,4 +19,4 @@ export { useLiveStatus } from "./useLiveStatus";
 export { navTo, closePanel, showToast, copyToClipboard, repo } from "./nav";
 
 // Types & data (for advanced use)
-export type { Run, TestResult, TestRunPoint, TestDetail, DiffRow, EnvSummary, StatusUpdate, Config, ServiceError } from "./types";
+export type { Run, TestResult, TestRunPoint, TestDetail, DiffRow, EnvSummary, StatusUpdate, Config, ServiceError, TestCase, TestSuite, TestTag, TestCaseFilter, ImportResult, ImportExportFormat, TestPriority, TestSeverity, TestStatus, SuiteNode, GenerateParams, TestStats, TestChangeLogEntry, TestSuiteConfig } from "./types";

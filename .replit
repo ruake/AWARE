@@ -20,20 +20,28 @@ path = "scripts/post-merge.sh"
 timeoutMs = 20000
 
 [[ports]]
-localPort = 5173
-externalPort = 80
+localPort = 4096
+externalPort = 8000
+exposeLocalhost = true
 
 [[ports]]
 localPort = 5174
-externalPort = 3000
 
 [[ports]]
 localPort = 8080
-externalPort = 8080
+externalPort = 6000
 
 [[ports]]
 localPort = 8081
-externalPort = 8081
+externalPort = 80
+
+[[ports]]
+localPort = 8082
+externalPort = 3000
+
+[[ports]]
+localPort = 20857
+externalPort = 3001
 
 [nix]
 packages = ["iproute_mptcp"]

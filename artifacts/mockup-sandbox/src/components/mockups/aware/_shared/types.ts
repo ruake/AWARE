@@ -81,6 +81,118 @@ export interface ServiceError {
   retryable: boolean;
 }
 
+// ── Test Case Management Types ─────────────────────────────
+
+export type TestPriority = "P0" | "P1" | "P2" | "P3";
+export type TestSeverity = "critical" | "major" | "minor" | "trivial";
+export type TestStatus = "active" | "disabled" | "deprecated";
+
+export interface TestTag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface TestChangeLogEntry {
+  version: number;
+  timestamp: string;
+  author: string;
+  summary: string;
+  changes: string[];
+}
+
+export interface TestCase {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  priority: TestPriority;
+  severity: TestSeverity;
+  status: TestStatus;
+  tags: string[];
+  owner: string;
+  suiteIds: string[];
+  automated: boolean;
+  scriptPath: string;
+  preconditions: string;
+  expectedBehavior: string;
+  documentation: string;
+  relatedTestIds: string[];
+  version: number;
+  changelog: TestChangeLogEntry[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TestSuiteConfig {
+  target: string;
+  environment: string;
+  parallelism: number;
+  retries: number;
+  failFast: boolean;
+  timeoutMinutes: number;
+}
+
+export interface TestSuite {
+  id: string;
+  name: string;
+  description: string;
+  parentId: string | null;
+  testIds: string[];
+  config: TestSuiteConfig;
+  tags: string[];
+  schedule: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SuiteNode {
+  suite: TestSuite;
+  children: SuiteNode[];
+  depth: number;
+}
+
+export type ImportExportFormat = "json" | "junit_xml" | "csv";
+
+export interface ImportResult {
+  imported: number;
+  skipped: number;
+  errors: { line: number; message: string }[];
+}
+
+export interface GenerateParams {
+  count: number;
+  category: string;
+  status: TestStatus;
+  priority: TestPriority;
+  owner: string;
+  prefix: string;
+  suites: string[];
+}
+
+export interface TestStats {
+  total: number;
+  byStatus: Record<string, number>;
+  byPriority: Record<string, number>;
+  byCategory: Record<string, number>;
+  bySeverity: Record<string, number>;
+  byOwner: Record<string, number>;
+  byTag: Record<string, number>;
+  automated: number;
+  manual: number;
+  coverage: number;
+  avgVersion: number;
+}
+
+export interface TestCaseFilter {
+  search: string;
+  status: TestStatus | "";
+  priority: TestPriority | "";
+  category: string;
+  tags: string[];
+  suiteId: string;
+}
+
 export function classifyError(err: unknown): ServiceError {
   if (err instanceof TimeoutError) {
     return { code: "TIMEOUT", message: err.message, url: err.url, retryable: true };

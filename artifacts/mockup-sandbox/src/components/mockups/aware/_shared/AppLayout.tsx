@@ -15,7 +15,8 @@ import {
   Check,
   AlertTriangle,
   Activity,
-  Workflow
+  Workflow,
+  Bug,
 } from "lucide-react";
 import { navTo, repo } from "./nav";
 import { CommandPalette } from "./CommandPalette";
@@ -53,6 +54,7 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
     { id: "runs", label: "Runs", icon: List, path: "Runs" },
     { id: "new-run", label: "New Run", icon: PlayCircle, path: "StartRun" },
     { id: "compare", label: "Compare", icon: GitCompare, path: "Compare" },
+    { id: "tests", label: "Tests", icon: Bug, path: "TestManager" },
     { id: "status", label: "Status", icon: Activity, path: "Status" },
     { id: "search", label: "Search", icon: Search, path: "SearchDemo" },
     { id: "about", label: "About", icon: Info, path: "About" },

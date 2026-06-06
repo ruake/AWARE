@@ -11,5 +11,7 @@ export const modules: ModuleMap = {
   "./components/mockups/aware/StartRun.tsx": () => import("../components/mockups/aware/StartRun.tsx"),
   "./components/mockups/aware/Status.tsx": () => import("../components/mockups/aware/Status.tsx"),
   "./components/mockups/aware/TestAnalytics.tsx": () => import("../components/mockups/aware/TestAnalytics.tsx"),
-  "./components/mockups/aware/TestDoc.tsx": () => import("../components/mockups/aware/TestDoc.tsx")
+  "./components/mockups/aware/TestDoc.tsx": () => import("../components/mockups/aware/TestDoc.tsx"),
+  "./components/mockups/aware/TestManager.tsx": () => import("../components/mockups/aware/TestManager.tsx"),
+  "./components/mockups/aware/TestSuiteManager.tsx": () => import("../components/mockups/aware/TestSuiteManager.tsx")
 };

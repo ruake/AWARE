@@ -1,21 +1,37 @@
 import React from "react";
 import { navTo } from "./nav";
-import { useSyncRuns, useSyncDiffs } from "./hooks";
-import { Search, List, GitCompare, Beaker, ArrowUpRight } from "lucide-react";
+import { useSyncRuns, useSyncDiffs, useSyncTestCases, useSyncTestSuites } from "./hooks";
+import { Search, List, GitCompare, Beaker, ArrowUpRight, Bug, FolderTree } from "lucide-react";
 
 type SearchResult = {
   id: string;
   label: string;
   description: string;
-  type: "test" | "run" | "compare";
+  type: "test" | "run" | "compare" | "suite";
   path: string;
 };
 
 export function CommandPalette({ onClose }: { onClose: () => void }) {
   const runs = useSyncRuns();
   const diffs = useSyncDiffs();
+  const testCases = useSyncTestCases();
+  const suites = useSyncTestSuites();
 
   const ALL_RESULTS: SearchResult[] = [
+    ...suites.map(s => ({
+      id: s.id,
+      label: s.name,
+      description: `${s.testIds.length} tests · ${s.config.target}/${s.config.environment}`,
+      type: "suite" as const,
+      path: `TestSuiteManager?sel=${s.id}`,
+    })),
+    ...testCases.map(tc => ({
+      id: tc.id,
+      label: tc.name,
+      description: `${tc.category} · ${tc.priority} · ${tc.status}`,
+      type: "test" as const,
+      path: `TestManager?sel=${tc.id}`,
+    })),
     ...diffs.map(d => ({
       id: d.id,
       label: d.name,
@@ -58,7 +74,9 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
     return !q || r.label.toLowerCase().includes(q) || r.description.toLowerCase().includes(q);
   });
 
-  if (activeIdx >= filtered.length) setActiveIdx(0);
+  React.useEffect(() => {
+    if (activeIdx >= filtered.length) setActiveIdx(0);
+  }, [activeIdx, filtered.length]);
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") { e.preventDefault(); setActiveIdx(i => Math.min(i + 1, filtered.length - 1)); }
@@ -69,8 +87,8 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const typeCounts = { test: 0, run: 0, compare: 0 };
-  ALL_RESULTS.forEach(r => typeCounts[r.type]++);
+  const typeCounts = { test: 0, run: 0, compare: 0, suite: 0 };
+  ALL_RESULTS.forEach(r => { if (r.type in typeCounts) typeCounts[r.type as keyof typeof typeCounts]++; });
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh]" onClick={onClose}>
@@ -96,7 +114,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 
         {/* Filter chips */}
         <div className="flex gap-2 px-5 py-2.5 border-b border-[var(--gcp-grey)] bg-[var(--gcp-grey-bg)]">
-          {(["test", "run", "compare"] as const).map(type => (
+          {(["test", "suite", "run", "compare"] as const).map(type => (
             <button
               key={type}
               onClick={() => setTypeFilter(typeFilter === type ? null : type)}
@@ -130,10 +148,12 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
               >
                 <div className={`w-7 h-7 rounded flex items-center justify-center ${
                   r.type === "test" ? "bg-[var(--gcp-purple-bg)] text-[#9334e6]" :
+                  r.type === "suite" ? "bg-[var(--gcp-yellow-bg)] text-[var(--gcp-yellow)]" :
                   r.type === "run" ? "bg-[var(--gcp-blue-bg)] text-[var(--gcp-blue)]" :
                   "bg-[var(--gcp-green-bg)] text-[var(--gcp-green)]"
                 }`}>
                   {r.type === "test" ? <Beaker size={14} /> :
+                   r.type === "suite" ? <FolderTree size={14} /> :
                    r.type === "run" ? <List size={14} /> :
                    <GitCompare size={14} />}
                 </div>
@@ -144,6 +164,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
                 <div className="flex items-center gap-2 shrink-0">
                   <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${
                     r.type === "test" ? "bg-[var(--gcp-purple-bg)] text-[#9334e6]" :
+                    r.type === "suite" ? "bg-[var(--gcp-yellow-bg)] text-[var(--gcp-yellow)]" :
                     r.type === "run" ? "bg-[var(--gcp-blue-bg)] text-[var(--gcp-blue)]" :
                     "bg-[var(--gcp-green-bg)] text-[var(--gcp-green)]"
                   }`}>

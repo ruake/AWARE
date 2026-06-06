@@ -12,10 +12,14 @@ on:
         required: true
         type: choice
         options:
-          - full_suite
-          - geo_gating
-          - smoke
-          - url_health
+          - suite_full
+          - suite_geo
+          - suite_perf
+          - suite_security
+          - suite_smoke
+          - suite_uat
+          - suite_edge
+          - suite_mobile
       target:
         description: Target environment
         required: true
@@ -30,10 +34,36 @@ on:
         options:
           - Production
           - Staging
+      parallelism:
+        description: Max parallel jobs
+        required: false
+        type: number
+        default: 4
+      retries:
+        description: Failure retry count
+        required: false
+        type: number
+        default: 1
 
 jobs:
-  run-tests:
+  resolve-tests:
     runs-on: ubuntu-latest
+    outputs:
+      test-matrix: ${{ steps.resolve.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      - id: resolve
+        run: |
+          echo "matrix={\"target\":[\"${{ github.event.inputs.target }}\"],\"environment\":[\"${{ github.event.inputs.environment }}\"]}" >> $GITHUB_OUTPUT
+
+  run-tests:
+    needs: resolve-tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.resolve-tests.outputs.test-matrix) }}
+      max-parallel: ${{ github.event.inputs.parallelism }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -50,16 +80,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run ${{ github.event.inputs.suite }} on ${{ github.event.inputs.target }}/${{ github.event.inputs.environment }}
-        run: echo "Running ${{ github.event.inputs.suite }} on ${{ github.event.inputs.target }}/${{ github.event.inputs.environment }}..."
-        # Replace with actual test command:
-        # pnpm --filter @workspace/mockup-sandbox run test -- --suite ${{ github.event.inputs.suite }}
+      - name: Install Playwright browsers
+        run: pnpm --filter @workspace/mockup-sandbox exec playwright install chromium --with-deps
+        continue-on-error: true
+
+      - name: Run ${{ github.event.inputs.suite }} on ${{ matrix.target }}/${{ matrix.environment }}
+        run: |
+          pnpm --filter @workspace/mockup-sandbox run test -- \
+            --suite "${{ github.event.inputs.suite }}" \
+            --target "${{ matrix.target }}" \
+            --environment "${{ matrix.environment }}" \
+            --retries "${{ github.event.inputs.retries }}"
 
       - name: Upload test results
         if: always()
-        run: echo "Uploading results..."
-        # Replace with actual upload step:
-        # uses: actions/upload-artifact@v4
-        # with:
-        #   name: test-results-${{ github.run_id }}
-        #   path: artifacts/mockup-sandbox/test-results/
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_id }}-${{ matrix.target }}-${{ matrix.environment }}
+          path: artifacts/mockup-sandbox/test-results/
+          retention-days: 14

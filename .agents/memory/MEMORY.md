@@ -1,0 +1,1 @@
+- [AWARE app routing pattern](aware-routing.md) — use `useLocation` + `navigate()` or pass props to `Link` directly; never nest `<a>` inside `<Link>` (wouter renders Link as `<a>` already).
