@@ -2,8 +2,23 @@ import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
 import { RUNS } from "./_shared/data";
 import { navTo, copyToClipboard, repo } from "./_shared/nav";
+import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import "./_group.css";
 import { Link2, Check, Share2, Copy, ExternalLink, PlayCircle, Github, X } from "lucide-react";
+
+const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
+
+function applyFilters(runs: typeof RUNS, filters: Record<string, ColumnFilterState>) {
+  return runs.filter(r => {
+    for (const [field, f] of Object.entries(filters)) {
+      const raw = String((r as unknown as Record<string, unknown>)[field] ?? "");
+      const textMatch = !f.text || raw.toLowerCase().includes(f.text.toLowerCase());
+      const selMatch = f.selected.length === 0 || f.selected.includes(raw);
+      if (!textMatch || !selMatch) return false;
+    }
+    return true;
+  });
+}
 
 function CopyLinkBtn({ runId }: { runId: string }) {
   const [copied, setCopied] = React.useState(false);
@@ -16,21 +31,6 @@ function CopyLinkBtn({ runId }: { runId: string }) {
   return (
     <button onClick={handle} title={`Copy permalink for ${runId}`} className="opacity-0 group-hover:opacity-100 transition-opacity ml-1.5 text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]">
       {copied ? <Check size={12} className="text-[var(--gcp-green)]" /> : <Link2 size={12} />}
-    </button>
-  );
-}
-
-function SlackBtn({ runId }: { runId: string }) {
-  const [copied, setCopied] = React.useState(false);
-  const handle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    copyToClipboard(`Slack snippet for run ${runId}: https://aware.example.com/runs/${runId}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
-  };
-  return (
-    <button onClick={handle} title="Copy Slack snippet" className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[#4a154b]">
-      {copied ? <Check size={12} className="text-[var(--gcp-green)]" /> : <Share2 size={12} />}
     </button>
   );
 }
@@ -116,23 +116,58 @@ function NewRunModal({ onClose }: { onClose: () => void }) {
 export function Runs() {
   const [shareToast, setShareToast] = React.useState<string | null>(null);
   const [showNewRun, setShowNewRun] = React.useState(false);
+  const [statusFilter, setStatusFilter] = React.useState<string | null>(null);
+  const [quickSuite, setQuickSuite] = React.useState("All");
+  const [quickTarget, setQuickTarget] = React.useState("All");
+  const [quickEnv, setQuickEnv] = React.useState("All");
+
+  const [colFilters, setColFilters] = React.useState<Record<string, ColumnFilterState>>({});
   const showToast = (msg: string) => { setShareToast(msg); setTimeout(() => setShareToast(null), 2500); };
+
+  const updateColFilter = (field: string) => (f: ColumnFilterState) => {
+    setColFilters(prev => ({ ...prev, [field]: f }));
+  };
+
+  let filtered = applyFilters(RUNS, colFilters);
+  if (statusFilter) filtered = filtered.filter(r => r.status === statusFilter);
+  if (quickSuite !== "All") filtered = filtered.filter(r => r.suite === quickSuite);
+  if (quickTarget !== "All") filtered = filtered.filter(r => r.target === quickTarget);
+  if (quickEnv !== "All") filtered = filtered.filter(r => r.env.includes(quickEnv));
+
+  const suites = [...new Set(RUNS.map(r => r.suite))];
+  const targets = [...new Set(RUNS.map(r => r.target))];
+  const envs = [...new Set(RUNS.map(r => r.env))];
+  const statuses = [...new Set(RUNS.map(r => r.status))];
+  const pms = [...new Set(RUNS.map(r => r.pm))];
+  const ews = [...new Set(RUNS.map(r => r.ew))];
 
   return (
     <AppLayout activeTab="runs">
       <div className="max-w-[1600px] mx-auto space-y-4">
 
-        {/* Filters */}
+        {/* Toolbar Filters */}
         <div className="gcp-card p-4 flex flex-wrap gap-4 items-center">
           <div className="flex gap-2">
             {["All", "PASS", "FAIL", "PARTIAL", "FLAKY"].map(s => (
-              <span key={s} onClick={() => showToast(`Filtered by: ${s}`)} className={`gcp-badge cursor-pointer ${s === 'All' ? 'bg-[var(--gcp-blue)] text-white' : 'bg-[var(--gcp-grey-bg)] text-[var(--gcp-text)]'}`}>{s}</span>
+              <span key={s} onClick={() => {
+                setStatusFilter(s === "All" ? null : s);
+                showToast(s === "All" ? "Filter cleared" : `Filtered by: ${s}`);
+              }} className={`gcp-badge cursor-pointer ${(s === "All" && !statusFilter) || statusFilter === s ? 'bg-[var(--gcp-blue)] text-white' : 'bg-[var(--gcp-grey-bg)] text-[var(--gcp-text)]'}`}>{s}</span>
             ))}
           </div>
           <div className="h-6 w-px bg-[var(--gcp-grey)]" />
-          <select className="gcp-input" onChange={e => showToast(`Suite: ${e.target.value}`)}><option>full_suite</option><option>geo_gating</option><option>smoke</option><option>url_health</option></select>
-          <select className="gcp-input" onChange={e => showToast(`Target: ${e.target.value}`)}><option>Prod</option><option>UAT</option></select>
-          <select className="gcp-input" onChange={e => showToast(`Env: ${e.target.value}`)}><option>Production</option><option>Staging</option></select>
+          <select className="gcp-input" value={quickSuite} onChange={e => { setQuickSuite(e.target.value); showToast(`Suite: ${e.target.value}`); }}>
+            <option>All</option>
+            {suites.map(s => <option key={s}>{s}</option>)}
+          </select>
+          <select className="gcp-input" value={quickTarget} onChange={e => { setQuickTarget(e.target.value); showToast(`Target: ${e.target.value}`); }}>
+            <option>All</option>
+            {targets.map(s => <option key={s}>{s}</option>)}
+          </select>
+          <select className="gcp-input" value={quickEnv} onChange={e => { setQuickEnv(e.target.value); showToast(`Env: ${e.target.value}`); }}>
+            <option>All</option>
+            {envs.map(s => <option key={s}>{s}</option>)}
+          </select>
           <input type="date" className="gcp-input" onChange={e => showToast(`Date: ${e.target.value}`)} />
         </div>
 
@@ -157,22 +192,22 @@ export function Runs() {
           <table className="gcp-table">
             <thead>
               <tr>
-                <th>Run ID</th>
-                <th>Label</th>
-                <th>Suite</th>
-                <th>Target</th>
-                <th>Status</th>
-                <th className="text-right">Pass %</th>
+                <th><TableHeaderFilter label="Run ID" allValues={RUNS.map(r => r.id)} filter={colFilters.id ?? EMPTY_FILTER} onFilterChange={updateColFilter("id")} /></th>
+                <th><TableHeaderFilter label="Label" filter={colFilters.label ?? EMPTY_FILTER} onFilterChange={updateColFilter("label")} /></th>
+                <th><TableHeaderFilter label="Suite" allValues={suites} filter={colFilters.suite ?? EMPTY_FILTER} onFilterChange={updateColFilter("suite")} /></th>
+                <th><TableHeaderFilter label="Target" allValues={targets} filter={colFilters.target ?? EMPTY_FILTER} onFilterChange={updateColFilter("target")} /></th>
+                <th><TableHeaderFilter label="Status" allValues={statuses} filter={colFilters.status ?? EMPTY_FILTER} onFilterChange={updateColFilter("status")} /></th>
+                <th className="text-right"><TableHeaderFilter label="Pass %" filter={colFilters.passPct ?? EMPTY_FILTER} onFilterChange={updateColFilter("passPct")} /></th>
                 <th className="text-right">Failures</th>
                 <th className="text-right">Duration</th>
-                <th>Started</th>
-                <th>PM</th>
-                <th>EW</th>
+                <th><TableHeaderFilter label="Started" filter={colFilters.started ?? EMPTY_FILTER} onFilterChange={updateColFilter("started")} /></th>
+                <th><TableHeaderFilter label="PM" allValues={pms} filter={colFilters.pm ?? EMPTY_FILTER} onFilterChange={updateColFilter("pm")} /></th>
+                <th><TableHeaderFilter label="EW" allValues={ews} filter={colFilters.ew ?? EMPTY_FILTER} onFilterChange={updateColFilter("ew")} /></th>
                 <th className="w-16 text-center text-[var(--gcp-text-secondary)]">Share</th>
               </tr>
             </thead>
             <tbody>
-              {RUNS.map((run, i) => {
+              {filtered.map((run, i) => {
                 const statusBadge = run.status === "PASS" ? "gcp-badge-pass" : run.status === "FAIL" ? "gcp-badge-fail" : "gcp-badge-flaky";
                 return (
                   <tr key={run.id} className={`group ${i === 1 ? "bg-[var(--gcp-blue-bg)]" : ""}`}>
@@ -207,7 +242,7 @@ export function Runs() {
             </tbody>
           </table>
           <div className="p-4 border-t border-[var(--gcp-grey)] flex justify-between items-center text-sm text-[var(--gcp-text-secondary)]">
-            <span>Showing 1–12 of 145 runs</span>
+            <span>Showing {filtered.length} of {RUNS.length} runs</span>
             <div className="flex gap-2">
               <button className="gcp-button" disabled onClick={() => showToast("Already on first page")}>&lt; Prev</button>
               <button className="gcp-button" onClick={() => showToast("Loading next page...")}>Next &gt;</button>

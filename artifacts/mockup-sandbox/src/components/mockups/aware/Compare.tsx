@@ -2,8 +2,12 @@ import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
 import { RUNS, DIFF_ROWS, TEST_DETAILS } from "./_shared/data";
 import { copyToClipboard, navTo } from "./_shared/nav";
+import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import "./_group.css";
-import { Link2, Github, Share2, Copy, Check, AlertTriangle, BarChart3, X, ArrowUpRight } from "lucide-react";
+import { Link2, Github, Share2, Copy, Check, AlertTriangle, BarChart3, X, ArrowUpRight, Calendar, Filter } from "lucide-react";
+
+const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
+const TIME_SLICES = ["1d", "7d", "14d", "30d", "All"];
 
 function ComparisonSidePanel({ diff, testId }: { diff: typeof DIFF_ROWS[number]; testId: string }) {
   const deltaMs = diff.durCand - diff.durBase;
@@ -104,6 +108,10 @@ export function Compare() {
   const [baseline, setBaseline] = React.useState(initialBaseline);
   const [candidate, setCandidate] = React.useState(initialCandidate);
   const [selectedTestId, setSelectedTestId] = React.useState<string | null>(null);
+  const [colFilters, setColFilters] = React.useState<Record<string, ColumnFilterState>>({});
+  const [searchText, setSearchText] = React.useState("");
+  const [regressionsOnly, setRegressionsOnly] = React.useState(false);
+  const [timeSlice, setTimeSlice] = React.useState("All");
 
   const [shareToast, setShareToast] = React.useState<string | null>(null);
   const [issueFiled, setIssueFiled] = React.useState<string | null>(null);
@@ -114,11 +122,6 @@ export function Compare() {
     copyToClipboard(`GitHub issue for test: ${testName}\nComparison: ${baseline} vs ${candidate}`);
     showToast(`GitHub issue template copied for ${testName}`);
     setTimeout(() => setIssueFiled(null), 3000);
-  };
-
-  const swap = () => {
-    setBaseline(candidate);
-    setCandidate(baseline);
   };
 
   const runIds = RUNS.map(r => r.id);
@@ -150,34 +153,70 @@ export function Compare() {
     window.history.replaceState({}, "", url.toString());
   };
 
+  const updateColFilter = (field: string) => (f: ColumnFilterState) => {
+    setColFilters(prev => ({ ...prev, [field]: f }));
+  };
+
+  let filteredRows = DIFF_ROWS;
+  if (searchText) {
+    const q = searchText.toLowerCase();
+    filteredRows = filteredRows.filter(d => d.name.toLowerCase().includes(q));
+  }
+  if (regressionsOnly) {
+    filteredRows = filteredRows.filter(d => d.state === "regression");
+  }
+  for (const [field, f] of Object.entries(colFilters)) {
+    if (f.text || f.selected.length > 0) {
+      filteredRows = filteredRows.filter(d => {
+        const raw = String((d as unknown as Record<string, unknown>)[field] ?? "");
+        const textMatch = !f.text || raw.toLowerCase().includes(f.text.toLowerCase());
+        const selMatch = f.selected.length === 0 || f.selected.includes(raw);
+        return textMatch && selMatch;
+      });
+    }
+  }
+
+  const categories = [...new Set(DIFF_ROWS.map(d => d.category))];
+  const states = [...new Set(DIFF_ROWS.map(d => d.state))];
+
   return (
     <AppLayout activeTab="compare">
       <div className="h-[calc(100vh-100px)] flex flex-col max-w-[1600px] mx-auto gap-4">
 
-        {/* Selectors (shrink-0) */}
+        {/* Selectors */}
         <div className="gcp-card p-4 flex items-center justify-between bg-[var(--gcp-surface-hover)] shrink-0">
-          <div className="flex-1">
-            <label className="block text-xs font-bold text-[var(--gcp-text-secondary)] mb-1 uppercase">Baseline Run</label>
-            <select className="gcp-input w-full font-mono text-sm" value={baseline} onChange={e => updateBaseline(e.target.value)}>
-              {runIds.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 border-r border-[var(--gcp-grey)] pr-3">
+              <Calendar size={13} />
+              <select className="text-[12px] bg-transparent border-none outline-none font-medium cursor-pointer" value={timeSlice} onChange={e => setTimeSlice(e.target.value)}>
+                {TIME_SLICES.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
           </div>
-          <div className="px-8">
-            <button className="gcp-button" onClick={doSwap}>⇄ Swap</button>
+          <div className="flex-1 flex items-center gap-4 px-4">
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-[var(--gcp-text-secondary)] mb-1 uppercase">Baseline Run</label>
+              <select className="gcp-input w-full font-mono text-sm" value={baseline} onChange={e => updateBaseline(e.target.value)}>
+                {runIds.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+            <div className="pt-5">
+              <button className="gcp-button" onClick={doSwap}>⇄ Swap</button>
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-[var(--gcp-text-secondary)] mb-1 uppercase">Candidate Run</label>
+              <select className="gcp-input w-full font-mono text-sm border-[var(--gcp-blue)]" value={candidate} onChange={e => updateCandidate(e.target.value)}>
+                {runIds.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
           </div>
-          <div className="flex-1">
-            <label className="block text-xs font-bold text-[var(--gcp-text-secondary)] mb-1 uppercase">Candidate Run</label>
-            <select className="gcp-input w-full font-mono text-sm border-[var(--gcp-blue)]" value={candidate} onChange={e => updateCandidate(e.target.value)}>
-              {runIds.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-          </div>
-          <div className="pl-6 flex items-end gap-2 pb-0.5">
+          <div className="flex items-end gap-2 pb-0.5">
             <button onClick={() => { copyToClipboard(window.location.href); showToast("Comparison permalink copied"); }} className="gcp-button text-[12px] flex items-center gap-1.5"><Link2 size={13} /> Copy link</button>
             <button onClick={() => { copyToClipboard(`Comparison summary: ${baseline} vs ${candidate}\nNew failures: 7\nFixed: 12\nStill failing: 3\nDuration regressions: 2`); showToast("Slack comparison summary copied"); }} className="gcp-button text-[12px] flex items-center gap-1.5"><Share2 size={13} /> Share</button>
           </div>
         </div>
 
-        {/* Summary Tiles (shrink-0) */}
+        {/* Summary Tiles */}
         <div className="grid grid-cols-4 gap-4 shrink-0">
           <div className="gcp-card p-4 flex justify-between items-center border-l-4 border-l-[var(--gcp-red)]">
             <span className="font-medium text-[var(--gcp-text-secondary)]">New Failures</span>
@@ -197,7 +236,7 @@ export function Compare() {
           </div>
         </div>
 
-        {/* Regression quick-actions bar (shrink-0) */}
+        {/* Regression quick-actions bar */}
         <div className="flex items-center gap-3 text-[12px] text-[var(--gcp-text-secondary)] bg-[var(--gcp-red-bg)] border border-[var(--gcp-red)] rounded px-4 py-2.5 shrink-0">
           <AlertTriangle size={14} className="text-[var(--gcp-red)] shrink-0" />
           <span><strong>7 regressions</strong> detected. File GitHub issues or share with your team:</span>
@@ -212,24 +251,25 @@ export function Compare() {
           {/* Left: Table */}
           <div className={`flex flex-col gcp-card overflow-hidden ${selectedTestId ? "flex-1" : "w-full"}`}>
             <div className="p-3 border-b border-[var(--gcp-grey)] flex gap-4 items-center shrink-0">
-              <input type="text" placeholder="Search test name..." className="gcp-input flex-1" />
-              <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" defaultChecked /> Show regressions only</label>
+              <input type="text" placeholder="Search test name..." className="gcp-input flex-1" value={searchText} onChange={e => setSearchText(e.target.value)} />
+              <label className="flex items-center gap-2 text-sm cursor-pointer whitespace-nowrap"><input type="checkbox" checked={regressionsOnly} onChange={e => setRegressionsOnly(e.target.checked)} /> Regressions only</label>
               <span className="text-[11px] text-[var(--gcp-text-secondary)] ml-auto">Click a row for comparison detail</span>
             </div>
             <div className="flex-1 overflow-auto">
               <table className="gcp-table">
                 <thead className="sticky top-0 bg-[var(--gcp-surface)] z-10">
                   <tr>
-                    <th>Test Name</th>
-                    <th>Baseline Status</th>
-                    <th>Candidate Status</th>
-                    <th className="text-right">Δ Duration</th>
-                    <th>Category</th>
+                    <th><TableHeaderFilter label="Test Name" filter={colFilters.name ?? EMPTY_FILTER} onFilterChange={updateColFilter("name")} /></th>
+                    <th><TableHeaderFilter label="Baseline" allValues={["PASS", "FAIL"]} filter={colFilters.baseStatus ?? EMPTY_FILTER} onFilterChange={updateColFilter("baseStatus")} /></th>
+                    <th><TableHeaderFilter label="Candidate" allValues={["PASS", "FAIL"]} filter={colFilters.candStatus ?? EMPTY_FILTER} onFilterChange={updateColFilter("candStatus")} /></th>
+                    <th className="text-right"><TableHeaderFilter label="Δ Duration" filter={colFilters.durCand ?? EMPTY_FILTER} onFilterChange={updateColFilter("durCand")} /></th>
+                    <th><TableHeaderFilter label="Category" allValues={categories} filter={colFilters.category ?? EMPTY_FILTER} onFilterChange={updateColFilter("category")} /></th>
+                    <th><TableHeaderFilter label="State" allValues={states} filter={colFilters.state ?? EMPTY_FILTER} onFilterChange={updateColFilter("state")} /></th>
                     <th className="w-24 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {DIFF_ROWS.map((d, i) => (
+                  {filteredRows.map((d, i) => (
                     <tr key={d.id}
                       className={`group cursor-pointer ${
                         d.state === 'regression' ? 'bg-[var(--gcp-red-bg)]' : d.state === 'fixed' ? 'bg-[var(--gcp-green-bg)]' : ''
@@ -245,6 +285,15 @@ export function Compare() {
                           : <span className="text-[var(--gcp-text-secondary)]">~0ms</span>}
                       </td>
                       <td><span className="px-2 py-1 bg-[var(--gcp-surface)] text-[11px] border border-[var(--gcp-grey)] rounded">{d.category}</span></td>
+                      <td>
+                        <span className={`text-[11px] font-medium ${
+                          d.state === "regression" ? "text-[var(--gcp-red)]" :
+                          d.state === "fixed" ? "text-[var(--gcp-green)]" :
+                          d.state === "duration" ? "text-[var(--gcp-yellow)]" : "text-[var(--gcp-text-secondary)]"
+                        }`}>
+                          {d.state === "regression" ? "Regression" : d.state === "fixed" ? "Fixed" : d.state === "duration" ? "Duration" : "Unchanged"}
+                        </span>
+                      </td>
                       <td>
                         <div className="flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={(e) => { e.stopPropagation(); copyToClipboard(`https://aware.example.com/tests/${d.id}?baseline=${baseline}&candidate=${candidate}`); showToast("Permalink copied"); }} title="Copy permalink" className="p-1 text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)] rounded hover:bg-[var(--gcp-blue-bg)] transition-colors"><Link2 size={12} /></button>

@@ -4,7 +4,14 @@ import { AppLayout } from "./_shared/AppLayout";
 import { RUNS, ENV_PASS_RATE_DATA, ENV_SUMMARY } from "./_shared/data";
 import { navTo } from "./_shared/nav";
 import "./_group.css";
-import { TrendingDown, TrendingUp, Minus, AlertTriangle, ChevronRight, ArrowUpDown } from "lucide-react";
+import { TrendingDown, TrendingUp, Minus, AlertTriangle, ChevronRight, ArrowUpDown, Calendar } from "lucide-react";
+
+const TIME_SLICES = ["7d", "14d", "30d", "All"];
+function sliceData(data: (string | number | Record<string, unknown>)[][], slice: string): (string | number | Record<string, unknown>)[][] {
+  if (slice === "All" || data.length <= 1) return data;
+  const n = slice === "7d" ? 8 : slice === "14d" ? 15 : 31;
+  return [data[0], ...data.slice(-Math.min(n, data.length - 1))];
+}
 
 const ENV_COLORS = ["#1a73e8", "#f9ab00", "#1e8e3e", "#9334e6"];
 
@@ -16,12 +23,15 @@ function TrendIcon({ delta }: { delta: number }) {
 
 export function Dashboard() {
   const regressed = ENV_SUMMARY.filter(e => e.alert);
+  const [timeSlice, setTimeSlice] = React.useState("14d");
   const [chartKey, setChartKey] = React.useState(0);
 
   React.useEffect(() => {
     const t = setTimeout(() => setChartKey(k => k + 1), 100);
     return () => clearTimeout(t);
   }, []);
+
+  const slicedChartData = sliceData(ENV_PASS_RATE_DATA, timeSlice);
 
   return (
     <AppLayout activeTab="dashboard">
@@ -100,16 +110,25 @@ export function Dashboard() {
 
         {/* Composite Multi-Environment Line Chart */}
         <div className="gcp-card p-4">
-          <h3 className="font-medium text-[14px] text-[var(--gcp-text-secondary)] mb-4 uppercase tracking-wider flex items-center gap-2">
-            <ArrowUpDown size={14} /> Pass Rate by Environment
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-medium text-[14px] text-[var(--gcp-text-secondary)] uppercase tracking-wider flex items-center gap-2">
+              <ArrowUpDown size={14} /> Pass Rate by Environment
+            </h3>
+            <div className="flex items-center gap-1 border border-[var(--gcp-grey)] rounded bg-[var(--gcp-surface)]">
+              {TIME_SLICES.map(s => (
+                <button key={s} onClick={() => setTimeSlice(s)} className={`text-[11px] px-2.5 py-1 font-medium transition-colors ${timeSlice === s ? 'bg-[var(--gcp-blue)] text-white' : 'text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)]'}`}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="h-72 w-full">
             <Chart
-              key={chartKey}
+              key={chartKey + timeSlice}
               chartType="LineChart"
               width="100%"
               height="100%"
-              data={ENV_PASS_RATE_DATA}
+              data={slicedChartData}
               options={{
                 curveType: "function",
                 pointSize: 6,

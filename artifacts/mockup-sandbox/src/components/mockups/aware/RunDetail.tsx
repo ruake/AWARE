@@ -2,8 +2,13 @@ import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
 import { RUNS, getRunById, getRunIndex, getTestResultsForRun } from "./_shared/data";
 import { navTo, copyToClipboard, repo } from "./_shared/nav";
+import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import "./_group.css";
-import { Copy, Check, Share2, Link2, Github, ExternalLink, GitCompare } from "lucide-react";
+import { Copy, Check, Share2, Link2, Github, ExternalLink, GitCompare, Calendar } from "lucide-react";
+
+const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
+
+const TIME_SLICES = ["1d", "7d", "14d", "30d", "All"];
 
 function EvidenceSection({ label, children, copyText }: {
   label: string; children: React.ReactNode; copyText: string;
@@ -35,6 +40,10 @@ export function RunDetail() {
     otherRuns[Math.min(0, otherRuns.length - 1)]?.id ?? ""
   );
 
+  const [timeSlice, setTimeSlice] = React.useState("All");
+  const [colFilters, setColFilters] = React.useState<Record<string, ColumnFilterState>>({});
+  const [searchText, setSearchText] = React.useState("");
+
   const dummyTests = getTestResultsForRun(Math.max(0, runIndex));
 
   const [shareToast, setShareToast] = React.useState<string | null>(null);
@@ -46,9 +55,33 @@ export function RunDetail() {
     }
   };
 
+  const updateColFilter = (field: string) => (f: ColumnFilterState) => {
+    setColFilters(prev => ({ ...prev, [field]: f }));
+  };
+
+  let filteredTests = dummyTests;
+  if (searchText) {
+    const q = searchText.toLowerCase();
+    filteredTests = filteredTests.filter(t => t.name.toLowerCase().includes(q));
+  }
+  for (const [field, f] of Object.entries(colFilters)) {
+    if (f.text || f.selected.length > 0) {
+      filteredTests = filteredTests.filter(t => {
+        const raw = String((t as unknown as Record<string, unknown>)[field] ?? "");
+        const textMatch = !f.text || raw.toLowerCase().includes(f.text.toLowerCase());
+        const selMatch = f.selected.length === 0 || f.selected.includes(raw);
+        return textMatch && selMatch;
+      });
+    }
+  }
+
   const runStatus = currentRun?.status ?? "FAIL";
   const statusBadge = runStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail";
   const runLabel = currentRun ? currentRun.label : "Prod/Production · PM 892 · EW 2341.1.0";
+
+  const categories = [...new Set(dummyTests.map(t => t.category))];
+  const statuses = [...new Set(dummyTests.map(t => t.status))];
+  const suites = [...new Set(dummyTests.map(t => t.suite))];
 
   return (
     <AppLayout activeTab="runs">
@@ -62,6 +95,12 @@ export function RunDetail() {
             <span className="text-[var(--gcp-text-secondary)] gcp-mono text-sm">{currentRunId}</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-[var(--gcp-text-secondary)]">
+            <div className="flex items-center gap-1.5 border-r border-[var(--gcp-grey)] pr-3">
+              <Calendar size={13} />
+              <select className="text-[12px] bg-transparent border-none outline-none font-medium cursor-pointer" value={timeSlice} onChange={e => setTimeSlice(e.target.value)}>
+                {TIME_SLICES.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
             <span>Duration: {currentRun?.duration ?? "45m"}</span>
             <span>Target: {currentRun?.env ?? "Prod/Production"}</span>
             <button onClick={() => { copyToClipboard(`https://aware.example.com/runs/${currentRunId}`); showToast("Permalink copied"); }} className="flex items-center gap-1.5 gcp-button text-[12px] px-3 py-1.5"><Link2 size={13} /> Copy link</button>
@@ -87,23 +126,23 @@ export function RunDetail() {
           {/* Left Panel */}
           <div className="w-[60%] flex flex-col gcp-card overflow-hidden">
             <div className="p-3 border-b border-[var(--gcp-grey)] flex gap-2">
-              <input type="text" placeholder="Search tests..." className="gcp-input flex-1" />
-              <button className="gcp-button" onClick={() => showToast("Filter applied")}>Filter</button>
+              <input type="text" placeholder="Search tests..." className="gcp-input flex-1" value={searchText} onChange={e => setSearchText(e.target.value)} />
+              <button className="gcp-button" onClick={() => showToast(`Showing ${filteredTests.length} tests`)}>Filter</button>
             </div>
             <div className="flex-1 overflow-auto">
               <table className="gcp-table">
                 <thead className="sticky top-0 bg-[var(--gcp-surface)] z-10">
                   <tr>
-                    <th>Test Name</th>
-                    <th>Status</th>
-                    <th className="text-right">Duration</th>
-                    <th>Category</th>
-                    <th>Suite</th>
+                    <th><TableHeaderFilter label="Test Name" filter={colFilters.name ?? EMPTY_FILTER} onFilterChange={updateColFilter("name")} /></th>
+                    <th><TableHeaderFilter label="Status" allValues={statuses} filter={colFilters.status ?? EMPTY_FILTER} onFilterChange={updateColFilter("status")} /></th>
+                    <th className="text-right"><TableHeaderFilter label="Duration" filter={colFilters.duration ?? EMPTY_FILTER} onFilterChange={updateColFilter("duration")} /></th>
+                    <th><TableHeaderFilter label="Category" allValues={categories} filter={colFilters.category ?? EMPTY_FILTER} onFilterChange={updateColFilter("category")} /></th>
+                    <th><TableHeaderFilter label="Suite" allValues={suites} filter={colFilters.suite ?? EMPTY_FILTER} onFilterChange={updateColFilter("suite")} /></th>
                     <th className="w-16 text-center">Share</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {dummyTests.map((t, i) => (
+                  {filteredTests.map((t, i) => (
                     <tr key={t.id} className={`group ${i === 3 ? "bg-[var(--gcp-blue-bg)]" : "cursor-pointer"}`}>
                       <td className="font-mono text-xs">{t.name}</td>
                       <td><span className={`gcp-badge ${t.status === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{t.status}</span></td>
@@ -121,8 +160,9 @@ export function RunDetail() {
                 </tbody>
               </table>
             </div>
-            <div className="p-2 border-t border-[var(--gcp-grey)] text-xs text-[var(--gcp-text-secondary)] bg-[var(--gcp-surface-hover)]">
-              Keyboard nav: ↑↓ navigate · Enter open evidence · <span className="font-mono">L</span> copy link · <span className="font-mono">G</span> file GitHub issue
+            <div className="p-2 border-t border-[var(--gcp-grey)] flex justify-between items-center text-xs text-[var(--gcp-text-secondary)] bg-[var(--gcp-surface-hover)]">
+              <span>Showing {filteredTests.length} of {dummyTests.length} tests</span>
+              <span>Keyboard nav: ↑↓ navigate · Enter open evidence · <span className="font-mono">L</span> copy link · <span className="font-mono">G</span> file GitHub issue</span>
             </div>
           </div>
 

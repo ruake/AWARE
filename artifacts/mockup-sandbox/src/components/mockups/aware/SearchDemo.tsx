@@ -75,7 +75,7 @@ function KindIcon({ kind }: { kind: ResultKind }) {
 }
 
 export function SearchDemo() {
-  const [query, setQuery] = React.useState("geo_match");
+  const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(0);
   const [activeFilter, setActiveFilter] = React.useState<"all" | "tests" | "runs" | "compare">("all");
 
@@ -94,7 +94,7 @@ export function SearchDemo() {
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") setActiveIdx((i) => Math.min(i + 1, results.length - 1));
     if (e.key === "ArrowUp") setActiveIdx((i) => Math.max(i - 1, 0));
-    if (e.key === "Escape") setQuery("");
+    if (e.key === "Escape") { setQuery(""); setActiveFilter("all"); }
   };
 
   const kindCounts = {
@@ -103,22 +103,15 @@ export function SearchDemo() {
     compare: rawResults.filter((r) => r.kind === "compare").length,
   };
 
+  const hasResults = showResults && results.length > 0;
+  const hasNoResults = showResults && results.length === 0;
+
   return (
     <AppLayout activeTab="search">
-      <div className="max-w-[960px] mx-auto space-y-6">
+      <div className="h-[calc(100vh-100px)] flex flex-col max-w-[960px] mx-auto gap-0">
 
-        {/* Page header */}
-        <div>
-          <h1 className="text-[22px] font-medium text-[var(--gcp-text)]">Global Search</h1>
-          <p className="text-[13px] text-[var(--gcp-text-secondary)] mt-0.5">
-            Search across tests, runs, and comparisons. Press <kbd className="gcp-mono text-[11px] bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded px-1.5 py-0.5">⌘K</kbd> anywhere to open.
-          </p>
-        </div>
-
-        {/* Command palette card */}
-        <div className="gcp-card overflow-hidden shadow-lg">
-
-          {/* Search bar */}
+        {/* Sticky search bar */}
+        <div className="gcp-card shrink-0 mb-4">
           <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--gcp-grey)]">
             <Search size={18} className="text-[var(--gcp-text-secondary)] shrink-0" />
             <input
@@ -130,7 +123,7 @@ export function SearchDemo() {
               onKeyDown={handleKey}
             />
             {query && (
-              <button onClick={() => setQuery("")} className="text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)]">
+              <button onClick={() => { setQuery(""); setActiveFilter("all"); }} className="text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)]">
                 <X size={15} />
               </button>
             )}
@@ -139,7 +132,7 @@ export function SearchDemo() {
             </div>
           </div>
 
-          {/* Filter chips — only when results exist */}
+          {/* Filter chips */}
           {showResults && rawResults.length > 0 && (
             <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--gcp-grey)] bg-[var(--gcp-grey-bg)]">
               {(["all", "tests", "runs", "compare"] as const).map((f) => {
@@ -162,13 +155,41 @@ export function SearchDemo() {
             </div>
           )}
 
-          {/* Results list */}
-          {showResults && results.length > 0 && (
-            <div className="max-h-[360px] overflow-y-auto">
+          {/* Keyboard hints footer */}
+          <div className="flex items-center gap-4 px-4 py-2 bg-[var(--gcp-grey-bg)]">
+            {[
+              { icon: <ArrowUp size={10} />, label: "up" },
+              { icon: <ArrowDown size={10} />, label: "down" },
+              { icon: <CornerDownLeft size={10} />, label: "open" },
+              { icon: <span className="text-[10px]">esc</span>, label: "clear" },
+            ].map((k, i) => (
+              <div key={i} className="flex items-center gap-1 text-[11px] text-[var(--gcp-text-secondary)]">
+                <kbd className="gcp-mono bg-[var(--gcp-surface)] border border-[var(--gcp-grey)] rounded px-1.5 py-0.5 flex items-center">
+                  {k.icon}
+                </kbd>
+                {k.label}
+              </div>
+            ))}
+            <div className="ml-auto text-[11px] text-[var(--gcp-text-secondary)]">
+              {hasResults ? `${results.length} result${results.length !== 1 ? "s" : ""}` : "Type to search"}
+            </div>
+          </div>
+        </div>
+
+        {/* Full-page results area — scrolls independently */}
+        <div className="flex-1 overflow-auto min-h-0">
+          {hasResults && (
+            <div className="gcp-card overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--gcp-grey)] bg-[var(--gcp-grey-bg)]">
+                <h2 className="text-[13px] font-medium text-[var(--gcp-text)]">
+                  Results for <span className="font-mono text-[var(--gcp-blue)]">"{query}"</span>
+                </h2>
+                <span className="text-[12px] text-[var(--gcp-text-secondary)]">{results.length} results</span>
+              </div>
               {results.map((r, i) => (
                 <div
-                  key={i}
-                  className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer border-b border-[var(--gcp-grey)] last:border-0 ${
+                  key={`${r.kind}-${i}`}
+                  className={`flex items-center gap-3 px-4 py-3 cursor-pointer border-b border-[var(--gcp-grey)] last:border-0 transition-colors ${
                     i === activeIdx ? "bg-[var(--gcp-blue-bg)]" : "hover:bg-[var(--gcp-surface-hover)]"
                   }`}
                   onMouseEnter={() => setActiveIdx(i)}
@@ -179,154 +200,71 @@ export function SearchDemo() {
                     <div className="text-[13px] font-mono text-[var(--gcp-text)] truncate">{r.label}</div>
                     <div className="text-[11px] text-[var(--gcp-text-secondary)] truncate">{r.sub}</div>
                   </div>
-                  {r.meta && (
-                    <span className="text-[11px] text-[var(--gcp-text-secondary)] shrink-0 gcp-mono">{r.meta}</span>
-                  )}
-                  {i === activeIdx && (
-                    <ChevronRight size={13} className="text-[var(--gcp-blue)] shrink-0" />
-                  )}
+                  <div className="flex items-center gap-3 shrink-0">
+                    {r.meta && (
+                      <span className="text-[11px] text-[var(--gcp-text-secondary)] gcp-mono">{r.meta}</span>
+                    )}
+                    <span className={`gcp-badge text-[10px] ${r.kind === "test" ? "bg-[var(--gcp-blue-bg)] text-[var(--gcp-blue)]" : r.kind === "run" ? "bg-[var(--gcp-green-bg)] text-[var(--gcp-green)]" : r.kind === "compare" ? "bg-[var(--gcp-yellow-bg)] text-[var(--gcp-yellow)]" : "bg-[var(--gcp-grey-bg)] text-[var(--gcp-text-secondary)]"}`}>
+                      {r.kind}
+                    </span>
+                    {i === activeIdx && (
+                      <ChevronRight size={14} className="text-[var(--gcp-blue)] shrink-0" />
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* No results state */}
-          {showResults && results.length === 0 && (
-            <div className="flex flex-col items-center gap-2 py-10 text-[var(--gcp-text-secondary)]">
-              <AlertTriangle size={24} className="text-[var(--gcp-yellow)]" />
-              <p className="text-[13px]">No results for <span className="font-mono text-[var(--gcp-text)]">"{query}"</span></p>
+          {hasNoResults && (
+            <div className="flex flex-col items-center justify-center gap-3 py-20 text-[var(--gcp-text-secondary)]">
+              <AlertTriangle size={28} className="text-[var(--gcp-yellow)]" />
+              <p className="text-[14px]">No results for <span className="font-mono text-[var(--gcp-text)]">"{query}"</span></p>
               <p className="text-[12px]">Try a test name, run ID, or version number.</p>
             </div>
           )}
 
-          {/* Empty / home state */}
+          {/* Home state — recent + quick actions */}
           {!showResults && (
-            <div className="px-4 py-3">
-              {/* Recent */}
-              <div className="mb-4">
-                <div className="text-[11px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Clock size={11} /> Recent
+            <div className="gcp-card overflow-hidden">
+              <div className="px-4 py-4">
+                {/* Recent */}
+                <div className="mb-5">
+                  <div className="text-[11px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Clock size={11} /> Recent
+                  </div>
+                  <div className="space-y-0.5">
+                    {RECENT.map((r, i) => (
+                      <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
+                        <StatusDot status={r.status} />
+                        <span className="text-[13px] font-mono text-[var(--gcp-text)] flex-1 truncate">{r.label}</span>
+                        <span className="text-[11px] text-[var(--gcp-text-secondary)]">{r.sub}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  {RECENT.map((r, i) => (
-                    <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
-                      <StatusDot status={r.status} />
-                      <span className="text-[13px] font-mono text-[var(--gcp-text)] flex-1 truncate">{r.label}</span>
-                      <span className="text-[11px] text-[var(--gcp-text-secondary)]">{r.sub}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Quick actions */}
-              <div>
-                <div className="text-[11px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Zap size={11} /> Quick Actions
-                </div>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {QUICK_ACTIONS.map((a, i) => (
-                    <div key={i} className="flex items-center gap-2 px-3 py-2 rounded border border-[var(--gcp-grey)] hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
-                      <a.icon size={14} style={{ color: a.color }} />
-                      <span className="text-[12px] text-[var(--gcp-text)] flex-1">{a.label}</span>
-                      <kbd className="gcp-mono text-[10px] bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded px-1 py-0.5 text-[var(--gcp-text-secondary)]">
-                        ⌘{a.shortcut}
-                      </kbd>
-                    </div>
-                  ))}
+                {/* Quick actions */}
+                <div>
+                  <div className="text-[11px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Zap size={11} /> Quick Actions
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {QUICK_ACTIONS.map((a, i) => (
+                      <div key={i} className="flex items-center gap-2 px-3 py-2 rounded border border-[var(--gcp-grey)] hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
+                        <a.icon size={14} style={{ color: a.color }} />
+                        <span className="text-[12px] text-[var(--gcp-text)] flex-1">{a.label}</span>
+                        <kbd className="gcp-mono text-[10px] bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded px-1 py-0.5 text-[var(--gcp-text-secondary)]">
+                          ⌘{a.shortcut}
+                        </kbd>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           )}
-
-          {/* Keyboard hints footer */}
-          <div className="flex items-center gap-4 px-4 py-2 border-t border-[var(--gcp-grey)] bg-[var(--gcp-grey-bg)]">
-            {[
-              { icon: <ArrowUp size={10} />, label: "up" },
-              { icon: <ArrowDown size={10} />, label: "down" },
-              { icon: <CornerDownLeft size={10} />, label: "open" },
-              { icon: <span className="text-[10px]">esc</span>, label: "close" },
-            ].map((k, i) => (
-              <div key={i} className="flex items-center gap-1 text-[11px] text-[var(--gcp-text-secondary)]">
-                <kbd className="gcp-mono bg-[var(--gcp-surface)] border border-[var(--gcp-grey)] rounded px-1.5 py-0.5 flex items-center">
-                  {k.icon}
-                </kbd>
-                {k.label}
-              </div>
-            ))}
-            <div className="ml-auto text-[11px] text-[var(--gcp-text-secondary)]">
-              {showResults ? `${results.length} result${results.length !== 1 ? "s" : ""}` : "Type to search"}
-            </div>
-          </div>
         </div>
-
-        {/* Full-page search results table (contextual) */}
-        {showResults && results.length > 0 && (
-          <div className="gcp-card overflow-hidden">
-            <div className="px-4 py-3 border-b border-[var(--gcp-grey)] bg-[var(--gcp-grey-bg)] flex items-center justify-between">
-              <h2 className="text-[13px] font-medium text-[var(--gcp-text)]">
-                All matches for <span className="font-mono text-[var(--gcp-blue)]">"{query}"</span>
-              </h2>
-              <span className="text-[12px] text-[var(--gcp-text-secondary)]">{results.length} results</span>
-            </div>
-            <table className="gcp-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Detail</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((r, i) => (
-                  <tr key={i} className="cursor-pointer">
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <KindIcon kind={r.kind} />
-                        <span className="font-mono text-[12px]">{r.label}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="gcp-badge bg-[var(--gcp-grey-bg)] text-[var(--gcp-text-secondary)] text-[11px]">
-                        {r.kind}
-                      </span>
-                    </td>
-                    <td>
-                      {r.status ? (
-                        <span className={`gcp-badge gcp-badge-${r.status}`}>{r.status.toUpperCase()}</span>
-                      ) : (
-                        <span className="text-[var(--gcp-text-secondary)] text-[12px]">—</span>
-                      )}
-                    </td>
-                    <td className="text-[var(--gcp-text-secondary)] text-[12px]">{r.sub}</td>
-                    <td>
-                      <div className="flex items-center gap-1 text-[var(--gcp-blue)] text-[12px] justify-end">
-                        Open <ChevronRight size={12} />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Pass-rate summary chips when showing test results */}
-        {showResults && results.some((r) => r.kind === "test") && (
-          <div className="flex flex-wrap gap-3">
-            {results.filter((r) => r.kind === "test").map((r, i) => (
-              <div key={i} className="gcp-card px-3 py-2 flex items-center gap-2">
-                <StatusDot status={r.status} />
-                <span className="font-mono text-[11px] text-[var(--gcp-text)]">{r.label.split("[")[0]}</span>
-                {r.status === "pass" && <CheckCircle2 size={12} className="text-[var(--gcp-green)]" />}
-                {r.status === "fail" && <X size={12} className="text-[var(--gcp-red)]" />}
-                {r.status === "flaky" && <AlertTriangle size={12} className="text-[var(--gcp-yellow)]" />}
-                <span className="text-[11px] text-[var(--gcp-text-secondary)]">{r.meta}</span>
-              </div>
-            ))}
-          </div>
-        )}
 
       </div>
     </AppLayout>
