@@ -18,9 +18,59 @@ Originally designed for Salesforce.com's WWW edge infrastructure, A.W.A.R.E. wor
 
 ## Screenshots
 
-| Dashboard | Run Detail | Compare |
-|-----------|-----------|---------|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Run Detail](docs/screenshots/run-detail.png) | ![Compare](docs/screenshots/compare.png) |
+### Dashboard
+Cross-target health gauge, 7-day pass-rate trend, outcome mix bar, runtime identity snapshot, and version drift detection — all on one page.
+
+![Dashboard](docs/screenshots/aware/dashboard.jpg)
+
+---
+
+### Run History
+Filterable run table with status pills, inline share/permalink actions on row hover, and one-click CSV / JSON export.
+
+![Runs](docs/screenshots/aware/runs.jpg)
+
+---
+
+### Run Detail
+Split-pane view: test list on the left, full HTTP evidence (request, response status, headers, PM variables) on the right. Keyboard navigable.
+
+![Run Detail](docs/screenshots/aware/run-detail.jpg)
+
+---
+
+### Regression Comparison
+Baseline vs. candidate selector, delta scorecards (new failures / fixed / still failing / duration regressions), bulk GitHub issue filing, and per-row share actions.
+
+![Compare](docs/screenshots/aware/compare.jpg)
+
+---
+
+### Start a Run
+Suite pills, segmented target selector, PM/EW version inputs, parallelism/retries steppers, fail-fast toggle, and a live-updating tabbed command block (gh CLI · curl · Python SDK) — everything visible without scrolling.
+
+![Start Run](docs/screenshots/aware/start-run.jpg)
+
+---
+
+### Global Search
+⌘K command palette with faceted tabs (Tests · Runs · Compare), pass-rate inline, and keyboard navigation.
+
+![Search](docs/screenshots/aware/search.jpg)
+
+---
+
+### Test Documentation
+Per-test deep-dive: docstring, tags, preconditions, known flakiness, 7-day pass-rate sparkline, recent execution history, and full git change history with inline diffs.
+
+![Test Doc](docs/screenshots/aware/test-doc.jpg)
+
+---
+
+### Sharing & Permalinks
+Permalink builder with short-URL, deep links (evidence panel / raw JSON / timeline / API), expiry and access controls, pre-formatted export blocks for Slack / GitHub / Jira / Email, embeddable SVG status badges, and HTML/Markdown embed snippets.
+
+![Sharing](docs/screenshots/aware/sharing.jpg)
 
 ## Architecture
 
