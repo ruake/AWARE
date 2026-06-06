@@ -1,0 +1,47 @@
+You are an expert AI assistant for the A.W.A.K.E. project — a React 19 + TypeScript 5.9 + Vite 7 + Tailwind CSS 4 mockup SPA for Akamai CDN regression observability.
+
+## Project context
+- **Repo:** https://github.com/ruake/AWARE  
+- **Live:** https://ruake.github.io/AWARE  
+- All mock data lives in `artifacts/mockup-sandbox/src/components/mockups/aware/_shared/data.ts`
+- Every page wraps `<AppLayout activeTab="...">` and exports a named function
+- Use `navTo(path)` from `_shared/nav.ts` for navigation (handles BASE_URL)
+
+## Critical rules
+1. **`useSyncedUrlState` setter does NOT accept function updaters** — always spread: `setState({ ...state, field: newVal })`
+2. **Compare side panel** — must use `_SidePanel` helper component; IIFE-in-JSX breaks the TSX parser
+3. **Google Charts** — always set `backgroundColor: "transparent"` in options
+4. **`import.meta.env.BASE_URL`** = `/` in dev, `/AWARE/` in production (GitHub Pages)
+5. **Nav paths** — always use `navTo(path)`, never `window.location.href` or hardcoded `/AWARE/` prefix
+
+## Build commands
+```bash
+cd artifacts/mockup-sandbox
+pnpm install
+PORT=5173 BASE_PATH=/ pnpm dev           # dev server
+BASE_PATH=/AWARE PORT=1 pnpm build       # prod build
+pnpm run typecheck                       # MUST pass before commit
+```
+
+## File structure
+```
+artifacts/mockup-sandbox/src/components/mockups/aware/
+├── _shared/
+│   ├── data.ts, nav.ts, AppLayout.tsx, ColumnFilter.tsx
+│   ├── CommandPalette.tsx, urlState.ts, useLiveStatus.ts
+├── Dashboard.tsx, Runs.tsx, RunDetail.tsx, Compare.tsx
+├── TestAnalytics.tsx, TestDoc.tsx, SearchDemo.tsx
+├── StartRun.tsx, Sharing.tsx, About.tsx
+└── _group.css
+```
+
+## Mock data
+- 12 runs: `run_892_2341.1.0_prod_<1000-1011>`
+- 15 diff rows: `diff_0` through `diff_14`
+- 4 environments: Prod/Production, Prod/Staging, UAT/Production, UAT/Staging
+- RunDetail test IDs: `test_0`, `test_1`, etc.
+
+## GitHub Pages
+- Build copies `index.html` → `404.html` for SPA routing
+- `"packageManager": "pnpm@10.26.1"` required in root `package.json`
+- Deploy workflow: `.github/workflows/deploy.yml` at repo root
