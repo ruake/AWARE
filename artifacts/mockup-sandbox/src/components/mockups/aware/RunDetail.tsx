@@ -42,7 +42,7 @@ export function RunDetail() {
 
   const otherRuns = RUNS.filter(r => r.id !== currentRunId);
   const [selectedCompareRun, setSelectedCompareRun] = React.useState(
-    otherRuns[Math.min(0, otherRuns.length - 1)]?.id ?? ""
+    otherRuns.length > 0 ? otherRuns[0].id : ""
   );
 
   React.useEffect(() => {
@@ -72,7 +72,7 @@ export function RunDetail() {
   };
 
   const updateColFilter = (field: string) => (f: ColumnFilterState) => {
-    setColFilters({ ...colFilters, [field]: f });
+    setColFilters(prev => ({ ...prev, [field]: f }));
   };
 
   let filteredTests = dummyTests;

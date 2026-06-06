@@ -14,7 +14,8 @@ import {
   Command,
   Check,
   AlertTriangle,
-  Activity
+  Activity,
+  Workflow
 } from "lucide-react";
 import { navTo, repo } from "./nav";
 import { CommandPalette } from "./CommandPalette";
@@ -52,6 +53,7 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
     { id: "runs", label: "Runs", icon: List, path: "Runs" },
     { id: "new-run", label: "New Run", icon: PlayCircle, path: "StartRun" },
     { id: "compare", label: "Compare", icon: GitCompare, path: "Compare" },
+    { id: "status", label: "Status", icon: Activity, path: "Status" },
     { id: "search", label: "Search", icon: Search, path: "SearchDemo" },
     { id: "about", label: "About", icon: Info, path: "About" },
   ];
@@ -123,9 +125,6 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
           <a href={`${repo}/actions`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[13px] text-[var(--gcp-blue)] hover:underline">
             GitHub Actions <ExternalLink size={14} />
           </a>
-          <div className="w-8 h-8 rounded-full bg-[var(--gcp-green)] text-white flex items-center justify-center text-sm font-bold cursor-pointer">
-            E
-          </div>
         </div>
       </header>
 

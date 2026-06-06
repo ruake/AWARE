@@ -187,7 +187,7 @@ export function Compare() {
   };
 
   const updateColFilter = (field: string) => (f: ColumnFilterState) => {
-    setColFilters({ ...colFilters, [field]: f });
+    setColFilters(prev => ({ ...prev, [field]: f }));
   };
 
   let filteredRows = DIFF_ROWS;

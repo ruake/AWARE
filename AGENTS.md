@@ -48,7 +48,7 @@ artifacts/mockup-sandbox/src/components/mockups/aware/
 
 ## Gotchas
 - `import.meta.env.BASE_URL` = `/` dev, `/AWARE/` production
-- `useSyncedUrlState` setter: NO function updaters — use `setState({ ...state, field: val })`
+- `useSyncedUrlState` setter: supports function updaters — use `setState(prev => ({ ...prev, field: val }))`
 - Compare side panel uses `_SidePanel` helper (IIFE-in-JSX fails TS parser)
 - `navTo()` uses `pushState` + manual `popstate` — read URL via `new URLSearchParams(window.location.search)`
 - GitHub Actions workflows must be at repo root `.github/workflows/`

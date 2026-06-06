@@ -111,7 +111,7 @@ export function Runs() {
   const showToast = (msg: string) => { setShareToast(msg); setTimeout(() => setShareToast(null), 2500); };
 
   const updateColFilter = (field: string) => (f: ColumnFilterState) => {
-    setColFilters({ ...colFilters, [field]: f });
+    setColFilters(prev => ({ ...prev, [field]: f }));
   };
 
   let filtered = applyFilters(RUNS, colFilters);
@@ -223,7 +223,7 @@ export function Runs() {
                           <div className="flex items-center justify-center gap-2" onClick={e => e.stopPropagation()}>
                             <button onClick={() => { copyToClipboard(`https://aware.example.com/runs/${run.id}`); showToast("Permalink copied"); }} title="Copy permalink" className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]"><Link2 size={13} /></button>
                             <button onClick={() => { copyToClipboard(`Slack snippet for run ${run.id}: https://aware.example.com/runs/${run.id}`); showToast("Slack snippet copied"); }} title="Copy Slack snippet" className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[#4a154b]"><Share2 size={13} /></button>
-                            <button onClick={() => window.open(`/preview/aware/RunDetail?runId=${run.id}`, "_blank", "noopener")} title="Open in new tab" className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]"><ExternalLink size={13} /></button>
+                            <button onClick={() => window.open(`${import.meta.env.BASE_URL}RunDetail?runId=${run.id}`, "_blank", "noopener")} title="Open in new tab" className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]"><ExternalLink size={13} /></button>
                           </div>
                         </td>
                       </tr>

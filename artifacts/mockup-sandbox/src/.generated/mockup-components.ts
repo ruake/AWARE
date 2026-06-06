@@ -9,6 +9,7 @@ export const modules: ModuleMap = {
   "./components/mockups/aware/SearchDemo.tsx": () => import("../components/mockups/aware/SearchDemo.tsx"),
   "./components/mockups/aware/Sharing.tsx": () => import("../components/mockups/aware/Sharing.tsx"),
   "./components/mockups/aware/StartRun.tsx": () => import("../components/mockups/aware/StartRun.tsx"),
+  "./components/mockups/aware/Status.tsx": () => import("../components/mockups/aware/Status.tsx"),
   "./components/mockups/aware/TestAnalytics.tsx": () => import("../components/mockups/aware/TestAnalytics.tsx"),
   "./components/mockups/aware/TestDoc.tsx": () => import("../components/mockups/aware/TestDoc.tsx")
 };
