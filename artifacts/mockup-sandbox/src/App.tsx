@@ -140,6 +140,14 @@ function App() {
     );
   }
 
+  // Redirect root to Dashboard
+  const basePath = getBasePath();
+  const target = `${basePath}/preview/aware/Dashboard`;
+  if (window.location.pathname !== target) {
+    window.location.replace(target);
+    return null;
+  }
+
   return <Gallery />;
 }
 
