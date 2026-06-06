@@ -4,7 +4,7 @@ import { RUNS, getRunById, getRunIndex, getTestResultsForRun } from "./_shared/d
 import { navTo, copyToClipboard, repo } from "./_shared/nav";
 import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import "./_group.css";
-import { Copy, Check, Share2, Link2, Github, ExternalLink, GitCompare, Calendar } from "lucide-react";
+import { Copy, Check, Share2, Link2, Github, ExternalLink, GitCompare, Calendar, FileText } from "lucide-react";
 
 const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 
@@ -151,6 +151,7 @@ export function RunDetail() {
                       <td className="text-[12px]">{t.suite}</td>
                       <td className="text-center">
                         <div className="flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => navTo(`TestDoc?testId=${t.id}`)} className="text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]" title="View test documentation"><FileText size={12} /></button>
                           <button onClick={() => { copyToClipboard(`https://aware.example.com/tests/${t.id}`); showToast("Permalink copied"); }} className="text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]" title="Copy test permalink"><Link2 size={12} /></button>
                           <button onClick={() => { copyToClipboard(`GitHub issue for test ${t.name} (status: ${t.status}, duration: ${t.duration}ms)`); showToast("GitHub issue template copied"); }} className="text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)]" title="Copy as GitHub issue"><Github size={12} /></button>
                         </div>

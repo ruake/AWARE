@@ -4,7 +4,7 @@ import { RUNS, DIFF_ROWS, TEST_DETAILS } from "./_shared/data";
 import { copyToClipboard, navTo } from "./_shared/nav";
 import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import "./_group.css";
-import { Link2, Github, Share2, Copy, Check, AlertTriangle, BarChart3, X, ArrowUpRight, Calendar, Filter } from "lucide-react";
+import { Link2, Github, Share2, Copy, Check, AlertTriangle, BarChart3, X, ArrowUpRight, Calendar, Filter, FileText } from "lucide-react";
 
 const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 const TIME_SLICES = ["1d", "7d", "14d", "30d", "All"];
@@ -20,6 +20,9 @@ function ComparisonSidePanel({ diff, testId }: { diff: typeof DIFF_ROWS[number];
       <div className="p-4 border-b border-[var(--gcp-grey)] flex items-center justify-between shrink-0">
         <h3 className="font-medium text-sm flex items-center gap-2"><BarChart3 size={15} className="text-[var(--gcp-blue)]" /> Comparison Detail</h3>
         <div className="flex items-center gap-2">
+          <button onClick={() => navTo(`TestDoc?testId=${testId}`)} className="gcp-button text-[11px] flex items-center gap-1 px-2.5 py-1.5">
+            <FileText size={12} /> View Docs <ArrowUpRight size={11} />
+          </button>
           <button onClick={() => navTo(`TestAnalytics?testId=${testId}`)} className="gcp-button text-[11px] flex items-center gap-1 px-2.5 py-1.5">
             <BarChart3 size={12} /> View Analytics <ArrowUpRight size={11} />
           </button>

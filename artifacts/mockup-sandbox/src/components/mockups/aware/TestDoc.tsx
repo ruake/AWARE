@@ -1,26 +1,48 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
-import { repo } from "./_shared/nav";
+import { DIFF_ROWS } from "./_shared/data";
+import { navTo, repo } from "./_shared/nav";
 import "./_group.css";
-import { ArrowLeft, Pin, Github, ExternalLink, FileText, CheckCircle2, AlertTriangle, AlertCircle, GitBranch, GitCommit } from "lucide-react";
+import { ArrowLeft, Pin, Github, ExternalLink, FileText, CheckCircle2, AlertTriangle, AlertCircle, GitBranch, GitCommit, Search } from "lucide-react";
 
 export function TestDoc() {
+  const params = new URLSearchParams(window.location.search);
+  const testId = params.get("testId") || "";
+  const diffRow = DIFF_ROWS.find(d => d.id === testId);
+  const testName = diffRow?.name ?? (testId || "test_geo_match_us_locale_prod[/us/]");
+  const testStatus = diffRow?.candStatus ?? "FAIL";
+  const testCategory = diffRow?.category ?? "geo-match";
+  const testSuite = "full_suite";
   return (
     <AppLayout activeTab="detail">
       <div className="flex flex-col h-[calc(100vh-80px)] max-w-[1800px] mx-auto gap-4">
         {/* Top Sticky Bar */}
         <div className="gcp-card p-4 flex items-center justify-between shrink-0 sticky top-0 z-10">
           <div className="flex items-center gap-4">
-            <button className="text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] p-1 rounded-full transition-colors flex items-center gap-1">
+            <button onClick={() => window.history.back()} className="text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] p-1 rounded-full transition-colors flex items-center gap-1">
               <ArrowLeft size={18} />
-              <span className="text-sm">Run Detail</span>
+              <span className="text-sm">Back</span>
             </button>
             <div className="w-px h-6 bg-[var(--gcp-grey)] mx-2"></div>
-            <h1 className="text-xl font-bold font-mono tracking-tight">test_geo_match_us_locale_prod<span className="text-[var(--gcp-text-secondary)]">[/us/]</span></h1>
-            <span className="gcp-badge gcp-badge-fail text-sm font-bold shadow-sm">FAIL</span>
+            <div className="flex items-center gap-2 relative">
+              <Search size={14} className="text-[var(--gcp-text-secondary)]" />
+              <select
+                className="gcp-input text-sm font-mono max-w-[300px]"
+                value={testId}
+                onChange={e => navTo(`TestDoc?testId=${e.target.value}`)}
+              >
+                <option value="">Jump to test...</option>
+                {DIFF_ROWS.map(d => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="w-px h-6 bg-[var(--gcp-grey)] mx-2"></div>
+            <h1 className="text-xl font-bold font-mono tracking-tight">{testName}</h1>
+            <span className={`gcp-badge text-sm font-bold shadow-sm ${testStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{testStatus}</span>
             <div className="flex gap-2">
-              <span className="px-2 py-1 bg-[var(--gcp-grey-bg)] text-[12px] font-medium rounded text-[var(--gcp-text-secondary)] border border-[var(--gcp-grey)]">geo-match</span>
-              <span className="px-2 py-1 bg-[var(--gcp-grey-bg)] text-[12px] font-medium rounded text-[var(--gcp-text-secondary)] border border-[var(--gcp-grey)]">full_suite</span>
+              <span className="px-2 py-1 bg-[var(--gcp-grey-bg)] text-[12px] font-medium rounded text-[var(--gcp-text-secondary)] border border-[var(--gcp-grey)]">{testCategory}</span>
+              <span className="px-2 py-1 bg-[var(--gcp-grey-bg)] text-[12px] font-medium rounded text-[var(--gcp-text-secondary)] border border-[var(--gcp-grey)]">{testSuite}</span>
             </div>
           </div>
           <div className="flex items-center gap-3">

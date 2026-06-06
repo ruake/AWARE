@@ -4,7 +4,7 @@ import { AppLayout } from "./_shared/AppLayout";
 import { TEST_DETAILS, DIFF_ROWS, RUNS } from "./_shared/data";
 import { navTo, copyToClipboard } from "./_shared/nav";
 import "./_group.css";
-import { BarChart3, Clock, Activity, Check, ArrowLeft, AlertTriangle } from "lucide-react";
+import { BarChart3, Clock, Activity, Check, ArrowLeft, AlertTriangle, FileText, Search } from "lucide-react";
 
 const ENVS = ["Prod/Production", "Prod/Staging", "UAT/Production", "UAT/Staging"];
 
@@ -62,6 +62,19 @@ export function TestAnalytics() {
             <button onClick={() => navTo("Compare")} className="gcp-button text-[12px] flex items-center gap-1 px-3 py-1.5">
               <ArrowLeft size={14} /> Back to Compare
             </button>
+            <div className="flex items-center gap-2">
+              <Search size={14} className="text-[var(--gcp-text-secondary)]" />
+              <select
+                className="gcp-input text-sm font-mono max-w-[280px]"
+                value={testId}
+                onChange={e => navTo(`TestAnalytics?testId=${e.target.value}`)}
+              >
+                <option value="">Jump to test...</option>
+                {DIFF_ROWS.map(d => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
             <div>
               <h1 className="text-lg font-medium text-[var(--gcp-text)]">{diff.name}</h1>
               <div className="flex items-center gap-2 mt-0.5">
@@ -70,9 +83,14 @@ export function TestAnalytics() {
               </div>
             </div>
           </div>
-          <button onClick={() => { copyToClipboard(window.location.href); showToast("Analytics permalink copied"); }} className="gcp-button text-[12px] flex items-center gap-1.5 px-3 py-1.5">
-            <Check size={13} /> Copy link
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => navTo(`TestDoc?testId=${testId}`)} className="gcp-button text-[12px] flex items-center gap-1.5 px-3 py-1.5">
+              <FileText size={13} /> View Docs
+            </button>
+            <button onClick={() => { copyToClipboard(window.location.href); showToast("Analytics permalink copied"); }} className="gcp-button text-[12px] flex items-center gap-1.5 px-3 py-1.5">
+              <Check size={13} /> Copy link
+            </button>
+          </div>
         </div>
 
         {/* Summary Cards */}
