@@ -1,5 +1,7 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
+import { RUNS } from "./_shared/data";
+import { navTo } from "./_shared/nav";
 import "./_group.css";
 import {
   Search, X, Clock, FileText, PlayCircle, GitCompare,
@@ -79,6 +81,13 @@ export function SearchDemo() {
   const [activeIdx, setActiveIdx] = React.useState(0);
   const [activeFilter, setActiveFilter] = React.useState<"all" | "tests" | "runs" | "compare">("all");
 
+  const navigateToResult = (r: Result) => {
+    if (r.kind === "run") navTo(`RunDetail?runId=${r.label}`);
+    else if (r.kind === "test") navTo(`TestAnalytics?testId=${r.label}`);
+    else if (r.kind === "compare") navTo(`Compare?baseline=${RUNS[0].id}&candidate=${RUNS[3].id}`);
+    else if (r.kind === "action") navTo("StartRun");
+  };
+
   const rawResults = filterResults(query);
   const results = activeFilter === "all"
     ? rawResults
@@ -94,6 +103,7 @@ export function SearchDemo() {
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") setActiveIdx((i) => Math.min(i + 1, results.length - 1));
     if (e.key === "ArrowUp") setActiveIdx((i) => Math.max(i - 1, 0));
+    if (e.key === "Enter" && results[activeIdx]) navigateToResult(results[activeIdx]);
     if (e.key === "Escape") { setQuery(""); setActiveFilter("all"); }
   };
 
@@ -193,6 +203,7 @@ export function SearchDemo() {
                     i === activeIdx ? "bg-[var(--gcp-blue-bg)]" : "hover:bg-[var(--gcp-surface-hover)]"
                   }`}
                   onMouseEnter={() => setActiveIdx(i)}
+                  onClick={() => navigateToResult(r)}
                 >
                   <KindIcon kind={r.kind} />
                   <StatusDot status={r.status} />
@@ -235,7 +246,7 @@ export function SearchDemo() {
                   </div>
                   <div className="space-y-0.5">
                     {RECENT.map((r, i) => (
-                      <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
+                      <div key={i} onClick={() => { if (r.type === "run") navTo(`RunDetail?runId=${r.label}`); else if (r.type === "compare") navTo(`Compare?baseline=${RUNS[0].id}&candidate=${RUNS[3].id}`); }} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
                         <StatusDot status={r.status} />
                         <span className="text-[13px] font-mono text-[var(--gcp-text)] flex-1 truncate">{r.label}</span>
                         <span className="text-[11px] text-[var(--gcp-text-secondary)]">{r.sub}</span>
@@ -251,7 +262,7 @@ export function SearchDemo() {
                   </div>
                   <div className="grid grid-cols-2 gap-1.5">
                     {QUICK_ACTIONS.map((a, i) => (
-                      <div key={i} className="flex items-center gap-2 px-3 py-2 rounded border border-[var(--gcp-grey)] hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
+                      <div key={i} onClick={() => { if (i === 0) navTo("StartRun"); else if (i === 1) navTo(`Compare?baseline=${RUNS[0].id}&candidate=${RUNS[3].id}`); else if (i === 2) navTo("TestDoc"); else navTo("Dashboard"); }} className="flex items-center gap-2 px-3 py-2 rounded border border-[var(--gcp-grey)] hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
                         <a.icon size={14} style={{ color: a.color }} />
                         <span className="text-[12px] text-[var(--gcp-text)] flex-1">{a.label}</span>
                         <kbd className="gcp-mono text-[10px] bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded px-1 py-0.5 text-[var(--gcp-text-secondary)]">

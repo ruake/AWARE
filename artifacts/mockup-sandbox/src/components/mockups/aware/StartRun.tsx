@@ -1,8 +1,9 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
+import { repo, copyToClipboard, navTo } from "./_shared/nav";
 import "./_group.css";
 import {
-  Play, Copy, Check, TerminalSquare, AlertCircle,
+  Copy, Check, TerminalSquare, AlertCircle, ExternalLink, Github, ArrowLeft,
   ChevronUp, ChevronDown, Minus, Plus, Zap, Clock,
 } from "lucide-react";
 
@@ -121,11 +122,6 @@ requests.post(
   const handleCopy = (t: TabId) => {
     setCopiedTab(t);
     setTimeout(() => setCopiedTab(null), 2000);
-  };
-
-  const handleTrigger = () => {
-    setTriggered(true);
-    setTimeout(() => setTriggered(false), 3000);
   };
 
   const GhLine = ({ line }: { line: string }) => {
@@ -364,16 +360,27 @@ requests.post(
 
         {/* ── Action Bar ── */}
         <div className="gcp-card p-3 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2 text-[11px] text-[var(--gcp-yellow)]">
-            <AlertCircle size={12} />
-            Requires <span className="font-mono">GH_TOKEN</span> with <strong>workflow</strong> scope
+          <div className="flex items-center gap-3">
+            <button onClick={() => navTo("Runs")} className="gcp-button text-[12px] flex items-center gap-1.5 px-3 py-1.5">
+              <ArrowLeft size={13} /> Back to Runs
+            </button>
+            <div className="flex items-center gap-2 text-[11px] text-[var(--gcp-yellow)]">
+              <AlertCircle size={12} />
+              Requires <span className="font-mono">GH_TOKEN</span> with <strong>workflow</strong> scope
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <button className="gcp-button text-[13px] px-4 py-2 flex items-center gap-1.5">
               <Zap size={13} /> Save as preset
             </button>
             <button
-              onClick={handleTrigger}
+              onClick={() => {
+                const url = `${repo}/actions/workflows/run-tests.yml`;
+                copyToClipboard(url);
+                window.open(url, "_blank", "noopener");
+                setTriggered(true);
+                setTimeout(() => setTriggered(false), 3000);
+              }}
               className={`flex items-center gap-2 px-5 py-2 rounded text-[13px] font-medium transition-all duration-200 min-w-[140px] justify-center ${
                 triggered
                   ? "bg-[var(--gcp-green)] text-white shadow-sm"
@@ -381,9 +388,9 @@ requests.post(
               }`}
             >
               {triggered ? (
-                <><Check size={14} /> Dispatched!</>
+                <><Check size={14} /> URL Copied!</>
               ) : (
-                <><Play size={14} /> Trigger Run</>
+                <><Github size={14} /> Open GitHub Actions</>
               )}
             </button>
           </div>
