@@ -97,14 +97,177 @@ and blocks the build.
 
 ---
 
+## Integrating with Test Frameworks
+
+The portal ships with `scripts/transform.mjs` — a CLI adapter that converts
+output from **pytest**, **Playwright**, **Akamai Test Centre**, and **Catchpoint**
+into the portal's JSON format. Run it after your test suite finishes.
+
+### Quick start with sample data
+
+```bash
+cd artifacts/mockup-sandbox
+pnpm generate:data                    # creates data/ with 6 sample JSON files
+VITE_USE_MOCK=false pnpm dev          # portal now reads from data/ instead of mock
+```
+
+Open http://localhost:5173/preview/aware/Dashboard — the portal fetches from the
+sample files at `/data/runs.json`, `/data/diff.json`, etc.
+
+### Transform real test output
+
+```bash
+# pytest
+pytest --json-report=report.json
+pnpm transform --pytest report.json
+
+# Playwright
+npx playwright test --reporter=json 2> pw-report.json
+pnpm transform --playwright pw-report.json
+
+# Akamai Test Centre (export JSON)
+pnpm transform --akamai akamai-results.json
+
+# Catchpoint (export JSON from dashboard or API)
+pnpm transform --catchpoint catchpoint-results.json
+
+# Merge multiple sources (e.g. pytest + Playwright in one run)
+pnpm transform --pytest unit.json --playwright e2e.json
+
+# Write to a custom directory
+pnpm transform --out ./my-data --pytest report.json
+```
+
+The adapter handles these input shapes automatically:
+
+| Source | Status values accepted | Notes |
+|--------|----------------------|-------|
+| pytest | `passed`/`failed`/`error`/`skipped` | Uses `--json-report` format; `nodeid` for test IDs |
+| Playwright | `passed`/`failed`/`skipped`/`expected`/`unexpected` | Uses `--reporter=json` format; flattens nested suites |
+| Akamai Test Centre | `true`/`false`, `pass`/`fail`, `success`/`error`, 0/1 | Handles PM validation, EdgeWorker, and API check outputs |
+| Catchpoint | `pass`/`fail`, `success`/`error`, numeric (0=pass) | Uses `testName`, `totalTime`, `node` fields |
+
+### End-to-end CI workflow (GitHub Actions)
+
+This workflow runs both pytest and Playwright, transforms their output into the
+portal's JSON format, and deploys to GitHub Pages:
+
+```yaml
+# .github/workflows/test-and-deploy.yml
+name: test-and-deploy
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/30 * * * *"
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifacts/mockup-sandbox
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+
+      - run: pnpm install
+
+      # ── Run tests ──
+      - name: pytest
+        run: |
+          pip install pytest pytest-json-report
+          pytest --json-report=report.json || true   # continue on failure
+
+      - name: Playwright
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test --reporter=json 2> pw-report.json || true
+
+      # ── Transform results into portal JSON ──
+      - name: Generate portal data
+        run: |
+          pnpm transform --pytest report.json --playwright pw-report.json
+
+      # ── Deploy to GitHub Pages ──
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/mockup-sandbox/data
+
+      - name: Deploy to Pages
+        uses: actions/deploy-pages@v4
+```
+
+### Writing a custom adapter
+
+If your test runner isn't one of the four built-in sources, create a custom
+transform function in `scripts/transform.mjs`:
+
+```js
+ADAPTERS.myRunner = (data) => {
+  // Map your data to the portal format
+  return {
+    runs: [/* Run[] — test run metadata */],
+    diffs: [/* DiffRow[] — per-test comparison */],
+    details: [/* TestDetail[] — per-test history */],
+    summary: [/* EnvSummary[] — dashboard health cards */],
+    passRateChartData: [/* Google Charts 2D array */],
+    envPassRateData: [/* Google Charts 2D array */],
+  };
+};
+```
+
+Then run:
+```bash
+pnpm transform --myRunner my-results.json
+```
+
+---
+
 ## Using Your Own Data
 
-There are two paths. **Option 1** is fastest (no network setup). **Option 2** is
-for CI/CD pipelines that generate data files on every test run.
+There are three paths. **Option 1** (static JSON) is the recommended approach
+for CI/CD. **Option 2** (mock data) is fastest for prototyping. **Option 3**
+is for when you already have a data pipeline.
 
-### Option 1: Replace mock data directly
+### Option 1: Static JSON files (recommended)
 
-Edit the file `src/components/mockups/aware/_shared/data.ts` and swap the
+Your CI pipeline generates JSON files that the portal fetches at runtime.
+No rebuild needed when data changes — just push new JSON files.
+
+```bash
+pnpm generate:data                     # create sample files to see the format
+# or use the transform adapter:
+pnpm transform --pytest report.json    # convert real test output
+```
+
+Set `VITE_USE_MOCK=false` in your `.env`:
+
+```bash
+# .env
+VITE_USE_MOCK=false
+VITE_API_BASE_URL=/data          # <-- no trailing slash!
+```
+
+The `data/` directory is served automatically in development and copied into the
+production build — no additional configuration needed.
+
+### Option 2: Replace mock data directly
+
+Edit `src/components/mockups/aware/_shared/data.ts` and swap the
 exported arrays with your own data.
 
 #### The 6 things you must replace
@@ -474,22 +637,66 @@ will work. If you see a 404, check the `destination_dir` in the workflow.
 
 ---
 
-## Graceful Fallback
+## Graceful Fallback (SaaS-grade reliability)
 
-When `VITE_USE_MOCK=false` and a fetch fails (network error, timeout, 404, CORS
-block), the portal **does not crash**. It falls back to the bundled mock data
-and logs a warning to the browser console:
+The portal is engineered for **zero blank screens**. Every failure mode is handled:
+
+| Layer | Failure | Behaviour |
+|-------|---------|-----------|
+| **Network** | Timeout, DNS failure, CORS | Retries with exponential backoff + jitter (up to `VITE_MAX_RETRIES`), then falls back to mock data |
+| **HTTP** | 404, 500, 429 rate-limit | 4xx non-retryable fails fast; 5xx/429 retries; all errors fall back to mock data |
+| **Data** | Empty arrays, missing fields | Components render empty states (no crash, no blank page) |
+| **Render** | Component crash | `ErrorBoundary` per page shows error card with retry + stack trace |
+| **Chart** | Google Charts load failure | Chart component renders without error, showing raw data table |
 
 ```
-[aware] runs.getAll failed (HTTP), using mock: 404 Not Found
+[aware] runs.getAll failed (TIMEOUT), using mock: Request timed out after 10000ms
 ```
 
-To see these warnings, open **DevTools → Console** (F12).
+Errors are logged to console in development. In production, failed fetches
+silently fall back to mock data — the user never sees a broken page.
 
-This means you can deploy with partial data — missing files will just show
-mock data instead of breaking the page.
+## Data Architecture
 
----
+```
+                    ┌───────────────────┐
+                    │  data/ directory  │  ← JSON files generated by CI (pnpm generate:data / pnpm transform)
+                    │  (static files)   │
+                    └────────┬──────────┘
+                             │ fetch (GET /data/runs.json, etc.)
+                             ▼
+┌──────────┐     ┌──────────────────┐     ┌──────────┐     ┌──────────────┐
+│  types   │ ←── │   services.ts    │ ──→ │ hooks.ts │ ──→ │ Components   │
+│  .ts     │     │                  │     │          │     │              │
+│          │     │  Mock (bundled)  │     │ useRuns  │     │ Dashboard    │
+│  Run     │     │  API (fetch)     │     │ useDiffs │     │ Runs         │
+│  DiffRow │     │  Fallback(auto)  │     │ useEnv…  │     │ RunDetail    │
+│  TestRes │     │                  │     │ refetch  │     │ Compare      │
+│  EnvSum  │     │  Config-driven   │     │          │     │ Status       │
+│  ...     │     │  VITE_USE_MOCK   │     │ Sync/Async│   │ … 10 pages   │
+└──────────┘     └──────────────────┘     └──────────┘     └──────────────┘
+                    │
+                    ▼
+         ┌──────────────────────┐
+         │   ErrorBoundary      │  ← wraps every page — catches render crashes
+         └──────────────────────┘
+```
+
+### Data flow
+
+1. **Config** (`getConfig()`) reads `VITE_*` env vars → determines mock or API mode
+2. **Services** (`getServices()`) returns either `mockRunService` (in-memory) or `apiRunService` (HTTP fetch with timeout / retry / fallback)
+3. **Hooks** (`useRuns()`, etc.) call services, return `{ data, loading, error, refetch }`
+4. **Components** render loading skeletons (`LoadingSkeleton`), error states (`ServiceError`), or the data
+5. **ErrorBoundary** catches any unhandled render errors per page
+
+### SaaS design principles applied
+
+- **Never show a blank page** — every component handles `loading`, `error`, and empty states
+- **Graceful degradation** — API failures fall back to bundled mock data transparently
+- **Observability** — all errors are classified (`TIMEOUT`, `NETWORK`, `HTTP`, `VALIDATION`, `PARSE`, `UNKNOWN`) with retryability hints
+- **Stateless** — no server sessions; every page load reconstructs state from URL params
+- **Backward-compatible** — mock data shares the exact same TypeScript interfaces as API data, so swapping between them is a one-env-var change
 
 ## Configuration Reference
 
@@ -505,12 +712,10 @@ See [`.env.example`](.env.example) for all available options with comments.
 | `VITE_RETRY_BASE_DELAY_MS` | `1000` | Base backoff delay in ms. Clamped to 200–30000. |
 | `VITE_CACHE_BUST` | auto | `true` in dev, `false` in production. Appends `?_t={ts}` to URLs. |
 
----
-
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
-|---------|-------------|-----|
+|---------|-------------|------|
 | Blank page at localhost:5173 | `BASE_PATH=/` not set | Restart with `BASE_PATH=/ pnpm dev` |
 | Charts don't render, JS errors | Missing Google Charts API key | The default demo key should work — check ad blockers |
 | `pnpm` command not found | pnpm not installed | `npm install -g pnpm` |
@@ -523,30 +728,19 @@ See [`.env.example`](.env.example) for all available options with comments.
 | `PORT=1` build never finishes | Missing `PORT=1` | The dev server runs instead — Ctrl+C and retry with `PORT=1` |
 | Relative paths broken in prod | `BASE_PATH=/AWARE` missing | Rebuild with `BASE_PATH=/AWARE PORT=1 pnpm build` |
 | Workflow not showing in Actions | Workflow file in wrong directory | Must be at `.github/workflows/publish-status.yml` (repo root, not inside `artifacts/`) |
+| Transform produces empty arrays | Input JSON doesn't match expected shape | Run the adapter with `--pytest`/`--playwright`/`--akamai`/`--catchpoint` flag matching your data |
 
----
+## Long-term roadmap (SaaS evolution)
 
-## Data Architecture
-
-```
-data.ts                — Mock data (replace with your own or delete for production)
-  ↕ imports types from
-types.ts               — All TypeScript interfaces + error types
-  ↕ wrapped by
-services.ts            — Service interfaces + mock/API implementations
-                       - Mock:   returns data.ts values wrapped in Promise
-                       - API:    fetch with timeout, retry, fallback to mock
-                       - Switch: VITE_USE_MOCK env var
-  ↕ wrapped by
-hooks.ts               — React hooks (useRuns, useDiffs, useEnvSummary, etc.)
-                       - Async hooks: { data, loading, error, refetch }
-                       - Sync hooks:  fills on mount, returns array directly
-  ↕ consumed by
-Components             — Dashboard, Runs, RunDetail, Compare, About, etc.
-```
-
-When `VITE_USE_MOCK=false` and a fetch fails, the `fallback()` wrapper in
-`services.ts` catches the error and returns mock data transparently.
+| Phase | What | Why |
+|-------|------|-----|
+| **Now** | Static JSON files generated by CI | Zero server cost, instant deploy, works on GitHub Pages |
+| **Near** | Server-side pagination for runs/tests | Static files load ALL data — breaks at ~10K+ runs |
+| **Near** | Multi-tenant data isolation | Different teams/suites need separate views |
+| **Mid** | Real-time streaming via WebSocket | Live test execution updates on Status page |
+| **Mid** | Data retention policies + archiving | Old runs auto-expire from active dataset |
+| **Far** | Pluggable backends (Postgres, S3, BigQuery) | Query live data instead of pre-generated files |
+| **Far** | Federated dashboards (multi-region, multi-CDN) | Compare Akamai vs CloudFront vs Fastly side by side |
 
 ---
 

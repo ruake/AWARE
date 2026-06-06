@@ -1,0 +1,152 @@
+[
+  {
+    "id": "diff_0",
+    "name": "Regression Check /path/0",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_1",
+    "name": "Regression Check /path/1",
+    "baseStatus": "PASS",
+    "candStatus": "FAIL",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "regression"
+  },
+  {
+    "id": "diff_2",
+    "name": "Regression Check /path/2",
+    "baseStatus": "FAIL",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "fixed"
+  },
+  {
+    "id": "diff_3",
+    "name": "Regression Check /path/3",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_4",
+    "name": "Regression Check /path/4",
+    "baseStatus": "PASS",
+    "candStatus": "FAIL",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "regression"
+  },
+  {
+    "id": "diff_5",
+    "name": "Regression Check /path/5",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 340,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_6",
+    "name": "Regression Check /path/6",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_7",
+    "name": "Regression Check /path/7",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_8",
+    "name": "Regression Check /path/8",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_9",
+    "name": "Regression Check /path/9",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_10",
+    "name": "Regression Check /path/10",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_11",
+    "name": "Regression Check /path/11",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_12",
+    "name": "Regression Check /path/12",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_13",
+    "name": "Regression Check /path/13",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_14",
+    "name": "Regression Check /path/14",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 125,
+    "category": "geo-match",
+    "state": "unchanged"
+  }
+]

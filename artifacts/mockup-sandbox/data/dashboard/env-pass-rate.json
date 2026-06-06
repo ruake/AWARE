@@ -1,0 +1,96 @@
+[
+  [
+    "Day",
+    "Prod/Production",
+    "Prod/Staging",
+    "UAT/Production",
+    "UAT/Staging",
+    {
+      "type": "string",
+      "role": "tooltip",
+      "p": {
+        "html": true
+      }
+    }
+  ],
+  [
+    "Mon",
+    100,
+    100,
+    100,
+    100,
+    "<b>Mon</b><br>Prod/Prod: 100%<br>Prod/Stg: 100%<br>UAT/Prod: 100%<br>UAT/Stg: 100%"
+  ],
+  [
+    "Tue",
+    98,
+    98,
+    99,
+    99,
+    "<b>Tue</b><br>Prod/Prod: 98%<br>Prod/Stg: 98%<br>UAT/Prod: 99%<br>UAT/Stg: 99%"
+  ],
+  [
+    "Wed",
+    96,
+    96,
+    98,
+    98,
+    "<b>Wed</b><br>Prod/Prod: 96%<br>Prod/Stg: 96%<br>UAT/Prod: 98%<br>UAT/Stg: 98%"
+  ],
+  [
+    "Thu",
+    94,
+    94,
+    97,
+    97,
+    "<b>Thu</b><br>Prod/Prod: 94%<br>Prod/Stg: 94%<br>UAT/Prod: 97%<br>UAT/Stg: 97%"
+  ],
+  [
+    "Fri",
+    74,
+    77,
+    96,
+    96,
+    "<b>Fri</b><br>Prod/Prod: 74%<br>Prod/Stg: 77%<br>UAT/Prod: 96%<br>UAT/Stg: 96%"
+  ],
+  [
+    "Sat",
+    90,
+    90,
+    95,
+    95,
+    "<b>Sat</b><br>Prod/Prod: 90%<br>Prod/Stg: 90%<br>UAT/Prod: 95%<br>UAT/Stg: 95%"
+  ],
+  [
+    "Sun",
+    88,
+    88,
+    95,
+    94,
+    "<b>Sun</b><br>Prod/Prod: 88%<br>Prod/Stg: 88%<br>UAT/Prod: 95%<br>UAT/Stg: 94%"
+  ],
+  [
+    "Mon",
+    86,
+    86,
+    95,
+    93,
+    "<b>Mon</b><br>Prod/Prod: 86%<br>Prod/Stg: 86%<br>UAT/Prod: 95%<br>UAT/Stg: 93%"
+  ],
+  [
+    "Tue",
+    84,
+    84,
+    95,
+    92,
+    "<b>Tue</b><br>Prod/Prod: 84%<br>Prod/Stg: 84%<br>UAT/Prod: 95%<br>UAT/Stg: 92%"
+  ],
+  [
+    "Wed",
+    82,
+    82,
+    95,
+    92,
+    "<b>Wed</b><br>Prod/Prod: 82%<br>Prod/Stg: 82%<br>UAT/Prod: 95%<br>UAT/Stg: 92%"
+  ]
+]
