@@ -35,6 +35,7 @@ jobs:
           node-version: 22
           cache: pnpm
           cache-dependency-path: artifacts/mockup-sandbox/pnpm-lock.yaml
+          package-manager-cache: false
 
       - name: Install dependencies
         run: pnpm install
