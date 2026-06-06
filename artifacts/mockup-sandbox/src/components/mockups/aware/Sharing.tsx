@@ -1,0 +1,491 @@
+import React from "react";
+import { AppLayout } from "./_shared/AppLayout";
+import "./_group.css";
+import {
+  Link2, Copy, Check, Slack, Github, ExternalLink, Code2,
+  PlayCircle, Hash, GitCompare, FileText, ChevronDown,
+  Bell, Shield, Share2, Mail, AlertTriangle, CheckCircle2,
+  Image, RefreshCw
+} from "lucide-react";
+
+type EntityKind = "run" | "test" | "comparison" | "testdoc";
+
+interface CopyState {
+  [key: string]: boolean;
+}
+
+const BASE = "https://aware.salesforce.com";
+
+const ENTITIES = {
+  run: {
+    label: "Run",
+    icon: PlayCircle,
+    id: "run_892_2341.1.0_prod_1001",
+    status: "FAIL",
+    statusColor: "var(--gcp-red)",
+    title: "Prod/Production · PM 892 · EW 2341.1.0",
+    meta: "45m · 2 failures · 2026-06-06",
+    url: `${BASE}/runs/run_892_2341.1.0_prod_1001`,
+    short: `${BASE}/r/xQ9kL2`,
+  },
+  test: {
+    label: "Test",
+    icon: Hash,
+    id: "test_geo_match_us_locale_prod[/us/]",
+    status: "FAIL",
+    statusColor: "var(--gcp-red)",
+    title: "test_geo_match_us_locale_prod[/us/]",
+    meta: "geo-match · full_suite · 94.8% pass rate",
+    url: `${BASE}/tests/test_geo_match_us_locale_prod`,
+    short: `${BASE}/t/mR3wP8`,
+  },
+  comparison: {
+    label: "Comparison",
+    icon: GitCompare,
+    id: "cmp_892_vs_891_prod",
+    status: "REGRESSION",
+    statusColor: "var(--gcp-red)",
+    title: "PM 892 vs PM 891 — Prod/Production",
+    meta: "+7 regressions · +12 fixed · 3d ago",
+    url: `${BASE}/compare/run_892_2341.1.0_prod_1000..run_891_2340.0.1_prod_0998`,
+    short: `${BASE}/c/nT7vK1`,
+  },
+  testdoc: {
+    label: "Test Doc",
+    icon: FileText,
+    id: "test_geo_match_us_locale_prod",
+    status: "FLAKY",
+    statusColor: "var(--gcp-yellow)",
+    title: "Test Documentation — test_geo_match_us_locale_prod",
+    meta: "5.3% flake rate · last updated Jun 5",
+    url: `${BASE}/docs/test_geo_match_us_locale_prod`,
+    short: `${BASE}/d/kW2xJ4`,
+  },
+} as const;
+
+const BADGES = [
+  { target: "Prod/Production", pass: 87, status: "degraded", color: "#d93025" },
+  { target: "Prod/Staging",    pass: 92, status: "warning",  color: "#f9ab00" },
+  { target: "UAT/Production",  pass: 100, status: "healthy", color: "#1e8e3e" },
+  { target: "UAT/Staging",     pass: 98, status: "healthy",  color: "#1e8e3e" },
+];
+
+function useCopy() {
+  const [states, setStates] = React.useState<CopyState>({});
+  const copy = (key: string, _text: string) => {
+    setStates(s => ({ ...s, [key]: true }));
+    setTimeout(() => setStates(s => ({ ...s, [key]: false })), 2000);
+  };
+  return { states, copy };
+}
+
+function CopyBtn({ id, text, onClick }: { id: string; text: string; onClick: (key: string, text: string) => void; }) {
+  const [copied, setCopied] = React.useState(false);
+  const handle = () => { onClick(id, text); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+  return (
+    <button onClick={handle} className="flex items-center gap-1.5 text-[11px] text-[var(--gcp-blue)] hover:text-[var(--gcp-blue-hover)] transition-colors shrink-0">
+      {copied ? <Check size={11} /> : <Copy size={11} />}
+      {copied ? "Copied" : "Copy"}
+    </button>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-[11px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+      {children}
+    </div>
+  );
+}
+
+function FormatBlock({ label, icon, content, copyKey, onCopy, mono = true, maxH }: {
+  label: string; icon: React.ReactNode; content: string; copyKey: string;
+  onCopy: (k: string, t: string) => void; mono?: boolean; maxH?: string;
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--gcp-text-secondary)]">
+          {icon} {label}
+        </div>
+        <CopyBtn id={copyKey} text={content} onClick={onCopy} />
+      </div>
+      <pre className={`text-[11px] leading-relaxed p-2.5 rounded border border-[var(--gcp-grey)] bg-[var(--gcp-grey-bg)] whitespace-pre-wrap ${mono ? "font-mono" : "font-sans"} overflow-y-auto ${maxH ?? "max-h-[120px]"}`}>
+        {content}
+      </pre>
+    </div>
+  );
+}
+
+export function Sharing() {
+  const [kind, setKind] = React.useState<EntityKind>("run");
+  const [activeBadge, setActiveBadge] = React.useState(0);
+  const { copy } = useCopy();
+  const e = ENTITIES[kind];
+
+  const slackMsg = `*[A.W.A.R.E.]* ${e.status} detected on \`${e.id}\`
+> ${e.title}
+> ${e.meta}
+
+:link: <${e.url}|View in A.W.A.R.E.>  |  :spiral_note_pad: <${e.url}/evidence|Evidence>`;
+
+  const githubBody = `## A.W.A.R.E. ${e.status === "REGRESSION" ? "Regression" : "Test Failure"} Report
+
+**Entity:** \`${e.id}\`
+**Status:** ${e.status}
+**Context:** ${e.title}
+**Detail:** ${e.meta}
+
+### Reproduce
+\`\`\`bash
+# Open in A.W.A.R.E.
+open "${e.url}"
+\`\`\`
+
+### Evidence
+See attached run detail at: ${e.url}/evidence
+
+---
+_Auto-generated by [A.W.A.R.E.](${BASE}) · ${new Date().toISOString().slice(0, 10)}_`;
+
+  const jiraDesc = `h2. A.W.A.R.E. Alert
+
+||Field||Value||
+|Entity|{{${e.id}}}|
+|Status|${e.status}|
+|Context|${e.title}|
+|Detail|${e.meta}|
+|Link|[View in A.W.A.R.E.|${e.url}]|
+
+h3. Steps to Reproduce
+# Open A.W.A.R.E. Run Detail: ${e.url}
+# Review evidence panel for request/response diff
+# Cross-reference PM variables section`;
+
+  const emailSubj = `[A.W.A.R.E.] ${e.status}: ${e.id}`;
+  const emailBody = `${e.title}
+
+Status: ${e.status}
+Detail: ${e.meta}
+
+View in A.W.A.R.E.: ${e.url}
+
+--
+Sent by A.W.A.R.E. (Akamai Web Analytics & Regression Engine)`;
+
+  const badge = BADGES[activeBadge];
+  const badgeHtml = `<img src="${BASE}/badges/${badge.target.toLowerCase().replace(/\//g, "-").replace(/\s/g, "")}.svg"
+     alt="A.W.A.R.E. ${badge.target}: ${badge.pass}%"
+     title="${badge.target} — ${badge.pass}% pass rate" />`;
+  const badgeMd = `![A.W.A.R.E. ${badge.target}](${BASE}/badges/${badge.target.toLowerCase().replace(/\//g, "-").replace(/\s/g, "")}.svg)`;
+
+  const kindIcon = (k: EntityKind) => {
+    const Icon = ENTITIES[k].icon;
+    return <Icon size={13} />;
+  };
+
+  return (
+    <AppLayout activeTab="runs">
+      <div className="max-w-[1400px] mx-auto space-y-5">
+
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-[22px] font-medium text-[var(--gcp-text)]">Sharing & Permalinks</h1>
+            <p className="text-[13px] text-[var(--gcp-text-secondary)] mt-0.5">
+              Deep links, export formats, and embeddable badges for every entity in A.W.A.R.E.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-[12px] text-[var(--gcp-text-secondary)] bg-[var(--gcp-grey-bg)] px-3 py-1.5 rounded border border-[var(--gcp-grey)]">
+            <Shield size={12} /> All links include a read-only token valid for 30 days
+          </div>
+        </div>
+
+        {/* Entity Picker */}
+        <div className="flex gap-2">
+          {(Object.keys(ENTITIES) as EntityKind[]).map(k => {
+            const Icon = ENTITIES[k].icon;
+            return (
+              <button
+                key={k}
+                onClick={() => setKind(k)}
+                className={`flex items-center gap-2 px-4 py-2 rounded text-[13px] font-medium border transition-colors ${
+                  kind === k
+                    ? "bg-[var(--gcp-blue)] text-white border-[var(--gcp-blue)]"
+                    : "bg-[var(--gcp-surface)] border-[var(--gcp-grey)] text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)] hover:bg-[var(--gcp-surface-hover)]"
+                }`}
+              >
+                <Icon size={13} />
+                {ENTITIES[k].label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Entity info strip */}
+        <div className="gcp-card p-3 flex items-center gap-4 bg-[var(--gcp-grey-bg)]">
+          {kindIcon(kind)}
+          <div className="font-mono text-[13px] text-[var(--gcp-text)] font-medium">{e.id}</div>
+          <span
+            className="gcp-badge text-[11px]"
+            style={{ backgroundColor: e.statusColor + "22", color: e.statusColor }}
+          >
+            {e.status}
+          </span>
+          <div className="text-[12px] text-[var(--gcp-text-secondary)]">{e.title}</div>
+          <div className="text-[11px] text-[var(--gcp-text-secondary)] ml-auto">{e.meta}</div>
+        </div>
+
+        {/* 3-column grid */}
+        <div className="grid grid-cols-3 gap-5">
+
+          {/* ── Col 1: Permalink & Links ── */}
+          <div className="space-y-4">
+            <div className="gcp-card p-4 space-y-4">
+              <h2 className="text-[12px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider border-b border-[var(--gcp-grey)] pb-2 flex items-center gap-1.5">
+                <Link2 size={12} /> Permalink
+              </h2>
+
+              <div>
+                <SectionLabel>Full URL</SectionLabel>
+                <div className="flex items-center gap-2 bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded px-2.5 py-2">
+                  <span className="font-mono text-[11px] text-[var(--gcp-text)] flex-1 truncate">{e.url}</span>
+                  <CopyBtn id="full" text={e.url} onClick={copy} />
+                </div>
+              </div>
+
+              <div>
+                <SectionLabel>Short URL</SectionLabel>
+                <div className="flex items-center gap-2 bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded px-2.5 py-2">
+                  <span className="font-mono text-[11px] text-[var(--gcp-blue)] flex-1">{e.short}</span>
+                  <CopyBtn id="short" text={e.short} onClick={copy} />
+                </div>
+              </div>
+
+              <div>
+                <SectionLabel>Deep Links</SectionLabel>
+                <div className="space-y-1.5">
+                  {[
+                    { label: "Evidence panel", path: "/evidence" },
+                    { label: "Raw JSON", path: "/json" },
+                    { label: "Timeline view", path: "/timeline" },
+                    { label: "API response", path: "/api" },
+                  ].map(dl => (
+                    <div key={dl.path} className="flex items-center justify-between py-1 border-b border-[var(--gcp-grey)] last:border-0">
+                      <span className="text-[12px] text-[var(--gcp-text)]">{dl.label}</span>
+                      <CopyBtn id={`dl-${dl.path}`} text={e.url + dl.path} onClick={copy} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Access control */}
+            <div className="gcp-card p-4 space-y-3">
+              <h2 className="text-[12px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider border-b border-[var(--gcp-grey)] pb-2 flex items-center gap-1.5">
+                <Shield size={12} /> Link Settings
+              </h2>
+              <div className="space-y-2">
+                {[
+                  { label: "Expiry", value: "30 days", action: "Change" },
+                  { label: "Access", value: "Anyone with link", action: "Restrict" },
+                  { label: "Auth required", value: "No", action: "Enable" },
+                ].map(s => (
+                  <div key={s.label} className="flex items-center justify-between">
+                    <div>
+                      <div className="text-[12px] text-[var(--gcp-text)]">{s.label}</div>
+                      <div className="text-[11px] text-[var(--gcp-text-secondary)]">{s.value}</div>
+                    </div>
+                    <button className="text-[11px] text-[var(--gcp-blue)] hover:underline">{s.action}</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Col 2: Export Formats ── */}
+          <div className="gcp-card p-4 space-y-4">
+            <h2 className="text-[12px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider border-b border-[var(--gcp-grey)] pb-2 flex items-center gap-1.5">
+              <Share2 size={12} /> Export Formats
+            </h2>
+
+            <FormatBlock
+              label="Slack message"
+              icon={<Slack size={11} className="text-[#4a154b]" />}
+              content={slackMsg}
+              copyKey="slack"
+              onCopy={copy}
+              mono={false}
+              maxH="max-h-[100px]"
+            />
+
+            <FormatBlock
+              label="GitHub Issue body"
+              icon={<Github size={11} />}
+              content={githubBody}
+              copyKey="github"
+              onCopy={copy}
+              maxH="max-h-[120px]"
+            />
+
+            <FormatBlock
+              label="Jira description (wiki markup)"
+              icon={<span className="text-[10px] font-bold text-[#0052cc]">J</span>}
+              content={jiraDesc}
+              copyKey="jira"
+              onCopy={copy}
+              maxH="max-h-[110px]"
+            />
+
+            <FormatBlock
+              label="Email"
+              icon={<Mail size={11} />}
+              content={`Subject: ${emailSubj}\n\n${emailBody}`}
+              copyKey="email"
+              onCopy={copy}
+              mono={false}
+              maxH="max-h-[100px]"
+            />
+          </div>
+
+          {/* ── Col 3: Status Badges & Embed ── */}
+          <div className="space-y-4">
+            <div className="gcp-card p-4 space-y-4">
+              <h2 className="text-[12px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider border-b border-[var(--gcp-grey)] pb-2 flex items-center gap-1.5">
+                <Image size={12} /> Status Badges
+              </h2>
+
+              <p className="text-[11px] text-[var(--gcp-text-secondary)]">
+                Embed live pass-rate badges in Confluence, GitHub READMEs, or Slack channel topics.
+              </p>
+
+              <div className="space-y-2">
+                {BADGES.map((b, i) => (
+                  <div
+                    key={b.target}
+                    onClick={() => setActiveBadge(i)}
+                    className={`flex items-center gap-3 p-2 rounded cursor-pointer border transition-colors ${
+                      activeBadge === i
+                        ? "border-[var(--gcp-blue)] bg-[var(--gcp-blue-bg)]"
+                        : "border-[var(--gcp-grey)] hover:bg-[var(--gcp-surface-hover)]"
+                    }`}
+                  >
+                    {/* Badge preview */}
+                    <div className="flex items-center text-white text-[11px] font-medium rounded overflow-hidden shadow-sm shrink-0">
+                      <span className="bg-[#555] px-2 py-0.5 whitespace-nowrap">A.W.A.R.E.</span>
+                      <span style={{ backgroundColor: b.color }} className="px-2 py-0.5 whitespace-nowrap">{b.pass}% pass</span>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[12px] text-[var(--gcp-text)] truncate">{b.target}</div>
+                      <div className="text-[10px] text-[var(--gcp-text-secondary)]">{b.status}</div>
+                    </div>
+                    <div className="ml-auto">
+                      {b.status === "healthy"
+                        ? <CheckCircle2 size={13} className="text-[var(--gcp-green)]" />
+                        : b.status === "warning"
+                        ? <AlertTriangle size={13} className="text-[var(--gcp-yellow)]" />
+                        : <AlertTriangle size={13} className="text-[var(--gcp-red)]" />
+                      }
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="gcp-card p-4 space-y-3">
+              <h2 className="text-[12px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider border-b border-[var(--gcp-grey)] pb-2 flex items-center gap-1.5">
+                <Code2 size={12} /> Embed Code
+              </h2>
+              <div className="text-[11px] text-[var(--gcp-text-secondary)] font-medium">{BADGES[activeBadge].target}</div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] text-[var(--gcp-text-secondary)]">HTML</span>
+                  <CopyBtn id="badge-html" text={badgeHtml} onClick={copy} />
+                </div>
+                <pre className="text-[11px] font-mono p-2 bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded whitespace-pre-wrap overflow-hidden">{badgeHtml}</pre>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] text-[var(--gcp-text-secondary)]">Markdown</span>
+                  <CopyBtn id="badge-md" text={badgeMd} onClick={copy} />
+                </div>
+                <pre className="text-[11px] font-mono p-2 bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded whitespace-pre-wrap overflow-hidden">{badgeMd}</pre>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] text-[var(--gcp-text-secondary)]">Auto-refresh</span>
+                  <div className="flex items-center gap-1 text-[11px] text-[var(--gcp-text-secondary)]">
+                    <RefreshCw size={10} /> Every 5 min
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Notification rules */}
+            <div className="gcp-card p-4 space-y-3">
+              <h2 className="text-[12px] font-medium text-[var(--gcp-text-secondary)] uppercase tracking-wider border-b border-[var(--gcp-grey)] pb-2 flex items-center gap-1.5">
+                <Bell size={12} /> Notification Rules
+              </h2>
+              {[
+                { channel: "#aware-alerts", trigger: "Any FAIL on Prod", via: "Slack" },
+                { channel: "eng-oncall@sf.com", trigger: "Pass rate < 90%", via: "Email" },
+                { channel: "SFDC-7842", trigger: "New regression detected", via: "Jira" },
+              ].map((rule, i) => (
+                <div key={i} className="flex items-start justify-between py-1.5 border-b border-[var(--gcp-grey)] last:border-0">
+                  <div>
+                    <div className="text-[12px] font-mono text-[var(--gcp-text)]">{rule.channel}</div>
+                    <div className="text-[11px] text-[var(--gcp-text-secondary)]">{rule.trigger}</div>
+                  </div>
+                  <span className="text-[10px] px-1.5 py-0.5 bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded text-[var(--gcp-text-secondary)]">{rule.via}</span>
+                </div>
+              ))}
+              <button className="gcp-button w-full text-[12px] py-1.5">+ Add rule</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent shares log */}
+        <div className="gcp-card overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-[var(--gcp-grey)] bg-[var(--gcp-grey-bg)] flex items-center justify-between">
+            <h2 className="text-[12px] font-medium text-[var(--gcp-text)]">Recent Share Activity</h2>
+            <span className="text-[11px] text-[var(--gcp-text-secondary)]">Last 24h</span>
+          </div>
+          <table className="gcp-table">
+            <thead>
+              <tr>
+                <th>Entity</th>
+                <th>Format</th>
+                <th>Shared by</th>
+                <th>Destination</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { entity: "run_892_2341.1.0_prod_1001", format: "Slack", by: "@alice", dest: "#aware-alerts", time: "2m ago", statusColor: "var(--gcp-red)" },
+                { entity: "test_geo_match_us_locale_prod", format: "GitHub Issue", by: "@bob", dest: "AWARE-1482", time: "18m ago", statusColor: "var(--gcp-green)" },
+                { entity: "cmp_892_vs_891_prod", format: "Permalink", by: "@carol", dest: "Confluence", time: "1h ago", statusColor: "var(--gcp-blue)" },
+                { entity: "run_891_2340.0.1_prod_0998", format: "curl", by: "@dave", dest: "Clipboard", time: "3h ago", statusColor: "var(--gcp-text-secondary)" },
+                { entity: "test_edgeworker_cache_key_v3", format: "Badge embed", by: "@alice", dest: "README.md", time: "5h ago", statusColor: "var(--gcp-green)" },
+              ].map((r, i) => (
+                <tr key={i}>
+                  <td className="font-mono text-[11px]">{r.entity}</td>
+                  <td>
+                    <span className="gcp-badge bg-[var(--gcp-grey-bg)] text-[var(--gcp-text-secondary)] text-[10px]">{r.format}</span>
+                  </td>
+                  <td className="text-[12px] text-[var(--gcp-blue)]">{r.by}</td>
+                  <td className="text-[12px] font-mono">{r.dest}</td>
+                  <td className="text-[11px] text-[var(--gcp-text-secondary)]">{r.time}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </AppLayout>
+  );
+}
