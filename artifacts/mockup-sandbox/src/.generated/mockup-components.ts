@@ -4,5 +4,6 @@ export const modules: ModuleMap = {
   "./components/mockups/aware/Compare.tsx": () => import("../components/mockups/aware/Compare.tsx"),
   "./components/mockups/aware/Dashboard.tsx": () => import("../components/mockups/aware/Dashboard.tsx"),
   "./components/mockups/aware/RunDetail.tsx": () => import("../components/mockups/aware/RunDetail.tsx"),
-  "./components/mockups/aware/Runs.tsx": () => import("../components/mockups/aware/Runs.tsx")
+  "./components/mockups/aware/Runs.tsx": () => import("../components/mockups/aware/Runs.tsx"),
+  "./components/mockups/aware/TestDoc.tsx": () => import("../components/mockups/aware/TestDoc.tsx")
 };
