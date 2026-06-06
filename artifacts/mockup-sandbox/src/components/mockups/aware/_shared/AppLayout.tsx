@@ -5,6 +5,7 @@ import {
   GitCompare, 
   Info, 
   Search,
+  PlayCircle,
   Menu, 
   Moon, 
   Sun, 
@@ -29,6 +30,7 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "Dashboard" },
     { id: "runs", label: "Runs", icon: List, path: "Runs" },
+    { id: "new-run", label: "New Run", icon: PlayCircle, path: "StartRun" },
     { id: "compare", label: "Compare", icon: GitCompare, path: "Compare" },
     { id: "search", label: "Search", icon: Search, path: "SearchDemo" },
     { id: "about", label: "About", icon: Info, path: "About" },

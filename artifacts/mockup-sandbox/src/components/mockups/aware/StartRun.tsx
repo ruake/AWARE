@@ -170,7 +170,7 @@ requests.post(
   };
 
   return (
-    <AppLayout activeTab="runs">
+    <AppLayout activeTab="new-run">
       <div className="flex flex-col gap-4 max-w-[1400px] mx-auto h-[calc(100vh-92px)]">
 
         {/* ── Header ── */}
