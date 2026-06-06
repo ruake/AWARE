@@ -6,7 +6,7 @@ export interface ColumnFilterState {
   selected: string[];
 }
 
-export function TableHeaderFilter({
+export function ColumnFilter({
   label,
   allValues,
   filter,

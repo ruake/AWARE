@@ -3,7 +3,7 @@ import { AppLayout } from "./_shared/AppLayout";
 import { useSyncRuns, useSyncDiffs } from "./_shared/hooks";
 import type { DiffRow } from "./_shared/services";
 import { copyToClipboard, navTo } from "./_shared/nav";
-import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
+import { ColumnFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import { useSyncedUrlState } from "./_shared/urlState";
 import "./_group.css";
 import { Link2, Github, Share2, Copy, Check, AlertTriangle, BarChart3, X, ArrowUpRight, Calendar, Filter, FileText, ChevronLeft, ChevronRight } from "lucide-react";
@@ -297,12 +297,12 @@ export function Compare() {
               <table className="gcp-table">
                 <thead className="sticky top-0 bg-[var(--gcp-surface)] z-10">
                   <tr>
-                    <th><TableHeaderFilter label="Test Name" filter={colFilters.name ?? EMPTY_FILTER} onFilterChange={updateColFilter("name")} /></th>
-                    <th><TableHeaderFilter label="Baseline" allValues={["PASS", "FAIL"]} filter={colFilters.baseStatus ?? EMPTY_FILTER} onFilterChange={updateColFilter("baseStatus")} /></th>
-                    <th><TableHeaderFilter label="Candidate" allValues={["PASS", "FAIL"]} filter={colFilters.candStatus ?? EMPTY_FILTER} onFilterChange={updateColFilter("candStatus")} /></th>
-                    <th className="text-right"><TableHeaderFilter label="Δ Duration" filter={colFilters.durCand ?? EMPTY_FILTER} onFilterChange={updateColFilter("durCand")} /></th>
-                    <th><TableHeaderFilter label="Category" allValues={categories} filter={colFilters.category ?? EMPTY_FILTER} onFilterChange={updateColFilter("category")} /></th>
-                    <th><TableHeaderFilter label="State" allValues={states} filter={colFilters.state ?? EMPTY_FILTER} onFilterChange={updateColFilter("state")} /></th>
+                    <th><ColumnFilter label="Test Name" filter={colFilters.name ?? EMPTY_FILTER} onFilterChange={updateColFilter("name")} /></th>
+                    <th><ColumnFilter label="Baseline" allValues={["PASS", "FAIL"]} filter={colFilters.baseStatus ?? EMPTY_FILTER} onFilterChange={updateColFilter("baseStatus")} /></th>
+                    <th><ColumnFilter label="Candidate" allValues={["PASS", "FAIL"]} filter={colFilters.candStatus ?? EMPTY_FILTER} onFilterChange={updateColFilter("candStatus")} /></th>
+                    <th className="text-right"><ColumnFilter label="Δ Duration" filter={colFilters.durCand ?? EMPTY_FILTER} onFilterChange={updateColFilter("durCand")} /></th>
+                    <th><ColumnFilter label="Category" allValues={categories} filter={colFilters.category ?? EMPTY_FILTER} onFilterChange={updateColFilter("category")} /></th>
+                    <th><ColumnFilter label="State" allValues={states} filter={colFilters.state ?? EMPTY_FILTER} onFilterChange={updateColFilter("state")} /></th>
                     <th className="w-24 text-center">Actions</th>
                   </tr>
                 </thead>

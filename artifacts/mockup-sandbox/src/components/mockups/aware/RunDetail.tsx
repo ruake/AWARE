@@ -2,7 +2,7 @@ import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
 import { useSyncRuns, useTestResults } from "./_shared/hooks";
 import { navTo, copyToClipboard, repo } from "./_shared/nav";
-import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
+import { ColumnFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import { useSyncedUrlState } from "./_shared/urlState";
 import "./_group.css";
 import { Copy, Check, Share2, Link2, Github, ExternalLink, GitCompare, Calendar, FileText, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
@@ -169,11 +169,11 @@ export function RunDetail() {
               <table className="gcp-table">
                 <thead className="sticky top-0 bg-[var(--gcp-surface)] z-10">
                   <tr>
-                    <th><TableHeaderFilter label="Test Name" filter={colFilters.name ?? EMPTY_FILTER} onFilterChange={updateColFilter("name")} /></th>
-                    <th><TableHeaderFilter label="Status" allValues={statuses} filter={colFilters.status ?? EMPTY_FILTER} onFilterChange={updateColFilter("status")} /></th>
-                    <th className="text-right"><TableHeaderFilter label="Duration" filter={colFilters.duration ?? EMPTY_FILTER} onFilterChange={updateColFilter("duration")} /></th>
-                    <th><TableHeaderFilter label="Category" allValues={categories} filter={colFilters.category ?? EMPTY_FILTER} onFilterChange={updateColFilter("category")} /></th>
-                    <th><TableHeaderFilter label="Suite" allValues={suites} filter={colFilters.suite ?? EMPTY_FILTER} onFilterChange={updateColFilter("suite")} /></th>
+                    <th><ColumnFilter label="Test Name" filter={colFilters.name ?? EMPTY_FILTER} onFilterChange={updateColFilter("name")} /></th>
+                    <th><ColumnFilter label="Status" allValues={statuses} filter={colFilters.status ?? EMPTY_FILTER} onFilterChange={updateColFilter("status")} /></th>
+                    <th className="text-right"><ColumnFilter label="Duration" filter={colFilters.duration ?? EMPTY_FILTER} onFilterChange={updateColFilter("duration")} /></th>
+                    <th><ColumnFilter label="Category" allValues={categories} filter={colFilters.category ?? EMPTY_FILTER} onFilterChange={updateColFilter("category")} /></th>
+                    <th><ColumnFilter label="Suite" allValues={suites} filter={colFilters.suite ?? EMPTY_FILTER} onFilterChange={updateColFilter("suite")} /></th>
                     <th className="w-16 text-center">Share</th>
                   </tr>
                 </thead>

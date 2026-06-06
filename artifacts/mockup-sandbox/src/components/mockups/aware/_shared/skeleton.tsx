@@ -1,12 +1,6 @@
 import React from "react";
 
-interface SkeletonProps {
-  width?: string | number;
-  height?: string | number;
-  className?: string;
-}
-
-export function Skeleton({ width, height = 16, className = "" }: SkeletonProps) {
+export function Skeleton({ width, height = 16, className = "" }: { width?: string | number; height?: string | number; className?: string }) {
   return (
     <div
       className={`animate-pulse rounded bg-[var(--gcp-surface)] ${className}`}
@@ -15,11 +9,7 @@ export function Skeleton({ width, height = 16, className = "" }: SkeletonProps) 
   );
 }
 
-interface CardSkeleton {
-  lines?: number;
-}
-
-export function CardSkeleton({ lines = 3 }: CardSkeleton) {
+export function CardSkeleton({ lines = 3 }: { lines?: number }) {
   return (
     <div className="gcp-card p-4 space-y-3">
       <Skeleton width="60%" height={20} />

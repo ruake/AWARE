@@ -149,8 +149,15 @@ The adapter handles these input shapes automatically:
 
 ### End-to-end CI workflow (GitHub Actions)
 
-This workflow runs both pytest and Playwright, transforms their output into the
-portal's JSON format, and deploys to GitHub Pages:
+This workflow runs tests, transforms results into portal JSON, builds the full
+portal with data baked in, and deploys the SAME site to GitHub Pages. After
+deploy, live data flows to:
+
+```
+https://ruake.github.io/AWARE/data/runs.json
+https://ruake.github.io/AWARE/preview/aware/Runs        ← portal page
+https://ruake.github.io/AWARE/preview/aware/Dashboard    ← charts with live data
+```
 
 ```yaml
 # .github/workflows/test-and-deploy.yml
@@ -169,7 +176,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -182,34 +189,51 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 10.26.1
-
       - run: pnpm install
 
       # ── Run tests ──
       - name: pytest
         run: |
           pip install pytest pytest-json-report
-          pytest --json-report=report.json || true   # continue on failure
+          pytest --json-report=report.json || true
 
       - name: Playwright
         run: |
           npx playwright install --with-deps chromium
           npx playwright test --reporter=json 2> pw-report.json || true
 
-      # ── Transform results into portal JSON ──
+      # ── Transform results → portal JSON files in data/ ──
       - name: Generate portal data
+        run: pnpm transform --pytest report.json --playwright pw-report.json
+
+      # ── Build portal (copies data/ → dist/data/ automatically) ──
+      - name: Build portal
         run: |
-          pnpm transform --pytest report.json --playwright pw-report.json
+          pnpm generate:data                    # ensure sample data exists
+          BASE_PATH=/AWARE PORT=1 pnpm build
+          cp dist/index.html dist/404.html      # SPA routing fallback
 
       # ── Deploy to GitHub Pages ──
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: artifacts/mockup-sandbox/data
+          path: artifacts/mockup-sandbox/dist
 
       - name: Deploy to Pages
         uses: actions/deploy-pages@v4
 ```
+
+**Result after deploy:**
+
+| Resource | URL |
+|----------|-----|
+| Portal | `https://ruake.github.io/AWARE/preview/aware/Runs` |
+| Data file | `https://ruake.github.io/AWARE/data/runs.json` |
+| Chart | `https://ruake.github.io/AWARE/preview/aware/Dashboard` |
+
+The `dataServePlugin` in `vite.config.ts` copies the `data/` directory into
+`dist/data/` during the build, so the portal and its data deploy as one unit.
+No separate data-deployment step needed.
 
 ### Writing a custom adapter
 
@@ -656,6 +680,59 @@ The portal is engineered for **zero blank screens**. Every failure mode is handl
 Errors are logged to console in development. In production, failed fetches
 silently fall back to mock data — the user never sees a broken page.
 
+## Naming Conventions
+
+The project uses a three-tier naming convention. Every file's name and its
+primary export MUST agree.
+
+| Layer | File naming | Export naming | Examples |
+|-------|------------|---------------|----------|
+| **Pages** (`aware/`) | `PascalCase.tsx` | `PascalCase` function | `Dashboard.tsx` → `Dashboard`, `RunDetail.tsx` → `RunDetail` |
+| **Shared components** (`_shared/`) | `PascalCase.tsx` | `PascalCase` component | `ColumnFilter.tsx` → `ColumnFilter`, `ErrorBoundary.tsx` → `ErrorBoundary` |
+| **Shared utilities** (`_shared/`) | `camelCase.ts` | `camelCase` function/value | `hooks.ts` → `useRuns`, `nav.ts` → `navTo`, `services.ts` → `getServices` |
+| **Types** (`_shared/`) | `camelCase.ts` | `PascalCase` interfaces | `types.ts` → `Run`, `TestResult`, `DiffRow` |
+| **Data** (`_shared/`) | `camelCase.ts` | `SCREAMING_SNAKE` constants, `camelCase` functions | `data.ts` → `RUNS`, `getRunById` |
+| **Scripts** (`scripts/`) | `kebab-case.mjs` | top-level default | `generate-data.mjs`, `transform.mjs` |
+| **Data files** (`data/`) | `kebab-case.json` | N/A | `runs.json`, `env-pass-rate.json` |
+| **CSS** | `_group.css` | N/A | `_group.css` (underscore prefix = excluded from auto-scan) |
+
+### Rules
+
+1. **File name matches primary export** — `ColumnFilter.tsx` must export `ColumnFilter`, not `TableHeaderFilter`
+2. **Pages export a PascalCase function** named identically to the file — `Dashboard.tsx → export function Dashboard()`
+3. **React hooks use the `use` prefix** — `useRuns`, `useSyncedUrlState`, `useLiveStatus`
+4. **Private/internal files use `_` prefix** — `_group.css`, `_shared/` (excluded from component preview scanning)
+5. **Barrel exports** in `_shared/index.ts` — all consumers MAY import from `./_shared` for convenience
+
+### Why three tiers?
+
+| Tier | Purpose |
+|------|---------|
+| `PascalCase.tsx` | React components — discoverable by filename in IDE |
+| `camelCase.ts` | Pure logic modules — hooks, utilities, services, types |
+| `kebab-case.json` | Static data files — standard web convention for URLs (`/data/env-pass-rate.json`) |
+
+### Example
+
+```
+_shared/
+├── ColumnFilter.tsx        # PascalCase → component
+├── ErrorBoundary.tsx       # PascalCase → component
+├── skeleton.tsx            # camelCase → utility component group
+├── hooks.ts                # camelCase → hook functions
+├── nav.ts                  # camelCase → utility functions
+├── services.ts             # camelCase → service factory + interfaces
+├── types.ts                # camelCase → type interfaces
+├── data.ts                 # camelCase → mock data constants
+├── urlState.ts             # camelCase → hook
+├── useLiveStatus.ts        # camelCase → hook
+└── index.ts                # barrel — re-exports everything above
+```
+
+All 11 page files follow this exactly. No exceptions.
+
+---
+
 ## Data Architecture
 
 ```
@@ -687,7 +764,7 @@ silently fall back to mock data — the user never sees a broken page.
 1. **Config** (`getConfig()`) reads `VITE_*` env vars → determines mock or API mode
 2. **Services** (`getServices()`) returns either `mockRunService` (in-memory) or `apiRunService` (HTTP fetch with timeout / retry / fallback)
 3. **Hooks** (`useRuns()`, etc.) call services, return `{ data, loading, error, refetch }`
-4. **Components** render loading skeletons (`LoadingSkeleton`), error states (`ServiceError`), or the data
+4. **Components** render loading skeletons (`skeleton.tsx`), error states (`ServiceError`), or the data
 5. **ErrorBoundary** catches any unhandled render errors per page
 
 ### SaaS design principles applied

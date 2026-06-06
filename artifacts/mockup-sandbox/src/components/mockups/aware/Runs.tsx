@@ -3,7 +3,7 @@ import { AppLayout } from "./_shared/AppLayout";
 import { useSyncRuns } from "./_shared/hooks";
 import type { Run } from "./_shared/services";
 import { navTo, copyToClipboard } from "./_shared/nav";
-import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
+import { ColumnFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import { useSyncedUrlState } from "./_shared/urlState";
 import "./_group.css";
 import { Link2, Check, Share2, Copy, ExternalLink, PlayCircle, X, ArrowUpRight, AlertTriangle } from "lucide-react";
@@ -186,17 +186,17 @@ export function Runs() {
               <table className="gcp-table">
                 <thead className="sticky top-0 bg-[var(--gcp-surface)] z-10">
                   <tr>
-                    <th><TableHeaderFilter label="Run ID" allValues={RUNS.map(r => r.id)} filter={colFilters.id ?? EMPTY_FILTER} onFilterChange={updateColFilter("id")} /></th>
-                    <th><TableHeaderFilter label="Label" filter={colFilters.label ?? EMPTY_FILTER} onFilterChange={updateColFilter("label")} /></th>
-                    <th><TableHeaderFilter label="Suite" allValues={suites} filter={colFilters.suite ?? EMPTY_FILTER} onFilterChange={updateColFilter("suite")} /></th>
-                    <th><TableHeaderFilter label="Target" allValues={targets} filter={colFilters.target ?? EMPTY_FILTER} onFilterChange={updateColFilter("target")} /></th>
-                    <th><TableHeaderFilter label="Status" allValues={statuses} filter={colFilters.status ?? EMPTY_FILTER} onFilterChange={updateColFilter("status")} /></th>
-                    <th className="text-right"><TableHeaderFilter label="Pass %" filter={colFilters.passPct ?? EMPTY_FILTER} onFilterChange={updateColFilter("passPct")} /></th>
+                    <th><ColumnFilter label="Run ID" allValues={RUNS.map(r => r.id)} filter={colFilters.id ?? EMPTY_FILTER} onFilterChange={updateColFilter("id")} /></th>
+                    <th><ColumnFilter label="Label" filter={colFilters.label ?? EMPTY_FILTER} onFilterChange={updateColFilter("label")} /></th>
+                    <th><ColumnFilter label="Suite" allValues={suites} filter={colFilters.suite ?? EMPTY_FILTER} onFilterChange={updateColFilter("suite")} /></th>
+                    <th><ColumnFilter label="Target" allValues={targets} filter={colFilters.target ?? EMPTY_FILTER} onFilterChange={updateColFilter("target")} /></th>
+                    <th><ColumnFilter label="Status" allValues={statuses} filter={colFilters.status ?? EMPTY_FILTER} onFilterChange={updateColFilter("status")} /></th>
+                    <th className="text-right"><ColumnFilter label="Pass %" filter={colFilters.passPct ?? EMPTY_FILTER} onFilterChange={updateColFilter("passPct")} /></th>
                     <th className="text-right">Failures</th>
                     <th className="text-right">Duration</th>
-                    <th><TableHeaderFilter label="Started" filter={colFilters.started ?? EMPTY_FILTER} onFilterChange={updateColFilter("started")} /></th>
-                    <th><TableHeaderFilter label="PM" allValues={pms} filter={colFilters.pm ?? EMPTY_FILTER} onFilterChange={updateColFilter("pm")} /></th>
-                    <th><TableHeaderFilter label="EW" allValues={ews} filter={colFilters.ew ?? EMPTY_FILTER} onFilterChange={updateColFilter("ew")} /></th>
+                    <th><ColumnFilter label="Started" filter={colFilters.started ?? EMPTY_FILTER} onFilterChange={updateColFilter("started")} /></th>
+                    <th><ColumnFilter label="PM" allValues={pms} filter={colFilters.pm ?? EMPTY_FILTER} onFilterChange={updateColFilter("pm")} /></th>
+                    <th><ColumnFilter label="EW" allValues={ews} filter={colFilters.ew ?? EMPTY_FILTER} onFilterChange={updateColFilter("ew")} /></th>
                     <th className="w-16 text-center text-[var(--gcp-text-secondary)]">Share</th>
                   </tr>
                 </thead>

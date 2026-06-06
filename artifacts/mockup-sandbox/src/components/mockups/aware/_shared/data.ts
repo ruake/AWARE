@@ -1,3 +1,8 @@
+// ⚠️ KEEP IN SYNC with scripts/generate-data.mjs
+// This file is the in-memory mock used when VITE_USE_MOCK=true.
+// The generate script produces the same data as JSON files for the API path.
+// Update both when changing mock data shapes or values.
+
 import type { Run, TestResult, TestRunPoint, TestDetail, DiffRow } from "./types";
 
 export type { Run, TestResult, TestRunPoint, TestDetail, DiffRow };
