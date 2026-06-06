@@ -1,199 +1,109 @@
 # A.W.A.K.E. — Akamai Web Analyser & Kit for Evaluations
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Pages](https://img.shields.io/badge/GitHub%20Pages-deployed-blue)](https://ruake.github.io/AWARE)
 
-**A.W.A.K.E.** is an open-source edge regression observability platform for Akamai CDN configurations. It helps teams make informed release decisions by providing structured, versioned, longitudinal signal correlation across property manager versions, EdgeWorker versions, and test outcomes.
+**A.W.A.K.E.** is a cross-target test observability mockup for Akamai CDN configurations. It visualizes pass-rate trends across multiple environments, surfaces regressions via side-by-side run comparison, and provides per-test analytics — all as a static SPA served via GitHub Pages.
 
-Originally designed for Salesforce.com's WWW edge infrastructure, A.W.A.K.E. works with any Akamai property.
+**Live demo:** https://ruake.github.io/AWARE
 
-## Key Features
+## Pages
 
-- **Regression Dashboard** — Per-target pass-rate gauges, trend charts, outcome mix visualization, and Akamai version drift detection
-- **Run Management** — Browse run history, drill into individual run details with full test evidence
-- **Comparison View** — Baseline vs. candidate run comparison with regression/fix/duration-change detection
-- **Test Evidence Capture** — HTTP headers, cookies, cache keys, PM variables, EdgeWorker versions per test
-- **Immutable Reports** — JSON reports committed to a dedicated branch, built into a static SPA served via GitHub Pages
-- **Multi-Target** — Supports prod/production, prod/staging, UAT/production, UAT/staging environments
-- **Dark Mode** — GCP-inspired light/dark themes
-
-## Screenshots
-
-### Dashboard
-Cross-target health gauge, 7-day pass-rate trend, outcome mix bar, runtime identity snapshot, and version drift detection — all on one page.
-
-![Dashboard](docs/screenshots/aware/dashboard.jpg)
-
----
-
-### Run History
-Filterable run table with status pills, inline share/permalink actions on row hover, and one-click CSV / JSON export.
-
-![Runs](docs/screenshots/aware/runs.jpg)
-
----
-
-### Run Detail
-Split-pane view: test list on the left, full HTTP evidence (request, response status, headers, PM variables) on the right. Keyboard navigable.
-
-![Run Detail](docs/screenshots/aware/run-detail.jpg)
-
----
-
-### Regression Comparison
-Baseline vs. candidate selector, delta scorecards (new failures / fixed / still failing / duration regressions), bulk GitHub issue filing, and per-row share actions.
-
-![Compare](docs/screenshots/aware/compare.jpg)
-
----
-
-### Start a Run
-Suite pills, segmented target selector, PM/EW version inputs, parallelism/retries steppers, fail-fast toggle, and a live-updating tabbed command block (gh CLI · curl · Python SDK) — everything visible without scrolling.
-
-![Start Run](docs/screenshots/aware/start-run.jpg)
-
----
-
-### Global Search
-⌘K command palette with faceted tabs (Tests · Runs · Compare), pass-rate inline, and keyboard navigation.
-
-![Search](docs/screenshots/aware/search.jpg)
-
----
-
-### Test Documentation
-Per-test deep-dive: docstring, tags, preconditions, known flakiness, 7-day pass-rate sparkline, recent execution history, and full git change history with inline diffs.
-
-![Test Doc](docs/screenshots/aware/test-doc.jpg)
-
----
-
-### Sharing & Permalinks
-Permalink builder with short-URL, deep links (evidence panel / raw JSON / timeline / API), expiry and access controls, pre-formatted export blocks for Slack / GitHub / Jira / Email, embeddable SVG status badges, and HTML/Markdown embed snippets.
-
-![Sharing](docs/screenshots/aware/sharing.jpg)
-
-## Architecture
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  GitHub Actions                                          │
-│  ┌─────────────┐  ┌───────────┐  ┌────────────────────┐ │
-│  │ pytest       │  │ Playwright│  │ merge_pytest_      │ │
-│  │ (geo-gating, │  │ (forms)   │  │ reports.py         │ │
-│  │ URL health)  │  │           │  │                    │ │
-│  └─────────────┘  └───────────┘  └────────────────────┘ │
-│                        │                                      │
-│                        ▼                                      │
-│              ┌─────────────────┐                              │
-│              │  Normalize &    │                              │
-│              │  Commit JSON    │                              │
-│              │  to `results`   │                              │
-│              │  branch         │                              │
-│              └─────────────────┘                              │
-└──────────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌──────────────────────────────────────────────────────────┐
-│  GitHub Pages                                            │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │  Static SPA (React + Tailwind + shadcn/ui)          │ │
-│  │  ├─ Dashboard (pass rate, trends, version drift)    │ │
-│  │  ├─ Run History & Detail                            │ │
-│  │  ├─ Comparison View                                 │ │
-│  │  └─ Start Run / Search                              │ │
-│  │  Reads immutable JSON from `pages` branch           │ │
-│  └────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────┘
-```
-
-The platform is **stateless by design** — no server-side database for the reporting layer. All test results are committed as structured JSON files to a `results` branch, then built into a static SPA deployed to GitHub Pages.
+| Page | Route | Description |
+|------|-------|-------------|
+| Dashboard | `/preview/aware/Dashboard` | Multi-environment pass-rate line charts, per-target health cards, regression alerts, version drift detection |
+| Runs | `/preview/aware/Runs` | Filterable run table with column-header filters (text + checkboxes), status/target/env quick filters, inline permalink & Slack sharing, pagination |
+| Run Detail | `/preview/aware/RunDetail?runId=...` | Split-panel: filterable test results table (left) + HTTP evidence viewer (right) with syntax-highlighted request/response/PM variables |
+| Compare | `/preview/aware/Compare?baseline=...&candidate=...` | Baseline vs. candidate diff table with column filters, regression/fixed/duration-change detection, side panel with per-test analytics link |
+| New Run | `/preview/aware/StartRun` | Full-page workflow dispatcher: suite selector, target/environment picker, PM/EW version inputs, parallelism/retries/fail-fast controls, live gh/curl/Python command previews, one-click GitHub Actions launch |
+| Search | `/preview/aware/SearchDemo` | Full-page global search with keyboard navigation, facet filters (Tests/Runs/Compare), recent items, quick actions |
+| Test Analytics | `/preview/aware/TestAnalytics?testId=...` | Per-test analytics dashboard with pass-rate trend, duration history, flakiness score, and run history table |
+| Test Doc | `/preview/aware/TestDoc` | Per-test deep-dive with docstring, tags, preconditions, git change history |
+| About | `/preview/aware/About` | Project info, live stats, feature cards, tech stack |
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Runtime** | Node.js 24 |
 | **Language** | TypeScript 5.9 (strict) |
+| **Frontend** | React 19, Vite 7, Tailwind CSS 4 |
+| **Charts** | react-google-charts (Gauge, Line, Bar, Column) |
+| **Icons** | lucide-react |
 | **Package Manager** | pnpm workspaces |
-| **API Server** | Express 5 |
-| **Database** | PostgreSQL + Drizzle ORM |
-| **Frontend** | React 19, Vite 7, Tailwind CSS 4, shadcn/ui |
-| **Validation** | Zod, drizzle-zod |
-| **API Codegen** | Orval (OpenAPI → React Query + Zod) |
-| **Build** | esbuild (server), Vite (frontend) |
-| **CI/CD** | GitHub Actions |
+| **CI/CD** | GitHub Actions (build + deploy to GitHub Pages) |
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js 24
-- pnpm
-
-### Setup
-
 ```bash
 pnpm install
-pnpm run build
-```
-
-### Development
-
-```bash
-# API server (port 5000)
-pnpm --filter @workspace/api-server run dev
-
-# Mockup sandbox (UI preview)
-pnpm --filter @workspace/mockup-sandbox run dev
-
-# Typecheck all packages
 pnpm run typecheck
+pnpm --filter @workspace/mockup-sandbox run dev
 ```
 
-### Code Generation
+Open http://localhost:5173/preview/aware/Dashboard
+
+### Build for GitHub Pages
 
 ```bash
-# Regenerate API hooks and Zod schemas from OpenAPI spec
-pnpm --filter @workspace/api-spec run codegen
-
-# Push DB schema changes (dev only)
-pnpm --filter @workspace/db run push
+cd artifacts/mockup-sandbox
+BASE_PATH=/AWARE PORT=1 pnpm build
 ```
 
 ### Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `PORT` | API server port (default: 5000) |
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `5173` | Dev server port |
+| `BASE_PATH` | `/` | Path prefix (use `/AWARE` for GitHub Pages) |
 
 ## Project Structure
 
 ```
 ├── artifacts/
-│   ├── api-server/          # Express 5 API server
-│   └── mockup-sandbox/      # React UI preview sandbox
-├── lib/
-│   ├── api-client-react/    # Generated React Query hooks (Orval)
-│   ├── api-spec/            # OpenAPI 3.1 spec + Orval config
-│   ├── api-zod/             # Generated Zod schemas (Orval)
-│   └── db/                  # PostgreSQL + Drizzle ORM
-├── scripts/                 # Utility scripts
-├── docs/
-│   └── screenshots/         # Project screenshots
-└── attached_assets/         # Design assets & PRD
+│   └── mockup-sandbox/          # React UI sandbox
+│       ├── src/
+│       │   ├── components/
+│       │   │   └── mockups/
+│       │   │       └── aware/   # All page components
+│       │   │           ├── _shared/  # Shared data, nav, ColumnFilter, AppLayout
+│       │   │           ├── Dashboard.tsx
+│       │   │           ├── Runs.tsx
+│       │   │           ├── RunDetail.tsx
+│       │   │           ├── Compare.tsx
+│       │   │           ├── StartRun.tsx
+│       │   │           ├── SearchDemo.tsx
+│       │   │           ├── TestAnalytics.tsx
+│       │   │           ├── TestDoc.tsx
+│       │   │           ├── Sharing.tsx
+│       │   │           └── About.tsx
+│       │   └── App.tsx          # Preview dispatcher
+│       └── .github/workflows/   # Deploy workflow
+├── .github/workflows/           # CI workflows (root)
+└── docs/screenshots/            # Project screenshots
 ```
 
-## Test Suites
+## Features
 
-- **Geo-gating suite** — pytest: ~260 test functions covering geo match/mismatch/travel, locale split, cache-key isolation, URL health, and more
-- **Forms suite** — Playwright: form render, auto-download, redirect flows with screenshots
-- Results from both suites are merged into a combined dashboard run record
+- **Multi-environment pass-rate charts** — Composite line chart with all 4 environments overlaid + time-slice selector (7d/14d/30d/All)
+- **Column-header filtering** — Every table column supports text search + multi-select checkboxes; toolbar has quick filters for status/suite/target/env
+- **Regression alerts** — Dashboard highlights environments with pass-rate drops; Compare page shows regression/fixed/duration-change delta
+- **Full-page workflow dispatcher** — Dedicated Start Run page with suite selector, version inputs, parallelism/retries controls, and live gh/curl/Python command preview with one-click GitHub Actions launch
+- **Global search** — Full-page keyboard-navigable search across tests, runs, and comparisons with facet filters; Enter navigates to the result
+- **Side-by-side comparison** — Syncable URL with baseline/candidate run selectors, side panel for per-test detail, one-click GitHub issue filing
+- **Clipboard integration** — Every shareable entity has copy-to-clipboard with visual feedback (permalink, Slack snippet, GitHub issue template)
+- **Dark mode** — GCP-inspired light/dark theme toggle
+- **SPA 404 fallback** — `404.html` copies `index.html` for client-side routing on GitHub Pages
 
-## Contributing
+## GitHub Actions
 
-Contributions are welcome! Please open an issue or pull request.
+Push to `main` triggers the [deploy workflow](.github/workflows/deploy.yml) which:
+1. Installs dependencies with pnpm
+2. Builds with `BASE_PATH=/AWARE`
+3. Copies `index.html` as `404.html` for SPA routing
+4. Uploads and deploys to GitHub Pages
+
+The [run-tests workflow](.github/workflows/run-tests.yml) accepts `workflow_dispatch` inputs (branch, suite, target, environment) for triggerable test runs.
 
 ## License
 
-[MIT](LICENSE)
+MIT
