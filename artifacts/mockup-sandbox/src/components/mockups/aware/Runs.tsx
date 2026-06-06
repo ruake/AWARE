@@ -1,10 +1,10 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
 import { RUNS } from "./_shared/data";
-import { navTo, copyToClipboard, repo } from "./_shared/nav";
+import { navTo, copyToClipboard } from "./_shared/nav";
 import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import "./_group.css";
-import { Link2, Check, Share2, Copy, ExternalLink, PlayCircle, Github, X } from "lucide-react";
+import { Link2, Check, Share2, Copy, ExternalLink, PlayCircle } from "lucide-react";
 
 const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 
@@ -35,87 +35,8 @@ function CopyLinkBtn({ runId }: { runId: string }) {
   );
 }
 
-function NewRunModal({ onClose }: { onClose: () => void }) {
-  const [branch, setBranch] = React.useState("main");
-  const [suite, setSuite] = React.useState("full_suite");
-  const [target, setTarget] = React.useState("Prod");
-  const [env, setEnv] = React.useState("Production");
-  const [triggered, setTriggered] = React.useState(false);
-
-  const handleTrigger = () => {
-    const workflowUrl = `${repo}/actions/workflows/run-tests.yml`;
-    const params = new URLSearchParams({
-      inputs: JSON.stringify({ branch, suite, target, environment: env }),
-    });
-    copyToClipboard(`${workflowUrl}/dispatches?${params}`);
-    setTriggered(true);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="gcp-card w-[480px] p-5 shadow-xl" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-medium flex items-center gap-2">
-            <PlayCircle size={18} className="text-[var(--gcp-blue)]" /> New Run
-          </h2>
-          <button onClick={onClose} className="text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)]"><X size={18} /></button>
-        </div>
-
-        {triggered ? (
-          <div className="text-center py-6 space-y-3">
-            <Check size={32} className="mx-auto text-[var(--gcp-green)]" />
-            <p className="text-sm font-medium text-[var(--gcp-text)]">Workflow trigger copied to clipboard</p>
-            <p className="text-[12px] text-[var(--gcp-text-secondary)]">Open GitHub Actions to run the workflow:</p>
-            <a href={`${repo}/actions/workflows/run-tests.yml`} target="_blank" rel="noopener noreferrer" className="gcp-button gcp-button-primary inline-flex items-center gap-1.5 text-sm">
-              <Github size={15} /> Open GitHub Actions <ExternalLink size={13} />
-            </a>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div>
-              <label className="block text-[12px] font-medium text-[var(--gcp-text-secondary)] mb-1">Branch</label>
-              <input value={branch} onChange={e => setBranch(e.target.value)} className="gcp-input w-full font-mono text-sm" placeholder="main" />
-            </div>
-            <div>
-              <label className="block text-[12px] font-medium text-[var(--gcp-text-secondary)] mb-1">Suite</label>
-              <select value={suite} onChange={e => setSuite(e.target.value)} className="gcp-input w-full text-sm">
-                <option>full_suite</option>
-                <option>geo_gating</option>
-                <option>smoke</option>
-                <option>url_health</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[12px] font-medium text-[var(--gcp-text-secondary)] mb-1">Target</label>
-                <select value={target} onChange={e => setTarget(e.target.value)} className="gcp-input w-full text-sm">
-                  <option>Prod</option>
-                  <option>UAT</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[12px] font-medium text-[var(--gcp-text-secondary)] mb-1">Environment</label>
-                <select value={env} onChange={e => setEnv(e.target.value)} className="gcp-input w-full text-sm">
-                  <option>Production</option>
-                  <option>Staging</option>
-                </select>
-              </div>
-            </div>
-            <div className="pt-2">
-              <button onClick={handleTrigger} className="gcp-button gcp-button-primary w-full flex items-center justify-center gap-1.5 text-sm py-2.5">
-                <Github size={16} /> Trigger via GitHub Actions
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function Runs() {
   const [shareToast, setShareToast] = React.useState<string | null>(null);
-  const [showNewRun, setShowNewRun] = React.useState(false);
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null);
   const [quickSuite, setQuickSuite] = React.useState("All");
   const [quickTarget, setQuickTarget] = React.useState("All");
@@ -178,7 +99,7 @@ export function Runs() {
             Hover any row to copy its permalink or Slack snippet
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setShowNewRun(true)} className="gcp-button gcp-button-primary text-sm flex items-center gap-1.5">
+            <button onClick={() => navTo("StartRun")} className="gcp-button gcp-button-primary text-sm flex items-center gap-1.5">
               <PlayCircle size={14} /> New Run
             </button>
             <button onClick={() => { copyToClipboard(window.location.href); showToast("Current filter state URL copied"); }} className="gcp-button text-sm flex items-center gap-1.5"><Copy size={13} /> Share filtered view</button>
@@ -258,9 +179,6 @@ export function Runs() {
         )}
 
       </div>
-
-      {/* New Run Modal */}
-      {showNewRun && <NewRunModal onClose={() => setShowNewRun(false)} />}
     </AppLayout>
   );
 }
