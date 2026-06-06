@@ -3,8 +3,9 @@ import { AppLayout } from "./_shared/AppLayout";
 import { RUNS, getRunById, getRunIndex, getTestResultsForRun } from "./_shared/data";
 import { navTo, copyToClipboard, repo } from "./_shared/nav";
 import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
+import { useSyncedUrlState } from "./_shared/urlState";
 import "./_group.css";
-import { Copy, Check, Share2, Link2, Github, ExternalLink, GitCompare, Calendar, FileText } from "lucide-react";
+import { Copy, Check, Share2, Link2, Github, ExternalLink, GitCompare, Calendar, FileText, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 
 const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 
@@ -35,14 +36,29 @@ export function RunDetail() {
   const currentRun = getRunById(currentRunId);
   const runIndex = getRunIndex(currentRunId);
 
+  const runIds = RUNS.map(r => r.id);
+  const prevRunId = runIndex > 0 ? runIds[runIndex - 1] : null;
+  const nextRunId = runIndex < runIds.length - 1 ? runIds[runIndex + 1] : null;
+
   const otherRuns = RUNS.filter(r => r.id !== currentRunId);
   const [selectedCompareRun, setSelectedCompareRun] = React.useState(
     otherRuns[Math.min(0, otherRuns.length - 1)]?.id ?? ""
   );
 
-  const [timeSlice, setTimeSlice] = React.useState("All");
-  const [colFilters, setColFilters] = React.useState<Record<string, ColumnFilterState>>({});
-  const [searchText, setSearchText] = React.useState("");
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+      if (e.key === "ArrowLeft" && prevRunId) { navTo(`RunDetail?runId=${prevRunId}`); }
+      if (e.key === "ArrowRight" && nextRunId) { navTo(`RunDetail?runId=${nextRunId}`); }
+      if (e.key === "b" && !e.metaKey && !e.ctrlKey) { navTo("Runs"); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [prevRunId, nextRunId]);
+
+  const [timeSlice, setTimeSlice] = useSyncedUrlState("slice", "All");
+  const [colFilters, setColFilters] = useSyncedUrlState<Record<string, ColumnFilterState>>("filters", {});
+  const [searchText, setSearchText] = useSyncedUrlState("q", "");
 
   const dummyTests = getTestResultsForRun(Math.max(0, runIndex));
 
@@ -56,7 +72,7 @@ export function RunDetail() {
   };
 
   const updateColFilter = (field: string) => (f: ColumnFilterState) => {
-    setColFilters(prev => ({ ...prev, [field]: f }));
+    setColFilters({ ...colFilters, [field]: f });
   };
 
   let filteredTests = dummyTests;
@@ -89,7 +105,26 @@ export function RunDetail() {
 
         {/* Sticky Header */}
         <div className="gcp-card p-4 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navTo("Runs")} className="text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] p-1.5 rounded-full transition-colors" title="Back to Runs (b)">
+              <ArrowLeft size={18} />
+            </button>
+            <div className="flex items-center gap-1 border border-[var(--gcp-grey)] rounded bg-[var(--gcp-surface)]">
+              <button
+                onClick={() => prevRunId && navTo(`RunDetail?runId=${prevRunId}`)}
+                disabled={!prevRunId}
+                className={`p-1.5 ${prevRunId ? 'text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)] hover:bg-[var(--gcp-surface-hover)]' : 'text-[var(--gcp-grey)] cursor-not-allowed'} transition-colors`}
+                title="Previous run (←)"
+              ><ChevronLeft size={16} /></button>
+              <span className="text-[10px] text-[var(--gcp-text-secondary)] px-1 font-mono">{runIndex + 1}/{RUNS.length}</span>
+              <button
+                onClick={() => nextRunId && navTo(`RunDetail?runId=${nextRunId}`)}
+                disabled={!nextRunId}
+                className={`p-1.5 ${nextRunId ? 'text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)] hover:bg-[var(--gcp-surface-hover)]' : 'text-[var(--gcp-grey)] cursor-not-allowed'} transition-colors`}
+                title="Next run (→)"
+              ><ChevronRight size={16} /></button>
+            </div>
+            <div className="w-px h-6 bg-[var(--gcp-grey)]"></div>
             <span className={`gcp-badge text-sm ${statusBadge}`}>{runStatus}</span>
             <h1 className="text-lg font-medium">{runLabel}</h1>
             <span className="text-[var(--gcp-text-secondary)] gcp-mono text-sm">{currentRunId}</span>
@@ -163,7 +198,7 @@ export function RunDetail() {
             </div>
             <div className="p-2 border-t border-[var(--gcp-grey)] flex justify-between items-center text-xs text-[var(--gcp-text-secondary)] bg-[var(--gcp-surface-hover)]">
               <span>Showing {filteredTests.length} of {dummyTests.length} tests</span>
-              <span>Keyboard nav: ↑↓ navigate · Enter open evidence · <span className="font-mono">L</span> copy link · <span className="font-mono">G</span> file GitHub issue</span>
+              <span>Keyboard: <kbd className="gcp-mono text-[10px] bg-[var(--gcp-grey-bg)] px-1 rounded">←</kbd><kbd className="gcp-mono text-[10px] bg-[var(--gcp-grey-bg)] px-1 rounded">→</kbd> navigate runs · <kbd className="gcp-mono text-[10px] bg-[var(--gcp-grey-bg)] px-1 rounded">b</kbd> back to Runs</span>
             </div>
           </div>
 

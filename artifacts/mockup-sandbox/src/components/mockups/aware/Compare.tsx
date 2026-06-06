@@ -3,13 +3,17 @@ import { AppLayout } from "./_shared/AppLayout";
 import { RUNS, DIFF_ROWS, TEST_DETAILS } from "./_shared/data";
 import { copyToClipboard, navTo } from "./_shared/nav";
 import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
+import { useSyncedUrlState } from "./_shared/urlState";
 import "./_group.css";
-import { Link2, Github, Share2, Copy, Check, AlertTriangle, BarChart3, X, ArrowUpRight, Calendar, Filter, FileText } from "lucide-react";
+import { Link2, Github, Share2, Copy, Check, AlertTriangle, BarChart3, X, ArrowUpRight, Calendar, Filter, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 
 const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 const TIME_SLICES = ["1d", "7d", "14d", "30d", "All"];
 
-function ComparisonSidePanel({ diff, testId }: { diff: typeof DIFF_ROWS[number]; testId: string }) {
+function ComparisonSidePanel({ diff, testId, onPrev, onNext, hasPrev, hasNext }: {
+  diff: typeof DIFF_ROWS[number]; testId: string;
+  onPrev?: () => void; onNext?: () => void; hasPrev?: boolean; hasNext?: boolean;
+}) {
   const deltaMs = diff.durCand - diff.durBase;
   const hasDelta = Math.abs(deltaMs) > 20;
   const stateLabel = diff.state === "regression" ? "Regression" : diff.state === "fixed" ? "Fixed" : diff.state === "duration" ? "Duration Change" : "Unchanged";
@@ -18,7 +22,13 @@ function ComparisonSidePanel({ diff, testId }: { diff: typeof DIFF_ROWS[number];
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b border-[var(--gcp-grey)] flex items-center justify-between shrink-0">
-        <h3 className="font-medium text-sm flex items-center gap-2"><BarChart3 size={15} className="text-[var(--gcp-blue)]" /> Comparison Detail</h3>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 border border-[var(--gcp-grey)] rounded">
+            <button onClick={onPrev} disabled={!hasPrev} className={`p-1 ${hasPrev ? 'text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]' : 'text-[var(--gcp-grey)] cursor-not-allowed'} transition-colors`} title="Previous test"><ChevronLeft size={14} /></button>
+            <button onClick={onNext} disabled={!hasNext} className={`p-1 ${hasNext ? 'text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)]' : 'text-[var(--gcp-grey)] cursor-not-allowed'} transition-colors`} title="Next test"><ChevronRight size={14} /></button>
+          </div>
+          <h3 className="font-medium text-sm flex items-center gap-2"><BarChart3 size={15} className="text-[var(--gcp-blue)]" /> Comparison Detail</h3>
+        </div>
         <div className="flex items-center gap-2">
           <button onClick={() => navTo(`TestDoc?testId=${testId}`)} className="gcp-button text-[11px] flex items-center gap-1 px-2.5 py-1.5">
             <FileText size={12} /> View Docs <ArrowUpRight size={11} />
@@ -103,6 +113,26 @@ function ComparisonSidePanel({ diff, testId }: { diff: typeof DIFF_ROWS[number];
   );
 }
 
+function _SidePanel({ selectedDiff, selectedTestId, setSelectedTestId }: {
+  selectedDiff: typeof DIFF_ROWS[number];
+  selectedTestId: string;
+  setSelectedTestId: (id: string | null) => void;
+}) {
+  const si = DIFF_ROWS.findIndex(d => d.id === selectedTestId);
+  return (
+    <div className="w-[35%] gcp-card overflow-hidden shrink-0 bg-[var(--gcp-surface)] border-l-2 border-[var(--gcp-blue)]">
+      <ComparisonSidePanel
+        diff={selectedDiff}
+        testId={selectedTestId}
+        onPrev={() => { const p = DIFF_ROWS[si - 1]; if (p) setSelectedTestId(p.id); }}
+        onNext={() => { const n = DIFF_ROWS[si + 1]; if (n) setSelectedTestId(n.id); }}
+        hasPrev={si > 0}
+        hasNext={si < DIFF_ROWS.length - 1}
+      />
+    </div>
+  );
+}
+
 export function Compare() {
   const params = new URLSearchParams(window.location.search);
   const initialBaseline = params.get("baseline") || RUNS[0].id;
@@ -110,11 +140,11 @@ export function Compare() {
 
   const [baseline, setBaseline] = React.useState(initialBaseline);
   const [candidate, setCandidate] = React.useState(initialCandidate);
-  const [selectedTestId, setSelectedTestId] = React.useState<string | null>(null);
-  const [colFilters, setColFilters] = React.useState<Record<string, ColumnFilterState>>({});
-  const [searchText, setSearchText] = React.useState("");
-  const [regressionsOnly, setRegressionsOnly] = React.useState(false);
-  const [timeSlice, setTimeSlice] = React.useState("All");
+  const [selectedTestId, setSelectedTestId] = useSyncedUrlState<string | null>("sel", null);
+  const [colFilters, setColFilters] = useSyncedUrlState<Record<string, ColumnFilterState>>("filters", {});
+  const [searchText, setSearchText] = useSyncedUrlState("q", "");
+  const [regressionsOnly, setRegressionsOnly] = useSyncedUrlState("reg", false);
+  const [timeSlice, setTimeSlice] = useSyncedUrlState("slice", "All");
 
   const [shareToast, setShareToast] = React.useState<string | null>(null);
   const [issueFiled, setIssueFiled] = React.useState<string | null>(null);
@@ -157,7 +187,7 @@ export function Compare() {
   };
 
   const updateColFilter = (field: string) => (f: ColumnFilterState) => {
-    setColFilters(prev => ({ ...prev, [field]: f }));
+    setColFilters({ ...colFilters, [field]: f });
   };
 
   let filteredRows = DIFF_ROWS;
@@ -312,11 +342,7 @@ export function Compare() {
           </div>
 
           {/* Right: Side panel */}
-          {selectedDiff && (
-            <div className="w-[35%] gcp-card overflow-hidden shrink-0 bg-[var(--gcp-surface)] border-l-2 border-[var(--gcp-blue)]">
-              <ComparisonSidePanel diff={selectedDiff} testId={selectedTestId!} />
-            </div>
-          )}
+          {selectedDiff && selectedTestId && <_SidePanel selectedDiff={selectedDiff} selectedTestId={selectedTestId} setSelectedTestId={setSelectedTestId} />}
 
         </div>
 

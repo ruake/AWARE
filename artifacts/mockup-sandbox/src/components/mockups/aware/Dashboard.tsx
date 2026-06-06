@@ -3,6 +3,7 @@ import { Chart } from "react-google-charts";
 import { AppLayout } from "./_shared/AppLayout";
 import { RUNS, ENV_PASS_RATE_DATA, ENV_SUMMARY } from "./_shared/data";
 import { navTo } from "./_shared/nav";
+import { useSyncedUrlState } from "./_shared/urlState";
 import "./_group.css";
 import { TrendingDown, TrendingUp, Minus, AlertTriangle, ChevronRight, ArrowUpDown, Calendar } from "lucide-react";
 
@@ -23,7 +24,7 @@ function TrendIcon({ delta }: { delta: number }) {
 
 export function Dashboard() {
   const regressed = ENV_SUMMARY.filter(e => e.alert);
-  const [timeSlice, setTimeSlice] = React.useState("14d");
+  const [timeSlice, setTimeSlice] = useSyncedUrlState("slice", "14d");
   const [chartKey, setChartKey] = React.useState(0);
 
   React.useEffect(() => {

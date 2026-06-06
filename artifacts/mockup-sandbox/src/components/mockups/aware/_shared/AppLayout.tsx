@@ -9,9 +9,16 @@ import {
   Menu, 
   Moon, 
   Sun, 
-  ExternalLink 
+  ExternalLink,
+  Bell,
+  Command,
+  Check,
+  AlertTriangle,
+  Activity
 } from "lucide-react";
 import { navTo, repo } from "./nav";
+import { CommandPalette } from "./CommandPalette";
+import { useLiveStatus } from "./useLiveStatus";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -21,6 +28,19 @@ interface AppLayoutProps {
 export function AppLayout({ children, activeTab }: AppLayoutProps) {
   const [isDark, setIsDark] = React.useState(false);
   const [sidebarExpanded, setSidebarExpanded] = React.useState(false);
+  const [paletteOpen, setPaletteOpen] = React.useState(false);
+  const { currentToast, dismissToast, pendingCount, clearCount } = useLiveStatus();
+
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setPaletteOpen(p => !p);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -68,7 +88,35 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Live status indicator */}
+          <div className="relative">
+            <button
+              onClick={() => { clearCount(); }}
+              className="relative p-2 text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] rounded-full transition-colors"
+              title={`${pendingCount} pending updates`}
+            >
+              <Bell size={18} />
+              {pendingCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-[var(--gcp-red)] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {pendingCount > 9 ? "9+" : pendingCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* ⌘K button */}
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-[var(--gcp-text-secondary)] bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded-md hover:bg-[var(--gcp-surface-hover)] transition-colors"
+          >
+            <Search size={13} />
+            <span className="hidden sm:inline">Search... </span>
+            <kbd className="px-1.5 py-0.5 bg-[var(--gcp-surface)] border border-[var(--gcp-grey)] rounded font-mono text-[10px] font-bold">
+              <Command size={10} className="inline" />K
+            </kbd>
+          </button>
+
           <button onClick={toggleTheme} className="p-2 text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] rounded-full">
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
@@ -120,6 +168,29 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
           {children}
         </main>
       </div>
+
+      {/* Command Palette */}
+      {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
+
+      {/* Live status toast */}
+      {currentToast && (
+        <div
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-[13px] z-50 cursor-pointer transition-all animate-slide-up border ${
+            currentToast.type === "success"
+              ? "bg-[var(--gcp-green-bg)] text-[var(--gcp-green)] border-[var(--gcp-green)]"
+              : currentToast.type === "warning"
+              ? "bg-[var(--gcp-yellow-bg)] text-[var(--gcp-yellow)] border-[var(--gcp-yellow)]"
+              : "bg-[var(--gcp-blue-bg)] text-[var(--gcp-blue)] border-[var(--gcp-blue)]"
+          }`}
+          onClick={dismissToast}
+        >
+          {currentToast.type === "success" ? <Check size={16} /> :
+           currentToast.type === "warning" ? <AlertTriangle size={16} /> :
+           <Activity size={16} />}
+          <span>{currentToast.message}</span>
+          <button onClick={e => { e.stopPropagation(); dismissToast(); }} className="ml-2 opacity-60 hover:opacity-100">&times;</button>
+        </div>
+      )}
     </div>
   );
 }
