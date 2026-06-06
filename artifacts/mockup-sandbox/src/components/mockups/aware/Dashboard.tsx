@@ -1,7 +1,7 @@
 import React from "react";
 import { Chart } from "react-google-charts";
 import { AppLayout } from "./_shared/AppLayout";
-import { RUNS, ENV_PASS_RATE_DATA, ENV_SUMMARY } from "./_shared/data";
+import { useRuns, useEnvSummary, useEnvPassRateData } from "./_shared/hooks";
 import { navTo } from "./_shared/nav";
 import { useSyncedUrlState } from "./_shared/urlState";
 import "./_group.css";
@@ -23,7 +23,10 @@ function TrendIcon({ delta }: { delta: number }) {
 }
 
 export function Dashboard() {
-  const regressed = ENV_SUMMARY.filter(e => e.alert);
+  const { summary: envSummary } = useEnvSummary();
+  const { data: envPassRateData } = useEnvPassRateData();
+  const { runs } = useRuns();
+  const regressed = envSummary.filter(e => e.alert);
   const [timeSlice, setTimeSlice] = useSyncedUrlState("slice", "14d");
   const [chartKey, setChartKey] = React.useState(0);
 
@@ -32,7 +35,7 @@ export function Dashboard() {
     return () => clearTimeout(t);
   }, []);
 
-  const slicedChartData = sliceData(ENV_PASS_RATE_DATA, timeSlice);
+  const slicedChartData = sliceData(envPassRateData as (string | number | Record<string, unknown>)[][], timeSlice);
 
   return (
     <AppLayout activeTab="dashboard">
@@ -78,7 +81,7 @@ export function Dashboard() {
               <div className="text-right">
                 <div className="text-3xl font-mono font-bold text-[var(--gcp-red)]">87%</div>
                 <div className="text-sm text-[var(--gcp-text-secondary)]">14 failures</div>
-                <button onClick={() => navTo(`RunDetail?runId=${RUNS[RUNS.length - 1].id}`)} className="text-[12px] text-[var(--gcp-blue)] hover:underline mt-1">
+                <button onClick={() => navTo(`RunDetail?runId=${runs[runs.length - 1].id}`)} className="text-[12px] text-[var(--gcp-blue)] hover:underline mt-1">
                   View latest run &rarr;
                 </button>
               </div>
@@ -87,7 +90,7 @@ export function Dashboard() {
 
           {/* Env cards */}
           <div className="grid grid-cols-4 gap-3">
-            {ENV_SUMMARY.map((env, i) => (
+            {envSummary.map((env, i) => (
               <div
                 key={env.label}
                 className="border border-[var(--gcp-grey)] rounded p-3 hover:bg-[var(--gcp-surface-hover)] cursor-pointer transition-colors"
@@ -164,8 +167,8 @@ export function Dashboard() {
                   if (sel.length > 0) {
                     const row = sel[0].row;
                     const col = sel[0].column;
-                    if (row >= 0 && row < RUNS.length) {
-                      navTo(`RunDetail?runId=${RUNS[Math.min(row, RUNS.length - 1)].id}`);
+                    if (row >= 0 && row < runs.length) {
+                      navTo(`RunDetail?runId=${runs[Math.min(row, runs.length - 1)].id}`);
                     }
                   }
                 },

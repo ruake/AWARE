@@ -1,7 +1,7 @@
 import React from "react";
 import { Chart } from "react-google-charts";
 import { AppLayout } from "./_shared/AppLayout";
-import { TEST_DETAILS, DIFF_ROWS, RUNS } from "./_shared/data";
+import { useSyncDiffs, useTestHistory } from "./_shared/hooks";
 import { navTo, copyToClipboard } from "./_shared/nav";
 import "./_group.css";
 import { BarChart3, Clock, Activity, Check, ArrowLeft, AlertTriangle, FileText, Search } from "lucide-react";
@@ -12,8 +12,9 @@ export function TestAnalytics() {
   const params = new URLSearchParams(window.location.search);
   const testId = params.get("testId") || "diff_0";
   const index = Number(testId.replace("diff_", ""));
-  const detail = TEST_DETAILS[index];
-  const diff = DIFF_ROWS[index];
+  const diffs = useSyncDiffs();
+  const { detail } = useTestHistory(index);
+  const diff = diffs[index];
 
   const [shareToast, setShareToast] = React.useState<string | null>(null);
   const showToast = (msg: string) => { setShareToast(msg); setTimeout(() => setShareToast(null), 2500); };
@@ -70,7 +71,7 @@ export function TestAnalytics() {
                 onChange={e => navTo(`TestAnalytics?testId=${e.target.value}`)}
               >
                 <option value="">Jump to test...</option>
-                {DIFF_ROWS.map(d => (
+                {diffs.map(d => (
                   <option key={d.id} value={d.id}>{d.name}</option>
                 ))}
               </select>

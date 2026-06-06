@@ -1,6 +1,6 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
-import { RUNS } from "./_shared/data";
+import { useSyncRuns } from "./_shared/hooks";
 import { navTo } from "./_shared/nav";
 import "./_group.css";
 import {
@@ -122,6 +122,7 @@ export function Status() {
   const [showDetail, setShowDetail] = React.useState<string | null>(null);
   const [workflowFilter, setWorkflowFilter] = React.useState("all");
   const [restartKey, setRestartKey] = React.useState(0);
+  const runs = useSyncRuns();
 
   const isCompleted = currentStage >= STAGES.length;
   const stageCount = STAGES.length;
@@ -161,7 +162,7 @@ export function Status() {
     ? WORKFLOW_RUNS
     : WORKFLOW_RUNS.filter(r => r.status === workflowFilter);
 
-  const getRunId = (i: number) => RUNS[i % RUNS.length]?.id ?? RUNS[0].id;
+  const getRunId = (i: number) => runs[i % runs.length]?.id ?? runs[0].id;
 
   return (
     <AppLayout activeTab="status">
@@ -431,7 +432,7 @@ export function Status() {
                             className="p-1.5 text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)] hover:bg-[var(--gcp-blue-bg)] rounded-lg transition-all duration-200"
                             title="View run details"
                           ><ExternalLink size={12} /></button>
-                          <button onClick={() => navTo(`Compare?baseline=${RUNS[0].id}&candidate=${getRunId(i)}`)}
+                          <button onClick={() => navTo(`Compare?baseline=${runs[0].id}&candidate=${getRunId(i)}`)}
                             className="p-1.5 text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-blue)] hover:bg-[var(--gcp-blue-bg)] rounded-lg transition-all duration-200"
                             title="Compare this run"
                           ><GitCompare size={12} /></button>

@@ -1,6 +1,6 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
-import { RUNS } from "./_shared/data";
+import { useSyncRuns } from "./_shared/hooks";
 import { navTo } from "./_shared/nav";
 import "./_group.css";
 import {
@@ -32,23 +32,10 @@ interface Result {
   meta?: string;
 }
 
-const ALL_RESULTS: Result[] = [
-  { kind: "test", label: "test_geo_match_us_locale_prod[/us/]", sub: "geo-match · full_suite", status: "fail", meta: "94.8% pass" },
-  { kind: "test", label: "test_geo_match_eu_locale_prod[/eu/]", sub: "geo-match · full_suite", status: "pass", meta: "100% pass" },
-  { kind: "test", label: "test_edgeworker_cache_key_v3", sub: "cache-key · edgeworker", status: "pass", meta: "98.1% pass" },
-  { kind: "test", label: "test_locale_split_fr_staging", sub: "locale-match · smoke", status: "flaky", meta: "81% pass" },
-  { kind: "run", label: "run_892_2341.1.0_prod_1001", sub: "Prod/Production · PM 892 · EW 2341.1.0", status: "fail", meta: "45m" },
-  { kind: "run", label: "run_892_2341.1.0_uat_1002", sub: "UAT/Production · PM 892 · EW 2341.1.0", status: "pass", meta: "38m" },
-  { kind: "run", label: "run_891_2340.0.1_prod_0998", sub: "Prod/Production · PM 891 · EW 2340.0.1", status: "fail", meta: "51m" },
-  { kind: "compare", label: "PM 892 vs PM 891 — Prod/Production", sub: "7 regressions · 2 recoveries", status: null, meta: "3d ago" },
-  { kind: "compare", label: "EW 2341.1.0 vs 2340.0.1 — UAT", sub: "No regressions detected", status: null, meta: "5d ago" },
-  { kind: "action", label: "Start new regression run", sub: "Open workflow dispatcher", status: null, meta: "⌘N" },
-];
-
-function filterResults(q: string): Result[] {
+function filterResults(q: string, results: Result[]): Result[] {
   if (!q.trim()) return [];
   const lower = q.toLowerCase();
-  return ALL_RESULTS.filter(
+  return results.filter(
     (r) => r.label.toLowerCase().includes(lower) || r.sub.toLowerCase().includes(lower)
   ).slice(0, 8);
 }
@@ -77,18 +64,32 @@ function KindIcon({ kind }: { kind: ResultKind }) {
 }
 
 export function SearchDemo() {
+  const runs = useSyncRuns();
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(0);
   const [activeFilter, setActiveFilter] = React.useState<"all" | "tests" | "runs" | "compare">("all");
 
+  const ALL_RESULTS: Result[] = [
+    { kind: "test", label: "test_geo_match_us_locale_prod[/us/]", sub: "geo-match · full_suite", status: "fail", meta: "94.8% pass" },
+    { kind: "test", label: "test_geo_match_eu_locale_prod[/eu/]", sub: "geo-match · full_suite", status: "pass", meta: "100% pass" },
+    { kind: "test", label: "test_edgeworker_cache_key_v3", sub: "cache-key · edgeworker", status: "pass", meta: "98.1% pass" },
+    { kind: "test", label: "test_locale_split_fr_staging", sub: "locale-match · smoke", status: "flaky", meta: "81% pass" },
+    { kind: "run", label: "run_892_2341.1.0_prod_1001", sub: "Prod/Production · PM 892 · EW 2341.1.0", status: "fail", meta: "45m" },
+    { kind: "run", label: "run_892_2341.1.0_uat_1002", sub: "UAT/Production · PM 892 · EW 2341.1.0", status: "pass", meta: "38m" },
+    { kind: "run", label: "run_891_2340.0.1_prod_0998", sub: "Prod/Production · PM 891 · EW 2340.0.1", status: "fail", meta: "51m" },
+    { kind: "compare", label: "PM 892 vs PM 891 — Prod/Production", sub: "7 regressions · 2 recoveries", status: null, meta: "3d ago" },
+    { kind: "compare", label: "EW 2341.1.0 vs 2340.0.1 — UAT", sub: "No regressions detected", status: null, meta: "5d ago" },
+    { kind: "action", label: "Start new regression run", sub: "Open workflow dispatcher", status: null, meta: "⌘N" },
+  ];
+
   const navigateToResult = (r: Result) => {
     if (r.kind === "run") navTo(`RunDetail?runId=${r.label}`);
     else if (r.kind === "test") navTo(`TestAnalytics?testId=${r.label}`);
-    else if (r.kind === "compare") navTo(`Compare?baseline=${RUNS[0].id}&candidate=${RUNS[3].id}`);
+    else if (r.kind === "compare") navTo(`Compare?baseline=${runs[0].id}&candidate=${runs[3].id}`);
     else if (r.kind === "action") navTo("StartRun");
   };
 
-  const rawResults = filterResults(query);
+  const rawResults = filterResults(query, ALL_RESULTS);
   const results = activeFilter === "all"
     ? rawResults
     : rawResults.filter((r) => {
@@ -246,7 +247,7 @@ export function SearchDemo() {
                   </div>
                   <div className="space-y-0.5">
                     {RECENT.map((r, i) => (
-                      <div key={i} onClick={() => { if (r.type === "run") navTo(`RunDetail?runId=${r.label}`); else if (r.type === "compare") navTo(`Compare?baseline=${RUNS[0].id}&candidate=${RUNS[3].id}`); }} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
+                      <div key={i} onClick={() => { if (r.type === "run") navTo(`RunDetail?runId=${r.label}`); else if (r.type === "compare") navTo(`Compare?baseline=${runs[0].id}&candidate=${runs[3].id}`); }} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
                         <StatusDot status={r.status} />
                         <span className="text-[13px] font-mono text-[var(--gcp-text)] flex-1 truncate">{r.label}</span>
                         <span className="text-[11px] text-[var(--gcp-text-secondary)]">{r.sub}</span>
@@ -262,7 +263,7 @@ export function SearchDemo() {
                   </div>
                   <div className="grid grid-cols-2 gap-1.5">
                     {QUICK_ACTIONS.map((a, i) => (
-                      <div key={i} onClick={() => { if (i === 0) navTo("StartRun"); else if (i === 1) navTo(`Compare?baseline=${RUNS[0].id}&candidate=${RUNS[3].id}`); else if (i === 2) navTo("TestDoc"); else navTo("Dashboard"); }} className="flex items-center gap-2 px-3 py-2 rounded border border-[var(--gcp-grey)] hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
+                      <div key={i} onClick={() => { if (i === 0) navTo("StartRun"); else if (i === 1) navTo(`Compare?baseline=${runs[0].id}&candidate=${runs[3].id}`); else if (i === 2) navTo("TestDoc"); else navTo("Dashboard"); }} className="flex items-center gap-2 px-3 py-2 rounded border border-[var(--gcp-grey)] hover:bg-[var(--gcp-surface-hover)] cursor-pointer">
                         <a.icon size={14} style={{ color: a.color }} />
                         <span className="text-[12px] text-[var(--gcp-text)] flex-1">{a.label}</span>
                         <kbd className="gcp-mono text-[10px] bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded px-1 py-0.5 text-[var(--gcp-text-secondary)]">

@@ -1,6 +1,7 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
-import { RUNS, DIFF_ROWS, TEST_DETAILS } from "./_shared/data";
+import { useSyncRuns, useSyncDiffs } from "./_shared/hooks";
+import type { DiffRow } from "./_shared/services";
 import { copyToClipboard, navTo } from "./_shared/nav";
 import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import { useSyncedUrlState } from "./_shared/urlState";
@@ -11,9 +12,10 @@ const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 const TIME_SLICES = ["1d", "7d", "14d", "30d", "All"];
 
 function ComparisonSidePanel({ diff, testId, onPrev, onNext, hasPrev, hasNext }: {
-  diff: typeof DIFF_ROWS[number]; testId: string;
+  diff: DiffRow; testId: string;
   onPrev?: () => void; onNext?: () => void; hasPrev?: boolean; hasNext?: boolean;
 }) {
+  const runs = useSyncRuns();
   const deltaMs = diff.durCand - diff.durBase;
   const hasDelta = Math.abs(deltaMs) > 20;
   const stateLabel = diff.state === "regression" ? "Regression" : diff.state === "fixed" ? "Fixed" : diff.state === "duration" ? "Duration Change" : "Unchanged";
@@ -96,7 +98,7 @@ function ComparisonSidePanel({ diff, testId, onPrev, onNext, hasPrev, hasNext }:
         {/* Actions */}
         <div className="space-y-2">
           <button
-            onClick={() => { copyToClipboard(`https://aware.example.com/tests/${diff.id}?baseline=${RUNS[0].id}&candidate=${RUNS[3].id}`); }}
+            onClick={() => { copyToClipboard(`https://aware.example.com/tests/${diff.id}?baseline=${runs[0]?.id ?? ""}&candidate=${runs[3]?.id ?? ""}`); }}
             className="w-full gcp-button text-[12px] flex items-center justify-center gap-1.5 py-2"
           >
             <Link2 size={13} /> Copy permalink
@@ -114,29 +116,32 @@ function ComparisonSidePanel({ diff, testId, onPrev, onNext, hasPrev, hasNext }:
 }
 
 function _SidePanel({ selectedDiff, selectedTestId, setSelectedTestId }: {
-  selectedDiff: typeof DIFF_ROWS[number];
+  selectedDiff: DiffRow;
   selectedTestId: string;
   setSelectedTestId: (id: string | null) => void;
 }) {
-  const si = DIFF_ROWS.findIndex(d => d.id === selectedTestId);
+  const diffs = useSyncDiffs();
+  const si = diffs.findIndex(d => d.id === selectedTestId);
   return (
     <div className="w-[35%] gcp-card overflow-hidden shrink-0 bg-[var(--gcp-surface)] border-l-2 border-[var(--gcp-blue)]">
       <ComparisonSidePanel
         diff={selectedDiff}
         testId={selectedTestId}
-        onPrev={() => { const p = DIFF_ROWS[si - 1]; if (p) setSelectedTestId(p.id); }}
-        onNext={() => { const n = DIFF_ROWS[si + 1]; if (n) setSelectedTestId(n.id); }}
+        onPrev={() => { const p = diffs[si - 1]; if (p) setSelectedTestId(p.id); }}
+        onNext={() => { const n = diffs[si + 1]; if (n) setSelectedTestId(n.id); }}
         hasPrev={si > 0}
-        hasNext={si < DIFF_ROWS.length - 1}
+        hasNext={si < diffs.length - 1}
       />
     </div>
   );
 }
 
 export function Compare() {
+  const runs = useSyncRuns();
+  const diffs = useSyncDiffs();
   const params = new URLSearchParams(window.location.search);
-  const initialBaseline = params.get("baseline") || RUNS[0].id;
-  const initialCandidate = params.get("candidate") || RUNS[3].id;
+  const initialBaseline = params.get("baseline") || (runs[0]?.id ?? "");
+  const initialCandidate = params.get("candidate") || (runs[3]?.id ?? "");
 
   const [baseline, setBaseline] = React.useState(initialBaseline);
   const [candidate, setCandidate] = React.useState(initialCandidate);
@@ -157,10 +162,10 @@ export function Compare() {
     setTimeout(() => setIssueFiled(null), 3000);
   };
 
-  const runIds = RUNS.map(r => r.id);
+  const runIds = runs.map(r => r.id);
 
   const selectedDiff = selectedTestId
-    ? DIFF_ROWS.find(d => d.id === selectedTestId) ?? null
+    ? diffs.find(d => d.id === selectedTestId) ?? null
     : null;
 
   const updateBaseline = (val: string) => {
@@ -190,7 +195,7 @@ export function Compare() {
     setColFilters(prev => ({ ...prev, [field]: f }));
   };
 
-  let filteredRows = DIFF_ROWS;
+  let filteredRows = diffs;
   if (searchText) {
     const q = searchText.toLowerCase();
     filteredRows = filteredRows.filter(d => d.name.toLowerCase().includes(q));
@@ -209,8 +214,8 @@ export function Compare() {
     }
   }
 
-  const categories = [...new Set(DIFF_ROWS.map(d => d.category))];
-  const states = [...new Set(DIFF_ROWS.map(d => d.state))];
+  const categories = [...new Set(diffs.map(d => d.category))];
+  const states = [...new Set(diffs.map(d => d.state))];
 
   return (
     <AppLayout activeTab="compare">

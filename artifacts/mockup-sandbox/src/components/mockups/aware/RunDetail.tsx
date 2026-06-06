@@ -1,6 +1,6 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
-import { RUNS, getRunById, getRunIndex, getTestResultsForRun } from "./_shared/data";
+import { useSyncRuns, useTestResults } from "./_shared/hooks";
 import { navTo, copyToClipboard, repo } from "./_shared/nav";
 import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import { useSyncedUrlState } from "./_shared/urlState";
@@ -32,9 +32,10 @@ function EvidenceSection({ label, children, copyText }: {
 
 export function RunDetail() {
   const params = new URLSearchParams(window.location.search);
-  const currentRunId = params.get("runId") || RUNS[0].id;
-  const currentRun = getRunById(currentRunId);
-  const runIndex = getRunIndex(currentRunId);
+  const RUNS = useSyncRuns();
+  const currentRunId = params.get("runId") || (RUNS[0]?.id ?? "");
+  const currentRun = RUNS.find(r => r.id === currentRunId);
+  const runIndex = RUNS.findIndex(r => r.id === currentRunId);
 
   const runIds = RUNS.map(r => r.id);
   const prevRunId = runIndex > 0 ? runIds[runIndex - 1] : null;
@@ -60,7 +61,7 @@ export function RunDetail() {
   const [colFilters, setColFilters] = useSyncedUrlState<Record<string, ColumnFilterState>>("filters", {});
   const [searchText, setSearchText] = useSyncedUrlState("q", "");
 
-  const dummyTests = getTestResultsForRun(Math.max(0, runIndex));
+  const { tests: dummyTests } = useTestResults(Math.max(0, runIndex));
 
   const [shareToast, setShareToast] = React.useState<string | null>(null);
   const showToast = (msg: string) => { setShareToast(msg); setTimeout(() => setShareToast(null), 2500); };

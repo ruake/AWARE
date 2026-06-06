@@ -1,52 +1,6 @@
-export interface Run {
-  id: string;
-  label: string;
-  suite: string;
-  target: string;
-  status: "PASS" | "FAIL" | "PARTIAL" | "FLAKY";
-  passPct: number;
-  failures: number;
-  duration: string;
-  durationMs: number;
-  started: string;
-  pm: string;
-  ew: string;
-  env: string;
-}
+import type { Run, TestResult, TestRunPoint, TestDetail, DiffRow } from "./types";
 
-export interface TestResult {
-  id: string;
-  name: string;
-  status: "PASS" | "FAIL";
-  duration: number;
-  category: string;
-  suite: string;
-}
-
-export interface TestRunPoint {
-  runId: string;
-  status: "PASS" | "FAIL";
-  duration: number;
-  env: string;
-}
-
-export interface TestDetail {
-  history: TestRunPoint[];
-  passRate: number;
-  flakinessScore: number;
-  avgDuration: number;
-}
-
-export interface DiffRow {
-  id: string;
-  name: string;
-  baseStatus: "PASS" | "FAIL";
-  candStatus: "PASS" | "FAIL";
-  durBase: number;
-  durCand: number;
-  category: string;
-  state: "regression" | "fixed" | "duration" | "unchanged";
-}
+export type { Run, TestResult, TestRunPoint, TestDetail, DiffRow };
 
 const ENVS = ["Prod/Production", "Prod/Staging", "UAT/Production", "UAT/Staging"];
 

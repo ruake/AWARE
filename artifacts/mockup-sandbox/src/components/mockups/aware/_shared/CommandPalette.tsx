@@ -1,6 +1,6 @@
 import React from "react";
 import { navTo } from "./nav";
-import { RUNS, DIFF_ROWS } from "./data";
+import { useSyncRuns, useSyncDiffs } from "./hooks";
 import { Search, List, GitCompare, Beaker, ArrowUpRight } from "lucide-react";
 
 type SearchResult = {
@@ -11,31 +11,33 @@ type SearchResult = {
   path: string;
 };
 
-const ALL_RESULTS: SearchResult[] = [
-  ...DIFF_ROWS.map(d => ({
-    id: d.id,
-    label: d.name,
-    description: `${d.category} · ${d.state}`,
-    type: "test" as const,
-    path: `TestDoc?testId=${d.id}`,
-  })),
-  ...RUNS.map(r => ({
-    id: r.id,
-    label: r.id,
-    description: `${r.label} · ${r.passPct}% pass · ${r.status}`,
-    type: "run" as const,
-    path: `RunDetail?runId=${r.id}`,
-  })),
-  ...DIFF_ROWS.slice(0, 8).map(d => ({
-    id: `compare_${d.id}`,
-    label: `${d.name}`,
-    description: `baseline vs candidate · ${d.state}`,
-    type: "compare" as const,
-    path: `Compare?baseline=${RUNS[0].id}&candidate=${RUNS[3].id}`,
-  })),
-];
-
 export function CommandPalette({ onClose }: { onClose: () => void }) {
+  const runs = useSyncRuns();
+  const diffs = useSyncDiffs();
+
+  const ALL_RESULTS: SearchResult[] = [
+    ...diffs.map(d => ({
+      id: d.id,
+      label: d.name,
+      description: `${d.category} · ${d.state}`,
+      type: "test" as const,
+      path: `TestDoc?testId=${d.id}`,
+    })),
+    ...runs.map(r => ({
+      id: r.id,
+      label: r.id,
+      description: `${r.label} · ${r.passPct}% pass · ${r.status}`,
+      type: "run" as const,
+      path: `RunDetail?runId=${r.id}`,
+    })),
+    ...diffs.slice(0, 8).map(d => ({
+      id: `compare_${d.id}`,
+      label: `${d.name}`,
+      description: `baseline vs candidate · ${d.state}`,
+      type: "compare" as const,
+      path: `Compare?baseline=${runs[0].id}&candidate=${runs[3].id}`,
+    })),
+  ];
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(0);
   const [typeFilter, setTypeFilter] = React.useState<string | null>(null);

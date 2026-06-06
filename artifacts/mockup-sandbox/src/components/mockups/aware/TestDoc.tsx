@@ -1,14 +1,15 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
-import { DIFF_ROWS } from "./_shared/data";
+import { useSyncDiffs } from "./_shared/hooks";
 import { navTo, repo } from "./_shared/nav";
 import "./_group.css";
 import { ArrowLeft, Pin, Github, ExternalLink, FileText, CheckCircle2, AlertTriangle, AlertCircle, GitBranch, GitCommit, Search } from "lucide-react";
 
 export function TestDoc() {
+  const diffs = useSyncDiffs();
   const params = new URLSearchParams(window.location.search);
   const testId = params.get("testId") || "";
-  const diffRow = DIFF_ROWS.find(d => d.id === testId);
+  const diffRow = diffs.find(d => d.id === testId);
   const testName = diffRow?.name ?? (testId || "test_geo_match_us_locale_prod[/us/]");
   const testStatus = diffRow?.candStatus ?? "FAIL";
   const testCategory = diffRow?.category ?? "geo-match";
@@ -32,7 +33,7 @@ export function TestDoc() {
                 onChange={e => navTo(`TestDoc?testId=${e.target.value}`)}
               >
                 <option value="">Jump to test...</option>
-                {DIFF_ROWS.map(d => (
+                {diffs.map(d => (
                   <option key={d.id} value={d.id}>{d.name}</option>
                 ))}
               </select>

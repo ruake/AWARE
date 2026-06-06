@@ -1,6 +1,7 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
-import { RUNS } from "./_shared/data";
+import { useSyncRuns } from "./_shared/hooks";
+import type { Run } from "./_shared/services";
 import { navTo, copyToClipboard } from "./_shared/nav";
 import { TableHeaderFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import { useSyncedUrlState } from "./_shared/urlState";
@@ -9,7 +10,7 @@ import { Link2, Check, Share2, Copy, ExternalLink, PlayCircle, X, ArrowUpRight, 
 
 const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 
-function applyFilters(runs: typeof RUNS, filters: Record<string, ColumnFilterState>) {
+function applyFilters(runs: Run[], filters: Record<string, ColumnFilterState>) {
   return runs.filter(r => {
     for (const [field, f] of Object.entries(filters)) {
       const raw = String((r as unknown as Record<string, unknown>)[field] ?? "");
@@ -36,7 +37,7 @@ function CopyLinkBtn({ runId }: { runId: string }) {
   );
 }
 
-function RunSidePanel({ run, onClose }: { run: typeof RUNS[number]; onClose: () => void }) {
+function RunSidePanel({ run, onClose }: { run: Run; onClose: () => void }) {
   const statusBadge = run.status === "PASS" ? "gcp-badge-pass" : run.status === "FAIL" ? "gcp-badge-fail" : "gcp-badge-flaky";
   return (
     <div className="h-full flex flex-col">
@@ -109,6 +110,7 @@ export function Runs() {
   const [colFilters, setColFilters] = useSyncedUrlState<Record<string, ColumnFilterState>>("filters", {});
   const [selectedRunId, setSelectedRunId] = useSyncedUrlState<string | null>("sel", null);
   const showToast = (msg: string) => { setShareToast(msg); setTimeout(() => setShareToast(null), 2500); };
+  const RUNS = useSyncRuns();
 
   const updateColFilter = (field: string) => (f: ColumnFilterState) => {
     setColFilters(prev => ({ ...prev, [field]: f }));

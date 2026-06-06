@@ -1,6 +1,6 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
-import { RUNS, DIFF_ROWS } from "./_shared/data";
+import { useSyncRuns, useSyncDiffs } from "./_shared/hooks";
 import { repo } from "./_shared/nav";
 import "./_group.css";
 import { Info, GitCompare, List, FileText, LayoutDashboard, ExternalLink, Github, Shield, Users, Zap, BarChart3 } from "lucide-react";
@@ -14,16 +14,18 @@ const FEATURES = [
   { icon: Zap, label: "Global Search", desc: "Quick-search across tests, runs, and comparisons via ⌘K palette. Filter by type and navigate instantly." },
 ];
 
-const STATS = [
-  { label: "Total Runs Indexed", value: RUNS.length, suffix: "+" },
-  { label: "Tests Tracked", value: "280", suffix: "+" },
-  { label: "Environments", value: "4", suffix: "" },
-  { label: "Avg Pass Rate", value: "86", suffix: "%" },
-  { label: "Regressions (last 30d)", value: DIFF_ROWS.filter(d => d.state === "regression").length, suffix: "" },
-  { label: "Duration Regressions", value: DIFF_ROWS.filter(d => d.state === "duration").length, suffix: "" },
-];
-
 export function About() {
+  const runs = useSyncRuns();
+  const diffs = useSyncDiffs();
+  const STATS = [
+    { label: "Total Runs Indexed", value: runs.length, suffix: "+" },
+    { label: "Tests Tracked", value: "280", suffix: "+" },
+    { label: "Environments", value: "4", suffix: "" },
+    { label: "Avg Pass Rate", value: "86", suffix: "%" },
+    { label: "Regressions (last 30d)", value: diffs.filter(d => d.state === "regression").length, suffix: "" },
+    { label: "Duration Regressions", value: diffs.filter(d => d.state === "duration").length, suffix: "" },
+  ];
+
   return (
     <AppLayout activeTab="about">
       <div className="max-w-[1200px] mx-auto space-y-6">
