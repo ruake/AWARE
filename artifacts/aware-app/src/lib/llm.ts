@@ -208,37 +208,23 @@ function _getSkillId(messages: LLMMessage[]): string | null {
 }
 
 function mockComplete(messages: LLMMessage[]): LLMCompletionResponse {
-  const userMsg = messages.find(m => m.role === "user")?.content ?? "";
+  const userMsg = [...messages].reverse().find(m => m.role === "user")?.content ?? "";
   const lower = userMsg.toLowerCase();
   const skillId = _getSkillId(messages);
   let content = "";
 
   if (skillId === "generate-tests" && _looksLikeFormSubmission(userMsg)) {
     const lines = userMsg.split("\n").filter(l => l.includes(":"));
-    const getName = () => {
-      const n = lines.find(l => l.startsWith("name:"));
-      return n ? n.split(":")[1].trim() : "CDN Cache HIT Verification";
+    const extractVal = (key: string, fallback: string) => {
+      const line = lines.find(l => l.startsWith(`${key}:`));
+      return line ? line.split(":").slice(1).join(":").trim() : fallback;
     };
-    const getCat = () => {
-      const c = lines.find(l => l.startsWith("category:"));
-      return c ? c.split(":")[1].trim() : "caching";
-    };
-    const getPrio = () => {
-      const p = lines.find(l => l.startsWith("priority:"));
-      return p ? p.split(":")[1].trim() : "P2";
-    };
-    const getSeverity = () => {
-      const s = lines.find(l => l.startsWith("severity:"));
-      return s ? s.split(":")[1].trim() : "minor";
-    };
-    const getStatus = () => {
-      const s = lines.find(l => l.startsWith("expectedStatus:"));
-      return s ? s.split(":")[1].trim() : "200";
-    };
-    const isAuto = () => {
-      const a = lines.find(l => l.startsWith("automated:"));
-      return a ? a.split(":")[1].trim() === "true" : true;
-    };
+    const getName = () => extractVal("name", "CDN Cache HIT Verification");
+    const getCat = () => extractVal("category", "caching");
+    const getPrio = () => extractVal("priority", "P2");
+    const getSeverity = () => extractVal("severity", "minor");
+    const getStatus = () => extractVal("expectedStatus", "200");
+    const isAuto = () => extractVal("automated", "true") === "true";
     const name = getName();
     const cat = getCat();
     content = `Here's a summary of the test configuration I've generated:

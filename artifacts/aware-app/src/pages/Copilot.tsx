@@ -15,6 +15,15 @@ import { saveChatMessages, loadChatMessages, clearChatMessages } from "@/lib/cha
 import { ChatFormControls, parseFormBlocks } from "@/components/aware/ChatFormControls";
 import type { FormField } from "@/components/aware/ChatFormControls";
 
+function stripTestConfigBlock(content: string): string {
+  const start = "---TEST_CONFIG_START---";
+  const end = "---TEST_CONFIG_END---";
+  const si = content.indexOf(start);
+  const ei = content.indexOf(end);
+  if (si === -1 || ei === -1 || ei <= si) return content;
+  return (content.substring(0, si) + content.substring(ei + end.length)).trim();
+}
+
 const MARKDOWN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   code: ({ className, children, ...props }: any) => {
     const isInline = !className;
@@ -500,7 +509,7 @@ export default function Copilot() {
                       </div>
                       <div style={{ overflowX: "auto" }} className="copilot-markdown">
                         {msg.role === "user" ? msg.content : (() => {
-                          const { text, blocks } = parseFormBlocks(msg.content);
+                          const { text, blocks } = parseFormBlocks(stripTestConfigBlock(msg.content));
                           return (
                             <>
                               {text && (
@@ -615,7 +624,7 @@ export default function Copilot() {
                         </div>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 4 }}>{parent.role === "user" ? "You" : "AI Copilot"}</div>
-                          <ReactMarkdown components={MARKDOWN_COMPONENTS}>{parent.content.substring(0, 500)}</ReactMarkdown>
+                          <ReactMarkdown components={MARKDOWN_COMPONENTS}>{stripTestConfigBlock(parent.content).substring(0, 500)}</ReactMarkdown>
                         </div>
                       </div>
                     )}
