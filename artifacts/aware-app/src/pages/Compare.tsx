@@ -2,6 +2,8 @@ import React from "react";
 import { useLocation, useSearch } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
+import { CTAStatCard } from "@/components/aware/CTAStatCard";
+import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { RUNS, DIFF_ROWS, setPromotionDecision } from "@/lib/data";
 import type { DiffRow } from "@/lib/types";
 import {
@@ -11,13 +13,6 @@ import {
 } from "lucide-react";
 
 const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
-
-function useToast() {
-  const [msg, setMsg] = React.useState<string | null>(null);
-  const show = (m: string) => { setMsg(m); setTimeout(() => setMsg(null), 2500); };
-  const Toast = msg ? <div className="gcp-toast"><Check size={13} style={{ color: "var(--gcp-green)" }} /> {msg}</div> : null;
-  return { show, Toast };
-}
 
 function copy(text: string) { navigator.clipboard.writeText(text).catch(() => {}); }
 
@@ -36,7 +31,7 @@ function SidePanel({ diff, diffs, selectedId, onSelect, navigate }: {
   diff: DiffRow; diffs: DiffRow[]; selectedId: string;
   onSelect: (id: string | null) => void; navigate: (href: string) => void;
 }) {
-  const { show, Toast } = useToast();
+  const { show, Toast } = useSimpleToast();
   const idx = diffs.findIndex(d => d.id === selectedId);
   const deltaMs = diff.durCand - diff.durBase;
 
@@ -128,7 +123,7 @@ export default function Compare() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const [, navigate] = useLocation();
-  const { show, Toast } = useToast();
+  const { show, Toast } = useSimpleToast();
 
   const runIds = RUNS.map(r => r.id);
   const [baseline, setBaseline] = React.useState(params.get("baseline") ?? RUNS[RUNS.length - 1]?.id ?? "");
@@ -215,13 +210,14 @@ export default function Compare() {
             { label: "Duration Regressions", value: `+${duration.length}`, color: "var(--gcp-yellow)", key: "duration" },
             { label: "Unchanged", value: unchanged.length, color: "var(--gcp-text-secondary)", key: "unchanged" },
           ].map(tile => (
-            <div key={tile.label}
-              className="gcp-card"
+            <CTAStatCard
+              key={tile.label}
+              label={tile.label}
+              value={tile.value}
+              accentColor={tile.color}
+              active={colFilters.state?.selected.includes(tile.key)}
               onClick={() => updateColFilter("state")({ text: "", selected: colFilters.state?.selected.includes(tile.key) ? [] : [tile.key] })}
-              style={{ padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderLeft: `4px solid ${tile.color}`, cursor: "pointer" }}>
-              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--gcp-text-secondary)" }}>{tile.label}</span>
-              <span style={{ fontSize: 24, fontWeight: 700, color: tile.color }}>{tile.value}</span>
-            </div>
+            />
           ))}
         </div>
 

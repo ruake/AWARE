@@ -6,6 +6,7 @@ import {
   Play, FileJson, Eye, Database, RefreshCw, Zap, ChevronRight,
   Code2, Copy,
 } from "lucide-react";
+import { useSimpleToast } from "@/hooks/useSimpleToast";
 
 interface Stage {
   id: string; title: string; icon: React.ElementType;
@@ -86,15 +87,8 @@ const WORKFLOW_RUNS = [
   { id: "888", name: "Canary Tests", status: "failed", duration: "0m 52s", branch: "feature/new-edge", actor: "engineer-3" },
 ];
 
-function useToast() {
-  const [msg, setMsg] = React.useState<string | null>(null);
-  const show = (m: string) => { setMsg(m); setTimeout(() => setMsg(null), 2500); };
-  const Toast = msg ? <div className="gcp-toast"><Check size={13} style={{ color: "var(--gcp-green)" }} /> {msg}</div> : null;
-  return { show, Toast };
-}
-
 export default function Status() {
-  const { show, Toast } = useToast();
+  const { show, Toast } = useSimpleToast();
   const [activeStage, setActiveStage] = React.useState(2);
   const [yamlCopied, setYamlCopied] = React.useState(false);
 

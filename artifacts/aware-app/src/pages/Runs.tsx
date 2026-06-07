@@ -5,8 +5,9 @@ import { RUNS } from "@/lib/data";
 import type { Run } from "@/lib/types";
 import {
   Play, GitCompare, Search, Filter, BarChart3,
-  CheckCircle2, XCircle, Clock, Check, Share2,
+  CheckCircle2, XCircle, Clock, Share2,
 } from "lucide-react";
+import { useSimpleToast } from "@/hooks/useSimpleToast";
 
 function statusBadge(status: Run["status"]) {
   const map: Record<string, { cls: string; label: string }> = {
@@ -20,16 +21,9 @@ function statusBadge(status: Run["status"]) {
   return <span className={`gcp-badge ${s.cls}`}>{s.label}</span>;
 }
 
-function useToast() {
-  const [msg, setMsg] = React.useState<string | null>(null);
-  const show = (m: string) => { setMsg(m); setTimeout(() => setMsg(null), 2500); };
-  const Toast = msg ? <div className="gcp-toast"><Check size={13} style={{ color: "var(--gcp-green)" }} /> {msg}</div> : null;
-  return { show, Toast };
-}
-
 export default function Runs() {
   const [, navigate] = useLocation();
-  const { show, Toast } = useToast();
+  const { show, Toast } = useSimpleToast();
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [suiteFilter, setSuiteFilter] = React.useState<string>("all");

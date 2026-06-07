@@ -13,16 +13,10 @@ import type { Run } from "@/lib/types";
 import {
   CheckCircle2, XCircle, AlertTriangle, Play, GitCompare,
   TrendingDown, TrendingUp, ArrowRight, Github,
-  Clock, Zap, Shield, BarChart3, Share2, Check,
+  Clock, Zap, Shield, BarChart3, Share2,
   ChevronRight, RefreshCw,
 } from "lucide-react";
-
-function useToast() {
-  const [msg, setMsg] = React.useState<string | null>(null);
-  const show = (m: string) => { setMsg(m); setTimeout(() => setMsg(null), 2500); };
-  const Toast = msg ? <div className="gcp-toast"><Check size={13} style={{ color: "var(--gcp-green)" }} /> {msg}</div> : null;
-  return { show, Toast };
-}
+import { useSimpleToast } from "@/hooks/useSimpleToast";
 
 function statusBadge(status: Run["status"]) {
   const map: Record<string, { cls: string; label: string }> = {
@@ -40,7 +34,7 @@ function PromotionBanner({ latestRun }: { latestRun: Run }) {
   const [, navigate] = useLocation();
   const [decisions, setDecisions] = React.useState(getAllPromotionDecisions());
   const existing = decisions.find(d => d.runId === latestRun.id);
-  const { show, Toast } = useToast();
+  const { show, Toast } = useSimpleToast();
 
   const decide = (action: "promote" | "block") => {
     const d = {
@@ -115,7 +109,7 @@ function PromotionBanner({ latestRun }: { latestRun: Run }) {
 export default function Dashboard() {
   const [, navigate] = useLocation();
   const latestRun = RUNS[0];
-  const { show, Toast } = useToast();
+  const { show, Toast } = useSimpleToast();
 
   const recentRuns = RUNS.slice(0, 6);
   const overallPassRate = Math.round(RUNS.reduce((s, r) => s + r.passPct, 0) / RUNS.length);

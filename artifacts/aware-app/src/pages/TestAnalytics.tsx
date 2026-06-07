@@ -6,24 +6,17 @@ import {
 } from "recharts";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { DIFF_ROWS, TEST_DETAILS, generateTestHistory, RUNS } from "@/lib/data";
+import { ENVS } from "@/lib/constants";
 import {
-  ArrowLeft, BarChart3, Clock, Activity, Check, AlertTriangle,
+  ArrowLeft, BarChart3, Clock, Activity, AlertTriangle,
   FileText, Search, Share2, ChevronRight, Zap,
 } from "lucide-react";
-
-function useToast() {
-  const [msg, setMsg] = React.useState<string | null>(null);
-  const show = (m: string) => { setMsg(m); setTimeout(() => setMsg(null), 2500); };
-  const Toast = msg ? <div className="gcp-toast"><Check size={13} style={{ color: "var(--gcp-green)" }} /> {msg}</div> : null;
-  return { show, Toast };
-}
-
-const ENVS = ["Prod/Production", "Prod/Staging", "UAT/Production", "UAT/Staging"];
+import { useSimpleToast } from "@/hooks/useSimpleToast";
 
 export default function TestAnalytics() {
   const search = useSearch();
   const params = new URLSearchParams(search);
-  const { show, Toast } = useToast();
+  const { show, Toast } = useSimpleToast();
 
   const testId = params.get("testId") ?? "diff_0";
   const [selectedTestId, setSelectedTestId] = React.useState(testId);

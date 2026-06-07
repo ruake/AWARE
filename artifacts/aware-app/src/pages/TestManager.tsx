@@ -1,151 +1,31 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
 import { useSyncedUrlState } from "@/lib/urlState";
+import { useSimpleToast } from "@/hooks/useSimpleToast";
+import { useTestData } from "@/hooks/useTestData";
+import { EMPTY_FILTER, TagBadge, StatusBadge, priorityColor } from "@/components/aware/TestCard";
+import { StatsDashboard } from "@/components/aware/StatsDashboard";
+import { GenerateWizard } from "@/components/aware/GenerateWizard";
+import { TestManagerSidePanel } from "@/components/aware/TestManagerSidePanel";
+import { CATEGORIES, PRIORITIES, STATUSES } from "@/lib/constants";
 import {
-  getTestCases, getTestSuites, TEST_TAGS,
+  getTestCases, getTestSuites,
   createTestCase, updateTestCase, deleteTestCase, resetTestStore,
   importTestCases, exportTestCases, exportTestsAsJunitXml,
-  generateTestCases, computeTestStats, getTestChangelog,
-  updateTestCaseDocumentation, subscribeToTestCases, subscribeToTestSuites,
+  computeTestStats,
 } from "@/lib/data";
-import { generateTestsWithLLM } from "@/lib/llm";
-import { navTo } from "@/lib/nav";
-import type { TestCase, TestSuite, GenerateParams, ImportResult, TestStats } from "@/lib/types";
+import type { TestCase, TestSuite, ImportResult, TestStats } from "@/lib/types";
 import {
   Plus, Search, Check, Edit3, Trash2, Tag,
   RotateCcw, Upload, Download, FileJson, FileSpreadsheet, FileCode,
   X, Beaker, BarChart3, Clock, FileText, Sparkles, FolderTree,
 } from "lucide-react";
 
-const CATEGORIES = ["geo-match", "locale-split", "url-health", "security", "performance", "caching", "routing", "tls", "ddos"];
-const PRIORITIES: TestCase["priority"][] = ["P0", "P1", "P2", "P3"];
-const SEVERITIES: TestCase["severity"][] = ["critical", "major", "minor", "trivial"];
-const STATUSES: TestCase["status"][] = ["active", "disabled", "deprecated"];
-const OWNERS = ["alice@co.com", "bob@co.com", "carol@co.com", "dave@co.com", "eve@co.com"];
-const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
-
-const TAG_COLORS: Record<string, string> = {
-  geo: "#1a73e8", locale: "#9334e6", health: "#e8710a",
-  security: "#d93025", performance: "#1e8e3e", regression: "#f9ab00",
-  smoke: "#185abc", e2e: "#c5221f", automated: "#1e8e3e",
-};
-
-function useTestData() {
-  const [tcs, setTcs] = React.useState<TestCase[]>(() => getTestCases());
-  const [suites, setSuites] = React.useState<TestSuite[]>(() => getTestSuites());
-  React.useEffect(() => {
-    const u1 = subscribeToTestCases(() => setTcs(getTestCases()));
-    const u2 = subscribeToTestSuites(() => setSuites(getTestSuites()));
-    return () => { u1(); u2(); };
-  }, []);
-  return { tcs, suites };
-}
-
-function useToast() {
-  const [msg, setMsg] = React.useState<string | null>(null);
-  const show = (m: string) => { setMsg(m); setTimeout(() => setMsg(null), 2500); };
-  const Toast = msg ? (
-    <div className="gcp-toast"><Check size={13} style={{ color: "var(--gcp-green)" }} /> {msg}</div>
-  ) : null;
-  return { show, Toast };
-}
-
-function priorityColor(p: string) {
-  return p === "P0" ? "#d93025" : p === "P1" ? "#e8710a" : p === "P2" ? "#1a73e8" : "#5f6368";
-}
-
-function TagBadge({ tagId }: { tagId: string }) {
-  const tag = TEST_TAGS.find(t => t.id === tagId);
-  const name = tag ? tag.name : tagId.replace("tag_", "");
-  const color = TAG_COLORS[name] ?? "#5f6368";
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 8px", borderRadius: 12, fontSize: 10, fontWeight: 600, backgroundColor: color + "20", color, border: `1px solid ${color}40` }}>
-      <Tag size={9} /> {name}
-    </span>
-  );
-}
-
-function StatusBadge({ s }: { s: TestCase["status"] }) {
-  const map = { active: "gcp-badge-pass", disabled: "gcp-badge-flaky", deprecated: "gcp-badge-fail" };
-  const labels = { active: "Active", disabled: "Disabled", deprecated: "Deprecated" };
-  return <span className={`gcp-badge ${map[s]}`}>{labels[s]}</span>;
-}
-
-// ── Stats Dashboard ──────────────────────────────────────
-
-function StatsDashboard({ stats, colFilters, onToggleFilter }: {
-  stats: TestStats;
-  colFilters: Record<string, ColumnFilterState>;
-  onToggleFilter: (field: string, value: string) => void;
-}) {
-  const statusData = Object.entries(stats.byStatus).map(([k, v]) => ({
-    name: k, value: v,
-    color: k === "active" ? "#1e8e3e" : k === "disabled" ? "#f9ab00" : "#d93025",
-  }));
-  const priorityData = Object.entries(stats.byPriority).sort().map(([k, v]) => ({
-    name: k, value: v,
-    color: k === "P0" ? "#d93025" : k === "P1" ? "#e8710a" : k === "P2" ? "#1a73e8" : "#5f6368",
-  }));
-
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr) repeat(2, 2fr)", gap: 14, marginBottom: 16 }}>
-      {/* KPI tiles */}
-      <div className="gcp-card" style={{ padding: 16, textAlign: "center", cursor: "pointer" }} onClick={() => onToggleFilter("_clear", "")}>
-        <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-blue)" }}>{stats.total}</div>
-        <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Total Tests</div>
-      </div>
-      <div className="gcp-card" style={{ padding: 16, textAlign: "center", cursor: "pointer" }} onClick={() => onToggleFilter("automated", "true")}>
-        <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-green)" }}>{stats.automated}</div>
-        <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Automated</div>
-      </div>
-      <div className="gcp-card" style={{ padding: 16, textAlign: "center" }}>
-        <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-text)" }}>{stats.coverage}%</div>
-        <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Category Coverage</div>
-      </div>
-      <div className="gcp-card" style={{ padding: 16, textAlign: "center" }}>
-        <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-text)" }}>{stats.avgVersion}</div>
-        <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Avg Version</div>
-      </div>
-      {/* By Status bar chart */}
-      <div className="gcp-card" style={{ padding: "12px 14px" }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Status</div>
-        <ResponsiveContainer width="100%" height={100}>
-          <BarChart data={statusData} barSize={24} onClick={(data) => data?.activeLabel && onToggleFilter("status", data.activeLabel)}>
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-            <YAxis hide />
-            <Tooltip formatter={(v: number) => [v, "Count"]} contentStyle={{ fontSize: 11 }} />
-            <Bar dataKey="value" cursor="pointer">
-              {statusData.map((e, i) => <Cell key={i} fill={e.color} />)}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-      {/* By Priority bar chart */}
-      <div className="gcp-card" style={{ padding: "12px 14px" }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Priority</div>
-        <ResponsiveContainer width="100%" height={100}>
-          <BarChart data={priorityData} barSize={24} onClick={(data) => data?.activeLabel && onToggleFilter("priority", data.activeLabel)}>
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-            <YAxis hide />
-            <Tooltip formatter={(v: number) => [v, "Count"]} contentStyle={{ fontSize: 11 }} />
-            <Bar dataKey="value" cursor="pointer">
-              {priorityData.map((e, i) => <Cell key={i} fill={e.color} />)}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-}
-
-// ── Test Case Form Modal ─────────────────────────────────
-
 const EMPTY_FORM: Omit<TestCase, "id" | "createdAt" | "updatedAt"> = {
   name: "", description: "", category: "geo-match", priority: "P2",
-  severity: "minor", status: "active", tags: [], owner: OWNERS[0],
+  severity: "minor", status: "active", tags: [], owner: "alice@co.com",
   suiteIds: [], automated: true, scriptPath: "",
   preconditions: "", expectedBehavior: "", documentation: "", relatedTestIds: [],
   requestHeaders: {}, cookies: {}, expectedStatus: 200,
@@ -153,6 +33,10 @@ const EMPTY_FORM: Omit<TestCase, "id" | "createdAt" | "updatedAt"> = {
   testType: "web", config: {}, assertions: [],
   predicates: [], version: 1, changelog: [],
 };
+
+function Label({ children }: { children: React.ReactNode }) {
+  return <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{children}</label>;
+}
 
 function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
   initial: Omit<TestCase, "id" | "createdAt" | "updatedAt">;
@@ -174,7 +58,6 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onCancel}>
       <div style={{ background: "var(--gcp-surface)", borderRadius: 10, width: "min(860px, 94vw)", maxHeight: "90vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }} onClick={e => e.stopPropagation()}>
-        {/* Header */}
         <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <h2 style={{ fontSize: 16, fontWeight: 700 }}>{initial.name ? "Edit Test Case" : "New Test Case"}</h2>
@@ -182,13 +65,11 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
           </div>
           <button onClick={onCancel} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><X size={18} /></button>
         </div>
-        {/* Tabs */}
         <div style={{ display: "flex", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)", flexShrink: 0 }}>
           <button style={tabStyle("basic")} onClick={() => setActiveTab("basic")}>Basic Info</button>
           <button style={tabStyle("docs")} onClick={() => setActiveTab("docs")}>Documentation</button>
           <button style={tabStyle("http")} onClick={() => setActiveTab("http")}>HTTP &amp; Predicates</button>
         </div>
-        {/* Body */}
         <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
           {activeTab === "basic" && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
@@ -215,7 +96,7 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
               <div>
                 <Label>Severity</Label>
                 <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.severity} onChange={e => u("severity", e.target.value)}>
-                  {SEVERITIES.map(s => <option key={s}>{s}</option>)}
+                  {["critical", "major", "minor", "trivial"].map(s => <option key={s}>{s}</option>)}
                 </select>
               </div>
               <div>
@@ -291,7 +172,6 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
                 <Label>Expected Status Code</Label>
                 <input type="number" className="gcp-input" style={{ width: 100, marginTop: 6 }} value={form.expectedStatus} onChange={e => u("expectedStatus", Number(e.target.value))} />
               </div>
-              {/* Request Headers */}
               <div>
                 <Label>Request Headers</Label>
                 <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 6 }}>
@@ -311,7 +191,6 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
                   </button>
                 </div>
               </div>
-              {/* Cookies */}
               <div>
                 <Label>Cookies</Label>
                 <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 6 }}>
@@ -331,7 +210,6 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
                   </button>
                 </div>
               </div>
-              {/* Capture Response Headers */}
               <div>
                 <Label>Capture Response Headers</Label>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
@@ -350,7 +228,6 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
                   }} />
                 </div>
               </div>
-              {/* Filmstrip */}
               <div style={{ borderTop: "1px solid var(--gcp-grey)", paddingTop: 16 }}>
                 <Label>Filmstrip Visual Comparison</Label>
                 <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
@@ -380,7 +257,6 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
                   </div>
                 )}
               </div>
-              {/* Predicates */}
               <div style={{ borderTop: "1px solid var(--gcp-grey)", paddingTop: 16 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <Label>Predicates ({form.predicates.length})</Label>
@@ -439,7 +315,6 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
             </div>
           )}
         </div>
-        {/* Footer */}
         <div style={{ padding: "12px 20px", borderTop: "1px solid var(--gcp-grey)", display: "flex", justifyContent: "flex-end", gap: 10, flexShrink: 0 }}>
           <button onClick={onCancel} className="gcp-button" style={{ fontSize: 13 }}>Cancel</button>
           <button onClick={() => { if (!form.name.trim()) return; onSave(form); }} className="gcp-button gcp-button-primary" disabled={!form.name.trim()} style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
@@ -450,12 +325,6 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
     </div>
   );
 }
-
-function Label({ children }: { children: React.ReactNode }) {
-  return <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{children}</label>;
-}
-
-// ── Import Modal ─────────────────────────────────────────
 
 function ImportModal({ onClose, toast }: { onClose: () => void; toast: (m: string) => void }) {
   const [text, setText] = React.useState("");
@@ -499,236 +368,6 @@ function ImportModal({ onClose, toast }: { onClose: () => void; toast: (m: strin
     </div>
   );
 }
-
-// ── Generate Wizard ───────────────────────────────────────
-
-function GenerateWizard({ allSuites, onClose, toast }: { allSuites: TestSuite[]; onClose: () => void; toast: (m: string) => void }) {
-  const [mode, setMode] = React.useState<"template" | "ai">("template");
-  const [params, setParams] = React.useState<GenerateParams>({ count: 10, category: "geo-match", status: "active", priority: "P2", owner: OWNERS[0], suites: [] });
-  const [aiPrompt, setAiPrompt] = React.useState("");
-  const [aiCount, setAiCount] = React.useState(3);
-  const [loading, setLoading] = React.useState(false);
-
-  const handleGenerate = async () => {
-    setLoading(true);
-    try {
-      if (mode === "template") {
-        const result = generateTestCases(params);
-        toast(`Generated ${result.length} test cases`);
-      } else {
-        if (!aiPrompt.trim()) { toast("Please enter a description"); setLoading(false); return; }
-        const result = await generateTestsWithLLM({ count: aiCount, category: params.category, description: aiPrompt, suites: params.suites });
-        toast(`AI generated ${result.length} test cases`);
-      }
-      onClose();
-    } catch (e) {
-      toast(`Generation failed: ${e instanceof Error ? e.message : "Unknown"}`);
-    } finally { setLoading(false); }
-  };
-
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
-      <div style={{ background: "var(--gcp-surface)", borderRadius: 10, width: "min(520px, 92vw)", padding: 24, boxShadow: "0 20px 60px rgba(0,0,0,0.3)", display: "flex", flexDirection: "column", gap: 16 }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}><Sparkles size={18} style={{ color: "#f9ab00" }} /> Bulk Generate</h2>
-          <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><X size={18} /></button>
-        </div>
-
-        {/* Mode Toggle */}
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => setMode("template")} className="gcp-button" style={{ flex: 1, fontSize: 12, padding: "6px 0", background: mode === "template" ? "var(--gcp-blue)" : undefined, color: mode === "template" ? "white" : undefined, borderColor: mode === "template" ? "var(--gcp-blue)" : "var(--gcp-grey)" }}><FileCode size={12} style={{ marginRight: 4 }} /> Templates</button>
-          <button onClick={() => setMode("ai")} className="gcp-button" style={{ flex: 1, fontSize: 12, padding: "6px 0", background: mode === "ai" ? "var(--gcp-blue)" : undefined, color: mode === "ai" ? "white" : undefined, borderColor: mode === "ai" ? "var(--gcp-blue)" : "var(--gcp-grey)" }}><Sparkles size={12} style={{ marginRight: 4 }} /> AI-Powered</button>
-        </div>
-
-        {mode === "template" ? (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div>
-              <Label>Count</Label>
-              <input type="number" min={1} max={100} className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.count} onChange={e => setParams(p => ({ ...p, count: Number(e.target.value) }))} />
-            </div>
-            <div>
-              <Label>Category</Label>
-              <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.category} onChange={e => setParams(p => ({ ...p, category: e.target.value }))}>
-                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <Label>Priority</Label>
-              <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.priority} onChange={e => setParams(p => ({ ...p, priority: e.target.value as GenerateParams["priority"] }))}>
-                {PRIORITIES.map(p => <option key={p}>{p}</option>)}
-              </select>
-            </div>
-            <div>
-              <Label>Status</Label>
-              <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.status} onChange={e => setParams(p => ({ ...p, status: e.target.value as GenerateParams["status"] }))}>
-                {STATUSES.map(s => <option key={s}>{s}</option>)}
-              </select>
-            </div>
-            <div>
-              <Label>Owner</Label>
-              <input className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.owner} onChange={e => setParams(p => ({ ...p, owner: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Assign to Suites</Label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
-                {allSuites.slice(0, 6).map(s => (
-                  <span key={s.id} onClick={() => setParams(p => ({ ...p, suites: p.suites.includes(s.id) ? p.suites.filter(x => x !== s.id) : [...p.suites, s.id] }))}
-                    style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, cursor: "pointer", border: "1px solid",
-                      background: params.suites.includes(s.id) ? "var(--gcp-blue)" : "transparent",
-                      color: params.suites.includes(s.id) ? "white" : "var(--gcp-text-secondary)",
-                      borderColor: params.suites.includes(s.id) ? "var(--gcp-blue)" : "var(--gcp-grey)",
-                    }}>{s.name.split(" ")[0]}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div>
-              <Label>Describe the tests to generate</Label>
-              <textarea className="gcp-input" style={{ width: "100%", marginTop: 4, minHeight: 80, resize: "vertical", fontFamily: "var(--font-sans)", fontSize: 12 }}
-                value={aiPrompt} onChange={e => setAiPrompt(e.target.value)}
-                placeholder="e.g. Generate cache validation tests for static assets including edge routing, origin shield, and purge propagation across APAC and US regions" />
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div>
-                <Label>Count</Label>
-                <input type="number" min={1} max={20} className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={aiCount} onChange={e => setAiCount(Number(e.target.value))} />
-              </div>
-              <div>
-                <Label>Category</Label>
-                <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.category} onChange={e => setParams(p => ({ ...p, category: e.target.value }))}>
-                  {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-                </select>
-              </div>
-            </div>
-            <div>
-              <Label>Assign to Suites</Label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
-                {allSuites.slice(0, 6).map(s => (
-                  <span key={s.id} onClick={() => setParams(p => ({ ...p, suites: p.suites.includes(s.id) ? p.suites.filter(x => x !== s.id) : [...p.suites, s.id] }))}
-                    style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, cursor: "pointer", border: "1px solid",
-                      background: params.suites.includes(s.id) ? "var(--gcp-blue)" : "transparent",
-                      color: params.suites.includes(s.id) ? "white" : "var(--gcp-text-secondary)",
-                      borderColor: params.suites.includes(s.id) ? "var(--gcp-blue)" : "var(--gcp-grey)",
-                    }}>{s.name.split(" ")[0]}</span>
-                ))}
-              </div>
-            </div>
-            <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", background: "var(--gcp-blue-bg)", padding: "8px 10px", borderRadius: 6, display: "flex", alignItems: "center", gap: 6 }}>
-              <Sparkles size={12} style={{ color: "var(--gcp-blue)" }} />
-              Uses the configured AI provider. Go to <span style={{ color: "var(--gcp-blue)", cursor: "pointer", textDecoration: "underline" }} onClick={() => { onClose(); navTo("/copilot"); }}>AI Copilot</span> to configure API keys and models.
-            </div>
-          </div>
-        )}
-
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button onClick={onClose} className="gcp-button" style={{ fontSize: 13 }}>Cancel</button>
-          <button onClick={handleGenerate} disabled={loading} className="gcp-button gcp-button-primary" style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
-            <Sparkles size={14} /> {loading ? "Generating..." : mode === "ai" ? "Generate with AI" : `Generate ${params.count} Tests`}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Side Panel ────────────────────────────────────────────
-
-function SidePanel({ tc, onClose, toast, navigate }: { tc: TestCase; onClose: () => void; toast: (m: string) => void; navigate: (h: string) => void }) {
-  const [editingDoc, setEditingDoc] = React.useState(false);
-  const [docText, setDocText] = React.useState(tc.documentation);
-  const changelog = getTestChangelog(tc.id);
-
-  const handleSaveDoc = () => {
-    updateTestCaseDocumentation(tc.id, docText, tc.owner);
-    toast("Documentation updated");
-    setEditingDoc(false);
-  };
-
-  return (
-    <div style={{ width: 340, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", borderLeft: "3px solid var(--gcp-blue)", background: "var(--gcp-surface)" }} className="gcp-card">
-      <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--gcp-blue-bg)", flexShrink: 0 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-blue)", display: "flex", alignItems: "center", gap: 6 }}><Beaker size={13} /> {tc.id}</span>
-        <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)", fontSize: 18, lineHeight: 1 }}>×</button>
-      </div>
-      <div style={{ flex: 1, overflowY: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 14 }}>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.5, marginBottom: 6 }}>{tc.name}</div>
-          <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)", lineHeight: 1.5 }}>{tc.description}</p>
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          <StatusBadge s={tc.status} />
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: priorityColor(tc.priority) }}>{tc.priority}</span>
-          <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{tc.category}</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)" }}>v{tc.version}</span>
-          {tc.automated && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>Automated</span>}
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>{tc.tags.map(t => <TagBadge key={t} tagId={t} />)}</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-          {[
-            ["Owner", tc.owner],
-            ["Script", tc.scriptPath],
-            ["Expected Status", String(tc.expectedStatus)],
-            ["Predicates", `${tc.predicates.length} rules`],
-            ["Updated", new Date(tc.updatedAt).toLocaleDateString()],
-          ].map(([k, v]) => (
-            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--gcp-grey)", fontSize: 12 }}>
-              <span style={{ color: "var(--gcp-text-secondary)" }}>{k}</span>
-              <span style={{ fontFamily: k === "Script" || k === "Expected Status" ? "var(--font-mono)" : undefined, fontSize: 11 }}>{v}</span>
-            </div>
-          ))}
-        </div>
-        {/* HTTP summary */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-          {Object.keys(tc.requestHeaders).length > 0 && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>{Object.keys(tc.requestHeaders).length} headers</span>}
-          {Object.keys(tc.cookies).length > 0 && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>{Object.keys(tc.cookies).length} cookies</span>}
-          {tc.captureResponseHeaders.length > 0 && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>Capture {tc.captureResponseHeaders.length}</span>}
-          {tc.filmstrip.enabled && <span className="gcp-badge gcp-badge-flaky" style={{ fontSize: 10 }}>Filmstrip {Math.round(tc.filmstrip.threshold * 100)}%</span>}
-        </div>
-        {/* Documentation */}
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Documentation</span>
-            <button onClick={() => setEditingDoc(!editingDoc)} style={{ fontSize: 11, color: "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer" }}>{editingDoc ? "Preview" : "Edit"}</button>
-          </div>
-          {editingDoc ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <textarea className="gcp-input" style={{ width: "100%", minHeight: 120, fontFamily: "var(--font-mono)", fontSize: 12 }} value={docText} onChange={e => setDocText(e.target.value)} />
-              <button onClick={handleSaveDoc} className="gcp-button gcp-button-primary" style={{ fontSize: 12, alignSelf: "flex-start" }}>Save</button>
-            </div>
-          ) : (
-            <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{tc.documentation || "No documentation"}</div>
-          )}
-        </div>
-        {/* Changelog */}
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
-            <Clock size={11} /> Changelog (v{tc.version})
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {changelog.slice(0, 5).map(e => (
-              <div key={e.version} style={{ display: "flex", gap: 8, fontSize: 12 }}>
-                <span style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", flexShrink: 0 }}>v{e.version}</span>
-                <div>
-                  <p style={{ fontWeight: 600, margin: 0 }}>{e.summary}</p>
-                  <p style={{ fontSize: 11, color: "var(--gcp-text-secondary)", margin: 0 }}>{e.author} · {new Date(e.timestamp).toLocaleDateString()}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* Actions */}
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => navigate(`/analytics?testId=${tc.id}`)} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><BarChart3 size={13} /> Analytics</button>
-          <button onClick={() => { navigator.clipboard.writeText(`https://aware.example.com/tests/${tc.id}`); toast("Link copied"); }} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><FileText size={13} /> Copy Link</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Bulk Actions Bar ──────────────────────────────────────
 
 function BulkActionsBar({ selected, onClear, onDelete, onExport, onStatusChange }: {
   selected: Set<string>; onClear: () => void; onDelete: () => void;
@@ -777,13 +416,11 @@ function downloadString(content: string, filename: string) {
   a.click();
 }
 
-// ── Main Component ────────────────────────────────────────
-
 export default function TestManager() {
   const [, navigate] = useLocation();
   const { tcs, suites } = useTestData();
   const stats = React.useMemo(() => computeTestStats(), [tcs]);
-  const { show: toast, Toast } = useToast();
+  const { show: toast, Toast } = useSimpleToast();
 
   const [searchText, setSearchText] = React.useState("");
   const [colFilters, setColFilters] = useSyncedUrlState<Record<string, ColumnFilterState>>("filters", {});
@@ -856,9 +493,9 @@ export default function TestManager() {
   };
 
   const allValues = {
-    status: STATUSES as string[],
+    status: STATUSES as unknown as string[],
     priority: PRIORITIES as string[],
-    category: CATEGORIES,
+    category: ["geo-match", "locale-split", "url-health", "security", "performance", "caching", "routing", "tls", "ddos"],
     automated: ["true", "false"],
   };
 
@@ -866,8 +503,6 @@ export default function TestManager() {
     <AppLayout activeHref="/tests">
       {Toast}
       <div style={{ display: "flex", flexDirection: "column", gap: 16, height: "calc(100vh - 100px)", maxWidth: 1600, margin: "0 auto" }}>
-
-        {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--gcp-text)", marginBottom: 2 }}>Test Manager</h1>
@@ -881,11 +516,7 @@ export default function TestManager() {
             <button onClick={() => setShowCreate(true)} className="gcp-button gcp-button-primary" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><Plus size={13} /> New Test</button>
           </div>
         </div>
-
-        {/* Stats */}
         <StatsDashboard stats={stats} colFilters={colFilters} onToggleFilter={handleStatFilter} />
-
-        {/* Bulk actions */}
         <BulkActionsBar
           selected={selectedIds}
           onClear={() => setSelectedIds(new Set())}
@@ -893,8 +524,6 @@ export default function TestManager() {
           onExport={handleExport}
           onStatusChange={handleBulkStatusChange}
         />
-
-        {/* Search */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
           <div style={{ position: "relative", flex: 1 }}>
             <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--gcp-text-secondary)", pointerEvents: "none" }} />
@@ -905,8 +534,6 @@ export default function TestManager() {
             <button onClick={() => setColFilters({})} style={{ fontSize: 12, color: "var(--gcp-red)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>Clear filters</button>
           )}
         </div>
-
-        {/* Table + Side panel */}
         <div style={{ flex: 1, display: "flex", gap: 14, overflow: "hidden" }}>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }} className="gcp-card">
             <div style={{ flex: 1, overflowY: "auto" }}>
@@ -974,7 +601,6 @@ export default function TestManager() {
                 </tbody>
               </table>
             </div>
-            {/* Footer */}
             <div style={{ padding: "8px 14px", borderTop: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11, color: "var(--gcp-text-secondary)", flexShrink: 0 }}>
               <span>{filtered.length} of {tcs.length} test cases</span>
               <div style={{ display: "flex", gap: 8 }}>
@@ -983,14 +609,11 @@ export default function TestManager() {
               </div>
             </div>
           </div>
-
           {selectedPanel && (
-            <SidePanel tc={selectedPanel} onClose={() => setSelectedPanelId(null)} toast={toast} navigate={navigate} />
+            <TestManagerSidePanel tc={selectedPanel} onClose={() => setSelectedPanelId(null)} toast={toast} navigate={navigate} />
           )}
         </div>
       </div>
-
-      {/* Modals */}
       {showCreate && <TestCaseModal initial={EMPTY_FORM} allSuites={suites} onSave={handleCreate} onCancel={() => setShowCreate(false)} />}
       {editingTc && editingId && <TestCaseModal initial={editingTc} allSuites={suites} onSave={handleUpdate} onCancel={() => setEditingId(null)} />}
       {showImport && <ImportModal onClose={() => setShowImport(false)} toast={toast} />}

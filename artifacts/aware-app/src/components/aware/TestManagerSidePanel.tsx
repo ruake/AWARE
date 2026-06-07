@@ -1,0 +1,94 @@
+import React from "react";
+import { getTestChangelog, updateTestCaseDocumentation } from "@/lib/data";
+import type { TestCase } from "@/lib/types";
+import { TagBadge, StatusBadge, priorityColor } from "@/components/aware/TestCard";
+import { Beaker, Clock, BarChart3, FileText } from "lucide-react";
+
+export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: TestCase; onClose: () => void; toast: (m: string) => void; navigate: (h: string) => void }) {
+  const [editingDoc, setEditingDoc] = React.useState(false);
+  const [docText, setDocText] = React.useState(tc.documentation);
+  const changelog = getTestChangelog(tc.id);
+
+  const handleSaveDoc = () => {
+    updateTestCaseDocumentation(tc.id, docText, tc.owner);
+    toast("Documentation updated");
+    setEditingDoc(false);
+  };
+
+  return (
+    <div style={{ width: 340, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", borderLeft: "3px solid var(--gcp-blue)", background: "var(--gcp-surface)" }} className="gcp-card">
+      <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--gcp-blue-bg)", flexShrink: 0 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-blue)", display: "flex", alignItems: "center", gap: 6 }}><Beaker size={13} /> {tc.id}</span>
+        <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)", fontSize: 18, lineHeight: 1 }}>×</button>
+      </div>
+      <div style={{ flex: 1, overflowY: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 14 }}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.5, marginBottom: 6 }}>{tc.name}</div>
+          <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)", lineHeight: 1.5 }}>{tc.description}</p>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <StatusBadge s={tc.status} />
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: priorityColor(tc.priority) }}>{tc.priority}</span>
+          <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{tc.category}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)" }}>v{tc.version}</span>
+          {tc.automated && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>Automated</span>}
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>{tc.tags.map(t => <TagBadge key={t} tagId={t} />)}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {[
+            ["Owner", tc.owner],
+            ["Script", tc.scriptPath],
+            ["Expected Status", String(tc.expectedStatus)],
+            ["Predicates", `${tc.predicates.length} rules`],
+            ["Updated", new Date(tc.updatedAt).toLocaleDateString()],
+          ].map(([k, v]) => (
+            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--gcp-grey)", fontSize: 12 }}>
+              <span style={{ color: "var(--gcp-text-secondary)" }}>{k}</span>
+              <span style={{ fontFamily: k === "Script" || k === "Expected Status" ? "var(--font-mono)" : undefined, fontSize: 11 }}>{v}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+          {Object.keys(tc.requestHeaders).length > 0 && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>{Object.keys(tc.requestHeaders).length} headers</span>}
+          {Object.keys(tc.cookies).length > 0 && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>{Object.keys(tc.cookies).length} cookies</span>}
+          {tc.captureResponseHeaders.length > 0 && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>Capture {tc.captureResponseHeaders.length}</span>}
+          {tc.filmstrip.enabled && <span className="gcp-badge gcp-badge-flaky" style={{ fontSize: 10 }}>Filmstrip {Math.round(tc.filmstrip.threshold * 100)}%</span>}
+        </div>
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Documentation</span>
+            <button onClick={() => setEditingDoc(!editingDoc)} style={{ fontSize: 11, color: "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer" }}>{editingDoc ? "Preview" : "Edit"}</button>
+          </div>
+          {editingDoc ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <textarea className="gcp-input" style={{ width: "100%", minHeight: 120, fontFamily: "var(--font-mono)", fontSize: 12 }} value={docText} onChange={e => setDocText(e.target.value)} />
+              <button onClick={handleSaveDoc} className="gcp-button gcp-button-primary" style={{ fontSize: 12, alignSelf: "flex-start" }}>Save</button>
+            </div>
+          ) : (
+            <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{tc.documentation || "No documentation"}</div>
+          )}
+        </div>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
+            <Clock size={11} /> Changelog (v{tc.version})
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {changelog.slice(0, 5).map(e => (
+              <div key={e.version} style={{ display: "flex", gap: 8, fontSize: 12 }}>
+                <span style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", flexShrink: 0 }}>v{e.version}</span>
+                <div>
+                  <p style={{ fontWeight: 600, margin: 0 }}>{e.summary}</p>
+                  <p style={{ fontSize: 11, color: "var(--gcp-text-secondary)", margin: 0 }}>{e.author} · {new Date(e.timestamp).toLocaleDateString()}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={() => navigate(`/analytics?testId=${tc.id}`)} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><BarChart3 size={13} /> Analytics</button>
+          <button onClick={() => { navigator.clipboard.writeText(`https://aware.example.com/tests/${tc.id}`); toast("Link copied"); }} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><FileText size={13} /> Copy Link</button>
+        </div>
+      </div>
+    </div>
+  );
+}

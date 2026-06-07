@@ -7,22 +7,16 @@ import { AppLayout } from "@/components/aware/AppLayout";
 import { getRunById, getTestResultsForRun, RUNS, setPromotionDecision, getPromotionDecision } from "@/lib/data";
 import {
   ArrowLeft, GitCompare, CheckCircle2, XCircle, Github,
-  Share2, Check, AlertTriangle, Shield, Zap, RefreshCw,
+  Share2, AlertTriangle, Shield, Zap, RefreshCw,
   Search, ChevronRight,
 } from "lucide-react";
-
-function useToast() {
-  const [msg, setMsg] = React.useState<string | null>(null);
-  const show = (m: string) => { setMsg(m); setTimeout(() => setMsg(null), 2500); };
-  const Toast = msg ? <div className="gcp-toast"><Check size={13} style={{ color: "var(--gcp-green)" }} /> {msg}</div> : null;
-  return { show, Toast };
-}
+import { useSimpleToast } from "@/hooks/useSimpleToast";
 
 export default function RunDetail() {
   const params = useParams<{ runId: string }>();
   const [, navigate] = useLocation();
   const runId = params.runId ?? "";
-  const { show, Toast } = useToast();
+  const { show, Toast } = useSimpleToast();
 
   const run = getRunById(runId) ?? RUNS[0];
   const results = getTestResultsForRun(run.id);
