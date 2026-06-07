@@ -1,0 +1,183 @@
+# =============================================================================
+# AWARE — Akamai CDN Regression Test Configuration
+# Auto-generated from AWARE test registry
+# =============================================================================
+# 📋 INSTRUCTIONS:
+#   1. Save this file to your repository at: config/aware-test-config.yml
+#   2. Commit and push: git add config/aware-test-config.yml && git commit -m "update aware test config"
+#   3. GitHub Actions will use this config when you dispatch a workflow run
+#
+# 🚀 TO TRIGGER A RUN:
+#   gh workflow run run-tests.yml \
+#     --field suite=full_suite \
+#     --field target=Prod \
+#     --field environment=Production \
+#     --field parallelism=4 \
+#     --field retries=1
+#
+# 📍 WORKFLOW FILE:
+#   .github/workflows/run-tests.yml
+# =============================================================================
+
+version: '2.0'
+project: AWARE - Akamai Web Analyser & Kit for Evaluations
+description: Auto-generated CDN regression test configuration. Generated from AWARE test registry.
+suites:
+  - name: Full Regression Suite
+    testCount: 22
+    testIds:
+      - tc_0
+      - tc_1
+      - tc_2
+      - tc_3
+      - tc_4
+      - tc_5
+      - tc_6
+      - tc_7
+      - tc_8
+      - tc_9
+      - tc_10
+      - tc_11
+      - tc_12
+      - tc_13
+      - tc_14
+      - tc_15
+      - tc_16
+      - tc_17
+      - tc_18
+      - tc_19
+      - tc_20
+      - tc_21
+    categories:
+      - geo-match
+      - locale-split
+      - url-health
+      - security
+      - performance
+      - caching
+      - routing
+      - tls
+      - ddos
+  - name: Geo & Locale Validation
+    testCount: 8
+    testIds:
+      - tc_0
+      - tc_2
+      - tc_3
+      - tc_4
+      - tc_7
+      - tc_8
+      - tc_9
+      - tc_11
+    categories:
+      - geo-match
+      - url-health
+      - security
+      - performance
+      - tls
+      - ddos
+  - name: Performance & Caching
+    testCount: 6
+    testIds:
+      - tc_4
+      - tc_5
+      - tc_12
+      - tc_13
+      - tc_14
+      - tc_16
+    categories:
+      - performance
+      - caching
+      - security
+      - tls
+  - name: Security & DDoS
+    testCount: 5
+    testIds:
+      - tc_6
+      - tc_7
+      - tc_8
+      - tc_10
+      - tc_11
+    categories:
+      - routing
+      - tls
+      - ddos
+      - locale-split
+      - url-health
+  - name: Smoke Tests
+    testCount: 5
+    testIds:
+      - tc_0
+      - tc_1
+      - tc_2
+      - tc_3
+      - tc_4
+    categories:
+      - geo-match
+      - locale-split
+      - url-health
+      - security
+      - performance
+  - name: UAT Regression
+    testCount: 8
+    testIds:
+      - tc_0
+      - tc_2
+      - tc_4
+      - tc_6
+      - tc_8
+      - tc_10
+      - tc_12
+      - tc_14
+    categories:
+      - geo-match
+      - url-health
+      - performance
+      - routing
+      - ddos
+      - locale-split
+      - security
+      - caching
+  - name: Edge & CDN Config
+    testCount: 4
+    testIds:
+      - tc_3
+      - tc_12
+      - tc_13
+      - tc_14
+    categories:
+      - security
+      - performance
+      - caching
+  - name: Mobile & WebSocket
+    testCount: 3
+    testIds:
+      - tc_1
+      - tc_5
+      - tc_6
+    categories:
+      - locale-split
+      - caching
+      - routing
+environments:
+  - target: Prod
+    env: Production
+    network: production
+  - target: Prod
+    env: Staging
+    network: staging
+  - target: UAT
+    env: Production
+    network: production
+  - target: UAT
+    env: Staging
+    network: staging
+workflow:
+  file: run-tests.yml
+  path: .github/workflows/run-tests.yml
+  dispatch: gh workflow run run-tests.yml --field suite=<suite_name> --field target=<target> --field environment=<env>
+instructions: |-
+  1. Add this file to your repo at: config/aware-test-config.yml
+  2. The GitHub Actions workflow at .github/workflows/run-tests.yml reads this config
+  3. When you update tests in AWARE, re-download this file and commit it to trigger CI
+  4. Run: gh workflow run run-tests.yml --field suite=<suite_name> --field target=<target> --field environment=<env>

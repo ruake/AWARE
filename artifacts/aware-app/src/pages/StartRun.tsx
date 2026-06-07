@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
+import { CiConfigBanner } from "@/components/aware/CiConfigBanner";
+import { downloadCiConfig } from "@/lib/ciConfig";
 import {
   Copy, Check, TerminalSquare, AlertCircle, Github, ArrowLeft,
-  Minus, Plus, Zap, Clock, Play, ExternalLink,
+  Minus, Plus, Zap, Clock, Play, ExternalLink, Download, FileText,
 } from "lucide-react";
 
 const SUITES = [
@@ -267,6 +269,17 @@ requests.post(
           <pre style={{ flex: 1, overflowY: "auto", padding: 16, background: "#1e1e1e", color: "#d4d4d4", fontFamily: "var(--font-mono)", fontSize: 12, lineHeight: 1.7, margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
             {cmds[tab]}
           </pre>
+        </div>
+
+        {/* CI Config download */}
+        <div className="gcp-card" style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, flexWrap: "wrap", background: "var(--gcp-blue-bg)", border: "1px solid var(--gcp-blue)" }}>
+          <FileText size={14} style={{ color: "var(--gcp-blue)" }} />
+          <span style={{ fontSize: 12, flex: 1, color: "var(--gcp-text)" }}>
+            <strong>CI config.</strong> Download the <code style={{ fontSize: 11, background: "rgba(26,115,232,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "var(--font-mono)" }}>aware-test-config.yml</code> and commit to <code style={{ fontSize: 11, background: "rgba(26,115,232,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "var(--font-mono)" }}>config/</code> to sync GHA with your test registry.
+          </span>
+          <button onClick={() => { downloadCiConfig(); }} className="gcp-button-primary" style={{ fontSize: 11, padding: "5px 12px", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 5 }}>
+            <Download size={12} /> Download YAML
+          </button>
         </div>
 
         {/* Action bar */}

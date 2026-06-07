@@ -1,19 +1,14 @@
 import React from "react";
+import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { RUNS } from "@/lib/data";
-import { navTo } from "@/lib/nav";
+import { RUNS, DIFF_ROWS } from "@/lib/data";
+import { useTestData } from "@/hooks/useTestData";
 import "../_group.css";
 import {
-  Search, X, Clock, FileText, PlayCircle, GitCompare,
-  ChevronRight, Hash, Zap, AlertTriangle, CheckCircle2,
+  Search, X, FileText, PlayCircle, GitCompare,
+  ChevronRight, Hash, Zap, AlertTriangle,
   ArrowUp, ArrowDown, CornerDownLeft,
 } from "lucide-react";
-
-const RECENT = [
-  { type: "run", label: "run_892_2341.1.0_prod_1001", sub: "Prod/Production · FAIL · 2h ago", status: "fail" },
-  { type: "test", label: "test_geo_match_us_locale_prod", sub: "geo-match · 94.8% pass rate", status: "pass" },
-  { type: "compare", label: "PM 891 vs PM 892 — Prod/Production", sub: "Compare · 3d ago", status: null },
-];
 
 const QUICK_ACTIONS = [
   { icon: PlayCircle, label: "Start a new run", shortcut: "N", color: "var(--gcp-blue)" },
@@ -25,21 +20,36 @@ const QUICK_ACTIONS = [
 type ResultKind = "test" | "run" | "compare" | "action";
 
 interface Result {
-  kind: ResultKind; label: string; sub: string; status?: string | null; meta?: string;
+  kind: ResultKind; label: string; sub: string; id?: string; status?: string | null; meta?: string;
 }
 
-const ALL_RESULTS: Result[] = [
-  { kind: "test", label: "test_geo_match_us_locale_prod[/us/]", sub: "geo-match · full_suite", status: "fail", meta: "94.8% pass" },
-  { kind: "test", label: "test_geo_match_eu_locale_prod[/eu/]", sub: "geo-match · full_suite", status: "pass", meta: "100% pass" },
-  { kind: "test", label: "test_edgeworker_cache_key_v3", sub: "cache-key · edgeworker", status: "pass", meta: "98.1% pass" },
-  { kind: "test", label: "test_locale_split_fr_staging", sub: "locale-match · smoke", status: "flaky", meta: "81% pass" },
-  { kind: "run", label: "run_892_2341.1.0_prod_1001", sub: "Prod/Production · PM 892 · EW 2341.1.0", status: "fail", meta: "45m" },
-  { kind: "run", label: "run_892_2341.1.0_uat_1002", sub: "UAT/Production · PM 892 · EW 2341.1.0", status: "pass", meta: "38m" },
-  { kind: "run", label: "run_891_2340.0.1_prod_0998", sub: "Prod/Production · PM 891 · EW 2340.0.1", status: "fail", meta: "51m" },
-  { kind: "compare", label: "PM 892 vs PM 891 — Prod/Production", sub: "7 regressions · 2 recoveries", status: null, meta: "3d ago" },
-  { kind: "compare", label: "EW 2341.1.0 vs 2340.0.1 — UAT", sub: "No regressions detected", status: null, meta: "5d ago" },
-  { kind: "action", label: "Start new regression run", sub: "Open workflow dispatcher", status: null, meta: "⌘N" },
-];
+function buildResults(tcs: ReturnType<typeof useTestData>["tcs"], suites: ReturnType<typeof useTestData>["suites"]): Result[] {
+  const results: Result[] = [];
+  tcs.slice(0, 20).forEach(tc => {
+    const suiteNames = tc.suiteIds.map(id => suites.find(s => s.id === id)?.name ?? id).filter(Boolean).join(", ");
+    results.push({
+      kind: "test", label: tc.name, sub: `${tc.category} · ${suiteNames || "no suite"}`,
+      status: tc.status === "active" ? "pass" : tc.status === "disabled" ? "fail" : undefined,
+      id: tc.id, meta: tc.id,
+    });
+  });
+  RUNS.forEach(r => {
+    results.push({
+      kind: "run", label: r.id, sub: `${r.env} · ${r.status} · ${r.duration}`,
+      status: r.status === "PASS" ? "pass" : r.status === "FAIL" ? "fail" : "flaky",
+      id: r.id, meta: `${r.passPct}%`,
+    });
+  });
+  DIFF_ROWS.forEach(d => {
+    results.push({
+      kind: "compare", label: d.name, sub: `${d.baseStatus} → ${d.candStatus} · ${d.category}`,
+      status: d.state === "fixed" ? "pass" : d.state === "regression" ? "fail" : null,
+      id: d.id, meta: d.state,
+    });
+  });
+  results.push({ kind: "action", label: "Start new regression run", sub: "Open workflow dispatcher", status: null, meta: "⌘N" });
+  return results;
+}
 
 function filterResults(q: string, results: Result[]): Result[] {
   if (!q.trim()) return [];
@@ -62,19 +72,22 @@ function KindIcon({ kind }: { kind: ResultKind }) {
 }
 
 export default function SearchDemo() {
+  const [, navigate] = useLocation();
+  const { tcs, suites } = useTestData();
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(0);
   const [activeFilter, setActiveFilter] = React.useState<"all" | "tests" | "runs" | "compare">("all");
+  const allResults = React.useMemo(() => buildResults(tcs, suites), [tcs, suites]);
 
   const navigateToResult = (r: Result) => {
-    if (r.kind === "run") navTo(`/runs/${r.label}`);
-    else if (r.kind === "test") navTo(`/analytics?testId=${r.label}`);
-    else if (r.kind === "compare") navTo(`/compare?baseline=${RUNS[0]?.id}&candidate=${RUNS[3]?.id}`);
-    else if (r.kind === "action") navTo("/start");
+    if (r.kind === "run" && r.id) navigate(`/runs/${encodeURIComponent(r.id)}`);
+    else if (r.kind === "test" && r.id) navigate(`/analytics?testId=${encodeURIComponent(r.id)}`);
+    else if (r.kind === "compare") navigate(`/compare?baseline=${RUNS[0]?.id}&candidate=${RUNS[3]?.id}`);
+    else if (r.kind === "action") navigate("/start");
   };
 
-  const rawResults = filterResults(query, ALL_RESULTS);
-  const results = activeFilter === "all" ? rawResults : rawResults.filter(r => {
+  const rawResults = filterResults(query, allResults);
+  const filteredActive = activeFilter === "all" ? rawResults : rawResults.filter(r => {
     if (activeFilter === "tests") return r.kind === "test";
     if (activeFilter === "runs") return r.kind === "run";
     if (activeFilter === "compare") return r.kind === "compare";
@@ -83,14 +96,16 @@ export default function SearchDemo() {
 
   const showResults = query.trim().length > 0;
   const kindCounts = { tests: rawResults.filter(r => r.kind === "test").length, runs: rawResults.filter(r => r.kind === "run").length, compare: rawResults.filter(r => r.kind === "compare").length };
-  const hasResults = showResults && results.length > 0;
-  const hasNoResults = showResults && results.length === 0;
+  const hasResults = showResults && filteredActive.length > 0;
+  const hasNoResults = showResults && filteredActive.length === 0;
+  const maxIdx = filteredActive.length - 1;
 
   const handleKey = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowDown") setActiveIdx(i => Math.min(i + 1, results.length - 1));
+    if (e.key === "ArrowDown") setActiveIdx(i => Math.min(i + 1, maxIdx));
     if (e.key === "ArrowUp") setActiveIdx(i => Math.max(i - 1, 0));
-    if (e.key === "Enter" && results[activeIdx]) navigateToResult(results[activeIdx]);
+    if (e.key === "Enter" && filteredActive[activeIdx]) navigateToResult(filteredActive[activeIdx]);
     if (e.key === "Escape") { setQuery(""); setActiveFilter("all"); }
+    if (e.key === "Tab") { e.preventDefault(); setActiveFilter(f => f === "all" ? "tests" : f === "tests" ? "runs" : f === "runs" ? "compare" : "all"); }
   };
 
   return (
@@ -142,7 +157,7 @@ export default function SearchDemo() {
               </div>
             ))}
             <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--gcp-text-secondary)" }}>
-              {hasResults ? `${results.length} result${results.length !== 1 ? "s" : ""}` : "Type to search"}
+              {hasResults ? `${filteredActive.length} result${filteredActive.length !== 1 ? "s" : ""}` : "Type to search"}
             </span>
           </div>
         </div>
@@ -152,11 +167,11 @@ export default function SearchDemo() {
             <div className="gcp-card" style={{ overflow: "hidden" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)" }}>
                 <h2 style={{ fontSize: 13, fontWeight: 500 }}>Results for <span style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)" }}>"{query}"</span></h2>
-                <span style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>{results.length} results</span>
+                <span style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>{filteredActive.length} results</span>
               </div>
-              {results.map((r, i) => (
+              {filteredActive.map((r, i) => (
                 <div key={`${r.kind}-${i}`}
-                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", cursor: "pointer", borderBottom: i < results.length - 1 ? "1px solid var(--gcp-grey)" : undefined, background: i === activeIdx ? "var(--gcp-blue-bg)" : undefined, transition: "background 0.15s" }}
+                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", cursor: "pointer", borderBottom: i < filteredActive.length - 1 ? "1px solid var(--gcp-grey)" : undefined, background: i === activeIdx ? "var(--gcp-blue-bg)" : undefined, transition: "background 0.15s" }}
                   onMouseEnter={() => setActiveIdx(i)}
                   onClick={() => navigateToResult(r)}
                 >
@@ -188,17 +203,17 @@ export default function SearchDemo() {
               <div style={{ padding: 16 }}>
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ fontSize: 11, fontWeight: 500, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-                    <Clock size={11} /> Recent
+                    <PlayCircle size={11} /> Recent Runs
                   </div>
-                  {RECENT.map((r, i) => (
-                    <div key={i} onClick={() => { if (r.type === "run") navTo(`/runs/${r.label}`); }}
+                  {RUNS.slice(-5).reverse().map((r, i) => (
+                    <div key={i} onClick={() => navigate(`/runs/${encodeURIComponent(r.id)}`)}
                       style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 4, cursor: "pointer", transition: "background 0.15s" }}
                       onMouseEnter={e => e.currentTarget.style.background = "var(--gcp-surface-hover)"}
                       onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                     >
-                      <StatusDot status={r.status} />
-                      <span style={{ fontSize: 13, fontFamily: "var(--font-mono)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.label}</span>
-                      <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{r.sub}</span>
+                      <StatusDot status={r.status === "PASS" ? "pass" : r.status === "FAIL" ? "fail" : "flaky"} />
+                      <span style={{ fontSize: 13, fontFamily: "var(--font-mono)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.id}</span>
+                      <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{r.env} · {r.status}</span>
                     </div>
                   ))}
                 </div>
@@ -208,7 +223,7 @@ export default function SearchDemo() {
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                     {QUICK_ACTIONS.map((a, i) => (
-                      <div key={i} onClick={() => { if (i === 0) navTo("/start"); else if (i === 1) navTo("/compare"); else if (i === 2) navTo("/testdoc"); else navTo("/"); }}
+                      <div key={i} onClick={() => { if (i === 0) navigate("/start"); else if (i === 1) navigate("/compare"); else if (i === 2) navigate("/testdoc"); else navigate("/"); }}
                         style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 4, border: "1px solid var(--gcp-grey)", cursor: "pointer", transition: "background 0.15s" }}
                         onMouseEnter={e => e.currentTarget.style.background = "var(--gcp-surface-hover)"}
                         onMouseLeave={e => e.currentTarget.style.background = "transparent"}

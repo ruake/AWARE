@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
+import { CiConfigBanner } from "@/components/aware/CiConfigBanner";
 import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
@@ -13,10 +14,11 @@ import { CATEGORIES, PRIORITIES, STATUSES } from "@/lib/constants";
 import {
   getTestCases, getTestSuites,
   createTestCase, updateTestCase, deleteTestCase, resetTestStore,
-  importTestCases, exportTestCases, exportTestsAsJunitXml,
+  exportTestCases, exportTestsAsJunitXml,
   computeTestStats,
 } from "@/lib/data";
-import type { TestCase, TestSuite, ImportResult, TestStats } from "@/lib/types";
+import { importAuto } from "@/lib/testImportExport";
+import type { TestCase, TestSuite, TestStats } from "@/lib/types";
 import {
   Plus, Search, Check, Edit3, Trash2, Tag,
   RotateCcw, Upload, Download, FileJson, FileSpreadsheet, FileCode,
@@ -111,7 +113,7 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
               </div>
               <div>
                 <Label>Script Path</Label>
-                <input className="gcp-input" style={{ width: "100%", marginTop: 4, fontFamily: "var(--font-mono)", fontSize: 12 }} value={form.scriptPath} onChange={e => u("scriptPath", e.target.value)} placeholder="tests/geo/tc.spec.ts" />
+                <input className="gcp-input" style={{ width: "100%", marginTop: 4, fontFamily: "var(--font-mono)", fontSize: 12 }} value={form.scriptPath} onChange={e => u("scriptPath", e.target.value)} placeholder="tests/geo/tc.yaml" />
               </div>
               <div>
                 <Label>Automated</Label>
@@ -328,18 +330,18 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
 
 function ImportModal({ onClose, toast }: { onClose: () => void; toast: (m: string) => void }) {
   const [text, setText] = React.useState("");
-  const [result, setResult] = React.useState<ImportResult | null>(null);
+  const [result, setResult] = React.useState<{ tests: TestCase[]; errors: string[]; format: string } | null>(null);
   const [loading, setLoading] = React.useState(false);
 
   const handleImport = () => {
     setLoading(true);
     try {
-      const data = JSON.parse(text);
-      if (!Array.isArray(data)) { toast("Must be a JSON array"); setLoading(false); return; }
-      const res = importTestCases(data as TestCase[]);
+      const res = importAuto(text);
+      const count = res.tests.length;
       setResult(res);
-      if (res.imported > 0) toast(`Imported ${res.imported} test cases`);
-    } catch { toast("Invalid JSON"); } finally { setLoading(false); }
+      if (count > 0) toast(`Imported ${count} test cases from ${res.format}`);
+      if (res.errors.length > 0) toast(`${res.errors.length} issues during import`);
+    } catch (e) { toast(`Import failed: ${e instanceof Error ? e.message : String(e)}`); } finally { setLoading(false); }
   };
 
   return (
@@ -349,13 +351,13 @@ function ImportModal({ onClose, toast }: { onClose: () => void; toast: (m: strin
           <h2 style={{ fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}><Upload size={18} /> Import Test Cases</h2>
           <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><X size={18} /></button>
         </div>
-        <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>Paste a JSON array of test case objects. Required: <code style={{ background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3 }}>name</code>, <code style={{ background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3 }}>category</code></p>
-        <textarea className="gcp-input" style={{ width: "100%", minHeight: 180, fontFamily: "var(--font-mono)", fontSize: 12 }} value={text} onChange={e => setText(e.target.value)} placeholder='[{"name":"...","category":"geo-match",...}]' />
+        <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>Paste JSON, YAML, or JUnit XML — format is auto-detected. Required: <code style={{ background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3 }}>name</code>, <code style={{ background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3 }}>category</code></p>
+        <textarea className="gcp-input" style={{ width: "100%", minHeight: 180, fontFamily: "var(--font-mono)", fontSize: 12 }} value={text} onChange={e => setText(e.target.value)} placeholder='[{"name":"...","category":"geo-match",...}] or YAML or JUnit XML...' />
         {result && (
           <div style={{ padding: 12, background: "var(--gcp-grey-bg)", borderRadius: 6, fontSize: 13 }}>
-            <span style={{ color: "var(--gcp-green)", fontWeight: 600 }}>✓ {result.imported} imported</span>
-            {result.skipped > 0 && <span style={{ color: "var(--gcp-yellow)", fontWeight: 600, marginLeft: 12 }}>⏭ {result.skipped} skipped</span>}
-            {result.errors.length > 0 && <span style={{ color: "var(--gcp-red)", marginLeft: 12 }}>{result.errors.length} errors</span>}
+            <span style={{ color: "var(--gcp-green)", fontWeight: 600 }}>✓ {result.tests.length} imported</span>
+            {result.errors.length > 0 && <span style={{ color: "var(--gcp-red)", marginLeft: 12 }}>{result.errors.length} issues</span>}
+            <span style={{ color: "var(--gcp-text-secondary)", marginLeft: 12, fontSize: 11 }}>Format: {result.format}</span>
           </div>
         )}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
@@ -369,11 +371,15 @@ function ImportModal({ onClose, toast }: { onClose: () => void; toast: (m: strin
   );
 }
 
-function BulkActionsBar({ selected, onClear, onDelete, onExport, onStatusChange }: {
+function BulkActionsBar({ selected, onClear, onDelete, onExport, onStatusChange, onPriorityChange, onAddToSuite, suites }: {
   selected: Set<string>; onClear: () => void; onDelete: () => void;
   onExport: (format: "json" | "csv" | "junit_xml") => void;
   onStatusChange: (s: TestCase["status"]) => void;
+  onPriorityChange?: (p: TestCase["priority"]) => void;
+  onAddToSuite?: (suiteId: string) => void;
+  suites?: TestSuite[];
 }) {
+  const [showSuitePicker, setShowSuitePicker] = React.useState(false);
   if (selected.size === 0) return null;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", background: "var(--gcp-blue-bg)", border: "1px solid var(--gcp-blue)", borderRadius: 6, fontSize: 13, flexWrap: "wrap" }}>
@@ -383,6 +389,23 @@ function BulkActionsBar({ selected, onClear, onDelete, onExport, onStatusChange 
       <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", color: "var(--gcp-red)", background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600 }}><Trash2 size={12} /> Delete</button>
       <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>Status:</span>
       {STATUSES.map(s => <button key={s} onClick={() => onStatusChange(s)} style={{ padding: "3px 8px", fontSize: 12, border: "none", background: "none", cursor: "pointer", textTransform: "capitalize" }}>{s}</button>)}
+      {onPriorityChange && (<><span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>Priority:</span>
+        {(["P0", "P1", "P2", "P3"] as TestCase["priority"][]).map(p => <button key={p} onClick={() => onPriorityChange(p)} style={{ padding: "3px 8px", fontSize: 12, border: "none", background: "none", cursor: "pointer" }}>{p}</button>)}
+      </>)}
+      {onAddToSuite && suites && (
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <button onClick={() => setShowSuitePicker(v => !v)} style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", fontSize: 12, border: "none", background: "none", cursor: "pointer" }}><FolderTree size={12} /> Suite</button>
+          {showSuitePicker && (
+            <div style={{ position: "absolute", top: "100%", left: 0, marginTop: 4, background: "var(--gcp-surface)", border: "1px solid var(--gcp-grey)", borderRadius: 6, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 200, padding: 4 }}>
+              {suites.map(s => (
+                <div key={s.id} onClick={() => { onAddToSuite(s.id); setShowSuitePicker(false); }} style={{ padding: "6px 10px", cursor: "pointer", borderRadius: 4, fontSize: 12 }} onMouseEnter={e => e.currentTarget.style.background = "var(--gcp-grey-bg)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  {s.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <div style={{ flex: 1 }} />
       <button onClick={() => onExport("json")} style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", fontSize: 12, border: "none", background: "none", cursor: "pointer" }}><FileJson size={12} /> JSON</button>
       <button onClick={() => onExport("csv")} style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", fontSize: 12, border: "none", background: "none", cursor: "pointer" }}><FileSpreadsheet size={12} /> CSV</button>
@@ -430,6 +453,9 @@ export default function TestManager() {
   const [showImport, setShowImport] = React.useState(false);
   const [showGenerate, setShowGenerate] = React.useState(false);
   const [selectedPanelId, setSelectedPanelId] = useSyncedUrlState<string | null>("sel", null);
+  const [configChanged, setConfigChanged] = React.useState(false);
+
+  const markConfigChanged = () => { if (!configChanged) setConfigChanged(true); };
 
   const updateColFilter = (field: string) => (f: ColumnFilterState) => setColFilters(prev => ({ ...prev, [field]: f }));
 
@@ -455,6 +481,7 @@ export default function TestManager() {
   const handleCreate = (data: Omit<TestCase, "id" | "createdAt" | "updatedAt">) => {
     createTestCase(data);
     setShowCreate(false);
+    markConfigChanged();
     toast("Test case created");
   };
 
@@ -462,6 +489,7 @@ export default function TestManager() {
     if (!editingId) return;
     updateTestCase(editingId, data);
     setEditingId(null);
+    markConfigChanged();
     toast("Test case updated");
   };
 
@@ -469,6 +497,7 @@ export default function TestManager() {
     ids.forEach(id => deleteTestCase(id));
     setSelectedIds(new Set());
     if (selectedPanelId && ids.includes(selectedPanelId)) setSelectedPanelId(null);
+    markConfigChanged();
     toast(`Deleted ${ids.length} test case${ids.length > 1 ? "s" : ""}`);
   };
 
@@ -517,12 +546,16 @@ export default function TestManager() {
           </div>
         </div>
         <StatsDashboard stats={stats} colFilters={colFilters} onToggleFilter={handleStatFilter} />
+        <CiConfigBanner show={configChanged} onDismiss={() => setConfigChanged(false)} />
         <BulkActionsBar
           selected={selectedIds}
           onClear={() => setSelectedIds(new Set())}
           onDelete={() => handleDelete(Array.from(selectedIds))}
           onExport={handleExport}
+          suites={suites}
           onStatusChange={handleBulkStatusChange}
+          onPriorityChange={(p: TestCase["priority"]) => { selectedIds.forEach(id => updateTestCase(id, { priority: p })); setSelectedIds(new Set()); toast(`Updated ${selectedIds.size} tests to ${p}`); }}
+          onAddToSuite={suiteId => { selectedIds.forEach(id => { const tc = tcs.find(t => t.id === id); if (tc && !tc.suiteIds.includes(suiteId)) updateTestCase(id, { suiteIds: [...tc.suiteIds, suiteId] }); }); setSelectedIds(new Set()); toast(`Added ${selectedIds.size} tests to suite`); }}
         />
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
           <div style={{ position: "relative", flex: 1 }}>
