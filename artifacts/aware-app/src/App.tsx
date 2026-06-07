@@ -9,6 +9,7 @@ import TestAnalytics from "@/pages/TestAnalytics";
 import StartRun from "@/pages/StartRun";
 import TestManager from "@/pages/TestManager";
 import Status from "@/pages/Status";
+import About from "@/pages/About";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/start" component={StartRun} />
       <Route path="/tests" component={TestManager} />
       <Route path="/status" component={Status} />
+      <Route path="/about" component={About} />
       <Route component={NotFound} />
     </Switch>
   );

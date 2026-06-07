@@ -128,8 +128,20 @@ function getPreviewPath(): string | null {
   return match ? match[1] : null;
 }
 
+function useCurrentPath(): string | null {
+  const [path, setPath] = useState<string | null>(getPreviewPath);
+
+  useEffect(() => {
+    const handler = () => setPath(getPreviewPath());
+    window.addEventListener("popstate", handler);
+    return () => window.removeEventListener("popstate", handler);
+  }, []);
+
+  return path;
+}
+
 function App() {
-  const previewPath = getPreviewPath();
+  const previewPath = useCurrentPath();
 
   if (previewPath) {
     return (

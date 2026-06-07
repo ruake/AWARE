@@ -26,16 +26,16 @@ export function useLiveStatus() {
     const interval = setInterval(() => {
       const update = { ...SAMPLE_UPDATES[indexRef.current % SAMPLE_UPDATES.length], timestamp: Date.now() };
       indexRef.current++;
-
       setUpdates(prev => [update, ...prev].slice(0, 50));
       setPendingCount(prev => prev + 1);
       setCurrentToast(update);
       setTimeout(() => setCurrentToast(null), 5000);
-    }, Math.max(5000, Math.min(20000, 300000)));
+    }, 18000);
     return () => clearInterval(interval);
   }, []);
 
   const dismissToast = React.useCallback(() => setCurrentToast(null), []);
+  const clearCount = React.useCallback(() => setPendingCount(0), []);
 
-  return { updates, pendingCount, currentToast, dismissToast, clearCount: () => setPendingCount(0) };
+  return { updates, pendingCount, currentToast, dismissToast, clearCount };
 }

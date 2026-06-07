@@ -3,8 +3,8 @@ import { AppLayout } from "./_shared/AppLayout";
 import { repo, copyToClipboard, navTo } from "./_shared/nav";
 import "./_group.css";
 import {
-  Copy, Check, TerminalSquare, AlertCircle, ExternalLink, Github, ArrowLeft,
-  ChevronUp, ChevronDown, Minus, Plus, Zap, Clock,
+  Copy, Check, TerminalSquare, AlertCircle, Github, ArrowLeft,
+  Minus, Plus, Zap,
 } from "lucide-react";
 
 const SUITES = [
@@ -120,6 +120,7 @@ requests.post(
   const cmdMap: Record<TabId, string> = { gh: ghCmd, curl: curlCmd, python: pyCmd };
 
   const handleCopy = (t: TabId) => {
+    copyToClipboard(cmdMap[t]);
     setCopiedTab(t);
     setTimeout(() => setCopiedTab(null), 2000);
   };
@@ -304,7 +305,7 @@ requests.post(
                 {RECENT.map((r, i) => (
                   <button
                     key={i}
-                    onClick={() => { const [pm, , ew] = r.label.split("-"); setPmVersion(pm.replace("pm","")); setEwVersion(r.label.split("ew-")[1]); setSuite(r.suite); setTarget(r.target); }}
+                    onClick={() => { const parts = r.label.split("-"); setPmVersion(parts[1]); setEwVersion(r.label.split("ew-")[1]); setSuite(r.suite); setTarget(r.target); }}
                     className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono border border-[var(--gcp-grey)] rounded bg-[var(--gcp-grey-bg)] hover:bg-[var(--gcp-surface-hover)] hover:border-[var(--gcp-blue)] transition-colors"
                   >
                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${r.status === "PASS" ? "bg-[var(--gcp-green)]" : "bg-[var(--gcp-red)]"}`} />

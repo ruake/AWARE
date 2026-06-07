@@ -301,27 +301,18 @@ function TestCaseForm({ initial, onSave, onCancel }: {
                             <option value="statusCode">Status Code</option>
                             <option value="headerEquals">Header Equals</option>
                             <option value="headerContains">Header Contains</option>
-                            <option value="bodyContains">Body Contains</option>
-                            <option value="bodyJsonPath">Body JSON Path</option>
                             <option value="responseTime">Response Time</option>
                             <option value="cookieEquals">Cookie Equals</option>
-                            <option value="capturedHeader">Captured Header</option>
                           </select>
                         </div>
                         <div>
                           <label className="text-[10px] text-[var(--gcp-text-secondary)]">Operator</label>
                           <select className="gcp-input w-full mt-0.5 text-[12px]" value={p.operator} onChange={e => setForm(f => ({ ...f, predicates: f.predicates.map(x => x.id === p.id ? { ...x, operator: e.target.value as typeof p.operator } : x) }))}>
                             <option value="equals">Equals</option>
-                            <option value="notEquals">Not Equals</option>
                             <option value="contains">Contains</option>
-                            <option value="notContains">Not Contains</option>
                             <option value="gt">Greater Than</option>
-                            <option value="gte">Greater or Equal</option>
                             <option value="lt">Less Than</option>
-                            <option value="lte">Less or Equal</option>
-                            <option value="regex">Regex</option>
                             <option value="exists">Exists</option>
-                            <option value="notExists">Not Exists</option>
                           </select>
                         </div>
                       </div>
@@ -434,7 +425,7 @@ function GenerateWizard({ onClose, onGenerated }: { onClose: () => void; onGener
   const generate = useGenerateTestCases();
   const [params, setParams] = React.useState<GenerateParams>({
     count: 10, category: "geo-match", status: "active",
-    priority: "P2", owner: "system@aware", prefix: "gen", suites: [],
+    priority: "P2", owner: "system@aware", suites: [],
   });
   const [loading, setLoading] = React.useState(false);
   const allSuites = useSyncTestSuites();
@@ -483,10 +474,6 @@ function GenerateWizard({ onClose, onGenerated }: { onClose: () => void; onGener
           <div>
             <label className="text-[11px] text-[var(--gcp-text-secondary)]">Owner</label>
             <input className="gcp-input w-full mt-1" value={params.owner} onChange={e => setParams(p => ({ ...p, owner: e.target.value }))} />
-          </div>
-          <div>
-            <label className="text-[11px] text-[var(--gcp-text-secondary)]">Name Prefix</label>
-            <input className="gcp-input w-full mt-1" value={params.prefix} onChange={e => setParams(p => ({ ...p, prefix: e.target.value }))} />
           </div>
           <div className="col-span-2">
             <label className="text-[11px] text-[var(--gcp-text-secondary)]">Assign to Suites</label>
@@ -627,7 +614,7 @@ function StatsDashboard({ stats, colFilters, onToggleFilter }: {
 }
 
 function SidePanel({ testCase, onClose }: { testCase: TestCase; onClose: () => void }) {
-  const { entries } = useTestChangelog(testCase.id);
+  const { entries, loading: changelogLoading } = useTestChangelog(testCase.id);
   const updateDoc = useUpdateDocumentation();
   const [editingDoc, setEditingDoc] = React.useState(false);
   const [docText, setDocText] = React.useState(testCase.documentation);
@@ -691,6 +678,9 @@ function SidePanel({ testCase, onClose }: { testCase: TestCase; onClose: () => v
           <h4 className="text-[12px] font-medium uppercase tracking-wider text-[var(--gcp-text-secondary)] mb-2">
             <Clock size={12} className="inline mr-1" /> Changelog (v{testCase.version})
           </h4>
+          {changelogLoading ? (
+            <div className="text-[12px] text-[var(--gcp-text-secondary)]">Loading changelog...</div>
+          ) : (
           <div className="space-y-2">
             {entries.slice(0, 5).map(e => (
               <div key={e.version} className="flex gap-2 text-[12px]">
@@ -702,6 +692,7 @@ function SidePanel({ testCase, onClose }: { testCase: TestCase; onClose: () => v
               </div>
             ))}
           </div>
+          )}
         </div>
 
         <div className="border-t border-[var(--gcp-grey)] pt-3 space-y-2">
@@ -735,7 +726,7 @@ export function TestManager() {
   const updateTestCase = useUpdateTestCase();
   const exportCases = useExportTestCases();
   const allSuites = useSyncTestSuites();
-  const { stats, refetch: refreshStats } = useTestStats();
+  const { stats, loading: statsLoading, error: statsError, refetch: refreshStats } = useTestStats();
 
   const [searchText, setSearchText] = React.useState("");
   const [colFilters, setColFilters] = useSyncedUrlState<Record<string, ColumnFilterState>>("filters", {});
@@ -842,6 +833,14 @@ export function TestManager() {
     <AppLayout activeTab="tests">
       <div className="h-[calc(100vh-100px)] flex flex-col max-w-[1600px] mx-auto gap-3">
 
+        {statsLoading && (
+          <div className="flex items-center justify-center h-32 text-[var(--gcp-text-secondary)] text-sm">Loading stats...</div>
+        )}
+
+        {statsError && (
+          <div className="flex items-center justify-center h-32 text-[var(--gcp-red)] text-sm">Error: {statsError.message}</div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -903,7 +902,7 @@ export function TestManager() {
         />
 
         {/* Split: table + side panel */}
-        <div className="flex flex-col-reverse md:flex-row gap-4 flex-1 overflow-hidden">
+        <div className="flex-col-reverse lg:flex-row gap-4 flex-1 overflow-hidden">
           <div className={`flex flex-col gcp-card overflow-hidden ${selectedTest ? "w-full md:flex-1" : "w-full"}`}>
             <div className="flex-1 overflow-x-auto overflow-y-auto">
               <table className="gcp-table min-w-[700px] md:min-w-0">
@@ -972,7 +971,7 @@ export function TestManager() {
 
           {/* Side panel */}
           {selectedTest && (
-            <div className="w-[35%] gcp-card overflow-hidden shrink-0 bg-[var(--gcp-surface)] border-l-2 border-[var(--gcp-blue)]">
+            <div className="w-full lg:w-[35%] gcp-card overflow-hidden shrink-0 bg-[var(--gcp-surface)] border-l-2 border-[var(--gcp-blue)]">
               <SidePanel key={selectedTest.id} testCase={selectedTest} onClose={() => setSelectedPanelId(null)} />
             </div>
           )}

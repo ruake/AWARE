@@ -115,7 +115,7 @@ function SuiteEditor({ suite, onSave, onCancel }: {
           <button onClick={onCancel} className="p-1 text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] rounded"><X size={18} /></button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="col-span-2">
             <label className="text-[11px] uppercase text-[var(--gcp-text-secondary)]">Name</label>
             <input className="gcp-input w-full mt-1" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Suite name" />
@@ -137,7 +137,7 @@ function SuiteEditor({ suite, onSave, onCancel }: {
           </div>
           <div className="col-span-2">
             <label className="text-[11px] uppercase text-[var(--gcp-text-secondary)] mb-1 block">Config</label>
-            <div className="grid grid-cols-3 gap-3 p-3 bg-[var(--gcp-grey-bg)] rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-[var(--gcp-grey-bg)] rounded-lg">
               <div>
                 <label className="text-[10px] text-[var(--gcp-text-secondary)]">Target</label>
                 <select className="gcp-input w-full mt-0.5 text-[12px]" value={form.config.target} onChange={e => setForm(f => ({ ...f, config: { ...f.config, target: e.target.value } }))}>
@@ -173,7 +173,7 @@ function SuiteEditor({ suite, onSave, onCancel }: {
 
           <div className="col-span-2">
             <label className="text-[11px] uppercase text-[var(--gcp-text-secondary)] mb-1 block">Integrations</label>
-            <div className="grid grid-cols-2 gap-3 p-3 bg-[var(--gcp-grey-bg)] rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-[var(--gcp-grey-bg)] rounded-lg">
               <div>
                 <label className="text-[10px] text-[var(--gcp-text-secondary)]">Slack Channel</label>
                 <input className="gcp-input w-full mt-0.5 text-[12px]" value={form.config.integration?.slackChannel ?? ""} onChange={e => setForm(f => ({ ...f, config: { ...f.config, integration: { ...f.config.integration!, slackChannel: e.target.value } } }))} placeholder="#alerts" />
@@ -370,7 +370,7 @@ export function TestSuiteManager() {
 
               <div className="flex-1 overflow-auto p-4">
                 {/* Stats cards */}
-                <div className="grid grid-cols-4 gap-3 mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                   <div className="gcp-card p-3 text-center">
                     <div className="text-2xl font-bold text-[var(--gcp-blue)]">{selected.testIds.length}</div>
                     <div className="text-[11px] text-[var(--gcp-text-secondary)]">Tests</div>
@@ -390,7 +390,7 @@ export function TestSuiteManager() {
                 </div>
 
                 {/* Charts */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                   {categoryChart.length > 1 && (
                     <div className="gcp-card p-3" style={{ height: 160 }}>
                       <div className="text-[11px] font-medium text-[var(--gcp-text-secondary)] mb-1">Category Distribution</div>
@@ -408,7 +408,7 @@ export function TestSuiteManager() {
                 {/* Config details */}
                 <div className="gcp-card p-3 mb-4">
                   <h4 className="text-[11px] uppercase tracking-wider text-[var(--gcp-text-secondary)] font-medium mb-2 flex items-center gap-1"><Settings size={12} /> Configuration</h4>
-                  <div className="grid grid-cols-5 gap-3 text-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
                     <div><span className="text-[11px] text-[var(--gcp-text-secondary)]">Target</span><div className="font-medium">{selected.config.target}</div></div>
                     <div><span className="text-[11px] text-[var(--gcp-text-secondary)]">Env</span><div className="font-medium">{selected.config.environment}</div></div>
                     <div><span className="text-[11px] text-[var(--gcp-text-secondary)]">Timeout</span><div className="font-medium">{selected.config.timeoutMinutes}m</div></div>
@@ -418,7 +418,7 @@ export function TestSuiteManager() {
                   {selected.config.integration && (
                     <div className="mt-3 pt-3 border-t border-[var(--gcp-grey)]">
                       <h5 className="text-[10px] uppercase tracking-wider text-[var(--gcp-text-secondary)] font-medium mb-1.5 flex items-center gap-1"><GitCompare size={10} /> Integrations</h5>
-                      <div className="grid grid-cols-3 gap-2 text-[12px]">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[12px]">
                         <div>
                           <span className="text-[10px] text-[var(--gcp-text-secondary)] block">Slack</span>
                           <span className={selected.config.integration.slackChannel ? "text-[var(--gcp-green)]" : "text-[var(--gcp-text-secondary)]"}>{selected.config.integration.slackChannel || "Not configured"}</span>

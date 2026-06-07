@@ -42,9 +42,13 @@ export function RunDetail() {
   const nextRunId = runIndex < runIds.length - 1 ? runIds[runIndex + 1] : null;
 
   const otherRuns = RUNS.filter(r => r.id !== currentRunId);
-  const [selectedCompareRun, setSelectedCompareRun] = React.useState(
-    otherRuns.length > 0 ? otherRuns[0].id : ""
-  );
+  const [selectedCompareRun, setSelectedCompareRun] = React.useState("");
+
+  React.useEffect(() => {
+    if (otherRuns.length > 0 && !selectedCompareRun) {
+      setSelectedCompareRun(otherRuns[0].id);
+    }
+  }, [otherRuns.length]);
 
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -157,10 +161,10 @@ export function RunDetail() {
         </div>
 
         {/* Split View */}
-        <div className="flex gap-4 flex-1 overflow-hidden">
+        <div className="flex-col lg:flex-row gap-4 flex-1 overflow-hidden">
 
           {/* Left Panel */}
-          <div className="w-[60%] flex flex-col gcp-card overflow-hidden">
+          <div className="w-full lg:w-[60%] flex flex-col gcp-card overflow-hidden">
             <div className="p-3 border-b border-[var(--gcp-grey)] flex gap-2">
               <input type="text" placeholder="Search tests..." className="gcp-input flex-1" value={searchText} onChange={e => setSearchText(e.target.value)} />
               <button className="gcp-button" onClick={() => showToast(`Showing ${filteredTests.length} tests`)}>Filter</button>
@@ -204,7 +208,7 @@ export function RunDetail() {
           </div>
 
           {/* Right Panel (Evidence) */}
-          <div className="w-[40%] gcp-card bg-[#1e1e1e] text-[#d4d4d4] flex flex-col overflow-hidden">
+          <div className="w-full lg:w-[40%] gcp-card bg-[#1e1e1e] text-[#d4d4d4] flex flex-col overflow-hidden">
             <div className="p-3 border-b border-[#333] flex justify-between items-center bg-[#252526]">
               <div className="font-mono text-sm truncate flex-1 pr-4">Check Locale match for /api/v2/data</div>
               <div className="flex items-center gap-2 shrink-0">

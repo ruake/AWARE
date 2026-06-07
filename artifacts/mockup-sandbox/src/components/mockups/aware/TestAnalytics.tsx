@@ -13,11 +13,32 @@ export function TestAnalytics() {
   const testId = params.get("testId") || "diff_0";
   const index = Number(testId.replace("diff_", ""));
   const diffs = useSyncDiffs();
-  const { detail } = useTestHistory(index);
+  const { detail, loading: historyLoading, error: historyError } = useTestHistory(index);
   const diff = diffs[index];
 
   const [shareToast, setShareToast] = React.useState<string | null>(null);
+  const [tableFilter, setTableFilter] = React.useState<string | null>(null);
   const showToast = (msg: string) => { setShareToast(msg); setTimeout(() => setShareToast(null), 2500); };
+
+  const toggleTableFilter = (val: string) => {
+    setTableFilter(prev => prev === val ? null : val);
+  };
+
+  if (historyLoading) {
+    return (
+      <AppLayout activeTab="compare">
+        <div className="flex items-center justify-center h-32 text-[var(--gcp-text-secondary)] text-sm">Loading...</div>
+      </AppLayout>
+    );
+  }
+
+  if (historyError) {
+    return (
+      <AppLayout activeTab="compare">
+        <div className="flex items-center justify-center h-32 text-[var(--gcp-red)] text-sm">Error: {historyError.message}</div>
+      </AppLayout>
+    );
+  }
 
   if (!detail || !diff) {
     return (
@@ -30,6 +51,10 @@ export function TestAnalytics() {
       </AppLayout>
     );
   }
+
+  const filteredHistory = tableFilter
+    ? detail.history.filter(h => tableFilter === "PASS" ? h.status === "PASS" : h.status === "FAIL")
+    : detail.history;
 
   const runStatusData = [
     ["Run", "Status", { type: "string", role: "tooltip" }],
@@ -94,32 +119,50 @@ export function TestAnalytics() {
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-[var(--gcp-blue-bg)] rounded p-4 gcp-card">
+        {/* Summary Cards — clickable CTAs */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div
+            onClick={() => toggleTableFilter("PASS")}
+            className={`bg-[var(--gcp-blue-bg)] rounded p-4 gcp-card cursor-pointer transition-all hover:shadow-md ${
+              tableFilter === "PASS" ? "shadow-[inset_0_0_0_2px_var(--gcp-blue)]" : ""
+            }`}
+          >
             <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium">Pass Rate</div>
             <div className="text-3xl font-bold text-[var(--gcp-blue)] mt-1">{detail.passRate}%</div>
-            <div className="text-[12px] text-[var(--gcp-text-secondary)] mt-1">{detail.history.length} runs</div>
+            <div className="text-[12px] text-[var(--gcp-text-secondary)] mt-1">click to show PASS only</div>
           </div>
-          <div className="bg-[var(--gcp-yellow-bg)] rounded p-4 gcp-card">
+          <div
+            onClick={() => toggleTableFilter("FAIL")}
+            className={`bg-[var(--gcp-yellow-bg)] rounded p-4 gcp-card cursor-pointer transition-all hover:shadow-md ${
+              tableFilter === "FAIL" ? "shadow-[inset_0_0_0_2px_var(--gcp-yellow)]" : ""
+            }`}
+          >
             <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium">Flakiness</div>
             <div className="text-3xl font-bold text-[var(--gcp-yellow)] mt-1">{detail.flakinessScore}%</div>
-            <div className="text-[12px] text-[var(--gcp-text-secondary)] mt-1">status changes across runs</div>
+            <div className="text-[12px] text-[var(--gcp-text-secondary)] mt-1">click to show FAIL only</div>
           </div>
-          <div className="bg-[var(--gcp-green-bg)] rounded p-4 gcp-card">
+          <div
+            onClick={() => toggleTableFilter("DURATION")}
+            className={`bg-[var(--gcp-green-bg)] rounded p-4 gcp-card cursor-pointer transition-all hover:shadow-md ${
+              tableFilter === "DURATION" ? "shadow-[inset_0_0_0_2px_var(--gcp-green)]" : ""
+            }`}
+          >
             <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium">Avg Duration</div>
             <div className="text-3xl font-bold text-[var(--gcp-green)] mt-1">{detail.avgDuration}ms</div>
-            <div className="text-[12px] text-[var(--gcp-text-secondary)] mt-1">across all runs</div>
+            <div className="text-[12px] text-[var(--gcp-text-secondary)] mt-1">click to highlight fast/slow</div>
           </div>
-          <div className="bg-[var(--gcp-grey-bg)] rounded p-4 gcp-card">
+          <div
+            onClick={() => setTableFilter(null)}
+            className={`bg-[var(--gcp-grey-bg)] rounded p-4 gcp-card cursor-pointer transition-all hover:shadow-md`}
+          >
             <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium">Total Executions</div>
             <div className="text-3xl font-bold text-[var(--gcp-text)] mt-1">{detail.history.length}</div>
-            <div className="text-[12px] text-[var(--gcp-text-secondary)] mt-1">all environments combined</div>
+            <div className="text-[12px] text-[var(--gcp-text-secondary)] mt-1">click to clear filter</div>
           </div>
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
           {/* Pass/Fail Column Chart */}
           <div className="gcp-card p-4">
@@ -173,8 +216,11 @@ export function TestAnalytics() {
 
         {/* Run History Table */}
         <div className="gcp-card overflow-hidden">
-          <div className="px-4 py-3 border-b border-[var(--gcp-grey)] bg-[var(--gcp-grey-bg)]">
+          <div className="px-4 py-3 border-b border-[var(--gcp-grey)] bg-[var(--gcp-grey-bg)] flex items-center justify-between">
             <h3 className="text-[13px] font-medium text-[var(--gcp-text)]">Run History</h3>
+            {tableFilter && (
+              <span className="text-[11px] text-[var(--gcp-text-secondary)]">{filteredHistory.length} of {detail.history.length} runs</span>
+            )}
           </div>
           <div className="overflow-x-auto">
             <table className="gcp-table">
@@ -187,8 +233,14 @@ export function TestAnalytics() {
                 </tr>
               </thead>
               <tbody>
-                {detail.history.map((h, i) => (
-                  <tr key={h.runId} className="cursor-pointer" onClick={() => navTo(`RunDetail?runId=${h.runId}`)}>
+                {filteredHistory.map((h, i) => (
+                  <tr key={h.runId} className={`cursor-pointer transition-colors ${
+                    tableFilter === "DURATION"
+                      ? h.duration > detail.avgDuration
+                        ? "bg-[var(--gcp-red-bg)]"
+                        : "bg-[var(--gcp-green-bg)]"
+                      : ""
+                  }`} onClick={() => navTo(`RunDetail?runId=${h.runId}`)}>
                     <td className="font-mono text-[12px] text-[var(--gcp-blue)] hover:underline">{h.runId}</td>
                     <td><span className={`gcp-badge ${h.status === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{h.status}</span></td>
                     <td className="text-right font-mono text-[12px]">{h.duration}ms</td>

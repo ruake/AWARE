@@ -6,7 +6,7 @@ import { copyToClipboard, navTo } from "./_shared/nav";
 import { ColumnFilter, type ColumnFilterState } from "./_shared/ColumnFilter";
 import { useSyncedUrlState } from "./_shared/urlState";
 import "./_group.css";
-import { Link2, Github, Share2, Copy, Check, AlertTriangle, BarChart3, X, ArrowUpRight, Calendar, Filter, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { Link2, Github, Share2, Copy, Check, AlertTriangle, BarChart3, ArrowUpRight, Calendar, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 
 const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 const TIME_SLICES = ["1d", "7d", "14d", "30d", "All"];
@@ -123,7 +123,7 @@ function _SidePanel({ selectedDiff, selectedTestId, setSelectedTestId }: {
   const diffs = useSyncDiffs();
   const si = diffs.findIndex(d => d.id === selectedTestId);
   return (
-    <div className="w-[35%] gcp-card overflow-hidden shrink-0 bg-[var(--gcp-surface)] border-l-2 border-[var(--gcp-blue)]">
+    <div className="w-full lg:w-[35%] gcp-card overflow-hidden shrink-0 bg-[var(--gcp-surface)] border-l-2 border-[var(--gcp-blue)]">
       <ComparisonSidePanel
         diff={selectedDiff}
         testId={selectedTestId}
@@ -140,11 +140,17 @@ export function Compare() {
   const runs = useSyncRuns();
   const diffs = useSyncDiffs();
   const params = new URLSearchParams(window.location.search);
-  const initialBaseline = params.get("baseline") || (runs[0]?.id ?? "");
-  const initialCandidate = params.get("candidate") || (runs[3]?.id ?? "");
 
-  const [baseline, setBaseline] = React.useState(initialBaseline);
-  const [candidate, setCandidate] = React.useState(initialCandidate);
+  const [baseline, setBaseline] = React.useState(params.get("baseline") || "");
+  const [candidate, setCandidate] = React.useState(params.get("candidate") || "");
+
+  React.useEffect(() => {
+    if (runs.length >= 4) {
+      if (!params.get("baseline")) setBaseline(runs[0].id);
+      if (!params.get("candidate")) setCandidate(runs[3].id);
+    }
+  }, [runs.length]);
+
   const [selectedTestId, setSelectedTestId] = useSyncedUrlState<string | null>("sel", null);
   const [colFilters, setColFilters] = useSyncedUrlState<Record<string, ColumnFilterState>>("filters", {});
   const [searchText, setSearchText] = useSyncedUrlState("q", "");
@@ -194,6 +200,32 @@ export function Compare() {
   const updateColFilter = (field: string) => (f: ColumnFilterState) => {
     setColFilters(prev => ({ ...prev, [field]: f }));
   };
+
+  const toggleCardFilter = (filters: Record<string, ColumnFilterState>) => {
+    setColFilters(prev => {
+      const allActive = Object.entries(filters).every(([key, val]) => {
+        const current = prev[key];
+        return current !== undefined && val.selected.every(v => current.selected.includes(v));
+      });
+      if (allActive) {
+        const next = { ...prev };
+        Object.keys(filters).forEach(key => { if (next[key]) delete next[key]; });
+        return next;
+      }
+      return { ...prev, ...filters };
+    });
+  };
+
+  const cardActive = (filters: Record<string, ColumnFilterState>) =>
+    Object.entries(filters).every(([key, val]) => {
+      const current = colFilters[key];
+      return current !== undefined && val.selected.every(v => current.selected.includes(v));
+    });
+
+  const newFailuresActive = cardActive({ state: { text: "", selected: ["regression"] } });
+  const fixedActive = cardActive({ state: { text: "", selected: ["fixed"] } });
+  const stillFailingActive = cardActive({ baseStatus: { text: "", selected: ["FAIL"] }, candStatus: { text: "", selected: ["FAIL"] } });
+  const durationActive = cardActive({ state: { text: "", selected: ["duration"] } });
 
   let filteredRows = diffs;
   if (searchText) {
@@ -255,22 +287,42 @@ export function Compare() {
         </div>
 
         {/* Summary Tiles */}
-        <div className="grid grid-cols-4 gap-4 shrink-0">
-          <div className="gcp-card p-4 flex justify-between items-center border-l-4 border-l-[var(--gcp-red)]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 shrink-0">
+          <div
+            onClick={() => toggleCardFilter({ state: { text: "", selected: ["regression"] } })}
+            className={`gcp-card p-4 flex justify-between items-center border-l-4 border-l-[var(--gcp-red)] cursor-pointer transition-all hover:shadow-md ${
+              newFailuresActive ? "shadow-[inset_0_0_0_2px_var(--gcp-red)]" : ""
+            }`}
+          >
             <span className="font-medium text-[var(--gcp-text-secondary)]">New Failures</span>
-            <span className="text-2xl font-bold text-[var(--gcp-red)]">+7</span>
+            <span className={`text-2xl font-bold text-[var(--gcp-red)]`}>+7</span>
           </div>
-          <div className="gcp-card p-4 flex justify-between items-center border-l-4 border-l-[var(--gcp-green)]">
+          <div
+            onClick={() => toggleCardFilter({ state: { text: "", selected: ["fixed"] } })}
+            className={`gcp-card p-4 flex justify-between items-center border-l-4 border-l-[var(--gcp-green)] cursor-pointer transition-all hover:shadow-md ${
+              fixedActive ? "shadow-[inset_0_0_0_2px_var(--gcp-green)]" : ""
+            }`}
+          >
             <span className="font-medium text-[var(--gcp-text-secondary)]">Fixed</span>
-            <span className="text-2xl font-bold text-[var(--gcp-green)]">+12</span>
+            <span className={`text-2xl font-bold text-[var(--gcp-green)]`}>+12</span>
           </div>
-          <div className="gcp-card p-4 flex justify-between items-center border-l-4 border-l-[var(--gcp-grey)]">
+          <div
+            onClick={() => toggleCardFilter({ baseStatus: { text: "", selected: ["FAIL"] }, candStatus: { text: "", selected: ["FAIL"] } })}
+            className={`gcp-card p-4 flex justify-between items-center border-l-4 border-l-[var(--gcp-grey)] cursor-pointer transition-all hover:shadow-md ${
+              stillFailingActive ? "shadow-[inset_0_0_0_2px_var(--gcp-grey)]" : ""
+            }`}
+          >
             <span className="font-medium text-[var(--gcp-text-secondary)]">Still Failing</span>
-            <span className="text-2xl font-bold text-[var(--gcp-text-secondary)]">3</span>
+            <span className={`text-2xl font-bold text-[var(--gcp-text-secondary)]`}>3</span>
           </div>
-          <div className="gcp-card p-4 flex justify-between items-center border-l-4 border-l-[var(--gcp-yellow)]">
+          <div
+            onClick={() => toggleCardFilter({ state: { text: "", selected: ["duration"] } })}
+            className={`gcp-card p-4 flex justify-between items-center border-l-4 border-l-[var(--gcp-yellow)] cursor-pointer transition-all hover:shadow-md ${
+              durationActive ? "shadow-[inset_0_0_0_2px_var(--gcp-yellow)]" : ""
+            }`}
+          >
             <span className="font-medium text-[var(--gcp-text-secondary)]">Duration Regressions</span>
-            <span className="text-2xl font-bold text-[var(--gcp-yellow)]">+2</span>
+            <span className={`text-2xl font-bold text-[var(--gcp-yellow)]`}>+2</span>
           </div>
         </div>
 
@@ -284,7 +336,7 @@ export function Compare() {
         </div>
 
         {/* Main split: table (left) + side panel (right) */}
-        <div className="flex gap-4 flex-1 overflow-hidden">
+        <div className="flex-col lg:flex-row gap-4 flex-1 overflow-hidden">
 
           {/* Left: Table */}
           <div className={`flex flex-col gcp-card overflow-hidden ${selectedTestId ? "flex-1" : "w-full"}`}>

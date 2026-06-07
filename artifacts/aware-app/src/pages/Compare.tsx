@@ -1,13 +1,16 @@
 import React from "react";
 import { useLocation, useSearch } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { RUNS, DIFF_ROWS, setPromotionDecision, getPromotionDecision } from "@/lib/data";
+import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
+import { RUNS, DIFF_ROWS, setPromotionDecision } from "@/lib/data";
 import type { DiffRow } from "@/lib/types";
 import {
   Link2, Github, Share2, Check, AlertTriangle, BarChart3,
-  ChevronLeft, ChevronRight, Zap, XCircle, RefreshCw, Shield,
+  ChevronLeft, ChevronRight, Zap, XCircle, Shield,
   ArrowUpRight, Search,
 } from "lucide-react";
+
+const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 
 function useToast() {
   const [msg, setMsg] = React.useState<string | null>(null);
@@ -91,6 +94,18 @@ function SidePanel({ diff, diffs, selectedId, onSelect, navigate }: {
             </div>
           </div>
         </div>
+        {/* Filmstrip placeholder */}
+        <div className="gcp-card" style={{ padding: 10 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", marginBottom: 8 }}>Visual Diff (Filmstrip)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {["Baseline", "Candidate"].map(label => (
+              <div key={label} style={{ background: "var(--gcp-grey-bg)", borderRadius: 4, height: 80, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 4, border: "1px solid var(--gcp-grey)" }}>
+                <span style={{ fontSize: 20 }}>🎞</span>
+                <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <button onClick={() => navigate(`/analytics?testId=${diff.id}`)} className="gcp-button" style={{ fontSize: 11, justifyContent: "center" }}>
             <BarChart3 size={12} /> View Analytics <ArrowUpRight size={10} />
@@ -121,7 +136,9 @@ export default function Compare() {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [searchText, setSearchText] = React.useState("");
   const [regressionsOnly, setRegressionsOnly] = React.useState(false);
-  const [catFilter, setCatFilter] = React.useState("all");
+
+  const [colFilters, setColFilters] = React.useState<Record<string, ColumnFilterState>>({});
+  const updateColFilter = (field: string) => (f: ColumnFilterState) => setColFilters(p => ({ ...p, [field]: f }));
 
   const diffs = DIFF_ROWS;
   const regressions = diffs.filter(d => d.state === "regression");
@@ -129,14 +146,27 @@ export default function Compare() {
   const duration = diffs.filter(d => d.state === "duration");
   const unchanged = diffs.filter(d => d.state === "unchanged");
   const categories = [...new Set(diffs.map(d => d.category))];
+  const states: DiffRow["state"][] = ["regression", "fixed", "duration", "unchanged"];
 
-  let filtered = diffs;
-  if (searchText) filtered = filtered.filter(d => d.name.toLowerCase().includes(searchText.toLowerCase()));
-  if (regressionsOnly) filtered = filtered.filter(d => d.state === "regression");
-  if (catFilter !== "all") filtered = filtered.filter(d => d.category === catFilter);
+  const filtered = React.useMemo(() => {
+    return diffs.filter(d => {
+      if (searchText && !d.name.toLowerCase().includes(searchText.toLowerCase())) return false;
+      if (regressionsOnly && d.state !== "regression") return false;
+      const catF = colFilters.category;
+      if (catF?.selected.length && !catF.selected.includes(d.category)) return false;
+      if (catF?.text && !d.category.includes(catF.text)) return false;
+      const stateF = colFilters.state;
+      if (stateF?.selected.length && !stateF.selected.includes(d.state)) return false;
+      const baseF = colFilters.baseStatus;
+      if (baseF?.selected.length && !baseF.selected.includes(d.baseStatus)) return false;
+      const candF = colFilters.candStatus;
+      if (candF?.selected.length && !candF.selected.includes(d.candStatus)) return false;
+      return true;
+    });
+  }, [diffs, searchText, regressionsOnly, colFilters]);
 
   const selectedDiff = selectedId ? diffs.find(d => d.id === selectedId) ?? null : null;
-  const canPromote = regressions.length === 0;
+  const hasActiveFilters = Object.values(colFilters).some(f => f.text || f.selected.length > 0);
 
   const confirmPromotion = (action: "promote" | "block") => {
     setPromotionDecision({ runId: candidate, decision: action, decidedBy: "you", decidedAt: new Date().toISOString(), note: `${action === "promote" ? "Approved" : "Blocked"} via comparison` });
@@ -162,13 +192,17 @@ export default function Compare() {
               {runIds.map(id => <option key={id} value={id}>{id}</option>)}
             </select>
           </div>
-          <div style={{ display: "flex", gap: 8, flexShrink: 0, marginTop: 16 }}>
-            <button onClick={() => { copy(window.location.href); show("Permalink copied"); }} className="gcp-button" style={{ fontSize: 12 }}>
-              <Link2 size={13} /> Copy Link
+          <div style={{ display: "flex", gap: 8, flexShrink: 0, marginTop: 16, flexWrap: "wrap" }}>
+            <button onClick={() => { copy(`${window.location.href}?baseline=${baseline}&candidate=${candidate}`); show("Permalink copied"); }} className="gcp-button" style={{ fontSize: 12 }}>
+              <Link2 size={13} /> Permalink
             </button>
             <button onClick={() => { copy(`Comparison: ${baseline} vs ${candidate}\nNew failures: ${regressions.length}\nFixed: ${fixed.length}\nDuration regressions: ${duration.length}`); show("Slack summary copied"); }}
               className="gcp-button" style={{ fontSize: 12 }}>
               <Share2 size={13} /> Share
+            </button>
+            <button onClick={() => { copy(`## Regression Report\n**Baseline:** ${baseline}\n**Candidate:** ${candidate}\n\n### Regressions (${regressions.length})\n${regressions.map(r => `- ${r.name}`).join("\n")}\n\n### Fixed (${fixed.length})\n${fixed.map(r => `- ${r.name}`).join("\n")}`); show("Markdown report copied"); }}
+              className="gcp-button" style={{ fontSize: 12 }}>
+              <Github size={13} /> Report
             </button>
           </div>
         </div>
@@ -176,12 +210,15 @@ export default function Compare() {
         {/* Summary tiles */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
           {[
-            { label: "New Failures", value: `+${regressions.length}`, color: "var(--gcp-red)" },
-            { label: "Fixed", value: `+${fixed.length}`, color: "var(--gcp-green)" },
-            { label: "Duration Regressions", value: `+${duration.length}`, color: "var(--gcp-yellow)" },
-            { label: "Unchanged", value: unchanged.length, color: "var(--gcp-text-secondary)" },
+            { label: "New Failures", value: `+${regressions.length}`, color: "var(--gcp-red)", key: "regression" },
+            { label: "Fixed", value: `+${fixed.length}`, color: "var(--gcp-green)", key: "fixed" },
+            { label: "Duration Regressions", value: `+${duration.length}`, color: "var(--gcp-yellow)", key: "duration" },
+            { label: "Unchanged", value: unchanged.length, color: "var(--gcp-text-secondary)", key: "unchanged" },
           ].map(tile => (
-            <div key={tile.label} className="gcp-card" style={{ padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderLeft: `4px solid ${tile.color}` }}>
+            <div key={tile.label}
+              className="gcp-card"
+              onClick={() => updateColFilter("state")({ text: "", selected: colFilters.state?.selected.includes(tile.key) ? [] : [tile.key] })}
+              style={{ padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderLeft: `4px solid ${tile.color}`, cursor: "pointer" }}>
               <span style={{ fontSize: 12, fontWeight: 500, color: "var(--gcp-text-secondary)" }}>{tile.label}</span>
               <span style={{ fontSize: 24, fontWeight: 700, color: tile.color }}>{tile.value}</span>
             </div>
@@ -194,7 +231,7 @@ export default function Compare() {
             <AlertTriangle size={15} style={{ color: "var(--gcp-red)", flexShrink: 0 }} />
             <span style={{ fontSize: 12, flex: 1 }}><strong>{regressions.length} regression{regressions.length !== 1 ? "s" : ""} detected.</strong> Promotion blocked until fixed.</span>
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => { copy(`Bulk regression report\nBaseline: ${baseline}\nCandidate: ${candidate}\n${regressions.length} regressions: ${regressions.map(r => r.name).join(", ")}`); show("Bulk issue template copied"); }}
+              <button onClick={() => { copy(`Bulk regression report\nBaseline: ${baseline}\nCandidate: ${candidate}\n${regressions.length} regressions:\n${regressions.map(r => `- ${r.name}`).join("\n")}`); show("Bulk issue template copied"); }}
                 className="gcp-button-danger" style={{ fontSize: 11, padding: "5px 12px" }}>
                 <Github size={12} /> File All as Issues
               </button>
@@ -221,22 +258,36 @@ export default function Compare() {
                 <Search size={13} style={{ color: "var(--gcp-text-secondary)" }} />
                 <input className="gcp-input" placeholder="Search tests…" value={searchText} onChange={e => setSearchText(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
               </div>
-              <select className="gcp-input" value={catFilter} onChange={e => setCatFilter(e.target.value)}>
-                <option value="all">All categories</option>
-                {categories.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
               <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
                 <input type="checkbox" checked={regressionsOnly} onChange={e => setRegressionsOnly(e.target.checked)} />
                 Regressions only
               </label>
-              <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginLeft: "auto" }}>{filtered.length} tests · click for detail</span>
+              {hasActiveFilters && (
+                <button onClick={() => setColFilters({})} style={{ fontSize: 11, color: "var(--gcp-red)", background: "none", border: "none", cursor: "pointer" }}>
+                  Clear filters
+                </button>
+              )}
+              <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginLeft: "auto" }}>{filtered.length}/{diffs.length} tests</span>
             </div>
             <div style={{ flex: 1, overflowY: "auto" }}>
               <table className="gcp-table">
-                <thead style={{ position: "sticky", top: 0, zIndex: 10 }}><tr>
-                  <th>Test Name</th><th>Baseline</th><th>Candidate</th>
+                <thead style={{ position: "sticky", top: 0, zIndex: 10, background: "var(--gcp-surface)" }}><tr>
+                  <th>
+                    <ColumnFilter label="Test Name" filter={colFilters.name ?? EMPTY_FILTER} onFilterChange={updateColFilter("name")} />
+                  </th>
+                  <th>
+                    <ColumnFilter label="Baseline" allValues={["PASS", "FAIL"]} filter={colFilters.baseStatus ?? EMPTY_FILTER} onFilterChange={updateColFilter("baseStatus")} />
+                  </th>
+                  <th>
+                    <ColumnFilter label="Candidate" allValues={["PASS", "FAIL"]} filter={colFilters.candStatus ?? EMPTY_FILTER} onFilterChange={updateColFilter("candStatus")} />
+                  </th>
                   <th style={{ textAlign: "right" }}>Δ Duration</th>
-                  <th>Category</th><th>State</th>
+                  <th>
+                    <ColumnFilter label="Category" allValues={categories} filter={colFilters.category ?? EMPTY_FILTER} onFilterChange={updateColFilter("category")} />
+                  </th>
+                  <th>
+                    <ColumnFilter label="State" allValues={states} filter={colFilters.state ?? EMPTY_FILTER} onFilterChange={updateColFilter("state")} />
+                  </th>
                   <th style={{ textAlign: "center" }}>Actions</th>
                 </tr></thead>
                 <tbody>
@@ -246,7 +297,12 @@ export default function Compare() {
                     return (
                       <tr key={d.id}
                         onClick={() => setSelectedId(isSelected ? null : d.id)}
-                        style={{ cursor: "pointer", background: isSelected ? "var(--gcp-blue-bg)" : d.state === "regression" ? "rgba(217,48,37,0.04)" : d.state === "fixed" ? "rgba(30,142,62,0.04)" : undefined, outline: isSelected ? "2px solid var(--gcp-blue)" : "none", outlineOffset: -2 }}
+                        style={{
+                          cursor: "pointer",
+                          background: isSelected ? "var(--gcp-blue-bg)" : d.state === "regression" ? "rgba(217,48,37,0.04)" : d.state === "fixed" ? "rgba(30,142,62,0.04)" : undefined,
+                          outline: isSelected ? "2px solid var(--gcp-blue)" : "none",
+                          outlineOffset: -2,
+                        }}
                       >
                         <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", fontWeight: 500, maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</td>
                         <td><span className={`gcp-badge ${d.baseStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{d.baseStatus}</span></td>

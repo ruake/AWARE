@@ -37,7 +37,7 @@ function CopyLinkBtn({ runId }: { runId: string }) {
   );
 }
 
-function RunSidePanel({ run, onClose }: { run: Run; onClose: () => void }) {
+function RunSidePanel({ run, onClose, onFilter }: { run: Run; onClose: () => void; onFilter: (field: string, value: string) => void }) {
   const statusBadge = run.status === "PASS" ? "gcp-badge-pass" : run.status === "FAIL" ? "gcp-badge-fail" : "gcp-badge-flaky";
   return (
     <div className="h-full flex flex-col">
@@ -58,7 +58,10 @@ function RunSidePanel({ run, onClose }: { run: Run; onClose: () => void }) {
             <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium">Pass Rate</div>
             <div className="text-2xl font-bold mt-1">{run.passPct}%</div>
           </div>
-          <div className="gcp-card p-3">
+          <div
+            onClick={() => onFilter("status", "FAIL")}
+            className="gcp-card p-3 cursor-pointer transition-all hover:shadow-md"
+          >
             <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium">Failures</div>
             <div className="text-2xl font-bold text-[var(--gcp-red)] mt-1">{run.failures}</div>
           </div>
@@ -66,7 +69,10 @@ function RunSidePanel({ run, onClose }: { run: Run; onClose: () => void }) {
             <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium">Duration</div>
             <div className="text-lg font-bold mt-1">{run.duration}</div>
           </div>
-          <div className="gcp-card p-3">
+          <div
+            onClick={() => onFilter("target", run.target)}
+            className="gcp-card p-3 cursor-pointer transition-all hover:shadow-md"
+          >
             <div className="text-[11px] text-[var(--gcp-text-secondary)] uppercase tracking-wider font-medium">Target</div>
             <div className="text-lg font-bold mt-1">{run.target}</div>
           </div>
@@ -178,7 +184,7 @@ export function Runs() {
         </div>
 
         {/* Split: table (left) + side panel (right) */}
-        <div className="flex gap-4 flex-1 overflow-hidden">
+        <div className="flex-col lg:flex-row gap-4 flex-1 overflow-hidden">
 
           {/* Table */}
           <div className={`flex flex-col gcp-card overflow-hidden ${selectedRun ? "flex-1" : "w-full"}`}>
@@ -245,8 +251,12 @@ export function Runs() {
 
           {/* Side panel */}
           {selectedRun && (
-            <div className="w-[35%] gcp-card overflow-hidden shrink-0 bg-[var(--gcp-surface)] border-l-2 border-[var(--gcp-blue)]">
-              <RunSidePanel run={selectedRun} onClose={() => setSelectedRunId(null)} />
+            <div className="w-full lg:w-[35%] gcp-card overflow-hidden shrink-0 bg-[var(--gcp-surface)] border-l-2 border-[var(--gcp-blue)]">
+              <RunSidePanel run={selectedRun} onClose={() => setSelectedRunId(null)}
+                onFilter={(field, value) => {
+                  if (field === "status") setStatusFilter(value);
+                  if (field === "target") setQuickTarget(value);
+                }} />
             </div>
           )}
 

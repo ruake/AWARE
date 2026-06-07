@@ -5,7 +5,7 @@ import { useRuns, useEnvSummary, useEnvPassRateData } from "./_shared/hooks";
 import { navTo } from "./_shared/nav";
 import { useSyncedUrlState } from "./_shared/urlState";
 import "./_group.css";
-import { TrendingDown, TrendingUp, Minus, AlertTriangle, ChevronRight, ArrowUpDown, Calendar } from "lucide-react";
+import { TrendingDown, TrendingUp, Minus, AlertTriangle, ChevronRight, ArrowUpDown } from "lucide-react";
 
 const TIME_SLICES = ["7d", "14d", "30d", "All"];
 function sliceData(data: (string | number | Record<string, unknown>)[][], slice: string): (string | number | Record<string, unknown>)[][] {
@@ -23,9 +23,26 @@ function TrendIcon({ delta }: { delta: number }) {
 }
 
 export function Dashboard() {
-  const { summary: envSummary } = useEnvSummary();
-  const { data: envPassRateData } = useEnvPassRateData();
-  const { runs } = useRuns();
+  const { summary: envSummary, loading: envLoading, error: envError } = useEnvSummary();
+  const { data: envPassRateData, loading: prLoading, error: prError } = useEnvPassRateData();
+  const { runs, loading: runsLoading, error: runsError } = useRuns();
+
+  if (envLoading || prLoading || runsLoading) {
+    return (
+      <AppLayout activeTab="dashboard">
+        <div className="flex items-center justify-center h-32 text-[var(--gcp-text-secondary)] text-sm">Loading...</div>
+      </AppLayout>
+    );
+  }
+
+  const firstError = envError || prError || runsError;
+  if (firstError) {
+    return (
+      <AppLayout activeTab="dashboard">
+        <div className="flex items-center justify-center h-32 text-[var(--gcp-red)] text-sm">Error: {firstError.message}</div>
+      </AppLayout>
+    );
+  }
   const regressed = envSummary.filter(e => e.alert);
   const [timeSlice, setTimeSlice] = useSyncedUrlState("slice", "14d");
   const [chartKey, setChartKey] = React.useState(0);
@@ -76,6 +93,7 @@ export function Dashboard() {
                   redFrom: 0, redTo: 50, yellowFrom: 50, yellowTo: 80, greenFrom: 80, greenTo: 100,
                   minorTicks: 5, max: 100, min: 0, animation: { duration: 0 },
                   majorTicks: ["0", "25", "50", "75", "100"],
+                  backgroundColor: "transparent",
                 }}
               />
               <div className="text-right">
@@ -90,7 +108,7 @@ export function Dashboard() {
           </div>
 
           {/* Env cards */}
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {envSummary.map((env, i) => (
               <div
                 key={env.label}

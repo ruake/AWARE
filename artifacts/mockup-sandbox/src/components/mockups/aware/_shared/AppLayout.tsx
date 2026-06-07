@@ -76,12 +76,12 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
           </div>
         </div>
 
-        <nav className="flex h-full">
+        <nav className="hidden md:flex h-full overflow-x-auto overflow-y-hidden">
           {navItems.map((item) => (
             <div 
               key={item.id}
               onClick={() => navTo(item.path)}
-              className={`flex items-center px-4 h-full cursor-pointer text-sm font-medium border-b-2 transition-colors ${
+              className={`flex items-center px-2.5 lg:px-4 h-full cursor-pointer text-xs lg:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === item.id 
                   ? "border-[var(--gcp-blue)] text-[var(--gcp-blue)]" 
                   : "border-transparent text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)] hover:bg-[var(--gcp-surface-hover)]"
@@ -92,17 +92,17 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 sm:gap-3">
           {/* Live status indicator */}
           <div className="relative">
             <button
               onClick={() => { clearCount(); }}
-              className="relative p-2 text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] rounded-full transition-colors"
+              className="relative p-1.5 sm:p-2 text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] rounded-full transition-colors"
               title={`${pendingCount} pending updates`}
             >
-              <Bell size={18} />
+              <Bell size={16} className="sm:size-[18]" />
               {pendingCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-[var(--gcp-red)] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 sm:w-4.5 sm:h-4.5 bg-[var(--gcp-red)] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center">
                   {pendingCount > 9 ? "9+" : pendingCount}
                 </span>
               )}
@@ -112,19 +112,19 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
           {/* ⌘K button */}
           <button
             onClick={() => setPaletteOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-[var(--gcp-text-secondary)] bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded-md hover:bg-[var(--gcp-surface-hover)] transition-colors"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[10px] sm:text-[11px] text-[var(--gcp-text-secondary)] bg-[var(--gcp-grey-bg)] border border-[var(--gcp-grey)] rounded-md hover:bg-[var(--gcp-surface-hover)] transition-colors"
           >
-            <Search size={13} />
+            <Search size={11} className="sm:size-[13]" />
             <span className="hidden sm:inline">Search... </span>
-            <kbd className="px-1.5 py-0.5 bg-[var(--gcp-surface)] border border-[var(--gcp-grey)] rounded font-mono text-[10px] font-bold">
+            <kbd className="hidden sm:inline px-1.5 py-0.5 bg-[var(--gcp-surface)] border border-[var(--gcp-grey)] rounded font-mono text-[10px] font-bold">
               <Command size={10} className="inline" />K
             </kbd>
           </button>
 
-          <button onClick={toggleTheme} className="p-2 text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] rounded-full">
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          <button onClick={toggleTheme} className="p-1.5 sm:p-2 text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)] rounded-full">
+            {isDark ? <Sun size={16} className="sm:size-[18]" /> : <Moon size={16} className="sm:size-[18]" />}
           </button>
-          <a href={`${repo}/actions`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[13px] text-[var(--gcp-blue)] hover:underline">
+          <a href={`${repo}/actions`} target="_blank" rel="noopener noreferrer" className="hidden sm:flex items-center gap-1 text-[13px] text-[var(--gcp-blue)] hover:underline">
             GitHub Actions <ExternalLink size={14} />
           </a>
         </div>
@@ -138,9 +138,10 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
           }`}
           onMouseEnter={() => setSidebarExpanded(true)}
           onMouseLeave={() => setSidebarExpanded(false)}
+          onClick={() => { if ('ontouchstart' in window) setSidebarExpanded(e => !e); }}
         >
           <div className="py-2">
-            <button className="w-full flex justify-center p-3 text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)]">
+            <button onClick={() => setSidebarExpanded(e => !e)} className="w-full flex justify-center p-3 text-[var(--gcp-text-secondary)] hover:bg-[var(--gcp-surface-hover)]">
               <Menu size={20} />
             </button>
           </div>
@@ -165,7 +166,7 @@ export function AppLayout({ children, activeTab }: AppLayoutProps) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
           {children}
         </main>
       </div>

@@ -61,24 +61,6 @@ export type TestPriority = "P0" | "P1" | "P2" | "P3";
 export type TestSeverity = "critical" | "major" | "minor" | "trivial";
 export type TestStatus = "active" | "disabled" | "deprecated";
 
-export type CatchpointTestType =
-  | "web"
-  | "transaction"
-  | "api"
-  | "dns"
-  | "ping"
-  | "traceroute"
-  | "ftp"
-  | "smtp"
-  | "tcp"
-  | "ssl"
-  | "websocket"
-  | "bgp"
-  | "streaming"
-  | "cdn"
-  | "playwright"
-  | "network";
-
 export interface TestTag {
   id: string;
   name: string;
@@ -93,77 +75,28 @@ export interface TestChangeLogEntry {
   changes: string[];
 }
 
-export interface TransactionStep {
-  id: string;
-  action: "navigate" | "click" | "type" | "wait" | "assert" | "screenshot" | "scroll";
-  selector?: string;
-  value?: string;
-  description?: string;
-}
+export type PredicateOperator = "equals" | "contains" | "gt" | "lt" | "exists";
 
-export interface TestAssertion {
+export interface Predicate {
   id: string;
+  type: "statusCode" | "headerEquals" | "headerContains" | "responseTime" | "cookieEquals";
   field: string;
-  operator: "=" | "!=" | "<" | "<=" | ">" | ">=" | "contains" | "not_contains" | "exists" | "not_exists" | "matches";
-  value: string;
-  unit?: string;
+  expected: string;
+  operator: PredicateOperator;
+  description: string;
 }
 
-export interface TestConfig {
-  url?: string;
-  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
-  headers?: { key: string; value: string }[];
-  body?: string;
-  bodyType?: "none" | "json" | "xml" | "form" | "text";
-  expectedStatusCode?: number;
-  followRedirects?: boolean;
-  hostname?: string;
-  recordType?: "A" | "AAAA" | "CNAME" | "MX" | "NS" | "TXT" | "SOA" | "PTR";
-  expectedValue?: string;
-  nameserver?: string;
-  host?: string;
-  packetCount?: number;
-  packetSize?: number;
-  maxHops?: number;
-  protocol?: "ICMP" | "TCP" | "UDP" | "HLS" | "DASH" | "RTMP" | "RTSP";
-  port?: number;
-  username?: string;
-  remotePath?: string;
-  ftpOperation?: "connect" | "list" | "download" | "upload";
-  smtpFrom?: string;
-  smtpTo?: string;
-  useSSL?: boolean;
-  warnDaysBeforeExpiry?: number;
-  criticalDaysBeforeExpiry?: number;
-  wsMessage?: string;
-  wsExpectedResponse?: string;
-  prefix?: string;
-  asn?: string;
-  bgpCommunity?: string;
-  expectedBitrate?: number;
-  bufferingThreshold?: number;
-  expectedEdgeLocation?: string;
-  expectedCacheHeader?: string;
-  cdnProvider?: string;
-  timeoutMs?: number;
-  thresholds?: {
-    responseTimeMs?: number;
-    availabilityPct?: number;
-    errorRatePct?: number;
-  };
-  steps?: TransactionStep[];
-  playwrightScript?: string;
-  browser?: "chromium" | "firefox" | "webkit";
-  bandwidth?: number;
-  jitterThreshold?: number;
-  packetLossThreshold?: number;
+export interface FilmstripConfig {
+  enabled: boolean;
+  threshold: number;
+  region?: string;
+  ignoreAreas?: string[];
 }
 
 export interface TestCase {
   id: string;
   name: string;
   description: string;
-  testType: CatchpointTestType;
   category: string;
   priority: TestPriority;
   severity: TestSeverity;
@@ -177,12 +110,27 @@ export interface TestCase {
   expectedBehavior: string;
   documentation: string;
   relatedTestIds: string[];
-  config: TestConfig;
-  assertions: TestAssertion[];
+  requestHeaders: Record<string, string>;
+  cookies: Record<string, string>;
+  expectedStatus: number;
+  captureResponseHeaders: string[];
+  filmstrip: FilmstripConfig;
+  predicates: Predicate[];
   version: number;
   changelog: TestChangeLogEntry[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TestSuiteIntegration {
+  slackChannel?: string;
+  slackWebhookUrl?: string;
+  notifyOn: ("pass" | "fail" | "deploy" | "approval")[];
+  githubCommentPr: boolean;
+  githubDeploymentStatus: boolean;
+  requireApproval: boolean;
+  approvers: string[];
+  webhookUrl?: string;
 }
 
 export interface TestSuiteConfig {
@@ -192,6 +140,7 @@ export interface TestSuiteConfig {
   retries: number;
   failFast: boolean;
   timeoutMinutes: number;
+  integration?: TestSuiteIntegration;
 }
 
 export interface TestSuite {
@@ -205,6 +154,52 @@ export interface TestSuite {
   schedule: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SuiteNode {
+  suite: TestSuite;
+  children: SuiteNode[];
+  depth: number;
+}
+
+export type ImportExportFormat = "json" | "junit_xml" | "csv";
+
+export interface ImportResult {
+  imported: number;
+  skipped: number;
+  errors: { line: number; message: string }[];
+}
+
+export interface GenerateParams {
+  count: number;
+  category: string;
+  status: TestStatus;
+  priority: TestPriority;
+  owner: string;
+  suites: string[];
+}
+
+export interface TestStats {
+  total: number;
+  byStatus: Record<string, number>;
+  byPriority: Record<string, number>;
+  byCategory: Record<string, number>;
+  bySeverity: Record<string, number>;
+  byOwner: Record<string, number>;
+  byTag: Record<string, number>;
+  automated: number;
+  manual: number;
+  coverage: number;
+  avgVersion: number;
+}
+
+export interface TestCaseFilter {
+  search: string;
+  status: TestStatus | "";
+  priority: TestPriority | "";
+  category: string;
+  tags: string[];
+  suiteId: string;
 }
 
 export interface PromotionDecision {

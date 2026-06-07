@@ -2,7 +2,9 @@ const repo = "https://github.com/ruake/AWARE";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export function navTo(path: string) {
-  window.location.href = `${base}/preview/aware/${path}`;
+  const url = `${base}/preview/aware/${path}`;
+  history.pushState({ path }, "", url);
+  window.dispatchEvent(new PopStateEvent("popstate", { state: { path } }));
 }
 
 export function closePanel(name: string) {

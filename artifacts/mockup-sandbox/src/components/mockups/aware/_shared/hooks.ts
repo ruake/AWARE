@@ -209,14 +209,28 @@ export function useExportTestCases(): (format: ImportExportFormat, suiteId?: str
 export function useSyncTestCases(): TestCase[] {
   const svc = getServices().testCases;
   const [data, setData] = React.useState<TestCase[]>([]);
-  React.useEffect(() => { svc.getAll().then(setData); }, []);
+  React.useEffect(() => {
+    svc.getAll().then(setData);
+    const cb = () => { svc.getAll().then(setData); };
+    const unsub = "subscribe" in svc && typeof (svc as any).subscribe === "function"
+      ? (svc as any).subscribe(cb)
+      : undefined;
+    return () => { if (unsub) unsub(); };
+  }, []);
   return data;
 }
 
 export function useSyncTestSuites(): TestSuite[] {
   const svc = getServices().testSuites;
   const [data, setData] = React.useState<TestSuite[]>([]);
-  React.useEffect(() => { svc.getAll().then(setData); }, []);
+  React.useEffect(() => {
+    svc.getAll().then(setData);
+    const cb = () => { svc.getAll().then(setData); };
+    const unsub = "subscribe" in svc && typeof (svc as any).subscribe === "function"
+      ? (svc as any).subscribe(cb)
+      : undefined;
+    return () => { if (unsub) unsub(); };
+  }, []);
   return data;
 }
 
@@ -239,8 +253,10 @@ export function useTestChangelog(testId: string | null): { entries: TestChangeLo
   const [loading, setLoading] = React.useState(false);
   React.useEffect(() => {
     if (!testId) return;
+    let cancelled = false;
     setLoading(true);
-    svc.getChangelog(testId).then(setEntries).finally(() => setLoading(false));
+    svc.getChangelog(testId).then(res => { if (!cancelled) setEntries(res); }).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [testId]);
   return { entries, loading };
 }

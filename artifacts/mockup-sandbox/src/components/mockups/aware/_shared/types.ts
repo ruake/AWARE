@@ -101,11 +101,11 @@ export interface TestChangeLogEntry {
   changes: string[];
 }
 
-export type PredicateOperator = "equals" | "notEquals" | "contains" | "notContains" | "gt" | "gte" | "lt" | "lte" | "regex" | "exists" | "notExists";
+export type PredicateOperator = "equals" | "contains" | "gt" | "lt" | "exists";
 
 export interface Predicate {
   id: string;
-  type: "statusCode" | "headerEquals" | "headerContains" | "bodyContains" | "bodyJsonPath" | "responseTime" | "cookieEquals" | "capturedHeader";
+  type: "statusCode" | "headerEquals" | "headerContains" | "responseTime" | "cookieEquals";
   field: string;
   expected: string;
   operator: PredicateOperator;
@@ -202,7 +202,6 @@ export interface GenerateParams {
   status: TestStatus;
   priority: TestPriority;
   owner: string;
-  prefix: string;
   suites: string[];
 }
 

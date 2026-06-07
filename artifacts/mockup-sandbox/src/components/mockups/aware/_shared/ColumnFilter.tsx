@@ -19,16 +19,32 @@ export function ColumnFilter({
 }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
+  const toggleRef = React.useRef<HTMLButtonElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const close = React.useCallback(() => {
+    setOpen(false);
+    toggleRef.current?.focus();
+  }, []);
 
   React.useEffect(() => {
+    if (!open) return;
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
+        close();
       }
     };
-    if (open) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("keydown", keyHandler);
+    inputRef.current?.focus();
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("keydown", keyHandler);
+    };
+  }, [open, close]);
 
   const filteredValues = allValues?.filter(v =>
     v.toLowerCase().includes(filter.text.toLowerCase())
@@ -47,7 +63,10 @@ export function ColumnFilter({
   return (
     <div ref={ref} className="relative">
       <button
+        ref={toggleRef}
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
         className={`flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap transition-colors ${
           isActive ? "text-[var(--gcp-blue)]" : "text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)]"
         }`}
@@ -60,16 +79,16 @@ export function ColumnFilter({
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-56 z-50 gcp-card shadow-lg border border-[var(--gcp-grey)] p-2 bg-[var(--gcp-surface)]">
+        <div className="absolute top-full left-0 mt-1 w-56 z-50 gcp-card shadow-lg border border-[var(--gcp-grey)] p-2 bg-[var(--gcp-surface)]" role="listbox">
           <div className="flex items-center gap-1 border border-[var(--gcp-grey)] rounded px-2 py-1 mb-2">
             <Search size={12} className="text-[var(--gcp-text-secondary)] shrink-0" />
             <input
+              ref={inputRef}
               type="text"
               value={filter.text}
               onChange={e => onFilterChange({ ...filter, text: e.target.value })}
               placeholder="Search..."
               className="flex-1 text-[12px] outline-none bg-transparent border-none p-0 m-0"
-              autoFocus
             />
             {filter.text && (
               <button onClick={() => onFilterChange({ ...filter, text: "" })} className="shrink-0">

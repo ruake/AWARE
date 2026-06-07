@@ -1,9 +1,12 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
 import {
-  LayoutDashboard, List, GitCompare, FlaskConical, Play,
-  Activity, Bell, Search, Zap, Menu, X, Github
+  LayoutDashboard, List, GitCompare, Bug, Play,
+  Activity, Bell, Search, Menu, Moon, Sun, ExternalLink,
+  Check, AlertTriangle, Info,
 } from "lucide-react";
+import { CommandPalette } from "./CommandPalette";
+import { useLiveStatus } from "@/lib/useLiveStatus";
 
 interface NavItem {
   href: string;
@@ -15,195 +18,222 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/runs", label: "Runs", icon: List },
   { href: "/compare", label: "Compare", icon: GitCompare },
-  { href: "/tests", label: "Test Manager", icon: FlaskConical },
+  { href: "/tests", label: "Tests", icon: Bug },
   { href: "/start", label: "Start Run", icon: Play },
-  { href: "/status", label: "How It Works", icon: Activity },
+  { href: "/status", label: "Status", icon: Activity },
+  { href: "/about", label: "About", icon: Info },
 ];
 
 export function AppLayout({ children, activeHref }: { children: React.ReactNode; activeHref?: string }) {
   const [location] = useLocation();
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [searchOpen, setSearchOpen] = React.useState(false);
-  const [notifOpen, setNotifOpen] = React.useState(false);
-  const notifCount = 3;
+  const [isDark, setIsDark] = React.useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = React.useState(false);
+  const [paletteOpen, setPaletteOpen] = React.useState(false);
+  const { currentToast, dismissToast, pendingCount, clearCount } = useLiveStatus();
   const current = activeHref ?? location;
 
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setSearchOpen(s => !s); }
-      if (e.key === "Escape") { setSearchOpen(false); setNotifOpen(false); }
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setPaletteOpen(p => !p);
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--gcp-grey-bg)" }}>
+  const toggleTheme = () => {
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.classList.toggle("dark", next);
+  };
 
-      {/* Top header */}
+  const isActive = (href: string) =>
+    href === "/" ? current === "/" : current === href || current.startsWith(href + "/");
+
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--gcp-grey-bg)", color: "var(--gcp-text)" }}>
+
+      {/* Top Nav */}
       <header style={{
-        height: 56, background: "var(--gcp-surface)", borderBottom: "1px solid var(--gcp-grey)",
+        height: 56, background: "var(--gcp-surface)",
+        borderBottom: "1px solid var(--gcp-grey)",
         display: "flex", alignItems: "center", padding: "0 16px", gap: 12,
         position: "sticky", top: 0, zIndex: 100, flexShrink: 0,
         boxShadow: "0 1px 3px rgba(60,64,67,0.12)",
       }}>
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 8 }}>
-          <div style={{ width: 28, height: 28, background: "var(--gcp-blue)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Zap size={15} color="white" />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <div style={{ width: 30, height: 30, background: "var(--gcp-blue)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <span style={{ color: "white", fontWeight: 800, fontSize: 13, letterSpacing: "-0.5px" }}>AW</span>
           </div>
-          <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: "-0.2px", color: "var(--gcp-text)" }}>A.W.A.K.E.</span>
-          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)", marginTop: 2 }}>CDN·OBS</span>
+          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
+            <span style={{ fontWeight: 800, fontSize: 14, color: "var(--gcp-text)", letterSpacing: "-0.3px" }}>A.W.A.K.E.</span>
+            <span style={{ fontSize: 9, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>CDN Observability</span>
+          </div>
         </div>
 
-        {/* Desktop nav */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
+        {/* Desktop top nav */}
+        <nav style={{ display: "flex", height: "100%", overflowX: "auto", flex: 1 }}>
           {NAV_ITEMS.map(item => {
-            const active = current === item.href || (item.href !== "/" && current.startsWith(item.href));
-            const Icon = item.icon;
+            const active = isActive(item.href);
             return (
-              <NavLink key={item.href} href={item.href} active={active}>
-                <Icon size={14} /> {item.label}
-              </NavLink>
+              <Link key={item.href} href={item.href} style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "0 14px", height: "100%", cursor: "pointer",
+                fontSize: 13, fontWeight: active ? 600 : 400,
+                color: active ? "var(--gcp-blue)" : "var(--gcp-text-secondary)",
+                borderBottom: `2px solid ${active ? "var(--gcp-blue)" : "transparent"}`,
+                textDecoration: "none", whiteSpace: "nowrap", transition: "color 0.15s, border-color 0.15s",
+                flexShrink: 0,
+              }}>
+                {item.label}
+              </Link>
             );
           })}
         </nav>
 
         {/* Right actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", flexShrink: 0 }}>
+          {/* ⌘K search button */}
           <button
-            onClick={() => setSearchOpen(true)}
-            style={{ display: "flex", alignItems: "center", gap: 6, border: "1px solid var(--gcp-grey)", borderRadius: 4, background: "var(--gcp-grey-bg)", padding: "5px 10px", fontSize: 12, color: "var(--gcp-text-secondary)", cursor: "pointer" }}
+            onClick={() => setPaletteOpen(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "5px 10px", fontSize: 12, cursor: "pointer",
+              border: "1px solid var(--gcp-grey)", borderRadius: 4,
+              background: "var(--gcp-grey-bg)", color: "var(--gcp-text-secondary)",
+              whiteSpace: "nowrap",
+            }}
           >
-            <Search size={13} />
+            <Search size={12} />
             <span>Search</span>
-            <kbd style={{ fontSize: 10, border: "1px solid var(--gcp-grey)", borderRadius: 3, padding: "0 4px", lineHeight: "16px" }}>⌘K</kbd>
+            <kbd style={{ fontSize: 10, border: "1px solid var(--gcp-grey)", borderRadius: 3, padding: "0 4px", fontFamily: "var(--font-mono)", lineHeight: "16px" }}>⌘K</kbd>
           </button>
 
-          <a href="https://github.com/salesforce/aware" target="_blank" rel="noopener noreferrer" title="GitHub Actions" style={{ padding: 6, borderRadius: 4, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", textDecoration: "none" }}>
-            <Github size={18} />
-          </a>
-
-          <div style={{ position: "relative" }}>
-            <button onClick={() => setNotifOpen(n => !n)} style={{ position: "relative", padding: 6, borderRadius: 4, border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center" }}>
-              <Bell size={18} />
-              {notifCount > 0 && (
-                <span style={{ position: "absolute", top: 2, right: 2, width: 16, height: 16, borderRadius: "50%", background: "var(--gcp-red)", color: "white", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}>{notifCount}</span>
-              )}
-            </button>
-            {notifOpen && (
-              <div style={{ position: "absolute", right: 0, top: "calc(100% + 6px)", width: 320, background: "var(--gcp-surface)", border: "1px solid var(--gcp-grey)", borderRadius: 6, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 200 }}>
-                <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--gcp-grey)", fontWeight: 600, fontSize: 13 }}>Notifications</div>
-                {[
-                  { type: "fail", msg: "7 regressions detected in latest Prod/Production run", time: "2m ago" },
-                  { type: "warn", msg: "Prod/Production pass rate dropped 4% from baseline", time: "18m ago" },
-                  { type: "pass", msg: "UAT/Production run completed — 100% pass rate", time: "1h ago" },
-                ].map((n, i) => (
-                  <div key={i} style={{ padding: "10px 14px", borderBottom: i < 2 ? "1px solid var(--gcp-grey)" : "none", display: "flex", gap: 10, alignItems: "flex-start" }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", flexShrink: 0, marginTop: 4, background: n.type === "fail" ? "var(--gcp-red)" : n.type === "warn" ? "var(--gcp-yellow)" : "var(--gcp-green)" }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 12, color: "var(--gcp-text)", lineHeight: 1.4 }}>{n.msg}</div>
-                      <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>{n.time}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* Bell */}
+          <button
+            onClick={clearCount}
+            title={`${pendingCount} live updates`}
+            style={{ position: "relative", padding: 6, border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center" }}
+          >
+            <Bell size={18} />
+            {pendingCount > 0 && (
+              <span style={{
+                position: "absolute", top: 1, right: 1,
+                width: 16, height: 16, borderRadius: "50%",
+                background: "var(--gcp-red)", color: "white",
+                fontSize: 9, fontWeight: 700,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                {pendingCount > 9 ? "9+" : pendingCount}
+              </span>
             )}
-          </div>
-        </div>
+          </button>
 
-        {/* Mobile menu btn */}
-        <button onClick={() => setMobileOpen(m => !m)} style={{ padding: 6, border: "none", background: "transparent", cursor: "pointer" }}>
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
+          {/* Dark mode */}
+          <button
+            onClick={toggleTheme}
+            style={{ padding: 6, border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center" }}
+            title="Toggle dark mode"
+          >
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+
+          {/* GitHub */}
+          <a
+            href="https://github.com"
+            target="_blank" rel="noopener noreferrer"
+            style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--gcp-blue)", textDecoration: "none", padding: "4px 6px" }}
+          >
+            GitHub <ExternalLink size={12} />
+          </a>
+        </div>
       </header>
 
-      {/* Mobile nav */}
-      {mobileOpen && (
-        <div style={{ background: "var(--gcp-surface)", borderBottom: "1px solid var(--gcp-grey)", padding: "8px 12px" }}>
-          {NAV_ITEMS.map(item => {
-            const active = current === item.href || (item.href !== "/" && current.startsWith(item.href));
-            const Icon = item.icon;
-            return (
-              <NavLink key={item.href} href={item.href} active={active} onClick={() => setMobileOpen(false)} style={{ display: "flex", marginBottom: 4, padding: "10px 12px", fontSize: 14 }}>
-                <Icon size={16} /> {item.label}
-              </NavLink>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Search modal */}
-      {searchOpen && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 500, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 80 }} onClick={() => setSearchOpen(false)}>
-          <div style={{ background: "var(--gcp-surface)", borderRadius: 8, width: "min(560px, 90vw)", boxShadow: "0 8px 40px rgba(0,0,0,0.25)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: "flex", alignItems: "center", padding: "12px 16px", borderBottom: "1px solid var(--gcp-grey)", gap: 10 }}>
-              <Search size={16} color="var(--gcp-text-secondary)" />
-              <input autoFocus placeholder="Search runs, tests, comparisons…" style={{ flex: 1, border: "none", outline: "none", fontSize: 15, fontFamily: "var(--font-sans)", color: "var(--gcp-text)", background: "transparent" }} />
-              <kbd style={{ fontSize: 11, border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "2px 6px", color: "var(--gcp-text-secondary)" }}>ESC</kbd>
-            </div>
-            <div style={{ padding: "8px 0" }}>
-              {[
-                { label: "Dashboard", href: "/", desc: "Promotion readiness overview" },
-                { label: "Latest Runs", href: "/runs", desc: "All GitHub Actions test runs" },
-                { label: "Compare runs", href: "/compare", desc: "Baseline vs candidate diff" },
-                { label: "Start new run", href: "/start", desc: "Trigger regression test suite" },
-              ].map(item => (
-                <NavLink key={item.href} href={item.href} active={false} onClick={() => setSearchOpen(false)}
-                  style={{ display: "flex", gap: 12, padding: "10px 16px", justifyContent: "flex-start" }}>
-                  <span style={{ fontWeight: 500, fontSize: 13, flex: "0 0 auto" }}>{item.label}</span>
-                  <span style={{ fontSize: 12, color: "var(--gcp-text-secondary)", fontWeight: 400 }}>{item.desc}</span>
-                </NavLink>
-              ))}
-            </div>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        {/* Sidebar */}
+        <aside
+          style={{
+            display: "flex", flexDirection: "column",
+            borderRight: "1px solid var(--gcp-grey)", background: "var(--gcp-surface)",
+            width: sidebarExpanded ? 184 : 52,
+            transition: "width 0.25s ease", flexShrink: 0, overflow: "hidden",
+          }}
+          onMouseEnter={() => setSidebarExpanded(true)}
+          onMouseLeave={() => setSidebarExpanded(false)}
+        >
+          <div style={{ padding: "8px 0" }}>
+            <button
+              onClick={() => setSidebarExpanded(e => !e)}
+              style={{ width: "100%", display: "flex", justifyContent: "center", padding: 12, border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)" }}
+            >
+              <Menu size={20} />
+            </button>
           </div>
+          <div style={{ flex: 1, padding: "4px 0", display: "flex", flexDirection: "column", gap: 2 }}>
+            {NAV_ITEMS.map(item => {
+              const active = isActive(item.href);
+              const Icon = item.icon;
+              return (
+                <Link key={item.href} href={item.href} style={{
+                  display: "flex", alignItems: "center",
+                  padding: "10px 16px", cursor: "pointer",
+                  overflow: "hidden", whiteSpace: "nowrap",
+                  textDecoration: "none",
+                  color: active ? "var(--gcp-blue)" : "var(--gcp-text-secondary)",
+                  background: active ? "var(--gcp-blue-bg)" : "transparent",
+                  transition: "background 0.15s, color 0.15s",
+                }}>
+                  <Icon size={20} style={{ flexShrink: 0 }} />
+                  <span style={{
+                    marginLeft: 14, fontSize: 13, fontWeight: active ? 600 : 400,
+                    opacity: sidebarExpanded ? 1 : 0,
+                    transition: "opacity 0.2s",
+                  }}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </aside>
+
+        {/* Main content */}
+        <main style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+          {children}
+        </main>
+      </div>
+
+      {/* Command Palette */}
+      {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
+
+      {/* Live status toast */}
+      {currentToast && (
+        <div
+          onClick={dismissToast}
+          style={{
+            position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "12px 18px", borderRadius: 10, zIndex: 50,
+            cursor: "pointer", boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+            border: `1px solid ${currentToast.type === "success" ? "var(--gcp-green)" : currentToast.type === "warning" ? "var(--gcp-yellow)" : "var(--gcp-blue)"}`,
+            background: currentToast.type === "success" ? "var(--gcp-green-bg)" : currentToast.type === "warning" ? "var(--gcp-yellow-bg)" : "var(--gcp-blue-bg)",
+            color: currentToast.type === "success" ? "var(--gcp-green)" : currentToast.type === "warning" ? "var(--gcp-yellow)" : "var(--gcp-blue)",
+            fontSize: 13, fontWeight: 500,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {currentToast.type === "success" ? <Check size={15} /> : currentToast.type === "warning" ? <AlertTriangle size={15} /> : <Activity size={15} />}
+          {currentToast.message}
+          <button
+            onClick={e => { e.stopPropagation(); dismissToast(); }}
+            style={{ marginLeft: 6, background: "none", border: "none", cursor: "pointer", fontSize: 16, opacity: 0.6, lineHeight: 1, color: "inherit" }}
+          >×</button>
         </div>
       )}
-
-      {/* Main content */}
-      <main style={{ flex: 1, padding: "20px 24px", maxWidth: 1600, margin: "0 auto", width: "100%" }}>
-        {children}
-      </main>
-
-      {/* Footer */}
-      <footer style={{ borderTop: "1px solid var(--gcp-grey)", background: "var(--gcp-surface)", padding: "10px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>
-          A.W.A.K.E. — Akamai Web Analyser &amp; Kit for Evaluations · v2.0.0
-        </span>
-        <button onClick={() => navigator.clipboard.writeText(window.location.href)} style={{ fontSize: 11, color: "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer" }}>
-          Copy link
-        </button>
-      </footer>
     </div>
   );
 }
 
-function NavLink({ href, active, children, onClick, style }: {
-  href: string; active: boolean; children: React.ReactNode;
-  onClick?: () => void; style?: React.CSSProperties;
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      style={{
-        display: "inline-flex", alignItems: "center", gap: 6,
-        padding: "6px 12px", borderRadius: 4, fontSize: 13,
-        fontWeight: active ? 600 : 400,
-        color: active ? "var(--gcp-blue)" : "var(--gcp-text-secondary)",
-        background: active ? "var(--gcp-blue-bg)" : "transparent",
-        textDecoration: "none", transition: "all 0.15s", whiteSpace: "nowrap",
-        ...style,
-      }}
-    />
-  );
-}
-
-export function copyToClipboardUtil(text: string) {
-  navigator.clipboard.writeText(text).catch(() => {
-    const el = document.createElement("textarea");
-    el.value = text; document.body.appendChild(el);
-    el.select(); document.execCommand("copy");
-    document.body.removeChild(el);
-  });
-}

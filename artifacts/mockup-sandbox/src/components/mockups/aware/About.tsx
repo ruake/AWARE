@@ -1,7 +1,7 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
 import { useSyncRuns, useSyncDiffs } from "./_shared/hooks";
-import { repo } from "./_shared/nav";
+import { navTo, repo } from "./_shared/nav";
 import "./_group.css";
 import { Info, GitCompare, List, FileText, LayoutDashboard, ExternalLink, Github, Shield, Users, Zap, BarChart3 } from "lucide-react";
 
@@ -61,14 +61,20 @@ export function About() {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-6 gap-3">
-          {STATS.map(s => (
-            <div key={s.label} className="gcp-card p-3 text-center">
-              <div className="text-sm text-[var(--gcp-text-secondary)] truncate" title={s.label}>{s.label}</div>
-              <div className="text-2xl font-bold text-[var(--gcp-blue)] mt-1">{s.value}{s.suffix}</div>
-            </div>
-          ))}
+        {/* Stats Grid — clickable CTAs */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {STATS.map((s, i) => {
+            const href = i === 0 ? "Runs" : i === 1 ? "TestManager" : i >= 4 ? "Compare" : null;
+            return (
+              <div key={s.label}
+                onClick={href ? () => navTo(href) : undefined}
+                className={`gcp-card p-3 text-center ${href ? "cursor-pointer transition-all hover:shadow-md hover:scale-[1.02]" : ""}`}
+              >
+                <div className="text-sm text-[var(--gcp-text-secondary)] truncate" title={s.label}>{s.label}</div>
+                <div className="text-2xl font-bold text-[var(--gcp-blue)] mt-1">{s.value}{s.suffix}</div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Features */}
@@ -76,7 +82,7 @@ export function About() {
           <h2 className="text-base font-medium text-[var(--gcp-text)] mb-3 flex items-center gap-2">
             <Zap size={16} className="text-[var(--gcp-blue)]" /> Features
           </h2>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {FEATURES.map(f => (
               <div key={f.label} className="gcp-card p-4 hover:bg-[var(--gcp-surface-hover)] transition-colors">
                 <f.icon size={18} className="text-[var(--gcp-blue)] mb-2" />
@@ -92,7 +98,7 @@ export function About() {
           <h2 className="text-base font-medium text-[var(--gcp-text)] mb-3 flex items-center gap-2">
             <Shield size={16} className="text-[var(--gcp-blue)]" /> Tech Stack
           </h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <div className="text-[var(--gcp-text-secondary)] text-[12px] mb-1">Framework</div>
               <div className="font-medium">React + TypeScript + Vite</div>

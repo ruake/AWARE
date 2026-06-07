@@ -1,9 +1,10 @@
 import React from "react";
 import { AppLayout } from "./_shared/AppLayout";
 import "./_group.css";
+import { copyToClipboard } from "./_shared/nav";
 import {
-  Link2, Copy, Check, Slack, Github, ExternalLink, Code2,
-  PlayCircle, Hash, GitCompare, FileText, ChevronDown,
+  Link2, Copy, Check, Slack, Github, Code2,
+  PlayCircle, Hash, GitCompare, FileText,
   Bell, Shield, Share2, Mail, AlertTriangle, CheckCircle2,
   Image, RefreshCw
 } from "lucide-react";
@@ -72,7 +73,8 @@ const BADGES = [
 
 function useCopy() {
   const [states, setStates] = React.useState<CopyState>({});
-  const copy = (key: string, _text: string) => {
+  const copy = (key: string, text: string) => {
+    copyToClipboard(text);
     setStates(s => ({ ...s, [key]: true }));
     setTimeout(() => setStates(s => ({ ...s, [key]: false })), 2000);
   };
@@ -237,7 +239,7 @@ Sent by A.W.A.K.E. (Akamai Web Analyser & Kit for Evaluations)`;
         </div>
 
         {/* 3-column grid */}
-        <div className="grid grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
 
           {/* ── Col 1: Permalink & Links ── */}
           <div className="space-y-4">

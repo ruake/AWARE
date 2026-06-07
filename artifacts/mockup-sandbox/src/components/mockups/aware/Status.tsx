@@ -460,7 +460,7 @@ export function Status() {
             </div>
             <span className="text-sm font-semibold">How it works — Static File Status Pipeline</span>
           </div>
-          <div className="grid grid-cols-3 gap-8 text-[12px] text-[var(--gcp-text-secondary)] leading-relaxed">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-[12px] text-[var(--gcp-text-secondary)] leading-relaxed">
             {[
               { num: "1", title: "GitHub Actions publishes", desc: "After tests complete, the workflow runs ", code: "pnpm publish:status", desc2: " which generates ", code2: "status.json", desc3: " and pushes it to the ", code3: "gh-pages", desc4: " branch." },
               { num: "2", title: "Portal polls for changes", desc: "The ", code: "useLiveStatus", desc2: " hook polls ", code2: "status.json", desc3: " every 30s using fetch with ETag headers to detect updates." },

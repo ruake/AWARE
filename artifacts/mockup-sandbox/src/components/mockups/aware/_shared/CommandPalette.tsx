@@ -1,7 +1,7 @@
 import React from "react";
 import { navTo } from "./nav";
 import { useSyncRuns, useSyncDiffs, useSyncTestCases, useSyncTestSuites } from "./hooks";
-import { Search, List, GitCompare, Beaker, ArrowUpRight, Bug, FolderTree } from "lucide-react";
+import { Search, List, GitCompare, Beaker, ArrowUpRight, FolderTree } from "lucide-react";
 
 type SearchResult = {
   id: string;
@@ -46,13 +46,13 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       type: "run" as const,
       path: `RunDetail?runId=${r.id}`,
     })),
-    ...diffs.slice(0, 8).map(d => ({
+    ...(runs.length >= 4 ? diffs.slice(0, 8).map(d => ({
       id: `compare_${d.id}`,
       label: `${d.name}`,
       description: `baseline vs candidate · ${d.state}`,
       type: "compare" as const,
       path: `Compare?baseline=${runs[0].id}&candidate=${runs[3].id}`,
-    })),
+    })) : []),
   ];
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(0);

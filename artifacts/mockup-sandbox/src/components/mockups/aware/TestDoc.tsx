@@ -59,10 +59,10 @@ export function TestDoc() {
         </div>
 
         {/* 3-Column Body */}
-        <div className="flex gap-4 flex-1 overflow-hidden">
+        <div className="flex-col lg:flex-row gap-4 flex-1 overflow-hidden">
           
           {/* LEFT COLUMN: What This Test Does */}
-          <div className="w-[32%] flex flex-col gap-4 overflow-y-auto pr-2 pb-8" style={{ height: "calc(100vh - 150px)" }}>
+          <div className="w-full lg:w-[32%] flex flex-col gap-4 overflow-y-auto pr-2 pb-8" style={{ height: "calc(100vh - 150px)" }}>
             <div className="gcp-card flex flex-col">
               <div className="p-4 border-b border-[var(--gcp-grey)] bg-[var(--gcp-surface-hover)]">
                 <h2 className="font-medium flex items-center gap-2">
@@ -170,7 +170,7 @@ export function TestDoc() {
           </div>
 
           {/* CENTER COLUMN: Run History & Trends */}
-          <div className="w-[36%] flex flex-col gap-4 overflow-y-auto pr-2 pb-8" style={{ height: "calc(100vh - 150px)" }}>
+          <div className="w-full lg:w-[36%] flex flex-col gap-4 overflow-y-auto pr-2 pb-8" style={{ height: "calc(100vh - 150px)" }}>
             <div className="gcp-card flex flex-col">
               <div className="p-4 border-b border-[var(--gcp-grey)] flex justify-between items-center bg-[var(--gcp-surface-hover)]">
                 <h2 className="font-medium text-sm">Pass Rate Over Time (7d)</h2>
@@ -291,7 +291,7 @@ export function TestDoc() {
           </div>
 
           {/* RIGHT COLUMN: GitHub Change History */}
-          <div className="w-[32%] flex flex-col gap-4 overflow-y-auto pr-2 pb-8" style={{ height: "calc(100vh - 150px)" }}>
+          <div className="w-full lg:w-[32%] flex flex-col gap-4 overflow-y-auto pr-2 pb-8" style={{ height: "calc(100vh - 150px)" }}>
             <div className="gcp-card flex flex-col flex-1">
               <div className="p-4 border-b border-[var(--gcp-grey)] bg-[var(--gcp-surface-hover)] flex justify-between items-center sticky top-0 z-10">
                 <h2 className="font-medium flex items-center gap-2">

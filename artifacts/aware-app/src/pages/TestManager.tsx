@@ -1,99 +1,446 @@
 import React from "react";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { getTestCases, getTestSuites, TEST_TAGS, createTestCase, updateTestCase, deleteTestCase, resetTestStore } from "@/lib/data";
-import type { TestCase } from "@/lib/types";
+import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
+import { useSyncedUrlState } from "@/lib/urlState";
 import {
-  Plus, Search, Filter, Check, Edit2, Trash2, FlaskConical,
-  RotateCcw, Tag, User, AlertTriangle, ChevronDown, X, Save,
+  getTestCases, getTestSuites, TEST_TAGS,
+  createTestCase, updateTestCase, deleteTestCase, resetTestStore,
+  importTestCases, exportTestCases, exportTestsAsJunitXml,
+  generateTestCases, computeTestStats, getTestChangelog,
+  updateTestCaseDocumentation, subscribeToTestCases, subscribeToTestSuites,
+} from "@/lib/data";
+import type { TestCase, TestSuite, GenerateParams, ImportResult, TestStats } from "@/lib/types";
+import {
+  Plus, Search, Check, Edit3, Trash2, Tag,
+  RotateCcw, Upload, Download, FileJson, FileSpreadsheet, FileCode,
+  X, Beaker, BarChart3, Clock, FileText, Sparkles, FolderTree,
 } from "lucide-react";
+
+const CATEGORIES = ["geo-match", "locale-split", "url-health", "security", "performance", "caching", "routing", "tls", "ddos"];
+const PRIORITIES: TestCase["priority"][] = ["P0", "P1", "P2", "P3"];
+const SEVERITIES: TestCase["severity"][] = ["critical", "major", "minor", "trivial"];
+const STATUSES: TestCase["status"][] = ["active", "disabled", "deprecated"];
+const OWNERS = ["alice@co.com", "bob@co.com", "carol@co.com", "dave@co.com", "eve@co.com"];
+const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
+
+const TAG_COLORS: Record<string, string> = {
+  geo: "#1a73e8", locale: "#9334e6", health: "#e8710a",
+  security: "#d93025", performance: "#1e8e3e", regression: "#f9ab00",
+  smoke: "#185abc", e2e: "#c5221f", automated: "#1e8e3e",
+};
+
+function useTestData() {
+  const [tcs, setTcs] = React.useState<TestCase[]>(() => getTestCases());
+  const [suites, setSuites] = React.useState<TestSuite[]>(() => getTestSuites());
+  React.useEffect(() => {
+    const u1 = subscribeToTestCases(() => setTcs(getTestCases()));
+    const u2 = subscribeToTestSuites(() => setSuites(getTestSuites()));
+    return () => { u1(); u2(); };
+  }, []);
+  return { tcs, suites };
+}
 
 function useToast() {
   const [msg, setMsg] = React.useState<string | null>(null);
   const show = (m: string) => { setMsg(m); setTimeout(() => setMsg(null), 2500); };
-  const Toast = msg ? <div className="gcp-toast"><Check size={13} style={{ color: "var(--gcp-green)" }} /> {msg}</div> : null;
+  const Toast = msg ? (
+    <div className="gcp-toast"><Check size={13} style={{ color: "var(--gcp-green)" }} /> {msg}</div>
+  ) : null;
   return { show, Toast };
 }
 
-const CATEGORIES = ["geo-match", "locale-split", "url-health", "security", "performance", "caching", "routing", "tls", "ddos"];
-const PRIORITIES: TestCase["priority"][] = ["P0", "P1", "P2", "P3"];
-const OWNERS = ["alice@co.com", "bob@co.com", "carol@co.com", "dave@co.com", "eve@co.com"];
-
 function priorityColor(p: string) {
-  return p === "P0" ? "var(--gcp-red)" : p === "P1" ? "var(--gcp-orange)" : p === "P2" ? "var(--gcp-yellow)" : "var(--gcp-text-secondary)";
+  return p === "P0" ? "#d93025" : p === "P1" ? "#e8710a" : p === "P2" ? "#1a73e8" : "#5f6368";
 }
 
-function CreateEditModal({ tc, onSave, onClose }: {
-  tc?: TestCase; onSave: (data: Partial<TestCase>) => void; onClose: () => void;
+function TagBadge({ tagId }: { tagId: string }) {
+  const tag = TEST_TAGS.find(t => t.id === tagId);
+  const name = tag ? tag.name : tagId.replace("tag_", "");
+  const color = TAG_COLORS[name] ?? "#5f6368";
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 8px", borderRadius: 12, fontSize: 10, fontWeight: 600, backgroundColor: color + "20", color, border: `1px solid ${color}40` }}>
+      <Tag size={9} /> {name}
+    </span>
+  );
+}
+
+function StatusBadge({ s }: { s: TestCase["status"] }) {
+  const map = { active: "gcp-badge-pass", disabled: "gcp-badge-flaky", deprecated: "gcp-badge-fail" };
+  const labels = { active: "Active", disabled: "Disabled", deprecated: "Deprecated" };
+  return <span className={`gcp-badge ${map[s]}`}>{labels[s]}</span>;
+}
+
+// ── Stats Dashboard ──────────────────────────────────────
+
+function StatsDashboard({ stats, colFilters, onToggleFilter }: {
+  stats: TestStats;
+  colFilters: Record<string, ColumnFilterState>;
+  onToggleFilter: (field: string, value: string) => void;
 }) {
-  const [form, setForm] = React.useState({
-    name: tc?.name ?? "",
-    description: tc?.description ?? "",
-    category: tc?.category ?? "geo-match",
-    priority: tc?.priority ?? "P2" as TestCase["priority"],
-    owner: tc?.owner ?? "alice@co.com",
-    status: tc?.status ?? "active" as TestCase["status"],
-    preconditions: tc?.preconditions ?? "",
-    expectedBehavior: tc?.expectedBehavior ?? "",
+  const statusData = Object.entries(stats.byStatus).map(([k, v]) => ({
+    name: k, value: v,
+    color: k === "active" ? "#1e8e3e" : k === "disabled" ? "#f9ab00" : "#d93025",
+  }));
+  const priorityData = Object.entries(stats.byPriority).sort().map(([k, v]) => ({
+    name: k, value: v,
+    color: k === "P0" ? "#d93025" : k === "P1" ? "#e8710a" : k === "P2" ? "#1a73e8" : "#5f6368",
+  }));
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr) repeat(2, 2fr)", gap: 14, marginBottom: 16 }}>
+      {/* KPI tiles */}
+      <div className="gcp-card" style={{ padding: 16, textAlign: "center", cursor: "pointer" }} onClick={() => onToggleFilter("_clear", "")}>
+        <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-blue)" }}>{stats.total}</div>
+        <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Total Tests</div>
+      </div>
+      <div className="gcp-card" style={{ padding: 16, textAlign: "center", cursor: "pointer" }} onClick={() => onToggleFilter("automated", "true")}>
+        <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-green)" }}>{stats.automated}</div>
+        <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Automated</div>
+      </div>
+      <div className="gcp-card" style={{ padding: 16, textAlign: "center" }}>
+        <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-text)" }}>{stats.coverage}%</div>
+        <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Category Coverage</div>
+      </div>
+      <div className="gcp-card" style={{ padding: 16, textAlign: "center" }}>
+        <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-text)" }}>{stats.avgVersion}</div>
+        <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Avg Version</div>
+      </div>
+      {/* By Status bar chart */}
+      <div className="gcp-card" style={{ padding: "12px 14px" }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Status</div>
+        <ResponsiveContainer width="100%" height={100}>
+          <BarChart data={statusData} barSize={24} onClick={(data) => data?.activeLabel && onToggleFilter("status", data.activeLabel)}>
+            <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+            <YAxis hide />
+            <Tooltip formatter={(v: number) => [v, "Count"]} contentStyle={{ fontSize: 11 }} />
+            <Bar dataKey="value" cursor="pointer">
+              {statusData.map((e, i) => <Cell key={i} fill={e.color} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      {/* By Priority bar chart */}
+      <div className="gcp-card" style={{ padding: "12px 14px" }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Priority</div>
+        <ResponsiveContainer width="100%" height={100}>
+          <BarChart data={priorityData} barSize={24} onClick={(data) => data?.activeLabel && onToggleFilter("priority", data.activeLabel)}>
+            <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+            <YAxis hide />
+            <Tooltip formatter={(v: number) => [v, "Count"]} contentStyle={{ fontSize: 11 }} />
+            <Bar dataKey="value" cursor="pointer">
+              {priorityData.map((e, i) => <Cell key={i} fill={e.color} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+// ── Test Case Form Modal ─────────────────────────────────
+
+const EMPTY_FORM: Omit<TestCase, "id" | "createdAt" | "updatedAt"> = {
+  name: "", description: "", category: "geo-match", priority: "P2",
+  severity: "minor", status: "active", tags: [], owner: OWNERS[0],
+  suiteIds: [], automated: true, scriptPath: "",
+  preconditions: "", expectedBehavior: "", documentation: "", relatedTestIds: [],
+  requestHeaders: {}, cookies: {}, expectedStatus: 200,
+  captureResponseHeaders: [], filmstrip: { enabled: false, threshold: 0.99 },
+  predicates: [], version: 1, changelog: [],
+};
+
+function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
+  initial: Omit<TestCase, "id" | "createdAt" | "updatedAt">;
+  allSuites: TestSuite[];
+  onSave: (data: Omit<TestCase, "id" | "createdAt" | "updatedAt">) => void;
+  onCancel: () => void;
+}) {
+  const [form, setForm] = React.useState(initial);
+  const [activeTab, setActiveTab] = React.useState<"basic" | "docs" | "http">("basic");
+  const u = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }));
+
+  const tabStyle = (tab: string) => ({
+    padding: "10px 18px", fontSize: 13, fontWeight: 500, cursor: "pointer",
+    border: "none", background: activeTab === tab ? "var(--gcp-surface)" : "transparent",
+    borderBottom: `2px solid ${activeTab === tab ? "var(--gcp-blue)" : "transparent"}`,
+    color: activeTab === tab ? "var(--gcp-blue)" : "var(--gcp-text-secondary)",
   });
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
-      <div style={{ background: "var(--gcp-surface)", borderRadius: 6, width: "min(560px, 92vw)", maxHeight: "85vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 8px 40px rgba(0,0,0,0.25)" }} onClick={e => e.stopPropagation()}>
-        <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700 }}>{tc ? "Edit Test Case" : "New Test Case"}</h2>
-          <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 20, color: "var(--gcp-text-secondary)", lineHeight: 1 }}>×</button>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onCancel}>
+      <div style={{ background: "var(--gcp-surface)", borderRadius: 10, width: "min(860px, 94vw)", maxHeight: "90vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }} onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700 }}>{initial.name ? "Edit Test Case" : "New Test Case"}</h2>
+            {initial.version > 1 && <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "1px 7px", fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)" }}>v{initial.version}</span>}
+          </div>
+          <button onClick={onCancel} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><X size={18} /></button>
         </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
-          <div>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Test Name *</label>
-            <input className="gcp-input" style={{ width: "100%" }} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Verify Geo match for /api/v1/…" />
-          </div>
-          <div>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Description</label>
-            <textarea className="gcp-input" style={{ width: "100%", height: 64, resize: "vertical", fontFamily: "var(--font-sans)" }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-            <div>
-              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Category</label>
-              <select className="gcp-input" style={{ width: "100%" }} value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Priority</label>
-              <select className="gcp-input" style={{ width: "100%" }} value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value as TestCase["priority"] }))}>
-                {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Status</label>
-              <select className="gcp-input" style={{ width: "100%" }} value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as TestCase["status"] }))}>
-                <option value="active">Active</option>
-                <option value="disabled">Disabled</option>
-                <option value="deprecated">Deprecated</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Owner</label>
-            <select className="gcp-input" style={{ width: "100%" }} value={form.owner} onChange={e => setForm(f => ({ ...f, owner: e.target.value }))}>
-              {OWNERS.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
-          </div>
-          <div>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Preconditions</label>
-            <textarea className="gcp-input" style={{ width: "100%", height: 56, resize: "vertical", fontFamily: "var(--font-sans)", fontSize: 12 }} value={form.preconditions} onChange={e => setForm(f => ({ ...f, preconditions: e.target.value }))} />
-          </div>
-          <div>
-            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Expected Behavior</label>
-            <textarea className="gcp-input" style={{ width: "100%", height: 56, resize: "vertical", fontFamily: "var(--font-sans)", fontSize: 12 }} value={form.expectedBehavior} onChange={e => setForm(f => ({ ...f, expectedBehavior: e.target.value }))} />
-          </div>
+        {/* Tabs */}
+        <div style={{ display: "flex", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)", flexShrink: 0 }}>
+          <button style={tabStyle("basic")} onClick={() => setActiveTab("basic")}>Basic Info</button>
+          <button style={tabStyle("docs")} onClick={() => setActiveTab("docs")}>Documentation</button>
+          <button style={tabStyle("http")} onClick={() => setActiveTab("http")}>HTTP &amp; Predicates</button>
         </div>
-        <div style={{ padding: "12px 18px", borderTop: "1px solid var(--gcp-grey)", display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button onClick={onClose} className="gcp-button" style={{ fontSize: 13 }}>Cancel</button>
-          <button onClick={() => { if (!form.name.trim()) return; onSave(form); }} className="gcp-button-primary" style={{ fontSize: 13 }}>
-            <Save size={13} /> {tc ? "Save Changes" : "Create Test Case"}
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
+          {activeTab === "basic" && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div style={{ gridColumn: "1/-1" }}>
+                <Label>Name *</Label>
+                <input className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.name} onChange={e => u("name", e.target.value)} placeholder="Verify Geo match for /api/v1/…" />
+              </div>
+              <div style={{ gridColumn: "1/-1" }}>
+                <Label>Description</Label>
+                <textarea className="gcp-input" style={{ width: "100%", marginTop: 4, height: 60, resize: "vertical" }} value={form.description} onChange={e => u("description", e.target.value)} />
+              </div>
+              <div>
+                <Label>Category</Label>
+                <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.category} onChange={e => u("category", e.target.value)}>
+                  {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label>Priority</Label>
+                <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.priority} onChange={e => u("priority", e.target.value)}>
+                  {PRIORITIES.map(p => <option key={p}>{p}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label>Severity</Label>
+                <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.severity} onChange={e => u("severity", e.target.value)}>
+                  {SEVERITIES.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.status} onChange={e => u("status", e.target.value as TestCase["status"])}>
+                  {STATUSES.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label>Owner</Label>
+                <input className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.owner} onChange={e => u("owner", e.target.value)} placeholder="email@co.com" />
+              </div>
+              <div>
+                <Label>Script Path</Label>
+                <input className="gcp-input" style={{ width: "100%", marginTop: 4, fontFamily: "var(--font-mono)", fontSize: 12 }} value={form.scriptPath} onChange={e => u("scriptPath", e.target.value)} placeholder="tests/geo/tc.spec.ts" />
+              </div>
+              <div>
+                <Label>Automated</Label>
+                <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                  {[["Yes", true], ["No", false]].map(([label, val]) => (
+                    <span key={String(label)} onClick={() => u("automated", val)}
+                      style={{ padding: "4px 14px", borderRadius: 4, fontSize: 11, cursor: "pointer", border: "1px solid", fontWeight: 600,
+                        background: form.automated === val ? (val ? "var(--gcp-green)" : "var(--gcp-yellow)") : "transparent",
+                        color: form.automated === val ? "white" : "var(--gcp-text-secondary)",
+                        borderColor: form.automated === val ? (val ? "var(--gcp-green)" : "var(--gcp-yellow)") : "var(--gcp-grey)",
+                      }}>{label}</span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>Suites</Label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                  {allSuites.map(s => (
+                    <span key={s.id} onClick={() => u("suiteIds", form.suiteIds.includes(s.id) ? form.suiteIds.filter((x: string) => x !== s.id) : [...form.suiteIds, s.id])}
+                      style={{ padding: "3px 10px", borderRadius: 4, fontSize: 11, cursor: "pointer", border: "1px solid", fontWeight: 500,
+                        background: form.suiteIds.includes(s.id) ? "var(--gcp-blue)" : "transparent",
+                        color: form.suiteIds.includes(s.id) ? "white" : "var(--gcp-text-secondary)",
+                        borderColor: form.suiteIds.includes(s.id) ? "var(--gcp-blue)" : "var(--gcp-grey)",
+                      }}>{s.name}</span>
+                  ))}
+                </div>
+              </div>
+              <div style={{ gridColumn: "1/-1" }}>
+                <Label>Preconditions</Label>
+                <textarea className="gcp-input" style={{ width: "100%", marginTop: 4, height: 50, resize: "vertical", fontFamily: "var(--font-mono)", fontSize: 12 }} value={form.preconditions} onChange={e => u("preconditions", e.target.value)} />
+              </div>
+              <div style={{ gridColumn: "1/-1" }}>
+                <Label>Expected Behavior</Label>
+                <textarea className="gcp-input" style={{ width: "100%", marginTop: 4, height: 50, resize: "vertical", fontFamily: "var(--font-mono)", fontSize: 12 }} value={form.expectedBehavior} onChange={e => u("expectedBehavior", e.target.value)} />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "docs" && (
+            <div>
+              <Label>Markdown Documentation</Label>
+              <textarea className="gcp-input" style={{ width: "100%", marginTop: 6, minHeight: 280, fontFamily: "var(--font-mono)", fontSize: 12, lineHeight: 1.6, resize: "vertical" }} value={form.documentation} onChange={e => u("documentation", e.target.value)} />
+              {form.documentation && (
+                <div className="gcp-card" style={{ padding: 16, marginTop: 12, fontSize: 13, lineHeight: 1.7, color: "var(--gcp-text-secondary)" }}>
+                  {form.documentation.split("\n").map((line: string, i: number) => (
+                    <p key={i} style={{ margin: "2px 0", fontWeight: line.startsWith("##") ? 700 : 400, fontSize: line.startsWith("##") ? 15 : 13, color: line.startsWith("##") ? "var(--gcp-text)" : "var(--gcp-text-secondary)" }}>
+                      {line.replace(/^#{1,3}\s*/, "")}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "http" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <div>
+                <Label>Expected Status Code</Label>
+                <input type="number" className="gcp-input" style={{ width: 100, marginTop: 6 }} value={form.expectedStatus} onChange={e => u("expectedStatus", Number(e.target.value))} />
+              </div>
+              {/* Request Headers */}
+              <div>
+                <Label>Request Headers</Label>
+                <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 6 }}>
+                  {Object.entries(form.requestHeaders).map(([k, v]) => (
+                    <div key={k} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <input className="gcp-input" style={{ width: 180, fontFamily: "var(--font-mono)", fontSize: 12 }} value={k} onChange={e => {
+                        const h = { ...form.requestHeaders }; delete h[k]; h[e.target.value] = v as string;
+                        u("requestHeaders", h);
+                      }} placeholder="Header-Name" />
+                      <span style={{ color: "var(--gcp-text-secondary)" }}>:</span>
+                      <input className="gcp-input" style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: 12 }} value={v as string} onChange={e => u("requestHeaders", { ...form.requestHeaders, [k]: e.target.value })} placeholder="value" />
+                      <button onClick={() => { const h = { ...form.requestHeaders }; delete h[k]; u("requestHeaders", h); }} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-red)" }}><X size={14} /></button>
+                    </div>
+                  ))}
+                  <button onClick={() => u("requestHeaders", { ...form.requestHeaders, "": "" })} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--gcp-blue)", fontSize: 12, textAlign: "left", display: "flex", alignItems: "center", gap: 4 }}>
+                    <Plus size={12} /> Add Header
+                  </button>
+                </div>
+              </div>
+              {/* Cookies */}
+              <div>
+                <Label>Cookies</Label>
+                <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 6 }}>
+                  {Object.entries(form.cookies).map(([k, v]) => (
+                    <div key={k} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <input className="gcp-input" style={{ width: 180, fontFamily: "var(--font-mono)", fontSize: 12 }} value={k} onChange={e => {
+                        const c = { ...form.cookies }; delete c[k]; c[e.target.value] = v as string;
+                        u("cookies", c);
+                      }} placeholder="cookie-name" />
+                      <span style={{ color: "var(--gcp-text-secondary)" }}>:</span>
+                      <input className="gcp-input" style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: 12 }} value={v as string} onChange={e => u("cookies", { ...form.cookies, [k]: e.target.value })} placeholder="value" />
+                      <button onClick={() => { const c = { ...form.cookies }; delete c[k]; u("cookies", c); }} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-red)" }}><X size={14} /></button>
+                    </div>
+                  ))}
+                  <button onClick={() => u("cookies", { ...form.cookies, "": "" })} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--gcp-blue)", fontSize: 12, textAlign: "left", display: "flex", alignItems: "center", gap: 4 }}>
+                    <Plus size={12} /> Add Cookie
+                  </button>
+                </div>
+              </div>
+              {/* Capture Response Headers */}
+              <div>
+                <Label>Capture Response Headers</Label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                  {form.captureResponseHeaders.map((h: string) => (
+                    <span key={h} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 12, fontSize: 11, background: "var(--gcp-blue)", color: "white" }}>
+                      {h}
+                      <button onClick={() => u("captureResponseHeaders", form.captureResponseHeaders.filter((x: string) => x !== h))} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 12, lineHeight: 1 }}>×</button>
+                    </span>
+                  ))}
+                  <input className="gcp-input" style={{ width: 140, fontSize: 12 }} placeholder="Add header + Enter" onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      const v = (e.target as HTMLInputElement).value.trim();
+                      if (v && !form.captureResponseHeaders.includes(v)) u("captureResponseHeaders", [...form.captureResponseHeaders, v]);
+                      (e.target as HTMLInputElement).value = "";
+                    }
+                  }} />
+                </div>
+              </div>
+              {/* Filmstrip */}
+              <div style={{ borderTop: "1px solid var(--gcp-grey)", paddingTop: 16 }}>
+                <Label>Filmstrip Visual Comparison</Label>
+                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                  {[["Enabled", true], ["Disabled", false]].map(([label, val]) => (
+                    <span key={String(label)} onClick={() => u("filmstrip", { ...form.filmstrip, enabled: val })}
+                      style={{ padding: "4px 14px", borderRadius: 4, fontSize: 11, cursor: "pointer", border: "1px solid", fontWeight: 600,
+                        background: form.filmstrip.enabled === val ? (val ? "var(--gcp-green)" : "var(--gcp-yellow)") : "transparent",
+                        color: form.filmstrip.enabled === val ? "white" : "var(--gcp-text-secondary)",
+                        borderColor: form.filmstrip.enabled === val ? (val ? "var(--gcp-green)" : "var(--gcp-yellow)") : "var(--gcp-grey)",
+                      }}>{label}</span>
+                  ))}
+                </div>
+                {form.filmstrip.enabled && (
+                  <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div>
+                      <label style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>Similarity Threshold ({Math.round(form.filmstrip.threshold * 100)}%)</label>
+                      <input type="range" min={0.5} max={1} step={0.01} style={{ width: "100%", marginTop: 4 }} value={form.filmstrip.threshold} onChange={e => u("filmstrip", { ...form.filmstrip, threshold: Number(e.target.value) })} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>Region</label>
+                      <select className="gcp-input" style={{ marginTop: 4, width: 180 }} value={form.filmstrip.region ?? "full"} onChange={e => u("filmstrip", { ...form.filmstrip, region: e.target.value })}>
+                        <option value="full">Full Page</option>
+                        <option value="viewport">Viewport</option>
+                        <option value="element">Element</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* Predicates */}
+              <div style={{ borderTop: "1px solid var(--gcp-grey)", paddingTop: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                  <Label>Predicates ({form.predicates.length})</Label>
+                  <button onClick={() => {
+                    const newP = { id: `pred_${Date.now()}`, type: "statusCode" as const, field: "", expected: "200", operator: "equals" as const, description: "Assertion" };
+                    u("predicates", [...form.predicates, newP]);
+                  }} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--gcp-blue)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                    <Plus size={12} /> Add Predicate
+                  </button>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {form.predicates.map((p: TestCase["predicates"][0], pi: number) => (
+                    <div key={p.id} className="gcp-card" style={{ padding: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                        <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)" }}>#{pi + 1}</span>
+                        <button onClick={() => u("predicates", form.predicates.filter((x: typeof p) => x.id !== p.id))} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-red)" }}><X size={12} /></button>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                        <div>
+                          <label style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>Type</label>
+                          <select className="gcp-input" style={{ width: "100%", marginTop: 3, fontSize: 12 }} value={p.type} onChange={e => u("predicates", form.predicates.map((x: typeof p) => x.id === p.id ? { ...x, type: e.target.value } : x))}>
+                            <option value="statusCode">Status Code</option>
+                            <option value="headerEquals">Header Equals</option>
+                            <option value="headerContains">Header Contains</option>
+                            <option value="responseTime">Response Time</option>
+                            <option value="cookieEquals">Cookie Equals</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>Operator</label>
+                          <select className="gcp-input" style={{ width: "100%", marginTop: 3, fontSize: 12 }} value={p.operator} onChange={e => u("predicates", form.predicates.map((x: typeof p) => x.id === p.id ? { ...x, operator: e.target.value } : x))}>
+                            <option value="equals">Equals</option>
+                            <option value="contains">Contains</option>
+                            <option value="gt">Greater Than</option>
+                            <option value="lt">Less Than</option>
+                            <option value="exists">Exists</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>Field</label>
+                          <input className="gcp-input" style={{ width: "100%", marginTop: 3, fontSize: 12, fontFamily: "var(--font-mono)" }} value={p.field} onChange={e => u("predicates", form.predicates.map((x: typeof p) => x.id === p.id ? { ...x, field: e.target.value } : x))} placeholder={p.type === "statusCode" ? "(auto)" : "e.g. X-Cache"} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>Expected Value</label>
+                          <input className="gcp-input" style={{ width: "100%", marginTop: 3, fontSize: 12, fontFamily: "var(--font-mono)" }} value={p.expected} onChange={e => u("predicates", form.predicates.map((x: typeof p) => x.id === p.id ? { ...x, expected: e.target.value } : x))} placeholder={p.type === "statusCode" ? "200" : "value"} />
+                        </div>
+                        <div style={{ gridColumn: "1/-1" }}>
+                          <label style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>Description</label>
+                          <input className="gcp-input" style={{ width: "100%", marginTop: 3, fontSize: 12 }} value={p.description} onChange={e => u("predicates", form.predicates.map((x: typeof p) => x.id === p.id ? { ...x, description: e.target.value } : x))} placeholder="Assertion description" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        {/* Footer */}
+        <div style={{ padding: "12px 20px", borderTop: "1px solid var(--gcp-grey)", display: "flex", justifyContent: "flex-end", gap: 10, flexShrink: 0 }}>
+          <button onClick={onCancel} className="gcp-button" style={{ fontSize: 13 }}>Cancel</button>
+          <button onClick={() => { if (!form.name.trim()) return; onSave(form); }} className="gcp-button gcp-button-primary" disabled={!form.name.trim()} style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+            <Check size={13} /> {initial.name ? "Update" : "Create"}
           </button>
         </div>
       </div>
@@ -101,249 +448,492 @@ function CreateEditModal({ tc, onSave, onClose }: {
   );
 }
 
-export default function TestManager() {
-  const { show, Toast } = useToast();
-  const [cases, setCases] = React.useState(getTestCases());
-  const [suites] = React.useState(getTestSuites());
-  const [search, setSearch] = React.useState("");
-  const [catFilter, setCatFilter] = React.useState("all");
-  const [statusFilter, setStatusFilter] = React.useState("all");
-  const [priorityFilter, setPriorityFilter] = React.useState("all");
-  const [activeTab, setActiveTab] = React.useState<"cases" | "suites">("cases");
-  const [editingTc, setEditingTc] = React.useState<TestCase | undefined>(undefined);
-  const [creatingNew, setCreatingNew] = React.useState(false);
-  const [deleteConfirm, setDeleteConfirm] = React.useState<string | null>(null);
+function Label({ children }: { children: React.ReactNode }) {
+  return <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{children}</label>;
+}
 
-  const refresh = () => setCases(getTestCases());
+// ── Import Modal ─────────────────────────────────────────
 
-  const categories = [...new Set(getTestCases().map(t => t.category))];
+function ImportModal({ onClose, toast }: { onClose: () => void; toast: (m: string) => void }) {
+  const [text, setText] = React.useState("");
+  const [result, setResult] = React.useState<ImportResult | null>(null);
+  const [loading, setLoading] = React.useState(false);
 
-  const filtered = cases.filter(tc => {
-    if (catFilter !== "all" && tc.category !== catFilter) return false;
-    if (statusFilter !== "all" && tc.status !== statusFilter) return false;
-    if (priorityFilter !== "all" && tc.priority !== priorityFilter) return false;
-    if (search && !tc.name.toLowerCase().includes(search.toLowerCase())) return false;
+  const handleImport = () => {
+    setLoading(true);
+    try {
+      const data = JSON.parse(text);
+      if (!Array.isArray(data)) { toast("Must be a JSON array"); setLoading(false); return; }
+      const res = importTestCases(data as TestCase[]);
+      setResult(res);
+      if (res.imported > 0) toast(`Imported ${res.imported} test cases`);
+    } catch { toast("Invalid JSON"); } finally { setLoading(false); }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
+      <div style={{ background: "var(--gcp-surface)", borderRadius: 10, width: "min(600px, 92vw)", padding: 24, boxShadow: "0 20px 60px rgba(0,0,0,0.3)", display: "flex", flexDirection: "column", gap: 14 }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}><Upload size={18} /> Import Test Cases</h2>
+          <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><X size={18} /></button>
+        </div>
+        <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>Paste a JSON array of test case objects. Required: <code style={{ background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3 }}>name</code>, <code style={{ background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3 }}>category</code></p>
+        <textarea className="gcp-input" style={{ width: "100%", minHeight: 180, fontFamily: "var(--font-mono)", fontSize: 12 }} value={text} onChange={e => setText(e.target.value)} placeholder='[{"name":"...","category":"geo-match",...}]' />
+        {result && (
+          <div style={{ padding: 12, background: "var(--gcp-grey-bg)", borderRadius: 6, fontSize: 13 }}>
+            <span style={{ color: "var(--gcp-green)", fontWeight: 600 }}>✓ {result.imported} imported</span>
+            {result.skipped > 0 && <span style={{ color: "var(--gcp-yellow)", fontWeight: 600, marginLeft: 12 }}>⏭ {result.skipped} skipped</span>}
+            {result.errors.length > 0 && <span style={{ color: "var(--gcp-red)", marginLeft: 12 }}>{result.errors.length} errors</span>}
+          </div>
+        )}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+          <button onClick={onClose} className="gcp-button" style={{ fontSize: 13 }}>Close</button>
+          <button onClick={handleImport} disabled={loading || !text.trim()} className="gcp-button gcp-button-primary" style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+            <Upload size={14} /> {loading ? "Importing..." : "Import"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Generate Wizard ───────────────────────────────────────
+
+function GenerateWizard({ allSuites, onClose, toast }: { allSuites: TestSuite[]; onClose: () => void; toast: (m: string) => void }) {
+  const [params, setParams] = React.useState<GenerateParams>({ count: 10, category: "geo-match", status: "active", priority: "P2", owner: OWNERS[0], suites: [] });
+  const [loading, setLoading] = React.useState(false);
+
+  const handleGenerate = () => {
+    setLoading(true);
+    try {
+      const result = generateTestCases(params);
+      toast(`Generated ${result.length} test cases`);
+      onClose();
+    } catch { toast("Generation failed"); } finally { setLoading(false); }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
+      <div style={{ background: "var(--gcp-surface)", borderRadius: 10, width: "min(480px, 92vw)", padding: 24, boxShadow: "0 20px 60px rgba(0,0,0,0.3)", display: "flex", flexDirection: "column", gap: 16 }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}><Sparkles size={18} style={{ color: "#f9ab00" }} /> Bulk Generate</h2>
+          <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><X size={18} /></button>
+        </div>
+        <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>Generate multiple test cases from CDN templates.</p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div>
+            <Label>Count</Label>
+            <input type="number" min={1} max={100} className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.count} onChange={e => setParams(p => ({ ...p, count: Number(e.target.value) }))} />
+          </div>
+          <div>
+            <Label>Category</Label>
+            <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.category} onChange={e => setParams(p => ({ ...p, category: e.target.value }))}>
+              {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label>Priority</Label>
+            <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.priority} onChange={e => setParams(p => ({ ...p, priority: e.target.value as GenerateParams["priority"] }))}>
+              {PRIORITIES.map(p => <option key={p}>{p}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label>Status</Label>
+            <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.status} onChange={e => setParams(p => ({ ...p, status: e.target.value as GenerateParams["status"] }))}>
+              {STATUSES.map(s => <option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label>Owner</Label>
+            <input className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={params.owner} onChange={e => setParams(p => ({ ...p, owner: e.target.value }))} />
+          </div>
+          <div>
+            <Label>Assign to Suites</Label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+              {allSuites.slice(0, 6).map(s => (
+                <span key={s.id} onClick={() => setParams(p => ({ ...p, suites: p.suites.includes(s.id) ? p.suites.filter(x => x !== s.id) : [...p.suites, s.id] }))}
+                  style={{ padding: "2px 8px", borderRadius: 4, fontSize: 11, cursor: "pointer", border: "1px solid",
+                    background: params.suites.includes(s.id) ? "var(--gcp-blue)" : "transparent",
+                    color: params.suites.includes(s.id) ? "white" : "var(--gcp-text-secondary)",
+                    borderColor: params.suites.includes(s.id) ? "var(--gcp-blue)" : "var(--gcp-grey)",
+                  }}>{s.name.split(" ")[0]}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+          <button onClick={onClose} className="gcp-button" style={{ fontSize: 13 }}>Cancel</button>
+          <button onClick={handleGenerate} disabled={loading} className="gcp-button gcp-button-primary" style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+            <Sparkles size={14} /> {loading ? "Generating..." : `Generate ${params.count} Tests`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Side Panel ────────────────────────────────────────────
+
+function SidePanel({ tc, onClose, toast, navigate }: { tc: TestCase; onClose: () => void; toast: (m: string) => void; navigate: (h: string) => void }) {
+  const [editingDoc, setEditingDoc] = React.useState(false);
+  const [docText, setDocText] = React.useState(tc.documentation);
+  const changelog = getTestChangelog(tc.id);
+
+  const handleSaveDoc = () => {
+    updateTestCaseDocumentation(tc.id, docText, tc.owner);
+    toast("Documentation updated");
+    setEditingDoc(false);
+  };
+
+  return (
+    <div style={{ width: 340, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", borderLeft: "3px solid var(--gcp-blue)", background: "var(--gcp-surface)" }} className="gcp-card">
+      <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--gcp-blue-bg)", flexShrink: 0 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-blue)", display: "flex", alignItems: "center", gap: 6 }}><Beaker size={13} /> {tc.id}</span>
+        <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)", fontSize: 18, lineHeight: 1 }}>×</button>
+      </div>
+      <div style={{ flex: 1, overflowY: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 14 }}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.5, marginBottom: 6 }}>{tc.name}</div>
+          <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)", lineHeight: 1.5 }}>{tc.description}</p>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <StatusBadge s={tc.status} />
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: priorityColor(tc.priority) }}>{tc.priority}</span>
+          <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{tc.category}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)" }}>v{tc.version}</span>
+          {tc.automated && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>Automated</span>}
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>{tc.tags.map(t => <TagBadge key={t} tagId={t} />)}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {[
+            ["Owner", tc.owner],
+            ["Script", tc.scriptPath],
+            ["Expected Status", String(tc.expectedStatus)],
+            ["Predicates", `${tc.predicates.length} rules`],
+            ["Updated", new Date(tc.updatedAt).toLocaleDateString()],
+          ].map(([k, v]) => (
+            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--gcp-grey)", fontSize: 12 }}>
+              <span style={{ color: "var(--gcp-text-secondary)" }}>{k}</span>
+              <span style={{ fontFamily: k === "Script" || k === "Expected Status" ? "var(--font-mono)" : undefined, fontSize: 11 }}>{v}</span>
+            </div>
+          ))}
+        </div>
+        {/* HTTP summary */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+          {Object.keys(tc.requestHeaders).length > 0 && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>{Object.keys(tc.requestHeaders).length} headers</span>}
+          {Object.keys(tc.cookies).length > 0 && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>{Object.keys(tc.cookies).length} cookies</span>}
+          {tc.captureResponseHeaders.length > 0 && <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>Capture {tc.captureResponseHeaders.length}</span>}
+          {tc.filmstrip.enabled && <span className="gcp-badge gcp-badge-flaky" style={{ fontSize: 10 }}>Filmstrip {Math.round(tc.filmstrip.threshold * 100)}%</span>}
+        </div>
+        {/* Documentation */}
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Documentation</span>
+            <button onClick={() => setEditingDoc(!editingDoc)} style={{ fontSize: 11, color: "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer" }}>{editingDoc ? "Preview" : "Edit"}</button>
+          </div>
+          {editingDoc ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <textarea className="gcp-input" style={{ width: "100%", minHeight: 120, fontFamily: "var(--font-mono)", fontSize: 12 }} value={docText} onChange={e => setDocText(e.target.value)} />
+              <button onClick={handleSaveDoc} className="gcp-button gcp-button-primary" style={{ fontSize: 12, alignSelf: "flex-start" }}>Save</button>
+            </div>
+          ) : (
+            <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{tc.documentation || "No documentation"}</div>
+          )}
+        </div>
+        {/* Changelog */}
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
+            <Clock size={11} /> Changelog (v{tc.version})
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {changelog.slice(0, 5).map(e => (
+              <div key={e.version} style={{ display: "flex", gap: 8, fontSize: 12 }}>
+                <span style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", flexShrink: 0 }}>v{e.version}</span>
+                <div>
+                  <p style={{ fontWeight: 600, margin: 0 }}>{e.summary}</p>
+                  <p style={{ fontSize: 11, color: "var(--gcp-text-secondary)", margin: 0 }}>{e.author} · {new Date(e.timestamp).toLocaleDateString()}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Actions */}
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={() => navigate(`/analytics?testId=${tc.id}`)} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><BarChart3 size={13} /> Analytics</button>
+          <button onClick={() => { navigator.clipboard.writeText(`https://aware.example.com/tests/${tc.id}`); toast("Link copied"); }} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><FileText size={13} /> Copy Link</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Bulk Actions Bar ──────────────────────────────────────
+
+function BulkActionsBar({ selected, onClear, onDelete, onExport, onStatusChange }: {
+  selected: Set<string>; onClear: () => void; onDelete: () => void;
+  onExport: (format: "json" | "csv" | "junit_xml") => void;
+  onStatusChange: (s: TestCase["status"]) => void;
+}) {
+  if (selected.size === 0) return null;
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", background: "var(--gcp-blue-bg)", border: "1px solid var(--gcp-blue)", borderRadius: 6, fontSize: 13, flexWrap: "wrap" }}>
+      <Check size={14} style={{ color: "var(--gcp-blue)" }} />
+      <span style={{ fontWeight: 600, color: "var(--gcp-blue)" }}>{selected.size} selected</span>
+      <div style={{ width: 1, height: 16, background: "var(--gcp-grey)", margin: "0 4px" }} />
+      <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", color: "var(--gcp-red)", background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600 }}><Trash2 size={12} /> Delete</button>
+      <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>Status:</span>
+      {STATUSES.map(s => <button key={s} onClick={() => onStatusChange(s)} style={{ padding: "3px 8px", fontSize: 12, border: "none", background: "none", cursor: "pointer", textTransform: "capitalize" }}>{s}</button>)}
+      <div style={{ flex: 1 }} />
+      <button onClick={() => onExport("json")} style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", fontSize: 12, border: "none", background: "none", cursor: "pointer" }}><FileJson size={12} /> JSON</button>
+      <button onClick={() => onExport("csv")} style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", fontSize: 12, border: "none", background: "none", cursor: "pointer" }}><FileSpreadsheet size={12} /> CSV</button>
+      <button onClick={() => onExport("junit_xml")} style={{ display: "flex", alignItems: "center", gap: 4, padding: "3px 8px", fontSize: 12, border: "none", background: "none", cursor: "pointer" }}><FileCode size={12} /> JUnit</button>
+      <button onClick={onClear} style={{ padding: 4, border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><X size={14} /></button>
+    </div>
+  );
+}
+
+function applyFilters(tcs: TestCase[], colFilters: Record<string, ColumnFilterState>, searchText: string) {
+  return tcs.filter(tc => {
+    if (searchText) {
+      const q = searchText.toLowerCase();
+      if (!tc.name.toLowerCase().includes(q) && !tc.description.toLowerCase().includes(q) && !tc.id.toLowerCase().includes(q)) return false;
+    }
+    for (const [field, f] of Object.entries(colFilters)) {
+      if (!f.text && f.selected.length === 0) continue;
+      const raw = String((tc as unknown as Record<string, unknown>)[field] ?? "");
+      if (f.text && !raw.toLowerCase().includes(f.text.toLowerCase())) return false;
+      if (f.selected.length > 0 && !f.selected.includes(raw)) return false;
+    }
     return true;
   });
+}
 
-  const handleCreate = (data: Partial<TestCase>) => {
+function downloadString(content: string, filename: string) {
+  const blob = new Blob([content], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+// ── Main Component ────────────────────────────────────────
+
+export default function TestManager() {
+  const [, navigate] = useLocation();
+  const { tcs, suites } = useTestData();
+  const stats = React.useMemo(() => computeTestStats(), [tcs]);
+  const { show: toast, Toast } = useToast();
+
+  const [searchText, setSearchText] = React.useState("");
+  const [colFilters, setColFilters] = useSyncedUrlState<Record<string, ColumnFilterState>>("filters", {});
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [showCreate, setShowCreate] = React.useState(false);
+  const [showImport, setShowImport] = React.useState(false);
+  const [showGenerate, setShowGenerate] = React.useState(false);
+  const [selectedPanelId, setSelectedPanelId] = useSyncedUrlState<string | null>("sel", null);
+
+  const updateColFilter = (field: string) => (f: ColumnFilterState) => setColFilters(prev => ({ ...prev, [field]: f }));
+
+  const handleStatFilter = (field: string, value: string) => {
+    if (field === "_clear") { setColFilters({}); return; }
+    setColFilters(prev => {
+      const cur = prev[field];
+      const isActive = cur?.selected.includes(value);
+      if (isActive) {
+        const next = { ...prev };
+        if (next[field]) next[field] = { ...next[field], selected: next[field].selected.filter(v => v !== value) };
+        return next;
+      }
+      return { ...prev, [field]: { text: "", selected: [...(cur?.selected ?? []), value] } };
+    });
+  };
+
+  const filtered = React.useMemo(() => applyFilters(tcs, colFilters, searchText), [tcs, colFilters, searchText]);
+
+  const selectedPanel = selectedPanelId ? tcs.find(t => t.id === selectedPanelId) ?? null : null;
+  const editingTc = editingId ? tcs.find(t => t.id === editingId) : null;
+
+  const handleCreate = (data: Omit<TestCase, "id" | "createdAt" | "updatedAt">) => {
     createTestCase(data);
-    refresh();
-    setCreatingNew(false);
-    show("Test case created and saved to localStorage");
+    setShowCreate(false);
+    toast("Test case created");
   };
 
-  const handleEdit = (data: Partial<TestCase>) => {
-    if (editingTc) {
-      updateTestCase(editingTc.id, data);
-      refresh();
-      setEditingTc(undefined);
-      show("Test case updated");
+  const handleUpdate = (data: Omit<TestCase, "id" | "createdAt" | "updatedAt">) => {
+    if (!editingId) return;
+    updateTestCase(editingId, data);
+    setEditingId(null);
+    toast("Test case updated");
+  };
+
+  const handleDelete = (ids: string[]) => {
+    ids.forEach(id => deleteTestCase(id));
+    setSelectedIds(new Set());
+    if (selectedPanelId && ids.includes(selectedPanelId)) setSelectedPanelId(null);
+    toast(`Deleted ${ids.length} test case${ids.length > 1 ? "s" : ""}`);
+  };
+
+  const handleExport = (format: "json" | "csv" | "junit_xml") => {
+    if (format === "junit_xml") {
+      downloadString(exportTestsAsJunitXml(), "aware-tests.xml");
+    } else {
+      downloadString(exportTestCases(format), `aware-tests.${format === "json" ? "json" : "csv"}`);
     }
+    toast(`Exported as ${format.toUpperCase()}`);
   };
 
-  const handleDelete = (id: string) => {
-    deleteTestCase(id);
-    refresh();
-    setDeleteConfirm(null);
-    show("Test case deleted");
+  const handleBulkStatusChange = (status: TestCase["status"]) => {
+    selectedIds.forEach(id => updateTestCase(id, { status }));
+    setSelectedIds(new Set());
+    toast(`Updated ${selectedIds.size} tests to "${status}"`);
   };
 
-  const handleReset = () => {
-    resetTestStore();
-    setCases(getTestCases());
-    show("Test store reset to defaults");
+  const toggleAll = () => {
+    if (selectedIds.size === filtered.length) setSelectedIds(new Set());
+    else setSelectedIds(new Set(filtered.map(t => t.id)));
   };
 
-  const activeCases = cases.filter(tc => tc.status === "active").length;
+  const allValues = {
+    status: STATUSES as string[],
+    priority: PRIORITIES as string[],
+    category: CATEGORIES,
+    automated: ["true", "false"],
+  };
 
   return (
     <AppLayout activeHref="/tests">
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {Toast}
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, height: "calc(100vh - 100px)", maxWidth: 1600, margin: "0 auto" }}>
 
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
-            <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--gcp-text)" }}>Test Manager</h1>
-            <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", marginTop: 3 }}>
-              {activeCases} active tests · {suites.length} suites · Persisted in localStorage
-            </p>
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--gcp-text)", marginBottom: 2 }}>Test Manager</h1>
+            <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>{tcs.length} test cases across {suites.length} suites</p>
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={handleReset} className="gcp-button" style={{ fontSize: 12 }}>
-              <RotateCcw size={13} /> Reset to Defaults
-            </button>
-            <button onClick={() => setCreatingNew(true)} className="gcp-button-primary" style={{ fontSize: 13 }}>
-              <Plus size={14} /> New Test Case
-            </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={() => setShowImport(true)} className="gcp-button" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><Upload size={13} /> Import</button>
+            <button onClick={() => handleExport("json")} className="gcp-button" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><Download size={13} /> Export</button>
+            <button onClick={() => setShowGenerate(true)} className="gcp-button" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5, color: "var(--gcp-yellow)" }}><Sparkles size={13} /> Generate</button>
+            <button onClick={() => { if (confirm("Reset all test data to defaults?")) { resetTestStore(); toast("Store reset"); } }} className="gcp-button" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><RotateCcw size={13} /> Reset</button>
+            <button onClick={() => setShowCreate(true)} className="gcp-button gcp-button-primary" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><Plus size={13} /> New Test</button>
           </div>
         </div>
 
         {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
-          {[
-            { label: "Active", value: cases.filter(t => t.status === "active").length, color: "var(--gcp-green)" },
-            { label: "P0 Critical", value: cases.filter(t => t.priority === "P0").length, color: "var(--gcp-red)" },
-            { label: "Disabled", value: cases.filter(t => t.status === "disabled").length, color: "var(--gcp-yellow)" },
-            { label: "Suites", value: suites.length, color: "var(--gcp-blue)" },
-          ].map(s => (
-            <div key={s.label} className="gcp-card" style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>{s.label}</div>
-            </div>
-          ))}
+        <StatsDashboard stats={stats} colFilters={colFilters} onToggleFilter={handleStatFilter} />
+
+        {/* Bulk actions */}
+        <BulkActionsBar
+          selected={selectedIds}
+          onClear={() => setSelectedIds(new Set())}
+          onDelete={() => handleDelete(Array.from(selectedIds))}
+          onExport={handleExport}
+          onStatusChange={handleBulkStatusChange}
+        />
+
+        {/* Search */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+          <div style={{ position: "relative", flex: 1 }}>
+            <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--gcp-text-secondary)", pointerEvents: "none" }} />
+            <input className="gcp-input" style={{ width: "100%", paddingLeft: 32 }} placeholder="Search test name, description, ID…" value={searchText} onChange={e => setSearchText(e.target.value)} />
+          </div>
+          <span style={{ fontSize: 12, color: "var(--gcp-text-secondary)", whiteSpace: "nowrap" }}>{filtered.length} / {tcs.length} shown</span>
+          {Object.values(colFilters).some(f => f.text || f.selected.length > 0) && (
+            <button onClick={() => setColFilters({})} style={{ fontSize: 12, color: "var(--gcp-red)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>Clear filters</button>
+          )}
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", borderBottom: "2px solid var(--gcp-grey)", gap: 0 }}>
-          {[
-            { id: "cases" as const, label: `Test Cases (${cases.length})` },
-            { id: "suites" as const, label: `Suites (${suites.length})` },
-          ].map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-              padding: "8px 18px", border: "none", background: "transparent", cursor: "pointer",
-              fontSize: 13, fontWeight: activeTab === t.id ? 700 : 400,
-              color: activeTab === t.id ? "var(--gcp-blue)" : "var(--gcp-text-secondary)",
-              borderBottom: activeTab === t.id ? "2px solid var(--gcp-blue)" : "2px solid transparent",
-              marginBottom: -2, transition: "all 0.15s",
-            }}>{t.label}</button>
-          ))}
-        </div>
-
-        {activeTab === "cases" && (
-          <>
-            {/* Filters */}
-            <div className="gcp-card" style={{ padding: "10px 14px", display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 160 }}>
-                <Search size={13} style={{ color: "var(--gcp-text-secondary)" }} />
-                <input className="gcp-input" placeholder="Search test names…" value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
-              </div>
-              <select className="gcp-input" value={catFilter} onChange={e => setCatFilter(e.target.value)}>
-                <option value="all">All categories</option>
-                {categories.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <select className="gcp-input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-                <option value="all">All statuses</option>
-                <option value="active">Active</option>
-                <option value="disabled">Disabled</option>
-                <option value="deprecated">Deprecated</option>
-              </select>
-              <select className="gcp-input" value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}>
-                <option value="all">All priorities</option>
-                {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-              <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{filtered.length} of {cases.length}</span>
-            </div>
-
-            {/* Table */}
-            <div className="gcp-card" style={{ overflow: "hidden" }}>
-              <table className="gcp-table">
-                <thead><tr>
-                  <th>Test Name</th>
-                  <th>Category</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Owner</th>
-                  <th>Script</th>
-                  <th style={{ textAlign: "center" }}>Actions</th>
-                </tr></thead>
+        {/* Table + Side panel */}
+        <div style={{ flex: 1, display: "flex", gap: 14, overflow: "hidden" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }} className="gcp-card">
+            <div style={{ flex: 1, overflowY: "auto" }}>
+              <table className="gcp-table" style={{ margin: 0 }}>
+                <thead style={{ position: "sticky", top: 0, background: "var(--gcp-surface)", zIndex: 10 }}>
+                  <tr>
+                    <th style={{ width: 36 }}>
+                      <input type="checkbox" checked={selectedIds.size === filtered.length && filtered.length > 0} onChange={toggleAll} style={{ accentColor: "var(--gcp-blue)" }} />
+                    </th>
+                    <th><ColumnFilter label="Name" filter={colFilters.name ?? EMPTY_FILTER} onFilterChange={updateColFilter("name")} /></th>
+                    <th><ColumnFilter label="Status" allValues={allValues.status} filter={colFilters.status ?? EMPTY_FILTER} onFilterChange={updateColFilter("status")} /></th>
+                    <th><ColumnFilter label="Priority" allValues={allValues.priority} filter={colFilters.priority ?? EMPTY_FILTER} onFilterChange={updateColFilter("priority")} /></th>
+                    <th><ColumnFilter label="Category" allValues={allValues.category} filter={colFilters.category ?? EMPTY_FILTER} onFilterChange={updateColFilter("category")} /></th>
+                    <th>Tags</th>
+                    <th>Owner</th>
+                    <th style={{ width: 80, textAlign: "center" }}>Actions</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  {filtered.map(tc => (
-                    <tr key={tc.id} style={{ opacity: tc.status === "deprecated" ? 0.5 : 1 }}>
-                      <td style={{ maxWidth: 320, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        <div style={{ fontWeight: 500, fontSize: 12 }}>{tc.name}</div>
-                        <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", marginTop: 2 }}>v{tc.version} · updated {new Date(tc.updatedAt).toLocaleDateString()}</div>
-                      </td>
-                      <td><span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 7px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{tc.category}</span></td>
-                      <td><span style={{ fontSize: 12, fontWeight: 700, color: priorityColor(tc.priority) }}>{tc.priority}</span></td>
-                      <td>
-                        <span className={`gcp-badge ${tc.status === "active" ? "gcp-badge-pass" : tc.status === "disabled" ? "gcp-badge-flaky" : "gcp-badge-skip"}`}>
-                          {tc.status}
-                        </span>
-                      </td>
-                      <td style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{tc.owner.split("@")[0]}</td>
-                      <td style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {tc.scriptPath}
-                      </td>
-                      <td>
-                        <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
-                          <button onClick={() => setEditingTc(tc)} style={{ padding: "4px 8px", border: "1px solid var(--gcp-grey)", borderRadius: 4, background: "var(--gcp-surface)", cursor: "pointer", color: "var(--gcp-blue)", display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}>
-                            <Edit2 size={11} /> Edit
-                          </button>
-                          {deleteConfirm === tc.id ? (
-                            <div style={{ display: "flex", gap: 3 }}>
-                              <button onClick={() => handleDelete(tc.id)} style={{ padding: "4px 8px", border: "none", borderRadius: 4, background: "var(--gcp-red)", color: "white", cursor: "pointer", fontSize: 11 }}>Confirm</button>
-                              <button onClick={() => setDeleteConfirm(null)} style={{ padding: "4px 8px", border: "1px solid var(--gcp-grey)", borderRadius: 4, background: "transparent", cursor: "pointer", fontSize: 11 }}>Cancel</button>
-                            </div>
-                          ) : (
-                            <button onClick={() => setDeleteConfirm(tc.id)} style={{ padding: "4px 8px", border: "1px solid var(--gcp-grey)", borderRadius: 4, background: "var(--gcp-surface)", cursor: "pointer", color: "var(--gcp-red)", display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}>
-                              <Trash2 size={11} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {filtered.map(tc => {
+                    const isSelected = selectedIds.has(tc.id);
+                    const isPanelOpen = selectedPanelId === tc.id;
+                    return (
+                      <tr key={tc.id}
+                        onClick={() => setSelectedPanelId(isPanelOpen ? null : tc.id)}
+                        style={{
+                          cursor: "pointer",
+                          background: isPanelOpen ? "var(--gcp-blue-bg)" : isSelected ? "var(--gcp-grey-bg)" : undefined,
+                          outline: isPanelOpen ? "2px solid var(--gcp-blue) inset" : undefined,
+                        }}
+                      >
+                        <td onClick={e => e.stopPropagation()}>
+                          <input type="checkbox" checked={isSelected} onChange={e => {
+                            const next = new Set(selectedIds);
+                            e.target.checked ? next.add(tc.id) : next.delete(tc.id);
+                            setSelectedIds(next);
+                          }} style={{ accentColor: "var(--gcp-blue)" }} />
+                        </td>
+                        <td>
+                          <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", fontWeight: 600, maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={tc.name}>{tc.name}</div>
+                          <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>{tc.id} · v{tc.version}</div>
+                        </td>
+                        <td><StatusBadge s={tc.status} /></td>
+                        <td><span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: priorityColor(tc.priority) }}>{tc.priority}</span></td>
+                        <td><span style={{ fontSize: 11, padding: "2px 8px", background: "var(--gcp-surface)", border: "1px solid var(--gcp-grey)", borderRadius: 4 }}>{tc.category}</span></td>
+                        <td>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                            {tc.tags.slice(0, 2).map(t => <TagBadge key={t} tagId={t} />)}
+                            {tc.tags.length > 2 && <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>+{tc.tags.length - 2}</span>}
+                          </div>
+                        </td>
+                        <td style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{tc.owner.split("@")[0]}</td>
+                        <td onClick={e => e.stopPropagation()}>
+                          <div style={{ display: "flex", justifyContent: "center", gap: 4 }}>
+                            <button onClick={() => setEditingId(tc.id)} title="Edit" style={{ padding: 4, border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><Edit3 size={13} /></button>
+                            <button onClick={() => { if (confirm(`Delete "${tc.name}"?`)) handleDelete([tc.id]); }} title="Delete" style={{ padding: 4, border: "none", background: "none", cursor: "pointer", color: "var(--gcp-red)" }}><Trash2 size={13} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={7} style={{ textAlign: "center", padding: "28px", color: "var(--gcp-text-secondary)", fontSize: 13 }}>No test cases match</td></tr>
+                    <tr><td colSpan={8} style={{ textAlign: "center", padding: 40, color: "var(--gcp-text-secondary)", fontSize: 13 }}>No test cases match your filters</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
-          </>
-        )}
-
-        {activeTab === "suites" && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
-            {suites.map(suite => (
-              <div key={suite.id} className="gcp-card" style={{ padding: 16 }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--gcp-text)" }}>{suite.name}</div>
-                    <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", marginTop: 2 }}>{suite.id}</div>
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--gcp-blue)", background: "var(--gcp-blue-bg)", padding: "2px 8px", borderRadius: 12 }}>
-                    {suite.testIds.length} tests
-                  </span>
-                </div>
-                <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)", lineHeight: 1.5, marginBottom: 10 }}>{suite.description}</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, fontSize: 11, color: "var(--gcp-text-secondary)" }}>
-                  <div>Target: <strong style={{ color: "var(--gcp-text)" }}>{suite.config.target}</strong></div>
-                  <div>Parallelism: <strong style={{ color: "var(--gcp-text)", fontFamily: "var(--font-mono)" }}>{suite.config.parallelism}</strong></div>
-                  <div>Retries: <strong style={{ color: "var(--gcp-text)", fontFamily: "var(--font-mono)" }}>{suite.config.retries}</strong></div>
-                  <div>Timeout: <strong style={{ color: "var(--gcp-text)", fontFamily: "var(--font-mono)" }}>{suite.config.timeoutMinutes}m</strong></div>
-                </div>
-                {suite.schedule && (
-                  <div style={{ marginTop: 8, fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "4px 8px", borderRadius: 4 }}>
-                    ⏱ {suite.schedule}
-                  </div>
-                )}
-                <div style={{ marginTop: 10, display: "flex", gap: 6 }}>
-                  {suite.tags.map(tag => (
-                    <span key={tag} style={{ fontSize: 10, background: "var(--gcp-blue-bg)", color: "var(--gcp-blue)", padding: "2px 8px", borderRadius: 12, fontWeight: 500 }}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <Link href={`/start?suite=${suite.id}`}>
-                  <a className="gcp-button" style={{ fontSize: 11, marginTop: 12, justifyContent: "center", width: "100%" }}>
-                    Run This Suite →
-                  </a>
-                </Link>
+            {/* Footer */}
+            <div style={{ padding: "8px 14px", borderTop: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11, color: "var(--gcp-text-secondary)", flexShrink: 0 }}>
+              <span>{filtered.length} of {tcs.length} test cases</span>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => handleExport("csv")} style={{ fontSize: 11, color: "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer" }}>Export CSV</button>
+                <button onClick={() => handleExport("junit_xml")} style={{ fontSize: 11, color: "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer" }}>Export JUnit XML</button>
               </div>
-            ))}
+            </div>
           </div>
-        )}
+
+          {selectedPanel && (
+            <SidePanel tc={selectedPanel} onClose={() => setSelectedPanelId(null)} toast={toast} navigate={navigate} />
+          )}
+        </div>
       </div>
 
-      {(creatingNew || editingTc) && (
-        <CreateEditModal
-          tc={editingTc}
-          onSave={editingTc ? handleEdit : handleCreate}
-          onClose={() => { setCreatingNew(false); setEditingTc(undefined); }}
-        />
-      )}
-      {Toast}
+      {/* Modals */}
+      {showCreate && <TestCaseModal initial={EMPTY_FORM} allSuites={suites} onSave={handleCreate} onCancel={() => setShowCreate(false)} />}
+      {editingTc && editingId && <TestCaseModal initial={editingTc} allSuites={suites} onSave={handleUpdate} onCancel={() => setEditingId(null)} />}
+      {showImport && <ImportModal onClose={() => setShowImport(false)} toast={toast} />}
+      {showGenerate && <GenerateWizard allSuites={suites} onClose={() => setShowGenerate(false)} toast={toast} />}
     </AppLayout>
   );
 }

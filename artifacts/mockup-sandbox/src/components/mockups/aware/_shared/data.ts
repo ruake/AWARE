@@ -343,7 +343,7 @@ export const TEST_SUITES: TestSuite[] = [
     id: "suite_smoke",
     name: "Smoke Tests",
     description: "Quick health check suite for rapid deploy verification. Runs on every PR merge.",
-    parentId: null,
+    parentId: "suite_full",
     testIds: TEST_CASES.slice(0, 5).filter(t => t.status === "active").map(t => t.id),
     config: { target: "Prod", environment: "Production", parallelism: 2, retries: 0, failFast: true, timeoutMinutes: 10 },
     tags: ["smoke"],
@@ -355,7 +355,7 @@ export const TEST_SUITES: TestSuite[] = [
     id: "suite_uat",
     name: "UAT Regression",
     description: "Pre-release validation suite run against UAT staging before production promotion.",
-    parentId: null,
+    parentId: "suite_full",
     testIds: TEST_CASES.filter(t => t.status === "active" && t.severity === "critical").slice(0, 8).map(t => t.id),
     config: { target: "UAT", environment: "Staging", parallelism: 5, retries: 1, failFast: false, timeoutMinutes: 40 },
     tags: ["regression"],
@@ -395,6 +395,17 @@ let testCasesStore = [...TEST_CASES];
 let testSuitesStore = [...TEST_SUITES];
 let nextTcId = TEST_CASES.length;
 let nextSuiteId = TEST_SUITES.length;
+const _tcListeners = new Set<() => void>();
+const _tsListeners = new Set<() => void>();
+function _notify() { _tcListeners.forEach(l => l()); _tsListeners.forEach(l => l()); }
+export function subscribeToTestCases(onChange: () => void): () => void {
+  _tcListeners.add(onChange);
+  return () => _tcListeners.delete(onChange);
+}
+export function subscribeToTestSuites(onChange: () => void): () => void {
+  _tsListeners.add(onChange);
+  return () => _tsListeners.delete(onChange);
+}
 
 export function resetTestStore(): void {
   testCasesStore = [...TEST_CASES];
@@ -427,6 +438,7 @@ export function createTestCase(data: Omit<TestCase, "id" | "createdAt" | "update
     createdAt: now, updatedAt: now,
   };
   testCasesStore.push(tc);
+  _notify();
   return tc;
 }
 
@@ -443,7 +455,7 @@ export function updateTestCase(id: string, patch: Partial<Omit<TestCase, "id" | 
   if (patch.description && patch.description !== prev.description) changes.push("Description updated");
   if (patch.tags && JSON.stringify(patch.tags) !== JSON.stringify(prev.tags)) changes.push("Tags updated");
   if (patch.suiteIds && JSON.stringify(patch.suiteIds) !== JSON.stringify(prev.suiteIds)) changes.push("Suite membership changed");
-  if (patch.expectedStatus && patch.expectedStatus !== prev.expectedStatus) changes.push(`Expected status: ${prev.expectedStatus} → ${patch.expectedStatus}`);
+  if ("expectedStatus" in patch && patch.expectedStatus !== prev.expectedStatus) changes.push(`Expected status: ${prev.expectedStatus} → ${patch.expectedStatus}`);
   if (patch.requestHeaders && JSON.stringify(patch.requestHeaders) !== JSON.stringify(prev.requestHeaders)) changes.push("Request headers updated");
   if (patch.cookies && JSON.stringify(patch.cookies) !== JSON.stringify(prev.cookies)) changes.push("Cookies updated");
   if (patch.captureResponseHeaders && JSON.stringify(patch.captureResponseHeaders) !== JSON.stringify(prev.captureResponseHeaders)) changes.push("Captured response headers changed");
@@ -466,6 +478,7 @@ export function updateTestCase(id: string, patch: Partial<Omit<TestCase, "id" | 
     changelog: [...prev.changelog, entry],
     updatedAt: now,
   };
+  _notify();
   return testCasesStore[idx];
 }
 
@@ -474,6 +487,7 @@ export function deleteTestCase(id: string): boolean {
   if (idx === -1) return false;
   testCasesStore.splice(idx, 1);
   testSuitesStore.forEach(s => { s.testIds = s.testIds.filter(tid => tid !== id); });
+  _notify();
   return true;
 }
 
@@ -490,6 +504,7 @@ export function createTestSuite(data: Omit<TestSuite, "id" | "createdAt" | "upda
   const now = new Date().toISOString();
   const suite: TestSuite = { id, ...data, createdAt: now, updatedAt: now };
   testSuitesStore.push(suite);
+  _notify();
   return suite;
 }
 
@@ -497,6 +512,7 @@ export function updateTestSuite(id: string, patch: Partial<Omit<TestSuite, "id" 
   const idx = testSuitesStore.findIndex(s => s.id === id);
   if (idx === -1) return undefined;
   testSuitesStore[idx] = { ...testSuitesStore[idx], ...patch, updatedAt: new Date().toISOString() };
+  _notify();
   return testSuitesStore[idx];
 }
 
@@ -504,6 +520,7 @@ export function deleteTestSuite(id: string): boolean {
   const idx = testSuitesStore.findIndex(s => s.id === id);
   if (idx === -1) return false;
   testSuitesStore.splice(idx, 1);
+  _notify();
   return true;
 }
 
@@ -513,6 +530,7 @@ export function addTestsToSuite(suiteId: string, testIds: string[]): TestSuite |
   const existing = new Set(suite.testIds);
   testIds.forEach(tid => { if (!existing.has(tid)) { suite.testIds.push(tid); existing.add(tid); } });
   suite.updatedAt = new Date().toISOString();
+  _notify();
   return suite;
 }
 
@@ -522,6 +540,7 @@ export function removeTestsFromSuite(suiteId: string, testIds: string[]): TestSu
   const removeSet = new Set(testIds);
   suite.testIds = suite.testIds.filter(tid => !removeSet.has(tid));
   suite.updatedAt = new Date().toISOString();
+  _notify();
   return suite;
 }
 
@@ -551,6 +570,7 @@ export function importTestCases(data: TestCase[]): ImportResult {
     });
     result.imported++;
   });
+  if (result.imported > 0) _notify();
   return result;
 }
 
@@ -716,6 +736,7 @@ export function generateAndPersistTestCases(params: GenerateParams): TestCase[] 
     testCasesStore.push(tc);
     nextTcId++;
   });
+  _notify();
   return generated;
 }
 
@@ -799,6 +820,7 @@ export function updateTestCaseDocumentation(id: string, documentation: string, a
     changes: ["Documentation revised"],
   });
   tc.updatedAt = new Date().toISOString();
+  _notify();
   return tc;
 }
 

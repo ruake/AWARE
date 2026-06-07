@@ -24,6 +24,7 @@ import {
   computeTestStats as mockComputeStats,
   getTestChangelog as mockGetChangelog,
   updateTestCaseDocumentation as mockUpdateDoc,
+  subscribeToTestCases, subscribeToTestSuites,
 } from "./data";
 
 export type { Run, TestResult, DiffRow, TestDetail, EnvSummary, ServiceError, TestCase, TestSuite, TestTag, TestCaseFilter, ImportResult, ImportExportFormat, GenerateParams, TestStats, TestChangeLogEntry, Predicate, FilmstripConfig, TestSuiteIntegration };
@@ -215,6 +216,7 @@ export interface TestCaseService {
   getStats(): Promise<TestStats>;
   getChangelog(testId: string): Promise<TestChangeLogEntry[]>;
   updateDocumentation(id: string, documentation: string, author: string): Promise<TestCase | undefined>;
+  subscribe?(onChange: () => void): () => void;
 }
 
 export interface TestSuiteService {
@@ -228,6 +230,7 @@ export interface TestSuiteService {
   getTestCases(suiteId: string): Promise<TestCase[]>;
   buildTree(): Promise<SuiteNode[]>;
   reset(): Promise<void>;
+  subscribe?(onChange: () => void): () => void;
 }
 
 // ── Mock Implementations ───────────────────────────────────
@@ -271,6 +274,7 @@ export const mockTestCaseService: TestCaseService = {
   getStats: () => Promise.resolve(mockComputeStats()),
   getChangelog: (testId) => Promise.resolve(mockGetChangelog(testId)),
   updateDocumentation: (id, doc, author) => Promise.resolve(mockUpdateDoc(id, doc, author)),
+  subscribe: subscribeToTestCases,
 };
 
 export const mockTestSuiteService: TestSuiteService = {
@@ -284,6 +288,7 @@ export const mockTestSuiteService: TestSuiteService = {
   getTestCases: (suiteId) => Promise.resolve(mockGetTestCasesBySuiteId(suiteId)),
   buildTree: () => Promise.resolve(mockBuildSuiteTree()),
   reset: () => { mockResetTestStore(); return Promise.resolve(); },
+  subscribe: subscribeToTestSuites,
 };
 
 // ── API Implementations ────────────────────────────────────
