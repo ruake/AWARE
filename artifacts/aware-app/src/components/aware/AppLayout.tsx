@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, List, GitCompare, Bug, Play,
   Activity, Bell, Search, Menu, Moon, Sun, ExternalLink,
-  Check, AlertTriangle, Info,
+  Check, AlertTriangle, Info, Bot, BarChart3, FolderTree,
 } from "lucide-react";
 import { CommandPalette } from "./CommandPalette";
 import { useLiveStatus } from "@/lib/useLiveStatus";
@@ -19,6 +19,9 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/runs", label: "Runs", icon: List },
   { href: "/compare", label: "Compare", icon: GitCompare },
   { href: "/tests", label: "Tests", icon: Bug },
+  { href: "/suites", label: "Suites", icon: FolderTree },
+  { href: "/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/copilot", label: "AI Copilot", icon: Bot },
   { href: "/start", label: "Start Run", icon: Play },
   { href: "/status", label: "Status", icon: Activity },
   { href: "/about", label: "About", icon: Info },
