@@ -4,6 +4,7 @@ import {
   LayoutDashboard, List, GitCompare, Bug, Play,
   Activity, Bell, Search, Menu, Moon, Sun, ExternalLink,
   Check, AlertTriangle, Info, Bot, BarChart3, FolderTree,
+  Cpu,
 } from "lucide-react";
 import { CommandPalette } from "./CommandPalette";
 import { CopilotChatBubble } from "./CopilotChatBubble";
@@ -15,18 +16,23 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-const NAV_ITEMS: NavItem[] = [
+const PRIMARY_NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/search", label: "Search", icon: Search },
+  { href: "/start", label: "New Run", icon: Play },
   { href: "/runs", label: "Runs", icon: List },
   { href: "/compare", label: "Compare", icon: GitCompare },
+  { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/tests", label: "Tests", icon: Bug },
   { href: "/suites", label: "Suites", icon: FolderTree },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/start", label: "Start Run", icon: Play },
-  { href: "/status", label: "Status", icon: Activity },
+  { href: "/copilot", label: "Copilot", icon: Bot },
+];
+
+const SECONDARY_NAV: NavItem[] = [
+  { href: "/ci-pipeline", label: "CI Pipeline", icon: Cpu },
   { href: "/about", label: "About", icon: Info },
 ];
+
+const NAV_ITEMS = [...PRIMARY_NAV, ...SECONDARY_NAV];
 
 export function AppLayout({ children, activeHref }: { children: React.ReactNode; activeHref?: string }) {
   const [location] = useLocation();
@@ -104,9 +110,9 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
           </div>
         </div>
 
-        {/* Desktop top nav */}
+        {/* Desktop top nav — primary items only */}
         <nav style={{ display: "flex", height: "100%", overflowX: "auto", flex: 1 }}>
-          {NAV_ITEMS.map(item => {
+          {PRIMARY_NAV.map(item => {
             const active = isActive(item.href);
             return (
               <Link key={item.href} href={item.href} style={{
@@ -229,7 +235,8 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
             </button>
           </div>
           <div style={{ flex: 1, padding: "4px 0", display: "flex", flexDirection: "column", gap: 2 }}>
-            {NAV_ITEMS.map(item => {
+            {/* Primary nav */}
+            {PRIMARY_NAV.map(item => {
               const active = isActive(item.href);
               const Icon = item.icon;
               return (
@@ -245,6 +252,36 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
                   <Icon size={20} style={{ flexShrink: 0 }} />
                   <span style={{
                     marginLeft: 14, fontSize: 13, fontWeight: active ? 600 : 400,
+                    opacity: sidebarExpanded ? 1 : 0,
+                    transition: "opacity 0.2s",
+                  }}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+
+            {/* Divider between primary and secondary */}
+            <div style={{ margin: "6px 12px", borderTop: "1px solid var(--gcp-grey)", opacity: 0.6 }} />
+
+            {/* Secondary nav */}
+            {SECONDARY_NAV.map(item => {
+              const active = isActive(item.href);
+              const Icon = item.icon;
+              return (
+                <Link key={item.href} href={item.href} style={{
+                  display: "flex", alignItems: "center",
+                  padding: "8px 16px", cursor: "pointer",
+                  overflow: "hidden", whiteSpace: "nowrap",
+                  textDecoration: "none",
+                  color: active ? "var(--gcp-blue)" : "var(--gcp-text-secondary)",
+                  background: active ? "var(--gcp-blue-bg)" : "transparent",
+                  transition: "background 0.15s, color 0.15s",
+                  opacity: 0.75,
+                }}>
+                  <Icon size={17} style={{ flexShrink: 0 }} />
+                  <span style={{
+                    marginLeft: 14, fontSize: 12, fontWeight: active ? 600 : 400,
                     opacity: sidebarExpanded ? 1 : 0,
                     transition: "opacity 0.2s",
                   }}>

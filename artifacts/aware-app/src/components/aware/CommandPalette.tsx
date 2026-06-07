@@ -52,8 +52,9 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
     { id: "nav_dash", label: "Dashboard", description: "Promotion readiness overview", type: "run" as const, href: "/", icon: "📊" },
     { id: "nav_runs", label: "All Runs", description: "GitHub Actions test run history", type: "run" as const, href: "/runs", icon: "📋" },
     { id: "nav_compare", label: "Compare Runs", description: "Baseline vs candidate diff", type: "compare" as const, href: "/compare", icon: "⇄" },
-    { id: "nav_start", label: "Start New Run", description: "Trigger a regression test suite", type: "run" as const, href: "/start", icon: "▶" },
-    { id: "nav_status", label: "How It Works", description: "Architecture and status reference", type: "run" as const, href: "/status", icon: "📖" },
+    { id: "nav_start", label: "New Run", description: "Trigger a regression test suite", type: "run" as const, href: "/start", icon: "▶" },
+    { id: "nav_copilot", label: "Copilot", description: "AI assistant for tests and analysis", type: "run" as const, href: "/copilot", icon: "🤖" },
+    { id: "nav_ci", label: "CI Pipeline", description: "Architecture and CI/CD reference", type: "run" as const, href: "/ci-pipeline", icon: "⚙️" },
     { id: "nav_about", label: "About A.W.A.K.E.", description: "Platform information and tech stack", type: "run" as const, href: "/about", icon: "ℹ" },
   ];
 

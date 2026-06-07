@@ -170,12 +170,11 @@ export default function About() {
                     ["/tests", "TestManager", "CRUD test cases, bulk actions, import/export"],
                     ["/suites", "TestSuiteManager", "Suite tree + editor + YAML export"],
                     ["/analytics", "TestAnalytics", "Per-test pass rate charts & flakiness"],
-                    ["/search", "SearchDemo", "Full-page search wired to real stores"],
+                    ["/copilot", "Copilot", "AI assistant — full-page chat with skills"],
                     ["/start", "StartRun", "New run form + command preview"],
                     ["/sharing", "Sharing", "Permalink/share page"],
-                    ["/status", "Status", "System status dashboard"],
-                    ["/copilot", "Copilot", "AI chat with skill selector"],
-                    ["/test-doc", "TestDoc", "Per-test documentation (3-column layout)"],
+                    ["/ci-pipeline", "CI Pipeline", "GitHub Actions integration and architecture"],
+                    ["/testdoc", "TestDoc", "Per-test documentation (3-column layout)"],
                     ["/about", "About", "Project info + this documentation"],
                   ]}
                 />

@@ -104,7 +104,7 @@ export default function Status() {
   };
 
   return (
-    <AppLayout activeHref="/status">
+    <AppLayout activeHref="/ci-pipeline">
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
         {/* Header */}
