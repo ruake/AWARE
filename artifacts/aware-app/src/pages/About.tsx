@@ -1,7 +1,32 @@
 import React from "react";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { Link } from "wouter";
-import { Zap, BarChart3, GitCompare, Bug, Activity, Shield, Globe } from "lucide-react";
+import { Zap, BarChart3, GitCompare, Bug, Activity, Shield, Globe, Book, FolderTree, Database, FileCode, Route, ChevronDown } from "lucide-react";
+import { RUNS, DIFF_ROWS } from "@/lib/data";
+
+function DocSection({ title, defaultOpen, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = React.useState(defaultOpen ?? false);
+  return (
+    <div className="gcp-card" style={{ marginBottom: 12, overflow: "hidden" }}>
+      <button onClick={() => setOpen(!open)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", background: "var(--gcp-grey-bg)", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 700, color: "var(--gcp-text)", textAlign: "left" }}>
+        <ChevronDown size={14} style={{ transform: open ? "rotate(0deg)" : "rotate(-90deg)", transition: "transform 0.15s", flexShrink: 0 }} />
+        {title}
+      </button>
+      {open && <div style={{ padding: "4px 16px 16px", fontSize: 12, lineHeight: 1.7, color: "var(--gcp-text-secondary)" }}>{children}</div>}
+    </div>
+  );
+}
+
+function DocTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
+  return (
+    <table className="gcp-table" style={{ margin: "8px 0", fontSize: 11 }}>
+      <thead><tr>{headers.map(h => <th key={h}>{h}</th>)}</tr></thead>
+      <tbody>
+        {rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} style={{ fontFamily: j === 0 ? "var(--font-mono)" : undefined, fontSize: 11 }}>{c}</td>)}</tr>)}
+      </tbody>
+    </table>
+  );
+}
 
 export default function About() {
   const features = [
@@ -21,6 +46,8 @@ export default function About() {
     ["localStorage", "Client-side persistence for test registry"],
     ["Lucide React", "Icon system"],
   ];
+
+  const [showDocs, setShowDocs] = React.useState(false);
 
   return (
     <AppLayout>
@@ -88,6 +115,134 @@ export default function About() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Project Documentation toggle */}
+        <div style={{ marginBottom: 28 }}>
+          <button onClick={() => setShowDocs(!showDocs)} className="gcp-card" style={{ width: "100%", padding: "14px 20px", display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", background: "var(--gcp-blue-bg)", fontSize: 14, fontWeight: 700, color: "var(--gcp-blue)" }}>
+            <Book size={18} />
+            <span style={{ flex: 1, textAlign: "left" }}>{showDocs ? "Hide Project Documentation" : "📖 View Project Documentation — how this app works"}</span>
+            <ChevronDown size={16} style={{ transform: showDocs ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+          </button>
+
+          {showDocs && (
+            <div style={{ marginTop: 16 }}>
+
+              {/* Architecture */}
+              <DocSection title="🏗️ 1. Architecture — How Files Are Organized" defaultOpen>
+                <p>The app lives in <code style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3 }}>artifacts/aware-app/src/</code>. Everything is split into three folders:</p>
+                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+                  <li><strong><code>lib/</code></strong> — data layer: types, store, seed data, helpers</li>
+                  <li><strong><code>pages/</code></strong> — one file per route (Dashboard, Runs, Compare, etc.)</li>
+                  <li><strong><code>components/</code></strong> — reusable UI pieces: <code>aware/</code> for app-specific, <code>ui/</code> for shadcn</li>
+                </ul>
+                <p><strong>Core rule:</strong> Pages import from <code>@/lib/data</code> (a barrel file). Never import directly from <code>lib/</code> sub-modules.</p>
+              </DocSection>
+
+              {/* Data Architecture */}
+              <DocSection title="🗄️ 2. Data Architecture — Where Data Lives">
+                <p><strong>All data is in-memory + localStorage.</strong> There is no backend — data resets when you clear browser storage.</p>
+                <DocTable
+                  headers={["File", "What it stores"]}
+                  rows={[
+                    ["lib/runs.ts", "12 seed runs + 15 diff rows + test results"],
+                    ["lib/testCases.ts", "25 seed test cases with predicates, HTTP config, changelog"],
+                    ["lib/testSuites.ts", "8 seed suites organized in a tree"],
+                    ["lib/store.ts", "CRUD functions: createTestCase, updateTestCase, deleteTestCase, etc."],
+                    ["lib/promotions.ts", "Promotion decisions saved per run"],
+                    ["lib/constants.ts", "ENVS, TEST_NAMES, CATEGORIES, TAGS, etc."],
+                    ["lib/types.ts", "All TypeScript interfaces (Run, TestCase, DiffRow, etc.)"],
+                  ]}
+                />
+                <p><strong>How it works:</strong> When you add/edit/delete a test case, the store saves to localStorage under keys <code>aware_test_cases_v2</code> and <code>aware_test_suites_v2</code>. It also notifies subscribers so the UI updates automatically.</p>
+              </DocSection>
+
+              {/* Routes */}
+              <DocSection title="🧭 3. Routes — Every Page in the App">
+                <p>Routes are defined in <code style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3 }}>App.tsx</code> using <strong>wouter</strong> (not React Router).</p>
+                <DocTable
+                  headers={["Path", "Page", "What it does"]}
+                  rows={[
+                    ["/", "Dashboard", "Multi-env charts, alerts, promotion status"],
+                    ["/runs", "Runs", "Filterable run table with detail links"],
+                    ["/runs/:runId", "RunDetail", "Test results + evidence side panel"],
+                    ["/compare", "Compare", "Baseline vs candidate diff table"],
+                    ["/tests", "TestManager", "CRUD test cases, bulk actions, import/export"],
+                    ["/suites", "TestSuiteManager", "Suite tree + editor + YAML export"],
+                    ["/analytics", "TestAnalytics", "Per-test pass rate charts & flakiness"],
+                    ["/search", "SearchDemo", "Full-page search wired to real stores"],
+                    ["/start", "StartRun", "New run form + command preview"],
+                    ["/sharing", "Sharing", "Permalink/share page"],
+                    ["/status", "Status", "System status dashboard"],
+                    ["/copilot", "Copilot", "AI chat with skill selector"],
+                    ["/test-doc", "TestDoc", "Per-test documentation (3-column layout)"],
+                    ["/about", "About", "Project info + this documentation"],
+                  ]}
+                />
+              </DocSection>
+
+              {/* How to add a page */}
+              <DocSection title="📝 4. How to Add a New Page">
+                <ol style={{ paddingLeft: 18, margin: "8px 0" }}>
+                  <li>Create a file in <code>pages/</code> (e.g. <code>MyNewPage.tsx</code>)</li>
+                  <li>Import <code>AppLayout</code> from <code>@/components/aware/AppLayout</code></li>
+                  <li>Wrap your content in <code>&lt;AppLayout activeHref="/my-path"&gt;</code></li>
+                  <li>Add a route in <code>App.tsx</code>: <code>{'<Route path="/my-path" component={MyNewPage} />'}</code></li>
+                  <li>Add a nav item in <code>AppLayout.tsx</code> (the <code>NAV_ITEMS</code> array)</li>
+                </ol>
+              </DocSection>
+
+              {/* How data flows */}
+              <DocSection title="🔄 5. How Data Flows">
+                <p><strong>Page → lib/data → store → localStorage</strong></p>
+                <p>Every page calls functions from <code>@/lib/data</code> to read or write data. For example:</p>
+                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+                  <li><code>getTestCases()</code> — returns all test cases from the store</li>
+                  <li><code>createTestCase(data)</code> — adds a new test case, saves to localStorage</li>
+                  <li><code>getTestResultsForRun(runId)</code> — generates mock test results for a run</li>
+                  <li><code>getRunById(id)</code> — looks up a single run</li>
+                </ul>
+                <p>When data changes, the store calls <code>_notify()</code> which triggers listeners, so any component using <code>useTestData()</code> re-renders automatically.</p>
+              </DocSection>
+
+              {/* Key design decisions */}
+              <DocSection title="🎨 6. Design Rules — Know Before You Code">
+                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+                  <li><strong>All pages use inline <code>{'style={{}}'}</code></strong> — NOT Tailwind classes. CSS variables like <code>var(--gcp-blue)</code> are defined in <code>_group.css</code>.</li>
+                  <li><strong>No Playwright test scripts.</strong> All <code>scriptPath</code> fields use <code>.yaml</code> extension for portable YAML schemas.</li>
+                  <li><strong>Mock data lives in <code>lib/</code> modules.</strong> Replace <code>RUNS</code>, <code>DIFF_ROWS</code>, <code>getTestCases()</code> etc. with real API calls when ready.</li>
+                  <li><strong>Navigation:</strong> Use wouter's <code>useLocation()</code> for SPA navigation. <code>navTo()</code> does a full page reload.</li>
+                  <li><strong>Charts use Recharts.</strong> Not Google Charts.</li>
+                  <li><strong>shadcn UI</strong> components live in <code>components/ui/</code> with <code>class-variance-authority</code>.</li>
+                  <li><strong>Typecheck must pass</strong> before committing: <code>pnpm run typecheck</code>.</li>
+                </ul>
+              </DocSection>
+
+              {/* Available data */}
+              <DocSection title="📊 7. Current Seed Data">
+                <p>The app ships with realistic seed data so you can explore without setting up a backend:</p>
+                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+                  <li><strong>Runs:</strong> {RUNS.length} runs across Prod/Production, Prod/Staging, UAT/Production, UAT/Staging</li>
+                  <li><strong>Diff rows:</strong> {DIFF_ROWS.length} comparison results (regressions, fixed, duration, unchanged)</li>
+                  <li><strong>Test cases:</strong> 25 seed cases with categories, priorities, severity, tags</li>
+                  <li><strong>Suites:</strong> 8 suites with tree hierarchy and integration configs</li>
+                  <li><strong>Environments:</strong> 4 env targets × 2 networks = 8 env combinations</li>
+                </ul>
+              </DocSection>
+
+              {/* LLM/AI */}
+              <DocSection title="🤖 8. AI Copilot — How the LLM Works">
+                <p>The Copilot page at <code>/copilot</code> provides an AI chat with 3 providers:</p>
+                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+                  <li><strong>Mock</strong> — works offline, returns canned responses. No API key needed.</li>
+                  <li><strong>OpenAI</strong> — connects to any OpenAI-compatible API. Requires API Key.</li>
+                  <li><strong>WebLLM</strong> — runs a model in-browser via WebGPU. Shows an unavailable message if your browser doesn't support it.</li>
+                </ul>
+                <p>Switch providers in the config panel on the Copilot page. The app has 5 built-in skills (generate tests, generate scripts, analyze results, explain diffs, generate suites).</p>
+              </DocSection>
+
+            </div>
+          )}
         </div>
 
         {/* CTA */}

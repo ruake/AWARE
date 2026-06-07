@@ -81,12 +81,12 @@ jobs:
         run: pnpm install
 
       - name: Install Playwright browsers
-        run: pnpm --filter @workspace/mockup-sandbox exec playwright install chromium --with-deps
+        run: pnpm --filter @workspace/aware-app exec playwright install chromium --with-deps
         continue-on-error: true
 
       - name: Run ${{ github.event.inputs.suite }} on ${{ matrix.target }}/${{ matrix.environment }}
         run: |
-          pnpm --filter @workspace/mockup-sandbox run test -- \
+          pnpm --filter @workspace/aware-app run test -- \
             --suite "${{ github.event.inputs.suite }}" \
             --target "${{ matrix.target }}" \
             --environment "${{ matrix.environment }}" \
@@ -97,5 +97,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ github.run_id }}-${{ matrix.target }}-${{ matrix.environment }}
-          path: artifacts/mockup-sandbox/test-results/
+          path: artifacts/aware-app/test-results/
           retention-days: 14

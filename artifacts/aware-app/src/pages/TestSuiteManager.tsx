@@ -80,7 +80,7 @@ export default function TestSuiteManager() {
   }));
 
   return (
-    <AppLayout activeHref="/tests">
+    <AppLayout activeHref="/suites">
       <div style={{ height: "calc(100vh - 100px)", display: "flex", maxWidth: 1600, margin: "0 auto", gap: 16 }}>
         <div className="gcp-card" style={{ width: 320, flexShrink: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           <div style={{ padding: 12, borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>

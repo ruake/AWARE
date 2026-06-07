@@ -6,6 +6,7 @@ import {
   Check, AlertTriangle, Info, Bot, BarChart3, FolderTree,
 } from "lucide-react";
 import { CommandPalette } from "./CommandPalette";
+import { CopilotChatBubble } from "./CopilotChatBubble";
 import { useLiveStatus } from "@/lib/useLiveStatus";
 
 interface NavItem {
@@ -22,7 +23,6 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/tests", label: "Tests", icon: Bug },
   { href: "/suites", label: "Suites", icon: FolderTree },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/copilot", label: "AI Copilot", icon: Bot },
   { href: "/start", label: "Start Run", icon: Play },
   { href: "/status", label: "Status", icon: Activity },
   { href: "/about", label: "About", icon: Info },
@@ -33,14 +33,40 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
   const [isDark, setIsDark] = React.useState(false);
   const [sidebarExpanded, setSidebarExpanded] = React.useState(false);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
-  const { currentToast, dismissToast, pendingCount, clearCount } = useLiveStatus();
+  const [showNotifs, setShowNotifs] = React.useState(false);
+  const notifRef = React.useRef<HTMLDivElement>(null);
+  const { updates, currentToast, dismissToast, pendingCount, clearCount } = useLiveStatus();
+
+  const paletteRef = React.useRef(paletteOpen);
+  paletteRef.current = paletteOpen;
+  const notifOpenRef = React.useRef(showNotifs);
+  notifOpenRef.current = showNotifs;
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotifs(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
   const current = activeHref ?? location;
 
+  // Single persistent keyboard handler using refs to avoid re-attachment
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setPaletteOpen(p => !p);
+        return;
+      }
+      if (e.key === "/" && !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement)?.tagName)) {
+        e.preventDefault();
+        setPaletteOpen(true);
+        return;
+      }
+      if (e.key === "Escape") {
+        if (notifOpenRef.current) { setShowNotifs(false); e.preventDefault(); return; }
+        if (paletteRef.current) { setPaletteOpen(false); e.preventDefault(); return; }
       }
     };
     window.addEventListener("keydown", handler);
@@ -116,25 +142,51 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
             <kbd style={{ fontSize: 10, border: "1px solid var(--gcp-grey)", borderRadius: 3, padding: "0 4px", fontFamily: "var(--font-mono)", lineHeight: "16px" }}>⌘K</kbd>
           </button>
 
-          {/* Bell */}
-          <button
-            onClick={clearCount}
-            title={`${pendingCount} live updates`}
-            style={{ position: "relative", padding: 6, border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center" }}
-          >
-            <Bell size={18} />
-            {pendingCount > 0 && (
-              <span style={{
-                position: "absolute", top: 1, right: 1,
-                width: 16, height: 16, borderRadius: "50%",
-                background: "var(--gcp-red)", color: "white",
-                fontSize: 9, fontWeight: 700,
-                display: "flex", alignItems: "center", justifyContent: "center",
+          {/* Bell + Notification dropdown */}
+          <div ref={notifRef} style={{ position: "relative" }}>
+            <button
+              onClick={() => { setShowNotifs(p => !p); clearCount(); }}
+              title={`${pendingCount} live updates`}
+              style={{ position: "relative", padding: 6, border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center" }}
+            >
+              <Bell size={18} />
+              {pendingCount > 0 && (
+                <span style={{
+                  position: "absolute", top: 1, right: 1,
+                  width: 16, height: 16, borderRadius: "50%",
+                  background: "var(--gcp-red)", color: "white",
+                  fontSize: 9, fontWeight: 700,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {pendingCount > 9 ? "9+" : pendingCount}
+                </span>
+              )}
+            </button>
+            {showNotifs && (
+              <div style={{
+                position: "absolute", top: "100%", right: 0, marginTop: 6,
+                width: 320, maxHeight: 360, overflow: "auto",
+                background: "var(--gcp-surface)", border: "1px solid var(--gcp-grey)",
+                borderRadius: 8, boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+                zIndex: 200, animation: "slide-up 0.15s ease-out",
               }}>
-                {pendingCount > 9 ? "9+" : pendingCount}
-              </span>
+                <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--gcp-grey)", fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  Notifications
+                </div>
+                {updates.length === 0 && (
+                  <div style={{ padding: "20px 12px", textAlign: "center", fontSize: 12, color: "var(--gcp-text-secondary)" }}>No notifications yet</div>
+                )}
+                {updates.map(u => (
+                  <div key={u.id} style={{ display: "flex", gap: 8, padding: "8px 12px", borderBottom: "1px solid var(--gcp-grey)", fontSize: 12, alignItems: "flex-start" }}>
+                    {u.type === "success" ? <Check size={14} style={{ color: "var(--gcp-green)", flexShrink: 0, marginTop: 1 }} /> :
+                     u.type === "warning" ? <AlertTriangle size={14} style={{ color: "var(--gcp-yellow)", flexShrink: 0, marginTop: 1 }} /> :
+                     <Activity size={14} style={{ color: "var(--gcp-blue)", flexShrink: 0, marginTop: 1 }} />}
+                    <span style={{ flex: 1 }}>{u.message}</span>
+                  </div>
+                ))}
+              </div>
             )}
-          </button>
+          </div>
 
           {/* Dark mode */}
           <button
@@ -212,6 +264,9 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
 
       {/* Command Palette */}
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
+
+      {/* AI Copilot Chat Bubble */}
+      <CopilotChatBubble />
 
       {/* Live status toast */}
       {currentToast && (

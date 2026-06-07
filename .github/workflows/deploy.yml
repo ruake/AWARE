@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: artifacts/mockup-sandbox
+        working-directory: artifacts/aware-app
 
     environment:
       name: github-pages
@@ -46,12 +46,12 @@ jobs:
           PORT: "1"
 
       - name: SPA fallback — copy index.html as 404.html
-        run: cp dist/index.html dist/404.html
+        run: cp dist/public/index.html dist/public/404.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: artifacts/mockup-sandbox/dist
+          path: artifacts/aware-app/dist/public
 
       - name: Deploy to GitHub Pages
         id: deployment

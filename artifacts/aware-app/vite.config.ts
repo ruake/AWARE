@@ -38,9 +38,6 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    rollupOptions: {
-      external: ["@mlc-ai/web-llm"],
-    },
   },
   server: {
     port,

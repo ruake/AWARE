@@ -285,7 +285,26 @@ class OpenAILLMProvider implements ILLMProvider {
   }
 }
 
-// ── WebLLM Provider (stub — requires @mlc-ai/web-llm) ──────────────
+// ── WebLLM Provider (requires @mlc-ai/web-llm package + WebGPU) ─────
+
+let _webLlmAvailable: boolean | null = null;
+let _webLlmProgressCallback: ((progress: number, text: string) => void) | null = null;
+
+export function setWebLLMProgressCallback(cb: ((progress: number, text: string) => void) | null): void {
+  _webLlmProgressCallback = cb;
+}
+
+export async function checkWebLLM(): Promise<boolean> {
+  if (_webLlmAvailable !== null) return _webLlmAvailable;
+  try {
+    await import("@mlc-ai/web-llm");
+    _webLlmAvailable = true;
+  } catch (e) {
+    console.warn("WebLLM import failed:", e);
+    _webLlmAvailable = false;
+  }
+  return _webLlmAvailable;
+}
 
 class WebLLMProvider implements ILLMProvider {
   readonly type: LLMProviderType = "webllm";
@@ -294,6 +313,13 @@ class WebLLMProvider implements ILLMProvider {
   constructor(private config: LLMConfig) {}
 
   async complete(req: LLMCompletionRequest): Promise<LLMCompletionResponse> {
+    const avail = await checkWebLLM();
+    if (!avail) {
+      return {
+        content: "WebLLM is not available. This browser lacks WebGPU support or the `@mlc-ai/web-llm` package is not installed.\n\nTo use WebLLM:\n1. Use Chrome (≥113) with WebGPU enabled\n2. Run `pnpm add @mlc-ai/web-llm`\n\nFor now, switch to **Mock (offline)** or configure an **OpenAI-compatible API** in Settings.",
+        finishReason: "error",
+      };
+    }
     if (!this.engine) await this._init();
     const res = await this.engine.chat.completions.create({
       messages: req.messages.map(m => ({ role: m.role, content: m.content })),
@@ -308,29 +334,110 @@ class WebLLMProvider implements ILLMProvider {
   }
 
   private async _init() {
-    try {
-      const mod = await new Function(
-        'return import("@mlc-ai/web-llm")',
-      )().catch(() => {
-        throw new Error("WebLLM not available. Install @mlc-ai/web-llm and ensure WebGPU is available.");
-      }) as any;
-      this.engine = await mod.CreateMLCEngine(
-        this.config.model || "Llama-3.2-1B-Instruct-q4f32_1-MLC",
-      );
-    } catch (e) {
-      throw new Error(
-        `WebLLM init failed: ${e}. Install @mlc-ai/web-llm and ensure WebGPU is available.`,
-      );
-    }
+    const mod = await import("@mlc-ai/web-llm");
+    this.engine = await mod.CreateMLCEngine(
+      this.config.model || "Llama-3.2-1B-Instruct-q4f32_1-MLC",
+      {
+        initProgressCallback: (report: { progress: number; text: string }) => {
+          if (_webLlmProgressCallback) {
+            _webLlmProgressCallback(report.progress, report.text);
+          }
+        },
+      },
+    );
   }
 
   async testConnection(): Promise<boolean> {
     try {
-      await this._init();
+      const avail = await checkWebLLM();
+      if (!avail) return false;
+      if (!this.engine) await this._init();
       return this.engine !== null;
     } catch {
       return false;
     }
+  }
+}
+
+// ── Chrome Built-in AI Provider (LanguageModel API, Chrome 148+) ────
+
+let _chromeAIAvailable: boolean | null = null;
+let _chromeAIProgressCallback: ((progress: number, text: string) => void) | null = null;
+
+export function setChromeAIProgressCallback(cb: ((progress: number, text: string) => void) | null): void {
+  _chromeAIProgressCallback = cb;
+}
+
+export async function checkChromeAI(): Promise<boolean> {
+  if (_chromeAIAvailable !== null) return _chromeAIAvailable;
+  try {
+    if (!("LanguageModel" in self)) {
+      _chromeAIAvailable = false;
+      return false;
+    }
+    const availability: string = await (self as any).LanguageModel.availability();
+    _chromeAIAvailable = availability !== "unavailable";
+    return _chromeAIAvailable;
+  } catch {
+    _chromeAIAvailable = false;
+    return false;
+  }
+}
+
+export async function getChromeAIStatus(): Promise<"available" | "downloadable" | "downloading" | "unavailable"> {
+  if (!("LanguageModel" in self)) return "unavailable";
+  try {
+    return await (self as any).LanguageModel.availability() as any;
+  } catch {
+    return "unavailable";
+  }
+}
+
+class ChromeBuiltinLLMProvider implements ILLMProvider {
+  readonly type: LLMProviderType = "chrome";
+  private session: any = null;
+
+  async complete(req: LLMCompletionRequest): Promise<LLMCompletionResponse> {
+    const avail = await checkChromeAI();
+    if (!avail) {
+      return {
+        content: "Chrome Built-in AI is not available. This requires Chrome 148+ on desktop with Gemini Nano enabled.\n\nTo enable:\n1. Go to chrome://flags/#optimization-guide-on-device-model → Enabled\n2. Go to chrome://flags/#prompt-api-for-gemini-nano → Enabled\n3. Restart Chrome\n4. Visit chrome://on-device-internals to check model download status",
+        finishReason: "error",
+      };
+    }
+    if (!this.session) await this._init();
+
+    const systemMsg = req.messages.find(m => m.role === "system");
+    const userMessages = req.messages.filter(m => m.role !== "system").map(m => m.content).join("\n");
+
+    try {
+      const result = await this.session.prompt(userMessages);
+      return {
+        content: result,
+        finishReason: "stop",
+      };
+    } catch (err) {
+      return {
+        content: `Chrome AI error: ${err instanceof Error ? err.message : "Unknown error"}`,
+        finishReason: "error",
+      };
+    }
+  }
+
+  private async _init() {
+    this.session = await (self as any).LanguageModel.create({
+      monitor: (m: any) => {
+        if (_chromeAIProgressCallback) {
+          m.addEventListener("downloadprogress", (e: any) => {
+            _chromeAIProgressCallback!(e.loaded, `Downloading Gemini Nano model...`);
+          });
+        }
+      },
+    });
+  }
+
+  async testConnection(): Promise<boolean> {
+    return checkChromeAI();
   }
 }
 
@@ -365,6 +472,8 @@ function _buildProvider(config: LLMConfig): ILLMProvider {
       return new OpenAILLMProvider(config);
     case "webllm":
       return new WebLLMProvider(config);
+    case "chrome":
+      return new ChromeBuiltinLLMProvider();
     case "mock":
     default:
       return new MockLLMProvider();
@@ -413,11 +522,15 @@ export function clearChatHistory(): void {
   _chatHistory = [];
 }
 
+export function syncChatHistory(messages: { role: "system" | "user" | "assistant"; content: string }[]): void {
+  _chatHistory = messages.slice(-50);
+}
+
 export async function generateTestsWithLLM(
   params: GenerateWithLLMParams,
 ): Promise<TestCase[]> {
   const skill = _skills.find(s => s.id === "generate-tests");
-  const prompt = `Generate ${params.count} CDN test cases for the "${params.category}" category. Description: ${params.description}. Respond with a JSON array of test case objects, each with: name, description, category (use "${params.category}"), priority (P0-P3), severity, status ("active"), tags (array of strings), owner ("llm"), automated (true), scriptPath, preconditions, expectedBehavior, expectedStatus (HTTP number), predicates (array of {id, type, field, expected, operator, description}), and suiteIds.`;
+  const prompt = `Generate ${params.count} CDN test cases for the "${params.category}" category. Description: ${params.description}. Respond with a JSON array of test case objects, each with: name, description, category (use "${params.category}"), priority (P0-P3), severity, status ("active"), tags (array of strings), owner ("llm"), automated (true), scriptPath (use .yaml extension), preconditions, expectedBehavior, expectedStatus (HTTP number), predicates (array of {id, type, field, expected, operator, description}), and suiteIds.`;
 
   const res = await _provider.complete({
     messages: [
@@ -447,7 +560,7 @@ export async function generateTestsWithLLM(
         owner: item.owner ?? "llm",
         suiteIds: [...params.suites],
         automated: true,
-        scriptPath: item.scriptPath ?? `tests/generated/llm/tc_${testCases.length + 1}.spec.ts`,
+        scriptPath: item.scriptPath ?? `tests/generated/llm/tc_${testCases.length + 1}.yaml`,
         preconditions: item.preconditions ?? "",
         expectedBehavior: item.expectedBehavior ?? "",
         documentation: item.documentation ?? "",

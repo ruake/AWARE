@@ -1,18 +1,18 @@
 import React from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend
+  Tooltip, ResponsiveContainer, Legend, Cell
 } from "recharts";
 import { AppLayout } from "@/components/aware/AppLayout";
 import {
   RUNS, ENV_SUMMARY, PASS_RATE_CHART, ENV_PASS_RATE_CHART,
-  getAllPromotionDecisions, setPromotionDecision, getPromotionDecision,
+  getAllPromotionDecisions, setPromotionDecision,
 } from "@/lib/data";
 import type { Run } from "@/lib/types";
 import {
   CheckCircle2, XCircle, AlertTriangle, Play, GitCompare,
-  TrendingDown, TrendingUp, ArrowRight, Github,
+  TrendingDown, TrendingUp, Github,
   Clock, Zap, Shield, BarChart3, Share2,
   ChevronRight, RefreshCw,
 } from "lucide-react";
@@ -139,17 +139,19 @@ export default function Dashboard() {
         {/* Promotion Banner */}
         <PromotionBanner latestRun={latestRun} />
 
-        {/* KPI tiles */}
+        {/* KPI tiles — clickable */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
           {[
-            { label: "Overall Pass Rate", value: `${overallPassRate}%`, sub: `${RUNS.length} runs`, color: "var(--gcp-blue)", bg: "var(--gcp-blue-bg)", icon: BarChart3 },
-            { label: "Passing Runs", value: passRuns, sub: "of last 12 runs", color: "var(--gcp-green)", bg: "var(--gcp-green-bg)", icon: CheckCircle2 },
-            { label: "Failing Runs", value: failRuns, sub: "need attention", color: "var(--gcp-red)", bg: "var(--gcp-red-bg)", icon: XCircle },
-            { label: "Active Regressions", value: "7", sub: "Prod/Production", color: "var(--gcp-yellow)", bg: "var(--gcp-yellow-bg)", icon: AlertTriangle },
+            { label: "Overall Pass Rate", value: `${overallPassRate}%`, sub: `${RUNS.length} runs`, color: "var(--gcp-blue)", bg: "var(--gcp-blue-bg)", icon: BarChart3, href: "/runs" },
+            { label: "Passing Runs (PASS)", value: passRuns, sub: "click to view", color: "var(--gcp-green)", bg: "var(--gcp-green-bg)", icon: CheckCircle2, href: "/runs?status=PASS" },
+            { label: "Failing Runs (FAIL)", value: failRuns, sub: "needs attention", color: "var(--gcp-red)", bg: "var(--gcp-red-bg)", icon: XCircle, href: "/runs?status=FAIL" },
+            { label: "Active Regressions", value: "7", sub: "Prod/Production", color: "var(--gcp-yellow)", bg: "var(--gcp-yellow-bg)", icon: AlertTriangle, href: "/compare?regressions=true" },
           ].map(kpi => {
             const Icon = kpi.icon;
             return (
-              <div key={kpi.label} className="gcp-card" style={{ padding: "16px 18px", borderLeft: `4px solid ${kpi.color}` }}>
+              <div key={kpi.label} onClick={() => navigate(kpi.href)} style={{ cursor: "pointer", padding: "16px 18px", borderLeft: `4px solid ${kpi.color}`, background: "var(--gcp-surface)", borderRadius: 6, border: "1px solid var(--gcp-grey)", transition: "box-shadow 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.1)"}
+                onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{kpi.label}</span>
                   <div style={{ background: kpi.bg, borderRadius: 6, padding: 6 }}><Icon size={14} style={{ color: kpi.color }} /></div>
@@ -171,21 +173,23 @@ export default function Dashboard() {
               </div>
               <TrendingDown size={16} style={{ color: "var(--gcp-red)" }} />
             </div>
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart data={PASS_RATE_CHART} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1a73e8" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#1a73e8" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
-                <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#5f6368" }} />
-                <YAxis domain={[40, 105]} tick={{ fontSize: 10, fill: "#5f6368" }} />
-                <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--gcp-grey)" }} formatter={(v: number) => [`${v}%`, "Pass Rate"]} />
-                <Area type="monotone" dataKey="passRate" stroke="#1a73e8" strokeWidth={2} fill="url(#blueGrad)" dot={{ r: 3, fill: "#1a73e8" }} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <div style={{ cursor: "pointer" }} onClick={() => navigate("/runs")}>
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart data={PASS_RATE_CHART} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#1a73e8" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#1a73e8" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
+                  <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#5f6368" }} />
+                  <YAxis domain={[40, 105]} tick={{ fontSize: 10, fill: "#5f6368" }} />
+                  <Tooltip contentStyle={{ fontSize: 11, borderRadius: 4, border: "1px solid var(--gcp-grey)" }} formatter={(v: number) => [`${v}%`, "Pass Rate"]} labelFormatter={(label) => `Day: ${label}`} />
+                  <Area type="monotone" dataKey="passRate" stroke="#1a73e8" strokeWidth={2} fill="url(#blueGrad)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           <div className="gcp-card" style={{ padding: 16 }}>
@@ -200,9 +204,9 @@ export default function Dashboard() {
                 <YAxis domain={[60, 105]} tick={{ fontSize: 10, fill: "#5f6368" }} />
                 <Tooltip contentStyle={{ fontSize: 11, borderRadius: 4 }} />
                 <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="Prod/Production" fill="#1a73e8" radius={[2,2,0,0]} />
-                <Bar dataKey="Prod/Staging" fill="#f9ab00" radius={[2,2,0,0]} />
-                <Bar dataKey="UAT/Production" fill="#1e8e3e" radius={[2,2,0,0]} />
+                <Bar dataKey="Prod/Production" fill="#1a73e8" radius={[2,2,0,0]} cursor="pointer" />
+                <Bar dataKey="Prod/Staging" fill="#f9ab00" radius={[2,2,0,0]} cursor="pointer" />
+                <Bar dataKey="UAT/Production" fill="#1e8e3e" radius={[2,2,0,0]} cursor="pointer" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -215,7 +219,9 @@ export default function Dashboard() {
               <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text)" }}>Environment Health</h3>
             </div>
             {ENV_SUMMARY.map(env => (
-              <div key={env.label} style={{ padding: "12px 16px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", flexDirection: "column", gap: 6 }}>
+              <div key={env.label} onClick={() => navigate(`/runs?env=${encodeURIComponent(env.label)}`)} style={{ cursor: "pointer", padding: "12px 16px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", flexDirection: "column", gap: 6, transition: "background 0.1s" }}
+                onMouseEnter={e => e.currentTarget.style.background = "var(--gcp-grey-bg)"}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 13, fontWeight: 500 }}>{env.label}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -258,11 +264,13 @@ export default function Dashboard() {
               </tr></thead>
               <tbody>
                 {recentRuns.map(run => (
-                  <tr key={run.id} style={{ cursor: "pointer" }}>
+                  <tr key={run.id} onClick={() => navigate(`/runs/${run.id}`)} style={{ cursor: "pointer" }}
+                    onMouseEnter={e => { const tds = e.currentTarget.querySelectorAll("td"); tds.forEach(td => td.style.background = "var(--gcp-grey-bg)"); }}
+                    onMouseLeave={e => { const tds = e.currentTarget.querySelectorAll("td"); tds.forEach(td => td.style.background = ""); }}>
                     <td>
-                      <button onClick={() => navigate(`/runs/${run.id}`)} style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer", fontWeight: 500, padding: 0 }}>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", fontWeight: 500 }}>
                         {run.id.slice(-12)}
-                      </button>
+                      </span>
                     </td>
                     <td><span style={{ fontSize: 11, fontFamily: "var(--font-mono)" }}>{run.suite}</span></td>
                     <td><span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{run.env}</span></td>

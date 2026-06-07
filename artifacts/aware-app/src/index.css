@@ -166,3 +166,25 @@ select.gcp-input { cursor: pointer; }
 .pipeline-stage-enter:nth-child(4){animation-delay:.24s}
 .pipeline-stage-enter:nth-child(5){animation-delay:.32s}
 .pipeline-stage-enter:nth-child(6){animation-delay:.4s}
+
+/* Dark mode */
+.dark {
+  --gcp-blue-bg: #1a2744;
+  --gcp-green: #34a853;
+  --gcp-green-bg: #1b3624;
+  --gcp-red: #f28b82;
+  --gcp-red-bg: #3c1f1e;
+  --gcp-yellow: #fdd663;
+  --gcp-yellow-bg: #3d2e16;
+  --gcp-orange: #fbbc04;
+  --gcp-orange-bg: #3d2b13;
+  --gcp-purple: #d2a4ff;
+  --gcp-grey: #5f6368;
+  --gcp-grey-bg: #1e1e1e;
+  --gcp-text: #e8eaed;
+  --gcp-text-secondary: #9aa0a6;
+  --gcp-surface: #1e1e1e;
+  --gcp-surface-hover: #2a2a2a;
+}
+
+.dark body { background-color: var(--gcp-grey-bg); }

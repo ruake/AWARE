@@ -1,7 +1,7 @@
 import type { TestCase, TestCaseFilter, TestChangeLogEntry, TestStats, ImportResult, GenerateParams, Predicate, FilmstripConfig } from "./types";
 import { CATEGORIES, TEST_TAGS, TEST_NAMES, GENERATION_TEMPLATES, OWNERS } from "./constants";
-import { LS_TC_KEY, loadFromStorage, saveToStorage, _notify, subscribeToTestCases } from "./store";
-import { removeTestCaseFromAllSuites } from "./testSuites";
+import { LS_TC_KEY, loadFromStorage, saveToStorage, _notifyTC, subscribeToTestCases } from "./store";
+import { removeTestCaseFromAllSuites } from "./operations";
 
 export { subscribeToTestCases };
 
@@ -24,7 +24,7 @@ const BASE_TEST_CASES: TestCase[] = Array.from({ length: 25 }).map((_, i) => {
     owner: OWNERS[i % OWNERS.length],
     suiteIds: i < 10 ? ["suite_full", "suite_geo"] : i < 18 ? ["suite_full", "suite_perf"] : i < 22 ? ["suite_full"] : [],
     automated: true,
-    scriptPath: `tests/aware/${cat}/tc_${i}.spec.ts`,
+    scriptPath: `tests/aware/${cat}/tc_${i}.yaml`,
     preconditions: `- Akamai EdgeGrid credentials configured\n- ${cat} test data seeded\n- Target environment reachable`,
     expectedBehavior: `- Response status 200\n- Correct ${cat} headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8`,
     documentation: `## ${TEST_NAMES[i]}\n\nValidates ${cat} behavior for endpoint group ${i}.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8`,
@@ -104,11 +104,13 @@ function seedCaptureHeaders(i: number): string[] {
 let testCasesStore: TestCase[] = loadFromStorage<TestCase>(LS_TC_KEY, BASE_TEST_CASES);
 let nextTcId = Math.max(testCasesStore.length, 25);
 
-export function getTestCasesStore(): TestCase[] {
-  return testCasesStore;
+let _tcSnapshot: TestCase[] = [];
+function _dropTCSnapshot() { _tcSnapshot = []; }
+export function getTestCasesStore(): TestCase[] { return testCasesStore; }
+export function getTestCases(): TestCase[] {
+  if (_tcSnapshot.length === 0) _tcSnapshot = [...testCasesStore];
+  return _tcSnapshot;
 }
-
-export function getTestCases(): TestCase[] { return [...testCasesStore]; }
 export function getTestCaseById(id: string): TestCase | undefined { return testCasesStore.find(tc => tc.id === id); }
 
 export function createTestCase(data: Omit<TestCase, "id" | "createdAt" | "updatedAt">): TestCase {
@@ -132,7 +134,7 @@ export function createTestCase(data: Omit<TestCase, "id" | "createdAt" | "update
   };
   testCasesStore.push(tc);
   saveToStorage(LS_TC_KEY, testCasesStore);
-  _notify();
+  _dropTCSnapshot(); _notifyTC();
   return tc;
 }
 
@@ -167,7 +169,7 @@ export function updateTestCase(id: string, patch: Partial<Omit<TestCase, "id" | 
     updatedAt: now,
   };
   saveToStorage(LS_TC_KEY, testCasesStore);
-  _notify();
+  _dropTCSnapshot(); _notifyTC();
   return testCasesStore[idx];
 }
 
@@ -176,7 +178,7 @@ export function deleteTestCase(id: string): boolean {
   testCasesStore = testCasesStore.filter(tc => tc.id !== id);
   removeTestCaseFromAllSuites(id);
   saveToStorage(LS_TC_KEY, testCasesStore);
-  _notify();
+  _dropTCSnapshot(); _notifyTC();
   return testCasesStore.length < before;
 }
 
@@ -184,7 +186,7 @@ export function resetTestCasesStore(): void {
   testCasesStore = [...BASE_TEST_CASES];
   nextTcId = Math.max(testCasesStore.length, 25);
   saveToStorage(LS_TC_KEY, testCasesStore);
-  _notify();
+  _dropTCSnapshot(); _notifyTC();
 }
 
 export function updateTestCaseDocumentation(id: string, documentation: string, author: string): TestCase | undefined {
@@ -224,7 +226,8 @@ export function importTestCases(data: TestCase[]): ImportResult {
   });
   if (result.imported > 0) {
     saveToStorage(LS_TC_KEY, testCasesStore);
-    _notify();
+    _dropTCSnapshot();
+    _notifyTC();
   }
   return result;
 }
@@ -293,7 +296,7 @@ export function generateTestCases(params: GenerateParams): TestCase[] {
       owner: params.owner,
       suiteIds: [...params.suites],
       automated: true,
-      scriptPath: `tests/generated/${cat}/tc_${idx}.spec.ts`,
+      scriptPath: `tests/generated/${cat}/tc_${idx}.yaml`,
       preconditions: `- ${cat} test environment ready\n- Mock data seeded for ${template.path}\n- EdgeGrid token valid`,
       expectedBehavior: `- Response ${template.check}\n- Response time < 500ms\n- Correct headers present`,
       documentation: `## ${name}\n\nGenerated test for ${cat} — ${template.path}.\n\n### Expected\n- ${template.check}`,
@@ -321,7 +324,8 @@ export function generateTestCases(params: GenerateParams): TestCase[] {
   nextTcId += result.length;
   if (result.length > 0) {
     saveToStorage(LS_TC_KEY, testCasesStore);
-    _notify();
+    _dropTCSnapshot();
+    _notifyTC();
   }
   return result;
 }

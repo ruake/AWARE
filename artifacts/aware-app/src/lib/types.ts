@@ -12,6 +12,7 @@ export interface Run {
   pm: string;
   ew: string;
   env: string;
+  network: "staging" | "production";
 }
 
 export interface TestResult {
@@ -21,6 +22,19 @@ export interface TestResult {
   duration: number;
   category: string;
   suite: string;
+}
+
+export interface TestAssertionResult {
+  assertion: string;
+  expected: string;
+  actual: string;
+  passed: boolean;
+}
+
+export interface TestEvidence {
+  request: { method: string; url: string; headers: Record<string, string>; body?: string };
+  response: { status: number; headers: Record<string, string>; body?: string };
+  assertions: TestAssertionResult[];
 }
 
 export interface TestRunPoint {
@@ -45,7 +59,7 @@ export interface DiffRow {
   durBase: number;
   durCand: number;
   category: string;
-  state: "regression" | "fixed" | "duration" | "unchanged";
+  state: "regression" | "fixed" | "duration" | "unchanged" | "fishy";
 }
 
 export interface EnvSummary {
@@ -243,7 +257,7 @@ export interface PromotionDecision {
 
 // ── LLM / AI Copilot Types ──────────────────────────────────────────
 
-export type LLMProviderType = "mock" | "openai" | "webllm";
+export type LLMProviderType = "mock" | "openai" | "webllm" | "chrome";
 
 export type LLMRole = "system" | "user" | "assistant";
 
@@ -308,6 +322,8 @@ export interface LLMChatMessage {
   content: string;
   timestamp: number;
   skill?: string;
+  parentId?: string;
+  threadId?: string;
   metadata?: Record<string, unknown>;
 }
 

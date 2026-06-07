@@ -122,11 +122,11 @@ export default function Runs() {
                   onChange={e => setSelectedIds(e.target.checked ? new Set(filtered.map(r => r.id)) : new Set())}
                 />
               </th>
-              <th>Run ID</th><th>Suite</th><th>Target / Env</th><th>Status</th>
+              <th>Run ID</th><th>Suite</th><th>Target</th><th>Env / Network</th><th>Status</th>
               <th style={{ textAlign: "right" }}>Pass %</th>
               <th style={{ textAlign: "right" }}>Failures</th>
               <th style={{ textAlign: "right" }}>Duration</th>
-              <th>Started</th><th>Versions</th><th>Actions</th>
+              <th>Started</th><th>Akamai Config</th><th>Actions</th>
             </tr></thead>
             <tbody>
               {filtered.map(run => {
@@ -140,7 +140,13 @@ export default function Runs() {
                       </button>
                     </td>
                     <td><span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{run.suite}</span></td>
-                    <td style={{ fontSize: 12 }}>{run.target} / {run.env}</td>
+                    <td style={{ fontSize: 12, fontWeight: 500 }}>{run.target}</td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <span style={{ fontSize: 12 }}>{run.env}</span>
+                        <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.3px", background: run.network === "production" ? "var(--gcp-green-bg)" : "var(--gcp-yellow-bg)", color: run.network === "production" ? "var(--gcp-green)" : "#e37400", padding: "1px 5px", borderRadius: 3, border: `1px solid ${run.network === "production" ? "var(--gcp-green)" : "#f9ab00"}` }}>{run.network}</span>
+                      </div>
+                    </td>
                     <td>{statusBadge(run.status)}</td>
                     <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 13, color: run.passPct === 100 ? "var(--gcp-green)" : run.passPct < 90 ? "var(--gcp-red)" : "var(--gcp-text)" }}>{run.passPct}%</td>
                     <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 12, color: run.failures > 0 ? "var(--gcp-red)" : "var(--gcp-text-secondary)" }}>{run.failures || "—"}</td>
@@ -148,7 +154,12 @@ export default function Runs() {
                     <td style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>
                       {new Date(run.started).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </td>
-                    <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)" }}>PM {run.pm} · EW {run.ew}</td>
+                    <td>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text)" }}>PM {run.pm}</span>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>EW {run.ew}</span>
+                      </div>
+                    </td>
                     <td>
                       <div style={{ display: "flex", gap: 6 }}>
                         <button onClick={() => navigate(`/runs/${run.id}`)} className="gcp-button" style={{ fontSize: 11, padding: "3px 8px" }}>Detail</button>

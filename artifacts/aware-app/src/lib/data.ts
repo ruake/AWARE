@@ -1,15 +1,23 @@
-// Barrel re-export for backward compatibility.
-// New code should import directly from domain modules.
+// ── Data-layer barrel for @/lib/data ─────────────────────────────────
+// Re-exports the core data-domain API (runs, test cases, suites,
+// promotions, types, and the most-commonly-used convenience modules).
+// For AI/LLM, nav, CI config, etc., import directly from their modules
+// or use @/lib (the complete fan-out barrel).
 
 export type {
   Run, TestResult, TestDetail, TestRunPoint, DiffRow,
   TestCase, TestSuite, TestTag, TestChangeLogEntry, PromotionDecision,
   Predicate, FilmstripConfig, TestStats, TestCaseFilter, SuiteNode,
-  GenerateParams, ImportResult
+  GenerateParams, ImportResult,
+  TestPriority, TestSeverity, TestStatus,
 } from "./types";
 
 export {
-  RUNS, getRunIndex, getRunById, generateTestHistory,
+  loadFromStorage, saveToStorage,
+} from "./store";
+
+export {
+  RUNS, getRunIndex, getRunById, generateTestHistory, detectAnomaly,
   DIFF_ROWS, TEST_DETAILS, ENV_SUMMARY,
   PASS_RATE_CHART, ENV_PASS_RATE_CHART, getTestResultsForRun,
 } from "./runs";
@@ -27,7 +35,7 @@ export {
   getTestSuites, getTestSuiteById,
   createTestSuite, updateTestSuite, deleteTestSuite,
   addTestsToSuite, removeTestsFromSuite,
-  getTestCasesBySuiteId, buildSuiteTree,
+  buildSuiteTree,
   resetTestSuitesStore, subscribeToTestSuites,
 } from "./testSuites";
 
@@ -36,7 +44,19 @@ export {
   getAllPromotionDecisions, resetPromotionDecisions,
 } from "./promotions";
 
-// Cross-cutting orchestration — resets all stores
+export { getTestCasesBySuiteId } from "./operations";
+
+export {
+  ENVS, CATEGORIES, PRIORITIES, SEVERITIES, STATUSES, OWNERS,
+  TAG_COLORS, CATEGORY_COLORS, TEST_TAGS, TEST_NAMES,
+  GENERATION_TEMPLATES,
+} from "./constants";
+
+export { navTo, copyToClipboard, showToast, repo } from "./nav";
+
+export { useSyncedUrlState } from "./urlState";
+
+// ── Cross-cutting ────────────────────────────────────────────────────
 import { resetTestCasesStore } from "./testCases";
 import { resetTestSuitesStore } from "./testSuites";
 import { resetPromotionDecisions } from "./promotions";

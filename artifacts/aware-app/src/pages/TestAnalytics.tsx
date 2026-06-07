@@ -1,12 +1,13 @@
 import React from "react";
-import { Link, useSearch } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { DIFF_ROWS, TEST_DETAILS, generateTestHistory, RUNS } from "@/lib/data";
+import { DIFF_ROWS, TEST_DETAILS, generateTestHistory, getTestCases } from "@/lib/data";
 import { ENVS } from "@/lib/constants";
+import { useTestData } from "@/hooks/useTestData";
 import {
   ArrowLeft, BarChart3, Clock, Activity, AlertTriangle,
   FileText, Search, Share2, ChevronRight, Zap,
@@ -16,15 +17,29 @@ import { useSimpleToast } from "@/hooks/useSimpleToast";
 export default function TestAnalytics() {
   const search = useSearch();
   const params = new URLSearchParams(search);
+  const [, navigate] = useLocation();
   const { show, Toast } = useSimpleToast();
+  const { tcs } = useTestData();
 
-  const testId = params.get("testId") ?? "diff_0";
-  const [selectedTestId, setSelectedTestId] = React.useState(testId);
+  const rawTestId = params.get("testId") ?? "";
+  const rawDiffId = params.get("diffId") ?? "diff_0";
+  const isTcMode = rawTestId.startsWith("tc_");
 
-  const idx = Number(selectedTestId.replace("diff_", ""));
+  const testCase = isTcMode ? tcs.find(t => t.id === rawTestId) : null;
+  const selectedTestId = isTcMode ? rawTestId : rawDiffId;
+
+  const idx = isTcMode ? Math.abs((testCase ? parseInt(testCase.id.replace("tc_", "")) : 0) % DIFF_ROWS.length) : Number(selectedTestId.replace("diff_", ""));
   const diffs = DIFF_ROWS;
-  const diff = diffs[idx] ?? diffs[0];
-  const detail = TEST_DETAILS[idx] ?? generateTestHistory(idx);
+  const diff = diffs[Math.min(idx, diffs.length - 1)] ?? diffs[0];
+  const detail = TEST_DETAILS[idx % TEST_DETAILS.length] ?? generateTestHistory(idx);
+  const selectorItems = isTcMode
+    ? tcs.map(t => ({ id: t.id, name: t.name }))
+    : diffs.map(d => ({ id: d.id, name: d.name }));
+
+  const handleSelectChange = (id: string) => {
+    const key = isTcMode ? "testId" : "diffId";
+    navigate(`/analytics?${key}=${encodeURIComponent(id)}`, { replace: true });
+  };
 
   const envStatus = ENVS.map(env => {
     const runs = detail.history.filter(h => h.env === env);
@@ -50,25 +65,31 @@ export default function TestAnalytics() {
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Link href="/compare"><a className="gcp-button" style={{ fontSize: 12 }}><ArrowLeft size={13} /> Compare</a></Link>
+          <Link href={isTcMode ? "/tests" : "/compare"}>
+            <a className="gcp-button" style={{ fontSize: 12 }}><ArrowLeft size={13} /> {isTcMode ? "Tests" : "Compare"}</a>
+          </Link>
           <ChevronRight size={14} style={{ color: "var(--gcp-text-secondary)" }} />
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Search size={13} style={{ color: "var(--gcp-text-secondary)" }} />
             <select className="gcp-input" style={{ fontFamily: "var(--font-mono)", fontSize: 11, maxWidth: 340 }}
-              value={selectedTestId} onChange={e => setSelectedTestId(e.target.value)}>
-              {diffs.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+              value={selectedTestId} onChange={e => handleSelectChange(e.target.value)}>
+              {selectorItems.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
           </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, color: "var(--gcp-text)", maxWidth: 700 }}>{diff.name}</h1>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: "var(--gcp-text)", maxWidth: 700 }}>
+              {isTcMode && testCase ? testCase.name : diff.name}
+              {isTcMode && testCase && <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)", fontWeight: 400, marginLeft: 8, fontFamily: "var(--font-mono)" }}>{testCase.id} · v{testCase.version}</span>}
+            </h1>
             <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-              <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{diff.category}</span>
-              <span style={{ fontSize: 11, fontWeight: 600, color: isFlaky ? "var(--gcp-yellow)" : "var(--gcp-green)" }}>
+              <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{isTcMode && testCase ? testCase.category : diff.category}</span>
+              {isTcMode && testCase && <span style={{ fontSize: 11, fontWeight: 600, color: testCase.priority === "P0" ? "var(--gcp-red)" : "var(--gcp-text-secondary)" }}>{testCase.priority}</span>}
+              {!isTcMode && <span style={{ fontSize: 11, fontWeight: 600, color: isFlaky ? "var(--gcp-yellow)" : "var(--gcp-green)" }}>
                 {isFlaky ? "⚠ Flaky" : "✓ Stable"}
-              </span>
+              </span>}
               <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{detail.history.length} runs tracked</span>
             </div>
           </div>

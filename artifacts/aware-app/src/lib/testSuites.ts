@@ -1,6 +1,5 @@
-import type { TestCase, TestSuite, SuiteNode } from "./types";
-import { LS_SUITE_KEY, loadFromStorage, saveToStorage, _notify, subscribeToTestSuites } from "./store";
-import { getTestCasesStore } from "./testCases";
+import type { TestSuite, SuiteNode } from "./types";
+import { LS_SUITE_KEY, loadFromStorage, saveToStorage, _notifyTS, subscribeToTestSuites } from "./store";
 
 export { subscribeToTestSuites };
 
@@ -81,11 +80,19 @@ const BASE_TEST_SUITES: TestSuite[] = [
 
 let testSuitesStore: TestSuite[] = loadFromStorage<TestSuite>(LS_SUITE_KEY, BASE_TEST_SUITES);
 
+let _tsSnapshot: TestSuite[] = [];
+function _dropTSSnapshot() { _tsSnapshot = []; }
+export function getTestSuitesStore(): TestSuite[] { return testSuitesStore; }
+export function setTestSuitesStore(store: TestSuite[]) { testSuitesStore = store; }
+
 export function resetTestSuitesStore(): void {
   testSuitesStore = [...BASE_TEST_SUITES];
 }
 
-export function getTestSuites(): TestSuite[] { return [...testSuitesStore]; }
+export function getTestSuites(): TestSuite[] {
+  if (_tsSnapshot.length === 0) _tsSnapshot = [...testSuitesStore];
+  return _tsSnapshot;
+}
 export function getTestSuiteById(id: string): TestSuite | undefined { return testSuitesStore.find(s => s.id === id); }
 
 export function createTestSuite(data: Omit<TestSuite, "id" | "createdAt" | "updatedAt">): TestSuite {
@@ -94,7 +101,7 @@ export function createTestSuite(data: Omit<TestSuite, "id" | "createdAt" | "upda
   const suite: TestSuite = { id, ...data, createdAt: now, updatedAt: now };
   testSuitesStore.push(suite);
   saveToStorage(LS_SUITE_KEY, testSuitesStore);
-  _notify();
+  _dropTSSnapshot(); _notifyTS();
   return suite;
 }
 
@@ -103,20 +110,21 @@ export function updateTestSuite(id: string, patch: Partial<Omit<TestSuite, "id" 
   if (idx === -1) return undefined;
   testSuitesStore[idx] = { ...testSuitesStore[idx], ...patch, updatedAt: new Date().toISOString() };
   saveToStorage(LS_SUITE_KEY, testSuitesStore);
-  _notify();
+  _dropTSSnapshot(); _notifyTS();
   return testSuitesStore[idx];
 }
 
 export function removeTestCaseFromAllSuites(tcId: string): void {
   testSuitesStore.forEach(s => { s.testIds = s.testIds.filter(tid => tid !== tcId); });
   saveToStorage(LS_SUITE_KEY, testSuitesStore);
+  _dropTSSnapshot(); _notifyTS();
 }
 
 export function deleteTestSuite(id: string): boolean {
   const before = testSuitesStore.length;
   testSuitesStore = testSuitesStore.filter(s => s.id !== id);
   saveToStorage(LS_SUITE_KEY, testSuitesStore);
-  _notify();
+  _dropTSSnapshot(); _notifyTS();
   return testSuitesStore.length < before;
 }
 
@@ -127,7 +135,7 @@ export function addTestsToSuite(suiteId: string, testIds: string[]): TestSuite |
   testIds.forEach(tid => { if (!existing.has(tid)) { suite.testIds.push(tid); existing.add(tid); } });
   suite.updatedAt = new Date().toISOString();
   saveToStorage(LS_SUITE_KEY, testSuitesStore);
-  _notify();
+  _dropTSSnapshot(); _notifyTS();
   return suite;
 }
 
@@ -138,15 +146,8 @@ export function removeTestsFromSuite(suiteId: string, testIds: string[]): TestSu
   suite.testIds = suite.testIds.filter(tid => !removeSet.has(tid));
   suite.updatedAt = new Date().toISOString();
   saveToStorage(LS_SUITE_KEY, testSuitesStore);
-  _notify();
+  _dropTSSnapshot(); _notifyTS();
   return suite;
-}
-
-export function getTestCasesBySuiteId(suiteId: string): TestCase[] {
-  const suite = testSuitesStore.find(s => s.id === suiteId);
-  if (!suite) return [];
-  const store = getTestCasesStore();
-  return suite.testIds.map(tid => store.find(tc => tc.id === tid)).filter((t): t is TestCase => !!t);
 }
 
 export function buildSuiteTree(): SuiteNode[] {

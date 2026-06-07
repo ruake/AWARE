@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Pages](https://img.shields.io/badge/GitHub%20Pages-deployed-blue)](https://ruake.github.io/AWARE)
 
-**A.W.A.K.E.** is a cross-target test observability mockup for Akamai CDN configurations. It visualizes pass-rate trends across multiple environments, surfaces regressions via side-by-side run comparison, and provides per-test analytics — all as a static SPA served via GitHub Pages.
+**A.W.A.K.E.** is a CDN regression observability tool for Akamai configurations. It visualizes pass-rate trends across multiple environments, surfaces regressions via side-by-side run comparison, and provides per-test analytics — all as a static SPA served via GitHub Pages.
 
 **Live demo:** https://ruake.github.io/AWARE
 
@@ -11,15 +11,20 @@
 
 | Page | Route | Description |
 |------|-------|-------------|
-| Dashboard | `/preview/aware/Dashboard` | Multi-environment pass-rate line charts, per-target health cards, regression alerts, version drift detection |
-| Runs | `/preview/aware/Runs` | Filterable run table with column-header filters (text + checkboxes), status/target/env quick filters, inline permalink & Slack sharing, pagination |
-| Run Detail | `/preview/aware/RunDetail?runId=...` | Split-panel: filterable test results table (left) + HTTP evidence viewer (right) with syntax-highlighted request/response/PM variables |
-| Compare | `/preview/aware/Compare?baseline=...&candidate=...` | Baseline vs. candidate diff table with column filters, regression/fixed/duration-change detection, side panel with per-test analytics link |
-| New Run | `/preview/aware/StartRun` | Full-page workflow dispatcher: suite selector, target/environment picker, PM/EW version inputs, parallelism/retries/fail-fast controls, live gh/curl/Python command previews, one-click GitHub Actions launch |
-| Search | `/preview/aware/SearchDemo` | Full-page global search with keyboard navigation, facet filters (Tests/Runs/Compare), recent items, quick actions |
-| Test Analytics | `/preview/aware/TestAnalytics?testId=...` | Per-test analytics dashboard with pass-rate trend, duration history, flakiness score, and run history table |
-| Test Doc | `/preview/aware/TestDoc` | Per-test deep-dive with docstring, tags, preconditions, git change history |
-| About | `/preview/aware/About` | Project info, live stats, feature cards, tech stack |
+| Dashboard | `/` | Multi-environment pass-rate charts, per-env health cards, regression alerts, promotion banner |
+| Runs | `/runs` | Filterable run table with column filters, status/target quick filters, side panel with CTAs |
+| Run Detail | `/runs/:runId` | Test results table + HTTP evidence viewer with syntax-highlighted request/response |
+| Compare | `/compare` | Baseline vs. candidate diff with column filters, regression/fixed/duration CTAs, side panel |
+| Tests | `/tests` | Test case CRUD, multi-select bulk actions, batch status/priority/suite, multi-format import (JSON/YAML/JUnit), stats dashboard, template/AI generation |
+| Suites | `/suites` | Suite tree hierarchy, editor modal, YAML export, Recharts pie/bar charts |
+| Analytics | `/analytics` | Per-test analytics (supports both `testId=tc_N` and `diffId=diff_N`), pass-rate trend, duration history, flakiness score |
+| AI Copilot | `/copilot` | AI chat with skill selector, 3 providers (Mock/OpenAI/WebLLM), WebLLM availability check + user-friendly unavailable message |
+| Test Doc | `/testdoc` | Per-test deep-dive with docstring, predicates, changelog timeline |
+| Start Run | `/start` | Full-page workflow dispatcher: suite, target, env, parallelism, command preview |
+| Search | `/search` | Full-page keyboard-navigable search wired to real testCasesStore, RUNS, and DIFF_ROWS |
+| Sharing | `/share` | Permalink/share with entity tabs, export formats, badge embed |
+| Status | `/status` | System status dashboard |
+| About | `/about` | Project info, feature cards, tech stack |
 
 ## Tech Stack
 
@@ -27,26 +32,27 @@
 |-------|-----------|
 | **Language** | TypeScript 5.9 (strict) |
 | **Frontend** | React 19, Vite 7, Tailwind CSS 4 |
-| **Charts** | react-google-charts (Gauge, Line, Bar, Column) |
+| **Charts** | Recharts |
+| **LLM** | Mock (offline), OpenAI-compatible, WebLLM (WebGPU) |
 | **Icons** | lucide-react |
-| **Package Manager** | pnpm workspaces |
+| **Package Manager** | pnpm |
 | **CI/CD** | GitHub Actions (build + deploy to GitHub Pages) |
 
 ## Getting Started
 
 ```bash
+cd artifacts/aware-app
 pnpm install
-pnpm run typecheck
-pnpm --filter @workspace/mockup-sandbox run dev
+pnpm dev
 ```
 
-Open http://localhost:5173/preview/aware/Dashboard
+Open http://localhost:5173
 
 ### Build for GitHub Pages
 
 ```bash
-cd artifacts/mockup-sandbox
-BASE_PATH=/AWARE PORT=1 pnpm build
+cd artifacts/aware-app
+pnpm build
 ```
 
 ### Environment Variables
@@ -59,40 +65,31 @@ BASE_PATH=/AWARE PORT=1 pnpm build
 ## Project Structure
 
 ```
-├── artifacts/
-│   └── mockup-sandbox/          # React UI sandbox
-│       ├── src/
-│       │   ├── components/
-│       │   │   └── mockups/
-│       │   │       └── aware/   # All page components
-│       │   │           ├── _shared/  # Shared data, nav, ColumnFilter, AppLayout
-│       │   │           ├── Dashboard.tsx
-│       │   │           ├── Runs.tsx
-│       │   │           ├── RunDetail.tsx
-│       │   │           ├── Compare.tsx
-│       │   │           ├── StartRun.tsx
-│       │   │           ├── SearchDemo.tsx
-│       │   │           ├── TestAnalytics.tsx
-│       │   │           ├── TestDoc.tsx
-│       │   │           ├── Sharing.tsx
-│       │   │           └── About.tsx
-│       │   └── App.tsx          # Preview dispatcher
-│       └── .github/workflows/   # Deploy workflow
-├── .github/workflows/           # CI workflows (root)
-└── docs/screenshots/            # Project screenshots
+artifacts/aware-app/src/
+├── lib/               # Data layer (store, runs, testCases, testSuites, promotions, llm, skills, types)
+├── components/
+│   ├── aware/         # AppLayout, ColumnFilter, CTAStatCard, FilterBar, GenerateWizard, etc.
+│   └── ui/            # shadcn/ui components
+├── pages/             # 15 page components (Dashboard, Runs, Compare, TestManager, Copilot, etc.)
+├── hooks/             # useSimpleToast, useTestData, useSyncedUrlState
+├── App.tsx            # wouter Router with all routes
+├── main.tsx           # Entry point
+├── _group.css         # GCP theme CSS variables
+└── index.css          # Tailwind imports
 ```
 
 ## Features
 
-- **Multi-environment pass-rate charts** — Composite line chart with all 4 environments overlaid + time-slice selector (7d/14d/30d/All)
-- **Column-header filtering** — Every table column supports text search + multi-select checkboxes; toolbar has quick filters for status/suite/target/env
-- **Regression alerts** — Dashboard highlights environments with pass-rate drops; Compare page shows regression/fixed/duration-change delta
-- **Full-page workflow dispatcher** — Dedicated Start Run page with suite selector, version inputs, parallelism/retries controls, and live gh/curl/Python command preview with one-click GitHub Actions launch
-- **Global search** — Full-page keyboard-navigable search across tests, runs, and comparisons with facet filters; Enter navigates to the result
-- **Side-by-side comparison** — Syncable URL with baseline/candidate run selectors, side panel for per-test detail, one-click GitHub issue filing
-- **Clipboard integration** — Every shareable entity has copy-to-clipboard with visual feedback (permalink, Slack snippet, GitHub issue template)
+- **Multi-environment pass-rate charts** — Composite line chart with all environments overlaid
+- **Column-header filtering** — Every table column supports text search + multi-select checkboxes
+- **Regression alerts** — Dashboard highlights pass-rate drops; Compare shows regression/fixed/duration delta
+- **AI Copilot** — Chat interface with 5 skills for test generation, script creation (YAML), result analysis, diff explanation, suite config generation
+- **LLM providers** — Mock (offline), OpenAI-compatible, WebLLM (WebGPU) — configurable per session
+- **Stat-to-filter CTAs** — Clickable summary cards toggle column filters across Compare, Analytics, Runs, Dashboard
+- **Bulk generation** — Template-based or AI-powered test case generation with suite assignment
+- **Import/Export** — JSON, CSV, JUnit XML
 - **Dark mode** — GCP-inspired light/dark theme toggle
-- **SPA 404 fallback** — `404.html` copies `index.html` for client-side routing on GitHub Pages
+- **SPA routing** — wouter with 404 fallback for GitHub Pages
 
 ## GitHub Actions
 

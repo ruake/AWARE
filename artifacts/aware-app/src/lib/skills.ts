@@ -113,4 +113,26 @@ Follow Akamai CDN testing best practices: test across edge regions, validate cac
   },
 ];
 
-registerSkills(SKILLS);
+export const PROJECT_CONTEXT = `You are running inside the AWARE app (Akamai Web Analyser & Kit for Evaluations).
+This is a CDN regression observability tool built with React 19 + TypeScript + Vite.
+
+Key data types (available via import from @/lib/data):
+- TestCase: { id, name, description, category, priority, severity, status, owner, tags, suiteIds, automated, scriptPath, predicates, requestHeaders, expectedStatus, filmstrip, documentation, changelog }
+- TestSuite: { id, name, description, parentId, testIds: string[], config: { target, environment, parallelism, retries, failFast, timeoutMinutes, integration? }, tags, schedule }
+- DiffRow: { id, name, baseStatus, candStatus, durBase, durCand, category, state: "regression"|"fixed"|"duration"|"unchanged"|"fishy" }
+- Run: { id, label, suite, env, target, pm, ew, network, status, passPct, duration, timestamp, commit }
+- Predicate: { id, type: "statusCode"|"responseTime"|"header", field, expected, operator, description }
+
+Key store functions:
+- getTestCases(), getTestCaseById(id), createTestCase(data), updateTestCase(id, patch), deleteTestCase(id)
+- getTestSuites(), getTestSuiteById(id), createTestSuite(data), deleteSuite(id)
+- addTestsToSuite(suiteId, testIds), removeTestsFromSuite(suiteId, testIds)
+- RUNS (constant array), DIFF_ROWS (constant array), TEST_DETAILS (generated history)
+
+Generate YAML test scripts with .yaml extension. Use predicates for validation assertions.
+`;
+
+registerSkills(SKILLS.map(s => ({
+  ...s,
+  systemPrompt: PROJECT_CONTEXT + "\n\n" + s.systemPrompt,
+})));

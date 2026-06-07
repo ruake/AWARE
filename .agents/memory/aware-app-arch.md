@@ -5,9 +5,7 @@ description: Key architectural constraints for the aware-app artifact to stay co
 
 **Stack:** React 19 + Vite 7, wouter routing, recharts for charts, lucide-react icons.
 
-**Styling:** Inline styles using GCP CSS vars (`var(--gcp-blue)`, `var(--gcp-red)`, etc.) and CSS utility classes (`gcp-card`, `gcp-badge`, `gcp-button`, `gcp-table`, `gcp-input`, `gcp-toast`). NO Tailwind in the main app — Tailwind is only in the mockup-sandbox artifact.
-
-**Why:** The main app was bootstrapped with GCP CSS vars before Tailwind was considered. The mockup-sandbox uses Tailwind for rapid prototyping; ports always need conversion.
+**Styling:** Inline styles using GCP CSS vars (`var(--gcp-blue)`, `var(--gcp-red)`, etc.) and CSS utility classes (`gcp-card`, `gcp-badge`, `gcp-button`, `gcp-table`, `gcp-input`, `gcp-toast`). Tailwind utility classes only in `_group.css` and `index.css` baseline — never use `className` in page components.
 
 **localStorage keys:** `aware_test_cases_v2`, `aware_test_suites_v2`, `aware_promotion_decisions` (v2 avoids stale data from old schema keys).
 

@@ -21,6 +21,7 @@ export const RUNS: Run[] = Array.from({ length: 12 }).map((_, i) => {
     pm: "v892",
     ew: `2341.1.${i}`,
     env: ENVS[i % ENVS.length],
+    network: (ENVS[i % ENVS.length].split("/")[1]?.toLowerCase() ?? "production") as "staging" | "production",
   };
 });
 
@@ -51,20 +52,37 @@ export function generateTestHistory(testIndex: number): TestDetail {
   return { history, passRate, flakinessScore, avgDuration };
 }
 
+/** Compute "fishy" anomaly flag based on historical pass rate and flakiness.
+ *  A test is fishy when both statuses PASS but the pattern looks suspicious. */
+export function detectAnomaly(detail: TestDetail): boolean {
+  const { passRate, flakinessScore, avgDuration, history } = detail;
+  if (history.length < 3) return false;
+  if (flakinessScore > 30) return true;
+  if (passRate < 70) return true;
+  const recent = history.slice(-3);
+  const old = history.slice(0, -3);
+  if (old.length >= 3) {
+    const recentRate = recent.filter(h => h.status === "PASS").length / recent.length;
+    const oldRate = old.filter(h => h.status === "PASS").length / old.length;
+    if (oldRate - recentRate > 0.25) return true; // 25%+ drop in pass rate
+  }
+  return false;
+}
+
 export const DIFF_ROWS: DiffRow[] = [
   { id: "diff_0", name: "Verify Geo match /api/v1/data resolves correct PoP", baseStatus: "PASS", candStatus: "PASS", durBase: 120, durCand: 122, category: "geo-match", state: "unchanged" },
   { id: "diff_1", name: "Check locale split fr-CA content Quebec region", baseStatus: "PASS", candStatus: "FAIL", durBase: 95, durCand: 98, category: "locale-split", state: "regression" },
   { id: "diff_2", name: "Validate URL health check 200 /api/v2/status", baseStatus: "FAIL", candStatus: "PASS", durBase: 210, durCand: 185, category: "url-health", state: "fixed" },
-  { id: "diff_3", name: "Ensure edge redirect preserves query params /api/v3/data", baseStatus: "PASS", candStatus: "PASS", durBase: 88, durCand: 91, category: "routing", state: "unchanged" },
+  { id: "diff_3", name: "Ensure edge redirect preserves query params /api/v3/data", baseStatus: "PASS", candStatus: "PASS", durBase: 88, durCand: 91, category: "routing", state: "fishy" },
   { id: "diff_4", name: "Verify cache TTL header matches origin max-age directive", baseStatus: "PASS", candStatus: "FAIL", durBase: 145, durCand: 148, category: "caching", state: "regression" },
   { id: "diff_5", name: "Check gzip compression /api/v1/assets/*", baseStatus: "PASS", candStatus: "PASS", durBase: 120, durCand: 340, category: "performance", state: "duration" },
-  { id: "diff_6", name: "Validate CORS headers cross-origin /api/v2/config", baseStatus: "PASS", candStatus: "PASS", durBase: 75, durCand: 77, category: "security", state: "unchanged" },
+  { id: "diff_6", name: "Validate CORS headers cross-origin /api/v2/config", baseStatus: "PASS", candStatus: "PASS", durBase: 75, durCand: 77, category: "security", state: "fishy" },
   { id: "diff_7", name: "Ensure rate limiting triggers 100 req/min /api/v1/auth", baseStatus: "PASS", candStatus: "PASS", durBase: 320, durCand: 318, category: "security", state: "unchanged" },
   { id: "diff_8", name: "Verify TLS 1.3 negotiation /api/v3/secure endpoint", baseStatus: "PASS", candStatus: "PASS", durBase: 55, durCand: 58, category: "tls", state: "unchanged" },
   { id: "diff_9", name: "Check WAF rules block SQL injection /api/v1/search", baseStatus: "PASS", candStatus: "FAIL", durBase: 180, durCand: 182, category: "security", state: "regression" },
   { id: "diff_10", name: "Validate JWT token expiry returns 401 /api/v2/user", baseStatus: "PASS", candStatus: "PASS", durBase: 95, durCand: 97, category: "security", state: "unchanged" },
   { id: "diff_11", name: "Ensure CDN purge invalidates /api/v1/cache/* within 5s", baseStatus: "FAIL", candStatus: "PASS", durBase: 4200, durCand: 3800, category: "caching", state: "fixed" },
-  { id: "diff_12", name: "Check IPv6 preference dual-stack client", baseStatus: "PASS", candStatus: "PASS", durBase: 66, durCand: 68, category: "routing", state: "unchanged" },
+  { id: "diff_12", name: "Check IPv6 preference dual-stack client", baseStatus: "PASS", candStatus: "PASS", durBase: 66, durCand: 68, category: "routing", state: "fishy" },
   { id: "diff_13", name: "Verify HTTP/3 QUIC upgrade from Alt-Svc header", baseStatus: "PASS", candStatus: "PASS", durBase: 110, durCand: 320, category: "performance", state: "duration" },
   { id: "diff_14", name: "Validate origin shield hit ratio > 80% /api/v3/*", baseStatus: "PASS", candStatus: "PASS", durBase: 200, durCand: 205, category: "caching", state: "unchanged" },
 ];

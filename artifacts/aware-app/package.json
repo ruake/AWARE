@@ -44,6 +44,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/react-query": "catalog:",
+    "@types/dom-chromium-ai": "^0.0.16",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -75,7 +76,9 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.84",
     "@types/js-yaml": "^4.0.9",
-    "js-yaml": "^4.2.0"
+    "js-yaml": "^4.2.0",
+    "react-markdown": "^10.1.0"
   }
 }

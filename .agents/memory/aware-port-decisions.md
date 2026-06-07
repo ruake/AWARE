@@ -1,9 +1,9 @@
 ---
 name: AWARE port decisions
-description: Rules for porting mockup-sandbox designs into the aware-app main app.
+description: Rules for porting designs into the aware-app main app.
 ---
 
-When porting from mockup-sandbox to aware-app:
+When porting to aware-app:
 
 1. **Tailwind → inline styles:** Every `className="..."` Tailwind class must become a `style={{ ... }}` inline style using GCP CSS vars. Use `var(--gcp-blue)`, `var(--gcp-green)`, `var(--gcp-red)`, `var(--gcp-yellow)`, `var(--gcp-grey)`, `var(--gcp-surface)`, `var(--gcp-grey-bg)`, `var(--gcp-text)`, `var(--gcp-text-secondary)`, `var(--gcp-blue-bg)`, `var(--gcp-green-bg)`, `var(--gcp-red-bg)`, `var(--gcp-yellow-bg)`.
 

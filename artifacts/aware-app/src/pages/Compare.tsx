@@ -1,9 +1,10 @@
 import React from "react";
-import { useLocation, useSearch } from "wouter";
+import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
+import { useSyncedUrlState } from "@/lib/urlState";
 import { RUNS, DIFF_ROWS, setPromotionDecision } from "@/lib/data";
 import type { DiffRow } from "@/lib/types";
 import {
@@ -17,13 +18,14 @@ const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 function copy(text: string) { navigator.clipboard.writeText(text).catch(() => {}); }
 
 function stateBadge(state: DiffRow["state"]) {
-  const map = {
+  const map: Record<string, { color: string; label: string }> = {
     regression: { color: "var(--gcp-red)", label: "Regression" },
     fixed: { color: "var(--gcp-green)", label: "Fixed" },
     duration: { color: "var(--gcp-yellow)", label: "Duration ↑" },
     unchanged: { color: "var(--gcp-text-secondary)", label: "Unchanged" },
+    fishy: { color: "var(--gcp-purple)", label: "Fishy ⚠" },
   };
-  const s = map[state];
+  const s = map[state] ?? { color: "var(--gcp-text-secondary)", label: state };
   return <span style={{ fontSize: 11, fontWeight: 600, color: s.color }}>{s.label}</span>;
 }
 
@@ -36,7 +38,7 @@ function SidePanel({ diff, diffs, selectedId, onSelect, navigate }: {
   const deltaMs = diff.durCand - diff.durBase;
 
   return (
-    <div className="gcp-card" style={{ width: 340, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", borderLeft: "3px solid var(--gcp-blue)" }}>
+    <div className="gcp-card" style={{ width: 340, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", borderLeft: `3px solid ${diff.state === "regression" ? "var(--gcp-red)" : diff.state === "fixed" ? "var(--gcp-green)" : "var(--gcp-blue)"}` }}>
       <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", gap: 8, background: "var(--gcp-blue-bg)", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 1, border: "1px solid var(--gcp-grey)", borderRadius: 4, background: "var(--gcp-surface)" }}>
           <button disabled={idx <= 0} onClick={() => onSelect(diffs[idx - 1]?.id)} style={{ padding: "4px 7px", border: "none", background: "transparent", cursor: idx > 0 ? "pointer" : "not-allowed", color: idx > 0 ? "var(--gcp-blue)" : "var(--gcp-grey)" }}>
@@ -53,30 +55,30 @@ function SidePanel({ diff, diffs, selectedId, onSelect, navigate }: {
       <div style={{ flex: 1, overflow: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 12 }}>
         <div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text)", lineHeight: 1.5, wordBreak: "break-all" }}>{diff.name}</div>
-          <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-            <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{diff.category}</span>
+          <div style={{ display: "flex", gap: 4, marginTop: 8, flexWrap: "wrap" }}>
+            <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10 }}>{diff.category}</span>
             {stateBadge(diff.state)}
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          <div className="gcp-card" style={{ padding: 10, borderLeft: `3px solid ${diff.baseStatus === "PASS" ? "var(--gcp-green)" : "var(--gcp-red)"}` }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", marginBottom: 6 }}>Baseline</div>
-            <span className={`gcp-badge ${diff.baseStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{diff.baseStatus}</span>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 6 }}>{diff.durBase}ms</div>
+          <div style={{ padding: 10, background: `var(--${diff.baseStatus === "PASS" ? "gcp-green-bg" : "gcp-red-bg"})`, borderRadius: 6, border: `1px solid ${diff.baseStatus === "PASS" ? "var(--gcp-green)" : "var(--gcp-red)"}` }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: diff.baseStatus === "PASS" ? "var(--gcp-green)" : "var(--gcp-red)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 4 }}>Baseline</div>
+            <span className={`gcp-badge ${diff.baseStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`} style={{ fontSize: 10 }}>{diff.baseStatus}</span>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text)", marginTop: 6, fontWeight: 600 }}>{diff.durBase}ms</div>
           </div>
-          <div className="gcp-card" style={{ padding: 10, borderLeft: `3px solid ${diff.candStatus === "PASS" ? "var(--gcp-green)" : "var(--gcp-red)"}` }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", marginBottom: 6 }}>Candidate</div>
-            <span className={`gcp-badge ${diff.candStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{diff.candStatus}</span>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 6 }}>{diff.durCand}ms</div>
+          <div style={{ padding: 10, background: `var(--${diff.candStatus === "PASS" ? "gcp-green-bg" : "gcp-red-bg"})`, borderRadius: 6, border: `1px solid ${diff.candStatus === "PASS" ? "var(--gcp-green)" : "var(--gcp-red)"}` }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: diff.candStatus === "PASS" ? "var(--gcp-green)" : "var(--gcp-red)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 4 }}>Candidate</div>
+            <span className={`gcp-badge ${diff.candStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`} style={{ fontSize: 10 }}>{diff.candStatus}</span>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text)", marginTop: 6, fontWeight: 600 }}>{diff.durCand}ms</div>
           </div>
         </div>
-        <div className="gcp-card" style={{ padding: 10 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", marginBottom: 6 }}>Delta</div>
+        <div style={{ padding: 10, borderRadius: 6, border: "1px solid var(--gcp-grey)", background: deltaMs > 20 ? "var(--gcp-red-bg)" : deltaMs < -20 ? "var(--gcp-green-bg)" : "var(--gcp-grey-bg)" }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: deltaMs > 20 ? "var(--gcp-red)" : deltaMs < -20 ? "var(--gcp-green)" : "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 4 }}>Delta</div>
           <div style={{ display: "flex", gap: 16 }}>
             <div>
               <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>Status: </span>
               {diff.baseStatus === diff.candStatus
-                ? <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>No change</span>
+                ? <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>—</span>
                 : <span style={{ fontSize: 11, fontWeight: 700, color: diff.state === "regression" ? "var(--gcp-red)" : "var(--gcp-green)" }}>{diff.baseStatus} → {diff.candStatus}</span>
               }
             </div>
@@ -120,17 +122,17 @@ function SidePanel({ diff, diffs, selectedId, onSelect, navigate }: {
 }
 
 export default function Compare() {
-  const search = useSearch();
-  const params = new URLSearchParams(search);
   const [, navigate] = useLocation();
   const { show, Toast } = useSimpleToast();
 
   const runIds = RUNS.map(r => r.id);
-  const [baseline, setBaseline] = React.useState(params.get("baseline") ?? RUNS[RUNS.length - 1]?.id ?? "");
-  const [candidate, setCandidate] = React.useState(params.get("candidate") ?? RUNS[0]?.id ?? "");
-  const [selectedId, setSelectedId] = React.useState<string | null>(null);
-  const [searchText, setSearchText] = React.useState("");
-  const [regressionsOnly, setRegressionsOnly] = React.useState(false);
+  const [baseline, setBaseline] = useSyncedUrlState("baseline", RUNS[RUNS.length - 1]?.id ?? "");
+  const [candidate, setCandidate] = useSyncedUrlState("candidate", RUNS[0]?.id ?? "");
+  const [selectedId, setSelectedId] = useSyncedUrlState<string | null>("sel", null);
+  const [searchText, setSearchText] = useSyncedUrlState("q", "");
+  const [regressionsOnly, setRegressionsOnly] = useSyncedUrlState("regressions", false);
+  const baselineRun = RUNS.find(r => r.id === baseline);
+  const candidateRun = RUNS.find(r => r.id === candidate);
 
   const [colFilters, setColFilters] = React.useState<Record<string, ColumnFilterState>>({});
   const updateColFilter = (field: string) => (f: ColumnFilterState) => setColFilters(p => ({ ...p, [field]: f }));
@@ -174,21 +176,39 @@ export default function Compare() {
 
         {/* Run selectors */}
         <div className="gcp-card" style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ flex: "1 1 240px", minWidth: 200 }}>
             <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Baseline Run</label>
             <select className="gcp-input" style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: 11 }} value={baseline} onChange={e => setBaseline(e.target.value)}>
-              {runIds.map(id => <option key={id} value={id}>{id}</option>)}
+              {RUNS.map(r => <option key={r.id} value={r.id}>{r.id} · {r.env} · PM {r.pm} · EW {r.ew}</option>)}
             </select>
+            {baselineRun && (
+              <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{baselineRun.target}</span>
+                <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{baselineRun.env}</span>
+                <span className={`gcp-badge ${baselineRun.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{baselineRun.network}</span>
+                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>PM {baselineRun.pm}</span>
+                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>EW {baselineRun.ew}</span>
+              </div>
+            )}
           </div>
           <button onClick={() => { const t = baseline; setBaseline(candidate); setCandidate(t); }} className="gcp-button" style={{ fontSize: 12, marginTop: 16 }}>⇄ Swap</button>
-          <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ flex: "1 1 240px", minWidth: 200 }}>
             <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "var(--gcp-blue)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Candidate Run</label>
             <select className="gcp-input" style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: 11, borderColor: "var(--gcp-blue)" }} value={candidate} onChange={e => setCandidate(e.target.value)}>
-              {runIds.map(id => <option key={id} value={id}>{id}</option>)}
+              {RUNS.map(r => <option key={r.id} value={r.id}>{r.id} · {r.env} · PM {r.pm} · EW {r.ew}</option>)}
             </select>
+            {candidateRun && (
+              <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{candidateRun.target}</span>
+                <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{candidateRun.env}</span>
+                <span className={`gcp-badge ${candidateRun.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{candidateRun.network}</span>
+                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>PM {candidateRun.pm}</span>
+                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>EW {candidateRun.ew}</span>
+              </div>
+            )}
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0, marginTop: 16, flexWrap: "wrap" }}>
-            <button onClick={() => { copy(`${window.location.href}?baseline=${baseline}&candidate=${candidate}`); show("Permalink copied"); }} className="gcp-button" style={{ fontSize: 12 }}>
+            <button onClick={() => { copy(window.location.href); show("Permalink copied — URL always reflects current comparison"); }} className="gcp-button" style={{ fontSize: 12 }}>
               <Link2 size={13} /> Permalink
             </button>
             <button onClick={() => { copy(`Comparison: ${baseline} vs ${candidate}\nNew failures: ${regressions.length}\nFixed: ${fixed.length}\nDuration regressions: ${duration.length}`); show("Slack summary copied"); }}
@@ -221,27 +241,41 @@ export default function Compare() {
           ))}
         </div>
 
-        {/* Promotion/regression banner */}
+        {/* Run context ribbon */}
+        <div style={{ background: "var(--gcp-grey-bg)", border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "6px 14px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontSize: 11 }}>
+          <span style={{ fontWeight: 600, color: "var(--gcp-text-secondary)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.3px" }}>Comparison</span>
+          <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{baselineRun?.target} / {baselineRun?.env}</span>
+          <span className={`gcp-badge ${baselineRun?.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{baselineRun?.network}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>PM {baselineRun?.pm}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>EW {baselineRun?.ew}</span>
+          <span style={{ color: "var(--gcp-grey)", fontSize: 12 }}>|</span>
+          <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{candidateRun?.target} / {candidateRun?.env}</span>
+          <span className={`gcp-badge ${candidateRun?.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{candidateRun?.network}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>PM {candidateRun?.pm}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>EW {candidateRun?.ew}</span>
+          <span style={{ flex: 1 }} />
+          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>{diffs.length} tests compared</span>
+        </div>
+
+        {/* Promotion/regression — full-width ribbon w/ badges */}
         {regressions.length > 0 ? (
-          <div style={{ background: "var(--gcp-red-bg)", border: "1px solid var(--gcp-red)", borderRadius: 4, padding: "10px 14px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <AlertTriangle size={15} style={{ color: "var(--gcp-red)", flexShrink: 0 }} />
-            <span style={{ fontSize: 12, flex: 1 }}><strong>{regressions.length} regression{regressions.length !== 1 ? "s" : ""} detected.</strong> Promotion blocked until fixed.</span>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => { copy(`Bulk regression report\nBaseline: ${baseline}\nCandidate: ${candidate}\n${regressions.length} regressions:\n${regressions.map(r => `- ${r.name}`).join("\n")}`); show("Bulk issue template copied"); }}
-                className="gcp-button-danger" style={{ fontSize: 11, padding: "5px 12px" }}>
-                <Github size={12} /> File All as Issues
-              </button>
-              <button onClick={() => confirmPromotion("block")} className="gcp-button" style={{ fontSize: 11, padding: "5px 12px", color: "var(--gcp-red)", borderColor: "var(--gcp-red)" }}>
-                <XCircle size={12} /> Confirm Block
-              </button>
-            </div>
+          <div style={{ background: "var(--gcp-red-bg)", border: "1px solid var(--gcp-red)", borderRadius: 4, padding: "8px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span className="gcp-badge gcp-badge-fail" style={{ fontSize: 10 }}>{regressions.length} regression{regressions.length !== 1 ? "s" : ""}</span>
+            <span style={{ fontSize: 12, flex: 1 }}><strong>Promotion blocked.</strong> Fix regressions before deploying to Akamai.</span>
+            <button onClick={() => confirmPromotion("block")} className="gcp-button" style={{ fontSize: 11, padding: "3px 10px", color: "var(--gcp-red)", borderColor: "var(--gcp-red)" }}>
+              <XCircle size={11} /> Confirm Block
+            </button>
+            <button onClick={() => { copy(`Bulk regression report\nBaseline: ${baseline}\nCandidate: ${candidate}\n${regressions.length} regressions:\n${regressions.map(r => `- ${r.name}`).join("\n")}`); show("Bulk issue template copied"); }}
+              className="gcp-button-danger" style={{ fontSize: 11, padding: "3px 10px" }}>
+              <Github size={11} /> File Issues
+            </button>
           </div>
         ) : (
-          <div style={{ background: "var(--gcp-green-bg)", border: "1px solid var(--gcp-green)", borderRadius: 4, padding: "10px 14px", display: "flex", alignItems: "center", gap: 12 }}>
-            <Shield size={15} style={{ color: "var(--gcp-green)", flexShrink: 0 }} />
-            <span style={{ fontSize: 12, flex: 1 }}><strong>No regressions detected.</strong> Candidate is ready to promote to Akamai.</span>
-            <button onClick={() => confirmPromotion("promote")} className="gcp-button-success" style={{ fontSize: 11, padding: "5px 12px" }}>
-              <Zap size={12} /> Approve Promotion
+          <div style={{ background: "var(--gcp-green-bg)", border: "1px solid var(--gcp-green)", borderRadius: 4, padding: "8px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>All Clear</span>
+            <span style={{ fontSize: 12, flex: 1, fontWeight: 500 }}>No regressions — ready to promote to <strong>Akamai Production</strong></span>
+            <button onClick={() => confirmPromotion("promote")} className="gcp-button-success" style={{ fontSize: 11, padding: "3px 10px" }}>
+              <Zap size={11} /> Approve Promotion
             </button>
           </div>
         )}
@@ -308,7 +342,7 @@ export default function Compare() {
                             ? <span style={{ color: deltams > 0 ? "var(--gcp-red)" : "var(--gcp-green)", fontWeight: 700 }}>{deltams > 0 ? "+" : ""}{deltams}ms</span>
                             : <span style={{ color: "var(--gcp-text-secondary)" }}>~0ms</span>}
                         </td>
-                        <td><span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 7px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{d.category}</span></td>
+                        <td><span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10 }}>{d.category}</span></td>
                         <td>{stateBadge(d.state)}</td>
                         <td>
                           <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>

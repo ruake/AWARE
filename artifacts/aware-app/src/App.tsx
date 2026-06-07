@@ -5,16 +5,15 @@ import Dashboard from "@/pages/Dashboard";
 import Runs from "@/pages/Runs";
 import RunDetail from "@/pages/RunDetail";
 import Compare from "@/pages/Compare";
-import TestAnalytics from "@/pages/TestAnalytics";
-import StartRun from "@/pages/StartRun";
 import TestManager from "@/pages/TestManager";
-import Status from "@/pages/Status";
-import About from "@/pages/About";
 import TestSuiteManager from "@/pages/TestSuiteManager";
+import TestAnalytics from "@/pages/TestAnalytics";
 import TestDoc from "@/pages/TestDoc";
 import SearchDemo from "@/pages/SearchDemo";
+import StartRun from "@/pages/StartRun";
 import Sharing from "@/pages/Sharing";
-import Copilot from "@/pages/Copilot";
+import Status from "@/pages/Status";
+import About from "@/pages/About";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +33,6 @@ function Router() {
       <Route path="/testdoc" component={TestDoc} />
       <Route path="/search" component={SearchDemo} />
       <Route path="/share" component={Sharing} />
-      <Route path="/copilot" component={Copilot} />
       <Route component={NotFound} />
     </Switch>
   );

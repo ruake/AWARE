@@ -25,12 +25,12 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install
-      - run: pnpm --filter @workspace/mockup-sandbox run test -- --suite "${suite.id}"
+      - run: pnpm --filter @workspace/aware-app run test -- --suite "${suite.id}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results-\${{ github.run_id }}
-          path: artifacts/mockup-sandbox/test-results/
+          path: artifacts/aware-app/test-results/
 `;
 }
 
