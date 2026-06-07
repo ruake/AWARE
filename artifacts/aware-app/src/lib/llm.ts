@@ -261,8 +261,11 @@ class WebLLMProvider implements ILLMProvider {
 
   private async _init() {
     try {
-      // @ts-expect-error - @mlc-ai/web-llm is optional; handled in try/catch
-      const mod = await import("@mlc-ai/web-llm") as any;
+      const mod = await new Function(
+        'return import("@mlc-ai/web-llm")',
+      )().catch(() => {
+        throw new Error("WebLLM not available. Install @mlc-ai/web-llm and ensure WebGPU is available.");
+      }) as any;
       this.engine = await mod.CreateMLCEngine(
         this.config.model || "Llama-3.2-1B-Instruct-q4f32_1-MLC",
       );
