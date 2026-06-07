@@ -1,4 +1,4 @@
-modules = ["nodejs-24"]
+modules = ["nodejs-24", "python-3.11"]
 
 [deployment]
 router = "application"
@@ -20,6 +20,10 @@ author = "agent"
 task = "workflow.run"
 args = "aware-app"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "desktop"
+
 [[workflows.workflow]]
 name = "aware-app"
 author = "agent"
@@ -28,6 +32,18 @@ author = "agent"
 task = "shell.exec"
 args = "PORT=20857 BASE_PATH=/ pnpm --filter @workspace/aware-app run dev"
 waitForPort = 20857
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow]]
+name = "desktop"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash scripts/start-desktop.sh"
+waitForPort = 8080
 
 [workflows.workflow.metadata]
 outputType = "webview"
@@ -47,10 +63,14 @@ exposeLocalhost = true
 
 [[ports]]
 localPort = 5173
-externalPort = 5173
+externalPort = 80
 
 [[ports]]
 localPort = 5174
+
+[[ports]]
+localPort = 5999
+externalPort = 3002
 
 [[ports]]
 localPort = 8080
@@ -70,3 +90,4 @@ externalPort = 3001
 
 [nix]
 packages = ["iproute_mptcp"]
+channel = "stable-25_05"

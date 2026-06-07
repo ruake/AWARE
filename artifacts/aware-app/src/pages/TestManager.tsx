@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/aware/AppLayout";
 import { CiConfigBanner } from "@/components/aware/CiConfigBanner";
 import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
 import { useSyncedUrlState } from "@/lib/urlState";
+import { decodeTestConfigFromNav, getPendingTestConfig } from "@/lib/llm";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useTestData } from "@/hooks/useTestData";
 import { EMPTY_FILTER, TagBadge, StatusBadge, priorityColor } from "@/components/aware/TestCard";
@@ -449,11 +450,37 @@ export default function TestManager() {
   const [colFilters, setColFilters] = useSyncedUrlState<Record<string, ColumnFilterState>>("filters", {});
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [createInitial, setCreateInitial] = React.useState<Omit<TestCase, "id" | "createdAt" | "updatedAt">>(EMPTY_FORM);
   const [showCreate, setShowCreate] = React.useState(false);
   const [showImport, setShowImport] = React.useState(false);
   const [showGenerate, setShowGenerate] = React.useState(false);
   const [selectedPanelId, setSelectedPanelId] = useSyncedUrlState<string | null>("sel", null);
   const [configChanged, setConfigChanged] = React.useState(false);
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("newTestConfig");
+    if (raw) {
+      try {
+        const config = decodeTestConfigFromNav(raw);
+        const merged = { ...EMPTY_FORM, ...config };
+        setCreateInitial(merged);
+        setShowCreate(true);
+        const url = new URL(window.location.href);
+        url.searchParams.delete("newTestConfig");
+        window.history.replaceState({}, "", url.toString());
+        return;
+      } catch {
+        console.warn("Failed to decode newTestConfig param");
+      }
+    }
+    const pending = getPendingTestConfig();
+    if (pending) {
+      const merged = { ...EMPTY_FORM, ...pending };
+      setCreateInitial(merged);
+      setShowCreate(true);
+    }
+  }, []);
 
   const markConfigChanged = () => { if (!configChanged) setConfigChanged(true); };
 
@@ -647,7 +674,7 @@ export default function TestManager() {
           )}
         </div>
       </div>
-      {showCreate && <TestCaseModal initial={EMPTY_FORM} allSuites={suites} onSave={handleCreate} onCancel={() => setShowCreate(false)} />}
+      {showCreate && <TestCaseModal initial={createInitial} allSuites={suites} onSave={handleCreate} onCancel={() => { setShowCreate(false); setCreateInitial(EMPTY_FORM); }} />}
       {editingTc && editingId && <TestCaseModal initial={editingTc} allSuites={suites} onSave={handleUpdate} onCancel={() => setEditingId(null)} />}
       {showImport && <ImportModal onClose={() => setShowImport(false)} toast={toast} />}
       {showGenerate && <GenerateWizard allSuites={suites} onClose={() => setShowGenerate(false)} toast={toast} />}

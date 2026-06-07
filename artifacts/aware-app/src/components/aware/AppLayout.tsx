@@ -4,7 +4,7 @@ import {
   LayoutDashboard, List, GitCompare, Bug, Play,
   Activity, Bell, Search, Menu, Moon, Sun, ExternalLink,
   Check, AlertTriangle, Info, Bot, BarChart3, FolderTree,
-  Cpu,
+  Cpu, Monitor,
 } from "lucide-react";
 import { CommandPalette } from "./CommandPalette";
 import { CopilotChatBubble } from "./CopilotChatBubble";
@@ -25,6 +25,7 @@ const PRIMARY_NAV: NavItem[] = [
   { href: "/tests", label: "Tests", icon: Bug },
   { href: "/suites", label: "Suites", icon: FolderTree },
   { href: "/copilot", label: "Copilot", icon: Bot },
+  { href: "/desktop", label: "Desktop", icon: Monitor },
 ];
 
 const SECONDARY_NAV: NavItem[] = [

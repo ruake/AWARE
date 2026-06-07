@@ -4,14 +4,97 @@ import {
   Bot, Send, Sparkles, FileCode, Search, GitCompare,
   FolderTree, Settings2, Trash2, Loader2,
   AlertTriangle, Lightbulb, Zap, Download,
-  Maximize2, Minimize2, MessageSquare, X,
+  GitBranch, Maximize2, Minimize2, MessageSquare, X, FileText,
 } from "lucide-react";
-import { llmChat, getLLMConfig, setLLMConfig, clearChatHistory, getRegisteredSkills, generateTestsWithLLM, checkWebLLM, setWebLLMProgressCallback, getChromeAIStatus, setChromeAIProgressCallback } from "@/lib/llm";
+import { llmChat, getLLMConfig, setLLMConfig, clearChatHistory, syncChatHistory, getRegisteredSkills, checkWebLLM, setWebLLMProgressCallback, getChromeAIStatus, setChromeAIProgressCallback, extractTestConfigFromMessage, savePendingTestConfig } from "@/lib/llm";
 import { SKILLS, PROJECT_CONTEXT } from "@/lib/skills";
 import type { LLMConfig, LLMSkillDefinition, LLMChatMessage } from "@/lib/types";
 import { navTo } from "@/lib/nav";
 import ReactMarkdown from "react-markdown";
 import { saveChatMessages, loadChatMessages, clearChatMessages } from "@/lib/chatStorage";
+import { ChatFormControls, parseFormBlocks } from "@/components/aware/ChatFormControls";
+import type { FormField } from "@/components/aware/ChatFormControls";
+
+const MARKDOWN_COMPONENTS: Record<string, React.ComponentType<any>> = {
+  code: ({ className, children, ...props }: any) => {
+    const isInline = !className;
+    return isInline
+      ? <code style={{ background: "var(--gcp-grey-bg)", padding: "1px 4px", borderRadius: 3, fontSize: 11 }} {...props}>{children}</code>
+      : <pre style={{ background: "var(--gcp-grey-bg)", padding: 8, borderRadius: 6, overflowX: "auto", fontSize: 11, lineHeight: 1.4, margin: "4px 0" }}><code className={className} {...props}>{children}</code></pre>;
+  },
+  strong: ({ children }: any) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+  em: ({ children }: any) => <em style={{ fontStyle: "italic" }}>{children}</em>,
+  ul: ({ children }: any) => <ul style={{ paddingLeft: 16, margin: "4px 0" }}>{children}</ul>,
+  ol: ({ children }: any) => <ol style={{ paddingLeft: 16, margin: "4px 0" }}>{children}</ol>,
+  li: ({ children }: any) => <li style={{ marginBottom: 2 }}>{children}</li>,
+  h1: ({ children }: any) => <h1 style={{ fontSize: 14, fontWeight: 700, margin: "8px 0 4px" }}>{children}</h1>,
+  h2: ({ children }: any) => <h2 style={{ fontSize: 13, fontWeight: 700, margin: "6px 0 3px" }}>{children}</h2>,
+  h3: ({ children }: any) => <h3 style={{ fontSize: 12, fontWeight: 700, margin: "4px 0 2px" }}>{children}</h3>,
+  p: ({ children }: any) => <p style={{ margin: "4px 0" }}>{children}</p>,
+  a: ({ href, children }: any) => <a href={href} target="_blank" rel="noreferrer" style={{ color: "var(--gcp-blue)", textDecoration: "underline" }}>{children}</a>,
+  hr: () => <hr style={{ border: "none", borderTop: "1px solid var(--gcp-grey)", margin: "8px 0" }} />,
+  table: ({ children }: any) => <div style={{ overflowX: "auto" }}><table style={{ borderCollapse: "collapse", width: "100%", fontSize: 11, margin: "4px 0" }}>{children}</table></div>,
+  th: ({ children }: any) => <th style={{ border: "1px solid var(--gcp-grey)", padding: "4px 6px", background: "var(--gcp-grey-bg)", fontWeight: 600, textAlign: "left" }}>{children}</th>,
+  td: ({ children }: any) => <td style={{ border: "1px solid var(--gcp-grey)", padding: "4px 6px" }}>{children}</td>,
+};
+
+const DRAFT_CARD_STYLE: React.CSSProperties = {
+  border: "1px solid var(--gcp-blue)",
+  borderRadius: 8,
+  overflow: "hidden",
+  marginTop: 8,
+  fontSize: 12,
+};
+
+function DraftTestCard({ config, onConfirm }: { config: Record<string, unknown>; onConfirm: () => void }) {
+  const name = (config.name as string) || "Unnamed";
+  const priority = (config.priority as string) || "";
+  const severity = (config.severity as string) || "";
+  const category = (config.category as string) || "";
+  const status = (config.expectedStatus as string | number) ?? "";
+  const predicates = (config.predicates as Array<Record<string, unknown>>) || [];
+  return (
+    <div style={DRAFT_CARD_STYLE}>
+      <div style={{ padding: "8px 12px", background: "var(--gcp-blue-bg)", borderBottom: "1px solid var(--gcp-blue)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontWeight: 700, fontSize: 11, color: "var(--gcp-blue)", textTransform: "uppercase", letterSpacing: "0.3px" }}>
+          <FileText size={12} style={{ marginRight: 4, display: "inline", verticalAlign: "middle" }} />
+          Draft Test Case
+        </span>
+      </div>
+      <div style={{ padding: "10px 12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 16px" }}>
+        <div>
+          <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 1 }}>Name</div>
+          <div style={{ fontWeight: 600 }}>{name}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 1 }}>Category</div>
+          <div>{category}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 1 }}>Priority</div>
+          <div>{priority}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 1 }}>Severity</div>
+          <div>{severity}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 1 }}>Expected Status</div>
+          <div>{status}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 1 }}>Predicates</div>
+          <div>{predicates.length} rule{predicates.length !== 1 ? "s" : ""}</div>
+        </div>
+      </div>
+      <div style={{ padding: "8px 12px", borderTop: "1px solid var(--gcp-blue)", display: "flex", gap: 6 }}>
+        <button onClick={onConfirm} className="gcp-button gcp-button-primary" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+          <FileText size={12} /> Confirm & Open in Test Manager
+        </button>
+      </div>
+    </div>
+  );
+}
 
 type SkillOption = "none" | LLMSkillDefinition["id"];
 
@@ -20,7 +103,11 @@ const SKILL_ICONS: Record<string, React.ComponentType<any>> = {
 };
 
 export default function Copilot() {
-  const [messages, setMessages] = React.useState<LLMChatMessage[]>(() => loadChatMessages());
+  const [messages, setMessages] = React.useState<LLMChatMessage[]>(() => {
+    const loaded = loadChatMessages();
+    syncChatHistory(loaded.map(m => ({ role: m.role as "system" | "user" | "assistant", content: m.content })));
+    return loaded;
+  });
   const [input, setInput] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [activeSkill, setActiveSkill] = React.useState<SkillOption>("none");
@@ -33,6 +120,7 @@ export default function Copilot() {
   const [chromeAIStatus, setChromeAIStatus] = React.useState<"available" | "downloadable" | "downloading" | "unavailable" | "checking">("checking");
   const [activeThread, setActiveThread] = React.useState<string | null>(null);
   const [fullWindow, setFullWindow] = React.useState(false);
+  const [submittedForms, setSubmittedForms] = React.useState<Set<string>>(new Set());
   const [threadInput, setThreadInput] = React.useState("");
   const [threadLoading, setThreadLoading] = React.useState(false);
 
@@ -47,9 +135,10 @@ export default function Copilot() {
   React.useEffect(() => {
     getChromeAIStatus().then(s => {
       setChromeAIStatus(s);
-      if (s === "available" && getLLMConfig().provider === "mock") {
-        setLLMConfig({ provider: "chrome" });
-        setConfig(getLLMConfig());
+      if (s === "unavailable" && config.provider === "chrome") {
+        const newCfg = { ...config, provider: "mock" as const };
+        setConfig(newCfg);
+        setLLMConfig(newCfg);
       }
     });
   }, []);
@@ -175,32 +264,75 @@ export default function Copilot() {
     setShowConfig(false);
   };
 
-  const handleCreateTests = async (content: string) => {
+  const handleForkThread = (parentMsg: LLMChatMessage) => {
+    const contextMsg: LLMChatMessage = {
+      id: `msg_${Date.now()}_fork`,
+      role: "user",
+      content: `[Forked from previous message] Continuing from: ${parentMsg.content.substring(0, 300)}`,
+      timestamp: Date.now(),
+      skill: activeSkill,
+      parentId: undefined,
+    };
+    updateMessages(prev => [...prev, contextMsg]);
+    setInput("");
+  };
+
+  const handleFormSubmit = async (msgId: string, values: Record<string, unknown>) => {
+    if (loading) return;
+    setSubmittedForms(prev => new Set(prev).add(msgId));
+    const answer = Object.entries(values)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join("\n");
+    updateMessages(prev => [...prev, {
+      id: `msg_${Date.now()}_form`,
+      role: "user",
+      content: answer,
+      timestamp: Date.now(),
+      skill: activeSkill,
+    }]);
+    setLoading(true);
     try {
-      const result = await generateTestsWithLLM({
-        count: 3,
-        category: "general",
-        description: content.substring(0, 200),
-        suites: [],
-      });
-      const ids = result.map(tc => tc.id);
-      updateMessages(prev => [...prev, {
-        id: `msg_${Date.now()}_confirm`,
+      const res = await llmChat(answer, activeSkillDef?.systemPrompt ?? PROJECT_CONTEXT);
+      const assistantMsg: LLMChatMessage = {
+        id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         role: "assistant",
-        content: `✅ Created **${result.length} test cases** — [View in Test Manager →](/tests)`,
+        content: res.content,
+        timestamp: Date.now(),
+        skill: activeSkill,
+      };
+      updateMessages(prev => [...prev, assistantMsg]);
+    } catch (err) {
+      updateMessages(prev => [...prev, {
+        id: `msg_${Date.now()}_err`,
+        role: "assistant",
+        content: `Error: ${err instanceof Error ? err.message : "Request failed"}`,
         timestamp: Date.now(),
       }]);
-      setTimeout(() => { if (ids.length > 0) navTo(`/tests?highlight=${ids[0]}`); }, 800);
-    } catch {
-      navTo("/tests");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleCreateTestCase = (content: string) => {
+    const config = extractTestConfigFromMessage(content);
+    if (!config) {
+      updateMessages(prev => [...prev, {
+        id: `msg_${Date.now()}_err`,
+        role: "assistant",
+        content: "No structured test configuration found in the last message. Make sure the LLM outputs a complete test config wrapped in `---TEST_CONFIG_START---` and `---TEST_CONFIG_END---` markers.",
+        timestamp: Date.now(),
+      }]);
+      return;
+    }
+    savePendingTestConfig(config);
+    navTo(`/tests`);
   };
 
   const startExample = (skillId: SkillOption) => {
     setActiveSkill(skillId);
     setInput("");
     const examples: Record<string, string> = {
-      "generate-tests": "Generate 5 test cases for CDN cache validation including edge routing and origin shield scenarios",
+      "generate-tests": "I need to create a test for CDN cache validation. Let me tell you what I need...",
       "generate-script": "Write a Playwright test script that validates cache HIT/MISS headers across multiple edge locations",
       "analyze-results": "Analyze these test failures: 12 cache tests failed with MISS instead of HIT, 3 geo-routing tests timed out for APAC region",
       "explain-diff": "Explain the diff between baseline and candidate where we see 7 new regressions in caching and 4 fixed tests in security",
@@ -257,7 +389,7 @@ export default function Copilot() {
   );
 
   const mainContent = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12, height: fullWindow ? "100dvh" : "calc(100vh - 100px)" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, height: fullWindow ? "100vh" : "calc(100vh - 56px - 40px)", minHeight: 0 }}>
 
       {/* Header */}
       <div className="gcp-card" style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "space-between", flexShrink: 0 }}>
@@ -355,6 +487,7 @@ export default function Copilot() {
             )}
             {topLevelMessages.map(msg => {
               const replies = getThreadReplies(msg.id);
+              const testConfig = msg.role === "assistant" ? extractTestConfigFromMessage(msg.content) : null;
               return (
                 <div key={msg.id}>
                   <div style={{ display: "flex", gap: 8, flexDirection: msg.role === "user" ? "row-reverse" : "row", alignItems: "flex-start" }}>
@@ -366,55 +499,54 @@ export default function Copilot() {
                         {msg.role === "user" ? "You" : "AI Copilot"}{msg.skill ? ` · ${skills.find(s => s.id === msg.skill)?.name ?? msg.skill}` : ""}
                       </div>
                       <div style={{ overflowX: "auto" }} className="copilot-markdown">
-                        {msg.role === "user" ? msg.content : (
-                          <ReactMarkdown
-                            components={{
-                              code: ({ className, children, ...props }: any) => {
-                                const isInline = !className;
-                                return isInline
-                                  ? <code style={{ background: "var(--gcp-grey-bg)", padding: "1px 4px", borderRadius: 3, fontSize: 11 }} {...props}>{children}</code>
-                                  : <pre style={{ background: "var(--gcp-grey-bg)", padding: 8, borderRadius: 6, overflowX: "auto", fontSize: 11, lineHeight: 1.4, margin: "4px 0" }}><code className={className} {...props}>{children}</code></pre>;
-                              },
-                              strong: ({ children }: any) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
-                              em: ({ children }: any) => <em style={{ fontStyle: "italic" }}>{children}</em>,
-                              ul: ({ children }: any) => <ul style={{ paddingLeft: 16, margin: "4px 0" }}>{children}</ul>,
-                              ol: ({ children }: any) => <ol style={{ paddingLeft: 16, margin: "4px 0" }}>{children}</ol>,
-                              li: ({ children }: any) => <li style={{ marginBottom: 2 }}>{children}</li>,
-                              h1: ({ children }: any) => <h1 style={{ fontSize: 14, fontWeight: 700, margin: "8px 0 4px" }}>{children}</h1>,
-                              h2: ({ children }: any) => <h2 style={{ fontSize: 13, fontWeight: 700, margin: "6px 0 3px" }}>{children}</h2>,
-                              h3: ({ children }: any) => <h3 style={{ fontSize: 12, fontWeight: 700, margin: "4px 0 2px" }}>{children}</h3>,
-                              p: ({ children }: any) => <p style={{ margin: "4px 0" }}>{children}</p>,
-                              a: ({ href, children }: any) => <a href={href} target="_blank" rel="noreferrer" style={{ color: "var(--gcp-blue)", textDecoration: "underline" }}>{children}</a>,
-                              hr: () => <hr style={{ border: "none", borderTop: "1px solid var(--gcp-grey)", margin: "8px 0" }} />,
-                              table: ({ children }: any) => <div style={{ overflowX: "auto" }}><table style={{ borderCollapse: "collapse", width: "100%", fontSize: 11, margin: "4px 0" }}>{children}</table></div>,
-                              th: ({ children }: any) => <th style={{ border: "1px solid var(--gcp-grey)", padding: "4px 6px", background: "var(--gcp-grey-bg)", fontWeight: 600, textAlign: "left" }}>{children}</th>,
-                              td: ({ children }: any) => <td style={{ border: "1px solid var(--gcp-grey)", padding: "4px 6px" }}>{children}</td>,
-                            }}
-                          >
-                            {msg.content}
-                          </ReactMarkdown>
-                        )}
+                        {msg.role === "user" ? msg.content : (() => {
+                          const { text, blocks } = parseFormBlocks(msg.content);
+                          return (
+                            <>
+                              {text && (
+                                <ReactMarkdown components={MARKDOWN_COMPONENTS}>
+                                  {text}
+                                </ReactMarkdown>
+                              )}
+                              {blocks.map((block, bi) => {
+                                if (submittedForms.has(`${msg.id}_${bi}`)) return null;
+                                return (
+                                  <ChatFormControls
+                                    key={bi}
+                                    fields={block.fields}
+                                    onSubmit={values => {
+                                      handleFormSubmit(`${msg.id}_${bi}`, values);
+                                    }}
+                                  />
+                                );
+                              })}
+                            </>
+                          );
+                        })()}
                       </div>
-                      {msg.role === "assistant" && (
-                        <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                          <button onClick={() => handleCreateTests(msg.content)} className="gcp-button" style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 4 }}>
-                            <Sparkles size={10} /> Add as Test Cases
-                          </button>
-                          <button
-                            onClick={() => setActiveThread(msg.id)}
-                            className="gcp-button"
-                            style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 4 }}
-                          >
-                            <MessageSquare size={10} /> Reply in Thread
-                          </button>
-                          <button onClick={() => navTo("/tests")} className="gcp-button" style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 4 }}>
-                            <FolderTree size={10} /> Open Test Manager
-                          </button>
-                        </div>
+                      {testConfig && (
+                        <DraftTestCard config={testConfig} onConfirm={() => handleCreateTestCase(msg.content)} />
                       )}
+                      <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        {msg.role === "assistant" && testConfig && (
+                          <button onClick={() => handleCreateTestCase(msg.content)} className="gcp-button" style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 4 }}>
+                            <FileText size={10} /> Save to Test Manager
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setActiveThread(msg.id)}
+                          className="gcp-button"
+                          style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 4 }}
+                        >
+                          <MessageSquare size={10} /> Reply in Thread
+                        </button>
+                        <button onClick={() => handleForkThread(msg)} className="gcp-button" style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 4 }}>
+                          <GitBranch size={10} /> Fork
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  {msg.role === "assistant" && replies.length > 0 && (
+                  {replies.length > 0 && (
                     <div
                       onClick={() => setActiveThread(msg.id)}
                       style={{ marginLeft: 36, marginTop: 4, fontSize: 11, color: "var(--gcp-blue)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 4, width: "fit-content" }}
@@ -460,7 +592,12 @@ export default function Copilot() {
         {activeThread && (
           <div style={{ width: 380, marginLeft: 12, borderLeft: "1px solid var(--gcp-grey)", paddingLeft: 12, display: "flex", flexDirection: "column", flexShrink: 0, overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 8, borderBottom: "1px solid var(--gcp-grey)", flexShrink: 0 }}>
-              <span style={{ fontSize: 12, fontWeight: 700 }}>Thread</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <MessageSquare size={14} style={{ color: "var(--gcp-text-secondary)" }} />
+                <span style={{ fontSize: 12, fontWeight: 700 }}>
+                  Thread · @{(messages.find(m => m.id === activeThread)?.role === "user" ? "You" : "AI Copilot")}
+                </span>
+              </div>
               <button onClick={() => { setActiveThread(null); setThreadInput(""); }} className="gcp-button" style={{ fontSize: 10, padding: "2px 6px", border: "none", background: "transparent", cursor: "pointer" }}>
                 <X size={14} />
               </button>
@@ -472,9 +609,14 @@ export default function Copilot() {
                 return (
                   <>
                     {parent && (
-                      <div key={parent.id} style={{ padding: "8px 10px", borderRadius: 6, background: "var(--gcp-surface)", border: "1px solid var(--gcp-grey)", fontSize: 12, lineHeight: 1.5 }}>
-                        <div style={{ fontWeight: 600, fontSize: 10, color: "var(--gcp-text-secondary)", marginBottom: 2 }}>{parent.role === "user" ? "You" : "AI Copilot"}</div>
-                        <div style={{ fontSize: 11 }}>{parent.content.substring(0, 300)}</div>
+                      <div key={parent.id} style={{ display: "flex", gap: 8, padding: "8px 10px", borderRadius: 6, background: "var(--gcp-surface)", border: "1px solid var(--gcp-grey)", fontSize: 12, lineHeight: 1.5 }}>
+                        <div style={{ width: 24, height: 24, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: parent.role === "user" ? "var(--gcp-blue)" : "var(--gcp-grey-bg)", color: parent.role === "user" ? "white" : "var(--gcp-text)" }}>
+                          {parent.role === "user" ? <Lightbulb size={12} /> : <Bot size={12} />}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 4 }}>{parent.role === "user" ? "You" : "AI Copilot"}</div>
+                          <ReactMarkdown components={MARKDOWN_COMPONENTS}>{parent.content.substring(0, 500)}</ReactMarkdown>
+                        </div>
                       </div>
                     )}
                     {replies.map(r => (
@@ -484,17 +626,7 @@ export default function Copilot() {
                         </div>
                         <div style={{ maxWidth: "85%", padding: "6px 10px", borderRadius: 6, background: r.role === "user" ? "var(--gcp-blue-bg)" : "var(--gcp-grey-bg)", fontSize: 11, lineHeight: 1.5 }}>
                           <div style={{ fontWeight: 600, fontSize: 9, color: "var(--gcp-text-secondary)", marginBottom: 2 }}>{r.role === "user" ? "You" : "AI Copilot"}</div>
-                          <ReactMarkdown
-                            components={{
-                              code: ({ className, children, ...props }: any) => !className
-                                ? <code style={{ background: "rgba(0,0,0,0.06)", padding: "1px 3px", borderRadius: 2, fontSize: 10 }} {...props}>{children}</code>
-                                : <pre style={{ background: "rgba(0,0,0,0.06)", padding: 4, borderRadius: 4, overflowX: "auto", fontSize: 10, margin: "2px 0" }}><code className={className} {...props}>{children}</code></pre>,
-                              p: ({ children }: any) => <p style={{ margin: "2px 0" }}>{children}</p>,
-                              ul: ({ children }: any) => <ul style={{ paddingLeft: 12, margin: "2px 0" }}>{children}</ul>,
-                              ol: ({ children }: any) => <ol style={{ paddingLeft: 12, margin: "2px 0" }}>{children}</ol>,
-                              li: ({ children }: any) => <li style={{ marginBottom: 1 }}>{children}</li>,
-                            }}
-                          >
+                          <ReactMarkdown components={MARKDOWN_COMPONENTS}>
                             {r.content}
                           </ReactMarkdown>
                         </div>

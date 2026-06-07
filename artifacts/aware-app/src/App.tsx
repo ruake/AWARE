@@ -15,6 +15,7 @@ import Sharing from "@/pages/Sharing";
 import Status from "@/pages/Status";
 import About from "@/pages/About";
 import Copilot from "@/pages/Copilot";
+import Desktop from "@/pages/Desktop";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/tests" component={TestManager} />
       <Route path="/suites" component={TestSuiteManager} />
       <Route path="/copilot" component={Copilot} />
+      <Route path="/desktop" component={Desktop} />
       <Route path="/ci-pipeline" component={Status} />
       <Route path="/about" component={About} />
       <Route path="/testdoc" component={TestDoc} />

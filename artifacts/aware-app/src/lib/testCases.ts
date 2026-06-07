@@ -1,108 +1,18 @@
-import type { TestCase, TestCaseFilter, TestChangeLogEntry, TestStats, ImportResult, GenerateParams, Predicate, FilmstripConfig } from "./types";
-import { CATEGORIES, TEST_TAGS, TEST_NAMES, GENERATION_TEMPLATES, OWNERS } from "./constants";
+import type { TestCase, TestCaseFilter, TestChangeLogEntry, TestStats, ImportResult, GenerateParams } from "./types";
+import { CATEGORIES, GENERATION_TEMPLATES } from "./constants";
 import { LS_TC_KEY, loadFromStorage, saveToStorage, _notifyTC, subscribeToTestCases } from "./store";
 import { removeTestCaseFromAllSuites } from "./operations";
+import testCasesSeed from "@/data/test-cases.json";
 
 export { subscribeToTestCases };
 
-const BASE_TEST_CASES: TestCase[] = Array.from({ length: 25 }).map((_, i) => {
-  const tagCount = 1 + (i % 3);
-  const tags = TEST_TAGS.slice(i % TEST_TAGS.length).slice(0, tagCount).map(t => t.id);
-  const priority = (["P0", "P1", "P2", "P3"] as TestCase["priority"][])[i % 4];
-  const cat = CATEGORIES[i % CATEGORIES.length];
-  const now = `2026-0${1 + (i % 9)}-0${1 + (i % 7)}T10:00:00Z`;
-  const updated = `2026-0${1 + (i % 9)}-0${1 + (i % 7)}T14:30:00Z`;
-  return {
-    id: `tc_${i}`,
-    name: TEST_NAMES[i],
-    description: `Automated test verifying ${cat} behavior for endpoint group ${i}. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.`,
-    category: cat,
-    priority,
-    severity: (priority === "P0" ? "critical" : priority === "P1" ? "major" : priority === "P2" ? "minor" : "trivial") as TestCase["severity"],
-    status: (i < 22 ? "active" : i === 22 ? "disabled" : "deprecated") as TestCase["status"],
-    tags,
-    owner: OWNERS[i % OWNERS.length],
-    suiteIds: i < 10 ? ["suite_full", "suite_geo"] : i < 18 ? ["suite_full", "suite_perf"] : i < 22 ? ["suite_full"] : [],
-    automated: true,
-    scriptPath: `tests/aware/${cat}/tc_${i}.yaml`,
-    preconditions: `- Akamai EdgeGrid credentials configured\n- ${cat} test data seeded\n- Target environment reachable`,
-    expectedBehavior: `- Response status 200\n- Correct ${cat} headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8`,
-    documentation: `## ${TEST_NAMES[i]}\n\nValidates ${cat} behavior for endpoint group ${i}.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8`,
-    relatedTestIds: [`tc_${(i + 1) % 25}`, `tc_${(i + 2) % 25}`],
-    requestHeaders: seedRequestHeaders(i, cat),
-    cookies: seedCookies(i),
-    expectedStatus: cat === "security" ? 403 : cat === "ddos" ? 429 : cat === "tls" ? 302 : 200,
-    captureResponseHeaders: seedCaptureHeaders(i),
-    testType: "web" as const,
-    config: {},
-    assertions: [],
-    filmstrip: seedFilmstrip(i),
-    predicates: seedPredicates(i, cat),
-    version: 1 + (i % 3),
-    changelog: [
-      { version: 1, timestamp: now, author: OWNERS[i % OWNERS.length], summary: "Initial creation", changes: ["Test case created"] },
-    ],
-    createdAt: now,
-    updatedAt: updated,
-  };
-});
-
-function seedPredicates(i: number, cat: string): Predicate[] {
-  const base: Predicate[] = [
-    { id: `pred_${i}_0`, type: "statusCode", field: "", expected: "200", operator: "equals", description: "Response status is 200" },
-    { id: `pred_${i}_1`, type: "responseTime", field: "duration", expected: "1000", operator: "lt", description: "Response time < 1000ms" },
-  ];
-  if (cat === "security" || cat === "ddos") {
-    base.push({ id: `pred_${i}_2`, type: "headerContains", field: "X-Frame-Options", expected: "DENY", operator: "contains", description: "X-Frame-Options is DENY" });
-    base.push({ id: `pred_${i}_3`, type: "headerContains", field: "Content-Security-Policy", expected: "default-src", operator: "contains", description: "CSP header present" });
-  } else if (cat === "caching") {
-    base.push({ id: `pred_${i}_2`, type: "headerEquals", field: "X-Cache", expected: "HIT", operator: "equals", description: "Edge cache HIT" });
-    base.push({ id: `pred_${i}_3`, type: "headerContains", field: "Age", expected: "", operator: "exists", description: "Age header present" });
-  } else if (cat === "performance") {
-    base.push({ id: `pred_${i}_2`, type: "headerContains", field: "Content-Encoding", expected: "gzip", operator: "equals", description: "gzip encoding enabled" });
-  } else if (cat === "geo-match" || cat === "locale-split") {
-    base.push({ id: `pred_${i}_2`, type: "headerContains", field: "X-Region", expected: "", operator: "exists", description: "Region header present" });
-    base.push({ id: `pred_${i}_3`, type: "cookieEquals", field: "geo_override", expected: "enabled", operator: "equals", description: "Geo override cookie set" });
-  }
-  return base;
-}
-
-function seedFilmstrip(i: number): FilmstripConfig {
-  return {
-    enabled: i % 4 === 0,
-    threshold: 0.98 + (i % 3) * 0.01,
-    region: i % 2 === 0 ? "full" : "viewport",
-    ignoreAreas: i % 3 === 0 ? [".analytics-banner", ".cookie-notice"] : [],
-  };
-}
-
-function seedRequestHeaders(i: number, cat: string): Record<string, string> {
-  const h: Record<string, string> = {
-    "Accept": "application/json",
-    "User-Agent": "AWARE-TestRunner/2.0",
-  };
-  if (cat === "geo-match") h["X-Geo-Hint"] = "us-east";
-  if (cat === "locale-split") h["Accept-Language"] = i % 2 === 0 ? "fr-CA" : "en-US";
-  if (cat === "security") h["X-Forwarded-For"] = `192.168.${i}.1`;
-  return h;
-}
-
-function seedCookies(i: number): Record<string, string> {
-  const c: Record<string, string> = { session: `tok_${i}_abc123` };
-  if (i % 3 === 0) c["ab_test"] = "control";
-  if (i % 5 === 0) c["geo_override"] = "enabled";
-  return c;
-}
-
-function seedCaptureHeaders(i: number): string[] {
-  const base = ["X-Cache", "X-Request-ID", "Akamai-Cache-Status", "Age"];
-  if (i % 2 === 0) base.push("X-RateLimit-Remaining");
-  if (i % 3 === 0) base.push("Set-Cookie");
-  return base.slice(0, 3 + (i % 4));
-}
+const BASE_TEST_CASES = testCasesSeed as unknown as TestCase[];
 
 let testCasesStore: TestCase[] = loadFromStorage<TestCase>(LS_TC_KEY, BASE_TEST_CASES);
-let nextTcId = Math.max(testCasesStore.length, 25);
+let nextTcId = Math.max(testCasesStore.length, ...testCasesSeed.map(t => {
+  const n = parseInt((t as unknown as TestCase).id.replace("tc_", ""));
+  return isNaN(n) ? 0 : n + 1;
+}));
 
 let _tcSnapshot: TestCase[] = [];
 function _dropTCSnapshot() { _tcSnapshot = []; }

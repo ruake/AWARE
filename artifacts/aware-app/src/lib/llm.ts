@@ -26,16 +26,22 @@ export interface ILLMProvider {
 // ── Mock Provider (demo/dev — generates template-based output) ──────
 
 const MOCK_RESPONSES: Record<string, string> = {
-  "generate-tests": `Generate comprehensive CDN test cases covering edge caching, origin shield behavior, and cache key variations.
+  "generate-tests": `I'll help you create a CDN test case. Let me ask a few questions to collect the requirements.
 
-Each test should validate:
-  - Cache HIT/MISS status codes
-  - Response header propagation (X-Cache, Age, CF-Cache-Status)
-  - Edge node geographic routing
-  - Origin shield fallback behavior
-  - Cache purging propagation delay
+Please fill out the form below with the test details:
 
-Prioritize regression scenarios that could occur during Akamai-to-CloudFront migration.`,
+[FORM]
+[
+  {"question":"Test Name","type":"text","id":"name"},
+  {"question":"Category","type":"select","id":"category","options":["geo-match","locale-split","caching","security","performance","routing","tls","ddos","url-health"]},
+  {"question":"Priority","type":"radio","id":"priority","options":[{"value":"P0","label":"P0 - Critical"},{"value":"P1","label":"P1 - Major"},{"value":"P2","label":"P2 - Minor"},{"value":"P3","label":"P3 - Trivial"}]},
+  {"question":"Severity","type":"select","id":"severity","options":["critical","major","minor","trivial"]},
+  {"question":"Expected Status Code","type":"select","id":"expectedStatus","options":["200","201","301","302","403","404","429","500"]},
+  {"question":"Automated?","type":"toggle","id":"automated","default":true}
+]
+[/FORM]
+
+Once you submit the form, I'll generate the complete test configuration with predicates, request headers, and filmstrip settings.`,
 
   "generate-script": `# CDN Regression Test Script (YAML)
 # Compatible with standard CDN test runners
@@ -186,20 +192,78 @@ tests:
     automated: true`,
 };
 
+function _looksLikeFormSubmission(text: string): boolean {
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  return lines.length >= 2 && lines.every(l => /^\w+:\s*\S/.test(l));
+}
+
+function _getSkillId(messages: LLMMessage[]): string | null {
+  for (const m of messages) {
+    if (m.role === "system") {
+      const match = m.content.match(/\[SKILL:([a-z-]+)\]/);
+      if (match) return match[1];
+    }
+  }
+  return null;
+}
+
 function mockComplete(messages: LLMMessage[]): LLMCompletionResponse {
   const userMsg = messages.find(m => m.role === "user")?.content ?? "";
   const lower = userMsg.toLowerCase();
+  const skillId = _getSkillId(messages);
   let content = "";
 
-  if (lower.includes("test") && (lower.includes("generat") || lower.includes("create"))) {
+  if (skillId === "generate-tests" && _looksLikeFormSubmission(userMsg)) {
+    const lines = userMsg.split("\n").filter(l => l.includes(":"));
+    const getName = () => {
+      const n = lines.find(l => l.startsWith("name:"));
+      return n ? n.split(":")[1].trim() : "CDN Cache HIT Verification";
+    };
+    const getCat = () => {
+      const c = lines.find(l => l.startsWith("category:"));
+      return c ? c.split(":")[1].trim() : "caching";
+    };
+    const getPrio = () => {
+      const p = lines.find(l => l.startsWith("priority:"));
+      return p ? p.split(":")[1].trim() : "P2";
+    };
+    const getSeverity = () => {
+      const s = lines.find(l => l.startsWith("severity:"));
+      return s ? s.split(":")[1].trim() : "minor";
+    };
+    const getStatus = () => {
+      const s = lines.find(l => l.startsWith("expectedStatus:"));
+      return s ? s.split(":")[1].trim() : "200";
+    };
+    const isAuto = () => {
+      const a = lines.find(l => l.startsWith("automated:"));
+      return a ? a.split(":")[1].trim() === "true" : true;
+    };
+    const name = getName();
+    const cat = getCat();
+    content = `Here's a summary of the test configuration I've generated:
+
+- **Name**: ${name}
+- **Category**: ${cat}
+- **Priority**: ${getPrio()} · **Severity**: ${getSeverity()}
+- **Expected Status**: HTTP ${getStatus()}
+- **Predicates**: 2 rules (status code + response time)
+- **Automated**: ${isAuto() ? "Yes" : "No"}
+
+Please review the draft card below with the full configuration. Click **"Confirm & Open in Test Manager"** when you're ready to save it.
+
+---TEST_CONFIG_START---
+{"name":"${name}","description":"CDN test case for ${cat} — validates correct edge behavior across Akamai network","category":"${cat}","priority":"${getPrio()}","severity":"${getSeverity()}","status":"active","tags":["${cat}","cdn","regression"],"owner":"engineer@co.com","automated":${isAuto()},"scriptPath":"tests/${cat}/${name.toLowerCase().replace(/\s+/g, "_")}.yaml","preconditions":"- Edge token valid\\n- Test data seeded\\n- Cache warmed","expectedBehavior":"- Status ${getStatus()}\\n- Response time < 500ms\\n- Correct headers present","expectedStatus":${getStatus()},"requestHeaders":{"Accept":"application/json","User-Agent":"AWARE-TestRunner/2.0"},"cookies":{},"captureResponseHeaders":["X-Cache","X-Request-ID","Age"],"filmstrip":{"enabled":false,"threshold":0.99},"predicates":[{"id":"pred_0","type":"statusCode","field":"","expected":"${getStatus()}","operator":"equals","description":"Response status is ${getStatus()}"},{"id":"pred_1","type":"responseTime","field":"duration","expected":"500","operator":"lt","description":"Response under 500ms"}]}
+---TEST_CONFIG_END---`;
+  } else if (skillId === "generate-tests" || (lower.includes("test") && (lower.includes("generat") || lower.includes("create")))) {
     content = MOCK_RESPONSES["generate-tests"];
-  } else if (lower.includes("script") || lower.includes("yaml") || lower.includes("code")) {
+  } else if (skillId === "generate-script" || lower.includes("script") || lower.includes("yaml") || lower.includes("code")) {
     content = MOCK_RESPONSES["generate-script"];
-  } else if (lower.includes("analyz") || lower.includes("result") || lower.includes("fail")) {
+  } else if (skillId === "analyze-results" || lower.includes("analyz") || lower.includes("result") || lower.includes("fail")) {
     content = MOCK_RESPONSES["analyze-results"];
-  } else if (lower.includes("diff") || lower.includes("compar") || lower.includes("promot")) {
+  } else if (skillId === "explain-diff" || lower.includes("diff") || lower.includes("compar") || lower.includes("promot")) {
     content = MOCK_RESPONSES["explain-diff"];
-  } else if (lower.includes("suite") || lower.includes("config") || lower.includes("yaml")) {
+  } else if (skillId === "generate-suite" || lower.includes("suite") || lower.includes("config") || lower.includes("yaml")) {
     content = MOCK_RESPONSES["generate-suite"];
   } else {
     content = `I understand you're asking about: "${userMsg.substring(0, 100)}". As a CDN regression assistant, I can help with:
@@ -586,4 +650,48 @@ export async function generateTestsWithLLM(
   }
 
   return testCases;
+}
+
+// ── Test Config URL Encoding ─────────────────────────────────────────
+
+const PENDING_TEST_CONFIG_KEY = "aware_pending_test_config";
+
+export function savePendingTestConfig(config: Record<string, unknown>): void {
+  localStorage.setItem(PENDING_TEST_CONFIG_KEY, JSON.stringify(config));
+}
+
+export function getPendingTestConfig(): Record<string, unknown> | null {
+  try {
+    const raw = localStorage.getItem(PENDING_TEST_CONFIG_KEY);
+    if (!raw) return null;
+    localStorage.removeItem(PENDING_TEST_CONFIG_KEY);
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function encodeTestConfigForNav(config: Record<string, unknown>): string {
+  const json = JSON.stringify(config);
+  const encoded = encodeURIComponent(json);
+  return btoa(encoded);
+}
+
+export function decodeTestConfigFromNav(encoded: string): Record<string, unknown> {
+  const json = decodeURIComponent(atob(encoded));
+  return JSON.parse(json);
+}
+
+export function extractTestConfigFromMessage(content: string): Record<string, unknown> | null {
+  const startMarker = "---TEST_CONFIG_START---";
+  const endMarker = "---TEST_CONFIG_END---";
+  const startIdx = content.indexOf(startMarker);
+  const endIdx = content.indexOf(endMarker);
+  if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return null;
+  const jsonStr = content.substring(startIdx + startMarker.length, endIdx).trim();
+  try {
+    return JSON.parse(jsonStr);
+  } catch {
+    return null;
+  }
 }

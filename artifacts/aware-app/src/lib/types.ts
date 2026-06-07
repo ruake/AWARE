@@ -276,8 +276,8 @@ export interface LLMConfig {
 }
 
 export const DEFAULT_LLM_CONFIG: LLMConfig = {
-  provider: "mock",
-  model: "gpt-4o",
+  provider: "chrome",
+  model: "gemini-2.0-flash-lite",
   temperature: 0.7,
   maxTokens: 2048,
 };
