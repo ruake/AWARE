@@ -53,8 +53,12 @@ function dataServePlugin(): Plugin {
         if (!url.startsWith("/data")) return next();
         const reqPath = url.replace(/^\/data\/?/, "").split("?")[0];
         if (!reqPath) return next();
-        const filePath = path.join(dataDir, reqPath);
-        if (!fs.existsSync(filePath)) return next();
+        let filePath = path.join(dataDir, reqPath);
+        if (!fs.existsSync(filePath)) {
+          const withJson = filePath + ".json";
+          if (fs.existsSync(withJson)) filePath = withJson;
+          else return next();
+        }
         const ext = path.extname(filePath);
         const mime: Record<string, string> = {
           ".json": "application/json",

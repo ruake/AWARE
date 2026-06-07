@@ -1,0 +1,2150 @@
+[
+  {
+    "id": "tc_0",
+    "name": "Verify Geo match for /api/v1/data resolves correct PoP",
+    "description": "Automated test verifying geo-match behavior for endpoint group 0. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "geo-match",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "tag_perf"
+    ],
+    "owner": "alice@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_geo"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/geo-match/tc_0.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- geo-match test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct geo-match headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Verify Geo match for /api/v1/data resolves correct PoP\n\nValidates geo-match behavior for endpoint group 0.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent, X-Geo-Hint\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the geo-match validation suite.",
+    "relatedTestIds": [
+      "tc_1",
+      "tc_2"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0",
+      "X-Geo-Hint": "us-east"
+    },
+    "cookies": {
+      "session": "tok_0_abc123",
+      "ab_test": "control",
+      "geo_override": "enabled"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status"
+    ],
+    "filmstrip": {
+      "enabled": true,
+      "threshold": 0.98,
+      "region": "full",
+      "ignoreAreas": [
+        ".analytics-banner",
+        ".cookie-notice"
+      ]
+    },
+    "predicates": [
+      {
+        "id": "pred_0_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_0_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_0_2",
+        "type": "cookieEquals",
+        "field": "geo_override",
+        "expected": "enabled",
+        "operator": "equals",
+        "description": "Geo override cookie set"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-01-01T10:00:00Z",
+        "author": "alice@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-01-01T10:00:00Z",
+    "updatedAt": "2026-01-01T14:30:00Z"
+  },
+  {
+    "id": "tc_1",
+    "name": "Check locale split serves fr-CA content in Quebec region",
+    "description": "Automated test verifying locale-split behavior for endpoint group 1. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "locale-split",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "tag_geo",
+      "tag_locale"
+    ],
+    "owner": "bob@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_geo"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/locale-split/tc_1.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- locale-split test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct locale-split headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Check locale split serves fr-CA content in Quebec region\n\nValidates locale-split behavior for endpoint group 1.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent, Accept-Language\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the locale-split validation suite.",
+    "relatedTestIds": [
+      "tc_2",
+      "tc_3"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0",
+      "Accept-Language": "en-US"
+    },
+    "cookies": {
+      "session": "tok_1_abc123"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.99,
+      "region": "viewport",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_1_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_1_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_1_2",
+        "type": "cookieEquals",
+        "field": "geo_override",
+        "expected": "enabled",
+        "operator": "equals",
+        "description": "Geo override cookie set"
+      }
+    ],
+    "version": 2,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-02-02T10:00:00Z",
+        "author": "bob@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-02-02T10:00:00Z",
+    "updatedAt": "2026-02-02T14:30:00Z"
+  },
+  {
+    "id": "tc_2",
+    "name": "Validate URL health check returns 200 for /api/v2/status",
+    "description": "Automated test verifying url-health behavior for endpoint group 2. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "url-health",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "tag_geo",
+      "tag_locale",
+      "tag_health"
+    ],
+    "owner": "carol@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_geo"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/url-health/tc_2.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- url-health test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct url-health headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Validate URL health check returns 200 for /api/v2/status\n\nValidates url-health behavior for endpoint group 2.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the url-health validation suite.",
+    "relatedTestIds": [
+      "tc_3",
+      "tc_4"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_2_abc123"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age",
+      "X-RateLimit-Remaining"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 1,
+      "region": "full",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_2_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_2_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      }
+    ],
+    "version": 3,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-03-03T10:00:00Z",
+        "author": "carol@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-03-03T10:00:00Z",
+    "updatedAt": "2026-03-03T14:30:00Z"
+  },
+  {
+    "id": "tc_3",
+    "name": "Ensure edge redirect preserves query params on /api/v3/data",
+    "description": "Automated test verifying security behavior for endpoint group 3. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "security",
+    "priority": "P3",
+    "severity": "trivial",
+    "status": "active",
+    "tags": [
+      "tag_smoke"
+    ],
+    "owner": "dave@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_geo"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/security/tc_3.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- security test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct security headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Ensure edge redirect preserves query params on /api/v3/data\n\nValidates security behavior for endpoint group 3.\n\n### Test Steps\n1. Send HTTP GET with payload request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent, X-Forwarded-For\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the security validation suite.",
+    "relatedTestIds": [
+      "tc_4",
+      "tc_5"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0",
+      "X-Forwarded-For": "192.168.3.1"
+    },
+    "cookies": {
+      "session": "tok_3_abc123",
+      "ab_test": "control"
+    },
+    "expectedStatus": 403,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age",
+      "Set-Cookie"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.98,
+      "region": "viewport",
+      "ignoreAreas": [
+        ".analytics-banner",
+        ".cookie-notice"
+      ]
+    },
+    "predicates": [
+      {
+        "id": "pred_3_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_3_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_3_2",
+        "type": "headerContains",
+        "field": "X-Frame-Options",
+        "expected": "DENY",
+        "operator": "contains",
+        "description": "X-Frame-Options is DENY"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-04-04T10:00:00Z",
+        "author": "dave@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-04-04T10:00:00Z",
+    "updatedAt": "2026-04-04T14:30:00Z"
+  },
+  {
+    "id": "tc_4",
+    "name": "Verify cache TTL header matches origin max-age directive",
+    "description": "Automated test verifying performance behavior for endpoint group 4. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "performance",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "tag_health",
+      "tag_regression"
+    ],
+    "owner": "eve@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_geo"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/performance/tc_4.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- performance test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct performance headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Verify cache TTL header matches origin max-age directive\n\nValidates performance behavior for endpoint group 4.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the performance validation suite.",
+    "relatedTestIds": [
+      "tc_5",
+      "tc_6"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_4_abc123"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status"
+    ],
+    "filmstrip": {
+      "enabled": true,
+      "threshold": 0.99,
+      "region": "full",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_4_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_4_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_4_2",
+        "type": "headerContains",
+        "field": "Content-Encoding",
+        "expected": "gzip",
+        "operator": "equals",
+        "description": "gzip encoding enabled"
+      }
+    ],
+    "version": 2,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-05-05T10:00:00Z",
+        "author": "eve@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-05-05T10:00:00Z",
+    "updatedAt": "2026-05-05T14:30:00Z"
+  },
+  {
+    "id": "tc_5",
+    "name": "Check gzip compression enabled for /api/v1/assets/*",
+    "description": "Automated test verifying caching behavior for endpoint group 5. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "caching",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "tag_health",
+      "tag_locale",
+      "tag_perf"
+    ],
+    "owner": "alice@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_geo"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/caching/tc_5.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- caching test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct caching headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Check gzip compression enabled for /api/v1/assets/*\n\nValidates caching behavior for endpoint group 5.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the caching validation suite.",
+    "relatedTestIds": [
+      "tc_6",
+      "tc_7"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_5_abc123",
+      "geo_override": "enabled"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 1,
+      "region": "viewport",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_5_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_5_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_5_2",
+        "type": "headerEquals",
+        "field": "X-Cache",
+        "expected": "HIT",
+        "operator": "equals",
+        "description": "Edge cache HIT"
+      }
+    ],
+    "version": 3,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-06T10:00:00Z",
+        "author": "alice@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-06-06T10:00:00Z",
+    "updatedAt": "2026-06-06T14:30:00Z"
+  },
+  {
+    "id": "tc_6",
+    "name": "Validate CORS headers present on cross-origin /api/v2/config",
+    "description": "Automated test verifying routing behavior for endpoint group 6. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "routing",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "tag_regression"
+    ],
+    "owner": "bob@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_geo"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/routing/tc_6.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- routing test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct routing headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Validate CORS headers present on cross-origin /api/v2/config\n\nValidates routing behavior for endpoint group 6.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the routing validation suite.",
+    "relatedTestIds": [
+      "tc_7",
+      "tc_8"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_6_abc123",
+      "ab_test": "control"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age",
+      "X-RateLimit-Remaining"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.98,
+      "region": "full",
+      "ignoreAreas": [
+        ".analytics-banner",
+        ".cookie-notice"
+      ]
+    },
+    "predicates": [
+      {
+        "id": "pred_6_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_6_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T10:00:00Z",
+        "author": "bob@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T10:00:00Z",
+    "updatedAt": "2026-07-07T14:30:00Z"
+  },
+  {
+    "id": "tc_7",
+    "name": "Ensure rate limiting triggers after 100 req/min on /api/v1/auth",
+    "description": "Automated test verifying tls behavior for endpoint group 7. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "tls",
+    "priority": "P3",
+    "severity": "trivial",
+    "status": "active",
+    "tags": [
+      "tag_regression",
+      "tag_perf"
+    ],
+    "owner": "carol@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_geo"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/tls/tc_7.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- tls test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct tls headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Ensure rate limiting triggers after 100 req/min on /api/v1/auth\n\nValidates tls behavior for endpoint group 7.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the tls validation suite.",
+    "relatedTestIds": [
+      "tc_8",
+      "tc_9"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_7_abc123"
+    },
+    "expectedStatus": 302,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.99,
+      "region": "viewport",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_7_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_7_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      }
+    ],
+    "version": 2,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-08-01T10:00:00Z",
+        "author": "carol@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-08-01T10:00:00Z",
+    "updatedAt": "2026-08-01T14:30:00Z"
+  },
+  {
+    "id": "tc_8",
+    "name": "Verify TLS 1.3 negotiation for /api/v3/secure endpoint",
+    "description": "Automated test verifying ddos behavior for endpoint group 8. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "ddos",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "tag_health",
+      "tag_locale",
+      "tag_geo"
+    ],
+    "owner": "dave@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_geo"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/ddos/tc_8.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- ddos test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct ddos headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Verify TLS 1.3 negotiation for /api/v3/secure endpoint\n\nValidates ddos behavior for endpoint group 8.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the ddos validation suite.",
+    "relatedTestIds": [
+      "tc_9",
+      "tc_10"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_8_abc123"
+    },
+    "expectedStatus": 429,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status"
+    ],
+    "filmstrip": {
+      "enabled": true,
+      "threshold": 1,
+      "region": "full",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_8_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_8_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_8_2",
+        "type": "headerContains",
+        "field": "X-Frame-Options",
+        "expected": "DENY",
+        "operator": "contains",
+        "description": "X-Frame-Options is DENY"
+      }
+    ],
+    "version": 3,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-09-02T10:00:00Z",
+        "author": "dave@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-09-02T10:00:00Z",
+    "updatedAt": "2026-09-02T14:30:00Z"
+  },
+  {
+    "id": "tc_9",
+    "name": "Check WAF rules block SQL injection on /api/v1/search",
+    "description": "Automated test verifying geo-match behavior for endpoint group 9. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "geo-match",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "tag_locale"
+    ],
+    "owner": "eve@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_geo"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/geo-match/tc_9.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- geo-match test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct geo-match headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Check WAF rules block SQL injection on /api/v1/search\n\nValidates geo-match behavior for endpoint group 9.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent, X-Geo-Hint\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the geo-match validation suite.",
+    "relatedTestIds": [
+      "tc_10",
+      "tc_11"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0",
+      "X-Geo-Hint": "us-east"
+    },
+    "cookies": {
+      "session": "tok_9_abc123",
+      "ab_test": "control"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.98,
+      "region": "viewport",
+      "ignoreAreas": [
+        ".analytics-banner",
+        ".cookie-notice"
+      ]
+    },
+    "predicates": [
+      {
+        "id": "pred_9_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_9_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_9_2",
+        "type": "cookieEquals",
+        "field": "geo_override",
+        "expected": "enabled",
+        "operator": "equals",
+        "description": "Geo override cookie set"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-01-03T10:00:00Z",
+        "author": "eve@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-01-03T10:00:00Z",
+    "updatedAt": "2026-01-03T14:30:00Z"
+  },
+  {
+    "id": "tc_10",
+    "name": "Validate JWT token expiry returns 401 on /api/v2/user/profile",
+    "description": "Automated test verifying locale-split behavior for endpoint group 10. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "locale-split",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "tag_e2e",
+      "tag_regression"
+    ],
+    "owner": "alice@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_perf"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/locale-split/tc_10.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- locale-split test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct locale-split headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Validate JWT token expiry returns 401 on /api/v2/user/profile\n\nValidates locale-split behavior for endpoint group 10.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent, Accept-Language\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the locale-split validation suite.",
+    "relatedTestIds": [
+      "tc_11",
+      "tc_12"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0",
+      "Accept-Language": "fr-CA"
+    },
+    "cookies": {
+      "session": "tok_10_abc123",
+      "geo_override": "enabled"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age",
+      "X-RateLimit-Remaining"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.99,
+      "region": "full",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_10_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_10_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_10_2",
+        "type": "cookieEquals",
+        "field": "geo_override",
+        "expected": "enabled",
+        "operator": "equals",
+        "description": "Geo override cookie set"
+      }
+    ],
+    "version": 2,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-02-04T10:00:00Z",
+        "author": "alice@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-02-04T10:00:00Z",
+    "updatedAt": "2026-02-04T14:30:00Z"
+  },
+  {
+    "id": "tc_11",
+    "name": "Ensure CDN purge invalidates /api/v1/cache/* within 5s",
+    "description": "Automated test verifying url-health behavior for endpoint group 11. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "url-health",
+    "priority": "P3",
+    "severity": "trivial",
+    "status": "active",
+    "tags": [
+      "tag_security",
+      "tag_health",
+      "tag_e2e"
+    ],
+    "owner": "bob@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_perf"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/url-health/tc_11.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- url-health test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct url-health headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Ensure CDN purge invalidates /api/v1/cache/* within 5s\n\nValidates url-health behavior for endpoint group 11.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the url-health validation suite.",
+    "relatedTestIds": [
+      "tc_12",
+      "tc_13"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_11_abc123"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 1,
+      "region": "viewport",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_11_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_11_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      }
+    ],
+    "version": 3,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-03-05T10:00:00Z",
+        "author": "bob@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-03-05T10:00:00Z",
+    "updatedAt": "2026-03-05T14:30:00Z"
+  },
+  {
+    "id": "tc_12",
+    "name": "Check IPv6 preference when client supports dual-stack",
+    "description": "Automated test verifying security behavior for endpoint group 12. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "security",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "tag_geo"
+    ],
+    "owner": "carol@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_perf"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/security/tc_12.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- security test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct security headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Check IPv6 preference when client supports dual-stack\n\nValidates security behavior for endpoint group 12.\n\n### Test Steps\n1. Send HTTP GET with payload request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent, X-Forwarded-For\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the security validation suite.",
+    "relatedTestIds": [
+      "tc_13",
+      "tc_14"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0",
+      "X-Forwarded-For": "192.168.12.1"
+    },
+    "cookies": {
+      "session": "tok_12_abc123",
+      "ab_test": "control"
+    },
+    "expectedStatus": 403,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status"
+    ],
+    "filmstrip": {
+      "enabled": true,
+      "threshold": 0.98,
+      "region": "full",
+      "ignoreAreas": [
+        ".analytics-banner",
+        ".cookie-notice"
+      ]
+    },
+    "predicates": [
+      {
+        "id": "pred_12_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_12_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_12_2",
+        "type": "headerContains",
+        "field": "X-Frame-Options",
+        "expected": "DENY",
+        "operator": "contains",
+        "description": "X-Frame-Options is DENY"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-04-06T10:00:00Z",
+        "author": "carol@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-04-06T10:00:00Z",
+    "updatedAt": "2026-04-06T14:30:00Z"
+  },
+  {
+    "id": "tc_13",
+    "name": "Verify HTTP/3 (QUIC) upgrade from Alt-Svc header",
+    "description": "Automated test verifying performance behavior for endpoint group 13. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "performance",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "tag_geo",
+      "tag_smoke"
+    ],
+    "owner": "dave@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_perf"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/performance/tc_13.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- performance test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct performance headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Verify HTTP/3 (QUIC) upgrade from Alt-Svc header\n\nValidates performance behavior for endpoint group 13.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the performance validation suite.",
+    "relatedTestIds": [
+      "tc_14",
+      "tc_15"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_13_abc123"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.99,
+      "region": "viewport",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_13_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_13_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_13_2",
+        "type": "headerContains",
+        "field": "Content-Encoding",
+        "expected": "gzip",
+        "operator": "equals",
+        "description": "gzip encoding enabled"
+      }
+    ],
+    "version": 2,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-05-07T10:00:00Z",
+        "author": "dave@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-05-07T10:00:00Z",
+    "updatedAt": "2026-05-07T14:30:00Z"
+  },
+  {
+    "id": "tc_14",
+    "name": "Validate origin shield hit ratio exceeds 80% for /api/v3/*",
+    "description": "Automated test verifying caching behavior for endpoint group 14. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "caching",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "tag_e2e",
+      "tag_perf",
+      "tag_health"
+    ],
+    "owner": "eve@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_perf"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/caching/tc_14.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- caching test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct caching headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Validate origin shield hit ratio exceeds 80% for /api/v3/*\n\nValidates caching behavior for endpoint group 14.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the caching validation suite.",
+    "relatedTestIds": [
+      "tc_15",
+      "tc_16"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_14_abc123"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age",
+      "X-RateLimit-Remaining"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 1,
+      "region": "full",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_14_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_14_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_14_2",
+        "type": "headerEquals",
+        "field": "X-Cache",
+        "expected": "HIT",
+        "operator": "equals",
+        "description": "Edge cache HIT"
+      }
+    ],
+    "version": 3,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-01T10:00:00Z",
+        "author": "eve@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-06-01T10:00:00Z",
+    "updatedAt": "2026-06-01T14:30:00Z"
+  },
+  {
+    "id": "tc_15",
+    "name": "Check mobile redirect rules for /api/v1/mobile/* paths",
+    "description": "Automated test verifying routing behavior for endpoint group 15. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "routing",
+    "priority": "P3",
+    "severity": "trivial",
+    "status": "active",
+    "tags": [
+      "tag_smoke"
+    ],
+    "owner": "alice@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_perf"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/routing/tc_15.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- routing test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct routing headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Check mobile redirect rules for /api/v1/mobile/* paths\n\nValidates routing behavior for endpoint group 15.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the routing validation suite.",
+    "relatedTestIds": [
+      "tc_16",
+      "tc_17"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_15_abc123",
+      "ab_test": "control",
+      "geo_override": "enabled"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age",
+      "Set-Cookie"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.98,
+      "region": "viewport",
+      "ignoreAreas": [
+        ".analytics-banner",
+        ".cookie-notice"
+      ]
+    },
+    "predicates": [
+      {
+        "id": "pred_15_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_15_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-02T10:00:00Z",
+        "author": "alice@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-02T10:00:00Z",
+    "updatedAt": "2026-07-02T14:30:00Z"
+  },
+  {
+    "id": "tc_16",
+    "name": "Ensure API key rotation completes within 30s propagation",
+    "description": "Automated test verifying tls behavior for endpoint group 16. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "tls",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "tag_health",
+      "tag_locale"
+    ],
+    "owner": "bob@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_perf"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/tls/tc_16.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- tls test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct tls headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Ensure API key rotation completes within 30s propagation\n\nValidates tls behavior for endpoint group 16.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the tls validation suite.",
+    "relatedTestIds": [
+      "tc_17",
+      "tc_18"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_16_abc123"
+    },
+    "expectedStatus": 302,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status"
+    ],
+    "filmstrip": {
+      "enabled": true,
+      "threshold": 0.99,
+      "region": "full",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_16_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_16_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      }
+    ],
+    "version": 2,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-08-03T10:00:00Z",
+        "author": "bob@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-08-03T10:00:00Z",
+    "updatedAt": "2026-08-03T14:30:00Z"
+  },
+  {
+    "id": "tc_17",
+    "name": "Verify websocket upgrade handshake on /api/v2/ws endpoint",
+    "description": "Automated test verifying ddos behavior for endpoint group 17. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "ddos",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "tag_e2e",
+      "tag_regression",
+      "tag_perf"
+    ],
+    "owner": "carol@co.com",
+    "suiteIds": [
+      "suite_full",
+      "suite_perf"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/ddos/tc_17.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- ddos test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct ddos headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Verify websocket upgrade handshake on /api/v2/ws endpoint\n\nValidates ddos behavior for endpoint group 17.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the ddos validation suite.",
+    "relatedTestIds": [
+      "tc_18",
+      "tc_19"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_17_abc123"
+    },
+    "expectedStatus": 429,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 1,
+      "region": "viewport",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_17_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_17_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_17_2",
+        "type": "headerContains",
+        "field": "X-Frame-Options",
+        "expected": "DENY",
+        "operator": "contains",
+        "description": "X-Frame-Options is DENY"
+      }
+    ],
+    "version": 3,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-09-04T10:00:00Z",
+        "author": "carol@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-09-04T10:00:00Z",
+    "updatedAt": "2026-09-04T14:30:00Z"
+  },
+  {
+    "id": "tc_18",
+    "name": "Check custom error page served on 5xx origin responses",
+    "description": "Automated test verifying geo-match behavior for endpoint group 18. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "tag_regression"
+    ],
+    "owner": "dave@co.com",
+    "suiteIds": [
+      "suite_full"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/geo-match/tc_18.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- geo-match test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct geo-match headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Check custom error page served on 5xx origin responses\n\nValidates geo-match behavior for endpoint group 18.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent, X-Geo-Hint\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the geo-match validation suite.",
+    "relatedTestIds": [
+      "tc_19",
+      "tc_20"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0",
+      "X-Geo-Hint": "us-east"
+    },
+    "cookies": {
+      "session": "tok_18_abc123",
+      "ab_test": "control"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age",
+      "X-RateLimit-Remaining"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.98,
+      "region": "full",
+      "ignoreAreas": [
+        ".analytics-banner",
+        ".cookie-notice"
+      ]
+    },
+    "predicates": [
+      {
+        "id": "pred_18_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_18_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_18_2",
+        "type": "cookieEquals",
+        "field": "geo_override",
+        "expected": "enabled",
+        "operator": "equals",
+        "description": "Geo override cookie set"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-01-05T10:00:00Z",
+        "author": "dave@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-01-05T10:00:00Z",
+    "updatedAt": "2026-01-05T14:30:00Z"
+  },
+  {
+    "id": "tc_19",
+    "name": "Validate signed URL expiry enforced for /api/v1/media/*",
+    "description": "Automated test verifying locale-split behavior for endpoint group 19. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "locale-split",
+    "priority": "P3",
+    "severity": "trivial",
+    "status": "active",
+    "tags": [
+      "tag_e2e",
+      "tag_locale"
+    ],
+    "owner": "eve@co.com",
+    "suiteIds": [
+      "suite_full"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/locale-split/tc_19.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- locale-split test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct locale-split headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Validate signed URL expiry enforced for /api/v1/media/*\n\nValidates locale-split behavior for endpoint group 19.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent, Accept-Language\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the locale-split validation suite.",
+    "relatedTestIds": [
+      "tc_20",
+      "tc_21"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0",
+      "Accept-Language": "en-US"
+    },
+    "cookies": {
+      "session": "tok_19_abc123"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.99,
+      "region": "viewport",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_19_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_19_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_19_2",
+        "type": "cookieEquals",
+        "field": "geo_override",
+        "expected": "enabled",
+        "operator": "equals",
+        "description": "Geo override cookie set"
+      }
+    ],
+    "version": 2,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-02-06T10:00:00Z",
+        "author": "eve@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-02-06T10:00:00Z",
+    "updatedAt": "2026-02-06T14:30:00Z"
+  },
+  {
+    "id": "tc_20",
+    "name": "Verify SRI hash validation on injected script tags",
+    "description": "Automated test verifying url-health behavior for endpoint group 20. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "url-health",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "tag_geo",
+      "tag_security",
+      "tag_e2e"
+    ],
+    "owner": "alice@co.com",
+    "suiteIds": [
+      "suite_full"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/url-health/tc_20.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- url-health test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct url-health headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Verify SRI hash validation on injected script tags\n\nValidates url-health behavior for endpoint group 20.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the url-health validation suite.",
+    "relatedTestIds": [
+      "tc_21",
+      "tc_22"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_20_abc123",
+      "geo_override": "enabled"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status"
+    ],
+    "filmstrip": {
+      "enabled": true,
+      "threshold": 1,
+      "region": "full",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_20_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_20_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      }
+    ],
+    "version": 3,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-03-07T10:00:00Z",
+        "author": "alice@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-03-07T10:00:00Z",
+    "updatedAt": "2026-03-07T14:30:00Z"
+  },
+  {
+    "id": "tc_21",
+    "name": "Check geo-blocking returns 403 for disallowed regions",
+    "description": "Automated test verifying security behavior for endpoint group 21. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "tag_regression"
+    ],
+    "owner": "bob@co.com",
+    "suiteIds": [
+      "suite_full"
+    ],
+    "automated": true,
+    "scriptPath": "tests/aware/security/tc_21.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- security test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct security headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Check geo-blocking returns 403 for disallowed regions\n\nValidates security behavior for endpoint group 21.\n\n### Test Steps\n1. Send HTTP GET with payload request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent, X-Forwarded-For\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the security validation suite.",
+    "relatedTestIds": [
+      "tc_22",
+      "tc_23"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0",
+      "X-Forwarded-For": "192.168.21.1"
+    },
+    "cookies": {
+      "session": "tok_21_abc123",
+      "ab_test": "control"
+    },
+    "expectedStatus": 403,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.98,
+      "region": "viewport",
+      "ignoreAreas": [
+        ".analytics-banner",
+        ".cookie-notice"
+      ]
+    },
+    "predicates": [
+      {
+        "id": "pred_21_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_21_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_21_2",
+        "type": "headerContains",
+        "field": "X-Frame-Options",
+        "expected": "DENY",
+        "operator": "contains",
+        "description": "X-Frame-Options is DENY"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-04-01T10:00:00Z",
+        "author": "bob@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-04-01T10:00:00Z",
+    "updatedAt": "2026-04-01T14:30:00Z"
+  },
+  {
+    "id": "tc_22",
+    "name": "Ensure log delivery to Splunk within 60s of request",
+    "description": "Automated test verifying performance behavior for endpoint group 22. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "performance",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "disabled",
+    "tags": [
+      "tag_perf",
+      "tag_health"
+    ],
+    "owner": "carol@co.com",
+    "suiteIds": [],
+    "automated": true,
+    "scriptPath": "tests/aware/performance/tc_22.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- performance test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct performance headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Ensure log delivery to Splunk within 60s of request\n\nValidates performance behavior for endpoint group 22.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the performance validation suite.",
+    "relatedTestIds": [
+      "tc_23",
+      "tc_24"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_22_abc123"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age",
+      "X-RateLimit-Remaining"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0.99,
+      "region": "full",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_22_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_22_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_22_2",
+        "type": "headerContains",
+        "field": "Content-Encoding",
+        "expected": "gzip",
+        "operator": "equals",
+        "description": "gzip encoding enabled"
+      }
+    ],
+    "version": 2,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-05-02T10:00:00Z",
+        "author": "carol@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-05-02T10:00:00Z",
+    "updatedAt": "2026-05-02T14:30:00Z"
+  },
+  {
+    "id": "tc_23",
+    "name": "Validate DDoS mitigation triggers at 10000 req/s threshold",
+    "description": "Automated test verifying caching behavior for endpoint group 23. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "caching",
+    "priority": "P3",
+    "severity": "trivial",
+    "status": "deprecated",
+    "tags": [
+      "tag_security",
+      "tag_geo",
+      "tag_perf"
+    ],
+    "owner": "dave@co.com",
+    "suiteIds": [],
+    "automated": true,
+    "scriptPath": "tests/aware/caching/tc_23.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- caching test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct caching headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Validate DDoS mitigation triggers at 10000 req/s threshold\n\nValidates caching behavior for endpoint group 23.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the caching validation suite.",
+    "relatedTestIds": [
+      "tc_24",
+      "tc_0"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_23_abc123"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status",
+      "Age"
+    ],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 1,
+      "region": "viewport",
+      "ignoreAreas": []
+    },
+    "predicates": [
+      {
+        "id": "pred_23_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_23_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      },
+      {
+        "id": "pred_23_2",
+        "type": "headerEquals",
+        "field": "X-Cache",
+        "expected": "HIT",
+        "operator": "equals",
+        "description": "Edge cache HIT"
+      }
+    ],
+    "version": 3,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-03T10:00:00Z",
+        "author": "dave@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-06-03T10:00:00Z",
+    "updatedAt": "2026-06-03T14:30:00Z"
+  },
+  {
+    "id": "tc_24",
+    "name": "Check A/B testing cookie routing for /api/v1/experiments",
+    "description": "Automated test verifying routing behavior for endpoint group 24. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "category": "routing",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "deprecated",
+    "tags": [
+      "tag_smoke"
+    ],
+    "owner": "eve@co.com",
+    "suiteIds": [],
+    "automated": true,
+    "scriptPath": "tests/aware/routing/tc_24.spec.ts",
+    "preconditions": "- Akamai EdgeGrid credentials configured\n- routing test data seeded\n- Target environment reachable",
+    "expectedBehavior": "- Response status 200\n- Correct routing headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
+    "documentation": "## Check A/B testing cookie routing for /api/v1/experiments\n\nValidates routing behavior for endpoint group 24.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: Accept, User-Agent\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the routing validation suite.",
+    "relatedTestIds": [
+      "tc_0",
+      "tc_1"
+    ],
+    "requestHeaders": {
+      "Accept": "application/json",
+      "User-Agent": "AWARE-TestRunner/2.0"
+    },
+    "cookies": {
+      "session": "tok_24_abc123",
+      "ab_test": "control"
+    },
+    "expectedStatus": 200,
+    "captureResponseHeaders": [
+      "X-Cache",
+      "X-Request-ID",
+      "Akamai-Cache-Status"
+    ],
+    "filmstrip": {
+      "enabled": true,
+      "threshold": 0.98,
+      "region": "full",
+      "ignoreAreas": [
+        ".analytics-banner",
+        ".cookie-notice"
+      ]
+    },
+    "predicates": [
+      {
+        "id": "pred_24_0",
+        "type": "statusCode",
+        "field": "",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response status is 200"
+      },
+      {
+        "id": "pred_24_1",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "1000",
+        "operator": "lt",
+        "description": "Response time < 1000ms"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-04T10:00:00Z",
+        "author": "eve@co.com",
+        "summary": "Initial creation",
+        "changes": [
+          "Test case created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-04T10:00:00Z",
+    "updatedAt": "2026-07-04T14:30:00Z"
+  }
+]

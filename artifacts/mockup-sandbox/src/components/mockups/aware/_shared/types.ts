@@ -101,6 +101,24 @@ export interface TestChangeLogEntry {
   changes: string[];
 }
 
+export type PredicateOperator = "equals" | "notEquals" | "contains" | "notContains" | "gt" | "gte" | "lt" | "lte" | "regex" | "exists" | "notExists";
+
+export interface Predicate {
+  id: string;
+  type: "statusCode" | "headerEquals" | "headerContains" | "bodyContains" | "bodyJsonPath" | "responseTime" | "cookieEquals" | "capturedHeader";
+  field: string;
+  expected: string;
+  operator: PredicateOperator;
+  description: string;
+}
+
+export interface FilmstripConfig {
+  enabled: boolean;
+  threshold: number;
+  region?: string;
+  ignoreAreas?: string[];
+}
+
 export interface TestCase {
   id: string;
   name: string;
@@ -118,10 +136,27 @@ export interface TestCase {
   expectedBehavior: string;
   documentation: string;
   relatedTestIds: string[];
+  requestHeaders: Record<string, string>;
+  cookies: Record<string, string>;
+  expectedStatus: number;
+  captureResponseHeaders: string[];
+  filmstrip: FilmstripConfig;
+  predicates: Predicate[];
   version: number;
   changelog: TestChangeLogEntry[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TestSuiteIntegration {
+  slackChannel?: string;
+  slackWebhookUrl?: string;
+  notifyOn: ("pass" | "fail" | "deploy" | "approval")[];
+  githubCommentPr: boolean;
+  githubDeploymentStatus: boolean;
+  requireApproval: boolean;
+  approvers: string[];
+  webhookUrl?: string;
 }
 
 export interface TestSuiteConfig {
@@ -131,6 +166,7 @@ export interface TestSuiteConfig {
   retries: number;
   failFast: boolean;
   timeoutMinutes: number;
+  integration?: TestSuiteIntegration;
 }
 
 export interface TestSuite {

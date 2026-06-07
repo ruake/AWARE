@@ -1,4 +1,4 @@
-import type { Run, TestResult, DiffRow, TestDetail, EnvSummary, Config, ServiceError, TestCase, TestSuite, TestTag, TestCaseFilter, ImportResult, ImportExportFormat, GenerateParams, TestStats, TestChangeLogEntry, SuiteNode } from "./types";
+import type { Run, TestResult, DiffRow, TestDetail, EnvSummary, Config, ServiceError, TestCase, TestSuite, TestTag, TestCaseFilter, ImportResult, ImportExportFormat, GenerateParams, TestStats, TestChangeLogEntry, SuiteNode, Predicate, FilmstripConfig, TestSuiteIntegration } from "./types";
 import { classifyError, FetchError, TimeoutError, ValidationError } from "./types";
 import {
   RUNS as MOCK_RUNS, getRunById as mockGetRunById, getRunIndex as mockGetRunIndex,
@@ -26,7 +26,7 @@ import {
   updateTestCaseDocumentation as mockUpdateDoc,
 } from "./data";
 
-export type { Run, TestResult, DiffRow, TestDetail, EnvSummary, ServiceError, TestCase, TestSuite, TestTag, TestCaseFilter, ImportResult, ImportExportFormat, GenerateParams, TestStats, TestChangeLogEntry };
+export type { Run, TestResult, DiffRow, TestDetail, EnvSummary, ServiceError, TestCase, TestSuite, TestTag, TestCaseFilter, ImportResult, ImportExportFormat, GenerateParams, TestStats, TestChangeLogEntry, Predicate, FilmstripConfig, TestSuiteIntegration };
 
 // ── Config ──────────────────────────────────────────────────
 

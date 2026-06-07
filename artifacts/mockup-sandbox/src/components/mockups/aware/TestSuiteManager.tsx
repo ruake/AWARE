@@ -101,7 +101,7 @@ function SuiteEditor({ suite, onSave, onCancel }: {
     description: suite?.description ?? "",
     parentId: suite?.parentId ?? null,
     testIds: suite?.testIds ?? [],
-    config: suite?.config ?? { target: "Prod", environment: "Production", parallelism: 4, retries: 1, failFast: false, timeoutMinutes: 30 },
+    config: suite?.config ?? { target: "Prod", environment: "Production", parallelism: 4, retries: 1, failFast: false, timeoutMinutes: 30, integration: { slackChannel: "", notifyOn: ["fail"], githubCommentPr: false, githubDeploymentStatus: false, requireApproval: false, approvers: [] } },
     tags: suite?.tags ?? [],
     schedule: suite?.schedule ?? null,
   });
@@ -167,6 +167,54 @@ function SuiteEditor({ suite, onSave, onCancel }: {
                   <input type="checkbox" checked={form.config.failFast} onChange={e => setForm(f => ({ ...f, config: { ...f.config, failFast: e.target.checked } }))} className="accent-[var(--gcp-blue)]" />
                   <span className="text-[11px]">Fail fast</span>
                 </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-span-2">
+            <label className="text-[11px] uppercase text-[var(--gcp-text-secondary)] mb-1 block">Integrations</label>
+            <div className="grid grid-cols-2 gap-3 p-3 bg-[var(--gcp-grey-bg)] rounded-lg">
+              <div>
+                <label className="text-[10px] text-[var(--gcp-text-secondary)]">Slack Channel</label>
+                <input className="gcp-input w-full mt-0.5 text-[12px]" value={form.config.integration?.slackChannel ?? ""} onChange={e => setForm(f => ({ ...f, config: { ...f.config, integration: { ...f.config.integration!, slackChannel: e.target.value } } }))} placeholder="#alerts" />
+              </div>
+              <div>
+                <label className="text-[10px] text-[var(--gcp-text-secondary)]">Slack Webhook URL</label>
+                <input className="gcp-input w-full mt-0.5 text-[12px]" value={form.config.integration?.slackWebhookUrl ?? ""} onChange={e => setForm(f => ({ ...f, config: { ...f.config, integration: { ...f.config.integration!, slackWebhookUrl: e.target.value } } }))} placeholder="https://hooks.slack.com/…" />
+              </div>
+              <div>
+                <label className="text-[10px] text-[var(--gcp-text-secondary)]">Webhook URL</label>
+                <input className="gcp-input w-full mt-0.5 text-[12px]" value={form.config.integration?.webhookUrl ?? ""} onChange={e => setForm(f => ({ ...f, config: { ...f.config, integration: { ...f.config.integration!, webhookUrl: e.target.value } } }))} placeholder="https://hooks.example.com/notify" />
+              </div>
+              <div className="flex flex-col gap-1.5 pt-4">
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" checked={form.config.integration?.githubCommentPr ?? false} onChange={e => setForm(f => ({ ...f, config: { ...f.config, integration: { ...f.config.integration!, githubCommentPr: e.target.checked } } }))} className="accent-[var(--gcp-blue)]" />
+                  <span className="text-[11px]">Post PR comments</span>
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" checked={form.config.integration?.githubDeploymentStatus ?? false} onChange={e => setForm(f => ({ ...f, config: { ...f.config, integration: { ...f.config.integration!, githubDeploymentStatus: e.target.checked } } }))} className="accent-[var(--gcp-blue)]" />
+                  <span className="text-[11px]">Update deployment status</span>
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" checked={form.config.integration?.requireApproval ?? false} onChange={e => setForm(f => ({ ...f, config: { ...f.config, integration: { ...f.config.integration!, requireApproval: e.target.checked } } }))} className="accent-[var(--gcp-blue)]" />
+                  <span className="text-[11px]">Require approval</span>
+                </label>
+              </div>
+              <div className="col-span-2">
+                <label className="text-[10px] text-[var(--gcp-text-secondary)]">Approvers (comma-separated)</label>
+                <input className="gcp-input w-full mt-0.5 text-[12px]" value={(form.config.integration?.approvers ?? []).join(", ")} onChange={e => setForm(f => ({ ...f, config: { ...f.config, integration: { ...f.config.integration!, approvers: e.target.value.split(",").map(s => s.trim()).filter(Boolean) } } }))} placeholder="email@co.com, email2@co.com" />
+              </div>
+              <div className="col-span-2">
+                <label className="text-[10px] text-[var(--gcp-text-secondary)]">Notify On</label>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {(["pass", "fail", "deploy", "approval"] as const).map(n => (
+                    <span key={n} onClick={() => {
+                      const current = form.config.integration?.notifyOn ?? [];
+                      const next = current.includes(n) ? current.filter(x => x !== n) : [...current, n];
+                      setForm(f => ({ ...f, config: { ...f.config, integration: { ...f.config.integration!, notifyOn: next } } }));
+                    }} className={`px-2 py-1 rounded text-[11px] cursor-pointer border ${(form.config.integration?.notifyOn ?? []).includes(n) ? "bg-[var(--gcp-blue)] text-white border-[var(--gcp-blue)]" : "border-[var(--gcp-grey)] text-[var(--gcp-text-secondary)]"}`}>{n}</span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -367,6 +415,32 @@ export function TestSuiteManager() {
                     <div><span className="text-[11px] text-[var(--gcp-text-secondary)]">Fail Fast</span><div className="font-medium">{selected.config.failFast ? "Yes" : "No"}</div></div>
                     <div><span className="text-[11px] text-[var(--gcp-text-secondary)]">Schedule</span><div className="font-mono text-[12px]">{selected.schedule ?? "Manual"}</div></div>
                   </div>
+                  {selected.config.integration && (
+                    <div className="mt-3 pt-3 border-t border-[var(--gcp-grey)]">
+                      <h5 className="text-[10px] uppercase tracking-wider text-[var(--gcp-text-secondary)] font-medium mb-1.5 flex items-center gap-1"><GitCompare size={10} /> Integrations</h5>
+                      <div className="grid grid-cols-3 gap-2 text-[12px]">
+                        <div>
+                          <span className="text-[10px] text-[var(--gcp-text-secondary)] block">Slack</span>
+                          <span className={selected.config.integration.slackChannel ? "text-[var(--gcp-green)]" : "text-[var(--gcp-text-secondary)]"}>{selected.config.integration.slackChannel || "Not configured"}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-[var(--gcp-text-secondary)] block">GitHub</span>
+                          <div className="flex gap-2">
+                            {selected.config.integration.githubCommentPr && <span className="gcp-badge gcp-badge-pass text-[10px]">PR Comments</span>}
+                            {selected.config.integration.githubDeploymentStatus && <span className="gcp-badge gcp-badge-pass text-[10px]">Deploy Status</span>}
+                            {!selected.config.integration.githubCommentPr && !selected.config.integration.githubDeploymentStatus && <span className="text-[var(--gcp-text-secondary)]">Not configured</span>}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-[var(--gcp-text-secondary)] block">Approval</span>
+                          <span>{selected.config.integration.requireApproval ? `Required (${selected.config.integration.approvers.length})` : "Not required"}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {selected.config.integration.notifyOn.map(n => <span key={n} className="gcp-badge gcp-badge-flaky text-[10px] capitalize">{n}</span>)}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Test list */}

@@ -45,15 +45,15 @@ export function Dashboard() {
         {regressed.length > 0 && (
           <div className="flex gap-3">
             {regressed.map(env => (
-              <div key={env.label} className="gcp-card flex-1 p-4 border-l-4 border-[var(--gcp-red)] flex items-center gap-3">
+              <div key={env.label} className="gcp-card flex-1 p-4 border-l-4 border-[var(--gcp-red)] flex items-center gap-3 cursor-pointer hover:bg-[var(--gcp-surface-hover)] transition-colors" onClick={() => navTo(`Runs?env=${encodeURIComponent(env.label)}`)}>
                 <AlertTriangle size={20} className="text-[var(--gcp-red)] shrink-0" />
                 <div>
                   <div className="text-sm font-medium text-[var(--gcp-red)]">{env.alert}</div>
                   <div className="text-[12px] text-[var(--gcp-text-secondary)]">{env.label} — {env.passRate}% pass rate, {env.failures} failures</div>
                 </div>
-                <button onClick={() => navTo("Runs")} className="gcp-button ml-auto text-sm shrink-0 flex items-center gap-1">
+                <span className="gcp-button ml-auto text-sm shrink-0 flex items-center gap-1 pointer-events-none">
                   Investigate <ChevronRight size={14} />
-                </button>
+                </span>
               </div>
             ))}
           </div>
@@ -79,11 +79,12 @@ export function Dashboard() {
                 }}
               />
               <div className="text-right">
-                <div className="text-3xl font-mono font-bold text-[var(--gcp-red)]">87%</div>
-                <div className="text-sm text-[var(--gcp-text-secondary)]">14 failures</div>
-                <button onClick={() => navTo(`RunDetail?runId=${runs[runs.length - 1].id}`)} className="text-[12px] text-[var(--gcp-blue)] hover:underline mt-1">
-                  View latest run &rarr;
-                </button>
+                <div onClick={() => navTo("Runs?env=prod/production")} className="text-3xl font-mono font-bold text-[var(--gcp-red)] cursor-pointer hover:opacity-80">87%</div>
+                <div onClick={() => navTo("Runs?env=prod/production")} className="text-sm text-[var(--gcp-text-secondary)] cursor-pointer hover:opacity-80">14 failures</div>
+                <div className="mt-1 flex gap-2 justify-end">
+                  <button onClick={() => navTo("Runs?env=prod/production")} className="text-[12px] text-[var(--gcp-blue)] hover:underline">View runs &rarr;</button>
+                  <button onClick={() => navTo(`RunDetail?runId=${runs[runs.length - 1]?.id}`)} className="text-[12px] text-[var(--gcp-text-secondary)] hover:underline">Latest run &rarr;</button>
+                </div>
               </div>
             </div>
           </div>
@@ -94,7 +95,7 @@ export function Dashboard() {
               <div
                 key={env.label}
                 className="border border-[var(--gcp-grey)] rounded p-3 hover:bg-[var(--gcp-surface-hover)] cursor-pointer transition-colors"
-                onClick={() => navTo("Runs")}
+                onClick={() => navTo(`Runs?env=${encodeURIComponent(env.label)}`)}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[11px] font-medium uppercase tracking-wider">{env.label.replace("/", " · ")}</span>

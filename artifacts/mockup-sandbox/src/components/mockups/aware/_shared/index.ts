@@ -19,4 +19,4 @@ export { useLiveStatus } from "./useLiveStatus";
 export { navTo, closePanel, showToast, copyToClipboard, repo } from "./nav";
 
 // Types & data (for advanced use)
-export type { Run, TestResult, TestRunPoint, TestDetail, DiffRow, EnvSummary, StatusUpdate, Config, ServiceError, TestCase, TestSuite, TestTag, TestCaseFilter, ImportResult, ImportExportFormat, TestPriority, TestSeverity, TestStatus, SuiteNode, GenerateParams, TestStats, TestChangeLogEntry, TestSuiteConfig } from "./types";
+export type { Run, TestResult, TestRunPoint, TestDetail, DiffRow, EnvSummary, StatusUpdate, Config, ServiceError, TestCase, TestSuite, TestTag, TestCaseFilter, ImportResult, ImportExportFormat, TestPriority, TestSeverity, TestStatus, SuiteNode, GenerateParams, TestStats, TestChangeLogEntry, TestSuiteConfig, TestSuiteIntegration, Predicate, PredicateOperator, FilmstripConfig } from "./types";

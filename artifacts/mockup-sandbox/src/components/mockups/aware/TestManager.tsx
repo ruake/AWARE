@@ -70,6 +70,10 @@ const EMPTY_FORM: Omit<TestCase, "id" | "createdAt" | "updatedAt"> = {
   severity: "minor", status: "active", tags: [], owner: "",
   suiteIds: [], automated: true, scriptPath: "",
   preconditions: "", expectedBehavior: "", documentation: "", relatedTestIds: [],
+  requestHeaders: {}, cookies: {}, expectedStatus: 200,
+  captureResponseHeaders: [],
+  filmstrip: { enabled: false, threshold: 0.99 },
+  predicates: [],
   version: 1, changelog: [],
 };
 
@@ -80,7 +84,7 @@ function TestCaseForm({ initial, onSave, onCancel }: {
 }) {
   const [form, setForm] = React.useState(initial);
   const allSuites = useSyncTestSuites();
-  const [activeTab, setActiveTab] = React.useState<"basic" | "docs">("basic");
+  const [activeTab, setActiveTab] = React.useState<"basic" | "docs" | "http">("basic");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onCancel}>
@@ -96,6 +100,7 @@ function TestCaseForm({ initial, onSave, onCancel }: {
         <div className="flex border-b border-[var(--gcp-grey)] bg-[var(--gcp-grey-bg)]">
           <button onClick={() => setActiveTab("basic")} className={`px-5 py-2.5 text-sm font-medium ${activeTab === "basic" ? "bg-[var(--gcp-surface)] border-b-2 border-[var(--gcp-blue)] text-[var(--gcp-blue)]" : "text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)]"}`}>Basic Info</button>
           <button onClick={() => setActiveTab("docs")} className={`px-5 py-2.5 text-sm font-medium ${activeTab === "docs" ? "bg-[var(--gcp-surface)] border-b-2 border-[var(--gcp-blue)] text-[var(--gcp-blue)]" : "text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)]"}`}>Documentation</button>
+          <button onClick={() => setActiveTab("http")} className={`px-5 py-2.5 text-sm font-medium ${activeTab === "http" ? "bg-[var(--gcp-surface)] border-b-2 border-[var(--gcp-blue)] text-[var(--gcp-blue)]" : "text-[var(--gcp-text-secondary)] hover:text-[var(--gcp-text)]"}`}>HTTP & Predicates</button>
         </div>
 
         <div className="p-5 space-y-4">
@@ -181,6 +186,163 @@ function TestCaseForm({ initial, onSave, onCancel }: {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === "http" && (
+            <div className="space-y-5">
+              <div>
+                <label className="text-[11px] uppercase tracking-wider text-[var(--gcp-text-secondary)] font-medium mb-1 block">Expected Status Code</label>
+                <input type="number" className="gcp-input w-32 mt-1" value={form.expectedStatus} onChange={e => setForm(f => ({ ...f, expectedStatus: Number(e.target.value) }))} />
+              </div>
+
+              <div>
+                <label className="text-[11px] uppercase tracking-wider text-[var(--gcp-text-secondary)] font-medium mb-1 block">Request Headers</label>
+                <div className="space-y-1.5">
+                  {Object.entries(form.requestHeaders).map(([k, v]) => (
+                    <div key={k} className="flex gap-2 items-center">
+                      <input className="gcp-input w-48 text-[12px] font-mono" value={k} onChange={e => {
+                        const newHeaders = { ...form.requestHeaders };
+                        delete newHeaders[k];
+                        newHeaders[e.target.value] = v;
+                        setForm(f => ({ ...f, requestHeaders: newHeaders }));
+                      }} placeholder="Header name" />
+                      <span className="text-[var(--gcp-text-secondary)]">:</span>
+                      <input className="gcp-input flex-1 text-[12px] font-mono" value={v} onChange={e => setForm(f => ({ ...f, requestHeaders: { ...f.requestHeaders, [k]: e.target.value } }))} placeholder="Value" />
+                      <button onClick={() => { const h = { ...form.requestHeaders }; delete h[k]; setForm(f => ({ ...f, requestHeaders: h })); }} className="p-1 text-[var(--gcp-red)] hover:bg-red-50 rounded"><X size={14} /></button>
+                    </div>
+                  ))}
+                  <button onClick={() => setForm(f => ({ ...f, requestHeaders: { ...f.requestHeaders, "": "" } }))} className="text-[12px] text-[var(--gcp-blue)] hover:underline flex items-center gap-1"><Plus size={12} /> Add Header</button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] uppercase tracking-wider text-[var(--gcp-text-secondary)] font-medium mb-1 block">Cookies</label>
+                <div className="space-y-1.5">
+                  {Object.entries(form.cookies).map(([k, v]) => (
+                    <div key={k} className="flex gap-2 items-center">
+                      <input className="gcp-input w-48 text-[12px] font-mono" value={k} onChange={e => {
+                        const c = { ...form.cookies };
+                        delete c[k];
+                        c[e.target.value] = v;
+                        setForm(f => ({ ...f, cookies: c }));
+                      }} placeholder="Cookie name" />
+                      <span className="text-[var(--gcp-text-secondary)]">:</span>
+                      <input className="gcp-input flex-1 text-[12px] font-mono" value={v} onChange={e => setForm(f => ({ ...f, cookies: { ...f.cookies, [k]: e.target.value } }))} placeholder="Value" />
+                      <button onClick={() => { const c = { ...form.cookies }; delete c[k]; setForm(f => ({ ...f, cookies: c })); }} className="p-1 text-[var(--gcp-red)] hover:bg-red-50 rounded"><X size={14} /></button>
+                    </div>
+                  ))}
+                  <button onClick={() => setForm(f => ({ ...f, cookies: { ...f.cookies, "": "" } }))} className="text-[12px] text-[var(--gcp-blue)] hover:underline flex items-center gap-1"><Plus size={12} /> Add Cookie</button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] uppercase tracking-wider text-[var(--gcp-text-secondary)] font-medium mb-1 block">Capture Response Headers</label>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {form.captureResponseHeaders.map(h => (
+                    <span key={h} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-[var(--gcp-blue)] text-white">
+                      {h}
+                      <button onClick={() => setForm(f => ({ ...f, captureResponseHeaders: f.captureResponseHeaders.filter(x => x !== h) }))} className="hover:text-red-200"><X size={10} /></button>
+                    </span>
+                  ))}
+                  <input className="gcp-input w-40 text-[12px]" placeholder="Add header…" onKeyDown={e => {
+                    if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
+                      const v = (e.target as HTMLInputElement).value.trim();
+                      if (!form.captureResponseHeaders.includes(v)) setForm(f => ({ ...f, captureResponseHeaders: [...f.captureResponseHeaders, v] }));
+                      (e.target as HTMLInputElement).value = "";
+                    }
+                  }} />
+                </div>
+              </div>
+
+              <div className="border-t border-[var(--gcp-grey)] pt-4">
+                <label className="text-[11px] uppercase tracking-wider text-[var(--gcp-text-secondary)] font-medium mb-2 block">Filmstrip Visual Comparison</label>
+                <div className="flex items-center gap-3">
+                  <span onClick={() => setForm(f => ({ ...f, filmstrip: { ...f.filmstrip, enabled: true } }))} className={`px-3 py-1 rounded text-[11px] cursor-pointer border ${form.filmstrip.enabled ? "bg-[var(--gcp-green)] text-white border-[var(--gcp-green)]" : "border-[var(--gcp-grey)] text-[var(--gcp-text-secondary)]"}`}>Enabled</span>
+                  <span onClick={() => setForm(f => ({ ...f, filmstrip: { ...f.filmstrip, enabled: false } }))} className={`px-3 py-1 rounded text-[11px] cursor-pointer border ${!form.filmstrip.enabled ? "bg-[var(--gcp-yellow)] text-white border-[var(--gcp-yellow)]" : "border-[var(--gcp-grey)] text-[var(--gcp-text-secondary)]"}`}>Disabled</span>
+                </div>
+                {form.filmstrip.enabled && (
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <label className="text-[11px] text-[var(--gcp-text-secondary)]">Similarity Threshold ({Math.round(form.filmstrip.threshold * 100)}%)</label>
+                      <input type="range" min={0.5} max={1} step={0.01} className="w-full mt-1" value={form.filmstrip.threshold} onChange={e => setForm(f => ({ ...f, filmstrip: { ...f.filmstrip, threshold: Number(e.target.value) } }))} />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-[var(--gcp-text-secondary)]">Region</label>
+                      <select className="gcp-input w-full mt-1" value={form.filmstrip.region ?? "full"} onChange={e => setForm(f => ({ ...f, filmstrip: { ...f.filmstrip, region: e.target.value } }))}>
+                        <option value="full">Full Page</option>
+                        <option value="viewport">Viewport</option>
+                        <option value="element">Element</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-[var(--gcp-grey)] pt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-[11px] uppercase tracking-wider text-[var(--gcp-text-secondary)] font-medium">Predicates ({form.predicates.length})</label>
+                  <button onClick={() => {
+                    const newPred = { id: `pred_${Date.now()}`, type: "statusCode" as const, field: "", expected: "200", operator: "equals" as const, description: "Assertion" };
+                    setForm(f => ({ ...f, predicates: [...f.predicates, newPred] }));
+                  }} className="text-[12px] text-[var(--gcp-blue)] hover:underline flex items-center gap-1"><Plus size={12} /> Add Predicate</button>
+                </div>
+                <div className="space-y-2">
+                  {form.predicates.map((p, pi) => (
+                    <div key={p.id} className="gcp-card p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono text-[var(--gcp-text-secondary)]">#{pi + 1}</span>
+                        <button onClick={() => setForm(f => ({ ...f, predicates: f.predicates.filter(x => x.id !== p.id) }))} className="text-[var(--gcp-red)] hover:bg-red-50 rounded p-0.5"><X size={12} /></button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] text-[var(--gcp-text-secondary)]">Type</label>
+                          <select className="gcp-input w-full mt-0.5 text-[12px]" value={p.type} onChange={e => setForm(f => ({ ...f, predicates: f.predicates.map(x => x.id === p.id ? { ...x, type: e.target.value as typeof p.type } : x) }))}>
+                            <option value="statusCode">Status Code</option>
+                            <option value="headerEquals">Header Equals</option>
+                            <option value="headerContains">Header Contains</option>
+                            <option value="bodyContains">Body Contains</option>
+                            <option value="bodyJsonPath">Body JSON Path</option>
+                            <option value="responseTime">Response Time</option>
+                            <option value="cookieEquals">Cookie Equals</option>
+                            <option value="capturedHeader">Captured Header</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-[var(--gcp-text-secondary)]">Operator</label>
+                          <select className="gcp-input w-full mt-0.5 text-[12px]" value={p.operator} onChange={e => setForm(f => ({ ...f, predicates: f.predicates.map(x => x.id === p.id ? { ...x, operator: e.target.value as typeof p.operator } : x) }))}>
+                            <option value="equals">Equals</option>
+                            <option value="notEquals">Not Equals</option>
+                            <option value="contains">Contains</option>
+                            <option value="notContains">Not Contains</option>
+                            <option value="gt">Greater Than</option>
+                            <option value="gte">Greater or Equal</option>
+                            <option value="lt">Less Than</option>
+                            <option value="lte">Less or Equal</option>
+                            <option value="regex">Regex</option>
+                            <option value="exists">Exists</option>
+                            <option value="notExists">Not Exists</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] text-[var(--gcp-text-secondary)]">Field</label>
+                          <input className="gcp-input w-full mt-0.5 text-[12px] font-mono" value={p.field} onChange={e => setForm(f => ({ ...f, predicates: f.predicates.map(x => x.id === p.id ? { ...x, field: e.target.value } : x) }))} placeholder={p.type === "statusCode" ? "(auto)" : "e.g. X-Cache"} />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-[var(--gcp-text-secondary)]">Expected Value</label>
+                          <input className="gcp-input w-full mt-0.5 text-[12px] font-mono" value={p.expected} onChange={e => setForm(f => ({ ...f, predicates: f.predicates.map(x => x.id === p.id ? { ...x, expected: e.target.value } : x) }))} placeholder={p.type === "statusCode" ? "200" : "value"} />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[var(--gcp-text-secondary)]">Description</label>
+                        <input className="gcp-input w-full mt-0.5 text-[12px]" value={p.description} onChange={e => setForm(f => ({ ...f, predicates: f.predicates.map(x => x.id === p.id ? { ...x, description: e.target.value } : x) }))} placeholder="Assertion description" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -349,21 +511,36 @@ function GenerateWizard({ onClose, onGenerated }: { onClose: () => void; onGener
   );
 }
 
-function StatsDashboard({ stats }: { stats: TestStats | null }) {
+function isFilterActive(colFilters: Record<string, ColumnFilterState>, field: string, value: string) {
+  const cur = colFilters[field];
+  return cur?.selected.includes(value) ?? false;
+}
+
+function activeFilterClass(active: boolean) {
+  return active ? "ring-2 ring-inset ring-[var(--gcp-blue)] bg-[var(--gcp-blue-bg)]" : "";
+}
+
+function StatsDashboard({ stats, colFilters, onToggleFilter }: {
+  stats: TestStats | null;
+  colFilters: Record<string, ColumnFilterState>;
+  onToggleFilter: (field: string, value: string) => void;
+}) {
   if (!stats) return null;
 
   const statusData = [["Status", "Count", { role: "style" }], ...Object.entries(stats.byStatus).map(([k, v]) => [k, v, k === "active" ? "#1e8e3e" : k === "disabled" ? "#f9ab00" : "#d93025"])];
   const priorityData = [["Priority", "Count", { role: "style" }], ...Object.entries(stats.byPriority).sort().map(([k, v]) => [k, v, k === "P0" ? "#d93025" : k === "P1" ? "#e8710a" : k === "P2" ? "#1a73e8" : "#5f6368"])];
-  const categoryData = [["Category", "Count"], ...Object.entries(stats.byCategory).sort((a, b) => b[1] - a[1])];
-  const tagData = [["Tag", "Count"], ...Object.entries(stats.byTag).sort((a, b) => b[1] - a[1]).slice(0, 10)];
+
+  const statusNames: Record<string, string> = { active: "Active", disabled: "Disabled", deprecated: "Deprecated" };
 
   return (
-    <div className="grid grid-cols-4 gap-3 mb-3">
-      <div className="gcp-card p-3 text-center">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+      <div className={`gcp-card p-3 text-center cursor-pointer transition-colors hover:bg-[var(--gcp-surface-hover)] ${activeFilterClass(Object.keys(colFilters).length === 0)}`}
+        onClick={() => onToggleFilter("_clear", "")} title="Click to clear all filters">
         <div className="text-2xl font-bold text-[var(--gcp-blue)]">{stats.total}</div>
         <div className="text-[11px] text-[var(--gcp-text-secondary)]">Total Tests</div>
       </div>
-      <div className="gcp-card p-3 text-center">
+      <div className={`gcp-card p-3 text-center cursor-pointer transition-colors hover:bg-[var(--gcp-surface-hover)] ${activeFilterClass(isFilterActive(colFilters, "automated", "true"))}`}
+        onClick={() => onToggleFilter("automated", "true")}>
         <div className="text-2xl font-bold text-[var(--gcp-green)]">{stats.automated}</div>
         <div className="text-[11px] text-[var(--gcp-text-secondary)]">Automated</div>
       </div>
@@ -377,11 +554,73 @@ function StatsDashboard({ stats }: { stats: TestStats | null }) {
       </div>
       <div className="col-span-2 gcp-card p-3" style={{ height: 180 }}>
         <div className="text-[11px] font-medium text-[var(--gcp-text-secondary)] mb-1">By Status</div>
-        <Chart chartType="ColumnChart" data={statusData} options={{ backgroundColor: "transparent", legend: "none", chartArea: { width: "80%", height: "75%" }, bar: { groupWidth: "60%" }}} width="100%" height="140px" />
+        <Chart chartType="ColumnChart" data={statusData}
+          options={{ backgroundColor: "transparent", legend: "none", chartArea: { width: "80%", height: "75%" }, bar: { groupWidth: "60%" } }}
+          width="100%" height="140px"
+          chartEvents={[{
+            eventName: "select",
+            callback: ({ chartWrapper }) => {
+              if (!chartWrapper) return;
+              const chart = chartWrapper.getChart();
+              if (!chart) return;
+              const sel = chart.getSelection();
+              if (sel.length > 0 && sel[0].row !== undefined && sel[0].row >= 0) {
+                const statusKey = (statusData[sel[0].row + 1]?.[0] as string) ?? "";
+                if (statusKey) onToggleFilter("status", statusKey);
+              }
+            },
+          }]}
+        />
       </div>
       <div className="col-span-2 gcp-card p-3" style={{ height: 180 }}>
         <div className="text-[11px] font-medium text-[var(--gcp-text-secondary)] mb-1">By Priority</div>
-        <Chart chartType="ColumnChart" data={priorityData} options={{ backgroundColor: "transparent", legend: "none", chartArea: { width: "80%", height: "75%" }, bar: { groupWidth: "60%" }}} width="100%" height="140px" />
+        <Chart chartType="ColumnChart" data={priorityData}
+          options={{ backgroundColor: "transparent", legend: "none", chartArea: { width: "80%", height: "75%" }, bar: { groupWidth: "60%" } }}
+          width="100%" height="140px"
+          chartEvents={[{
+            eventName: "select",
+            callback: ({ chartWrapper }) => {
+              if (!chartWrapper) return;
+              const chart = chartWrapper.getChart();
+              if (!chart) return;
+              const sel = chart.getSelection();
+              if (sel.length > 0 && sel[0].row !== undefined && sel[0].row >= 0) {
+                const priorityKey = (priorityData[sel[0].row + 1]?.[0] as string) ?? "";
+                if (priorityKey) onToggleFilter("priority", priorityKey);
+              }
+            },
+          }]}
+        />
+      </div>
+      {/* Clickable status pills */}
+      <div className="col-span-2 flex flex-wrap gap-1.5 items-center">
+        {Object.entries(stats.byStatus).map(([k, v]) => {
+          const active = isFilterActive(colFilters, "status", k);
+          const color = k === "active" ? "#1e8e3e" : k === "disabled" ? "#f9ab00" : "#d93025";
+          return (
+            <button key={k} onClick={() => onToggleFilter("status", k)}
+              className={`gcp-card px-3 py-2 text-center cursor-pointer transition-all hover:shadow-md ${active ? "ring-2 ring-inset" : ""}`}
+              style={active ? { boxShadow: `inset 0 0 0 2px ${color}` } : {}}>
+              <div className="text-lg font-bold" style={{ color }}>{v}</div>
+              <div className="text-[10px] text-[var(--gcp-text-secondary)]">{statusNames[k] ?? k}</div>
+            </button>
+          );
+        })}
+      </div>
+      <div className="col-span-2 flex flex-wrap gap-1.5 items-center">
+        {Object.entries(stats.byPriority).sort().map(([k, v]) => {
+          const active = isFilterActive(colFilters, "priority", k);
+          const colors: Record<string, string> = { P0: "#d93025", P1: "#e8710a", P2: "#1a73e8", P3: "#5f6368" };
+          const c = colors[k] ?? "#1a73e8";
+          return (
+            <button key={k} onClick={() => onToggleFilter("priority", k)}
+              className={`gcp-card px-3 py-2 text-center cursor-pointer transition-all hover:shadow-md ${active ? "ring-2 ring-inset" : ""}`}
+              style={active ? { boxShadow: `inset 0 0 0 2px ${c}` } : {}}>
+              <div className="text-lg font-bold" style={{ color: c }}>{v}</div>
+              <div className="text-[10px] text-[var(--gcp-text-secondary)]">P{k.replace("P", "")}</div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -465,6 +704,21 @@ function SidePanel({ testCase, onClose }: { testCase: TestCase; onClose: () => v
           </div>
         </div>
 
+        <div className="border-t border-[var(--gcp-grey)] pt-3 space-y-2">
+          <h4 className="text-[12px] font-medium uppercase tracking-wider text-[var(--gcp-text-secondary)]">HTTP / Predicates</h4>
+          <div className="flex items-center gap-2 text-[12px]">
+            <span className="text-[var(--gcp-text-secondary)]">Expected:</span>
+            <span className={`font-mono font-bold ${testCase.expectedStatus < 300 ? "text-[var(--gcp-green)]" : testCase.expectedStatus < 400 ? "text-[var(--gcp-yellow)]" : "text-[var(--gcp-red)]"}`}>{testCase.expectedStatus}</span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {Object.keys(testCase.requestHeaders).length > 0 && <span className="gcp-badge gcp-badge-pass text-[10px]">{Object.keys(testCase.requestHeaders).length} headers</span>}
+            {Object.keys(testCase.cookies).length > 0 && <span className="gcp-badge gcp-badge-pass text-[10px]">{Object.keys(testCase.cookies).length} cookies</span>}
+            {testCase.captureResponseHeaders.length > 0 && <span className="gcp-badge gcp-badge-pass text-[10px]">Capture {testCase.captureResponseHeaders.length}</span>}
+            {testCase.filmstrip.enabled && <span className="gcp-badge gcp-badge-flaky text-[10px]">Filmstrip {Math.round(testCase.filmstrip.threshold * 100)}%</span>}
+            <span className="gcp-badge text-[10px]">{testCase.predicates.length} predicates</span>
+          </div>
+        </div>
+
         <div className="flex gap-2 pt-2">
           <button onClick={() => navTo(`TestAnalytics?testId=${testCase.id}`)} className="gcp-button text-[12px] flex-1 flex items-center justify-center gap-1"><BarChart3 size={13} /> Analytics</button>
           <button onClick={() => copyToClipboard(`https://aware.example.com/tests/${testCase.id}`)} className="gcp-button text-[12px] flex-1 flex items-center justify-center gap-1"><FileText size={13} /> Copy Link</button>
@@ -494,6 +748,26 @@ export function TestManager() {
   const [selectedPanelId, setSelectedPanelId] = React.useState<string | null>(null);
 
   const updateColFilter = (field: string) => (f: ColumnFilterState) => setColFilters(prev => ({ ...prev, [field]: f }));
+
+  const handleStatFilter = (field: string, value: string) => {
+    if (field === "_clear") {
+      setColFilters({});
+      return;
+    }
+    setColFilters(prev => {
+      const cur = prev[field];
+      const isActive = cur?.selected.includes(value);
+      if (isActive) {
+        const next: Record<string, ColumnFilterState> = { ...prev };
+        if (next[field]) {
+          next[field] = { text: "", selected: next[field].selected.filter(v => v !== value) };
+        }
+        return next;
+      } else {
+        return { ...prev, [field]: { text: "", selected: [value] } };
+      }
+    });
+  };
 
   const filtered = applyFilters(testCases, colFilters, searchText);
   const categories = [...new Set(testCases.map(tc => tc.category))];
@@ -579,42 +853,42 @@ export function TestManager() {
               <p className="text-[12px] text-[var(--gcp-text-secondary)]">{testCases.length} total · {stats?.automated ?? 0} automated · {stats?.manual ?? 0} manual</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setShowImport(true)} className="gcp-button text-sm flex items-center gap-1.5"><Upload size={14} /> Import</button>
-            <button onClick={() => setShowGenerate(true)} className="gcp-button text-sm flex items-center gap-1.5"><Sparkles size={14} /> Generate</button>
+          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+            <button onClick={() => setShowImport(true)} className="gcp-button text-[12px] sm:text-sm flex items-center gap-1"><Upload size={13} /><span className="hidden sm:inline">Import</span></button>
+            <button onClick={() => setShowGenerate(true)} className="gcp-button text-[12px] sm:text-sm flex items-center gap-1"><Sparkles size={13} /><span className="hidden sm:inline">Generate</span></button>
             <div className="relative group">
-              <button className="gcp-button text-sm flex items-center gap-1.5"><Download size={14} /> Export</button>
+              <button className="gcp-button text-[12px] sm:text-sm flex items-center gap-1"><Download size={13} /><span className="hidden sm:inline">Export</span></button>
               <div className="absolute right-0 top-full mt-1 w-36 bg-[var(--gcp-surface)] border border-[var(--gcp-grey)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity z-20 overflow-hidden">
                 <button onClick={() => handleFullExport("json")} className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--gcp-surface-hover)] text-left"><FileJson size={14} /> JSON</button>
                 <button onClick={() => handleFullExport("csv")} className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--gcp-surface-hover)] text-left"><FileSpreadsheet size={14} /> CSV</button>
                 <button onClick={() => handleFullExport("junit_xml")} className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--gcp-surface-hover)] text-left"><FileCode size={14} /> JUnit XML</button>
               </div>
             </div>
-            <button onClick={() => navTo("TestSuiteManager")} className="gcp-button text-sm flex items-center gap-1.5"><FolderTree size={14} /> Suites</button>
-            <button onClick={() => setShowCreate(true)} className="gcp-button gcp-button-primary text-sm flex items-center gap-1.5"><Plus size={14} /> New Test</button>
+            <button onClick={() => navTo("TestSuiteManager")} className="gcp-button text-[12px] sm:text-sm flex items-center gap-1"><FolderTree size={13} /><span className="hidden sm:inline">Suites</span></button>
+            <button onClick={() => setShowCreate(true)} className="gcp-button gcp-button-primary text-[12px] sm:text-sm flex items-center gap-1"><Plus size={13} /><span className="hidden sm:inline">New Test</span></button>
           </div>
         </div>
 
         {/* Stats Dashboard */}
-        <StatsDashboard stats={stats} />
+        <StatsDashboard stats={stats} colFilters={colFilters} onToggleFilter={handleStatFilter} />
 
         {/* Filters */}
-        <div className="gcp-card p-3 flex flex-wrap gap-3 items-center shrink-0">
-          <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-            <Search size={15} className="text-[var(--gcp-text-secondary)]" />
-            <input className="gcp-input flex-1" placeholder="Search by name, description, or ID..." value={searchText} onChange={e => setSearchText(e.target.value)} />
+        <div className="gcp-card p-3 flex flex-wrap gap-2 items-center shrink-0">
+          <div className="flex items-center gap-2 flex-1 min-w-[160px]">
+            <Search size={15} className="text-[var(--gcp-text-secondary)] shrink-0" />
+            <input className="gcp-input flex-1 text-[13px]" placeholder="Search..." value={searchText} onChange={e => setSearchText(e.target.value)} />
           </div>
-          <div className="h-5 w-px bg-[var(--gcp-grey)]" />
-          <select className="gcp-input text-[12px]" value="" onChange={e => { if (e.target.value) setColFilters(prev => ({ ...prev, priority: { text: "", selected: [e.target.value] } })); }}>
-            <option value="">Filter Priority</option>
+          <div className="hidden sm:block h-5 w-px bg-[var(--gcp-grey)]" />
+          <select className="gcp-input text-[11px] sm:text-[12px]" value="" onChange={e => { if (e.target.value) setColFilters(prev => ({ ...prev, priority: { text: "", selected: [e.target.value] } })); }}>
+            <option value="">Priority</option>
             {PRIORITIES.map(p => <option key={p}>{p}</option>)}
           </select>
-          <select className="gcp-input text-[12px]" value="" onChange={e => { if (e.target.value) setColFilters(prev => ({ ...prev, status: { text: "", selected: [e.target.value] } })); }}>
-            <option value="">Filter Status</option>
+          <select className="gcp-input text-[11px] sm:text-[12px]" value="" onChange={e => { if (e.target.value) setColFilters(prev => ({ ...prev, status: { text: "", selected: [e.target.value] } })); }}>
+            <option value="">Status</option>
             {STATUSES.map(s => <option key={s}>{s}</option>)}
           </select>
-          <select className="gcp-input text-[12px]" value="" onChange={e => { if (e.target.value) setColFilters(prev => ({ ...prev, category: { text: "", selected: [e.target.value] } })); }}>
-            <option value="">Filter Category</option>
+          <select className="gcp-input text-[11px] sm:text-[12px]" value="" onChange={e => { if (e.target.value) setColFilters(prev => ({ ...prev, category: { text: "", selected: [e.target.value] } })); }}>
+            <option value="">Category</option>
             {categories.map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
@@ -629,10 +903,10 @@ export function TestManager() {
         />
 
         {/* Split: table + side panel */}
-        <div className="flex gap-4 flex-1 overflow-hidden">
-          <div className={`flex flex-col gcp-card overflow-hidden ${selectedTest ? "flex-1" : "w-full"}`}>
-            <div className="flex-1 overflow-auto">
-              <table className="gcp-table">
+        <div className="flex flex-col-reverse md:flex-row gap-4 flex-1 overflow-hidden">
+          <div className={`flex flex-col gcp-card overflow-hidden ${selectedTest ? "w-full md:flex-1" : "w-full"}`}>
+            <div className="flex-1 overflow-x-auto overflow-y-auto">
+              <table className="gcp-table min-w-[700px] md:min-w-0">
                 <thead className="sticky top-0 bg-[var(--gcp-surface)] z-10">
                   <tr>
                     <th className="w-8">

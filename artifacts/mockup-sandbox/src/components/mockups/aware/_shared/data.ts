@@ -3,9 +3,9 @@
 // The generate script produces the same data as JSON files for the API path.
 // Update both when changing mock data shapes or values.
 
-import type { Run, TestResult, TestRunPoint, TestDetail, DiffRow, TestCase, TestSuite, TestTag, ImportResult, TestChangeLogEntry, GenerateParams, TestStats, TestCaseFilter, SuiteNode } from "./types";
+import type { Run, TestResult, TestRunPoint, TestDetail, DiffRow, TestCase, TestSuite, TestTag, ImportResult, TestChangeLogEntry, GenerateParams, TestStats, TestCaseFilter, SuiteNode, Predicate, FilmstripConfig } from "./types";
 
-export type { Run, TestResult, TestRunPoint, TestDetail, DiffRow, TestCase, TestSuite, TestTag, ImportResult, TestChangeLogEntry, GenerateParams, TestStats, TestCaseFilter, SuiteNode };
+export type { Run, TestResult, TestRunPoint, TestDetail, DiffRow, TestCase, TestSuite, TestTag, ImportResult, TestChangeLogEntry, GenerateParams, TestStats, TestCaseFilter, SuiteNode, Predicate, FilmstripConfig };
 
 const ENVS = ["Prod/Production", "Prod/Staging", "UAT/Production", "UAT/Staging"];
 
@@ -196,6 +196,60 @@ const PRIORITIES = ["P0", "P1", "P2", "P3"] as const;
 const SEVERITIES = ["critical", "major", "minor", "trivial"] as const;
 const OWNERS = ["alice@co.com", "bob@co.com", "carol@co.com", "dave@co.com", "eve@co.com"];
 
+function seedPredicates(i: number, cat: string): Predicate[] {
+  const base: Predicate[] = [
+    { id: `pred_${i}_0`, type: "statusCode", field: "", expected: "200", operator: "equals", description: "Response status is 200" },
+    { id: `pred_${i}_1`, type: "responseTime", field: "duration", expected: "1000", operator: "lt", description: "Response time < 1000ms" },
+  ];
+  if (cat === "security" || cat === "ddos") {
+    base.push({ id: `pred_${i}_2`, type: "headerContains", field: "X-Frame-Options", expected: "DENY", operator: "contains", description: "X-Frame-Options is DENY" });
+    base.push({ id: `pred_${i}_3`, type: "headerContains", field: "Content-Security-Policy", expected: "default-src", operator: "contains", description: "CSP header present" });
+  } else if (cat === "caching") {
+    base.push({ id: `pred_${i}_2`, type: "headerEquals", field: "X-Cache", expected: "HIT", operator: "equals", description: "Edge cache HIT" });
+    base.push({ id: `pred_${i}_3`, type: "headerContains", field: "Age", expected: "", operator: "exists", description: "Age header present" });
+  } else if (cat === "performance") {
+    base.push({ id: `pred_${i}_2`, type: "headerContains", field: "Content-Encoding", expected: "gzip", operator: "equals", description: "gzip encoding enabled" });
+  } else if (cat === "geo-match" || cat === "locale-split") {
+    base.push({ id: `pred_${i}_2`, type: "headerContains", field: "X-Region", expected: "", operator: "exists", description: "Region header present" });
+    base.push({ id: `pred_${i}_3`, type: "cookieEquals", field: "geo_override", expected: "enabled", operator: "equals", description: "Geo override cookie set" });
+  }
+  return base;
+}
+
+function seedFilmstrip(i: number): FilmstripConfig {
+  return {
+    enabled: i % 4 === 0,
+    threshold: 0.98 + (i % 3) * 0.01,
+    region: i % 2 === 0 ? "full" : "viewport",
+    ignoreAreas: i % 3 === 0 ? [".analytics-banner", ".cookie-notice"] : [],
+  };
+}
+
+function seedRequestHeaders(i: number, cat: string): Record<string, string> {
+  const h: Record<string, string> = {
+    "Accept": "application/json",
+    "User-Agent": "AWARE-TestRunner/2.0",
+  };
+  if (cat === "geo-match") h["X-Geo-Hint"] = "us-east";
+  if (cat === "locale-split") h["Accept-Language"] = i % 2 === 0 ? "fr-CA" : "en-US";
+  if (cat === "security") h["X-Forwarded-For"] = `192.168.${i}.1`;
+  return h;
+}
+
+function seedCookies(i: number): Record<string, string> {
+  const c: Record<string, string> = { session: `tok_${i}_abc123` };
+  if (i % 3 === 0) c["ab_test"] = "control";
+  if (i % 5 === 0) c["geo_override"] = "enabled";
+  return c;
+}
+
+function seedCaptureHeaders(i: number): string[] {
+  const base = ["X-Cache", "X-Request-ID", "Akamai-Cache-Status", "Age"];
+  if (i % 2 === 0) base.push("X-RateLimit-Remaining");
+  if (i % 3 === 0) base.push("Set-Cookie");
+  return base.slice(0, 3 + (i % 4));
+}
+
 export const TEST_CASES: TestCase[] = Array.from({ length: 25 }).map((_, i) => {
   const tagCount = 1 + (i % 3);
   const shuffled = [...TEST_TAGS].sort(() => Math.random() - 0.5);
@@ -219,8 +273,14 @@ export const TEST_CASES: TestCase[] = Array.from({ length: 25 }).map((_, i) => {
     scriptPath: `tests/aware/${cat}/tc_${i}.spec.ts`,
     preconditions: `- Akamai EdgeGrid credentials configured\n- ${cat} test data seeded\n- Target environment reachable`,
     expectedBehavior: `- Response status 200\n- Correct ${cat} headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8`,
-    documentation: `## ${TEST_NAMES[i]}\n\nValidates ${cat} behavior for endpoint group ${i}.\n\n### Test Steps\n1. Send request to endpoint\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the ${cat} validation suite.`,
+    documentation: `## ${TEST_NAMES[i]}\n\nValidates ${cat} behavior for endpoint group ${i}.\n\n### Test Steps\n1. Send HTTP ${cat === "security" ? "GET with payload" : "GET"} request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Request\n- Method: GET\n- Headers: ${Object.keys(seedRequestHeaders(i, cat)).join(", ")}\n- Expected Status: 200\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8\n\n### Notes\nThis test is part of the ${cat} validation suite.`,
     relatedTestIds: [`tc_${(i + 1) % 25}`, `tc_${(i + 2) % 25}`],
+    requestHeaders: seedRequestHeaders(i, cat),
+    cookies: seedCookies(i),
+    expectedStatus: cat === "security" ? 403 : cat === "ddos" ? 429 : cat === "tls" ? 302 : 200,
+    captureResponseHeaders: seedCaptureHeaders(i),
+    filmstrip: seedFilmstrip(i),
+    predicates: seedPredicates(i, cat),
     version: 1 + (i % 3),
     changelog: [
       { version: 1, timestamp: now.toISOString(), author: OWNERS[i % OWNERS.length], summary: "Initial creation", changes: ["Test case created"] },
@@ -237,7 +297,7 @@ export const TEST_SUITES: TestSuite[] = [
     description: "Complete end-to-end regression covering all category groups. Runs on every production deploy.",
     parentId: null,
     testIds: TEST_CASES.filter(t => t.status === "active").map(t => t.id),
-    config: { target: "Prod", environment: "Production", parallelism: 8, retries: 2, failFast: false, timeoutMinutes: 60 },
+    config: { target: "Prod", environment: "Production", parallelism: 8, retries: 2, failFast: false, timeoutMinutes: 60, integration: { slackChannel: "#regression-alerts", slackWebhookUrl: "https://hooks.slack.com/services/T00/B00/xxxx", notifyOn: ["fail", "deploy"], githubCommentPr: true, githubDeploymentStatus: true, requireApproval: true, approvers: ["alice@co.com", "bob@co.com"], webhookUrl: "https://hooks.example.com/aware/notify" } },
     tags: ["regression", "e2e"],
     schedule: "0 6 * * 1-5",
     createdAt: "2026-01-15T08:00:00Z",
@@ -249,7 +309,7 @@ export const TEST_SUITES: TestSuite[] = [
     description: "Tests for geographic routing, locale splitting, and multi-region behavior.",
     parentId: null,
     testIds: TEST_CASES.filter(t => t.category === "geo-match" || t.category === "locale-split").slice(0, 8).map(t => t.id),
-    config: { target: "Prod", environment: "Production", parallelism: 4, retries: 1, failFast: false, timeoutMinutes: 30 },
+    config: { target: "Prod", environment: "Production", parallelism: 4, retries: 1, failFast: false, timeoutMinutes: 30, integration: { slackChannel: "#geo-alerts", notifyOn: ["fail"], githubCommentPr: true, githubDeploymentStatus: false, requireApproval: false, approvers: [] } },
     tags: ["geo", "locale"],
     schedule: "0 */4 * * *",
     createdAt: "2026-02-10T09:00:00Z",
@@ -261,7 +321,7 @@ export const TEST_SUITES: TestSuite[] = [
     description: "Performance benchmarks, cache hit ratio validation, and compression checks.",
     parentId: null,
     testIds: TEST_CASES.filter(t => t.category === "performance" || t.category === "caching").slice(0, 6).map(t => t.id),
-    config: { target: "Prod", environment: "Staging", parallelism: 6, retries: 2, failFast: true, timeoutMinutes: 45 },
+    config: { target: "Prod", environment: "Staging", parallelism: 6, retries: 2, failFast: true, timeoutMinutes: 45, integration: { slackChannel: "#perf-bot", notifyOn: ["pass", "fail"], githubCommentPr: true, githubDeploymentStatus: true, requireApproval: true, approvers: ["carol@co.com", "dave@co.com"], webhookUrl: "https://hooks.example.com/perf" } },
     tags: ["performance"],
     schedule: "0 */2 * * *",
     createdAt: "2026-03-05T10:00:00Z",
@@ -356,6 +416,12 @@ export function createTestCase(data: Omit<TestCase, "id" | "createdAt" | "update
   const now = new Date().toISOString();
   const tc: TestCase = {
     id, ...data,
+    requestHeaders: data.requestHeaders ?? {},
+    cookies: data.cookies ?? {},
+    expectedStatus: data.expectedStatus ?? 200,
+    captureResponseHeaders: data.captureResponseHeaders ?? [],
+    filmstrip: data.filmstrip ?? { enabled: false, threshold: 0.99 },
+    predicates: data.predicates ?? [],
     version: 1,
     changelog: [{ version: 1, timestamp: now, author: data.owner || "system", summary: "Test case created", changes: ["Initial creation"] }],
     createdAt: now, updatedAt: now,
@@ -377,6 +443,12 @@ export function updateTestCase(id: string, patch: Partial<Omit<TestCase, "id" | 
   if (patch.description && patch.description !== prev.description) changes.push("Description updated");
   if (patch.tags && JSON.stringify(patch.tags) !== JSON.stringify(prev.tags)) changes.push("Tags updated");
   if (patch.suiteIds && JSON.stringify(patch.suiteIds) !== JSON.stringify(prev.suiteIds)) changes.push("Suite membership changed");
+  if (patch.expectedStatus && patch.expectedStatus !== prev.expectedStatus) changes.push(`Expected status: ${prev.expectedStatus} → ${patch.expectedStatus}`);
+  if (patch.requestHeaders && JSON.stringify(patch.requestHeaders) !== JSON.stringify(prev.requestHeaders)) changes.push("Request headers updated");
+  if (patch.cookies && JSON.stringify(patch.cookies) !== JSON.stringify(prev.cookies)) changes.push("Cookies updated");
+  if (patch.captureResponseHeaders && JSON.stringify(patch.captureResponseHeaders) !== JSON.stringify(prev.captureResponseHeaders)) changes.push("Captured response headers changed");
+  if (patch.filmstrip && JSON.stringify(patch.filmstrip) !== JSON.stringify(prev.filmstrip)) changes.push("Filmstrip config changed");
+  if (patch.predicates && JSON.stringify(patch.predicates) !== JSON.stringify(prev.predicates)) changes.push("Predicates updated");
 
   const now = new Date().toISOString();
   const newVersion = prev.version + 1;
@@ -466,6 +538,12 @@ export function importTestCases(data: TestCase[]): ImportResult {
     const id = `tc_${nextTcId++}`;
     testCasesStore.push({
       ...tc, id,
+      requestHeaders: tc.requestHeaders ?? {},
+      cookies: tc.cookies ?? {},
+      expectedStatus: tc.expectedStatus ?? 200,
+      captureResponseHeaders: tc.captureResponseHeaders ?? [],
+      filmstrip: tc.filmstrip ?? { enabled: false, threshold: 0.99 },
+      predicates: tc.predicates ?? [],
       version: tc.version || 1,
       changelog: tc.changelog || [{ version: 1, timestamp: now, author: tc.owner || "import", summary: "Imported", changes: ["Imported from external source"] }],
       documentation: tc.documentation || "",
@@ -478,9 +556,9 @@ export function importTestCases(data: TestCase[]): ImportResult {
 
 export function exportTestCases(format: "json" | "csv"): string {
   if (format === "csv") {
-    const headers = "id,name,description,category,priority,severity,status,owner,automated,scriptPath,version,tags";
+    const headers = "id,name,description,category,priority,severity,status,owner,automated,scriptPath,version,tags,expectedStatus,predicateCount";
     const rows = testCasesStore.map(tc =>
-      `"${tc.id}","${tc.name.replace(/"/g, '""')}","${tc.description.replace(/"/g, '""')}","${tc.category}",${tc.priority},${tc.severity},${tc.status},"${tc.owner}",${tc.automated},"${tc.scriptPath}",${tc.version},"${tc.tags.join(";")}"`
+      `"${tc.id}","${tc.name.replace(/"/g, '""')}","${tc.description.replace(/"/g, '""')}","${tc.category}",${tc.priority},${tc.severity},${tc.status},"${tc.owner}",${tc.automated},"${tc.scriptPath}",${tc.version},"${tc.tags.join(";")}",${tc.expectedStatus},${tc.predicates.length}`
     );
     return [headers, ...rows].join("\n");
   }
@@ -489,6 +567,9 @@ export function exportTestCases(format: "json" | "csv"): string {
     priority: tc.priority, severity: tc.severity, status: tc.status,
     owner: tc.owner, tags: tc.tags, automated: tc.automated, version: tc.version,
     scriptPath: tc.scriptPath,
+    requestHeaders: tc.requestHeaders, cookies: tc.cookies,
+    expectedStatus: tc.expectedStatus, captureResponseHeaders: tc.captureResponseHeaders,
+    filmstrip: tc.filmstrip, predicates: tc.predicates,
   })), null, 2);
 }
 
@@ -508,6 +589,11 @@ export function exportTestsAsJunitXml(suiteId?: string): string {
     lines.push(`        <property name="severity" value="${tc.severity}"/>`);
     lines.push(`        <property name="owner" value="${tc.owner}"/>`);
     lines.push(`        <property name="tags" value="${tc.tags.join(",")}"/>`);
+    lines.push(`        <property name="expectedStatus" value="${tc.expectedStatus}"/>`);
+    lines.push(`        <property name="predicateCount" value="${tc.predicates.length}"/>`);
+    lines.push(`        <property name="filmstripEnabled" value="${tc.filmstrip.enabled}"/>`);
+    lines.push(`        <property name="requestHeaders" value="${Object.keys(tc.requestHeaders).join(",")}"/>`);
+    lines.push(`        <property name="captureHeaders" value="${tc.captureResponseHeaders.join(",")}"/>`);
     lines.push(`      </properties>`);
     lines.push(`    </testcase>`);
   });
@@ -585,24 +671,34 @@ export function generateTestCases(params: GenerateParams): TestCase[] {
     const idx = nextTcId + result.length;
     const id = `tc_${idx}`;
     const name = `${template.verb} ${template.field} ${template.check}`;
+    const cat = params.category;
 
     const tc: TestCase = {
       id,
       name,
-      description: `Generated test: ${template.verb} ${template.field} for ${template.path} — ${template.check}. Part of ${params.category} suite.`,
-      category: params.category,
+      description: `Generated test: ${template.verb} ${template.field} for ${template.path} — ${template.check}. Part of ${cat} suite.`,
+      category: cat,
       priority: params.priority,
       severity: params.priority === "P0" ? "critical" : params.priority === "P1" ? "major" : params.priority === "P2" ? "minor" : "trivial",
       status: params.status,
-      tags: [params.category.replace(/[^a-z0-9]/g, "_"), ...(i % 2 === 0 ? ["automated"] : ["regression"])],
+      tags: [cat.replace(/[^a-z0-9]/g, "_"), ...(i % 2 === 0 ? ["automated"] : ["regression"])],
       owner: params.owner,
       suiteIds: [...params.suites],
       automated: true,
-      scriptPath: `tests/generated/${params.category}/tc_${idx}.spec.ts`,
-      preconditions: `- ${params.category} test environment ready\n- Mock data seeded for ${template.path}\n- EdgeGrid token valid`,
+      scriptPath: `tests/generated/${cat}/tc_${idx}.spec.ts`,
+      preconditions: `- ${cat} test environment ready\n- Mock data seeded for ${template.path}\n- EdgeGrid token valid`,
       expectedBehavior: `- Status 200 for ${template.path}\n- ${template.check}\n- Response time < 1000ms`,
-      documentation: `## ${name}\n\n**Category:** ${params.category}\n\n**Endpoint:** ${template.path}\n\n### Test Steps\n1. Send ${params.category === "security" ? "malicious" : "standard"} request to ${template.path}\n2. Validate response\n3. ${template.check}\n\n### Expected\n- ${template.check}\n- Response < 1000ms\n\n**Auto-generated** — review before production use.`,
+      documentation: `## ${name}\n\n**Category:** ${cat}\n\n**Endpoint:** ${template.path}\n\n### Test Steps\n1. Send ${cat === "security" ? "malicious" : "standard"} request to ${template.path}\n2. Validate response\n3. ${template.check}\n\n### Expected\n- ${template.check}\n- Response < 1000ms\n\n**Auto-generated** — review before production use.`,
       relatedTestIds: [],
+      requestHeaders: { Accept: "application/json", "User-Agent": "AWARE-Generator/1.0" },
+      cookies: {},
+      expectedStatus: cat === "security" ? 403 : cat === "ddos" ? 429 : 200,
+      captureResponseHeaders: ["X-Cache", "X-Request-ID"],
+      filmstrip: { enabled: false, threshold: 0.99 },
+      predicates: [
+        { id: `gen_pred_${idx}_0`, type: "statusCode", field: "", expected: "200", operator: "equals", description: "Status is 200" },
+        { id: `gen_pred_${idx}_1`, type: "responseTime", field: "duration", expected: "1000", operator: "lt", description: "Response time < 1000ms" },
+      ],
       version: 1,
       changelog: [{ version: 1, timestamp: now.toISOString(), author: params.owner, summary: "Auto-generated", changes: ["Bulk generated via test manager"] }],
       createdAt: now.toISOString(),

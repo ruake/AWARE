@@ -1,0 +1,42 @@
+[
+  {
+    "id": "tag_geo",
+    "name": "geo",
+    "color": "#1a73e8"
+  },
+  {
+    "id": "tag_locale",
+    "name": "locale",
+    "color": "#9334e6"
+  },
+  {
+    "id": "tag_health",
+    "name": "health",
+    "color": "#e8710a"
+  },
+  {
+    "id": "tag_security",
+    "name": "security",
+    "color": "#d93025"
+  },
+  {
+    "id": "tag_perf",
+    "name": "performance",
+    "color": "#1e8e3e"
+  },
+  {
+    "id": "tag_regression",
+    "name": "regression",
+    "color": "#f9ab00"
+  },
+  {
+    "id": "tag_smoke",
+    "name": "smoke",
+    "color": "#185abc"
+  },
+  {
+    "id": "tag_e2e",
+    "name": "e2e",
+    "color": "#c5221f"
+  }
+]
