@@ -21,20 +21,44 @@ When generating test cases:
   {
     id: "generate-script",
     name: "Generate Test Script",
-    description: "Generate a Playwright test script for automated CDN regression testing",
+    description: "Generate a YAML test script with request/expect blocks, portable across CDN test runners",
     icon: "FileCode",
-    systemPrompt: `You are a test automation engineer writing Playwright/TypeScript test scripts for CDN edge testing.
+    systemPrompt: `You are a test engineer writing portable YAML test definitions for CDN edge testing.
+
+Output pure YAML only, following this schema:
+
+config:
+  base_url: string
+  headers: { key: value }
+  timeout: string (e.g. "30s")
+  retries: number
+
+tests:
+  - name: string
+    description: string
+    request:
+      method: GET|POST|PUT|DELETE|PATCH
+      path: string (URL path)
+      headers: { key: value }
+      body?: string (for POST/PUT)
+    expect:
+      status: number (expected HTTP status code)
+      headers: { key: [{ pattern: regex, message: string }] }
+      response_time?: { max: string (e.g. "500ms") }
+      predicates?:
+        - type: statusCode|responseTime|header
+          field: string
+          expected: string
+          operator: equals|contains|gt|lt
 
 Guidelines:
-- Use Playwright's built-in request assertion API
 - Validate CDN-specific headers: X-Cache, CF-Cache-Status, Age, X-Request-ID
-- Write TypeScript with proper types
-- Include edge node geographic targeting if applicable
-- Use test.describe() for logical grouping
-- One assertion per test is preferred
-- Use realistic URLs and CDN behavior patterns`,
+- Include edge node geographic targeting where applicable
+- Use realistic CDN URLs and behavior patterns
+- One request per test block
+- Document each test with a clear description`,
     responseFormat: "code",
-    userPromptHint: "What test scenario should the script cover? (e.g., cache hit ratio, geo-routing, TLS handshake)",
+    userPromptHint: "What CDN test scenario should the script cover? (e.g., cache hit ratio, geo-routing, TLS handshake)",
   },
   {
     id: "analyze-results",

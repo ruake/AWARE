@@ -37,28 +37,76 @@ Each test should validate:
 
 Prioritize regression scenarios that could occur during Akamai-to-CloudFront migration.`,
 
-  "generate-script": `import { test, expect } from '@playwright/test';
+  "generate-script": `# CDN Regression Test Script (YAML)
+# Compatible with standard CDN test runners
 
-const BASE = process.env.APP_URL || 'https://example.com';
-const EDGE_CACHE_HEADERS = ['X-Cache', 'CF-Cache-Status', 'Age'];
+config:
+  base_url: "https://example.com"
+  headers:
+    User-Agent: "AWARE-TestRunner/2.0"
+  timeout: 30s
+  retries: 2
 
-test.describe('CDN Edge Regression Suite', () => {
-  test('CDN01: Static asset returns HIT after second request', async ({ page }) => {
-    const url = BASE + '/assets/logo.png';
-    const resp1 = await page.request.get(url);
-    expect(resp1.headers()['CF-Cache-Status'] || resp1.headers()['X-Cache']).toMatch(/MISS|DYNAMIC/);
+tests:
+  - name: "CDN01: Static asset cache HIT after warm-up"
+    description: >
+      Verify that a static asset transitions from
+      MISS to HIT on second request
+    request:
+      method: GET
+      path: "/assets/logo.png"
+      headers:
+        Accept: "image/*"
+    expect:
+      status: 200
+      headers:
+        X-Cache:
+          - pattern: "HIT|STALE"
+            message: "Asset should be served from edge cache"
+        Age:
+          type: number
+          gt: 0
+      predicates:
+        - type: responseTime
+          field: duration
+          expected: "2000"
+          operator: lt
 
-    const resp2 = await page.request.get(url);
-    const cache2 = resp2.headers()['CF-Cache-Status'] || resp2.headers()['X-Cache'];
-    expect(cache2).toMatch(/HIT|STALE/);
-  });
+  - name: "CDN02: Origin shield fallback"
+    description: >
+      Validate origin shield serves cached content
+      when origin is degraded
+    request:
+      method: GET
+      path: "/api/health"
+    expect:
+      status: 200
+      headers:
+        Age:
+          exists: true
+        CF-Cache-Status:
+          - pattern: "HIT|STALE|DYNAMIC"
+      predicates:
+        - type: statusCode
+          field: ""
+          expected: "200"
+          operator: equals
 
-  test('CDN02: Origin shield populates on cache miss', async ({ page }) => {
-    const resp = await page.request.get(BASE + '/api/health');
-    const age = resp.headers()['Age'];
-    expect(Number(age) || 0).toBeGreaterThanOrEqual(0);
-  });
-});`,
+  - name: "CDN03: Geo-routing APAC"
+    description: APAC users must be routed to nearest edge
+    request:
+      method: GET
+      path: "/api/v1/data"
+      headers:
+        X-Region: "ap-southeast-1"
+    expect:
+      status: 200
+      headers:
+        X-Edge-Location:
+          - pattern: "^(HKG|SIN|NRT)"
+            message: "Should route to APAC edge"
+      response_time:
+        max: 500ms`,
 
   "analyze-results": `## Regression Analysis Report
 
@@ -145,7 +193,7 @@ function mockComplete(messages: LLMMessage[]): LLMCompletionResponse {
 
   if (lower.includes("test") && (lower.includes("generat") || lower.includes("create"))) {
     content = MOCK_RESPONSES["generate-tests"];
-  } else if (lower.includes("script") || lower.includes("code") || lower.includes("playwright")) {
+  } else if (lower.includes("script") || lower.includes("yaml") || lower.includes("code")) {
     content = MOCK_RESPONSES["generate-script"];
   } else if (lower.includes("analyz") || lower.includes("result") || lower.includes("fail")) {
     content = MOCK_RESPONSES["analyze-results"];
