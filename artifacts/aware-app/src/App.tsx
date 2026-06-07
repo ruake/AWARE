@@ -10,6 +10,10 @@ import StartRun from "@/pages/StartRun";
 import TestManager from "@/pages/TestManager";
 import Status from "@/pages/Status";
 import About from "@/pages/About";
+import TestSuiteManager from "@/pages/TestSuiteManager";
+import TestDoc from "@/pages/TestDoc";
+import SearchDemo from "@/pages/SearchDemo";
+import Sharing from "@/pages/Sharing";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +29,10 @@ function Router() {
       <Route path="/tests" component={TestManager} />
       <Route path="/status" component={Status} />
       <Route path="/about" component={About} />
+      <Route path="/suites" component={TestSuiteManager} />
+      <Route path="/testdoc" component={TestDoc} />
+      <Route path="/search" component={SearchDemo} />
+      <Route path="/share" component={Sharing} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -37,6 +37,10 @@ export const RUNS: Run[] = Array.from({ length: 12 }).map((_, i) => {
   };
 });
 
+export function getRunIndex(runId: string): number {
+  return RUNS.findIndex(r => r.id === runId);
+}
+
 export function getRunById(id: string): Run | undefined {
   return RUNS.find(r => r.id === id);
 }
@@ -233,6 +237,9 @@ const BASE_TEST_CASES: TestCase[] = Array.from({ length: 25 }).map((_, i) => {
     cookies: seedCookies(i),
     expectedStatus: cat === "security" ? 403 : cat === "ddos" ? 429 : cat === "tls" ? 302 : 200,
     captureResponseHeaders: seedCaptureHeaders(i),
+    testType: "web",
+    config: {},
+    assertions: [],
     filmstrip: seedFilmstrip(i),
     predicates: seedPredicates(i, cat),
     version: 1 + (i % 3),
@@ -373,6 +380,9 @@ export function createTestCase(data: Omit<TestCase, "id" | "createdAt" | "update
   const now = new Date().toISOString();
   const tc: TestCase = {
     id, ...data,
+    testType: data.testType ?? "web",
+    config: data.config ?? {},
+    assertions: data.assertions ?? [],
     requestHeaders: data.requestHeaders ?? {},
     cookies: data.cookies ?? {},
     expectedStatus: data.expectedStatus ?? 200,
@@ -669,6 +679,9 @@ export function generateTestCases(params: GenerateParams): TestCase[] {
       requestHeaders: { "Accept": "application/json", "User-Agent": "AWARE-TestRunner/2.0" },
       cookies: {},
       expectedStatus: cat === "security" ? 403 : cat === "ddos" ? 429 : 200,
+      testType: "web" as const,
+      config: {},
+      assertions: [],
       captureResponseHeaders: ["X-Cache", "X-Request-ID", "Age"],
       filmstrip: { enabled: false, threshold: 0.99 },
       predicates: [

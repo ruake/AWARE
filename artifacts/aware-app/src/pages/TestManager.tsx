@@ -148,6 +148,7 @@ const EMPTY_FORM: Omit<TestCase, "id" | "createdAt" | "updatedAt"> = {
   preconditions: "", expectedBehavior: "", documentation: "", relatedTestIds: [],
   requestHeaders: {}, cookies: {}, expectedStatus: 200,
   captureResponseHeaders: [], filmstrip: { enabled: false, threshold: 0.99 },
+  testType: "web", config: {}, assertions: [],
   predicates: [], version: 1, changelog: [],
 };
 

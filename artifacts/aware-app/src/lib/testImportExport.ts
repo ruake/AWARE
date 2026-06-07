@@ -1,5 +1,5 @@
 import yaml from "js-yaml";
-import type { TestCase, TestAssertion, TestConfig, TransactionStep } from "./types";
+import type { TestCase, TestAssertion, TestConfig, TransactionStep, FilmstripConfig, Predicate } from "./types";
 
 export type ExportFormat = "json" | "yaml" | "xml";
 
@@ -105,6 +105,12 @@ function coerceTestCase(raw: Record<string, unknown>): TestCase {
     assertions: Array.isArray(raw.assertions)
       ? (raw.assertions as TestAssertion[])
       : [],
+    requestHeaders: (raw.requestHeaders as Record<string, string>) ?? {},
+    cookies: (raw.cookies as Record<string, string>) ?? {},
+    expectedStatus: Number(raw.expectedStatus ?? 200),
+    captureResponseHeaders: Array.isArray(raw.captureResponseHeaders) ? raw.captureResponseHeaders.map(String) : [],
+    filmstrip: (raw.filmstrip as FilmstripConfig) ?? { enabled: false, threshold: 0.99 },
+    predicates: Array.isArray(raw.predicates) ? raw.predicates as Predicate[] : [],
     version: Number(raw.version ?? 1),
     changelog: Array.isArray(raw.changelog) ? raw.changelog as TestCase["changelog"] : [],
     createdAt: String(raw.createdAt ?? now),

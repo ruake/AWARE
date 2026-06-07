@@ -93,10 +93,39 @@ export interface FilmstripConfig {
   ignoreAreas?: string[];
 }
 
+export interface TestAssertion {
+  id: string;
+  type: "statusCode" | "header" | "body" | "responseTime" | "cookie" | "jsonPath";
+  field: string;
+  expected: string;
+  operator: "equals" | "contains" | "regex" | "gt" | "lt" | "exists" | "notExists";
+  description?: string;
+}
+
+export interface TransactionStep {
+  id: string;
+  name: string;
+  url: string;
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+  headers?: Record<string, string>;
+  body?: string;
+  assertions: TestAssertion[];
+}
+
+export interface TestConfig {
+  baseUrl?: string;
+  timeout?: number;
+  retries?: number;
+  headers?: Record<string, string>;
+  cookies?: Record<string, string>;
+  screenshotOnFailure?: boolean;
+}
+
 export interface TestCase {
   id: string;
   name: string;
   description: string;
+  testType: "web" | "api" | "edgeworker" | "transaction";
   category: string;
   priority: TestPriority;
   severity: TestSeverity;
@@ -116,6 +145,8 @@ export interface TestCase {
   captureResponseHeaders: string[];
   filmstrip: FilmstripConfig;
   predicates: Predicate[];
+  config: TestConfig;
+  assertions: TestAssertion[];
   version: number;
   changelog: TestChangeLogEntry[];
   createdAt: string;
@@ -208,4 +239,146 @@ export interface PromotionDecision {
   decidedBy?: string;
   decidedAt?: string;
   note?: string;
+}
+
+// ── LLM / AI Copilot Types ──────────────────────────────────────────
+
+export type LLMProviderType = "mock" | "openai" | "webllm";
+
+export type LLMRole = "system" | "user" | "assistant";
+
+export interface LLMMessage {
+  role: LLMRole;
+  content: string;
+}
+
+export interface LLMConfig {
+  provider: LLMProviderType;
+  apiKey?: string;
+  apiUrl?: string;
+  model: string;
+  temperature: number;
+  maxTokens: number;
+}
+
+export const DEFAULT_LLM_CONFIG: LLMConfig = {
+  provider: "mock",
+  model: "gpt-4o",
+  temperature: 0.7,
+  maxTokens: 2048,
+};
+
+export interface LLMSkillDefinition {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  systemPrompt: string;
+  responseFormat: "text" | "json" | "code";
+  userPromptHint: string;
+}
+
+export interface GenerateWithLLMParams {
+  count: number;
+  category: string;
+  description: string;
+  suites: string[];
+}
+
+export interface LLMCompletionRequest {
+  messages: LLMMessage[];
+  temperature?: number;
+  maxTokens?: number;
+  stream?: boolean;
+}
+
+export interface LLMCompletionResponse {
+  content: string;
+  finishReason: "stop" | "length" | "error";
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+}
+
+export interface LLMChatMessage {
+  id: string;
+  role: LLMRole;
+  content: string;
+  timestamp: number;
+  skill?: string;
+  metadata?: Record<string, unknown>;
+}
+
+// ── Status & Config ──────────────────────────────────────────────────
+
+export interface StatusUpdate {
+  type: "success" | "warning" | "info";
+  message: string;
+}
+
+export interface Config {
+  apiBaseUrl: string;
+  useMock: boolean;
+  pollingIntervalMs: number;
+  requestTimeoutMs: number;
+  maxRetries: number;
+  retryBaseDelayMs: number;
+  cacheBust: boolean;
+  mode: "development" | "production" | "test";
+}
+
+export interface ServiceError {
+  code: "TIMEOUT" | "NETWORK" | "HTTP" | "VALIDATION" | "PARSE" | "UNKNOWN";
+  message: string;
+  url?: string;
+  status?: number;
+  retryable: boolean;
+}
+
+export function classifyError(err: unknown): ServiceError {
+  if (err instanceof TimeoutError) {
+    return { code: "TIMEOUT", message: err.message, url: err.url, retryable: true };
+  }
+  if (err instanceof FetchError) {
+    return {
+      code: "HTTP", message: err.message, url: err.url,
+      status: err.status,
+      retryable: err.status >= 500 || err.status === 429,
+    };
+  }
+  if (err instanceof ValidationError) {
+    return { code: "VALIDATION", message: err.message, url: err.url, retryable: false };
+  }
+  if (err instanceof TypeError && err.message.includes("fetch")) {
+    return { code: "NETWORK", message: "Network request failed", retryable: true };
+  }
+  const msg = err instanceof Error ? err.message : String(err);
+  return { code: "UNKNOWN", message: msg, retryable: false };
+}
+
+export class FetchError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly url: string,
+  ) {
+    super(message);
+    this.name = "FetchError";
+  }
+}
+
+export class TimeoutError extends Error {
+  constructor(public readonly url: string, public readonly timeoutMs: number) {
+    super(`Request timed out after ${timeoutMs}ms: ${url}`);
+    this.name = "TimeoutError";
+  }
+}
+
+export class ValidationError extends Error {
+  constructor(message: string, public readonly url: string, public readonly data: unknown) {
+    super(message);
+    this.name = "ValidationError";
+  }
 }
