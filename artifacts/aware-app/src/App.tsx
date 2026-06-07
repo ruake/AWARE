@@ -14,6 +14,7 @@ import TestSuiteManager from "@/pages/TestSuiteManager";
 import TestDoc from "@/pages/TestDoc";
 import SearchDemo from "@/pages/SearchDemo";
 import Sharing from "@/pages/Sharing";
+import Copilot from "@/pages/Copilot";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/testdoc" component={TestDoc} />
       <Route path="/search" component={SearchDemo} />
       <Route path="/share" component={Sharing} />
+      <Route path="/copilot" component={Copilot} />
       <Route component={NotFound} />
     </Switch>
   );
