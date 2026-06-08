@@ -4,23 +4,10 @@ import { Link } from "wouter";
 import {
   Zap, BarChart3, GitCompare, Bug, Activity, Shield, Globe, Book,
   ChevronDown, ChevronLeft, ChevronRight, CheckCircle2, Plus, Trash2,
-  Maximize2, Download, Copy, Layout, GripHorizontal, Edit3, X, Save,
-  Image, RotateCw, AlignLeft, Columns, PanelBottom, Eye
+  Maximize2, Download, Copy, GripHorizontal, Edit3, X, Save,
+  Image, RotateCw, Search,
 } from "lucide-react";
 import { RUNS, DIFF_ROWS } from "@/lib/data";
-
-function DocSection({ title, defaultOpen, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
-  const [open, setOpen] = React.useState(defaultOpen ?? false);
-  return (
-    <div className="gcp-card" style={{ marginBottom: 12, overflow: "hidden" }}>
-      <button onClick={() => setOpen(!open)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", background: "var(--gcp-grey-bg)", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 700, color: "var(--gcp-text)", textAlign: "left" }}>
-        <ChevronDown size={14} style={{ transform: open ? "rotate(0deg)" : "rotate(-90deg)", transition: "transform 0.15s", flexShrink: 0 }} />
-        {title}
-      </button>
-      {open && <div style={{ padding: "4px 16px 16px", fontSize: 12, lineHeight: 1.7, color: "var(--gcp-text-secondary)" }}>{children}</div>}
-    </div>
-  );
-}
 
 function DocTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
@@ -30,6 +17,93 @@ function DocTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
         {rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} style={{ fontFamily: j === 0 ? "var(--font-mono)" : undefined, fontSize: 11 }}>{c}</td>)}</tr>)}
       </tbody>
     </table>
+  );
+}
+
+interface DocEntry { id: string; icon: string; number: string; title: string; content: () => React.ReactNode; }
+
+function DocViewer({ sections }: { sections: DocEntry[] }) {
+  const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
+  const [search, setSearch] = React.useState("");
+  const contentRef = React.useRef<HTMLDivElement>(null);
+
+  const filtered = sections.filter(s =>
+    !search || s.title.toLowerCase().includes(search.toLowerCase()) || s.number.includes(search)
+  );
+
+  const active = sections.find(s => s.id === activeId) ?? sections[0];
+  React.useEffect(() => { contentRef.current?.scrollTo(0, 0); }, [activeId]);
+
+  return (
+    <div style={{ display: "flex", gap: 0, border: "1px solid var(--gcp-grey)", borderRadius: 8, overflow: "hidden", background: "var(--gcp-surface)" }}>
+      {/* Sidebar */}
+      <div style={{ width: 260, flexShrink: 0, borderRight: "1px solid var(--gcp-grey)", display: "flex", flexDirection: "column", background: "var(--gcp-grey-bg)" }}>
+        <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", gap: 6 }}>
+          <Book size={14} style={{ color: "var(--gcp-text-secondary)" }} />
+          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--gcp-text)", flex: 1 }}>Documentation</span>
+          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", background: "var(--gcp-surface)", padding: "1px 6px", borderRadius: 4 }}>{sections.length}</span>
+        </div>
+        <div style={{ padding: "6px 10px", borderBottom: "1px solid var(--gcp-grey)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)", background: "var(--gcp-surface)" }}>
+            <Search size={12} style={{ color: "var(--gcp-text-secondary)", flexShrink: 0 }} />
+            <input
+              placeholder="Filter sections..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ border: "none", outline: "none", fontSize: 11, background: "transparent", flex: 1, minWidth: 0, color: "var(--gcp-text)" }}
+            />
+            {search && (
+              <button onClick={() => setSearch("")} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)", padding: 0, lineHeight: 1 }}>
+                <X size={10} />
+              </button>
+            )}
+          </div>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", padding: "6px 0" }}>
+          {filtered.map(s => {
+            const isActive = s.id === activeId;
+            return (
+              <button
+                key={s.id}
+                onClick={() => { setActiveId(s.id); setSearch(""); }}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "8px 14px",
+                  border: "none", cursor: "pointer", fontSize: 11, textAlign: "left",
+                  background: isActive ? "var(--gcp-blue)" : "transparent",
+                  color: isActive ? "#fff" : "var(--gcp-text)", fontWeight: isActive ? 600 : 400,
+                  transition: "background 0.1s",
+                }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--gcp-surface)"; }}
+                onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+              >
+                <span style={{ fontSize: 14, lineHeight: 1, flexShrink: 0 }}>{s.icon}</span>
+                <span style={{ flex: 1, lineHeight: 1.3 }}>{s.title}</span>
+                <span style={{ fontSize: 9, opacity: 0.6, fontFamily: "var(--font-mono)", flexShrink: 0 }}>{s.number}</span>
+              </button>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div style={{ padding: "24px 14px", textAlign: "center", fontSize: 11, color: "var(--gcp-text-secondary)" }}>
+              No sections match "{search}"
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div ref={contentRef} style={{ flex: 1, overflowY: "auto", padding: "24px 28px", maxHeight: "70vh", fontSize: 12, lineHeight: 1.7, color: "var(--gcp-text-secondary)" }}>
+        {active && (
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, paddingBottom: 12, borderBottom: "1px solid var(--gcp-grey)" }}>
+              <span style={{ fontSize: 16 }}>{active.icon}</span>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--gcp-text)", margin: 0 }}>{active.title}</h3>
+              <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)", marginLeft: "auto" }}>Section {active.number}</span>
+            </div>
+            {active.content()}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -410,6 +484,203 @@ li { font-size: 13px; color: #3c4043; display: flex; align-items: center; gap: 8
 const tbStyle: React.CSSProperties = { display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", fontSize: 11, border: "1px solid var(--gcp-grey)", borderRadius: 4, background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)" };
 const navBtnStyle: React.CSSProperties = { width: 28, height: 28, border: "1px solid var(--gcp-grey)", borderRadius: 6, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gcp-text-secondary)" };
 
+const DOC_SECTIONS: DocEntry[] = [
+  { id: "quickstart", icon: "🚀", number: "1", title: "Quick Start", content: () => (
+    <>
+      <p><strong>PROOF</strong> is a web-based observability dashboard for your GitHub Actions test pipeline. It runs entirely in your browser with pre-loaded seed data — no backend or API setup needed.</p>
+      <ol style={{ paddingLeft: 18, margin: "8px 0" }}>
+        <li><strong>Open the Dashboard</strong> (<code>/</code>) — See pass-rate charts per environment, run frequency, recent alerts, and promotion status at a glance.</li>
+        <li><strong>Browse Runs</strong> (<code>/runs</code>) — Explore past test runs. Click any run to see individual test results and evidence.</li>
+        <li><strong>Compare a Promotion</strong> (<code>/compare</code>) — Pick a baseline vs candidate run. Review regressions, fixed tests, and approve or block the promotion.</li>
+        <li><strong>Manage Tests</strong> (<code>/tests</code>) — Create, edit, import, export, and organize test cases. Use bulk actions to update statuses or add to suites.</li>
+        <li><strong>Organize Suites</strong> (<code>/suites</code>) — Group test cases into suites with YAML export. Build a tree hierarchy for your test categories.</li>
+      </ol>
+    </>
+  )},
+  { id: "walkthrough", icon: "🗺️", number: "2", title: "Page-by-Page Walkthrough", content: () => (
+    <DocTable
+      headers={["Page", "Path", "What to do here"]}
+      rows={[
+        ["Dashboard", "/", "Monitor pass rates across environments. Check the Run Frequency chart to see test cadence. The Env Health card shows alerts. Use CTA stat cards to jump to runs, compare, or analytics."],
+        ["Runs", "/runs", "Filter runs by environment, network, or status via the FilterBar. Click a row for the side panel with full run details, test results, and evidence. Use the export/share buttons."],
+        ["Run Detail", "/runs/:id", "Drill into a specific run. See pass/fail breakdown per test. Click evidence rows to expand assertions. Use the panel to navigate to related analytics or compare views."],
+        ["Compare", "/compare", "Select baseline and candidate runs from the dropdowns. The diff table shows regressions, fixes, duration changes. Click a row for the side panel. Use column filters (status, env, duration). The green banner shows promotion readiness."],
+        ["Test Manager", "/tests", "Full CRUD for test cases. The table has search, column toggles, and bulk actions (delete, change status/priority, add to suite). Use the + button to add a case with the tabbed form. Import auto-detects JSON/YAML/JUnit XML. Use the Generate Wizard to AI-generate tests."],
+        ["Test Suites", "/suites", "Tree view of all suites. Click to edit suite metadata, manage test membership, and export as YAML. Use Add Tests modal to bulk-add from the full test list."],
+        ["Test Analytics", "/analytics", "Pass-rate trend chart and flakiness analysis for a specific test. Accepts <code>?testId=tc_N</code> or <code>?diffId=diff_N</code> params. CTA cards link to run history and comparisons."],
+        ["Test Doc", "/testdoc", "Three-column layout: top bar with test metadata, sidebar with related tests and changelog, main area for documentation. Good for reviewing test intent and history."],
+        ["Copilot", "/copilot", "AI chat with 5 built-in skills. Select a provider (Mock/OpenAI/WebLLM) in the config panel. Use skills to generate tests, write scripts, analyze results, explain diffs, or create suites. Chat history persists in localStorage."],
+        ["Status", "/status", "System health overview. See environment statuses, service uptime indicators, and recent incidents."],
+        ["Start Run", "/start", "Form to configure a new test run. Fill in target, environment, network, build info. Copy the command preview to trigger a run in your CI pipeline."],
+        ["Sharing", "/sharing", "Permalink viewer. Past a sharing link or ID to load a saved comparison or run view."],
+        ["CI Pipeline", "/ci-pipeline", "Architecture diagram of the GitHub Actions integration. Shows how test runs flow from PR → CI → Results → Dashboard."],
+      ]}
+    />
+  )},
+  { id: "workflows", icon: "🔄", number: "3", title: "Daily Operator Workflows", content: () => (
+    <>
+      <p><strong>Morning Check:</strong> Open Dashboard → check pass-rate trends. If an env is dipping, click the stat card to jump to Runs filtered by that env. Identify failing tests and investigate in Run Detail.</p>
+      <p><strong>Promotion Review:</strong> Go to Compare → select the candidate run. Scan the diff table for regressions. Use column filters to isolate failed tests. If all clear, click "Approve Promotion". If blocked, file GitHub issues from the regression list.</p>
+      <p><strong>Adding a Test Case:</strong> Go to Test Manager → click "+ New Test Case". Fill in the Basic Info tab (name, category, priority, severity). Switch to the HTTP tab to set URL, method, headers, and expected status. Add Predicates (response time, status code, header checks) in the Predicates tab. Review in Docs tab. Save.</p>
+      <p><strong>Bulk Import:</strong> Go to Test Manager → click "Import". Drop a JSON, YAML, or JUnit XML file. The app auto-detects the format. Review the parsed tests and confirm. All imported cases appear in the table immediately.</p>
+      <p><strong>Investigating a Regression:</strong> Find the regression in Compare → click the row to open the side panel. Click "View in Analytics" to see historical pass rate. Click "View in Run Detail" to see the specific failure evidence. File an issue from the side panel.</p>
+      <p><strong>Using AI Copilot:</strong> Go to Copilot → select a skill (e.g. "Generate Tests"). Describe what you need. The AI returns structured test configs with a form. Fill in remaining fields and click "Confirm & Open in Test Manager" to save.</p>
+    </>
+  )},
+  { id: "charts", icon: "📈", number: "4", title: "Understanding Charts & Metrics", content: () => (
+    <>
+      <p><strong>Pass Rate by Environment</strong> (Dashboard) — Area chart showing daily pass rates for each env. A dip indicates regressions. Hover points to see exact values. Click a point to navigate to that run.</p>
+      <p><strong>Aggregate by Day</strong> (Dashboard) — Grouped bar chart of pass/fail counts per day. Use this to spot volume trends — are more tests running? Are failure days clustered?</p>
+      <p><strong>Run Frequency</strong> (Dashboard) — Shows runs per day with env-distributed bar segments. The "Totals by Env" column shows env-level run counts. Gaps (days without runs) are shown in red below the chart. Avg interval hours help you understand test cadence.</p>
+      <p><strong>Test Analytics Charts</strong> — Per-test pass rate line chart + flakiness score (how often a test flips between pass/fail). A flaky test needs investigation even if its pass rate is high.</p>
+      <p><strong>Stat Cards</strong> — Clickable cards that act as shortcuts. "Pass Rate" goes to Dashboard, "Runs This Week" goes to Runs, "Active Regressions" goes to Compare filtered, etc. Each card shows a sub-label with more context.</p>
+    </>
+  )},
+  { id: "testcases", icon: "🧪", number: "5", title: "Working with Test Cases", content: () => (
+    <>
+      <p><strong>Test Case Fields:</strong></p>
+      <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+        <li><strong>Basic Info</strong> — name, description, category (caching, routing, security, etc.), priority (P0-P3), severity, status (active/draft/archived), owner, tags, automated flag</li>
+        <li><strong>HTTP Config</strong> — URL, method (GET/POST/PUT/DELETE), headers, request body, expected status code</li>
+        <li><strong>Predicates</strong> — Validation rules: status code equals, response time less than, header contains, body matches regex, etc. Each has type, field, expected value, operator, and description</li>
+        <li><strong>Filmstrip</strong> — Visual comparison snapshots: enabled/disabled, similarity threshold (0-1)</li>
+        <li><strong>Docs</strong> — Free-text documentation, preconditions, expected behavior</li>
+        <li><strong>Changelog</strong> — Auto-generated version history with author, timestamp, and change summary</li>
+      </ul>
+      <p><strong>Bulk Actions:</strong> Select multiple tests via checkboxes → choose action from the toolbar: delete, set status (active/draft/archived), set priority (P0-P3), add to suite (opens suite picker modal).</p>
+      <p><strong>Import Formats:</strong> JSON array of test case objects, YAML with test case definitions (auto-detected by extension or content inspection), JUnit XML (parses test case results as test case definitions).</p>
+      <p><strong>Export Formats:</strong> JSON (full test case objects), CSV (flat table with key fields), JUnit XML (test suite structure).</p>
+      <p><strong>Suites:</strong> Create a suite with a name, description, and optional parent (for tree nesting). Add tests to suites via the Add Tests modal. Export suites as YAML for CI integration.</p>
+    </>
+  )},
+  { id: "filtering", icon: "🔍", number: "6", title: "Filtering & Navigation Tips", content: () => (
+    <>
+      <p><strong>Every table has:</strong> Search bar (filters by name/description), column visibility toggle (eye icon), sortable columns (click header to sort).</p>
+      <p><strong>Compare page:</strong> "Regressions only" checkbox filters the table to show only regressions. Column dropdowns let you filter by specific status/environment/duration ranges.</p>
+      <p><strong>Runs page:</strong> FilterBar at top lets you filter by environment, network (production/staging), and status. The date range picker filters runs by timeframe.</p>
+      <p><strong>Side panels:</strong> Click any row in Compare or Runs to open a detail panel. The panel has tabs (details, evidence, related) and action buttons (view analytics, file issue, share).</p>
+      <p><strong>Keyboard shortcuts:</strong> Ctrl+K / Cmd+K opens the Command Palette for quick navigation between pages.</p>
+      <p><strong>SPA vs Full Nav:</strong> The app uses wouter for client-side routing. Links within the app use SPA navigation (instant, no page reload). The <code>navTo()</code> function triggers a full page reload — used for external navigation or reset operations.</p>
+    </>
+  )},
+  { id: "environments", icon: "🌐", number: "7", title: "Environment Configuration", content: () => (
+    <>
+      <p>The app ships with 4 environment targets: <strong>Prod/Production</strong>, <strong>Prod/Staging</strong>, <strong>UAT/Production</strong>, <strong>UAT/Staging</strong>. Each environment has:</p>
+      <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+        <li><strong>Base URL</strong> — The endpoint used for test requests (e.g. <code>https://prod.example.com</code>)</li>
+        <li><strong>Target</strong> — Logical grouping (Prod, UAT)</li>
+        <li><strong>Network</strong> — Network tier (production, staging)</li>
+        <li><strong>IP Addresses</strong> — Optional list of IPs for network-level filtering</li>
+      </ul>
+      <p>Edit environments in the Dashboard via the <strong>Env Config</strong> panel (gear icon). Changes persist in localStorage. Reset to defaults with the "Reset" button in the panel.</p>
+      <p>Each environment gets its own pass-rate tracking in charts. Compare behavior across envs to catch staging-only regressions before they reach production.</p>
+    </>
+  )},
+  { id: "copilot", icon: "🤖", number: "8", title: "AI Copilot Guide", content: () => (
+    <>
+      <p><strong>Providers:</strong></p>
+      <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+        <li><strong>Mock</strong> — Built-in, works offline. Returns pre-programmed responses. Best for testing the UI flow without API keys. Set <code>provider: "mock"</code> in config.</li>
+        <li><strong>OpenAI</strong> — Connects to any OpenAI-compatible API (OpenAI, Azure, local LLMs). Requires <code>apiKey</code> and optional <code>apiUrl</code> (defaults to OpenAI). Configure model, temperature, max tokens.</li>
+        <li><strong>WebLLM</strong> — Runs a model in-browser via WebGPU. Requires Chrome with WebGPU support and the <code>@mlc-ai/web-llm</code> package. Shows "not available" message when unsupported.</li>
+      </ul>
+      <p><strong>5 Built-in Skills:</strong></p>
+      <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+        <li><strong>Generate Tests</strong> — "Create a cache validation test for CDN edge." Returns a structured config with predicates, filmstrip, and changelog. Review the card and confirm to save in Test Manager.</li>
+        <li><strong>Generate Script</strong> — "Write a YAML test script for a geo-routing check." Returns a portable YAML test definition.</li>
+        <li><strong>Analyze Results</strong> — "My pass rate dropped in Prod/Staging." Returns regression analysis with root cause suggestions.</li>
+        <li><strong>Explain Diff</strong> — "Compare the last two production runs." Returns a structured comparison of regressions, fixes, and duration changes.</li>
+        <li><strong>Generate Suite</strong> — "Create a security test suite." Returns a suite configuration with integrations and test selection criteria.</li>
+      </ul>
+      <p><strong>Chat Tips:</strong> The AI remembers the last 50 messages in the conversation. Use clear, specific descriptions. You can include category, priority, status codes, and test names in your request — the AI extracts these automatically. Switch skills mid-conversation to change the AI's behavior.</p>
+      <p><strong>Config Panel:</strong> Access via the gear icon on the Copilot page. Change provider, enter API key, set model/temperature/max tokens. Config persists in localStorage.</p>
+    </>
+  )},
+  { id: "datalifecycle", icon: "💾", number: "9", title: "Data Lifecycle & Storage", content: () => (
+    <>
+      <p><strong>All data lives in your browser's localStorage.</strong> There is no server backend. Data persists across page refreshes and browser restarts. Clearing browser storage or using incognito with a fresh session will reset all data to defaults.</p>
+      <DocTable
+        headers={["Storage Key", "What it stores"]}
+        rows={[
+          ["aware_test_cases_v2", "All test cases (CRUD operations)"],
+          ["aware_test_suites_v2", "Test suites tree structure"],
+          ["aware_promotion_decisions", "Promotion approve/block records per run"],
+          ["proof_env_configs", "Environment targets and IP configs"],
+          ["aware_copilot_chat", "Copilot chat message history"],
+          ["aware_pending_test_config", "In-flight test config being confirmed in Copilot"],
+          ["aware_carousel_templates", "Saved carousel slide templates (About page)"],
+        ]}
+      />
+      <p><strong>Reset:</strong> Use the "Reset All Data" option in the Dashboard to clear test cases, suites, and promotion decisions and reload seed data. Individual resets are available for env configs and chat history.</p>
+      <p><strong>Seed Data:</strong> The app ships with {RUNS.length} runs, {DIFF_ROWS.length} diff rows, 25 test cases, and 8 suites.</p>
+    </>
+  )},
+  { id: "troubleshooting", icon: "❓", number: "10", title: "Troubleshooting & FAQ", content: () => (
+    <>
+      <p><strong>Q: My changes disappeared after refresh.</strong><br />A: localStorage only persists on the same browser/device. If you cleared site data or switched browsers, data resets. Export your test cases before clearing storage.</p>
+      <p><strong>Q: The Copilot says "API Error 401".</strong><br />A: Your OpenAI API key is invalid or missing. Go to the Copilot config panel and set a valid key. Or switch to Mock provider for offline use.</p>
+      <p><strong>Q: Charts show no data.</strong><br />A: The seed data includes runs from specific dates. If you're viewing outside that date range, use the time frame selector on the chart. If all data was cleared, perform a reset from the Dashboard.</p>
+      <p><strong>Q: I accidentally deleted a test case.</strong><br />A: There's no undo. Export your test cases regularly via the Export button in Test Manager as a backup.</p>
+      <p><strong>Q: How do I add real GitHub Actions data?</strong><br />A: The app is designed to work with mock data out of the box. To connect real data, replace the <code>RUNS</code>, <code>DIFF_ROWS</code>, and store functions in <code>lib/</code> with API calls to your CI system.</p>
+      <p><strong>Q: The Compare page shows no runs in the dropdown.</strong><br />A: You need at least 2 runs to compare. The seed data has {RUNS.length} runs. If empty, reset data from the Dashboard.</p>
+      <p><strong>Q: WebLLM shows "Not Available".</strong><br />A: WebLLM requires Chrome with WebGPU support. Check <code>chrome://gpu</code> for WebGPU availability. The <code>@mlc-ai/web-llm</code> package must be installed.</p>
+    </>
+  )},
+  { id: "architecture", icon: "🏗️", number: "11", title: "Architecture", content: () => (
+    <>
+      <p>The app lives in <code>artifacts/aware-app/src/</code>. Everything is split into three folders:</p>
+      <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+        <li><strong><code>lib/</code></strong> — data layer: types, store, seed data, helpers</li>
+        <li><strong><code>pages/</code></strong> — one file per route (Dashboard, Runs, Compare, etc.)</li>
+        <li><strong><code>components/</code></strong> — reusable UI pieces: <code>aware/</code> for app-specific, <code>ui/</code> for shadcn</li>
+      </ul>
+      <p><strong>Core rule:</strong> Pages import from <code>@/lib/data</code> (a barrel file). Never import directly from <code>lib/</code> sub-modules.</p>
+    </>
+  )},
+  { id: "dataflow", icon: "🔄", number: "12", title: "Data Flow", content: () => (
+    <>
+      <p><strong>Page → lib/data → store → localStorage</strong></p>
+      <p>Every page calls functions from <code>@/lib/data</code> to read or write data. For example:</p>
+      <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+        <li><code>getTestCases()</code> — returns all test cases from the store</li>
+        <li><code>createTestCase(data)</code> — adds a new test case, saves to localStorage</li>
+        <li><code>getTestResultsForRun(runId)</code> — generates mock test results for a run</li>
+        <li><code>getRunById(id)</code> — looks up a single run</li>
+      </ul>
+      <p>When data changes, the store calls <code>_notify()</code> which triggers listeners, so any component using <code>useTestData()</code> re-renders automatically.</p>
+    </>
+  )},
+  { id: "development", icon: "🧑‍💻", number: "13", title: "Development", content: () => (
+    <>
+      <p><strong>Commands:</strong></p>
+      <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+        <li><code>cd artifacts/aware-app</code></li>
+        <li><code>pnpm install</code> — install dependencies</li>
+        <li><code>pnpm dev</code> — start dev server at <code>:5173</code></li>
+        <li><code>pnpm build</code> — production build to <code>dist/public/</code></li>
+        <li><code>pnpm run typecheck</code> — TypeScript check (must pass before committing)</li>
+      </ul>
+      <p><strong>How to add a new page:</strong></p>
+      <ol style={{ paddingLeft: 18, margin: "8px 0" }}>
+        <li>Create a file in <code>pages/</code> (e.g. <code>MyNewPage.tsx</code>)</li>
+        <li>Import <code>AppLayout</code> from <code>@/components/aware/AppLayout</code></li>
+        <li>Wrap your content in <code>{'<AppLayout activeHref="/my-path">'}</code></li>
+        <li>Add a route in <code>App.tsx</code>: <code>{'<Route path="/my-path" component={MyNewPage} />'}</code></li>
+        <li>Add a nav item in <code>AppLayout.tsx</code> (the <code>NAV_ITEMS</code> array)</li>
+      </ol>
+      <p><strong>Design Rules:</strong></p>
+      <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
+        <li>All pages use inline <code>style={}</code> — NOT Tailwind classes</li>
+        <li>CSS variables like <code>var(--gcp-blue)</code> are defined in <code>_group.css</code></li>
+        <li>Script paths use <code>.yaml</code> extension</li>
+        <li>Use wouter's <code>useLocation()</code> for SPA navigation</li>
+        <li>Charts use Google Charts (wrappers in <code>GoogleCharts.tsx</code>)</li>
+        <li>Typecheck must pass before committing: <code>pnpm run typecheck</code></li>
+      </ul>
+    </>
+  )},
+];
+
 export default function About() {
   const features = [
     { icon: BarChart3, title: "Dashboard", desc: "Promotion readiness overview with per-environment pass rates, regression alerts, and version drift tracking." },
@@ -514,205 +785,7 @@ export default function About() {
           </button>
 
           {showDocs && (
-            <div style={{ marginTop: 16 }}>
-
-              {/* 1. Quick Start Guide */}
-              <DocSection title="🚀 1. Quick Start — How to Use This App" defaultOpen>
-                <p><strong>PROOF</strong> is a web-based observability dashboard for your GitHub Actions test pipeline. It runs entirely in your browser with pre-loaded seed data — no backend or API setup needed.</p>
-                <ol style={{ paddingLeft: 18, margin: "8px 0" }}>
-                  <li><strong>Open the Dashboard</strong> (<code>/</code>) — See pass-rate charts per environment, run frequency, recent alerts, and promotion status at a glance.</li>
-                  <li><strong>Browse Runs</strong> (<code>/runs</code>) — Explore past test runs. Click any run to see individual test results and evidence.</li>
-                  <li><strong>Compare a Promotion</strong> (<code>/compare</code>) — Pick a baseline vs candidate run. Review regressions, fixed tests, and approve or block the promotion.</li>
-                  <li><strong>Manage Tests</strong> (<code>/tests</code>) — Create, edit, import, export, and organize test cases. Use bulk actions to update statuses or add to suites.</li>
-                  <li><strong>Organize Suites</strong> (<code>/suites</code>) — Group test cases into suites with YAML export. Build a tree hierarchy for your test categories.</li>
-                </ol>
-              </DocSection>
-
-              {/* 2. Page-by-Page Walkthrough */}
-              <DocSection title="🗺️ 2. Page-by-Page Walkthrough — What Each Screen Does">
-                <DocTable
-                  headers={["Page", "Path", "What to do here"]}
-                  rows={[
-                    ["Dashboard", "/", "Monitor pass rates across environments. Check the Run Frequency chart to see test cadence. The Env Health card shows alerts. Use CTA stat cards to jump to runs, compare, or analytics."],
-                    ["Runs", "/runs", "Filter runs by environment, network, or status via the FilterBar. Click a row for the side panel with full run details, test results, and evidence. Use the export/share buttons."],
-                    ["Run Detail", "/runs/:id", "Drill into a specific run. See pass/fail breakdown per test. Click evidence rows to expand assertions. Use the panel to navigate to related analytics or compare views."],
-                    ["Compare", "/compare", "Select baseline and candidate runs from the dropdowns. The diff table shows regressions, fixes, duration changes. Click a row for the side panel. Use column filters (status, env, duration). The green banner shows promotion readiness."],
-                    ["Test Manager", "/tests", "Full CRUD for test cases. The table has search, column toggles, and bulk actions (delete, change status/priority, add to suite). Use the + button to add a case with the tabbed form. Import auto-detects JSON/YAML/JUnit XML. Use the Generate Wizard to AI-generate tests."],
-                    ["Test Suites", "/suites", "Tree view of all suites. Click to edit suite metadata, manage test membership, and export as YAML. Use Add Tests modal to bulk-add from the full test list."],
-                    ["Test Analytics", "/analytics", "Pass-rate trend chart and flakiness analysis for a specific test. Accepts <code>?testId=tc_N</code> or <code>?diffId=diff_N</code> params. CTA cards link to run history and comparisons."],
-                    ["Test Doc", "/testdoc", "Three-column layout: top bar with test metadata, sidebar with related tests and changelog, main area for documentation. Good for reviewing test intent and history."],
-                    ["Copilot", "/copilot", "AI chat with 5 built-in skills. Select a provider (Mock/OpenAI/WebLLM) in the config panel. Use skills to generate tests, write scripts, analyze results, explain diffs, or create suites. Chat history persists in localStorage."],
-                    ["Status", "/status", "System health overview. See environment statuses, service uptime indicators, and recent incidents."],
-                    ["Start Run", "/start", "Form to configure a new test run. Fill in target, environment, network, build info. Copy the command preview to trigger a run in your CI pipeline."],
-                    ["Sharing", "/sharing", "Permalink viewer. Past a sharing link or ID to load a saved comparison or run view."],
-                    ["CI Pipeline", "/ci-pipeline", "Architecture diagram of the GitHub Actions integration. Shows how test runs flow from PR → CI → Results → Dashboard."],
-                  ]}
-                />
-              </DocSection>
-
-              {/* 3. Daily Operator Workflows */}
-              <DocSection title="🔄 3. Daily Operator Workflows — Common Tasks">
-                <p><strong>Morning Check:</strong> Open Dashboard → check pass-rate trends. If an env is dipping, click the stat card to jump to Runs filtered by that env. Identify failing tests and investigate in Run Detail.</p>
-                <p><strong>Promotion Review:</strong> Go to Compare → select the candidate run. Scan the diff table for regressions. Use column filters to isolate failed tests. If all clear, click "Approve Promotion". If blocked, file GitHub issues from the regression list.</p>
-                <p><strong>Adding a Test Case:</strong> Go to Test Manager → click "+ New Test Case". Fill in the Basic Info tab (name, category, priority, severity). Switch to the HTTP tab to set URL, method, headers, and expected status. Add Predicates (response time, status code, header checks) in the Predicates tab. Review in Docs tab. Save.</p>
-                <p><strong>Bulk Import:</strong> Go to Test Manager → click "Import". Drop a JSON, YAML, or JUnit XML file. The app auto-detects the format. Review the parsed tests and confirm. All imported cases appear in the table immediately.</p>
-                <p><strong>Investigating a Regression:</strong> Find the regression in Compare → click the row to open the side panel. Click "View in Analytics" to see historical pass rate. Click "View in Run Detail" to see the specific failure evidence. File an issue from the side panel.</p>
-                <p><strong>Using AI Copilot:</strong> Go to Copilot → select a skill (e.g. "Generate Tests"). Describe what you need. The AI returns structured test configs with a form. Fill in remaining fields and click "Confirm & Open in Test Manager" to save.</p>
-              </DocSection>
-
-              {/* 4. Understanding the Charts & Metrics */}
-              <DocSection title="📈 4. Understanding the Charts & Metrics">
-                <p><strong>Pass Rate by Environment</strong> (Dashboard) — Area chart showing daily pass rates for each env. A dip indicates regressions. Hover points to see exact values. Click a point to navigate to that run.</p>
-                <p><strong>Aggregate by Day</strong> (Dashboard) — Grouped bar chart of pass/fail counts per day. Use this to spot volume trends — are more tests running? Are failure days clustered?</p>
-                <p><strong>Run Frequency</strong> (Dashboard) — Shows runs per day with env-distributed bar segments. The "Totals by Env" column shows env-level run counts. Gaps (days without runs) are shown in red below the chart. Avg interval hours help you understand test cadence.</p>
-                <p><strong>Test Analytics Charts</strong> — Per-test pass rate line chart + flakiness score (how often a test flips between pass/fail). A flaky test needs investigation even if its pass rate is high.</p>
-                <p><strong>Stat Cards</strong> — Clickable cards that act as shortcuts. "Pass Rate" goes to Dashboard, "Runs This Week" goes to Runs, "Active Regressions" goes to Compare filtered, etc. Each card shows a sub-label with more context.</p>
-              </DocSection>
-
-              {/* 5. Working with Test Cases */}
-              <DocSection title="🧪 5. Working with Test Cases — CRUD, Bulk, Import/Export">
-                <p><strong>Test Case Fields:</strong></p>
-                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-                  <li><strong>Basic Info</strong> — name, description, category (caching, routing, security, etc.), priority (P0-P3), severity, status (active/draft/archived), owner, tags, automated flag</li>
-                  <li><strong>HTTP Config</strong> — URL, method (GET/POST/PUT/DELETE), headers, request body, expected status code</li>
-                  <li><strong>Predicates</strong> — Validation rules: status code equals, response time less than, header contains, body matches regex, etc. Each has type, field, expected value, operator, and description</li>
-                  <li><strong>Filmstrip</strong> — Visual comparison snapshots: enabled/disabled, similarity threshold (0-1)</li>
-                  <li><strong>Docs</strong> — Free-text documentation, preconditions, expected behavior</li>
-                  <li><strong>Changelog</strong> — Auto-generated version history with author, timestamp, and change summary</li>
-                </ul>
-                <p><strong>Bulk Actions:</strong> Select multiple tests via checkboxes → choose action from the toolbar: delete, set status (active/draft/archived), set priority (P0-P3), add to suite (opens suite picker modal).</p>
-                <p><strong>Import Formats:</strong> JSON array of test case objects, YAML with test case definitions (auto-detected by extension or content inspection), JUnit XML (parses test case results as test case definitions).</p>
-                <p><strong>Export Formats:</strong> JSON (full test case objects), CSV (flat table with key fields), JUnit XML (test suite structure).</p>
-                <p><strong>Suites:</strong> Create a suite with a name, description, and optional parent (for tree nesting). Add tests to suites via the Add Tests modal. Export suites as YAML for CI integration.</p>
-              </DocSection>
-
-              {/* 6. Filtering & Navigation Tips */}
-              <DocSection title="🔍 6. Filtering & Navigation Tips">
-                <p><strong>Every table has:</strong> Search bar (filters by name/description), column visibility toggle (eye icon), sortable columns (click header to sort).</p>
-                <p><strong>Compare page:</strong> "Regressions only" checkbox filters the table to show only regressions. Column dropdowns let you filter by specific status/environment/duration ranges.</p>
-                <p><strong>Runs page:</strong> FilterBar at top lets you filter by environment, network (production/staging), and status. The date range picker filters runs by timeframe.</p>
-                <p><strong>Side panels:</strong> Click any row in Compare or Runs to open a detail panel. The panel has tabs (details, evidence, related) and action buttons (view analytics, file issue, share).</p>
-                <p><strong>Keyboard shortcuts:</strong> <kbd>Ctrl+K</kbd> / <kbd>Cmd+K</kbd> opens the Command Palette for quick navigation between pages.</p>
-                <p><strong>SPA vs Full Nav:</strong> The app uses wouter for client-side routing. Links within the app use SPA navigation (instant, no page reload). The <code>navTo()</code> function triggers a full page reload — used for external navigation or reset operations.</p>
-              </DocSection>
-
-              {/* 7. Environment Configuration */}
-              <DocSection title="🌐 7. Environments — What They Are & How to Configure">
-                <p>The app ships with 4 environment targets: <strong>Prod/Production</strong>, <strong>Prod/Staging</strong>, <strong>UAT/Production</strong>, <strong>UAT/Staging</strong>. Each environment has:</p>
-                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-                  <li><strong>Base URL</strong> — The endpoint used for test requests (e.g. <code>https://prod.example.com</code>)</li>
-                  <li><strong>Target</strong> — Logical grouping (Prod, UAT)</li>
-                  <li><strong>Network</strong> — Network tier (production, staging)</li>
-                  <li><strong>IP Addresses</strong> — Optional list of IPs for network-level filtering</li>
-                </ul>
-                <p>Edit environments in the Dashboard via the <strong>Env Config</strong> panel (gear icon). Changes persist in localStorage. Reset to defaults with the "Reset" button in the panel.</p>
-                <p>Each environment gets its own pass-rate tracking in charts. Compare behavior across envs to catch staging-only regressions before they reach production.</p>
-              </DocSection>
-
-              {/* 8. AI Copilot — Complete Usage Guide */}
-              <DocSection title="🤖 8. AI Copilot — Complete Usage Guide">
-                <p><strong>Providers:</strong></p>
-                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-                  <li><strong>Mock</strong> — Built-in, works offline. Returns pre-programmed responses. Best for testing the UI flow without API keys. Set <code>provider: "mock"</code> in config.</li>
-                  <li><strong>OpenAI</strong> — Connects to any OpenAI-compatible API (OpenAI, Azure, local LLMs). Requires <code>apiKey</code> and optional <code>apiUrl</code> (defaults to OpenAI). Configure model, temperature, max tokens.</li>
-                  <li><strong>WebLLM</strong> — Runs a model in-browser via WebGPU. Requires Chrome with WebGPU support and the <code>@mlc-ai/web-llm</code> package. Shows "not available" message when unsupported.</li>
-                </ul>
-                <p><strong>5 Built-in Skills:</strong></p>
-                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-                  <li><strong>Generate Tests</strong> — "Create a cache validation test for CDN edge." Returns a structured config with predicates, filmstrip, and changelog. Review the card and confirm to save in Test Manager.</li>
-                  <li><strong>Generate Script</strong> — "Write a YAML test script for a geo-routing check." Returns a portable YAML test definition.</li>
-                  <li><strong>Analyze Results</strong> — "My pass rate dropped in Prod/Staging." Returns regression analysis with root cause suggestions.</li>
-                  <li><strong>Explain Diff</strong> — "Compare the last two production runs." Returns a structured comparison of regressions, fixes, and duration changes.</li>
-                  <li><strong>Generate Suite</strong> — "Create a security test suite." Returns a suite configuration with integrations and test selection criteria.</li>
-                </ul>
-                <p><strong>Chat Tips:</strong> The AI remembers the last 50 messages in the conversation. Use clear, specific descriptions. You can include category, priority, status codes, and test names in your request — the AI extracts these automatically. Switch skills mid-conversation to change the AI's behavior.</p>
-                <p><strong>Config Panel:</strong> Access via the gear icon on the Copilot page. Change provider, enter API key, set model/temperature/max tokens. Config persists in localStorage.</p>
-              </DocSection>
-
-              {/* 9. Data Lifecycle & Storage */}
-              <DocSection title="💾 9. Data Lifecycle — What Gets Saved & How to Reset">
-                <p><strong>All data lives in your browser's localStorage.</strong> There is no server backend. Data persists across page refreshes and browser restarts. Clearing browser storage or using incognito with a fresh session will reset all data to defaults.</p>
-                <DocTable
-                  headers={["Storage Key", "What it stores"]}
-                  rows={[
-                    ["aware_test_cases_v2", "All test cases (CRUD operations)"],
-                    ["aware_test_suites_v2", "Test suites tree structure"],
-                    ["aware_promotion_decisions", "Promotion approve/block records per run"],
-                    ["proof_env_configs", "Environment targets and IP configs"],
-                    ["aware_copilot_chat", "Copilot chat message history"],
-                    ["aware_pending_test_config", "In-flight test config being confirmed in Copilot"],
-                    ["aware_carousel_templates", "Saved carousel slide templates (About page)"],
-                  ]}
-                />
-                <p><strong>Reset:</strong> Use the "Reset All Data" option in the Dashboard to clear test cases, suites, and promotion decisions and reload seed data. Individual resets are available for env configs and chat history.</p>
-                <p><strong>Seed Data:</strong> The app ships with {RUNS.length} runs, {DIFF_ROWS.length} diff rows, 25 test cases, and 8 suites. These are defined in <code>lib/runs.ts</code>, <code>lib/testCases.ts</code>, and <code>lib/testSuites.ts</code>. Modify these files to customize the seed set.</p>
-              </DocSection>
-
-              {/* 10. Troubleshooting & FAQ */}
-              <DocSection title="❓ 10. Troubleshooting & FAQ">
-                <p><strong>Q: My changes disappeared after refresh.</strong><br />A: localStorage only persists on the same browser/device. If you cleared site data or switched browsers, data resets. Export your test cases before clearing storage.</p>
-                <p><strong>Q: The Copilot says "API Error 401".</strong><br />A: Your OpenAI API key is invalid or missing. Go to the Copilot config panel and set a valid key. Or switch to Mock provider for offline use.</p>
-                <p><strong>Q: Charts show no data.</strong><br />A: The seed data includes runs from specific dates. If you're viewing outside that date range, use the time frame selector on the chart. If all data was cleared, perform a reset from the Dashboard.</p>
-                <p><strong>Q: I accidentally deleted a test case.</strong><br />A: There's no undo. Export your test cases regularly via the Export button in Test Manager as a backup.</p>
-                <p><strong>Q: How do I add real GitHub Actions data?</strong><br />A: The app is designed to work with mock data out of the box. To connect real data, replace the <code>RUNS</code>, <code>DIFF_ROWS</code>, and store functions in <code>lib/</code> with API calls to your CI system. The data layer is fully abstracted behind the <code>@/lib/data</code> barrel.</p>
-                <p><strong>Q: The Compare page shows no runs in the dropdown.</strong><br />A: You need at least 2 runs to compare. The seed data has {RUNS.length} runs. If empty, reset data from the Dashboard.</p>
-                <p><strong>Q: WebLLM shows "Not Available".</strong><br />A: WebLLM requires Chrome with WebGPU support. Check <code>chrome://gpu</code> for WebGPU availability. The <code>@mlc-ai/web-llm</code> package must be installed. Use OpenAI or Mock as alternatives.</p>
-              </DocSection>
-
-              {/* 11. Architecture */}
-              <DocSection title="🏗️ 11. Architecture — How Files Are Organized">
-                <p>The app lives in <code style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3 }}>artifacts/aware-app/src/</code>. Everything is split into three folders:</p>
-                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-                  <li><strong><code>lib/</code></strong> — data layer: types, store, seed data, helpers</li>
-                  <li><strong><code>pages/</code></strong> — one file per route (Dashboard, Runs, Compare, etc.)</li>
-                  <li><strong><code>components/</code></strong> — reusable UI pieces: <code>aware/</code> for app-specific, <code>ui/</code> for shadcn</li>
-                </ul>
-                <p><strong>Core rule:</strong> Pages import from <code>@/lib/data</code> (a barrel file). Never import directly from <code>lib/</code> sub-modules.</p>
-              </DocSection>
-
-              {/* 12. Data Flow */}
-              <DocSection title="🔄 12. Data Flow — How Changes Propagate">
-                <p><strong>Page → lib/data → store → localStorage</strong></p>
-                <p>Every page calls functions from <code>@/lib/data</code> to read or write data. For example:</p>
-                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-                  <li><code>getTestCases()</code> — returns all test cases from the store</li>
-                  <li><code>createTestCase(data)</code> — adds a new test case, saves to localStorage</li>
-                  <li><code>getTestResultsForRun(runId)</code> — generates mock test results for a run</li>
-                  <li><code>getRunById(id)</code> — looks up a single run</li>
-                </ul>
-                <p>When data changes, the store calls <code>_notify()</code> which triggers listeners, so any component using <code>useTestData()</code> re-renders automatically.</p>
-              </DocSection>
-
-              {/* 13. Development */}
-              <DocSection title="🧑‍💻 13. Development — How to Contribute">
-                <p><strong>Commands:</strong></p>
-                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-                  <li><code>cd artifacts/aware-app</code></li>
-                  <li><code>pnpm install</code> — install dependencies</li>
-                  <li><code>pnpm dev</code> — start dev server at <code>:5173</code></li>
-                  <li><code>pnpm build</code> — production build to <code>dist/public/</code></li>
-                  <li><code>pnpm run typecheck</code> — TypeScript check (must pass before committing)</li>
-                </ul>
-                <p><strong>How to add a new page:</strong></p>
-                <ol style={{ paddingLeft: 18, margin: "8px 0" }}>
-                  <li>Create a file in <code>pages/</code> (e.g. <code>MyNewPage.tsx</code>)</li>
-                  <li>Import <code>AppLayout</code> from <code>@/components/aware/AppLayout</code></li>
-                  <li>Wrap your content in <code>{'<AppLayout activeHref="/my-path">'}</code></li>
-                  <li>Add a route in <code>App.tsx</code>: <code>{'<Route path="/my-path" component={MyNewPage} />'}</code></li>
-                  <li>Add a nav item in <code>AppLayout.tsx</code> (the <code>NAV_ITEMS</code> array)</li>
-                </ol>
-                <p><strong>Design Rules:</strong></p>
-                <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-                  <li>All pages use inline <code>{'style={{}}'}</code> — NOT Tailwind classes</li>
-                  <li>CSS variables like <code>var(--gcp-blue)</code> are defined in <code>_group.css</code></li>
-                  <li>No Playwright test scripts — all <code>scriptPath</code> fields use <code>.yaml</code></li>
-                  <li>Use wouter's <code>useLocation()</code> for SPA navigation</li>
-                  <li>Charts use Google Charts (wrappers in <code>GoogleCharts.tsx</code>)</li>
-                  <li>Typecheck must pass before committing: <code>pnpm run typecheck</code></li>
-                </ul>
-              </DocSection>
-
-            </div>
+            <DocViewer sections={DOC_SECTIONS} />
           )}
         </div>
 
