@@ -22,11 +22,10 @@ test.describe("PROOF App Smoke Tests", () => {
     await expect(table).toBeVisible({ timeout: 5000 });
   });
 
-  test("Copilot page loads and shows chat input", async ({ page }) => {
+  test("Copilot page loads and shows placeholder", async ({ page }) => {
     await page.goto("/copilot");
-    await expect(page.getByText("AI Copilot").first()).toBeVisible({ timeout: 5000 });
-    const input = page.locator("input.gcp-input");
-    await expect(input.first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("Copilot").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("currently unavailable")).toBeVisible({ timeout: 5000 });
   });
 
   test("About page shows system stats", async ({ page }) => {

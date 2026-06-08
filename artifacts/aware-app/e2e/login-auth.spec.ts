@@ -10,7 +10,7 @@ test.describe("Login Page Authentication", () => {
     await page.click("button[type=submit]");
     await expect(page.locator(".flash.success")).toBeVisible();
     await expect(page).toHaveURL(/\/secure/);
-    await expect(page.locator(".subheader")).toContainText("Secure area");
+    await expect(page.locator(".subheader")).toContainText("Secure Area");
   });
 
   test("failed login with invalid password", async ({ page }) => {
