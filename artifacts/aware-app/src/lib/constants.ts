@@ -57,25 +57,4 @@ export const TEST_NAMES = [
   "Check A/B testing cookie routing for /api/v1/experiments",
 ];
 
-export const GENERATION_TEMPLATES = [
-  { verb: "Verify", field: "Geo match", path: "/api/v1/data", check: "resolves correct PoP" },
-  { verb: "Check", field: "locale split", path: "/api/v2/content", check: "serves region-correct content" },
-  { verb: "Validate", field: "URL health", path: "/api/v1/status", check: "returns 200 OK" },
-  { verb: "Ensure", field: "edge redirect", path: "/api/v3/redirect", check: "preserves query params" },
-  { verb: "Verify", field: "cache TTL", path: "/api/v2/assets", check: "matches origin max-age" },
-  { verb: "Check", field: "compression", path: "/api/v1/static", check: "gzip enabled" },
-  { verb: "Validate", field: "CORS headers", path: "/api/v2/config", check: "present on cross-origin" },
-  { verb: "Ensure", field: "rate limiting", path: "/api/v1/auth", check: "triggers at threshold" },
-  { verb: "Verify", field: "TLS version", path: "/api/v3/secure", check: "1.3 negotiated" },
-  { verb: "Check", field: "WAF rules", path: "/api/v1/input", check: "block SQL injection" },
-  { verb: "Validate", field: "auth token", path: "/api/v2/user", check: "expiry returns 401" },
-  { verb: "Ensure", field: "CDN purge", path: "/api/v1/cache", check: "completes within 5s" },
-  { verb: "Verify", field: "IPv6", path: "/api/v2/network", check: "preferred when available" },
-  { verb: "Check", field: "HTTP/3 upgrade", path: "/api/v3/alt-svc", check: "from Alt-Svc header" },
-  { verb: "Validate", field: "origin shield", path: "/api/v1/origin", check: "hit ratio > 80%" },
-  { verb: "Ensure", field: "mobile redirect", path: "/api/v1/mobile", check: "applied correctly" },
-  { verb: "Verify", field: "API key rotation", path: "/api/v2/keys", check: "propagates in 30s" },
-  { verb: "Check", field: "websocket handshake", path: "/api/v2/ws", check: "upgrades successfully" },
-  { verb: "Validate", field: "custom error page", path: "/api/v3/errors", check: "served on 5xx" },
-  { verb: "Ensure", field: "signed URL expiry", path: "/api/v1/media", check: "enforced correctly" },
-];
+

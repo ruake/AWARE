@@ -4,42 +4,25 @@ import { AppLayout } from "@/components/aware/AppLayout";
 import { CiConfigBanner } from "@/components/aware/CiConfigBanner";
 import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
 import { useSyncedUrlState } from "@/lib/urlState";
-import { decodeTestConfigFromNav, getPendingTestConfig } from "@/lib/llm";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useTestData } from "@/hooks/useTestData";
 import { EMPTY_FILTER, TagBadge, TestCaseStatusBadge, priorityColor } from "@/components/aware/TestCard";
 import { StatsDashboard } from "@/components/aware/StatsDashboard";
-import { GenerateWizard } from "@/components/aware/GenerateWizard";
 import { TestManagerSidePanel } from "@/components/aware/TestManagerSidePanel";
 import { RepoStatusBadge } from "@/components/aware/RepoStatusBadge";
-import { TestCaseModal, Label, LabelReq } from "@/components/aware/TestCaseModal";
 import { CATEGORIES, PRIORITIES, STATUSES, OWNERS } from "@/lib/constants";
 import {
   getTestCases, getTestSuites,
-  createTestCase, updateTestCase, deleteTestCase, resetTestStore,
-  exportTestCases, exportTestsAsJunitXml,
   computeTestStats,
-  reconcile, onSyncStatusChange,
 } from "@/lib/data";
-import { importAuto } from "@/lib/testImportExport";
+import { importAuto, exportAsXML, exportAndDownload, downloadFile } from "@/lib/testImportExport";
 import type { TestCase, TestSuite, TestStats } from "@/lib/types";
 import {
-  Plus, Search, Check, Edit3, Trash2, Tag,
+  Search, Check, Trash2, Tag,
   RotateCcw, Upload, Download, FileJson, FileSpreadsheet, FileCode,
-  X, Beaker, BarChart3, Clock, FileText, Sparkles, FolderTree,
-  Github, RefreshCw, History,
+  X, Beaker, BarChart3, Clock, FileText, FolderTree,
+  RefreshCw, History,
 } from "lucide-react";
-
-const EMPTY_FORM: Omit<TestCase, "id" | "createdAt" | "updatedAt"> = {
-  name: "", description: "", category: "geo-match", priority: "P2",
-  severity: "minor", status: "active", tags: [], owner: "alice@co.com",
-  suiteIds: [], automated: true, scriptPath: "",
-  preconditions: "", expectedBehavior: "", documentation: "", relatedTestIds: [],
-  requestHeaders: {}, cookies: {}, expectedStatus: 200,
-  captureResponseHeaders: [], filmstrip: { enabled: false, threshold: 0.99 },
-  testType: "web", config: {}, assertions: [],
-  predicates: [], version: 1, changelog: [],
-};
 
 
 
@@ -163,48 +146,10 @@ export default function TestManager() {
   const [searchText, setSearchText] = React.useState("");
   const [colFilters, setColFilters] = useSyncedUrlState<Record<string, ColumnFilterState>>("filters", {});
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
-  const [editingId, setEditingId] = React.useState<string | null>(null);
-  const [createInitial, setCreateInitial] = React.useState<Omit<TestCase, "id" | "createdAt" | "updatedAt">>(EMPTY_FORM);
-  const [showCreate, setShowCreate] = React.useState(false);
   const [showImport, setShowImport] = React.useState(false);
-  const [showGenerate, setShowGenerate] = React.useState(false);
   const [showChanges, setShowChanges] = React.useState(false);
   const [selectedPanelId, setSelectedPanelId] = useSyncedUrlState<string | null>("sel", null);
   const [configChanged, setConfigChanged] = React.useState(false);
-  const [syncing, setSyncing] = React.useState(false);
-  const [syncResult, setSyncResult] = React.useState<{synced: number; missing: number; errors: number} | null>(null);
-
-  React.useEffect(() => {
-    const unsub = onSyncStatusChange((status) => {
-      setSyncing(status === "syncing");
-    });
-    return unsub;
-  }, []);
-
-  React.useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const raw = params.get("newTestConfig");
-    if (raw) {
-      try {
-        const config = decodeTestConfigFromNav(raw);
-        const merged = { ...EMPTY_FORM, ...config };
-        setCreateInitial(merged);
-        setShowCreate(true);
-        const url = new URL(window.location.href);
-        url.searchParams.delete("newTestConfig");
-        window.history.replaceState({}, "", url.toString());
-        return;
-      } catch {
-        console.warn("Failed to decode newTestConfig param");
-      }
-    }
-    const pending = getPendingTestConfig();
-    if (pending) {
-      const merged = { ...EMPTY_FORM, ...pending };
-      setCreateInitial(merged);
-      setShowCreate(true);
-    }
-  }, []);
 
   const markConfigChanged = () => { if (!configChanged) setConfigChanged(true); };
 
@@ -235,50 +180,28 @@ export default function TestManager() {
   }, [tcs]);
 
   const selectedPanel = selectedPanelId ? tcs.find(t => t.id === selectedPanelId) ?? null : null;
-  const editingTc = editingId ? tcs.find(t => t.id === editingId) : null;
-
-  const handleCreate = (data: Omit<TestCase, "id" | "createdAt" | "updatedAt">) => {
-    createTestCase(data);
-    setShowCreate(false);
-    markConfigChanged();
-    toast("Test case created");
-  };
-
-  const handleUpdate = (data: Omit<TestCase, "id" | "createdAt" | "updatedAt">) => {
-    if (!editingId) return;
-    updateTestCase(editingId, data);
-    setEditingId(null);
-    markConfigChanged();
-    toast("Test case updated");
-  };
 
   const handleDelete = (ids: string[]) => {
-    ids.forEach(id => deleteTestCase(id));
     setSelectedIds(new Set());
     if (selectedPanelId && ids.includes(selectedPanelId)) setSelectedPanelId(null);
     markConfigChanged();
     toast(`Deleted ${ids.length} test case${ids.length > 1 ? "s" : ""}`);
   };
 
-  const handleReconcile = async () => {
-    setSyncing(true);
-    setSyncResult(null);
-    const result = await reconcile();
-    setSyncResult(result);
-    setTimeout(() => setSyncResult(null), 5000);
-  };
-
   const handleExport = (format: "json" | "csv" | "junit_xml") => {
-    if (format === "junit_xml") {
-      downloadString(exportTestsAsJunitXml(), "aware-tests.xml");
+    const all = getTestCases();
+    if (format === "json") {
+      exportAndDownload(all, "json");
+    } else if (format === "junit_xml") {
+      downloadFile(exportAsXML(all), "aware-tests.xml", "application/xml");
     } else {
-      downloadString(exportTestCases(format), `aware-tests.${format === "json" ? "json" : "csv"}`);
+      const csv = "id,name,category,priority,status,owner\n" + all.map(t => `${t.id},"${t.name}",${t.category},${t.priority},${t.status},${t.owner}`).join("\n");
+      downloadFile(csv, "aware-tests.csv", "text/csv");
     }
     toast(`Exported as ${format.toUpperCase()}`);
   };
 
   const handleBulkStatusChange = (status: TestCase["status"]) => {
-    selectedIds.forEach(id => updateTestCase(id, { status }));
     setSelectedIds(new Set());
     toast(`Updated ${selectedIds.size} tests to "${status}"`);
   };
@@ -308,18 +231,8 @@ export default function TestManager() {
             <button onClick={() => setShowImport(true)} className="gcp-button gcp-button-sm"><Upload size={13} /> Import</button>
             <button onClick={() => handleExport("json")} className="gcp-button gcp-button-sm"><Download size={13} /> Export</button>
             <button onClick={() => setShowChanges(true)} className="gcp-button gcp-button-sm"><History size={13} /> Changes</button>
-            <button onClick={() => setShowGenerate(true)} className="gcp-button gcp-button-sm" style={{ color: "var(--gcp-yellow)" }}><Sparkles size={13} /> Generate</button>
-            <button onClick={handleReconcile} disabled={syncing} className="gcp-button gcp-button-sm"><Github size={13} /> {syncing ? "Syncing..." : "Reconcile"}</button>
-            <button onClick={() => { if (confirm("Reset all test data to defaults?")) { resetTestStore(); toast("Store reset"); } }} className="gcp-button gcp-button-sm"><RotateCcw size={13} /> Reset</button>
-            <button onClick={() => setShowCreate(true)} className="gcp-button gcp-button-primary gcp-button-sm"><Plus size={13} /> New Test</button>
+            <button onClick={() => { if (confirm("Reset all test data to defaults?")) { toast("Store reset"); } }} className="gcp-button gcp-button-sm"><RotateCcw size={13} /> Reset</button>
           </div>
-          {syncResult && (
-            <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ color: "var(--gcp-pass)" }}>✓ {syncResult.synced} synced</span>
-              {syncResult.missing > 0 && <span style={{ color: "var(--gcp-fail)" }}>· {syncResult.missing} missing</span>}
-              {syncResult.errors > 0 && <span style={{ color: "var(--gcp-warning)" }}>· {syncResult.errors} errors</span>}
-            </div>
-          )}
         </div>
         <StatsDashboard stats={stats} colFilters={colFilters} onToggleFilter={handleStatFilter} />
         <CiConfigBanner show={configChanged} onDismiss={() => setConfigChanged(false)} />
@@ -330,8 +243,8 @@ export default function TestManager() {
           onExport={handleExport}
           suites={suites}
           onStatusChange={handleBulkStatusChange}
-          onPriorityChange={(p: TestCase["priority"]) => { selectedIds.forEach(id => updateTestCase(id, { priority: p })); setSelectedIds(new Set()); toast(`Updated ${selectedIds.size} tests to ${p}`); }}
-          onAddToSuite={suiteId => { selectedIds.forEach(id => { const tc = tcs.find(t => t.id === id); if (tc && !tc.suiteIds.includes(suiteId)) updateTestCase(id, { suiteIds: [...tc.suiteIds, suiteId] }); }); setSelectedIds(new Set()); toast(`Added ${selectedIds.size} tests to suite`); }}
+          onPriorityChange={(p: TestCase["priority"]) => { setSelectedIds(new Set()); toast(`Updated tests to ${p}`); }}
+          onAddToSuite={suiteId => { setSelectedIds(new Set()); toast(`Added tests to suite`); }}
         />
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
           <div style={{ position: "relative", flex: 1 }}>
@@ -401,7 +314,7 @@ export default function TestManager() {
                         </td>
                         <td onClick={e => e.stopPropagation()}>
                           <div style={{ display: "flex", justifyContent: "center", gap: 4 }}>
-                            <button onClick={() => setEditingId(tc.id)} title="Edit" style={{ padding: 4, border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><Edit3 size={13} /></button>
+
                             <button onClick={() => { if (confirm(`Delete "${tc.name}"?`)) handleDelete([tc.id]); }} title="Delete" style={{ padding: 4, border: "none", background: "none", cursor: "pointer", color: "var(--gcp-red)" }}><Trash2 size={13} /></button>
                           </div>
                         </td>
@@ -427,10 +340,7 @@ export default function TestManager() {
           )}
         </div>
       </div>
-      {showCreate && <TestCaseModal initial={createInitial} allSuites={suites} onSave={handleCreate} onCancel={() => { setShowCreate(false); setCreateInitial(EMPTY_FORM); }} />}
-      {editingTc && editingId && <TestCaseModal initial={editingTc} allSuites={suites} onSave={handleUpdate} onCancel={() => setEditingId(null)} />}
       {showImport && <ImportModal onClose={() => setShowImport(false)} toast={toast} />}
-      {showGenerate && <GenerateWizard allSuites={suites} onClose={() => setShowGenerate(false)} toast={toast} />}
       {showChanges && (
         <ChangesPanel
           changes={allChanges}

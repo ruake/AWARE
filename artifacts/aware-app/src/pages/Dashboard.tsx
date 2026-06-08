@@ -3,19 +3,18 @@ import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import {
   RUNS, DIFF_ROWS, ENV_SUMMARY, ENV_PASS_RATE_CHART,
-  getAllPromotionDecisions, setPromotionDecision,
   computeRunFrequency,
 } from "@/lib/data";
 import type { Run } from "@/lib/types";
 import {
   CheckCircle2, XCircle, AlertTriangle, Play, GitCompare,
   TrendingDown, TrendingUp, Github,
-  Zap, Shield, BarChart3, Share2, Activity,
-  ChevronRight, RefreshCw, Settings,
+  BarChart3, Share2, Activity,
+  ChevronRight, RefreshCw,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
-import { EnvironmentConfigPanel } from "@/components/aware/EnvironmentConfigPanel";
+
 import { GoogleFilterableTable, GoogleAreaChart } from "@/components/aware/GoogleCharts";
 
 function statusBadge(status: Run["status"]) {
@@ -30,88 +29,11 @@ function statusBadge(status: Run["status"]) {
   return <span className={`gcp-badge ${s.cls}`}>{s.label}</span>;
 }
 
-function PromotionBanner({ latestRun }: { latestRun: Run }) {
-  const [, navigate] = useLocation();
-  const [decisions, setDecisions] = React.useState(getAllPromotionDecisions());
-  const existing = decisions.find(d => d.runId === latestRun.id);
-  const { show, Toast } = useSimpleToast();
-
-  const decide = (action: "promote" | "block") => {
-    const d = {
-      runId: latestRun.id, decision: action,
-      decidedBy: "you", decidedAt: new Date().toISOString(),
-      note: action === "promote" ? "Approved via PROOF portal" : "Blocked via PROOF portal",
-    };
-    setPromotionDecision(d);
-    setDecisions(getAllPromotionDecisions());
-    show(action === "promote" ? "✓ Promotion approved — config can be deployed" : "✗ Promotion blocked — regressions must be fixed first");
-  };
-
-  const canPromote = latestRun.status === "PASS";
-
-  if (existing && existing.decision !== "pending") {
-    const isPromoted = existing.decision === "promote";
-    return (
-      <div style={{ background: isPromoted ? "var(--gcp-green-bg)" : "var(--gcp-red-bg)", border: `2px solid ${isPromoted ? "var(--gcp-green)" : "var(--gcp-red)"}`, borderRadius: 6, padding: "14px 20px", display: "flex", alignItems: "center", gap: 16 }}>
-        {isPromoted ? <CheckCircle2 size={22} style={{ color: "var(--gcp-green)", flexShrink: 0 }} /> : <XCircle size={22} style={{ color: "var(--gcp-red)", flexShrink: 0 }} />}
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 14, color: isPromoted ? "var(--gcp-green)" : "var(--gcp-red)" }}>
-            {isPromoted ? "Promotion Approved" : "Promotion Blocked"}
-          </div>
-          <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)", marginTop: 2 }}>
-            {existing.note} · {new Date(existing.decidedAt!).toLocaleString()}
-          </div>
-        </div>
-        <button onClick={() => { setPromotionDecision({ runId: latestRun.id, decision: "pending" }); setDecisions(getAllPromotionDecisions()); }} className="gcp-button gcp-button-sm">
-          <RefreshCw size={12} /> Reset Decision
-        </button>
-        {Toast}
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ background: canPromote ? "var(--gcp-green-bg)" : "var(--gcp-red-bg)", border: `2px solid ${canPromote ? "var(--gcp-green)" : "var(--gcp-red)"}`, borderRadius: 6, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-      {canPromote
-        ? <Shield size={24} style={{ color: "var(--gcp-green)", flexShrink: 0 }} />
-        : <AlertTriangle size={24} style={{ color: "var(--gcp-red)", flexShrink: 0 }} />
-      }
-      <div style={{ flex: 1, minWidth: 200 }}>
-        <div style={{ fontWeight: 700, fontSize: 15, color: canPromote ? "var(--gcp-green)" : "var(--gcp-red)" }}>
-          {canPromote
-            ? `✓ Ready to Promote — ${latestRun.passPct}% pass rate, 0 regressions`
-            : `✗ Promotion Blocked — ${latestRun.failures} regression${latestRun.failures !== 1 ? "s" : ""} detected`
-          }
-        </div>
-        <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)", marginTop: 3, fontFamily: "var(--font-mono)" }}>
-          {latestRun.id}
-          <span style={{ fontFamily: "var(--font-sans)" }}> · {latestRun.suite} · {latestRun.env}</span>
-        </div>
-      </div>
-      <div style={{ display: "flex", gap: 10, flexShrink: 0, flexWrap: "wrap" }}>
-        <button onClick={() => navigate("/compare")} className="gcp-button gcp-button-sm">
-          <GitCompare size={13} /> View Diff
-        </button>
-        {canPromote
-          ? <button onClick={() => decide("promote")} className="gcp-button-success" style={{ fontSize: 13 }}>
-              <Zap size={14} /> Approve Promotion
-            </button>
-          : <button onClick={() => decide("block")} className="gcp-button-danger" style={{ fontSize: 13 }}>
-              <XCircle size={14} /> Confirm Block
-            </button>
-        }
-      </div>
-      {Toast}
-    </div>
-  );
-}
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
   const latestRun = RUNS[0] ?? null;
   const { show, Toast } = useSimpleToast();
-  const [showEnvConfig, setShowEnvConfig] = React.useState(false);
-
   const runFreq = React.useMemo(() => computeRunFrequency(), []);
   const recentRuns = RUNS.slice(0, 6);
   const overallPassRate = RUNS.length > 0 ? Math.round(RUNS.reduce((s, r) => s + r.passPct, 0) / RUNS.length) : 0;
@@ -142,9 +64,6 @@ export default function Dashboard() {
             <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", marginTop: 3 }}>Test analytics &amp; promotion readiness · Powered by GitHub Actions</p>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={() => setShowEnvConfig(!showEnvConfig)} className="gcp-button gcp-button-sm">
-              <Settings size={13} /> Env Config
-            </button>
             <button onClick={() => show("Run data refreshed")} className="gcp-button gcp-button-sm">
               <RefreshCw size={13} /> Refresh
             </button>
@@ -153,9 +72,6 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
-
-        {/* Promotion Banner */}
-        <PromotionBanner latestRun={latestRun} />
 
         {/* Comparison Summary */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
@@ -275,7 +191,6 @@ export default function Dashboard() {
         </div>
 
       </div>
-      {showEnvConfig && <EnvironmentConfigPanel onClose={() => setShowEnvConfig(false)} />}
       </div>
       {Toast}
     </AppLayout>

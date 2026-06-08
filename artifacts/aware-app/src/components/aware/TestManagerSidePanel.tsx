@@ -1,5 +1,5 @@
 import React from "react";
-import { getTestChangelog, updateTestCaseDocumentation } from "@/lib/data";
+import { getTestChangelog } from "@/lib/data";
 import type { TestCase } from "@/lib/types";
 import { TagBadge, TestCaseStatusBadge, priorityColor } from "@/components/aware/TestCard";
 import { RepoStatusBadge } from "./RepoStatusBadge";
@@ -12,8 +12,6 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
   const changelog = getTestChangelog(tc.id);
 
   const handleSaveDoc = () => {
-    updateTestCaseDocumentation(tc.id, docText, tc.owner);
-    toast("Documentation updated");
     setEditingDoc(false);
   };
 

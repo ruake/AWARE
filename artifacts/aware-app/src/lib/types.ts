@@ -223,21 +223,6 @@ export interface SuiteNode {
 
 export type ImportExportFormat = "json" | "junit_xml" | "csv";
 
-export interface ImportResult {
-  imported: number;
-  skipped: number;
-  errors: { line: number; message: string }[];
-}
-
-export interface GenerateParams {
-  count: number;
-  category: string;
-  status: TestStatus;
-  priority: TestPriority;
-  owner: string;
-  suites: string[];
-}
-
 export interface TestStats {
   total: number;
   byStatus: Record<string, number>;

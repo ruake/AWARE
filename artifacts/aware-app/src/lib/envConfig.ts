@@ -1,7 +1,5 @@
 import type { EnvironmentConfig } from "./types";
 
-const LS_KEY = "proof_env_configs";
-
 const DEFAULT_ENVIRONMENTS: EnvironmentConfig[] = [
   {
     id: "prod_prod",
@@ -41,82 +39,22 @@ const DEFAULT_ENVIRONMENTS: EnvironmentConfig[] = [
   },
 ];
 
-let _envConfigs: EnvironmentConfig[] | null = null;
-let _listeners: Array<() => void> = [];
-
-function loadConfigs(): EnvironmentConfig[] {
-  if (_envConfigs) return _envConfigs;
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (raw) {
-      _envConfigs = JSON.parse(raw) as EnvironmentConfig[];
-      return _envConfigs;
-    }
-  } catch { /* fall through */ }
-  _envConfigs = DEFAULT_ENVIRONMENTS.map(e => ({ ...e }));
-  return _envConfigs;
-}
-
-function saveConfigs(): void {
-  if (!_envConfigs) return;
-  localStorage.setItem(LS_KEY, JSON.stringify(_envConfigs));
-}
-
-function notify(): void {
-  _listeners.forEach(cb => cb());
-}
-
 export function getEnvConfigs(): EnvironmentConfig[] {
-  return loadConfigs();
+  return [...DEFAULT_ENVIRONMENTS];
 }
 
 export function getEnvLabels(): string[] {
-  return loadConfigs().map(e => e.label);
+  return DEFAULT_ENVIRONMENTS.map(e => e.label);
 }
 
 export function getEnvConfig(label: string): EnvironmentConfig | undefined {
-  return loadConfigs().find(e => e.label === label);
+  return DEFAULT_ENVIRONMENTS.find(e => e.label === label);
 }
 
 export function getEnvConfigById(id: string): EnvironmentConfig | undefined {
-  return loadConfigs().find(e => e.id === id);
+  return DEFAULT_ENVIRONMENTS.find(e => e.id === id);
 }
 
-export function addEnvConfig(config: EnvironmentConfig): void {
-  const configs = loadConfigs();
-  if (configs.find(e => e.id === config.id)) return;
-  configs.push(config);
-  saveConfigs();
-  notify();
-}
-
-export function updateEnvConfig(id: string, updates: Partial<EnvironmentConfig>): void {
-  const configs = loadConfigs();
-  const idx = configs.findIndex(e => e.id === id);
-  if (idx !== -1) {
-    configs[idx] = { ...configs[idx], ...updates };
-    saveConfigs();
-    notify();
-  }
-}
-
-export function removeEnvConfig(id: string): void {
-  const configs = loadConfigs();
-  const idx = configs.findIndex(e => e.id === id);
-  if (idx !== -1) {
-    configs.splice(idx, 1);
-    saveConfigs();
-    notify();
-  }
-}
-
-export function resetEnvConfigs(): void {
-  _envConfigs = DEFAULT_ENVIRONMENTS.map(e => ({ ...e }));
-  saveConfigs();
-  notify();
-}
-
-export function subscribeToEnvConfigs(cb: () => void): () => void {
-  _listeners.push(cb);
-  return () => { _listeners = _listeners.filter(l => l !== cb); };
+export function subscribeToEnvConfigs(_cb: () => void): () => void {
+  return () => {};
 }

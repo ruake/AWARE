@@ -1,6 +1,6 @@
 import React from "react";
 import type { TestSuite, TestCase } from "@/lib/types";
-import { FolderTree, Bug, ChevronDown, ChevronRight, Plus, Trash2, Clock } from "lucide-react";
+import { FolderTree, Bug, ChevronDown, ChevronRight, Clock } from "lucide-react";
 
 function matchesFilter(suite: TestSuite, filter: string, allSuites: TestSuite[], testCases: TestCase[]): boolean {
   if (!filter) return true;
@@ -11,11 +11,11 @@ function matchesFilter(suite: TestSuite, filter: string, allSuites: TestSuite[],
 }
 
 export function SuiteTreeItem({
-  suite, depth, allSuites, testCases, onSelect, selectedId, onDelete, onAddTest, onTestSelect, filter, expandedIds, onToggle,
+  suite, depth, allSuites, testCases, onSelect, selectedId, onTestSelect, filter, expandedIds, onToggle,
 }: {
   suite: TestSuite; depth: number; allSuites: TestSuite[]; testCases: TestCase[];
-  onSelect: (s: TestSuite) => void; selectedId: string | null; onDelete: (id: string) => void;
-  onAddTest: (suiteId: string) => void; onTestSelect?: (testId: string) => void;
+  onSelect: (s: TestSuite) => void; selectedId: string | null;
+  onTestSelect?: (testId: string) => void;
   filter?: string; expandedIds: Set<string>; onToggle: (id: string) => void;
 }) {
   const expanded = expandedIds.has(suite.id);
@@ -65,10 +65,7 @@ export function SuiteTreeItem({
             {suite.schedule && <span style={{ display: "flex", alignItems: "center", gap: 2 }}><Clock size={10} />{suite.schedule}</span>}
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 2 }} onClick={e => e.stopPropagation()}>
-          <button onClick={() => onAddTest(suite.id)} className="gcp-button-icon" title="Add tests"><Plus size={14} /></button>
-          <button onClick={() => onDelete(suite.id)} className="gcp-button-icon" title="Delete suite"><Trash2 size={14} /></button>
-        </div>
+
       </div>
       {expanded && (
         <>
@@ -93,7 +90,7 @@ export function SuiteTreeItem({
           ))}
           {filteredChildren.map(child => (
             <SuiteTreeItem key={child.id} suite={child} depth={depth + 1} allSuites={allSuites} testCases={testCases}
-              onSelect={onSelect} selectedId={selectedId} onDelete={onDelete} onAddTest={onAddTest} onTestSelect={onTestSelect}
+              onSelect={onSelect} selectedId={selectedId} onTestSelect={onTestSelect}
               filter={filter} expandedIds={expandedIds} onToggle={onToggle} />
           ))}
         </>

@@ -11,25 +11,12 @@ export function loadFromStorage<T>(key: string, fallback: T[]): T[] {
   }
 }
 
-export function saveToStorage<T>(key: string, data: T[]): void {
-  try { localStorage.setItem(key, JSON.stringify(data)); } catch { /* quota */ }
-}
-
 export const _tcListeners = new Set<() => void>();
 export const _tsListeners = new Set<() => void>();
 
-// Separate notifications — prevents cascade re-renders.
-// Test case mutations only trigger TC listeners; suite mutations only trigger TS listeners.
-export function _notifyTC() {
-  _tcListeners.forEach(l => l());
-}
-export function _notifyTS() {
-  _tsListeners.forEach(l => l());
-}
-// Legacy: triggers BOTH (kept for callers that don't distinguish)
-export function _notify() {
-  _notifyTC(); _notifyTS();
-}
+export function _notifyTC() {}
+export function _notifyTS() {}
+export function _notify() {}
 
 export function subscribeToTestCases(onChange: () => void): () => void {
   _tcListeners.add(onChange);

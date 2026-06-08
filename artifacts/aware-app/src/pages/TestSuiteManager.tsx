@@ -2,88 +2,29 @@ import React from "react";
 import { useLocation } from "wouter";
 import { GoogleBarChart, GooglePieChart } from "@/components/aware/GoogleCharts";
 import { AppLayout } from "@/components/aware/AppLayout";
-import {
-  createTestSuite, updateTestSuite, deleteTestSuite,
-  addTestsToSuite, removeTestsFromSuite,
-  updateTestCase,
-} from "@/lib/data";
-import type { TestCase, TestSuite } from "@/lib/types";
-import { TestCaseModal } from "@/components/aware/TestCaseModal";
-
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useTestData } from "@/hooks/useTestData";
 import { SuiteTreeItem } from "@/components/aware/SuiteTreeItem";
-import { SuiteEditor } from "@/components/aware/SuiteEditor";
-import { AddTestsModal } from "@/components/aware/AddTestsModal";
-import { YamlPreview, generateGitHubActionsYaml } from "@/components/aware/YamlPreview";
 import {
-  FolderTree, Plus, X, Edit3, Trash2, PlayCircle,
-  Settings, Beaker, GitCompare, Workflow, ExternalLink,
-  Bug, FileText, Code, Search, Check,
+  FolderTree, PlayCircle,
+  Settings, Beaker, GitCompare,
+  Bug, Code, Search,
 } from "lucide-react";
 
 
 export default function TestSuiteManager() {
   const { tcs, suites } = useTestData();
   const [, navigate] = useLocation();
-  const { show, Toast } = useSimpleToast();
+  const { Toast } = useSimpleToast();
 
   const [selectedSuiteId, setSelectedSuiteId] = React.useState<string | null>(null);
   const [selectedTestId, setSelectedTestId] = React.useState<string | null>(null);
-  const [editingModalTest, setEditingModalTest] = React.useState<TestCase | null>(null);
-  const [showEditor, setShowEditor] = React.useState(false);
-  const [editingSuite, setEditingSuite] = React.useState<string | null>(null);
-  const [showAddTests, setShowAddTests] = React.useState<string | null>(null);
-  const [showYaml, setShowYaml] = React.useState(false);
   const [suiteSearch, setSuiteSearch] = React.useState("");
   const [expandedIds, setExpandedIds] = React.useState<Set<string>>(new Set(suites.map(s => s.id)));
 
   const selected = selectedSuiteId ? suites.find(s => s.id === selectedSuiteId) ?? null : null;
   const selectedTest = selectedTestId ? tcs.find(tc => tc.id === selectedTestId) ?? null : null;
   const selectedTests = selected ? tcs.filter(tc => selected.testIds.includes(tc.id)) : [];
-
-  const downloadSuiteJson = (suite: TestSuite) => {
-    const json = JSON.stringify(suite, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${suite.name.replace(/\s+/g, "-").toLowerCase()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleCreate = (data: Omit<TestSuite, "id" | "createdAt" | "updatedAt">) => {
-    const suite = createTestSuite(data);
-    show("Suite created", { label: "Download to commit", onClick: () => downloadSuiteJson(suite) });
-    setShowEditor(false);
-  };
-
-  const handleUpdate = (data: Omit<TestSuite, "id" | "createdAt" | "updatedAt">) => {
-    if (!editingSuite) return;
-    const suite = updateTestSuite(editingSuite, data);
-    setEditingSuite(null);
-    if (suite) show("Suite updated", { label: "Download to commit", onClick: () => downloadSuiteJson(suite) });
-  };
-
-  const handleDelete = (id: string) => {
-    if (!confirm("Delete this suite?")) return;
-    deleteTestSuite(id);
-    if (selectedSuiteId === id) setSelectedSuiteId(null);
-    show("Suite deleted");
-  };
-
-  const handleRemoveTest = (testId: string) => {
-    if (!selected) return;
-    const suite = removeTestsFromSuite(selected.id, [testId]);
-    if (suite) show("Test removed from suite", { label: "Download to commit", onClick: () => downloadSuiteJson(suite) });
-  };
-
-  const handleAddTests = (suiteId: string, testIds: string[]) => {
-    const suite = addTestsToSuite(suiteId, testIds);
-    setShowAddTests(null);
-    if (suite) show(`Added ${testIds.length} tests`, { label: "Download to commit", onClick: () => downloadSuiteJson(suite) });
-  };
 
   const catCounts: Record<string, number> = {};
   selectedTests.forEach(tc => { catCounts[tc.category] = (catCounts[tc.category] || 0) + 1; });
@@ -102,7 +43,6 @@ export default function TestSuiteManager() {
           <div className="gcp-card" style={{ width: 320, flexShrink: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: 12, borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
               <h2 style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}><FolderTree size={15} /> Suites</h2>
-              <button onClick={() => setShowEditor(true)} className="gcp-button gcp-button-primary gcp-button-sm" style={{ padding: "4px 10px" }}><Plus size={12} style={{ display: "inline", marginRight: 4 }} />New</button>
             </div>
             <div style={{ padding: "6px 8px", borderBottom: "1px solid var(--gcp-grey)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 4, border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "4px 8px", background: "var(--gcp-grey-bg)" }}>
@@ -116,7 +56,6 @@ export default function TestSuiteManager() {
                 <SuiteTreeItem key={suite.id} suite={suite} depth={0} allSuites={suites} testCases={tcs} filter={suiteSearch}
                   expandedIds={expandedIds} onToggle={(id) => setExpandedIds(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; })}
                   onSelect={(s) => { setSelectedSuiteId(s.id); setSelectedTestId(null); }} selectedId={selectedSuiteId}
-                  onDelete={handleDelete} onAddTest={(id) => setShowAddTests(id)}
                   onTestSelect={(testId) => { setSelectedTestId(testId); setSelectedSuiteId(null); }} />
               ))}
             {suites.filter(s => s.parentId === null).length === 0 && (
@@ -135,11 +74,6 @@ export default function TestSuiteManager() {
                     <h2 style={{ fontWeight: 700, fontSize: 16 }}>{selectedTest.name}</h2>
                     <p style={{ fontSize: 11, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>{selectedTest.id}</p>
                   </div>
-                </div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button onClick={() => setEditingModalTest(selectedTest)} className="gcp-button gcp-button-xs">
-                    <Edit3 size={12} /> Edit
-                  </button>
                 </div>
               </div>
               <div style={{ flex: 1, overflow: "auto", padding: 16 }}>
@@ -189,13 +123,9 @@ export default function TestSuiteManager() {
                   <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>{selected.description}</p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <button onClick={() => setShowYaml(!showYaml)} className="gcp-button gcp-button-sm"><Workflow size={13} /> Generate YAML</button>
-                  <button onClick={() => { setEditingSuite(selected.id); }} className="gcp-button gcp-button-sm"><Edit3 size={13} /> Edit</button>
                   <button onClick={() => navigate(`/start?suite=${selected.id}`)} className="gcp-button gcp-button-primary gcp-button-sm"><PlayCircle size={13} /> Run</button>
                 </div>
               </div>
-
-              {showYaml && <YamlPreview yaml={generateGitHubActionsYaml(selected)} />}
 
               <div style={{ flex: 1, overflow: "auto", padding: 16 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
@@ -293,16 +223,11 @@ export default function TestSuiteManager() {
                       <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tc.name}</span>
                       <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{tc.category}</span>
                       <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{tc.priority}</span>
-                      <button onClick={() => handleRemoveTest(tc.id)} style={{ padding: 2, border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)", borderRadius: 4, opacity: 0 }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = "1"}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = "0"}
-                      ><X size={12} /></button>
                     </div>
                   ))}
                   {selectedTests.length === 0 && (
                     <div style={{ padding: "24px 0", textAlign: "center", fontSize: 13, color: "var(--gcp-text-secondary)" }}>
                       No tests in this suite
-                      <button onClick={() => setShowAddTests(selected.id)} className="gcp-button gcp-button-sm" style={{ display: "block", margin: "8px auto 0" }}>Add Tests</button>
                     </div>
                   )}
                 </div>
@@ -363,22 +288,6 @@ export default function TestSuiteManager() {
             </div>
           )}
         </div>
-
-        {showEditor && <SuiteEditor allSuites={suites} onSave={handleCreate} onClose={() => setShowEditor(false)} />}
-        {editingSuite && (
-          <SuiteEditor suite={suites.find(s => s.id === editingSuite) ?? null}
-            allSuites={suites} onSave={handleUpdate} onClose={() => setEditingSuite(null)} />
-        )}
-        {showAddTests && <AddTestsModal suiteId={showAddTests} allTestCases={tcs} onClose={() => setShowAddTests(null)} onAdd={handleAddTests} />}
-
-        {editingModalTest && (
-          <TestCaseModal
-            initial={(() => { const { id, createdAt, updatedAt, ...rest } = editingModalTest; return { ...rest, tags: [...rest.tags], suiteIds: [...rest.suiteIds], predicates: rest.predicates.map(p => ({ ...p })), changelog: [...rest.changelog], requestHeaders: { ...rest.requestHeaders }, cookies: { ...rest.cookies }, captureResponseHeaders: [...rest.captureResponseHeaders] }; })()}
-            allSuites={suites}
-            onSave={(data) => { updateTestCase(editingModalTest.id, data); show("Test updated"); setEditingModalTest(null); }}
-            onCancel={() => setEditingModalTest(null)}
-          />
-        )}
 
         {Toast}
       </div>

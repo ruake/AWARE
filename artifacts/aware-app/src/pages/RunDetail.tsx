@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
-import { getRunById, getTestResultsForRun, RUNS, setPromotionDecision, getPromotionDecision, getTestCases } from "@/lib/data";
+import { getRunById, getTestResultsForRun, RUNS, getPromotionDecision, getTestCases } from "@/lib/data";
 import type { TestResult, TestEvidence, TestAssertionResult } from "@/lib/types";
 import {
   ArrowLeft, GitCompare, CheckCircle2, XCircle, Github,
@@ -88,7 +88,6 @@ export default function RunDetail() {
 
   const decide = (action: "promote" | "block") => {
     const d = { runId: run.id, decision: action, decidedBy: "you", decidedAt: new Date().toISOString(), note: action === "promote" ? "Approved via run detail" : "Blocked via run detail" };
-    setPromotionDecision(d);
     setDecision(d);
     show(action === "promote" ? "Promotion approved for this run" : "Promotion blocked for this run");
   };
@@ -184,7 +183,7 @@ export default function RunDetail() {
                 ? <button onClick={() => decide("promote")} className="gcp-button-success" style={{ fontSize: 13 }}><Zap size={14} /> Approve Promotion</button>
                 : <button onClick={() => decide("block")} className="gcp-button-danger" style={{ fontSize: 13 }}><XCircle size={14} /> Confirm Block</button>
             ) : (
-              <button onClick={() => { setPromotionDecision({ runId: run.id, decision: "pending" }); setDecision(undefined); }} className="gcp-button gcp-button-sm">
+              <button onClick={() => { setDecision(undefined); }} className="gcp-button gcp-button-sm">
                 <RefreshCw size={13} /> Reset
               </button>
             )}

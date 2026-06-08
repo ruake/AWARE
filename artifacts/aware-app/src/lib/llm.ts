@@ -4,12 +4,9 @@ import type {
   LLMMessage,
   LLMCompletionRequest,
   LLMCompletionResponse,
-  TestCase,
-  GenerateWithLLMParams,
   LLMSkillDefinition,
 } from "./types";
 import { DEFAULT_LLM_CONFIG } from "./types";
-import { createTestCase } from "./data";
 
 // ── Provider Interface ───────────────────────────────────────────────
 
@@ -24,10 +21,6 @@ export interface ILLMProvider {
 }
 
 // ── Mock Provider (production-grade — context-aware dynamic responses) ──
-
-const CATEGORIES = ["geo-match", "locale-split", "caching", "security", "performance", "routing", "tls", "ddos", "url-health"] as const;
-const TEST_TYPES = ["web", "api", "edgeworker", "transaction"] as const;
-const SEVERITIES = ["critical", "major", "minor", "trivial"] as const;
 
 function _getSkillId(messages: LLMMessage[]): string | null {
   for (const m of messages) {
@@ -44,62 +37,8 @@ function _isGreeting(text: string): boolean {
   return greetings.some(g => text === g || (text.startsWith(g) && text.replace(g, "").trim().length < 5));
 }
 
-function _extractTestDetails(text: string): Record<string, string> {
-  const lower = text.toLowerCase();
-  const details: Record<string, string> = {};
-
-  for (const cat of CATEGORIES) {
-    if (lower.includes(cat)) { details.category = cat; break; }
-  }
-
-  const prioMatch = text.match(/\b(P[0-3])\b/);
-  if (prioMatch) details.priority = prioMatch[1];
-
-  for (const sev of SEVERITIES) {
-    if (lower.includes(sev)) { details.severity = sev; break; }
-  }
-
-  const statusMatch = text.match(/\b(20[0-9]|30[0-9]|40[0-9]|50[0-9])\b/);
-  if (statusMatch) details.expectedStatus = statusMatch[1];
-
-  for (const t of TEST_TYPES) {
-    if (lower.includes(t)) { details.testType = t; break; }
-  }
-
-  const nameMatch = text.match(/(?:test|case|scenario|check|verify|validate)\s+(?:for|to|that|called|named)?\s*[""]?([A-Za-z][A-Za-z0-9\s\-_]{4,80})/i);
-  if (nameMatch) details.name = nameMatch[1].trim();
-
-  if (/\b(auto|automated|yes)\b/i.test(lower)) details.automated = "true";
-  if (/\b(manual|no)\b/i.test(lower)) details.automated = "false";
-
-  const lines = text.split("\n").filter(l => l.includes(":") && !l.startsWith(" "));
-  for (const line of lines) {
-    const [key, ...rest] = line.split(":");
-    const val = rest.join(":").trim();
-    const k = key.trim().toLowerCase().replace(/\s+/g, "");
-    if (k === "name") details.name = val;
-    else if (k === "category" || k === "cat") details.category = val;
-    else if (k === "priority") details.priority = val;
-    else if (k === "severity") details.severity = val;
-    else if (k === "status" || k === "expectedstatus") details.expectedStatus = val;
-    else if (k === "type" || k === "testtype") details.testType = val;
-    else if (k === "automated" || k === "auto") details.automated = val;
-  }
-
-  return details;
-}
-
 function _skillGreeting(skillId: string): string {
   const map: Record<string, string> = {
-    "generate-tests": `Hello! I'm your test engineer assistant. I can help you create structured test cases for web application delivery.
-
-What kind of test would you like to create? For example:
-• A **cache validation** test to verify HIT/MISS behavior
-• A **geo-routing** test to check regional targeting
-• A **security** test for WAF or TLS validation
-• A **performance** test for response time thresholds
-
-Describe the behavior you want to validate and I'll generate a complete test configuration with predicates, headers, filmstrip, and changelog.`,
     "analyze-results": `Hello! I'm your regression analyst. I can review test run results and identify regressions, root causes, and remediation steps.
 
 Please share the test run data or describe what regressions you're seeing — cache ratio drops, latency spikes, error rate increases, or specific test failures.`,
@@ -109,127 +48,23 @@ Share the comparison diff data or describe what changed between runs — I'll br
     "generate-script": `Hello! I'm your test script writer. I can generate portable YAML test definitions for web application testing scenarios.
 
 Describe the test scenario you need a script for — include the endpoint, expected behavior, headers, and any validation predicates you want to check.`,
-    "generate-suite": `Hello! I'm your test infrastructure engineer. I can design test suite configurations with integrations, parallelism, and test selection criteria.
-
-Describe the suite you want to create — target environment, categories to include, integration requirements (Slack, GitHub, Jira), and execution parameters.`,
   };
   return map[skillId] ?? `Hello! I'm your regression testing assistant. I can help you with:
 
-• **Generating test cases** — describe the behavior you want to validate
 • **Writing test scripts** — YAML scripts for automated testing
 • **Analyzing results** — explain test failures and regressions
 • **Comparing runs** — interpret baseline vs candidate diffs
-• **Generating suite configs** — YAML configurations for test suites
 
 What would you like to work on today?`;
 }
 
 const _GENERIC_GREETING = `Hello! I'm your regression testing assistant. I can help you with:
 
-• **Generating test cases** — describe the behavior you want to validate
 • **Writing test scripts** — YAML scripts for automated testing
 • **Analyzing results** — explain test failures and regressions
 • **Comparing runs** — interpret baseline vs candidate diffs
-• **Generating suite configs** — YAML configurations for test suites
 
 What skill would you like to use? Select one from the list above.`;
-
-function _handleGenerateTests(userMsg: string, messages: LLMMessage[]): LLMCompletionResponse {
-  const hasAssistant = messages.some(m => m.role === "assistant");
-  const assistantCount = messages.filter(m => m.role === "assistant").length;
-
-  if (!hasAssistant || (userMsg.trim().length < 15 && assistantCount >= 1)) {
-    return { content: _skillGreeting("generate-tests"), finishReason: "stop" };
-  }
-
-  const details = _extractTestDetails(userMsg);
-  const now = Date.now();
-  const name = details.name || "Web App Regression Test";
-  const safeName = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || `cdn_test_${now % 10000}`;
-  const cat = details.category || "caching";
-  const priority = details.priority || "P2";
-  const severity = details.severity || "minor";
-  const statusCode = details.expectedStatus || "200";
-  const testType = details.testType || "web";
-  const automated = details.automated !== "false";
-  const timestamp = new Date().toISOString();
-
-  const config = {
-    id: `tc_${now % 100000}`,
-    name,
-    description: `Test case for ${cat} — validates correct behavior across the delivery network. Generated based on user input: "${userMsg.substring(0, 100)}"`,
-    testType,
-    category: cat,
-    priority,
-    severity,
-    status: "active",
-    tags: [cat, "cdn", "regression", testType],
-    owner: "mock-llm",
-    suiteIds: [] as string[],
-    automated,
-    scriptPath: `tests/${cat}/${safeName}.yaml`,
-    preconditions: "- Edge PoP token is valid and active\n- Test data has been seeded\n- Cache has been warmed with initial request\n- Network latency baseline captured",
-    expectedBehavior: `- HTTP ${statusCode} response received\n- Response time under 500ms (p95)\n- X-Cache header contains HIT or STALE\n- Edge location header matches routing policy\n- Response body validates content type`,
-    expectedStatus: parseInt(statusCode, 10),
-    requestHeaders: {
-      "Accept": "application/json",
-      "User-Agent": "PROOF-TestRunner/2.0",
-      "X-Debug": "true",
-    },
-    cookies: {},
-    captureResponseHeaders: ["X-Cache", "X-Request-ID", "Age", "X-Edge-Location", "CF-Cache-Status"],
-    filmstrip: {
-      enabled: automated,
-      threshold: 0.95,
-    },
-    predicates: [
-      {
-        id: `pred_${now}`,
-        type: "statusCode",
-        field: "",
-        expected: statusCode,
-        operator: "equals",
-        description: `Response status code is ${statusCode}`,
-      },
-      {
-        id: `pred_${now + 1}`,
-        type: "responseTime",
-        field: "duration",
-        expected: "500",
-        operator: "lt",
-        description: "Response time under 500ms threshold",
-      },
-    ],
-    version: 1,
-    changelog: [
-      {
-        version: 1,
-        timestamp,
-        author: "mock-llm",
-        summary: "Initial test case generation",
-        changes: ["Created via MockLLMProvider with dynamic generation"],
-      },
-    ],
-  };
-
-  return {
-    content: `Here's a summary of the test configuration I've generated:
-
-- **Name**: ${name}
-- **Category**: ${cat}
-- **Priority**: ${priority} · **Severity**: ${severity}
-- **Expected Status**: HTTP ${statusCode}
-- **Predicates**: ${config.predicates.length} rules (status code + response time)
-- **Automated**: ${automated ? "Yes" : "No"}
-
-Please review the draft card below with the full configuration. Click **"Confirm & Open in Test Manager"** when you're ready to save it.
-
----TEST_CONFIG_START---
-${JSON.stringify(config, null, 2)}
----TEST_CONFIG_END---`,
-    finishReason: "stop",
-  };
-}
 
 
 
@@ -506,106 +341,6 @@ ${hasGeo ? `  - name: "${testNames[1]}"
   };
 }
 
-function _handleGenerateSuite(userMsg: string): LLMCompletionResponse {
-  const lower = userMsg.toLowerCase();
-  const hasProd = lower.includes("prod") || lower.includes("production");
-  const hasStaging = lower.includes("staging") || lower.includes("stage");
-  const targetEnv = hasProd && !hasStaging ? "production" : "staging";
-  const network = hasProd && !hasStaging ? "production" : "staging";
-  const includeCaching = lower.includes("cache") || lower.includes("caching");
-  const includeGeo = lower.includes("geo") || lower.includes("routing");
-  const includeSecurity = lower.includes("security") || lower.includes("waf") || lower.includes("tls");
-  const includePerformance = lower.includes("perf") || lower.includes("perform") || lower.includes("latency");
-  const parallelism = 2 + Math.floor(Math.random() * 4);
-  const now = Date.now();
-
-  return {
-    content: `# web app Test Suite Configuration
-# Generated: ${new Date().toISOString()}
-# Suite ID: suite_${now % 100000}
-
-name: ${(lower.match(/(?:suite|config)\s+(?:for|to|named|called)?\s*[""]?([A-Za-z][A-Za-z0-9\s\-_]+)/i)?.[1]?.trim().toLowerCase().replace(/\s+/g, "-") || "cdn-regression-suite")}
-description: "web app regression test suite for ${targetEnv} environment — validates edge delivery, caching, and routing behavior"
-target: ${targetEnv}
-environment: ${network}
-parallelism: ${parallelism}
-retries: 2
-timeout: ${180 + Math.floor(Math.random() * 120)}
-failFast: false
-
-integrations:
-  slack:
-    channel: "#cdn-alerts"
-    notifyOn: ["failure", "regression", "new"]
-  github:
-    labels: ["regression", "cdn", "${targetEnv}"]
-    assignees: ["sre-team"]
-  jira:
-    project: "OPS"
-    issueType: "Bug"
-    components: ["cdn", "${targetEnv}"]
-
-test_selection:
-  categories:
-  ${[
-    includeCaching && "- caching",
-    includeGeo && "- routing",
-    includeSecurity && "- security",
-    includePerformance && "- performance",
-    !includeCaching && !includeGeo && !includeSecurity && !includePerformance && "- caching",
-    "- url-health",
-  ].filter(Boolean).join("\n  ")}
-
-  priorities:
-    - P0
-    - P1
-
-  tags:
-    - "regression"
-    - "${targetEnv}"
-
-schedule:
-  frequency: "daily"
-  time: "06:00 UTC"
-  days: ["monday", "tuesday", "wednesday", "thursday", "friday"]
-
-tests:
-${[
-  (includeCaching || true) && `  - name: "Cache HIT/MISS validation"
-    category: "caching"
-    priority: P0
-    automated: true
-    script: "tests/caching/cache_hit_validation.yaml"
-    description: "Verify static assets are served from edge cache with correct cache headers"`,
-  includeGeo && `  - name: "Geo-routing validation"
-    category: "routing"
-    priority: P1
-    automated: true
-    script: "tests/routing/geo_routing_validation.yaml"
-    description: "Verify requests are routed to correct edge PoP based on geographic region"`,
-  includeSecurity && `  - name: "TLS handshake check"
-    category: "security"
-    priority: P0
-    automated: true
-    script: "tests/security/tls_handshake_check.yaml"
-    description: "Validate TLS certificate chain and handshake completion across all edge nodes"`,
-  includePerformance && `  - name: "Latency SLO validation"
-    category: "performance"
-    priority: P1
-    automated: true
-    script: "tests/performance/latency_slo_check.yaml"
-    description: "Verify p95 response time remains under 500ms SLO threshold for all regions"`,
-  `  - name: "URL health check"
-    category: "url-health"
-    priority: P0
-    automated: true
-    script: "tests/url_health/endpoint_health.yaml"
-    description: "Verify all configured endpoints return expected status codes"`,
-].filter(Boolean).join("\n")}`,
-    finishReason: "stop",
-  };
-}
-
 async function mockComplete(req: LLMCompletionRequest): Promise<LLMCompletionResponse> {
   const { messages } = req;
   const userMsg = [...messages].reverse().find(m => m.role === "user")?.content ?? "";
@@ -622,16 +357,12 @@ async function mockComplete(req: LLMCompletionRequest): Promise<LLMCompletionRes
 
   // Skill-specific routing based on [SKILL:xxx] marker in system prompt
   switch (skillId) {
-    case "generate-tests":
-      return _handleGenerateTests(userMsg, messages);
     case "analyze-results":
       return _handleAnalyzeResults(userMsg);
     case "explain-diff":
       return _handleExplainDiff(userMsg);
     case "generate-script":
       return _handleGenerateScript(userMsg);
-    case "generate-suite":
-      return _handleGenerateSuite(userMsg);
     case null:
     case undefined:
       break;
@@ -641,11 +372,9 @@ async function mockComplete(req: LLMCompletionRequest): Promise<LLMCompletionRes
   return {
     content: `I understand you're asking about: "${userMsg.substring(0, 100)}". As a web app regression assistant, I can help with:
 
-• **Generating test cases** — describe the web app behavior you want to validate
 • **Writing test scripts** — YAML scripts for automated testing
 • **Analyzing results** — explain test failures and regressions
 • **Comparing runs** — interpret baseline vs candidate diffs
-• **Generating suite configs** — YAML configurations for test suites
 
 Select a skill above or describe what you need more specifically.`,
     finishReason: "stop",
@@ -719,23 +448,10 @@ class OpenAILLMProvider implements ILLMProvider {
 
 // ── WebLLM Provider (requires @mlc-ai/web-llm package + WebGPU) ─────
 
-let _webLlmAvailable: boolean | null = null;
 let _webLlmProgressCallback: ((progress: number, text: string) => void) | null = null;
 
-export function setWebLLMProgressCallback(cb: ((progress: number, text: string) => void) | null): void {
-  _webLlmProgressCallback = cb;
-}
-
-export async function checkWebLLM(): Promise<boolean> {
-  if (_webLlmAvailable !== null) return _webLlmAvailable;
-  try {
-    await import("@mlc-ai/web-llm");
-    _webLlmAvailable = true;
-  } catch (e) {
-    console.warn("WebLLM import failed:", e);
-    _webLlmAvailable = false;
-  }
-  return _webLlmAvailable;
+export function checkWebLLM(): Promise<boolean> {
+  return Promise.resolve(false);
 }
 
 class WebLLMProvider implements ILLMProvider {
@@ -797,35 +513,15 @@ class WebLLMProvider implements ILLMProvider {
 
 // ── Chrome Built-in AI Provider (LanguageModel API, Chrome 148+) ────
 
-let _chromeAIAvailable: boolean | null = null;
 let _chromeAIProgressCallback: ((progress: number, text: string) => void) | null = null;
 
-export function setChromeAIProgressCallback(cb: ((progress: number, text: string) => void) | null): void {
-  _chromeAIProgressCallback = cb;
-}
-
 export async function checkChromeAI(): Promise<boolean> {
-  if (_chromeAIAvailable !== null) return _chromeAIAvailable;
   try {
-    if (!("LanguageModel" in self)) {
-      _chromeAIAvailable = false;
-      return false;
-    }
+    if (!("LanguageModel" in self)) return false;
     const availability: string = await (self as any).LanguageModel.availability();
-    _chromeAIAvailable = availability !== "unavailable";
-    return _chromeAIAvailable;
+    return availability !== "unavailable";
   } catch {
-    _chromeAIAvailable = false;
     return false;
-  }
-}
-
-export async function getChromeAIStatus(): Promise<"available" | "downloadable" | "downloading" | "unavailable"> {
-  if (!("LanguageModel" in self)) return "unavailable";
-  try {
-    return await (self as any).LanguageModel.availability() as any;
-  } catch {
-    return "unavailable";
   }
 }
 
@@ -981,115 +677,3 @@ export function syncChatHistory(messages: { role: "system" | "user" | "assistant
   _chatHistory = messages.slice(-50);
 }
 
-export async function generateTestsWithLLM(
-  params: GenerateWithLLMParams,
-): Promise<TestCase[]> {
-  const skill = _skills.find(s => s.id === "generate-tests");
-  const prompt = `Generate ${params.count} web app test cases for the "${params.category}" category. Description: ${params.description}. Respond with a JSON array of test case objects, each with: name, description, category (use "${params.category}"), priority (P0-P3), severity, status ("active"), tags (array of strings), owner ("llm"), automated (true), scriptPath (use .yaml extension), preconditions, expectedBehavior, expectedStatus (HTTP number), predicates (array of {id, type, field, expected, operator, description}), and suiteIds.`;
-
-  const res = await _provider.complete({
-    messages: [
-      {
-        role: "system",
-        content: `You are a web app test engineer generating structured test cases. Always respond with valid JSON only, no markdown formatting. Use this skill context: ${skill?.systemPrompt ?? ""}`,
-      },
-      { role: "user", content: prompt },
-    ],
-    temperature: 0.4,
-    maxTokens: 4096,
-  });
-
-  const testCases: TestCase[] = [];
-  try {
-    const parsed = JSON.parse(res.content);
-    const items = Array.isArray(parsed) ? parsed : parsed.testCases ?? parsed.tests ?? [];
-    for (const item of items.slice(0, params.count)) {
-      const tc = createTestCase({
-        name: item.name ?? `Generated Test ${testCases.length + 1}`,
-        description: item.description ?? "",
-        category: item.category ?? params.category,
-        priority: item.priority ?? "P2",
-        severity: item.severity ?? "minor",
-        status: "active",
-        tags: item.tags ?? [params.category.replace(/[^a-z0-9]/g, "_")],
-        owner: item.owner ?? "llm",
-        suiteIds: [...params.suites],
-        automated: true,
-        scriptPath: item.scriptPath ?? `tests/generated/llm/tc_${testCases.length + 1}.yaml`,
-        preconditions: item.preconditions ?? "",
-        expectedBehavior: item.expectedBehavior ?? "",
-        documentation: item.documentation ?? "",
-        relatedTestIds: [],
-        requestHeaders: { "Accept": "application/json" },
-        cookies: {},
-        expectedStatus: item.expectedStatus ?? 200,
-        testType: "web",
-        config: {},
-        assertions: [],
-        captureResponseHeaders: ["X-Cache", "X-Request-ID"],
-        filmstrip: { enabled: false, threshold: 0.99 },
-        predicates: item.predicates ?? [],
-        version: 1,
-        changelog: [],
-      });
-      testCases.push(tc);
-    }
-  } catch {
-    throw new Error(
-      `Failed to parse LLM response as test cases. Raw: ${res.content.substring(0, 200)}`,
-    );
-  }
-
-  return testCases;
-}
-
-// ── Test Config URL Encoding ─────────────────────────────────────────
-
-const PENDING_TEST_CONFIG_KEY = "aware_pending_test_config";
-
-export function savePendingTestConfig(config: Record<string, unknown>): void {
-  localStorage.setItem(PENDING_TEST_CONFIG_KEY, JSON.stringify(config));
-}
-
-export function getPendingTestConfig(): Record<string, unknown> | null {
-  try {
-    const raw = localStorage.getItem(PENDING_TEST_CONFIG_KEY);
-    if (!raw) return null;
-    localStorage.removeItem(PENDING_TEST_CONFIG_KEY);
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-export function encodeTestConfigForNav(config: Record<string, unknown>): string {
-  try {
-    const json = JSON.stringify(config);
-    return btoa(encodeURIComponent(json));
-  } catch {
-    return "";
-  }
-}
-
-export function decodeTestConfigFromNav(encoded: string): Record<string, unknown> {
-  try {
-    const json = decodeURIComponent(atob(encoded));
-    return JSON.parse(json);
-  } catch {
-    return {};
-  }
-}
-
-export function extractTestConfigFromMessage(content: string): Record<string, unknown> | null {
-  const startMarker = "---TEST_CONFIG_START---";
-  const endMarker = "---TEST_CONFIG_END---";
-  const startIdx = content.indexOf(startMarker);
-  const endIdx = content.indexOf(endMarker);
-  if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return null;
-  const jsonStr = content.substring(startIdx + startMarker.length, endIdx).trim();
-  try {
-    return JSON.parse(jsonStr);
-  } catch {
-    return null;
-  }
-}

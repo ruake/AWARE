@@ -1,14 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import {
-  extractTestConfigFromMessage,
-  savePendingTestConfig,
-  getPendingTestConfig,
-  encodeTestConfigForNav,
-  decodeTestConfigFromNav,
   clearChatHistory,
   llmChat,
   setLLMConfig,
-  getLLMConfig,
 } from "./llm";
 import "./skills";
 
@@ -18,147 +12,7 @@ beforeEach(() => {
   setLLMConfig({ provider: "mock" });
 });
 
-describe("extractTestConfigFromMessage", () => {
-  it("extracts JSON between markers", () => {
-    const content = `Here is the config:
----TEST_CONFIG_START---
-{"name":"Cache HIT Test","category":"caching","priority":"P1","severity":"minor","status":"active"}
----TEST_CONFIG_END---
-Review it and confirm.`;
-    const config = extractTestConfigFromMessage(content);
-    expect(config).not.toBeNull();
-    expect(config!.name).toBe("Cache HIT Test");
-    expect(config!.category).toBe("caching");
-    expect(config!.priority).toBe("P1");
-  });
-
-  it("returns null when no markers present", () => {
-    const result = extractTestConfigFromMessage("just a normal message");
-    expect(result).toBeNull();
-  });
-
-  it("returns null for invalid JSON between markers", () => {
-    const content = `---TEST_CONFIG_START---
-{invalid json}
----TEST_CONFIG_END---`;
-    const result = extractTestConfigFromMessage(content);
-    expect(result).toBeNull();
-  });
-
-  it("returns null with only start marker", () => {
-    const content = `---TEST_CONFIG_START---
-{"name":"test"}`;
-    const result = extractTestConfigFromMessage(content);
-    expect(result).toBeNull();
-  });
-
-  it("handles empty JSON object", () => {
-    const content = `---TEST_CONFIG_START---
-{}
----TEST_CONFIG_END---`;
-    const result = extractTestConfigFromMessage(content);
-    expect(result).toEqual({});
-  });
-});
-
-describe("savePendingTestConfig / getPendingTestConfig", () => {
-  it("saves and retrieves config", () => {
-    const config = { name: "Test", category: "caching", priority: "P1" };
-    savePendingTestConfig(config);
-    const retrieved = getPendingTestConfig();
-    expect(retrieved).toEqual(config);
-  });
-
-  it("clears config after retrieval", () => {
-    savePendingTestConfig({ name: "Test" });
-    getPendingTestConfig();
-    expect(getPendingTestConfig()).toBeNull();
-  });
-
-  it("returns null when no config stored", () => {
-    expect(getPendingTestConfig()).toBeNull();
-  });
-
-  it("handles complex nested config", () => {
-    const config = {
-      name: "CDN Cache HIT Verification",
-      description: "Validates edge cache behavior",
-      category: "caching",
-      priority: "P0",
-      severity: "critical",
-      status: "active",
-      tags: ["caching", "cdn", "regression"],
-      owner: "engineer@co.com",
-      automated: true,
-      predicates: [
-        { id: "pred_0", type: "statusCode", field: "", expected: "200", operator: "equals" },
-        { id: "pred_1", type: "responseTime", field: "duration", expected: "500", operator: "lt" },
-      ],
-    };
-    savePendingTestConfig(config);
-    const retrieved = getPendingTestConfig();
-    expect(retrieved).toEqual(config);
-    expect(Array.isArray(retrieved!.predicates)).toBe(true);
-    expect(retrieved!.predicates).toHaveLength(2);
-  });
-});
-
-describe("encode / decode test config for nav", () => {
-  it("round-trips a config through encode/decode", () => {
-    const config = { name: "Geo Routing Test", category: "routing", priority: "P2" };
-    const encoded = encodeTestConfigForNav(config);
-    expect(typeof encoded).toBe("string");
-    expect(encoded.length).toBeGreaterThan(0);
-    const decoded = decodeTestConfigFromNav(encoded);
-    expect(decoded).toEqual(config);
-  });
-
-  it("handles special characters", () => {
-    const config = { name: "TLS 1.3 & QUIC Test", path: "/api/v1/data?env=prod" };
-    const encoded = encodeTestConfigForNav(config);
-    const decoded = decodeTestConfigFromNav(encoded);
-    expect(decoded).toEqual(config);
-  });
-});
-
 describe("llmChat with skill routing (mock)", () => {
-  it("responds with test config on generate-tests request with category context", async () => {
-    // First message establishes conversation (mock returns greeting)
-    await llmChat("hello", "[SKILL:generate-tests]\nYou are a CDN test engineer.");
-    // Second message with request containing category context → mock generates config directly
-    const res = await llmChat("I need to create a test for CDN caching", "[SKILL:generate-tests]\nYou are a CDN test engineer.");
-    expect(res.content).toContain("---TEST_CONFIG_START---");
-    expect(res.content).toContain("---TEST_CONFIG_END---");
-
-    const config = extractTestConfigFromMessage(res.content);
-    expect(config).not.toBeNull();
-    expect(config!.category).toBe("caching");
-    expect(res.finishReason).toBe("stop");
-  });
-
-  it("responds with test config on complete form submission", async () => {
-    // Establish conversation
-    await llmChat("hello", "[SKILL:generate-tests]\nYou are a CDN test engineer.");
-
-    const formData = [
-      "name: CDN Cache HIT Verification",
-      "category: caching",
-      "priority: P1",
-      "severity: major",
-      "expectedStatus: 200",
-      "automated: true",
-    ].join("\n");
-
-    const res = await llmChat(formData, "[SKILL:generate-tests]\nYou are a CDN test engineer.");
-    expect(res.content).toContain("---TEST_CONFIG_START---");
-    expect(res.content).toContain("---TEST_CONFIG_END---");
-
-    const config = extractTestConfigFromMessage(res.content);
-    expect(config).not.toBeNull();
-    expect(config!.name).toBe("CDN Cache HIT Verification");
-    expect(config!.category).toBe("caching");
-  });
-
   it("runs generate-script skill when [SKILL:generate-script] is set", async () => {
     await llmChat("hello", "[SKILL:generate-script]\nYou are a test engineer.");
     const res = await llmChat("generate a script for cache HIT", "[SKILL:generate-script]\nYou are a test engineer.");
@@ -176,39 +30,5 @@ describe("llmChat with skill routing (mock)", () => {
     await llmChat("hello", "[SKILL:explain-diff]\nYou are a release engineer.");
     const res = await llmChat("compare baseline vs candidate", "[SKILL:explain-diff]\nYou are a release engineer.");
     expect(res.content).toContain("Comparison");
-  });
-
-  it("runs generate-suite skill when [SKILL:generate-suite] is set", async () => {
-    await llmChat("hello", "[SKILL:generate-suite]\nYou are an infrastructure engineer.");
-    const res = await llmChat("create a suite for CDN", "[SKILL:generate-suite]\nYou are an infrastructure engineer.");
-    expect(res.content).toContain("name:");
-  });
-});
-
-describe("config persistence across chat", () => {
-  it("matches the complete copilot flow: greeting → config → localStorage bridge", async () => {
-    // Establish conversation
-    await llmChat("hello", "[SKILL:generate-tests]\nYou are a CDN engineer.");
-
-    // Second message with form data → mock generates config directly
-    const formData = [
-      "name: CDN Cache HIT Verification",
-      "category: caching",
-      "priority: P0",
-      "severity: critical",
-      "expectedStatus: 200",
-      "automated: true",
-    ].join("\n");
-    const configRes = await llmChat(formData, "[SKILL:generate-tests]\nYou are a CDN engineer.");
-    expect(configRes.content).toContain("---TEST_CONFIG_START---");
-
-    const config = extractTestConfigFromMessage(configRes.content);
-    expect(config).not.toBeNull();
-
-    savePendingTestConfig(config!);
-
-    const retrieved = getPendingTestConfig();
-    expect(retrieved).toEqual(config);
-    expect(getPendingTestConfig()).toBeNull();
   });
 });

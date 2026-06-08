@@ -1,13 +1,11 @@
 import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { DIFF_ROWS, getTestCaseById, reconcile, getCheckInSteps, generateYamlContent, onSyncStatusChange } from "@/lib/data";
+import { DIFF_ROWS, getTestCaseById } from "@/lib/data";
 import { TestDocTopBar } from "@/components/aware/TestDocTopBar";
 import { TestDocSidebar } from "@/components/aware/TestDocSidebar";
 import { TestDocChangelog } from "@/components/aware/TestDocChangelog";
 import { TestFlowDiagram } from "@/components/aware/TestFlowDiagram";
-import { RepoStatusBadge } from "@/components/aware/RepoStatusBadge";
-import { Github, Download, RefreshCw, CheckCircle2, AlertTriangle } from "lucide-react";
 
 export default function TestDoc() {
   const [location] = useLocation();
@@ -21,91 +19,10 @@ export default function TestDoc() {
 
   const testCase = React.useMemo(() => getTestCaseById(testId), [testId]);
 
-  const [syncing, setSyncing] = React.useState(false);
-  const [checkInSteps, setCheckInSteps] = React.useState<string[] | null>(null);
-
-  React.useEffect(() => {
-    const unsub = onSyncStatusChange((status) => {
-      setSyncing(status === "syncing");
-    });
-    return unsub;
-  }, []);
-
-  const handleReconcile = async () => {
-    if (!testCase) return;
-    setSyncing(true);
-    await reconcile();
-    setSyncing(false);
-  };
-
-  const handleShowCheckInSteps = () => {
-    if (!testCase) return;
-    setCheckInSteps(prev => prev ? null : getCheckInSteps(testCase));
-  };
-
-  const handleDownloadYaml = () => {
-    if (!testCase) return;
-    const yaml = generateYamlContent(testCase);
-    const blob = new Blob([yaml], { type: "text/yaml" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${testCase.id}.yaml`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <AppLayout activeHref="/tests">
       <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 80px)", maxWidth: 1800, margin: "0 auto", gap: 16 }}>
         <TestDocTopBar testId={testId} testName={testName} testStatus={testStatus} testCategory={testCategory} testSuite={testSuite} testCase={testCase} />
-
-        {/* GitHub Sync Section */}
-        <div className="gcp-card" style={{ padding: "12px 16px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Github size={16} style={{ color: "var(--gcp-text-secondary)" }} />
-              <span style={{ fontWeight: 600, fontSize: 13 }}>Repository Sync</span>
-              {testCase && <RepoStatusBadge status={testCase.repoStatus} />}
-            </div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={handleReconcile} disabled={syncing} className="gcp-button gcp-button-xs">
-                <RefreshCw size={12} /> {syncing ? "Syncing..." : "Re-sync"}
-              </button>
-              <button onClick={handleShowCheckInSteps} className="gcp-button gcp-button-xs">
-                <Github size={12} /> Check-in Steps
-              </button>
-              <button onClick={handleDownloadYaml} className="gcp-button gcp-button-xs">
-                <Download size={12} /> YAML
-              </button>
-            </div>
-          </div>
-
-          {checkInSteps && (
-            <div style={{ marginTop: 12, padding: 12, background: "var(--gcp-grey-bg)", borderRadius: 6, fontSize: 11, lineHeight: 1.6, whiteSpace: "pre-wrap", fontFamily: "monospace", maxHeight: 300, overflowY: "auto" }}>
-              {checkInSteps.join("\n\n")}
-            </div>
-          )}
-
-          {testCase?.repoStatus === "missing" && (
-            <div style={{ marginTop: 8, display: "flex", alignItems: "flex-start", gap: 6, padding: "8px 12px", background: "var(--gcp-fail-bg)", borderRadius: 6, fontSize: 11, color: "var(--gcp-fail)" }}>
-              <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
-              <div>
-                <strong>Not in repository</strong> — This test case will not be executed by CI until it is checked in. Use the check-in steps above to commit it to the repo.
-              </div>
-            </div>
-          )}
-
-          {testCase?.repoStatus === "synced" && (
-            <div style={{ marginTop: 8, display: "flex", alignItems: "flex-start", gap: 6, padding: "8px 12px", background: "var(--gcp-pass-bg)", borderRadius: 6, fontSize: 11, color: "var(--gcp-pass)" }}>
-              <CheckCircle2 size={14} style={{ flexShrink: 0, marginTop: 1 }} />
-              <div>
-                <strong>In repository</strong> — This test case is checked into the GitHub repo and will be executed by CI.
-                {testCase.lastSyncedAt && <span style={{ display: "block", marginTop: 2, opacity: 0.7 }}>Last confirmed: {new Date(testCase.lastSyncedAt).toLocaleString()}</span>}
-              </div>
-            </div>
-          )}
-        </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, overflow: "hidden" }}>
           <TestDocSidebar testCase={testCase} />

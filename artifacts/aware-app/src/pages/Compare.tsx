@@ -4,10 +4,10 @@ import { AppLayout } from "@/components/aware/AppLayout";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useSyncedUrlState } from "@/lib/urlState";
-import { RUNS, DIFF_ROWS, setPromotionDecision } from "@/lib/data";
+import { RUNS, DIFF_ROWS } from "@/lib/data";
 import type { DiffRow } from "@/lib/types";
 import {
-  Link2, Github, Share2, BarChart3, ChevronLeft, ChevronRight, Zap, XCircle, ArrowUpRight, Search,
+  Link2, Github, Share2, BarChart3, ChevronLeft, ChevronRight, Zap, ArrowUpRight, Search,
 } from "lucide-react";
 
 function copy(text: string) { navigator.clipboard.writeText(text).catch(() => {}); }
@@ -119,7 +119,6 @@ export default function Compare() {
   const [, navigate] = useLocation();
   const { show, Toast } = useSimpleToast();
 
-  const runIds = RUNS.map(r => r.id);
   const [baseline, setBaseline] = useSyncedUrlState("baseline", RUNS[RUNS.length - 1]?.id ?? "");
   const [candidate, setCandidate] = useSyncedUrlState("candidate", RUNS[0]?.id ?? "");
   const [selectedId, setSelectedId] = useSyncedUrlState<string | null>("sel", null);
@@ -173,11 +172,6 @@ export default function Compare() {
 
   const selectedDiff = selectedId ? diffs.find(d => d.id === selectedId) ?? null : null;
   const hasActiveFilters = Object.values(colFilters).some(v => v);
-
-  const confirmPromotion = (action: "promote" | "block") => {
-    setPromotionDecision({ runId: candidate, decision: action, decidedBy: "you", decidedAt: new Date().toISOString(), note: `${action === "promote" ? "Approved" : "Blocked"} via comparison` });
-    show(action === "promote" ? "Promotion approved — config can be deployed" : "Promotion blocked — regressions must be fixed");
-  };
 
   return (
     <AppLayout activeHref="/compare">
@@ -270,28 +264,14 @@ export default function Compare() {
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Build {candidateRun?.build}</span>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Rev {candidateRun?.rev}</span>
           {regressions.length > 0 ? (
-            <>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "var(--gcp-red-bg)", border: "1px solid var(--gcp-red)", borderRadius: 3, padding: "1px 6px", fontSize: 10 }}>
-                <span className="gcp-badge gcp-badge-fail" style={{ fontSize: 8, padding: "0 4px" }}>{regressions.length}</span>
-                Blocked
-              </span>
-              <button onClick={() => confirmPromotion("block")} style={{ fontSize: 9, padding: "1px 6px", border: "1px solid var(--gcp-red)", borderRadius: 3, background: "transparent", cursor: "pointer", color: "var(--gcp-red)" }}>
-                <XCircle size={9} /> Block
-              </button>
-              <button onClick={() => { copy(`Bulk regression report\nBaseline: ${baseline}\nCandidate: ${candidate}\n${regressions.length} regressions:\n${regressions.map(r => `- ${r.name}`).join("\n")}`); show("Bulk issue template copied"); }}
-                style={{ fontSize: 9, padding: "1px 6px", border: "1px solid var(--gcp-red)", borderRadius: 3, background: "transparent", cursor: "pointer", color: "var(--gcp-red)" }}>
-                <Github size={9} /> Issues
-              </button>
-            </>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "var(--gcp-red-bg)", border: "1px solid var(--gcp-red)", borderRadius: 3, padding: "1px 6px", fontSize: 10 }}>
+              <span className="gcp-badge gcp-badge-fail" style={{ fontSize: 8, padding: "0 4px" }}>{regressions.length}</span>
+              Blocked
+            </span>
           ) : (
-            <>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 3, color: "var(--gcp-green)", fontSize: 10, fontWeight: 600 }}>
-                <Zap size={10} /> Ready to promote
-              </span>
-              <button onClick={() => confirmPromotion("promote")} style={{ fontSize: 9, padding: "1px 6px", border: "1px solid var(--gcp-green)", borderRadius: 3, background: "var(--gcp-green-bg)", cursor: "pointer", color: "var(--gcp-green)" }}>
-                <Zap size={9} /> Promote
-              </button>
-            </>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 3, color: "var(--gcp-green)", fontSize: 10, fontWeight: 600 }}>
+              <Zap size={10} /> Ready to promote
+            </span>
           )}
           <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>{diffs.length} tests</span>
         </div>

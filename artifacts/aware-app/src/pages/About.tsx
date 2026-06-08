@@ -4,10 +4,9 @@ import { Link } from "wouter";
 import {
   Zap, BarChart3, GitCompare, Bug, Activity, Shield, Globe, Book,
   ChevronDown, ChevronLeft, ChevronRight, CheckCircle2,
-  Maximize2, X, Search, Settings, Bot,
+  Maximize2, X, Search,
 } from "lucide-react";
 import { RUNS, DIFF_ROWS } from "@/lib/data";
-import { getFeatureFlags, updateFeatureFlag, subscribeToFeatureFlags } from "@/lib/data";
 
 function DocTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
@@ -555,9 +554,6 @@ export default function About() {
   ];
 
   const [showDocs, setShowDocs] = React.useState(false);
-  const [ff, setFf] = React.useState(getFeatureFlags);
-
-  React.useEffect(() => subscribeToFeatureFlags(() => setFf(getFeatureFlags())), []);
 
   return (
     <AppLayout>
@@ -693,37 +689,6 @@ export default function About() {
               ))}
             </tbody>
           </table>
-        </div>
-
-        {/* Settings */}
-        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--gcp-text)" }}>Settings</h2>
-        <div className="gcp-card" style={{ padding: 20, marginBottom: 28 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 36, height: 36, background: "var(--gcp-blue-bg)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Bot size={18} color="var(--gcp-blue)" />
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2, color: "var(--gcp-text)" }}>Copilot</div>
-                  <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>AI chat assistant with test generation and analysis</div>
-                </div>
-              </div>
-              <button
-                onClick={() => updateFeatureFlag("copilot", !ff.copilot)}
-                style={{
-                  width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", position: "relative",
-                  background: ff.copilot ? "var(--gcp-blue)" : "#ccc",
-                  transition: "background 0.2s",
-                }}
-              >
-                <div style={{
-                  width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3,
-                  left: ff.copilot ? 23 : 3, transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                }} />
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Project Documentation toggle */}
