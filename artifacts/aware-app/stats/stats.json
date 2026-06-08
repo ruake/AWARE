@@ -1,0 +1,35 @@
+{
+  "generated": "2026-06-08T08:50:47.396Z",
+  "total": 26,
+  "automated": 26,
+  "manual": 0,
+  "byStatus": {
+    "active": 23,
+    "disabled": 1,
+    "deprecated": 2
+  },
+  "byPriority": {
+    "P0": 8,
+    "P1": 6,
+    "P2": 6,
+    "P3": 6
+  },
+  "byCategory": {
+    "geo-match": 3,
+    "locale-split": 3,
+    "url-health": 4,
+    "security": 3,
+    "performance": 3,
+    "caching": 3,
+    "routing": 3,
+    "tls": 2,
+    "ddos": 2
+  },
+  "bySeverity": {
+    "critical": 8,
+    "major": 6,
+    "minor": 6,
+    "trivial": 6
+  },
+  "coverage": 9
+}
