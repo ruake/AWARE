@@ -258,32 +258,32 @@ export default function Compare() {
           <span className={`gcp-badge ${candidateRun?.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{candidateRun?.network}</span>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Build {candidateRun?.build}</span>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Rev {candidateRun?.rev}</span>
-          <span style={{ flex: 1 }} />
-          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>{diffs.length} tests compared</span>
+          {regressions.length > 0 ? (
+            <>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "var(--gcp-red-bg)", border: "1px solid var(--gcp-red)", borderRadius: 3, padding: "1px 6px", fontSize: 10 }}>
+                <span className="gcp-badge gcp-badge-fail" style={{ fontSize: 8, padding: "0 4px" }}>{regressions.length}</span>
+                Blocked
+              </span>
+              <button onClick={() => confirmPromotion("block")} style={{ fontSize: 9, padding: "1px 6px", border: "1px solid var(--gcp-red)", borderRadius: 3, background: "transparent", cursor: "pointer", color: "var(--gcp-red)" }}>
+                <XCircle size={9} /> Block
+              </button>
+              <button onClick={() => { copy(`Bulk regression report\nBaseline: ${baseline}\nCandidate: ${candidate}\n${regressions.length} regressions:\n${regressions.map(r => `- ${r.name}`).join("\n")}`); show("Bulk issue template copied"); }}
+                style={{ fontSize: 9, padding: "1px 6px", border: "1px solid var(--gcp-red)", borderRadius: 3, background: "transparent", cursor: "pointer", color: "var(--gcp-red)" }}>
+                <Github size={9} /> Issues
+              </button>
+            </>
+          ) : (
+            <>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 3, color: "var(--gcp-green)", fontSize: 10, fontWeight: 600 }}>
+                <Zap size={10} /> Ready to promote
+              </span>
+              <button onClick={() => confirmPromotion("promote")} style={{ fontSize: 9, padding: "1px 6px", border: "1px solid var(--gcp-green)", borderRadius: 3, background: "var(--gcp-green-bg)", cursor: "pointer", color: "var(--gcp-green)" }}>
+                <Zap size={9} /> Promote
+              </button>
+            </>
+          )}
+          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>{diffs.length} tests</span>
         </div>
-
-        {/* Promotion/regression — full-width ribbon w/ badges */}
-        {regressions.length > 0 ? (
-          <div style={{ background: "var(--gcp-red-bg)", border: "1px solid var(--gcp-red)", borderRadius: 4, padding: "8px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <span className="gcp-badge gcp-badge-fail" style={{ fontSize: 10 }}>{regressions.length} regression{regressions.length !== 1 ? "s" : ""}</span>
-            <span style={{ fontSize: 12, flex: 1 }}><strong>Promotion blocked.</strong> Fix regressions before deploying.</span>
-            <button onClick={() => confirmPromotion("block")} className="gcp-button" style={{ fontSize: 11, padding: "3px 10px", color: "var(--gcp-red)", borderColor: "var(--gcp-red)" }}>
-              <XCircle size={11} /> Confirm Block
-            </button>
-            <button onClick={() => { copy(`Bulk regression report\nBaseline: ${baseline}\nCandidate: ${candidate}\n${regressions.length} regressions:\n${regressions.map(r => `- ${r.name}`).join("\n")}`); show("Bulk issue template copied"); }}
-              className="gcp-button-danger" style={{ fontSize: 11, padding: "3px 10px" }}>
-              <Github size={11} /> File Issues
-            </button>
-          </div>
-        ) : (
-          <div style={{ background: "var(--gcp-green-bg)", border: "1px solid var(--gcp-green)", borderRadius: 4, padding: "8px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>All Clear</span>
-            <span style={{ fontSize: 12, flex: 1, fontWeight: 500 }}>No regressions — ready to promote to <strong>Production</strong></span>
-            <button onClick={() => confirmPromotion("promote")} className="gcp-button-success" style={{ fontSize: 11, padding: "3px 10px" }}>
-              <Zap size={11} /> Approve Promotion
-            </button>
-          </div>
-        )}
 
         {/* Table + side panel */}
         <div style={{ display: "flex", gap: 14 }}>
