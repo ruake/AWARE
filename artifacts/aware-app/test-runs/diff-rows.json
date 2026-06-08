@@ -1,0 +1,152 @@
+[
+  {
+    "id": "diff_0",
+    "name": "Geo match PoP resolution",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 122,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_1",
+    "name": "Locale split fr-CA content",
+    "baseStatus": "PASS",
+    "candStatus": "FAIL",
+    "durBase": 95,
+    "durCand": 98,
+    "category": "locale-split",
+    "state": "regression"
+  },
+  {
+    "id": "diff_2",
+    "name": "URL health check 200",
+    "baseStatus": "FAIL",
+    "candStatus": "PASS",
+    "durBase": 210,
+    "durCand": 185,
+    "category": "url-health",
+    "state": "fixed"
+  },
+  {
+    "id": "diff_3",
+    "name": "Edge redirect preserves params",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 88,
+    "durCand": 91,
+    "category": "routing",
+    "state": "fishy"
+  },
+  {
+    "id": "diff_4",
+    "name": "Cache TTL header match",
+    "baseStatus": "PASS",
+    "candStatus": "FAIL",
+    "durBase": 145,
+    "durCand": 148,
+    "category": "caching",
+    "state": "regression"
+  },
+  {
+    "id": "diff_5",
+    "name": "Gzip compression",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 120,
+    "durCand": 340,
+    "category": "performance",
+    "state": "duration"
+  },
+  {
+    "id": "diff_6",
+    "name": "CORS headers",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 75,
+    "durCand": 77,
+    "category": "security",
+    "state": "fishy"
+  },
+  {
+    "id": "diff_7",
+    "name": "Rate limiting",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 320,
+    "durCand": 318,
+    "category": "security",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_8",
+    "name": "TLS 1.3 negotiation",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 55,
+    "durCand": 58,
+    "category": "tls",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_9",
+    "name": "WAF block SQL injection",
+    "baseStatus": "PASS",
+    "candStatus": "FAIL",
+    "durBase": 180,
+    "durCand": 182,
+    "category": "security",
+    "state": "regression"
+  },
+  {
+    "id": "diff_10",
+    "name": "JWT expiry 401",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 95,
+    "durCand": 97,
+    "category": "security",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_11",
+    "name": "CDN purge invalidation",
+    "baseStatus": "FAIL",
+    "candStatus": "PASS",
+    "durBase": 4200,
+    "durCand": 3800,
+    "category": "caching",
+    "state": "fixed"
+  },
+  {
+    "id": "diff_12",
+    "name": "IPv6 preference",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 66,
+    "durCand": 68,
+    "category": "routing",
+    "state": "fishy"
+  },
+  {
+    "id": "diff_13",
+    "name": "HTTP/3 QUIC upgrade",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 110,
+    "durCand": 320,
+    "category": "performance",
+    "state": "duration"
+  },
+  {
+    "id": "diff_14",
+    "name": "Origin shield hit ratio",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 200,
+    "durCand": 205,
+    "category": "caching",
+    "state": "unchanged"
+  }
+]
