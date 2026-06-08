@@ -1,0 +1,21 @@
+{
+  "generated": "2026-06-08T08:50:46.821Z",
+  "totalTests": 26,
+  "categories": [
+    "geo-match",
+    "locale-split",
+    "url-health",
+    "security",
+    "performance",
+    "caching",
+    "routing",
+    "tls",
+    "ddos"
+  ],
+  "suites": [
+    "suite_full",
+    "suite_geo",
+    "suite_perf"
+  ],
+  "automated": 26
+}
