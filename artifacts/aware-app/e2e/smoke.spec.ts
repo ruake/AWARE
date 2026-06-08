@@ -10,7 +10,7 @@ test.describe("PROOF App Smoke Tests", () => {
 
   test("Runs page shows run table", async ({ page }) => {
     await page.goto("/runs");
-    await expect(page.locator("h1")).toContainText("Run History");
+    await expect(page.locator("h1")).toContainText("Regression Runs");
     const rows = page.locator("table.gcp-table tbody tr");
     await expect(rows.first()).toBeVisible({ timeout: 5000 });
   });
@@ -25,7 +25,7 @@ test.describe("PROOF App Smoke Tests", () => {
   test("Copilot page loads and shows chat input", async ({ page }) => {
     await page.goto("/copilot");
     await expect(page.getByText("AI Copilot").first()).toBeVisible({ timeout: 5000 });
-    const input = page.locator("input[type='text'], textarea");
+    const input = page.locator("input.gcp-input");
     await expect(input.first()).toBeVisible({ timeout: 5000 });
   });
 
@@ -37,7 +37,7 @@ test.describe("PROOF App Smoke Tests", () => {
 
   test("Compare page shows diff table", async ({ page }) => {
     await page.goto("/compare");
-    await expect(page.locator("h1").or(page.locator("h2"))).toBeVisible({ timeout: 5000 });
+    await expect(page.locator("table.gcp-table")).toBeVisible({ timeout: 5000 });
     const table = page.locator("table.gcp-table");
     await expect(table).toBeVisible({ timeout: 5000 });
   });
