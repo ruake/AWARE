@@ -10,13 +10,13 @@ import {
 
 type EntityKind = "run" | "test" | "comparison" | "testdoc";
 
-const BASE = "https://aware.salesforce.com";
+const BASE = "https://proof.example.com";
 
 const ENTITIES = {
   run: {
     label: "Run", icon: PlayCircle,
     id: "run_892_2341.1.0_prod_1001", status: "FAIL", statusColor: "var(--gcp-red)",
-    title: "Prod/Production · PM 892 · EW 2341.1.0",
+    title: "Prod/Production · Build v892 · Rev 2341.1.0",
     meta: "45m · 2 failures · 2026-06-06",
     url: `${BASE}/runs/run_892_2341.1.0_prod_1001`,
     short: `${BASE}/r/xQ9kL2`,
@@ -32,7 +32,7 @@ const ENTITIES = {
   comparison: {
     label: "Comparison", icon: GitCompare,
     id: "cmp_892_vs_891_prod", status: "REGRESSION", statusColor: "var(--gcp-red)",
-    title: "PM 892 vs PM 891 — Prod/Production",
+    title: "Build v892 vs Build v891 — Prod/Production",
     meta: "+7 regressions · +12 fixed · 3d ago",
     url: `${BASE}/compare/run_892..run_891`,
     short: `${BASE}/c/nT7vK1`,
@@ -74,11 +74,11 @@ export default function Sharing() {
     copyToClipboard(text);
   };
 
-  const slackMsg = `*[A.W.A.K.E.]* ${e.status} detected on \`${e.id}\`\n> ${e.title}\n> ${e.meta}\n\n:link: <${e.url}|View in A.W.A.K.E.>`;
+  const slackMsg = `*[PROOF]* ${e.status} detected on \`${e.id}\`\n> ${e.title}\n> ${e.meta}\n\n:link: <${e.url}|View in PROOF>`;
 
-  const githubBody = `## A.W.A.K.E. Regression Report\n\n**Entity:** \`${e.id}\`\n**Status:** ${e.status}\n**Context:** ${e.title}\n**Detail:** ${e.meta}\n\n\`\`\`bash\nopen "${e.url}"\n\`\`\``;
+  const githubBody = `## PROOF Regression Report\n\n**Entity:** \`${e.id}\`\n**Status:** ${e.status}\n**Context:** ${e.title}\n**Detail:** ${e.meta}\n\n\`\`\`bash\nopen "${e.url}"\n\`\`\``;
 
-  const emailBody = `${e.title}\n\nStatus: ${e.status}\nDetail: ${e.meta}\n\nView in A.W.A.K.E.: ${e.url}`;
+  const emailBody = `${e.title}\n\nStatus: ${e.status}\nDetail: ${e.meta}\n\nView in PROOF: ${e.url}`;
 
   const badge = BADGES[activeBadge];
 
@@ -190,15 +190,15 @@ export default function Sharing() {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--gcp-grey-bg)", border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "8px 10px", marginBottom: 8 }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {`[![A.W.A.K.E. ${badge.target}](${BASE}/badges/${badge.target.toLowerCase().replace(/\//g, "-").replace(/\s/g, "")}.svg)](${BASE})`}
+                  {`[![PROOF ${badge.target}](${BASE}/badges/${badge.target.toLowerCase().replace(/\//g, "-").replace(/\s/g, "")}.svg)](${BASE})`}
                 </span>
-                <CopyBtn id="badge-md" text={`[![A.W.A.K.E. ${badge.target}](${BASE}/badges/${badge.target.toLowerCase().replace(/\//g, "-").replace(/\s/g, "")}.svg)](${BASE})`} onClick={copy} />
+                <CopyBtn id="badge-md" text={`[![PROOF ${badge.target}](${BASE}/badges/${badge.target.toLowerCase().replace(/\//g, "-").replace(/\s/g, "")}.svg)](${BASE})`} onClick={copy} />
               </div>
             </div>
             <div>
               <div style={{ fontSize: 11, fontWeight: 500, color: "var(--gcp-text-secondary)", textTransform: "uppercase", marginBottom: 6 }}>HTML Embed</div>
               <pre style={{ fontSize: 11, lineHeight: 1.4, padding: 10, borderRadius: 4, border: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)", whiteSpace: "pre-wrap", fontFamily: "var(--font-mono)", maxHeight: 80, overflow: "auto", margin: 0 }}>
-                {`<img src="${BASE}/badges/${badge.target.toLowerCase().replace(/\//g, "-").replace(/\s/g, "")}.svg" alt="A.W.A.K.E. ${badge.target}" />`}
+                {`<img src="${BASE}/badges/${badge.target.toLowerCase().replace(/\//g, "-").replace(/\s/g, "")}.svg" alt="PROOF ${badge.target}" />`}
               </pre>
             </div>
           </div>

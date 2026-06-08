@@ -18,5 +18,6 @@ export { EMPTY_FILTER, TagBadge, priorityColor } from "./TestCard";
 export { TestDocChangelog } from "./TestDocChangelog";
 export { TestDocSidebar } from "./TestDocSidebar";
 export { TestDocTopBar } from "./TestDocTopBar";
+export { TestFlowDiagram } from "./TestFlowDiagram";
 export { TestManagerSidePanel } from "./TestManagerSidePanel";
 export { YamlPreview, generateGitHubActionsYaml } from "./YamlPreview";

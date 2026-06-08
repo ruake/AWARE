@@ -70,7 +70,7 @@ localPort = 5174
 
 [[ports]]
 localPort = 5999
-externalPort = 3002
+externalPort = 5900
 
 [[ports]]
 localPort = 8080

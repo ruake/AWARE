@@ -1,9 +1,9 @@
-# A.W.A.K.E. — opencode Agent Instructions
+# PROOF — opencode Agent Instructions
 
 ## Project
 - React 19 + TypeScript 5.9 + Vite 7 SPA (Tailwind CSS 4 in index.css only, pages use inline `style={{}}`)
 - Single app at `artifacts/aware-app/` — mockup fully removed
-- Akamai CDN regression observability tool
+- Configurable web app test observability dashboard
 - Live: https://ruake.github.io/AWARE | Repo: https://github.com/ruake/AWARE
 
 ## Commands
@@ -19,7 +19,8 @@ pnpm run typecheck          # TS check (MUST pass before commit)
 - **Routing**: wouter (`<Switch>` / `<Route>` / `<Link>`) with `base` from `import.meta.env.BASE_URL`
 - **Data layer**: `src/lib/` — 15 modules. Barrel re-exported through `data.ts`. localStorage-persisted CRUD store (`aware_test_cases_v2`, `aware_test_suites_v2`); subscription system (`_notify()`, `_tcListeners`, `_tsListeners`) for reactive updates. Modules: `store.ts`, `runs.ts`, `testCases.ts`, `testSuites.ts`, `promotions.ts`, `testImportExport.ts`, `constants.ts`, `utils.ts`
 - **Types**: `src/lib/types.ts` — all type interfaces (TestCase, TestSuite, Predicate, GenerateParams, LLM types, error classes, etc.)
-- **Charts**: Recharts (not Google Charts)
+- **Charts**: Google Charts via `react-google-charts` (wrappers in `GoogleCharts.tsx`: `GoogleFilterableTable`, `GoogleAreaChart`, `GoogleBarChart`)
+- **Env Config**: `src/lib/envConfig.ts` — configurable environment system with localStorage CRUD, subscription reactivity, defaults for 4 envs each with `baseUrl`/`ips`
 - **Styling**: Inline `style={{}}` with `var(--gcp-*)` CSS variables from `src/_group.css`; shadcn/ui via `class-variance-authority` + `components.json`
 - **LLM/AI**: `src/lib/llm.ts` — provider abstraction (Mock, OpenAI, WebLLM) + singleton service; `src/lib/skills.ts` — 5 skill registry for code gen, test analysis, diff explanation
 - **Error handling**: `classifyError()`, `FetchError`, `TimeoutError`, `ValidationError` in `types.ts`; `ErrorBoundary` at `src/components/aware/ErrorBoundary.tsx`
@@ -27,17 +28,17 @@ pnpm run typecheck          # TS check (MUST pass before commit)
 ## File Layout
 ```
 artifacts/aware-app/src/
-├── lib/                   # data.ts (barrel), store, runs, testCases, testSuites, promotions, constants, testImportExport, utils, llm, skills, types, nav, urlState, useLiveStatus
+├── lib/                   # data.ts (barrel), store, runs, testCases, testSuites, promotions, constants, testImportExport, utils, llm, skills, types, nav, urlState, useLiveStatus, envConfig
 ├── components/
-│   ├── aware/             # AppLayout, ColumnFilter, CTAStatCard, FilterBar, StatusBadge, SectionHeader, GenerateWizard, StatsDashboard, TestCard, TestManagerSidePanel, SuiteTreeItem, SuiteEditor, AddTestsModal, YamlPreview, TestDocTopBar, TestDocSidebar, TestDocChangelog, CommandPalette, ErrorBoundary
+│   ├── aware/             # AppLayout, ColumnFilter, CTAStatCard, FilterBar, StatusBadge, SectionHeader, GenerateWizard, StatsDashboard, TestCard, TestManagerSidePanel, SuiteTreeItem, SuiteEditor, AddTestsModal, YamlPreview, TestDocTopBar, TestDocSidebar, TestDocChangelog, CommandPalette, ErrorBoundary, EnvironmentConfigPanel, GoogleCharts
 │   └── ui/                # shadcn/ui components (button, card, badge, dialog, etc.)
 ├── pages/
-│   ├── Dashboard.tsx      # Multi-env charts, alerts, promotion banner
+│   ├── Dashboard.tsx      # Multi-env Google Charts, alerts, promotion banner, env config panel
 │   ├── Runs.tsx           # Filterable run table + side panel CTAs
 │   ├── RunDetail.tsx      # Test results + evidence viewer
 │   ├── Compare.tsx        # Baseline vs candidate diff + CTA stat cards
 │   ├── TestManager.tsx    # Test case CRUD, bulk actions, multi-format import, stats dashboard, generate wizard
-│   ├── TestSuiteManager.tsx # Suite tree + editor + YAML export + recharts charts
+│   ├── TestSuiteManager.tsx # Suite tree + editor + YAML export + Google Charts
 │   ├── TestAnalytics.tsx  # Per-test analytics (works with tc_N and diff_N IDs)
 │   ├── TestDoc.tsx        # Per-test documentation + 3-column layout
 │   ├── SearchDemo.tsx     # Full-page search wired to real testCasesStore, RUNS, DIFF_ROWS
@@ -76,6 +77,7 @@ artifacts/aware-app/src/
 
 ## Gotchas
 - All pages use inline `style={{}}` NOT Tailwind `className`
+- All charts use Google Charts (`GoogleAreaChart`, `GoogleBarChart`, `GoogleFilterableTable`); Recharts has been fully removed
 - `useSyncedUrlState` setter supports function updaters: `setState(prev => ({ ...prev, field: val }))`
 - `navTo()` in `src/lib/nav.ts` uses `window.location.href` (full nav); use wouter's `useLocation()` for SPA navigation
 - `import.meta.env.BASE_URL` = `/` dev, `/AWARE/` production

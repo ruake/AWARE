@@ -1,0 +1,108 @@
+name: Sync Data Branches
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "artifacts/aware-app/src/data/**"
+      - "artifacts/aware-app/src/lib/runs.ts"
+  schedule:
+    - cron: "0 6 * * 1" # every Monday 6am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-test-cases:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifacts/aware-app
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Generate test-cases data
+        run: node scripts/extract-branch-data.js test-cases
+      - name: Push to test-cases branch
+        run: |
+          git config user.name "AWARE Bot"
+          git config user.email "bot@aware-cdn.dev"
+          git fetch origin test-cases:test-cases 2>/dev/null || git branch test-cases
+          git checkout test-cases
+          git pull origin test-cases --rebase 2>/dev/null || true
+          rm -rf test-cases/
+          cp -r dist/branch-data/test-cases test-cases/
+          git add test-cases/
+          if git diff --cached --quiet; then
+            echo "No changes to test-cases"
+          else
+            git commit -m "sync: update test cases data ($(date -u +%Y-%m-%d))"
+            git push origin test-cases
+          fi
+        shell: bash
+
+  sync-test-runs:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifacts/aware-app
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Generate test-runs data
+        run: node scripts/extract-branch-data.js test-runs
+      - name: Push to test-runs branch
+        run: |
+          git config user.name "PROOF Bot"
+          git config user.email "bot@proof-test.dev"
+          git fetch origin test-runs:test-runs 2>/dev/null || git branch test-runs
+          git checkout test-runs
+          git pull origin test-runs --rebase 2>/dev/null || true
+          rm -rf test-runs/
+          cp -r dist/branch-data/test-runs test-runs/
+          git add test-runs/
+          if git diff --cached --quiet; then
+            echo "No changes to test-runs"
+          else
+            git commit -m "sync: update test run data ($(date -u +%Y-%m-%d))"
+            git push origin test-runs
+          fi
+        shell: bash
+
+  sync-stats:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifacts/aware-app
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Generate stats data
+        run: node scripts/extract-branch-data.js stats
+      - name: Push to stats branch
+        run: |
+          git config user.name "PROOF Bot"
+          git config user.email "bot@proof-test.dev"
+          git fetch origin stats:stats 2>/dev/null || git branch stats
+          git checkout stats
+          git pull origin stats --rebase 2>/dev/null || true
+          rm -rf stats/
+          cp -r dist/branch-data/stats stats/
+          git add stats/
+          if git diff --cached --quiet; then
+            echo "No changes to stats"
+          else
+            git commit -m "sync: update stats ($(date -u +%Y-%m-%d))"
+            git push origin stats
+          fi
+        shell: bash

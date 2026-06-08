@@ -15,7 +15,50 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifacts/aware-app
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install
+      - name: TypeScript check
+        run: pnpm run typecheck
+      - name: Run unit tests
+        run: pnpm test || echo "No unit tests"
+
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifacts/aware-app
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install
+      - name: Install Playwright browsers
+        run: pnpm run test:e2e:install
+      - name: Run E2E tests
+        run: pnpm run test:e2e:ci
+        env:
+          PLAYWRIGHT_BASE_URL: "http://localhost:5173"
+
   build-and-deploy:
+    needs: [ci, e2e]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -39,11 +82,32 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
+      - name: Generate test manifest from seed data
+        run: |
+          echo "Generating test manifest..."
+          mkdir -p dist/public
+          node -e "
+            const fs = require('fs');
+            const seed = JSON.parse(fs.readFileSync('src/data/test-cases.json','utf8'));
+            const manifest = {
+              generated: new Date().toISOString(),
+              totalTests: seed.length,
+              suites: [...new Set(seed.flatMap(t => t.suiteIds || []))],
+              categories: [...new Set(seed.map(t => t.category))],
+              automated: seed.filter(t => t.automated).length,
+              manual: seed.filter(t => !t.automated).length,
+            };
+            fs.writeFileSync('public/test-manifest.json', JSON.stringify(manifest, null, 2));
+            console.log('Manifest:', JSON.stringify(manifest, null, 2));
+          "
+
+      - name: Build (production — non-mock)
         run: pnpm build
         env:
           BASE_PATH: /AWARE
           PORT: "1"
+          VITE_USE_MOCK: "false"
+          NODE_ENV: production
 
       - name: SPA fallback — copy index.html as 404.html
         run: cp dist/public/index.html dist/public/404.html

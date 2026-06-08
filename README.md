@@ -1,9 +1,9 @@
-# A.W.A.K.E. — Akamai Web Analyser & Kit for Evaluations
+# PROOF — Test Observability Dashboard
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Pages](https://img.shields.io/badge/GitHub%20Pages-deployed-blue)](https://ruake.github.io/AWARE)
 
-**A.W.A.K.E.** is a CDN regression observability tool for Akamai configurations. It visualizes pass-rate trends across multiple environments, surfaces regressions via side-by-side run comparison, and provides per-test analytics — all as a static SPA served via GitHub Pages.
+**PROOF** is a configurable web application testing observability dashboard. It visualizes pass-rate trends across multiple environments, surfaces regressions via side-by-side run comparison, and provides per-test analytics — all as a static SPA served via GitHub Pages.
 
 **Live demo:** https://ruake.github.io/AWARE
 
@@ -32,7 +32,7 @@
 |-------|-----------|
 | **Language** | TypeScript 5.9 (strict) |
 | **Frontend** | React 19, Vite 7, Tailwind CSS 4 |
-| **Charts** | Recharts |
+| **Charts** | Google Charts |
 | **LLM** | Mock (offline), OpenAI-compatible, WebLLM (WebGPU) |
 | **Icons** | lucide-react |
 | **Package Manager** | pnpm |
@@ -60,7 +60,7 @@ pnpm build
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `5173` | Dev server port |
-| `BASE_PATH` | `/` | Path prefix (use `/AWARE` for GitHub Pages) |
+| `BASE_PATH` | `/` | Path prefix (use `/PROOF` for GitHub Pages) |
 
 ## Project Structure
 
@@ -98,6 +98,8 @@ Push to `main` triggers the [deploy workflow](.github/workflows/deploy.yml) whic
 2. Builds with `BASE_PATH=/AWARE`
 3. Copies `index.html` as `404.html` for SPA routing
 4. Uploads and deploys to GitHub Pages
+
+> **Note:** The deploy workflow still uses `AWARE` for backwards compatibility until the domain is migrated.
 
 The [run-tests workflow](.github/workflows/run-tests.yml) accepts `workflow_dispatch` inputs (branch, suite, target, environment) for triggerable test runs.
 

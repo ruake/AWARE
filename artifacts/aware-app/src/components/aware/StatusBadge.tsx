@@ -1,6 +1,6 @@
 import React from "react";
 
-type StatusType = "PASS" | "FAIL" | "FLAKY" | "WARNING" | "SKIP" | "RUNNING" | "PARTIAL" | string;
+type StatusType = "PASS" | "FAIL" | "FLAKY" | "WARNING" | "SKIP" | "RUNNING" | "PARTIAL";
 
 interface StatusBadgeProps {
   status: StatusType;

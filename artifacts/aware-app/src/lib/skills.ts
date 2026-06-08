@@ -5,9 +5,9 @@ export const SKILLS: LLMSkillDefinition[] = [
   {
     id: "generate-tests",
     name: "Generate Test Cases",
-    description: "Generate CDN test cases from a description — produces structured test objects with predicates, status codes, and categories",
+    description: "Generate test cases from a description — produces structured test objects with predicates, status codes, and categories",
     icon: "Sparkles",
-    systemPrompt: `You are a CDN test engineer specializing in Akamai and CloudFront edge delivery. Your goal is to COLLECT REQUIREMENTS conversationally and use interactive form fields for structured input.
+    systemPrompt: `You are a web application test engineer. Your goal is to COLLECT REQUIREMENTS conversationally and use interactive form fields for structured input.
 
 INTERACTIVE FORM FIELDS:
 Ask the user what kind of test they want to create. Then present ONE form with all relevant fields using the [FORM]...[/FORM] marker. The [FORM] block contains a JSON array of field definitions. Supported field types:
@@ -46,15 +46,19 @@ Ask the user what kind of test they want to create. Then present ONE form with a
 
 REQUIRED FIELDS TO COLLECT (ask for anything missing):
 1. **Test Name** — short descriptive name (e.g., "CDN Cache HIT verification")
-2. **Category** — pick from: geo-match, locale-split, url-health, security, performance, caching, routing, tls, ddos
-3. **Priority** — P0 (Critical), P1 (Major), P2 (Minor), P3 (Trivial)
-4. **Severity** — critical, major, minor, trivial
+2. **Test Type** — web, api, edgeworker, or transaction
+3. **Target URL** — full URL of the endpoint being tested (e.g., https://example.com/api/health)
+4. **Category** — pick from: geo-match, locale-split, url-health, security, performance, caching, routing, tls, ddos
 5. **Expected HTTP Status Code** — e.g., 200, 201, 301, 302, 403, 404, 429, 500
-6. **Automated?** — boolean toggle
+6. **Request Headers** — key:value headers to send (e.g., Accept, Authorization, X-Forwarded-Proto)
+7. **Cookies** — cookie string or key:value pairs
+8. **Priority** — P0 (Critical), P1 (Major), P2 (Minor), P3 (Trivial)
+9. **Severity** — critical, major, minor, trivial
+10. **Automated?** — boolean toggle
 
 RULES:
 1. Start with a natural language greeting explaining what you can help with
-2. If the user already gave enough detail covering ALL 6 required fields, skip the form and go straight to generating the config
+2. If the user already gave enough detail covering ALL 10 required fields, skip the form and go straight to generating the config
 3. Otherwise present ONE form with ALL missing fields using a single [FORM]...[/FORM] block
 4. After the user submits the form, review the answers and output:
    a. A brief summary of what was generated (name, category, priority, severity, expected status, predicates count)
@@ -76,7 +80,7 @@ Do NOT output the test config JSON until you have all the requirements. When you
     name: "Generate Test Script",
     description: "Generate a YAML test script with request/expect blocks, portable across CDN test runners",
     icon: "FileCode",
-    systemPrompt: `You are a test engineer writing portable YAML test definitions for CDN edge testing.
+    systemPrompt: `You are a test engineer writing portable YAML test definitions for web application testing.
 
 Output pure YAML only, following this schema:
 
@@ -105,20 +109,20 @@ tests:
           operator: equals|contains|gt|lt
 
 Guidelines:
-- Validate CDN-specific headers: X-Cache, CF-Cache-Status, Age, X-Request-ID
-- Include edge node geographic targeting where applicable
-- Use realistic CDN URLs and behavior patterns
+- Validate response headers: X-Cache, Age, X-Request-ID
+- Include geographic targeting where applicable
+- Use realistic URLs and behavior patterns
 - One request per test block
 - Document each test with a clear description`,
     responseFormat: "code",
-    userPromptHint: "What CDN test scenario should the script cover? (e.g., cache hit ratio, geo-routing, TLS handshake)",
+    userPromptHint: "What test scenario should the script cover? (e.g., cache behavior, geo-routing, TLS handshake)",
   },
   {
     id: "analyze-results",
     name: "Analyze Test Results",
     description: "Analyze test run results, identify regressions, and suggest root causes with severity",
     icon: "Search",
-    systemPrompt: `You are a CDN regression analyst reviewing test results.
+    systemPrompt: `You are a regression analyst reviewing test results.
 
 Output format:
 - Summary: total regressions found across categories
@@ -134,7 +138,7 @@ Be specific about CDN behavior: edge routing, cache policies, origin shielding, 
     name: "Explain Comparison Diff",
     description: "Analyze differences between baseline and candidate runs with promotion recommendations",
     icon: "GitCompare",
-    systemPrompt: `You are a CDN release engineer comparing baseline vs candidate test runs.
+    systemPrompt: `You are a release engineer comparing baseline vs candidate test runs.
 
 For each diff row:
 - Interpret what changed (state: regression, fixed, still_failing, duration)
@@ -142,7 +146,7 @@ For each diff row:
 - Calculate aggregate impact: new failure count, fixed count, duration regression count
 - Provide a clear PROMOTE or BLOCK recommendation with rationale
 
-Focus on CDN-specific metrics: cache ratio changes, origin latency shifts, edge routing differences.`,
+Focus on metrics: cache ratio changes, origin latency shifts, routing differences.`,
     responseFormat: "text",
     userPromptHint: "Describe or paste the comparison diff you want explained...",
   },
@@ -151,7 +155,7 @@ Focus on CDN-specific metrics: cache ratio changes, origin latency shifts, edge 
     name: "Generate Suite Config",
     description: "Generate a YAML test suite configuration with integrations, parallelism, and test selection",
     icon: "FolderTree",
-    systemPrompt: `You are a test infrastructure engineer designing CDN test suite configurations.
+    systemPrompt: `You are a test infrastructure engineer designing test suite configurations.
 
 Generate YAML configs with:
 - Suite metadata (name, description, target environment)
@@ -160,14 +164,14 @@ Generate YAML configs with:
 - Test selection criteria (categories, tags, priorities)
 - Use proper YAML formatting with comments explaining each section
 
-Follow Akamai CDN testing best practices: test across edge regions, validate cache behaviors, include origin shield tests.`,
+Follow testing best practices: test across regions, validate cache behaviors, include origin tests.`,
     responseFormat: "code",
     userPromptHint: "Describe the test suite purpose or paste requirements...",
   },
 ];
 
-export const PROJECT_CONTEXT = `You are running inside the AWARE app (Akamai Web Analyser & Kit for Evaluations).
-This is a CDN regression observability tool built with React 19 + TypeScript + Vite.
+export const PROJECT_CONTEXT = `You are running inside the PROOF app (Pipeline for Regression Observation and Output Framework).
+This is a web application regression testing tool built with React 19 + TypeScript + Vite.
 
 Key data types (available via import from @/lib/data):
 - TestCase: { id, name, description, category, priority, severity, status, owner, tags, suiteIds, automated, scriptPath, predicates, requestHeaders, expectedStatus, filmstrip, documentation, changelog }

@@ -1,6 +1,6 @@
-# A.W.A.K.E. — Project Context for AI Coding Tools
+# PROOF — Project Context for AI Coding Tools
 
-CDN regression observability SPA. React 19 + TypeScript 5.9 + Vite 7 + Tailwind CSS 4.
+Configurable web app test observability SPA. React 19 + TypeScript 5.9 + Vite 7 + Tailwind CSS 4.
 
 **Live:** https://ruake.github.io/AWARE  
 **Repo:** https://github.com/ruake/AWARE  
@@ -22,7 +22,7 @@ pnpm run typecheck      # strict TS check (MUST pass before commit)
 - **Navigation**: `navTo(path)` from `@/lib/nav` for external nav; wouter's `useLocation()` for SPA nav
 - **URL state**: `useSyncedUrlState(key, default)` from `@/lib/urlState` — supports function updaters
 - **Styling**: Inline `style={{}}` with `var(--gcp-*)` CSS variables from `src/_group.css`
-- **Charts**: Recharts (not Google Charts)
+- **Charts**: Google Charts
 - **LLM**: `src/lib/llm.ts` — 3 providers (Mock, OpenAI, WebLLM) + skills registry at `src/lib/skills.ts`
 
 ## Key Gotchas

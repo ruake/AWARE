@@ -12,6 +12,8 @@ export type {
   TestPriority, TestSeverity, TestStatus,
 } from "./types";
 
+export type { RunFrequency } from "./runs";
+
 export {
   loadFromStorage, saveToStorage,
 } from "./store";
@@ -19,7 +21,8 @@ export {
 export {
   RUNS, getRunIndex, getRunById, generateTestHistory, detectAnomaly,
   DIFF_ROWS, TEST_DETAILS, ENV_SUMMARY,
-  PASS_RATE_CHART, ENV_PASS_RATE_CHART, getTestResultsForRun,
+  PASS_RATE_CHART, ENV_PASS_RATE_CHART, PER_ENV_PASS_RATE, getTestResultsForRun,
+  computeRunFrequency,
 } from "./runs";
 
 export {
@@ -55,6 +58,16 @@ export {
 export { navTo, copyToClipboard, showToast, repo } from "./nav";
 
 export { useSyncedUrlState } from "./urlState";
+
+export {
+  getEnvConfigs, getEnvLabels, getEnvConfig, getEnvConfigById,
+  addEnvConfig, updateEnvConfig, removeEnvConfig, resetEnvConfigs,
+  subscribeToEnvConfigs,
+} from "./envConfig";
+
+export {
+  reconcile, checkTestCaseInRepo, getCheckInSteps, generateYamlContent, onSyncStatusChange, fetchManifest,
+} from "./gitHubSync";
 
 // ── Cross-cutting ────────────────────────────────────────────────────
 import { resetTestCasesStore } from "./testCases";

@@ -1,4 +1,5 @@
 import { getTestSuites, getTestCases } from "./data";
+import { getEnvConfigs } from "./envConfig";
 import { ENVS } from "./constants";
 import yaml from "js-yaml";
 
@@ -23,6 +24,8 @@ interface CiEnvironment {
   target: string;
   env: string;
   network: string;
+  baseUrl?: string;
+  ips?: string[];
 }
 
 interface CiWorkflowRef {
@@ -34,10 +37,11 @@ interface CiWorkflowRef {
 export function generateCiConfig(): CiConfig {
   const suites = getTestSuites();
   const tests = getTestCases();
+  const envConfigs = getEnvConfigs();
   return {
     version: "2.0",
-    project: "AWARE - Akamai Web Analyser & Kit for Evaluations",
-    description: "Auto-generated CDN regression test configuration. Generated from AWARE test registry.",
+    project: "PROOF - Pipeline for Regression Observation and Output Framework",
+    description: "Auto-generated regression test configuration. Generated from PROOF test registry.",
     suites: suites.map(s => {
       const suiteTests = tests.filter(t => s.testIds.includes(t.id));
       const cats = [...new Set(suiteTests.map(t => t.category))];
@@ -48,18 +52,20 @@ export function generateCiConfig(): CiConfig {
         categories: cats,
       };
     }),
-    environments: ENVS.map(e => {
-      const [target, env] = e.split("/");
-      return { target, env, network: env?.toLowerCase() ?? "production" };
-    }),
+    environments: envConfigs.length > 0
+      ? envConfigs.map(c => ({ target: c.target, env: c.stage, network: c.network, baseUrl: c.baseUrl, ips: c.ips.length > 0 ? c.ips : undefined }))
+      : ENVS.map(e => {
+          const [target, env] = e.split("/");
+          return { target, env, network: env?.toLowerCase() ?? "production" };
+        }),
     workflow: {
       file: "run-tests.yml",
       path: ".github/workflows/run-tests.yml",
       dispatch: `gh workflow run run-tests.yml --field suite=<suite_name> --field target=<target> --field environment=<env>`,
     },
-    instructions: `1. Add this file to your repo at: config/aware-test-config.yml
+    instructions: `1. Add this file to your repo at: config/proof-test-config.yml
 2. The GitHub Actions workflow at .github/workflows/run-tests.yml reads this config
-3. When you update tests in AWARE, re-download this file and commit it to trigger CI
+3. When you update tests in PROOF, re-download this file and commit it to trigger CI
 4. Run: gh workflow run run-tests.yml --field suite=<suite_name> --field target=<target> --field environment=<env>`,
   };
 }
@@ -68,12 +74,12 @@ export function generateCiConfigYaml(): string {
   const config = generateCiConfig();
   const yamlContent = yaml.dump(config, { lineWidth: 120, noRefs: true, noCompatMode: true });
   return `# =============================================================================
-# AWARE — Akamai CDN Regression Test Configuration
-# Auto-generated from AWARE test registry
+# PROOF — Regression Test Configuration
+# Auto-generated from PROOF test registry
 # =============================================================================
 # 📋 INSTRUCTIONS:
-#   1. Save this file to your repository at: config/aware-test-config.yml
-#   2. Commit and push: git add config/aware-test-config.yml && git commit -m "update aware test config"
+#   1. Save this file to your repository at: config/proof-test-config.yml
+#   2. Commit and push: git add config/proof-test-config.yml && git commit -m "update proof test config"
 #   3. GitHub Actions will use this config when you dispatch a workflow run
 #
 # 🚀 TO TRIGGER A RUN:
@@ -98,7 +104,7 @@ export function downloadCiConfig() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `aware-test-config-${ts}.yml`;
+  a.download = `proof-test-config-${ts}.yml`;
   a.click();
   URL.revokeObjectURL(url);
 }

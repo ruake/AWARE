@@ -24,4 +24,4 @@ export function showToast(msg: string) {
   (window as any).__showToast?.(msg);
 }
 
-export const repo = "https://github.com/ruake/AWARE";
+export const repo = "https://github.com/ruake/PROOF";

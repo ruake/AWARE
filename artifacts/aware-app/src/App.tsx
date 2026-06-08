@@ -1,5 +1,6 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ErrorBoundary } from "@/components/aware/ErrorBoundary";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import Runs from "@/pages/Runs";
@@ -15,7 +16,6 @@ import Sharing from "@/pages/Sharing";
 import Status from "@/pages/Status";
 import About from "@/pages/About";
 import Copilot from "@/pages/Copilot";
-import Desktop from "@/pages/Desktop";
 
 const queryClient = new QueryClient();
 
@@ -31,7 +31,7 @@ function Router() {
       <Route path="/tests" component={TestManager} />
       <Route path="/suites" component={TestSuiteManager} />
       <Route path="/copilot" component={Copilot} />
-      <Route path="/desktop" component={Desktop} />
+
       <Route path="/ci-pipeline" component={Status} />
       <Route path="/about" component={About} />
       <Route path="/testdoc" component={TestDoc} />
@@ -45,11 +45,13 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <Router />
-      </WouterRouter>
-    </QueryClientProvider>
+    <ErrorBoundary label="Application crashed">
+      <QueryClientProvider client={queryClient}>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <Router />
+        </WouterRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

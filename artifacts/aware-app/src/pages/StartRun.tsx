@@ -20,9 +20,9 @@ const SUITES = [
 const TARGETS = ["Prod/Production", "Prod/Staging", "UAT/Production", "UAT/Staging"];
 
 const RECENT = [
-  { label: "pm-892-ew-2341.1.0", suite: "full_suite",  target: "Prod/Production", status: "PASS", ago: "2h" },
-  { label: "pm-891-ew-2340.0.1", suite: "geo_gating",  target: "Prod/Production", status: "FAIL", ago: "6h" },
-  { label: "pm-892-ew-2341.1.0", suite: "smoke",       target: "UAT/Staging",     status: "PASS", ago: "1d" },
+  { label: "build-v892-rev-2341.1.0", suite: "full_suite",  target: "Prod/Production", status: "PASS", ago: "2h" },
+  { label: "build-v891-rev-2340.0.1", suite: "geo_gating",  target: "Prod/Production", status: "FAIL", ago: "6h" },
+  { label: "build-v892-rev-2341.1.0", suite: "smoke",       target: "UAT/Staging",     status: "PASS", ago: "1d" },
 ];
 
 type TabId = "gh" | "curl" | "python";
@@ -59,8 +59,8 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
 export default function StartRun() {
   const [suite, setSuite] = React.useState("full_suite");
   const [target, setTarget] = React.useState("Prod/Production");
-  const [pmVersion, setPmVersion] = React.useState("892");
-  const [ewVersion, setEwVersion] = React.useState("2341.1.0");
+  const [buildVersion, setBuildVersion] = React.useState("v892");
+  const [revVersion, setRevVersion] = React.useState("2341.1.0");
   const [label, setLabel] = React.useState("");
   const [parallelism, setParallelism] = React.useState(4);
   const [retries, setRetries] = React.useState(1);
@@ -69,13 +69,13 @@ export default function StartRun() {
   const [copied, setCopied] = React.useState(false);
   const [triggered, setTriggered] = React.useState(false);
 
-  const effectiveLabel = label.trim() || `pm-${pmVersion}-ew-${ewVersion}`;
+  const effectiveLabel = label.trim() || `build-${buildVersion}-rev-${revVersion}`;
 
   const ghCmd = `gh workflow run regression.yml \\
   --field suite=${suite} \\
   --field target="${target}" \\
-  --field pm_version=${pmVersion} \\
-  --field ew_version=${ewVersion} \\
+  --field build_version=${buildVersion} \\
+  --field rev_version=${revVersion} \\
   --field label="${effectiveLabel}" \\
   --field parallelism=${parallelism} \\
   --field fail_fast=${failFast} \\
@@ -84,13 +84,13 @@ export default function StartRun() {
   const curlCmd = `curl -sX POST \\
   -H "Authorization: Bearer $GH_TOKEN" \\
   -H "Accept: application/vnd.github+json" \\
-  https://api.github.com/repos/salesforce/aware/actions/workflows/regression.yml/dispatches \\
-  -d '{"ref":"main","inputs":{"suite":"${suite}","target":"${target}","pm_version":"${pmVersion}","ew_version":"${ewVersion}","label":"${effectiveLabel}","parallelism":"${parallelism}","fail_fast":"${failFast}","retries":"${retries}"}}'`;
+  https://api.github.com/repos/ruake/AWARE/actions/workflows/regression.yml/dispatches \\
+  -d '{"ref":"main","inputs":{"suite":"${suite}","target":"${target}","build_version":"${buildVersion}","rev_version":"${revVersion}","label":"${effectiveLabel}","parallelism":"${parallelism}","fail_fast":"${failFast}","retries":"${retries}"}}'`;
 
   const pyCmd = `import requests, os
 
 requests.post(
-    "https://api.github.com/repos/salesforce/aware/actions/workflows/regression.yml/dispatches",
+    "https://api.github.com/repos/ruake/AWARE/actions/workflows/regression.yml/dispatches",
     headers={
         "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
         "Accept": "application/vnd.github+json",
@@ -100,8 +100,8 @@ requests.post(
         "inputs": {
             "suite": "${suite}",
             "target": "${target}",
-            "pm_version": "${pmVersion}",
-            "ew_version": "${ewVersion}",
+            "build_version": "${buildVersion}",
+            "rev_version": "${revVersion}",
             "label": "${effectiveLabel}",
             "parallelism": "${parallelism}",
             "fail_fast": "${failFast}",
@@ -117,7 +117,7 @@ requests.post(
   };
 
   const handleTrigger = () => {
-    const url = `https://github.com/salesforce/aware/actions/workflows/regression.yml`;
+    const url = `https://github.com/ruake/PROOF/actions/workflows/regression.yml`;
     window.open(url, "_blank", "noopener");
     setTriggered(true);
     setTimeout(() => setTriggered(false), 3000);
@@ -134,7 +134,7 @@ requests.post(
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--gcp-text)" }}>Start Regression Run</h1>
             <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)", marginTop: 3 }}>
-              Configure and dispatch a GitHub Actions workflow to test Akamai CDN changes
+              Configure and dispatch a GitHub Actions workflow to test application changes
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--gcp-grey-bg)", border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "5px 12px", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)" }}>
@@ -180,12 +180,12 @@ requests.post(
             </div>
             <div style={{ width: 1, alignSelf: "stretch", background: "var(--gcp-grey)" }} />
             <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>PM Version</div>
-              <input value={pmVersion} onChange={e => setPmVersion(e.target.value)} className="gcp-input" style={{ width: 90, fontFamily: "var(--font-mono)", textAlign: "center", fontWeight: 700 }} />
+              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>Build Version</div>
+              <input value={buildVersion} onChange={e => setBuildVersion(e.target.value)} className="gcp-input" style={{ width: 110, fontFamily: "var(--font-mono)", textAlign: "center", fontWeight: 700 }} />
             </div>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>EW Version</div>
-              <input value={ewVersion} onChange={e => setEwVersion(e.target.value)} className="gcp-input" style={{ width: 110, fontFamily: "var(--font-mono)", textAlign: "center", fontWeight: 700 }} />
+              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>Rev Version</div>
+              <input value={revVersion} onChange={e => setRevVersion(e.target.value)} className="gcp-input" style={{ width: 110, fontFamily: "var(--font-mono)", textAlign: "center", fontWeight: 700 }} />
             </div>
             <div>
               <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>
@@ -223,8 +223,8 @@ requests.post(
                 {RECENT.map((r, i) => (
                   <button key={i} onClick={() => {
                     const parts = r.label.split("-");
-                    setPmVersion(parts[1] ?? "892");
-                    setEwVersion(r.label.split("ew-")[1] ?? "2341.1.0");
+                    setBuildVersion(parts[1] ?? "v892");
+                    setRevVersion(r.label.split("rev-")[1] ?? "2341.1.0");
                     setSuite(r.suite); setTarget(r.target);
                   }} style={{
                     display: "flex", alignItems: "center", gap: 6, padding: "4px 10px",

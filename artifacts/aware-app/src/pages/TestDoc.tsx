@@ -1,10 +1,13 @@
 import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { DIFF_ROWS } from "@/lib/data";
+import { DIFF_ROWS, getTestCaseById, reconcile, getCheckInSteps, generateYamlContent, onSyncStatusChange } from "@/lib/data";
 import { TestDocTopBar } from "@/components/aware/TestDocTopBar";
 import { TestDocSidebar } from "@/components/aware/TestDocSidebar";
 import { TestDocChangelog } from "@/components/aware/TestDocChangelog";
+import { TestFlowDiagram } from "@/components/aware/TestFlowDiagram";
+import { RepoStatusBadge } from "@/components/aware/RepoStatusBadge";
+import { Github, Download, RefreshCw, CheckCircle2, AlertTriangle } from "lucide-react";
 
 export default function TestDoc() {
   const [location] = useLocation();
@@ -16,15 +19,99 @@ export default function TestDoc() {
   const testCategory = diffRow?.category ?? "geo-match";
   const testSuite = "full_suite";
 
+  const testCase = React.useMemo(() => getTestCaseById(testId), [testId]);
+
+  const [syncing, setSyncing] = React.useState(false);
+  const [checkInSteps, setCheckInSteps] = React.useState<string[] | null>(null);
+
+  React.useEffect(() => {
+    const unsub = onSyncStatusChange((status) => {
+      setSyncing(status === "syncing");
+    });
+    return unsub;
+  }, []);
+
+  const handleReconcile = async () => {
+    if (!testCase) return;
+    setSyncing(true);
+    await reconcile();
+    setSyncing(false);
+  };
+
+  const handleShowCheckInSteps = () => {
+    if (!testCase) return;
+    setCheckInSteps(prev => prev ? null : getCheckInSteps(testCase));
+  };
+
+  const handleDownloadYaml = () => {
+    if (!testCase) return;
+    const yaml = generateYamlContent(testCase);
+    const blob = new Blob([yaml], { type: "text/yaml" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${testCase.id}.yaml`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <AppLayout activeHref="/tests">
       <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 80px)", maxWidth: 1800, margin: "0 auto", gap: 16 }}>
-        <TestDocTopBar testId={testId} testName={testName} testStatus={testStatus} testCategory={testCategory} testSuite={testSuite} />
+        <TestDocTopBar testId={testId} testName={testName} testStatus={testStatus} testCategory={testCategory} testSuite={testSuite} testCase={testCase} />
+
+        {/* GitHub Sync Section */}
+        <div className="gcp-card" style={{ padding: "12px 16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Github size={16} style={{ color: "var(--gcp-text-secondary)" }} />
+              <span style={{ fontWeight: 600, fontSize: 13 }}>Repository Sync</span>
+              {testCase && <RepoStatusBadge status={testCase.repoStatus} />}
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={handleReconcile} disabled={syncing} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+                <RefreshCw size={12} /> {syncing ? "Syncing..." : "Re-sync"}
+              </button>
+              <button onClick={handleShowCheckInSteps} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+                <Github size={12} /> Check-in Steps
+              </button>
+              <button onClick={handleDownloadYaml} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+                <Download size={12} /> YAML
+              </button>
+            </div>
+          </div>
+
+          {checkInSteps && (
+            <div style={{ marginTop: 12, padding: 12, background: "var(--gcp-grey-bg)", borderRadius: 6, fontSize: 11, lineHeight: 1.6, whiteSpace: "pre-wrap", fontFamily: "monospace", maxHeight: 300, overflowY: "auto" }}>
+              {checkInSteps.join("\n\n")}
+            </div>
+          )}
+
+          {testCase?.repoStatus === "missing" && (
+            <div style={{ marginTop: 8, display: "flex", alignItems: "flex-start", gap: 6, padding: "8px 12px", background: "var(--gcp-fail-bg)", borderRadius: 6, fontSize: 11, color: "var(--gcp-fail)" }}>
+              <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+              <div>
+                <strong>Not in repository</strong> — This test case will not be executed by CI until it is checked in. Use the check-in steps above to commit it to the repo.
+              </div>
+            </div>
+          )}
+
+          {testCase?.repoStatus === "synced" && (
+            <div style={{ marginTop: 8, display: "flex", alignItems: "flex-start", gap: 6, padding: "8px 12px", background: "var(--gcp-pass-bg)", borderRadius: 6, fontSize: 11, color: "var(--gcp-pass)" }}>
+              <CheckCircle2 size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+              <div>
+                <strong>In repository</strong> — This test case is checked into the GitHub repo and will be executed by CI.
+                {testCase.lastSyncedAt && <span style={{ display: "block", marginTop: 2, opacity: 0.7 }}>Last confirmed: {new Date(testCase.lastSyncedAt).toLocaleString()}</span>}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, overflow: "hidden" }}>
-          <TestDocSidebar />
+          <TestDocSidebar testCase={testCase} />
 
           <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto", paddingRight: 8, paddingBottom: 32, height: "calc(100vh - 150px)" }}>
+            {testCase && <TestFlowDiagram testCase={testCase} />}
             <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
               <div style={{ padding: 16, borderBottom: "1px solid var(--gcp-grey)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--gcp-surface-hover)" }}>
                 <h2 style={{ fontWeight: 500, fontSize: 13 }}>Pass Rate Over Time (7d)</h2>
@@ -48,7 +135,7 @@ export default function TestDoc() {
                   <circle cx="90" cy="100" r="6" fill="var(--gcp-red)" stroke="white" strokeWidth="2" />
                   <g transform="translate(90, 115)">
                     <rect x="-40" y="0" width="80" height="20" fill="var(--gcp-surface)" stroke="var(--gcp-red)" rx="2" />
-                    <text x="0" y="14" fontSize="10" fontFamily="var(--font-mono)" fill="var(--gcp-red)" textAnchor="middle" fontWeight="bold">FAIL - PM 889</text>
+                      <text x="0" y="14" fontSize="10" fontFamily="var(--font-mono)" fill="var(--gcp-red)" textAnchor="middle" fontWeight="bold">FAIL - Build 889</text>
                   </g>
                   <circle cx="120" cy="20" r="4" fill="var(--gcp-green)" />
                   <circle cx="150" cy="20" r="4" fill="var(--gcp-green)" />
@@ -58,7 +145,7 @@ export default function TestDoc() {
                   <circle cx="270" cy="100" r="6" fill="var(--gcp-red)" stroke="white" strokeWidth="2" />
                   <g transform="translate(270, 115)">
                     <rect x="-40" y="0" width="80" height="20" fill="var(--gcp-surface)" stroke="var(--gcp-red)" rx="2" />
-                    <text x="0" y="14" fontSize="10" fontFamily="var(--font-mono)" fill="var(--gcp-red)" textAnchor="middle" fontWeight="bold">FAIL - PM 891</text>
+                      <text x="0" y="14" fontSize="10" fontFamily="var(--font-mono)" fill="var(--gcp-red)" textAnchor="middle" fontWeight="bold">FAIL - Build 891</text>
                   </g>
                   <circle cx="300" cy="20" r="4" fill="var(--gcp-green)" />
                   <circle cx="330" cy="20" r="4" fill="var(--gcp-green)" />
@@ -80,20 +167,20 @@ export default function TestDoc() {
                       <th style={{ padding: "8px 0" }}>Date</th>
                       <th style={{ padding: "8px 0" }}>Status</th>
                       <th style={{ padding: "8px 0", textAlign: "right" }}>Duration</th>
-                      <th style={{ padding: "8px 0" }}>PM</th>
-                      <th style={{ padding: "8px 0" }}>EW</th>
+                      <th style={{ padding: "8px 0" }}>Build</th>
+                      <th style={{ padding: "8px 0" }}>Rev</th>
                     </tr>
                   </thead>
                   <tbody>
                     {[
-                      { run: "run_892_prod", date: "Today 10:45", status: "FAIL", dur: "185ms", pm: "892", ew: "2341.1.0" },
-                      { run: "run_891_prod", date: "Yesterday", status: "FAIL", dur: "192ms", pm: "891", ew: "2341.1.0" },
-                      { run: "run_890_prod", date: "Jun 10", status: "PASS", dur: "134ms", pm: "890", ew: "2340.2.1" },
-                      { run: "run_889_prod", date: "Jun 9", status: "FAIL", dur: "145ms", pm: "889", ew: "2340.2.1" },
-                      { run: "run_888_prod", date: "Jun 8", status: "PASS", dur: "132ms", pm: "888", ew: "2340.2.1" },
-                      { run: "run_887_prod", date: "Jun 7", status: "PASS", dur: "138ms", pm: "887", ew: "2340.2.1" },
-                      { run: "run_886_prod", date: "Jun 6", status: "PASS", dur: "450ms", pm: "886", ew: "2340.2.1", spike: true },
-                      { run: "run_885_prod", date: "Jun 5", status: "PASS", dur: "135ms", pm: "885", ew: "2340.2.1" },
+                      { run: "run_892_prod", date: "Today 10:45", status: "FAIL", dur: "185ms", build: "v892", rev: "2341.1.0" },
+                      { run: "run_891_prod", date: "Yesterday", status: "FAIL", dur: "192ms", build: "v891", rev: "2341.1.0" },
+                      { run: "run_890_prod", date: "Jun 10", status: "PASS", dur: "134ms", build: "v890", rev: "2340.2.1" },
+                      { run: "run_889_prod", date: "Jun 9", status: "FAIL", dur: "145ms", build: "v889", rev: "2340.2.1" },
+                      { run: "run_888_prod", date: "Jun 8", status: "PASS", dur: "132ms", build: "v888", rev: "2340.2.1" },
+                      { run: "run_887_prod", date: "Jun 7", status: "PASS", dur: "138ms", build: "v887", rev: "2340.2.1" },
+                      { run: "run_886_prod", date: "Jun 6", status: "PASS", dur: "450ms", build: "v886", rev: "2340.2.1", spike: true },
+                      { run: "run_885_prod", date: "Jun 5", status: "PASS", dur: "135ms", build: "v885", rev: "2340.2.1" },
                     ].map((row, i) => (
                       <tr key={i} style={{ cursor: "pointer", background: row.status === 'FAIL' ? "var(--gcp-red-bg)" : "transparent" }}>
                         <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)" }}>{row.run}</td>
@@ -106,8 +193,8 @@ export default function TestDoc() {
                         <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11 }}>
                           {(row as any).spike ? <span style={{ background: "#fef08a", color: "#713f12", padding: "1px 4px", borderRadius: 4, fontWeight: 700 }}>{row.dur}</span> : row.dur}
                         </td>
-                        <td style={{ fontSize: 11 }}>{row.pm}</td>
-                        <td style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)" }}>{row.ew}</td>
+                        <td style={{ fontSize: 11 }}>{row.build}</td>
+                        <td style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)" }}>{row.rev}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -130,7 +217,7 @@ export default function TestDoc() {
             </div>
           </div>
 
-          <TestDocChangelog />
+          <TestDocChangelog testCase={testCase} />
         </div>
       </div>
     </AppLayout>

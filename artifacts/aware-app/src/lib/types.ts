@@ -9,8 +9,8 @@ export interface Run {
   duration: string;
   durationMs: number;
   started: string;
-  pm: string;
-  ew: string;
+  build: string;
+  rev: string;
   env: string;
   network: "staging" | "production";
 }
@@ -60,6 +60,16 @@ export interface DiffRow {
   durCand: number;
   category: string;
   state: "regression" | "fixed" | "duration" | "unchanged" | "fishy";
+}
+
+export interface EnvironmentConfig {
+  id: string;
+  label: string;
+  target: string;
+  stage: string;
+  baseUrl: string;
+  ips: string[];
+  network: "staging" | "production";
 }
 
 export interface EnvSummary {
@@ -165,6 +175,10 @@ export interface TestCase {
   changelog: TestChangeLogEntry[];
   createdAt: string;
   updatedAt: string;
+  githubPath?: string;
+  githubUrl?: string;
+  repoStatus?: "not_checked" | "synced" | "modified" | "missing";
+  lastSyncedAt?: string;
 }
 
 export interface TestSuiteIntegration {

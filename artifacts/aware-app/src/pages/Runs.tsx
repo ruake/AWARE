@@ -2,10 +2,12 @@ import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { RUNS } from "@/lib/data";
+import { getEnvLabels } from "@/lib/envConfig";
+import { useSyncedUrlState } from "@/lib/urlState";
 import type { Run } from "@/lib/types";
 import {
   Play, GitCompare, Search, Filter, BarChart3,
-  CheckCircle2, XCircle, Clock, Share2,
+  CheckCircle2, XCircle, Clock, Share2, X,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 
@@ -24,18 +26,23 @@ function statusBadge(status: Run["status"]) {
 export default function Runs() {
   const [, navigate] = useLocation();
   const { show, Toast } = useSimpleToast();
-  const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<string>("all");
-  const [suiteFilter, setSuiteFilter] = React.useState<string>("all");
+  const [search, setSearch] = useSyncedUrlState("q", "");
+  const [statusFilter, setStatusFilter] = useSyncedUrlState("status", "all");
+  const [suiteFilter, setSuiteFilter] = useSyncedUrlState("suite", "all");
+  const [envFilter, setEnvFilter] = useSyncedUrlState("env", "all");
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 
+  const envs = [...new Set(RUNS.map(r => r.env))];
   const suites = [...new Set(RUNS.map(r => r.suite))];
+  const envLabels = getEnvLabels();
+
   const filtered = RUNS.filter(r => {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
     if (suiteFilter !== "all" && r.suite !== suiteFilter) return false;
+    if (envFilter !== "all" && r.env !== envFilter) return false;
     if (search) {
       const q = search.toLowerCase();
-      if (!r.id.toLowerCase().includes(q) && !r.env.toLowerCase().includes(q) && !r.suite.toLowerCase().includes(q)) return false;
+      if (!r.id.toLowerCase().includes(q) && !r.env.toLowerCase().includes(q) && !r.suite.toLowerCase().includes(q) && !r.target.toLowerCase().includes(q)) return false;
     }
     return true;
   });
@@ -45,6 +52,8 @@ export default function Runs() {
   };
 
   const comparePair = selectedIds.size === 2 ? [...selectedIds] : null;
+
+  const hasActiveFilters = statusFilter !== "all" || suiteFilter !== "all" || envFilter !== "all" || search !== "";
 
   return (
     <AppLayout activeHref="/runs">
@@ -67,17 +76,19 @@ export default function Runs() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats — clickable to filter */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
           {[
-            { label: "Total Runs", value: RUNS.length, icon: BarChart3, color: "var(--gcp-blue)" },
-            { label: "Passing", value: RUNS.filter(r => r.status === "PASS").length, icon: CheckCircle2, color: "var(--gcp-green)" },
-            { label: "Failing", value: RUNS.filter(r => r.status === "FAIL").length, icon: XCircle, color: "var(--gcp-red)" },
-            { label: "Avg Duration", value: `${Math.round(RUNS.reduce((s, r) => s + r.durationMs, 0) / RUNS.length / 60000)}m`, icon: Clock, color: "var(--gcp-text-secondary)" },
+            { label: "Total Runs", value: RUNS.length, icon: BarChart3, color: "var(--gcp-blue)", filter: () => { setStatusFilter("all"); setEnvFilter("all"); setSuiteFilter("all"); setSearch(""); } },
+            { label: "Passing", value: RUNS.filter(r => r.status === "PASS").length, icon: CheckCircle2, color: "var(--gcp-green)", filter: () => setStatusFilter(statusFilter === "PASS" ? "all" : "PASS") },
+            { label: "Failing", value: RUNS.filter(r => r.status === "FAIL").length, icon: XCircle, color: "var(--gcp-red)", filter: () => setStatusFilter(statusFilter === "FAIL" ? "all" : "FAIL") },
+            { label: "Avg Duration", value: `${Math.round(RUNS.reduce((s, r) => s + r.durationMs, 0) / RUNS.length / 60000)}m`, icon: Clock, color: "var(--gcp-text-secondary)", filter: () => {} },
           ].map(s => {
             const Icon = s.icon;
             return (
-              <div key={s.label} className="gcp-card" style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+              <div key={s.label} onClick={s.filter} style={{ cursor: s.filter !== (() => {}) ? "pointer" : "default", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, border: `1px solid ${statusFilter === s.label ? "var(--gcp-blue)" : "var(--gcp-grey)"}`, borderRadius: 6, background: "var(--gcp-surface)", transition: "box-shadow 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.1)"}
+                onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}>
                 <Icon size={20} style={{ color: s.color }} />
                 <div>
                   <div style={{ fontSize: 20, fontWeight: 700, color: s.color }}>{s.value}</div>
@@ -92,7 +103,7 @@ export default function Runs() {
         <div className="gcp-card" style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flex: "1 1 200px", minWidth: 160 }}>
             <Search size={14} style={{ color: "var(--gcp-text-secondary)", flexShrink: 0 }} />
-            <input className="gcp-input" placeholder="Search run ID, env, suite…" value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
+            <input className="gcp-input" placeholder="Search run ID, env, suite, target…" value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Filter size={13} style={{ color: "var(--gcp-text-secondary)" }} />
@@ -101,16 +112,48 @@ export default function Runs() {
               <option value="PASS">PASS</option>
               <option value="FAIL">FAIL</option>
               <option value="PARTIAL">PARTIAL</option>
+              <option value="FLAKY">FLAKY</option>
             </select>
           </div>
           <select className="gcp-input" value={suiteFilter} onChange={e => setSuiteFilter(e.target.value)}>
             <option value="all">All suites</option>
             {suites.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
+          <select className="gcp-input" value={envFilter} onChange={e => setEnvFilter(e.target.value)}>
+            <option value="all">All environments</option>
+            {envs.map(e => <option key={e} value={e}>{e}</option>)}
+          </select>
+          {hasActiveFilters && (
+            <button onClick={() => { setStatusFilter("all"); setSuiteFilter("all"); setEnvFilter("all"); setSearch(""); }} style={{ fontSize: 11, color: "var(--gcp-red)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 3 }}>
+              <X size={12} /> Clear filters
+            </button>
+          )}
           <span style={{ fontSize: 12, color: "var(--gcp-text-secondary)", marginLeft: "auto" }}>
             {filtered.length} of {RUNS.length} runs{selectedIds.size > 0 && ` · ${selectedIds.size} selected`}
           </span>
         </div>
+
+        {/* Active filter badges */}
+        {(statusFilter !== "all" || suiteFilter !== "all" || envFilter !== "all") && (
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+            <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>Active filters:</span>
+            {statusFilter !== "all" && (
+              <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10, cursor: "pointer" }} onClick={() => setStatusFilter("all")}>
+                status={statusFilter} <X size={10} style={{ marginLeft: 3 }} />
+              </span>
+            )}
+            {suiteFilter !== "all" && (
+              <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10, cursor: "pointer" }} onClick={() => setSuiteFilter("all")}>
+                suite={suiteFilter} <X size={10} style={{ marginLeft: 3 }} />
+              </span>
+            )}
+            {envFilter !== "all" && (
+              <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10, cursor: "pointer" }} onClick={() => setEnvFilter("all")}>
+                env={envFilter} <X size={10} style={{ marginLeft: 3 }} />
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Table */}
         <div className="gcp-card" style={{ overflow: "hidden" }}>
@@ -126,7 +169,7 @@ export default function Runs() {
               <th style={{ textAlign: "right" }}>Pass %</th>
               <th style={{ textAlign: "right" }}>Failures</th>
               <th style={{ textAlign: "right" }}>Duration</th>
-              <th>Started</th><th>Akamai Config</th><th>Actions</th>
+              <th>Started</th><th>Build Config</th><th>Actions</th>
             </tr></thead>
             <tbody>
               {filtered.map(run => {
@@ -156,8 +199,8 @@ export default function Runs() {
                     </td>
                     <td>
                       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text)" }}>PM {run.pm}</span>
-                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>EW {run.ew}</span>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text)" }}>Build {run.build}</span>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Rev {run.rev}</span>
                       </div>
                     </td>
                     <td>

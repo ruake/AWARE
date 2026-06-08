@@ -55,7 +55,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
     { id: "nav_start", label: "New Run", description: "Trigger a regression test suite", type: "run" as const, href: "/start", icon: "▶" },
     { id: "nav_copilot", label: "Copilot", description: "AI assistant for tests and analysis", type: "run" as const, href: "/copilot", icon: "🤖" },
     { id: "nav_ci", label: "CI Pipeline", description: "Architecture and CI/CD reference", type: "run" as const, href: "/ci-pipeline", icon: "⚙️" },
-    { id: "nav_about", label: "About A.W.A.K.E.", description: "Platform information and tech stack", type: "run" as const, href: "/about", icon: "ℹ" },
+    { id: "nav_about", label: "About PROOF", description: "Platform information and tech stack", type: "run" as const, href: "/about", icon: "ℹ" },
   ];
 
   const [query, setQuery] = React.useState("");

@@ -1,9 +1,7 @@
 import React from "react";
 import { useParams, useLocation } from "wouter";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from "recharts";
 import { AppLayout } from "@/components/aware/AppLayout";
+import { GoogleBarChart } from "@/components/aware/GoogleCharts";
 import { getRunById, getTestResultsForRun, RUNS, setPromotionDecision, getPromotionDecision, getTestCases } from "@/lib/data";
 import type { TestResult, TestEvidence, TestAssertionResult } from "@/lib/types";
 import {
@@ -37,7 +35,7 @@ function generateEvidence(result: TestResult): TestEvidence {
         "X-Cache": result.status === "PASS" ? "HIT" : "MISS",
         "X-Request-ID": `req_${result.id}_${Math.random().toString(36).slice(2, 8)}`,
         "Age": result.status === "PASS" ? "127" : "0",
-        "Akamai-Cache-Status": result.status === "PASS" ? "TCP_HIT from a72-48" : "TCP_MISS from a72-48",
+        "X-Cache-Status": result.status === "PASS" ? "HIT from a72-48" : "MISS from a72-48",
       },
       body,
     },
@@ -47,7 +45,7 @@ function generateEvidence(result: TestResult): TestEvidence {
       { assertion: "X-Cache is HIT", expected: "HIT", actual: result.status === "PASS" ? "HIT" : "MISS", passed: result.status === "PASS" },
       { assertion: "X-Request-ID present", expected: "non-empty", actual: "req_" + result.id.slice(-4), passed: true },
       { assertion: "Age header > 0", expected: "> 0", actual: result.status === "PASS" ? "127" : "0", passed: result.status === "PASS" },
-      { assertion: "Cache status contains HIT", expected: "contains HIT", actual: result.status === "PASS" ? "TCP_HIT from a72-48" : "TCP_MISS from a72-48", passed: result.status === "PASS" },
+      { assertion: "Cache status contains HIT", expected: "contains HIT", actual: result.status === "PASS" ? "HIT from a72-48" : "MISS from a72-48", passed: result.status === "PASS" },
     ],
   };
 }
@@ -69,12 +67,24 @@ export default function RunDetail() {
   const runId = params.runId ?? "";
   const { show, Toast } = useSimpleToast();
 
-  const run = getRunById(runId) ?? RUNS[0];
-  const results = getTestResultsForRun(run.id);
+  const run = getRunById(runId) ?? RUNS[0] ?? null;
+  const results = run ? getTestResultsForRun(run.id) : [];
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [catFilter, setCatFilter] = React.useState<string>("all");
-  const [decision, setDecision] = React.useState(getPromotionDecision(run.id));
+  const [decision, setDecision] = React.useState(run ? getPromotionDecision(run.id) : null);
+
+  if (!run) {
+    return (
+      <AppLayout activeHref="/runs">
+        <div style={{ textAlign: "center", padding: 64 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--gcp-text-primary)" }}>Run not found</h2>
+          <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", marginTop: 8 }}>The requested run does not exist.</p>
+          <button onClick={() => navigate("/runs")} className="gcp-button" style={{ fontSize: 13, marginTop: 16 }}>Back to Runs</button>
+        </div>
+      </AppLayout>
+    );
+  }
 
   const decide = (action: "promote" | "block") => {
     const d = { runId: run.id, decision: action, decidedBy: "you", decidedAt: new Date().toISOString(), note: action === "promote" ? "Approved via run detail" : "Blocked via run detail" };
@@ -93,12 +103,12 @@ export default function RunDetail() {
 
   const passCount = results.filter(r => r.status === "PASS").length;
   const failCount = results.filter(r => r.status === "FAIL").length;
-  const passRate = Math.round((passCount / results.length) * 100);
+  const passRate = results.length > 0 ? Math.round((passCount / results.length) * 100) : 0;
   const canPromote = run.status === "PASS";
 
   const catData = categories.map(cat => {
     const catResults = results.filter(r => r.category === cat);
-    return { cat: cat.slice(0, 8), pass: catResults.filter(r => r.status === "PASS").length, fail: catResults.filter(r => r.status === "FAIL").length };
+    return { category: cat.slice(0, 8), pass: catResults.filter(r => r.status === "PASS").length, fail: catResults.filter(r => r.status === "FAIL").length };
   });
 
   const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(null);
@@ -131,8 +141,8 @@ export default function RunDetail() {
               <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10, marginRight: 6 }}>{run.target}</span>
               <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10, marginRight: 6 }}>{run.env}</span>
               <span className={`gcp-badge ${run.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 10, marginRight: 6 }}>{run.network}</span>
-              <span style={{ marginRight: 6 }}>PM {run.pm}</span>
-              <span>EW {run.ew}</span>
+              <span style={{ marginRight: 6 }}>Build {run.build}</span>
+              <span>Rev {run.rev}</span>
             </div>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
@@ -142,7 +152,7 @@ export default function RunDetail() {
             <button onClick={() => navigate(`/compare?candidate=${run.id}&baseline=${RUNS[RUNS.length - 1]?.id}`)} className="gcp-button" style={{ fontSize: 12 }}>
               <GitCompare size={13} /> Compare to Baseline
             </button>
-            <a href={`https://github.com/salesforce/aware/actions/runs/${run.id}`} target="_blank" rel="noopener" className="gcp-button" style={{ fontSize: 12, textDecoration: "none" }}>
+            <a href={`https://github.com/ruake/PROOF/actions/runs/${run.id}`} target="_blank" rel="noopener" className="gcp-button" style={{ fontSize: 12, textDecoration: "none" }}>
               <Github size={13} /> Open in GitHub
             </a>
           </div>
@@ -157,14 +167,14 @@ export default function RunDetail() {
           {canPromote ? <Shield size={20} style={{ color: "var(--gcp-green)" }} /> : <AlertTriangle size={20} style={{ color: "var(--gcp-red)" }} />}
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: 14, color: hasDecision ? (decisionIsPromote ? "var(--gcp-green)" : "var(--gcp-red)") : canPromote ? "var(--gcp-green)" : "var(--gcp-red)" }}>
-              {hasDecision ? (decisionIsPromote ? "Promotion Approved" : "Promotion Blocked") : canPromote ? "Ready to Promote to Akamai" : `${failCount} regression${failCount !== 1 ? "s" : ""} — Promotion Blocked`}
+              {hasDecision ? (decisionIsPromote ? "Promotion Approved" : "Promotion Blocked") : canPromote ? "Ready to Promote" : `${failCount} regression${failCount !== 1 ? "s" : ""} — Promotion Blocked`}
             </div>
             <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
               <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{run.suite}</span>
               <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{run.env}</span>
               <span className={`gcp-badge ${run.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{run.network}</span>
-              <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>PM {run.pm}</span>
-              <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>EW {run.ew}</span>
+              <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>Build {run.build}</span>
+              <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>Rev {run.rev}</span>
               <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)" }}>{run.duration}</span>
             </div>
           </div>
@@ -201,16 +211,18 @@ export default function RunDetail() {
         <div style={{ display: "flex", gap: 14 }}>
           <div className="gcp-card" style={{ padding: 16, width: 260, flexShrink: 0 }}>
             <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12 }}>By Category</h3>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={catData} layout="vertical" margin={{ top: 0, right: 16, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f3f4" />
-                <XAxis type="number" tick={{ fontSize: 10, fill: "#5f6368" }} />
-                <YAxis dataKey="cat" type="category" tick={{ fontSize: 10, fill: "#5f6368" }} width={60} />
-                <Tooltip contentStyle={{ fontSize: 11, borderRadius: 4 }} />
-                <Bar dataKey="pass" fill="#1e8e3e" radius={[0,2,2,0]} name="Pass" stackId="a" />
-                <Bar dataKey="fail" fill="#d93025" radius={[0,2,2,0]} name="Fail" stackId="a" />
-              </BarChart>
-            </ResponsiveContainer>
+            <GoogleBarChart
+              title=""
+              columns={["Category", "Pass", "Fail"]}
+              data={catData}
+              xKey="category"
+              yKeys={["pass", "fail"]}
+              colors={["#1e8e3e", "#d93025"]}
+              height="220px"
+              showTimeFrame={false}
+              isHorizontal
+              barType="grouped"
+            />
           </div>
 
           <div className="gcp-card" style={{ overflow: "hidden", display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>

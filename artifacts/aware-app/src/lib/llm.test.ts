@@ -172,11 +172,9 @@ describe("llmChat with skill routing (mock)", () => {
 
 describe("config persistence across chat", () => {
   it("matches the complete copilot flow: form → config → localStorage bridge", async () => {
-    // Step 1: Send request → get form
     const formRes = await llmChat("Create a cache test", "[SKILL:generate-tests]\nYou are a CDN engineer.");
     expect(formRes.content).toContain("[FORM]");
 
-    // Step 2: Submit form → get config
     const formData = [
       "name: CDN Cache HIT Verification",
       "category: caching",
@@ -188,14 +186,11 @@ describe("config persistence across chat", () => {
     const configRes = await llmChat(formData, "[SKILL:generate-tests]\nYou are a CDN engineer.");
     expect(configRes.content).toContain("---TEST_CONFIG_START---");
 
-    // Step 3: Extract config
     const config = extractTestConfigFromMessage(configRes.content);
     expect(config).not.toBeNull();
 
-    // Step 4: Save via localStorage bridge (simulates what Copilot.tsx does)
     savePendingTestConfig(config!);
 
-    // Step 5: Retrieve and verify it auto-clears
     const retrieved = getPendingTestConfig();
     expect(retrieved).toEqual(config);
     expect(getPendingTestConfig()).toBeNull();

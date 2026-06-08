@@ -1,7 +1,7 @@
-# A.W.A.K.E. — CLAUDE.md
+# PROOF — CLAUDE.md
 
 ## Project Overview
-CDN regression observability SPA. React 19 + TypeScript 5.9 + Vite 7 + Tailwind CSS 4. Deployed to GitHub Pages.
+Configurable web app test observability SPA. React 19 + TypeScript 5.9 + Vite 7 + Tailwind CSS 4. Deployed to GitHub Pages.
 
 **Live demo:** https://ruake.github.io/AWARE  
 **Repo:** https://github.com/ruake/AWARE  

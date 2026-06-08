@@ -9,20 +9,21 @@ interface Props {
 
 interface State {
   error: Error | null;
+  retryKey: number;
 }
 
 export class ErrorBoundary extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { error: null };
+    this.state = { error: null, retryKey: 0 };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { error };
+    return { error, retryKey: 0 };
   }
 
   handleRetry = () => {
-    this.setState({ error: null });
+    this.setState(s => ({ error: null, retryKey: s.retryKey + 1 }));
   };
 
   handleHome = () => {
@@ -78,6 +79,6 @@ export class ErrorBoundary extends React.Component<Props, State> {
         </div>
       );
     }
-    return this.props.children;
+    return <div key={this.state.retryKey}>{this.props.children}</div>;
   }
 }

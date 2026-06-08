@@ -55,7 +55,7 @@ export function FilterBar({
 
       {filters?.map((filter, i) => (
         <div
-          key={i}
+          key={filter.label}
           style={{
             display: "flex",
             alignItems: "center",

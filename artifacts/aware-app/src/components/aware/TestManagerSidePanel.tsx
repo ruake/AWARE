@@ -1,8 +1,10 @@
 import React from "react";
 import { getTestChangelog, updateTestCaseDocumentation } from "@/lib/data";
 import type { TestCase } from "@/lib/types";
-import { TagBadge, StatusBadge, priorityColor } from "@/components/aware/TestCard";
-import { Beaker, Clock, BarChart3, FileText } from "lucide-react";
+import { TagBadge, TestCaseStatusBadge, priorityColor } from "@/components/aware/TestCard";
+import { RepoStatusBadge } from "./RepoStatusBadge";
+import { TestFlowDiagram } from "./TestFlowDiagram";
+import { Beaker, Clock, BarChart3, FileText, Github, ExternalLink, Network } from "lucide-react";
 
 export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: TestCase; onClose: () => void; toast: (m: string) => void; navigate: (h: string) => void }) {
   const [editingDoc, setEditingDoc] = React.useState(false);
@@ -14,6 +16,8 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
     toast("Documentation updated");
     setEditingDoc(false);
   };
+
+  const [showFlow, setShowFlow] = React.useState(false);
 
   return (
     <div style={{ width: 340, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", borderLeft: "3px solid var(--gcp-blue)", background: "var(--gcp-surface)" }} className="gcp-card">
@@ -27,7 +31,7 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
           <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)", lineHeight: 1.5 }}>{tc.description}</p>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          <StatusBadge s={tc.status} />
+          <TestCaseStatusBadge s={tc.status} />
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: priorityColor(tc.priority) }}>{tc.priority}</span>
           <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{tc.category}</span>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)" }}>v{tc.version}</span>
@@ -84,9 +88,58 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
             ))}
           </div>
         </div>
+        {/* Flow Visualization Toggle */}
+        <div>
+          <button
+            onClick={() => setShowFlow(!showFlow)}
+            style={{
+              width: "100%",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "8px 0",
+              fontSize: 12,
+              fontWeight: 600,
+              color: showFlow ? "var(--gcp-blue)" : "var(--gcp-text-secondary)",
+            }}
+          >
+            <Network size={14} />
+            Test Flow Diagram
+            <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--gcp-text-secondary)" }}>
+              {showFlow ? "Hide" : "Show"}
+            </span>
+          </button>
+          {showFlow && <div style={{ maxHeight: 500, overflowY: "auto" }}><TestFlowDiagram testCase={tc} /></div>}
+        </div>
+
+        {/* Repository Status */}
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>Repository</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <RepoStatusBadge status={tc.repoStatus} />
+            {tc.repoStatus === "synced" && tc.githubUrl && (
+              <a href={tc.githubUrl} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--gcp-blue)", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                <Github size={12} /> View <ExternalLink size={10} />
+              </a>
+            )}
+          </div>
+          {tc.lastSyncedAt && (
+            <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", marginTop: 4 }}>
+              Last checked: {new Date(tc.lastSyncedAt).toLocaleString()}
+            </div>
+          )}
+          {tc.repoStatus === "missing" && (
+            <div style={{ fontSize: 10, color: "var(--gcp-fail)", marginTop: 4, background: "var(--gcp-fail-bg)", padding: "4px 8px", borderRadius: 4 }}>
+              This test case is not checked into the repository and will not be executed by CI.
+            </div>
+          )}
+        </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={() => navigate(`/analytics?testId=${tc.id}`)} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><BarChart3 size={13} /> Analytics</button>
-          <button onClick={() => { navigator.clipboard.writeText(`https://aware.example.com/tests/${tc.id}`); toast("Link copied"); }} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><FileText size={13} /> Copy Link</button>
+          <button onClick={() => { navigator.clipboard.writeText(`https://proof.example.com/tests/${tc.id}`); toast("Link copied"); }} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><FileText size={13} /> Copy Link</button>
         </div>
       </div>
     </div>

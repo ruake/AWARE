@@ -7,23 +7,28 @@ import { useSyncedUrlState } from "@/lib/urlState";
 import { decodeTestConfigFromNav, getPendingTestConfig } from "@/lib/llm";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useTestData } from "@/hooks/useTestData";
-import { EMPTY_FILTER, TagBadge, StatusBadge, priorityColor } from "@/components/aware/TestCard";
+import { EMPTY_FILTER, TagBadge, TestCaseStatusBadge, priorityColor } from "@/components/aware/TestCard";
 import { StatsDashboard } from "@/components/aware/StatsDashboard";
 import { GenerateWizard } from "@/components/aware/GenerateWizard";
 import { TestManagerSidePanel } from "@/components/aware/TestManagerSidePanel";
-import { CATEGORIES, PRIORITIES, STATUSES } from "@/lib/constants";
+import { RepoStatusBadge } from "@/components/aware/RepoStatusBadge";
+import { CATEGORIES, PRIORITIES, STATUSES, OWNERS } from "@/lib/constants";
 import {
   getTestCases, getTestSuites,
   createTestCase, updateTestCase, deleteTestCase, resetTestStore,
   exportTestCases, exportTestsAsJunitXml,
   computeTestStats,
+  reconcile, onSyncStatusChange,
 } from "@/lib/data";
 import { importAuto } from "@/lib/testImportExport";
 import type { TestCase, TestSuite, TestStats } from "@/lib/types";
+import { testCaseToDraft, formatTestCaseDraftAsYaml, REQUIRED_FIELDS } from "@/lib/formUtils";
+import yaml from "js-yaml";
 import {
   Plus, Search, Check, Edit3, Trash2, Tag,
   RotateCcw, Upload, Download, FileJson, FileSpreadsheet, FileCode,
   X, Beaker, BarChart3, Clock, FileText, Sparkles, FolderTree,
+  Github, RefreshCw, Code, History,
 } from "lucide-react";
 
 const EMPTY_FORM: Omit<TestCase, "id" | "createdAt" | "updatedAt"> = {
@@ -41,6 +46,17 @@ function Label({ children }: { children: React.ReactNode }) {
   return <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{children}</label>;
 }
 
+function LabelReq({ children, required }: { children: React.ReactNode; required?: boolean }) {
+  return (
+    <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+      {children}
+      {required && <span style={{ color: "var(--gcp-red)", marginLeft: 2 }}>*</span>}
+    </label>
+  );
+}
+
+type FormMode = "form" | "yaml" | "json";
+
 function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
   initial: Omit<TestCase, "id" | "createdAt" | "updatedAt">;
   allSuites: TestSuite[];
@@ -49,7 +65,9 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
 }) {
   const [form, setForm] = React.useState(initial);
   const [activeTab, setActiveTab] = React.useState<"basic" | "docs" | "http">("basic");
+  const [formMode, setFormMode] = React.useState<FormMode>("form");
   const u = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }));
+  const reqFields = REQUIRED_FIELDS[form.testType] || REQUIRED_FIELDS.web;
 
   const tabStyle = (tab: string) => ({
     padding: "10px 18px", fontSize: 13, fontWeight: 500, cursor: "pointer",
@@ -57,6 +75,70 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
     borderBottom: `2px solid ${activeTab === tab ? "var(--gcp-blue)" : "transparent"}`,
     color: activeTab === tab ? "var(--gcp-blue)" : "var(--gcp-text-secondary)",
   });
+
+  const modeBtnStyle = (mode: FormMode) => ({
+    padding: "3px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer",
+    border: `1px solid ${formMode === mode ? "var(--gcp-blue)" : "var(--gcp-grey)"}`,
+    background: formMode === mode ? "var(--gcp-blue)" : "transparent",
+    color: formMode === mode ? "white" : "var(--gcp-text-secondary)",
+    borderRadius: 4, transition: "all 0.15s",
+  });
+
+  const draft = React.useMemo(() => testCaseToDraft(form), [form]);
+
+  const [codeText, setCodeText] = React.useState(() => formatTestCaseDraftAsYaml(testCaseToDraft(form)));
+
+  React.useEffect(() => {
+    if (formMode === "yaml") setCodeText(formatTestCaseDraftAsYaml(draft));
+    else if (formMode === "json") setCodeText(JSON.stringify(draft, null, 2));
+  }, [formMode, draft, form]);
+
+  const handleCodeApply = () => {
+    try {
+      let parsed: Record<string, unknown>;
+      if (formMode === "yaml") {
+        parsed = yaml.load(codeText) as Record<string, unknown>;
+      } else {
+        parsed = JSON.parse(codeText);
+      }
+      if (!parsed || typeof parsed !== "object") return;
+      const newForm = { ...form };
+      if (parsed.name) newForm.name = String(parsed.name);
+      if (parsed.description) newForm.description = String(parsed.description);
+      if (parsed.testType) newForm.testType = parsed.testType as TestCase["testType"];
+      if (parsed.category) newForm.category = String(parsed.category);
+      if (parsed.priority) newForm.priority = parsed.priority as TestCase["priority"];
+      if (parsed.severity) newForm.severity = parsed.severity as TestCase["severity"];
+      if (parsed.status) newForm.status = parsed.status as TestCase["status"];
+      if (parsed.tags) newForm.tags = (parsed.tags as string[]).map(String);
+      if (parsed.owner) newForm.owner = String(parsed.owner);
+      if (parsed.automated !== undefined) newForm.automated = Boolean(parsed.automated);
+      if (parsed.scriptPath) newForm.scriptPath = String(parsed.scriptPath);
+      if (parsed.preconditions) newForm.preconditions = String(parsed.preconditions);
+      if (parsed.expectedBehavior) newForm.expectedBehavior = String(parsed.expectedBehavior);
+      if (parsed.expectedStatus !== undefined) newForm.expectedStatus = Number(parsed.expectedStatus);
+      if (parsed.requestHeaders) newForm.requestHeaders = parsed.requestHeaders as Record<string, string>;
+      if (parsed.cookies) newForm.cookies = parsed.cookies as Record<string, string>;
+      if (parsed.captureResponseHeaders) newForm.captureResponseHeaders = (parsed.captureResponseHeaders as string[]).map(String);
+      if (parsed.filmstrip) newForm.filmstrip = {
+        ...newForm.filmstrip,
+        enabled: (parsed.filmstrip as Record<string, unknown>).enabled === true,
+        threshold: Number((parsed.filmstrip as Record<string, unknown>).threshold ?? 0.99),
+        region: String((parsed.filmstrip as Record<string, unknown>).region || "full"),
+      };
+      if (parsed.predicates) newForm.predicates = (parsed.predicates as Array<Record<string, unknown>>).map(p => ({
+        id: `pred_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        type: (String(p.type || "statusCode")) as TestCase["predicates"][0]["type"],
+        field: String(p.field || ""),
+        expected: String(p.expected || ""),
+        operator: (String(p.operator || "equals")) as TestCase["predicates"][0]["operator"],
+        description: String(p.description || ""),
+      }));
+      setForm(newForm);
+    } catch {
+      // parse error - ignore
+    }
+  };
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onCancel}>
@@ -66,38 +148,91 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
             <h2 style={{ fontSize: 16, fontWeight: 700 }}>{initial.name ? "Edit Test Case" : "New Test Case"}</h2>
             {initial.version > 1 && <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "1px 7px", fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)" }}>v{initial.version}</span>}
           </div>
-          <button onClick={onCancel} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><X size={18} /></button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button style={modeBtnStyle("form")} onClick={() => setFormMode("form")}><Code size={11} style={{ marginRight: 4 }} />Form</button>
+            <button style={modeBtnStyle("yaml")} onClick={() => setFormMode("yaml")}>YAML</button>
+            <button style={modeBtnStyle("json")} onClick={() => setFormMode("json")}>JSON</button>
+            <div style={{ width: 1, height: 18, background: "var(--gcp-grey)", margin: "0 4px" }} />
+            <button onClick={onCancel} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><X size={18} /></button>
+          </div>
         </div>
-        <div style={{ display: "flex", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)", flexShrink: 0 }}>
+
+        {/* YAML/JSON Editor Mode */}
+        {formMode !== "form" && (
+          <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 400 }}>
+            <div style={{ padding: "8px 14px", background: "var(--gcp-grey-bg)", borderBottom: "1px solid var(--gcp-grey)", fontSize: 11, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 8 }}>
+              <span>Edit test case in {formMode.toUpperCase()} format. All fields are directly editable.</span>
+              <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--gcp-blue)", cursor: "pointer" }} onClick={handleCodeApply}>Apply changes</span>
+            </div>
+            <textarea
+              className="gcp-input"
+              style={{
+                flex: 1, width: "100%", minHeight: 400, resize: "none", fontFamily: "var(--font-mono)", fontSize: 12, lineHeight: 1.6, border: "none", borderRadius: 0, padding: 16,
+              }}
+              value={codeText}
+              onChange={e => setCodeText(e.target.value)}
+              spellCheck={false}
+            />
+            <div style={{ padding: "8px 14px", borderTop: "1px solid var(--gcp-grey)", fontSize: 10, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 12 }}>
+              <span>Edit and click "Apply changes" to sync back to the form — then Save.</span>
+              <button onClick={() => setFormMode("form")} className="gcp-button" style={{ fontSize: 10, marginLeft: "auto" }}>Back to Form</button>
+            </div>
+          </div>
+        )}
+
+        {/* Form Mode */}
+        {formMode === "form" && <div style={{ display: "flex", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)", flexShrink: 0 }}>
           <button style={tabStyle("basic")} onClick={() => setActiveTab("basic")}>Basic Info</button>
           <button style={tabStyle("docs")} onClick={() => setActiveTab("docs")}>Documentation</button>
           <button style={tabStyle("http")} onClick={() => setActiveTab("http")}>HTTP &amp; Predicates</button>
-        </div>
+        </div>}
         <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
-          {activeTab === "basic" && (
+          {formMode !== "form" ? null : activeTab === "basic" && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div style={{ gridColumn: "1/-1" }}>
-                <Label>Name *</Label>
+                <LabelReq required>Name</LabelReq>
                 <input className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.name} onChange={e => u("name", e.target.value)} placeholder="Verify Geo match for /api/v1/…" />
               </div>
-              <div style={{ gridColumn: "1/-1" }}>
-                <Label>Description</Label>
-                <textarea className="gcp-input" style={{ width: "100%", marginTop: 4, height: 60, resize: "vertical" }} value={form.description} onChange={e => u("description", e.target.value)} />
+              <div>
+                <LabelReq required>Test Type</LabelReq>
+                <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.testType} onChange={e => {
+                  const newType = e.target.value as TestCase["testType"];
+                  u("testType", newType);
+                  const slug = form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "unnamed";
+                  if (newType === "transaction") u("scriptPath", `tests/transaction/${slug}.yaml`);
+                  else if (newType === "edgeworker") u("scriptPath", `tests/edgeworker/${slug}.yaml`);
+                  else u("scriptPath", `tests/${form.category}/${slug}.yaml`);
+                }}>
+                  <option value="web">Web</option>
+                  <option value="api">API</option>
+                  <option value="edgeworker">EdgeWorker</option>
+                  <option value="transaction">Transaction</option>
+                </select>
               </div>
               <div>
-                <Label>Category</Label>
+                <LabelReq required={reqFields.includes("expectedStatus")}>Expected Status</LabelReq>
+                <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.expectedStatus} onChange={e => u("expectedStatus", Number(e.target.value))}>
+                  {[200, 201, 204, 301, 302, 304, 400, 401, 403, 404, 429, 500, 502, 503].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div style={{ gridColumn: "1/-1" }}>
+                <LabelReq required>Description</LabelReq>
+                <textarea className="gcp-input" style={{ width: "100%", marginTop: 4, height: 60, resize: "vertical" }} value={form.description} onChange={e => u("description", e.target.value)} placeholder="What does this test validate?" />
+              </div>
+              <div>
+                <LabelReq required={reqFields.includes("category")}>Category</LabelReq>
                 <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.category} onChange={e => u("category", e.target.value)}>
                   {CATEGORIES.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <Label>Priority</Label>
+                <LabelReq required={reqFields.includes("priority")}>Priority</LabelReq>
                 <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.priority} onChange={e => u("priority", e.target.value)}>
                   {PRIORITIES.map(p => <option key={p}>{p}</option>)}
                 </select>
               </div>
               <div>
-                <Label>Severity</Label>
+                <LabelReq required={reqFields.includes("severity")}>Severity</LabelReq>
                 <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.severity} onChange={e => u("severity", e.target.value)}>
                   {["critical", "major", "minor", "trivial"].map(s => <option key={s}>{s}</option>)}
                 </select>
@@ -109,11 +244,13 @@ function TestCaseModal({ initial, allSuites, onSave, onCancel }: {
                 </select>
               </div>
               <div>
-                <Label>Owner</Label>
-                <input className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.owner} onChange={e => u("owner", e.target.value)} placeholder="email@co.com" />
+                <LabelReq required={reqFields.includes("owner")}>Owner</LabelReq>
+                <select className="gcp-input" style={{ width: "100%", marginTop: 4 }} value={form.owner} onChange={e => u("owner", e.target.value)}>
+                  {OWNERS.map(o => <option key={o}>{o}</option>)}
+                </select>
               </div>
               <div>
-                <Label>Script Path</Label>
+                <LabelReq required={reqFields.includes("scriptPath")}>Script Path</LabelReq>
                 <input className="gcp-input" style={{ width: "100%", marginTop: 4, fontFamily: "var(--font-mono)", fontSize: 12 }} value={form.scriptPath} onChange={e => u("scriptPath", e.target.value)} placeholder="tests/geo/tc.yaml" />
               </div>
               <div>
@@ -454,8 +591,18 @@ export default function TestManager() {
   const [showCreate, setShowCreate] = React.useState(false);
   const [showImport, setShowImport] = React.useState(false);
   const [showGenerate, setShowGenerate] = React.useState(false);
+  const [showChanges, setShowChanges] = React.useState(false);
   const [selectedPanelId, setSelectedPanelId] = useSyncedUrlState<string | null>("sel", null);
   const [configChanged, setConfigChanged] = React.useState(false);
+  const [syncing, setSyncing] = React.useState(false);
+  const [syncResult, setSyncResult] = React.useState<{synced: number; missing: number; errors: number} | null>(null);
+
+  React.useEffect(() => {
+    const unsub = onSyncStatusChange((status) => {
+      setSyncing(status === "syncing");
+    });
+    return unsub;
+  }, []);
 
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -502,6 +649,14 @@ export default function TestManager() {
 
   const filtered = React.useMemo(() => applyFilters(tcs, colFilters, searchText), [tcs, colFilters, searchText]);
 
+  const allChanges = React.useMemo(() => {
+    const entries = tcs.flatMap(tc =>
+      tc.changelog.map(entry => ({ ...entry, testId: tc.id, testName: tc.name }))
+    );
+    entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return entries;
+  }, [tcs]);
+
   const selectedPanel = selectedPanelId ? tcs.find(t => t.id === selectedPanelId) ?? null : null;
   const editingTc = editingId ? tcs.find(t => t.id === editingId) : null;
 
@@ -526,6 +681,14 @@ export default function TestManager() {
     if (selectedPanelId && ids.includes(selectedPanelId)) setSelectedPanelId(null);
     markConfigChanged();
     toast(`Deleted ${ids.length} test case${ids.length > 1 ? "s" : ""}`);
+  };
+
+  const handleReconcile = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    const result = await reconcile();
+    setSyncResult(result);
+    setTimeout(() => setSyncResult(null), 5000);
   };
 
   const handleExport = (format: "json" | "csv" | "junit_xml") => {
@@ -567,10 +730,19 @@ export default function TestManager() {
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => setShowImport(true)} className="gcp-button" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><Upload size={13} /> Import</button>
             <button onClick={() => handleExport("json")} className="gcp-button" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><Download size={13} /> Export</button>
+            <button onClick={() => setShowChanges(true)} className="gcp-button" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><History size={13} /> Changes</button>
             <button onClick={() => setShowGenerate(true)} className="gcp-button" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5, color: "var(--gcp-yellow)" }}><Sparkles size={13} /> Generate</button>
+            <button onClick={handleReconcile} disabled={syncing} className="gcp-button" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><Github size={13} /> {syncing ? "Syncing..." : "Reconcile"}</button>
             <button onClick={() => { if (confirm("Reset all test data to defaults?")) { resetTestStore(); toast("Store reset"); } }} className="gcp-button" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><RotateCcw size={13} /> Reset</button>
             <button onClick={() => setShowCreate(true)} className="gcp-button gcp-button-primary" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><Plus size={13} /> New Test</button>
           </div>
+          {syncResult && (
+            <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ color: "var(--gcp-pass)" }}>✓ {syncResult.synced} synced</span>
+              {syncResult.missing > 0 && <span style={{ color: "var(--gcp-fail)" }}>· {syncResult.missing} missing</span>}
+              {syncResult.errors > 0 && <span style={{ color: "var(--gcp-warning)" }}>· {syncResult.errors} errors</span>}
+            </div>
+          )}
         </div>
         <StatsDashboard stats={stats} colFilters={colFilters} onToggleFilter={handleStatFilter} />
         <CiConfigBanner show={configChanged} onDismiss={() => setConfigChanged(false)} />
@@ -609,6 +781,7 @@ export default function TestManager() {
                     <th><ColumnFilter label="Category" allValues={allValues.category} filter={colFilters.category ?? EMPTY_FILTER} onFilterChange={updateColFilter("category")} /></th>
                     <th>Tags</th>
                     <th>Owner</th>
+                    <th style={{ width: 100 }}>Repo</th>
                     <th style={{ width: 80, textAlign: "center" }}>Actions</th>
                   </tr>
                 </thead>
@@ -636,7 +809,7 @@ export default function TestManager() {
                           <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", fontWeight: 600, maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={tc.name}>{tc.name}</div>
                           <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>{tc.id} · v{tc.version}</div>
                         </td>
-                        <td><StatusBadge s={tc.status} /></td>
+                        <td><TestCaseStatusBadge s={tc.status} /></td>
                         <td><span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700, color: priorityColor(tc.priority) }}>{tc.priority}</span></td>
                         <td><span style={{ fontSize: 11, padding: "2px 8px", background: "var(--gcp-surface)", border: "1px solid var(--gcp-grey)", borderRadius: 4 }}>{tc.category}</span></td>
                         <td>
@@ -646,6 +819,9 @@ export default function TestManager() {
                           </div>
                         </td>
                         <td style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{tc.owner.split("@")[0]}</td>
+                        <td style={{ padding: "6px 8px", fontSize: 11, whiteSpace: "nowrap", verticalAlign: "middle" }}>
+                          <RepoStatusBadge status={tc.repoStatus} />
+                        </td>
                         <td onClick={e => e.stopPropagation()}>
                           <div style={{ display: "flex", justifyContent: "center", gap: 4 }}>
                             <button onClick={() => setEditingId(tc.id)} title="Edit" style={{ padding: 4, border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)" }}><Edit3 size={13} /></button>
@@ -656,7 +832,7 @@ export default function TestManager() {
                     );
                   })}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={8} style={{ textAlign: "center", padding: 40, color: "var(--gcp-text-secondary)", fontSize: 13 }}>No test cases match your filters</td></tr>
+                    <tr><td colSpan={9} style={{ textAlign: "center", padding: 40, color: "var(--gcp-text-secondary)", fontSize: 13 }}>No test cases match your filters</td></tr>
                   )}
                 </tbody>
               </table>
@@ -678,6 +854,77 @@ export default function TestManager() {
       {editingTc && editingId && <TestCaseModal initial={editingTc} allSuites={suites} onSave={handleUpdate} onCancel={() => setEditingId(null)} />}
       {showImport && <ImportModal onClose={() => setShowImport(false)} toast={toast} />}
       {showGenerate && <GenerateWizard allSuites={suites} onClose={() => setShowGenerate(false)} toast={toast} />}
+      {showChanges && (
+        <ChangesPanel
+          changes={allChanges}
+          testCount={tcs.length}
+          suiteCount={suites.length}
+          onExport={handleExport}
+          onClose={() => setShowChanges(false)}
+        />
+      )}
     </AppLayout>
+  );
+}
+
+function ChangesPanel({ changes, testCount, suiteCount, onExport, onClose }: {
+  changes: { testId: string; testName: string; version: number; timestamp: string; author: string; summary: string; changes: string[] }[];
+  testCount: number; suiteCount: number;
+  onExport: (format: "json" | "csv" | "junit_xml") => void;
+  onClose: () => void;
+}) {
+  const authors = [...new Set(changes.map(c => c.author))].length;
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
+      <div className="gcp-card" style={{ width: 640, maxHeight: "80vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <div>
+            <h2 style={{ fontSize: 16, fontWeight: 700 }}>Changes & Export</h2>
+            <p style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>
+              {testCount} tests · {suiteCount} suites · {changes.length} changes · {authors} contributors
+            </p>
+          </div>
+          <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 18, color: "var(--gcp-text-secondary)" }}>×</button>
+        </div>
+        <div style={{ padding: "12px 18px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", gap: 8, flexShrink: 0 }}>
+          <button onClick={() => onExport("json")} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><FileJson size={12} /> JSON</button>
+          <button onClick={() => onExport("csv")} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><FileSpreadsheet size={12} /> CSV</button>
+          <button onClick={() => onExport("junit_xml")} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><FileCode size={12} /> JUnit XML</button>
+          <span style={{ flex: 1 }} />
+          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", alignSelf: "center" }}>Download full test registry</span>
+        </div>
+        <div style={{ flex: 1, overflow: "auto", padding: "8px 18px" }}>
+          {changes.length === 0 ? (
+            <div style={{ padding: "32px 0", textAlign: "center", fontSize: 13, color: "var(--gcp-text-secondary)" }}>No changes recorded yet</div>
+          ) : (
+            changes.slice(0, 100).map((entry, i) => (
+              <div key={`${entry.testId}-${entry.version}`} style={{ display: "flex", gap: 10, padding: "8px 0", borderBottom: i < Math.min(changes.length, 100) - 1 ? "1px solid var(--gcp-grey)" : "none" }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--gcp-blue-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "var(--gcp-blue)", fontSize: 11, fontWeight: 700 }}>
+                  {entry.author[0]?.toUpperCase()}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>{entry.summary}</span>
+                    <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>{new Date(entry.timestamp).toLocaleDateString()}</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-blue)" }}>{entry.testId}</span>
+                    {' · '}{entry.testName}
+                    {' · by '}{entry.author}
+                  </div>
+                  {entry.changes.length > 0 && (
+                    <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", marginTop: 4, display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {entry.changes.map((c, j) => (
+                        <span key={j} style={{ background: "var(--gcp-grey-bg)", padding: "1px 6px", borderRadius: 3 }}>{c}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

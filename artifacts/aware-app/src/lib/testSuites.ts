@@ -15,6 +15,8 @@ export function setTestSuitesStore(store: TestSuite[]) { testSuitesStore = store
 
 export function resetTestSuitesStore(): void {
   testSuitesStore = [...BASE_TEST_SUITES];
+  saveToStorage(LS_SUITE_KEY, testSuitesStore);
+  _dropTSSnapshot(); _notifyTS();
 }
 
 export function getTestSuites(): TestSuite[] {

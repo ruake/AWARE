@@ -1,16 +1,15 @@
 import React from "react";
 import { Link, useLocation, useSearch } from "wouter";
-import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell,
-} from "recharts";
+import { GoogleBarChart, GoogleAreaChart } from "@/components/aware/GoogleCharts";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { DIFF_ROWS, TEST_DETAILS, generateTestHistory, getTestCases } from "@/lib/data";
+import { CTAStatCard } from "@/components/aware/CTAStatCard";
+import { DIFF_ROWS, TEST_DETAILS, generateTestHistory } from "@/lib/data";
+import { getEnvLabels } from "@/lib/envConfig";
 import { ENVS } from "@/lib/constants";
 import { useTestData } from "@/hooks/useTestData";
 import {
   ArrowLeft, BarChart3, Clock, Activity, AlertTriangle,
-  FileText, Search, Share2, ChevronRight, Zap,
+  Search, Share2, ChevronRight,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 
@@ -30,8 +29,19 @@ export default function TestAnalytics() {
 
   const idx = isTcMode ? Math.abs((testCase ? parseInt(testCase.id.replace("tc_", "")) : 0) % DIFF_ROWS.length) : Number(selectedTestId.replace("diff_", ""));
   const diffs = DIFF_ROWS;
+  if (diffs.length === 0) {
+    return (
+      <AppLayout activeHref="/analytics">
+        <div style={{ textAlign: "center", padding: 64 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--gcp-text-primary)" }}>No test data available</h2>
+          <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", marginTop: 8 }}>Run a comparison first to see analytics.</p>
+          <button onClick={() => navigate("/compare")} className="gcp-button" style={{ fontSize: 13, marginTop: 16 }}>Go to Compare</button>
+        </div>
+      </AppLayout>
+    );
+  }
   const diff = diffs[Math.min(idx, diffs.length - 1)] ?? diffs[0];
-  const detail = TEST_DETAILS[idx % TEST_DETAILS.length] ?? generateTestHistory(idx);
+  const detail = TEST_DETAILS.length > 0 ? (TEST_DETAILS[idx % TEST_DETAILS.length] ?? generateTestHistory(idx)) : generateTestHistory(idx);
   const selectorItems = isTcMode
     ? tcs.map(t => ({ id: t.id, name: t.name }))
     : diffs.map(d => ({ id: d.id, name: d.name }));
@@ -41,7 +51,8 @@ export default function TestAnalytics() {
     navigate(`/analytics?${key}=${encodeURIComponent(id)}`, { replace: true });
   };
 
-  const envStatus = ENVS.map(env => {
+  const envLabels = getEnvLabels();
+  const envStatus = (envLabels.length > 0 ? envLabels : ENVS).map(env => {
     const runs = detail.history.filter(h => h.env === env);
     const pass = runs.filter(r => r.status === "PASS").length;
     const fail = runs.filter(r => r.status === "FAIL").length;
@@ -49,8 +60,9 @@ export default function TestAnalytics() {
   });
 
   const historyChartData = detail.history.map((h, i) => ({
-    run: `R${1000 + i}`,
-    status: h.status === "PASS" ? 1 : 0,
+    runId: `R${1000 + i}`,
+    pass: h.status === "PASS" ? 1 : 0,
+    fail: h.status === "FAIL" ? 1 : 0,
     duration: h.duration,
     env: h.env,
   }));
@@ -60,7 +72,7 @@ export default function TestAnalytics() {
     detail.history.slice(-3).every(h => h.status === "PASS") ? "stable" : "flaky";
 
   return (
-    <AppLayout activeHref="/compare">
+    <AppLayout activeHref="/analytics">
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
         {/* Header */}
@@ -105,7 +117,7 @@ export default function TestAnalytics() {
         {trend === "degrading" && (
           <div style={{ background: "var(--gcp-red-bg)", border: "1px solid var(--gcp-red)", borderRadius: 4, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, fontSize: 12 }}>
             <AlertTriangle size={14} style={{ color: "var(--gcp-red)" }} />
-            <strong>Degrading trend</strong> — last 3 runs all FAIL. Investigate before promoting Akamai changes.
+            <strong>Degrading trend</strong> — last 3 runs all FAIL. Investigate before promoting changes.
             <button onClick={() => { navigator.clipboard.writeText(`Test degrading: ${diff.name}\nLast 3 runs: FAIL\nPass Rate: ${detail.passRate}%`).then(() => show("Alert copied")); }}
               className="gcp-button" style={{ fontSize: 11, marginLeft: "auto" }}>
               Copy Alert
@@ -115,18 +127,10 @@ export default function TestAnalytics() {
 
         {/* KPI tiles */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
-          {[
-            { label: "Pass Rate", value: `${detail.passRate}%`, sub: `${detail.history.length} runs`, color: "var(--gcp-blue)", bg: "var(--gcp-blue-bg)" },
-            { label: "Flakiness", value: `${detail.flakinessScore}%`, sub: "status changes", color: isFlaky ? "var(--gcp-yellow)" : "var(--gcp-green)", bg: isFlaky ? "var(--gcp-yellow-bg)" : "var(--gcp-green-bg)" },
-            { label: "Avg Duration", value: `${detail.avgDuration}ms`, sub: "across all runs", color: "var(--gcp-green)", bg: "var(--gcp-green-bg)" },
-            { label: "Environments", value: ENVS.length, sub: "tested across", color: "var(--gcp-text-secondary)", bg: "var(--gcp-grey-bg)" },
-          ].map(k => (
-            <div key={k.label} className="gcp-card" style={{ padding: "16px 18px", background: k.bg, borderLeft: `4px solid ${k.color}` }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>{k.label}</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: k.color, lineHeight: 1 }}>{k.value}</div>
-              <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 6 }}>{k.sub}</div>
-            </div>
-          ))}
+          <CTAStatCard label="Pass Rate" value={`${detail.passRate}%`} subtitle={`${detail.history.length} runs`} accentColor="var(--gcp-blue)" />
+          <CTAStatCard label="Flakiness" value={`${detail.flakinessScore}%`} subtitle="status changes" accentColor={isFlaky ? "var(--gcp-yellow)" : "var(--gcp-green)"} />
+          <CTAStatCard label="Avg Duration" value={`${detail.avgDuration}ms`} subtitle="across all runs" accentColor="var(--gcp-green)" />
+          <CTAStatCard label="Environments" value={ENVS.length} subtitle="tested across" accentColor="var(--gcp-text-secondary)" />
         </div>
 
         {/* Charts */}
@@ -136,34 +140,32 @@ export default function TestAnalytics() {
             <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
               <Activity size={13} /> Pass/Fail Across Runs
             </h3>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={historyChartData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
-                <XAxis dataKey="run" tick={{ fontSize: 9, fill: "#5f6368" }} />
-                <YAxis domain={[0, 1]} ticks={[0, 1]} tickFormatter={v => v === 1 ? "PASS" : "FAIL"} tick={{ fontSize: 9, fill: "#5f6368" }} />
-                <Tooltip formatter={(v: number) => [v === 1 ? "PASS" : "FAIL", "Status"]} contentStyle={{ fontSize: 11, borderRadius: 4 }} />
-                <Bar dataKey="status" radius={[3,3,0,0]}>
-                  {historyChartData.map((entry, i) => (
-                    <Cell key={i} fill={entry.status === 1 ? "#1e8e3e" : "#d93025"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <GoogleBarChart
+              title=""
+              columns={["Run", "Pass", "Fail"]}
+              data={historyChartData}
+              xKey="runId"
+              yKeys={["pass", "fail"]}
+              colors={["#1e8e3e", "#d93025"]}
+              height="180px"
+              showTimeFrame={false}
+            />
           </div>
 
           <div className="gcp-card" style={{ padding: 16 }}>
             <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
               <Clock size={13} /> Duration Trend (ms)
             </h3>
-            <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={historyChartData} margin={{ top: 0, right: 0, left: -15, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
-                <XAxis dataKey="run" tick={{ fontSize: 9, fill: "#5f6368" }} />
-                <YAxis tick={{ fontSize: 9, fill: "#5f6368" }} />
-                <Tooltip formatter={(v: number) => [`${v}ms`, "Duration"]} contentStyle={{ fontSize: 11, borderRadius: 4 }} />
-                <Line type="monotone" dataKey="duration" stroke="#1e8e3e" strokeWidth={2} dot={{ r: 3, fill: "#1e8e3e" }} />
-              </LineChart>
-            </ResponsiveContainer>
+            <GoogleAreaChart
+              title=""
+              columns={["Run", "Duration"]}
+              data={historyChartData}
+              xKey="runId"
+              yKeys={["duration"]}
+              colors={["#1a73e8"]}
+              height="180px"
+              showTimeFrame={false}
+            />
           </div>
 
           {/* Env breakdown */}
@@ -171,16 +173,17 @@ export default function TestAnalytics() {
             <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
               <BarChart3 size={13} /> Pass/Fail by Environment
             </h3>
-            <ResponsiveContainer width="100%" height={140}>
-              <BarChart data={envStatus} layout="vertical" margin={{ top: 0, right: 20, left: 90, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f3f4" />
-                <XAxis type="number" tick={{ fontSize: 10, fill: "#5f6368" }} />
-                <YAxis dataKey="env" type="category" tick={{ fontSize: 10, fill: "#5f6368" }} width={90} />
-                <Tooltip contentStyle={{ fontSize: 11, borderRadius: 4 }} />
-                <Bar dataKey="pass" fill="#1e8e3e" name="Pass" stackId="a" radius={[0,2,2,0]} />
-                <Bar dataKey="fail" fill="#d93025" name="Fail" stackId="a" radius={[0,2,2,0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <GoogleBarChart
+              title=""
+              columns={["Environment", "Pass", "Fail"]}
+              data={envStatus}
+              xKey="env"
+              yKeys={["pass", "fail"]}
+              colors={["#1e8e3e", "#d93025"]}
+              height="140px"
+              showTimeFrame={false}
+              isHorizontal={true}
+            />
           </div>
         </div>
 

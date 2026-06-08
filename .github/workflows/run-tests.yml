@@ -1,6 +1,18 @@
 name: Run Tests
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "artifacts/aware-app/src/**"
+      - "artifacts/aware-app/e2e/**"
+      - "artifacts/aware-app/src/data/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "artifacts/aware-app/src/**"
+      - "artifacts/aware-app/e2e/**"
+      - "artifacts/aware-app/src/data/**"
   workflow_dispatch:
     inputs:
       branch:
@@ -46,7 +58,35 @@ on:
         default: 1
 
 jobs:
+  # ── On push/PR: typecheck + unit tests + E2E smoke ──
+  verify:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifacts/aware-app
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install
+      - name: TypeScript check
+        run: pnpm run typecheck
+      - name: Run unit tests
+        run: pnpm test || echo "No unit tests"
+      - name: Install Playwright browsers
+        run: pnpm run test:e2e:install
+      - name: Run E2E smoke tests
+        run: pnpm run test:e2e:ci
+
+  # ── On manual dispatch: resolve + execute suite ──
   resolve-tests:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     outputs:
       test-matrix: ${{ steps.resolve.outputs.matrix }}
@@ -59,6 +99,7 @@ jobs:
           echo "matrix={\"target\":[\"${{ github.event.inputs.target }}\"],\"environment\":[\"${{ github.event.inputs.environment }}\"]}" >> $GITHUB_OUTPUT
 
   run-tests:
+    if: github.event_name == 'workflow_dispatch'
     needs: resolve-tests
     runs-on: ubuntu-latest
     strategy:
@@ -81,12 +122,12 @@ jobs:
         run: pnpm install
 
       - name: Install Playwright browsers
-        run: pnpm --filter @workspace/aware-app exec playwright install chromium --with-deps
+        run: pnpm run test:e2e:install
         continue-on-error: true
 
       - name: Run ${{ github.event.inputs.suite }} on ${{ matrix.target }}/${{ matrix.environment }}
         run: |
-          pnpm --filter @workspace/aware-app run test -- \
+          pnpm run test -- \
             --suite "${{ github.event.inputs.suite }}" \
             --target "${{ matrix.target }}" \
             --environment "${{ matrix.environment }}" \

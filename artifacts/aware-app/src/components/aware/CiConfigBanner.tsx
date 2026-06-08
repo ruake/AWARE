@@ -12,7 +12,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px" }}>
         <FileText size={15} style={{ color: "var(--gcp-blue)", flexShrink: 0 }} />
         <span style={{ fontSize: 12, flex: 1, color: "var(--gcp-text)" }}>
-          <strong>CI config changed.</strong> Download the updated <code style={{ fontSize: 11, background: "rgba(26,115,232,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "var(--font-mono)" }}>aware-test-config.yml</code> and commit it to trigger GitHub Actions.
+          <strong>CI config changed.</strong> Download the updated <code style={{ fontSize: 11, background: "rgba(26,115,232,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "var(--font-mono)" }}>proof-test-config.yml</code> and commit it to trigger GitHub Actions.
         </span>
         <button onClick={() => { downloadCiConfig(); }} className="gcp-button-primary" style={{ fontSize: 11, padding: "5px 12px", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 5 }}>
           <Download size={12} /> Download Config
@@ -32,9 +32,9 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
                 <TerminalSquare size={12} /> Where to commit
               </div>
               <div style={{ background: "#1e293b", borderRadius: 4, padding: "8px 12px", fontFamily: "var(--font-mono)", fontSize: 10, lineHeight: 1.8, color: "#e2e8f0" }}>
-                <div><span style={{ color: "#60a5fa" }}>$</span> mv ~/Downloads/aware-test-config-*.yml config/aware-test-config.yml</div>
-                <div><span style={{ color: "#60a5fa" }}>$</span> git add config/aware-test-config.yml</div>
-                <div><span style={{ color: "#60a5fa" }}>$</span> git commit -m "update aware test config from AWARE"</div>
+                <div><span style={{ color: "#60a5fa" }}>$</span> mv ~/Downloads/proof-test-config-*.yml config/proof-test-config.yml</div>
+                <div><span style={{ color: "#60a5fa" }}>$</span> git add config/proof-test-config.yml</div>
+                <div><span style={{ color: "#60a5fa" }}>$</span> git commit -m "update proof test config from PROOF"</div>
                 <div><span style={{ color: "#60a5fa" }}>$</span> git push</div>
               </div>
             </div>

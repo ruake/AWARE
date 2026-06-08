@@ -2,7 +2,7 @@
   {
     "id": "tc_0",
     "name": "Verify GEO match for us-east users",
-    "description": "Automated test verifying geo-match behavior for endpoint group 0. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying geo-match behavior for endpoint group 0. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "geo-match",
     "priority": "P0",
     "severity": "critical",
@@ -17,7 +17,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/geo-match/tc_0.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- geo-match test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- geo-match test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct geo-match headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Verify GEO match for us-east users\n\nValidates geo-match behavior for endpoint group 0.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -38,7 +38,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status"
+      "X-Cache-Status"
     ],
     "testType": "web",
     "config": {},
@@ -104,7 +104,7 @@
   {
     "id": "tc_1",
     "name": "Validate locale splitting for fr-CA",
-    "description": "Automated test verifying locale-split behavior for endpoint group 1. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying locale-split behavior for endpoint group 1. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "locale-split",
     "priority": "P1",
     "severity": "major",
@@ -120,7 +120,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/locale-split/tc_1.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- locale-split test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- locale-split test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct locale-split headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Validate locale splitting for fr-CA\n\nValidates locale-split behavior for endpoint group 1.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -139,7 +139,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age"
     ],
     "testType": "web",
@@ -203,7 +203,7 @@
   {
     "id": "tc_2",
     "name": "Cache HIT ratio above 90%",
-    "description": "Automated test verifying url-health behavior for endpoint group 2. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying url-health behavior for endpoint group 2. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "url-health",
     "priority": "P2",
     "severity": "minor",
@@ -220,7 +220,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/url-health/tc_2.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- url-health test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- url-health test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct url-health headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Cache HIT ratio above 90%\n\nValidates url-health behavior for endpoint group 2.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -238,7 +238,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age",
       "X-RateLimit-Remaining"
     ],
@@ -287,7 +287,7 @@
   {
     "id": "tc_3",
     "name": "Geo-Routing consistency APAC",
-    "description": "Automated test verifying security behavior for endpoint group 3. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying security behavior for endpoint group 3. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "security",
     "priority": "P3",
     "severity": "trivial",
@@ -302,7 +302,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/security/tc_3.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- security test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- security test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct security headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Geo-Routing consistency APAC\n\nValidates security behavior for endpoint group 3.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -322,7 +322,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age",
       "Set-Cookie"
     ],
@@ -390,7 +390,7 @@
   {
     "id": "tc_4",
     "name": "Origin shield fallback behavior",
-    "description": "Automated test verifying performance behavior for endpoint group 4. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying performance behavior for endpoint group 4. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "performance",
     "priority": "P0",
     "severity": "critical",
@@ -406,7 +406,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/performance/tc_4.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- performance test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- performance test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct performance headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Origin shield fallback behavior\n\nValidates performance behavior for endpoint group 4.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -424,7 +424,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status"
+      "X-Cache-Status"
     ],
     "testType": "web",
     "config": {},
@@ -479,7 +479,7 @@
   {
     "id": "tc_5",
     "name": "TLS 1.3 handshake latency",
-    "description": "Automated test verifying caching behavior for endpoint group 5. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying caching behavior for endpoint group 5. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "caching",
     "priority": "P1",
     "severity": "major",
@@ -496,7 +496,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/caching/tc_5.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- caching test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- caching test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct caching headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## TLS 1.3 handshake latency\n\nValidates caching behavior for endpoint group 5.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -515,7 +515,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age"
     ],
     "testType": "web",
@@ -579,7 +579,7 @@
   {
     "id": "tc_6",
     "name": "WAF rate limiting threshold",
-    "description": "Automated test verifying routing behavior for endpoint group 6. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying routing behavior for endpoint group 6. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "routing",
     "priority": "P2",
     "severity": "minor",
@@ -594,7 +594,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/routing/tc_6.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- routing test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- routing test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct routing headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## WAF rate limiting threshold\n\nValidates routing behavior for endpoint group 6.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -613,7 +613,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age",
       "X-RateLimit-Remaining"
     ],
@@ -665,7 +665,7 @@
   {
     "id": "tc_7",
     "name": "DDoS mitigation trigger",
-    "description": "Automated test verifying tls behavior for endpoint group 7. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying tls behavior for endpoint group 7. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "tls",
     "priority": "P3",
     "severity": "trivial",
@@ -681,7 +681,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/tls/tc_7.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- tls test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- tls test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct tls headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## DDoS mitigation trigger\n\nValidates tls behavior for endpoint group 7.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -699,7 +699,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age"
     ],
     "testType": "web",
@@ -747,7 +747,7 @@
   {
     "id": "tc_8",
     "name": "Cache purge propagation",
-    "description": "Automated test verifying ddos behavior for endpoint group 8. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying ddos behavior for endpoint group 8. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "ddos",
     "priority": "P0",
     "severity": "critical",
@@ -763,7 +763,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/ddos/tc_8.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- ddos test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- ddos test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct ddos headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Cache purge propagation\n\nValidates ddos behavior for endpoint group 8.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -781,7 +781,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status"
+      "X-Cache-Status"
     ],
     "testType": "web",
     "config": {},
@@ -844,7 +844,7 @@
   {
     "id": "tc_9",
     "name": "Edge redirect chain depth",
-    "description": "Automated test verifying geo-match behavior for endpoint group 9. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying geo-match behavior for endpoint group 9. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "geo-match",
     "priority": "P1",
     "severity": "major",
@@ -859,7 +859,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/geo-match/tc_9.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- geo-match test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- geo-match test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct geo-match headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Edge redirect chain depth\n\nValidates geo-match behavior for endpoint group 9.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -879,7 +879,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age"
     ],
     "testType": "web",
@@ -946,7 +946,7 @@
   {
     "id": "tc_10",
     "name": "Signed URL token validation",
-    "description": "Automated test verifying locale-split behavior for endpoint group 10. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying locale-split behavior for endpoint group 10. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "locale-split",
     "priority": "P2",
     "severity": "minor",
@@ -962,7 +962,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/locale-split/tc_10.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- locale-split test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- locale-split test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct locale-split headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Signed URL token validation\n\nValidates locale-split behavior for endpoint group 10.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -982,7 +982,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age",
       "X-RateLimit-Remaining"
     ],
@@ -1047,7 +1047,7 @@
   {
     "id": "tc_11",
     "name": "Custom error page serving",
-    "description": "Automated test verifying url-health behavior for endpoint group 11. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying url-health behavior for endpoint group 11. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "url-health",
     "priority": "P3",
     "severity": "trivial",
@@ -1064,7 +1064,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/url-health/tc_11.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- url-health test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- url-health test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct url-health headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Custom error page serving\n\nValidates url-health behavior for endpoint group 11.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -1082,7 +1082,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age"
     ],
     "testType": "web",
@@ -1130,7 +1130,7 @@
   {
     "id": "tc_12",
     "name": "Gzip compression enabled",
-    "description": "Automated test verifying security behavior for endpoint group 12. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying security behavior for endpoint group 12. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "security",
     "priority": "P0",
     "severity": "critical",
@@ -1145,7 +1145,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/security/tc_12.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- security test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- security test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct security headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Gzip compression enabled\n\nValidates security behavior for endpoint group 12.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -1165,7 +1165,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status"
+      "X-Cache-Status"
     ],
     "testType": "web",
     "config": {},
@@ -1231,7 +1231,7 @@
   {
     "id": "tc_13",
     "name": "Security headers present",
-    "description": "Automated test verifying performance behavior for endpoint group 13. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying performance behavior for endpoint group 13. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "performance",
     "priority": "P1",
     "severity": "major",
@@ -1247,7 +1247,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/performance/tc_13.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- performance test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- performance test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct performance headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Security headers present\n\nValidates performance behavior for endpoint group 13.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -1265,7 +1265,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age"
     ],
     "testType": "web",
@@ -1321,7 +1321,7 @@
   {
     "id": "tc_14",
     "name": "Cookie-based session stickiness",
-    "description": "Automated test verifying caching behavior for endpoint group 14. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying caching behavior for endpoint group 14. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "caching",
     "priority": "P2",
     "severity": "minor",
@@ -1338,7 +1338,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/caching/tc_14.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- caching test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- caching test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct caching headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Cookie-based session stickiness\n\nValidates caching behavior for endpoint group 14.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -1356,7 +1356,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age",
       "X-RateLimit-Remaining"
     ],
@@ -1421,7 +1421,7 @@
   {
     "id": "tc_15",
     "name": "Health check endpoint 200",
-    "description": "Automated test verifying routing behavior for endpoint group 15. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying routing behavior for endpoint group 15. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "routing",
     "priority": "P3",
     "severity": "trivial",
@@ -1436,7 +1436,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/routing/tc_15.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- routing test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- routing test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct routing headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Health check endpoint 200\n\nValidates routing behavior for endpoint group 15.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -1456,7 +1456,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age",
       "Set-Cookie"
     ],
@@ -1508,7 +1508,7 @@
   {
     "id": "tc_16",
     "name": "DNS failover latency",
-    "description": "Automated test verifying tls behavior for endpoint group 16. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying tls behavior for endpoint group 16. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "tls",
     "priority": "P0",
     "severity": "critical",
@@ -1524,7 +1524,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/tls/tc_16.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- tls test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- tls test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct tls headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## DNS failover latency\n\nValidates tls behavior for endpoint group 16.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -1542,7 +1542,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status"
+      "X-Cache-Status"
     ],
     "testType": "web",
     "config": {},
@@ -1589,7 +1589,7 @@
   {
     "id": "tc_17",
     "name": "Origin response timeout",
-    "description": "Automated test verifying ddos behavior for endpoint group 17. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying ddos behavior for endpoint group 17. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "ddos",
     "priority": "P1",
     "severity": "major",
@@ -1606,7 +1606,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/ddos/tc_17.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- ddos test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- ddos test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct ddos headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Origin response timeout\n\nValidates ddos behavior for endpoint group 17.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -1624,7 +1624,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age"
     ],
     "testType": "web",
@@ -1688,7 +1688,7 @@
   {
     "id": "tc_18",
     "name": "CORS header propagation",
-    "description": "Automated test verifying geo-match behavior for endpoint group 18. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying geo-match behavior for endpoint group 18. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "geo-match",
     "priority": "P2",
     "severity": "minor",
@@ -1702,7 +1702,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/geo-match/tc_18.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- geo-match test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- geo-match test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct geo-match headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## CORS header propagation\n\nValidates geo-match behavior for endpoint group 18.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -1722,7 +1722,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age",
       "X-RateLimit-Remaining"
     ],
@@ -1790,7 +1790,7 @@
   {
     "id": "tc_19",
     "name": "WebSocket upgrade path",
-    "description": "Automated test verifying locale-split behavior for endpoint group 19. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying locale-split behavior for endpoint group 19. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "locale-split",
     "priority": "P3",
     "severity": "trivial",
@@ -1804,7 +1804,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/locale-split/tc_19.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- locale-split test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- locale-split test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct locale-split headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## WebSocket upgrade path\n\nValidates locale-split behavior for endpoint group 19.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -1823,7 +1823,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age"
     ],
     "testType": "web",
@@ -1887,7 +1887,7 @@
   {
     "id": "tc_20",
     "name": "Cache key normalization",
-    "description": "Automated test verifying url-health behavior for endpoint group 20. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying url-health behavior for endpoint group 20. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "url-health",
     "priority": "P0",
     "severity": "critical",
@@ -1903,7 +1903,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/url-health/tc_20.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- url-health test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- url-health test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct url-health headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Cache key normalization\n\nValidates url-health behavior for endpoint group 20.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -1922,7 +1922,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status"
+      "X-Cache-Status"
     ],
     "testType": "web",
     "config": {},
@@ -1969,7 +1969,7 @@
   {
     "id": "tc_21",
     "name": "Vary header routing correctness",
-    "description": "Automated test verifying security behavior for endpoint group 21. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying security behavior for endpoint group 21. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "security",
     "priority": "P1",
     "severity": "major",
@@ -1983,7 +1983,7 @@
     ],
     "automated": true,
     "scriptPath": "tests/aware/security/tc_21.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- security test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- security test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct security headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Vary header routing correctness\n\nValidates security behavior for endpoint group 21.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -2003,7 +2003,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age"
     ],
     "testType": "web",
@@ -2070,7 +2070,7 @@
   {
     "id": "tc_22",
     "name": "Deprecated TLS version",
-    "description": "Automated test verifying performance behavior for endpoint group 22. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying performance behavior for endpoint group 22. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "performance",
     "priority": "P2",
     "severity": "minor",
@@ -2083,7 +2083,7 @@
     "suiteIds": [],
     "automated": true,
     "scriptPath": "tests/aware/performance/tc_22.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- performance test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- performance test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct performance headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Deprecated TLS version\n\nValidates performance behavior for endpoint group 22.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -2101,7 +2101,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age",
       "X-RateLimit-Remaining"
     ],
@@ -2158,7 +2158,7 @@
   {
     "id": "tc_23",
     "name": "Multi-CDN failover",
-    "description": "Automated test verifying caching behavior for endpoint group 23. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying caching behavior for endpoint group 23. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "caching",
     "priority": "P3",
     "severity": "trivial",
@@ -2172,7 +2172,7 @@
     "suiteIds": [],
     "automated": true,
     "scriptPath": "tests/aware/caching/tc_23.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- caching test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- caching test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct caching headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Multi-CDN failover\n\nValidates caching behavior for endpoint group 23.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -2190,7 +2190,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status",
+      "X-Cache-Status",
       "Age"
     ],
     "testType": "web",
@@ -2254,7 +2254,7 @@
   {
     "id": "tc_24",
     "name": "Edge function execution time",
-    "description": "Automated test verifying routing behavior for endpoint group 24. Ensures correct behavior across Akamai CDN edge network with configurable thresholds and alerting.",
+    "description": "Automated test verifying routing behavior for endpoint group 24. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
     "category": "routing",
     "priority": "P0",
     "severity": "critical",
@@ -2266,7 +2266,7 @@
     "suiteIds": [],
     "automated": true,
     "scriptPath": "tests/aware/routing/tc_24.yaml",
-    "preconditions": "- Akamai EdgeGrid credentials configured\n- routing test data seeded\n- Target environment reachable",
+    "preconditions": "- API credentials configured\n- routing test data seeded\n- Target environment reachable",
     "expectedBehavior": "- Response status 200\n- Correct routing headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "documentation": "## Edge function execution time\n\nValidates routing behavior for endpoint group 24.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
     "relatedTestIds": [
@@ -2285,7 +2285,7 @@
     "captureResponseHeaders": [
       "X-Cache",
       "X-Request-ID",
-      "Akamai-Cache-Status"
+      "X-Cache-Status"
     ],
     "testType": "web",
     "config": {},

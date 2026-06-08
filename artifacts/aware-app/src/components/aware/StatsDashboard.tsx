@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { GoogleBarChart } from "@/components/aware/GoogleCharts";
 import type { TestStats } from "@/lib/types";
 import type { ColumnFilterState } from "@/components/aware/ColumnFilter";
 
@@ -8,12 +8,10 @@ export function StatsDashboard({ stats, colFilters, onToggleFilter }: {
   onToggleFilter: (field: string, value: string) => void;
 }) {
   const statusData = Object.entries(stats.byStatus).map(([k, v]) => ({
-    name: k, value: v,
-    color: k === "active" ? "#1e8e3e" : k === "disabled" ? "#f9ab00" : "#d93025",
+    status: k, count: v,
   }));
   const priorityData = Object.entries(stats.byPriority).sort().map(([k, v]) => ({
-    name: k, value: v,
-    color: k === "P0" ? "#d93025" : k === "P1" ? "#e8710a" : k === "P2" ? "#1a73e8" : "#5f6368",
+    priority: k, count: v,
   }));
 
   return (
@@ -36,29 +34,31 @@ export function StatsDashboard({ stats, colFilters, onToggleFilter }: {
       </div>
       <div className="gcp-card" style={{ padding: "12px 14px" }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Status</div>
-        <ResponsiveContainer width="100%" height={100}>
-          <BarChart data={statusData} barSize={24} onClick={(data) => data?.activeLabel && onToggleFilter("status", data.activeLabel)}>
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-            <YAxis hide />
-            <Tooltip formatter={(v: number) => [v, "Count"]} contentStyle={{ fontSize: 11 }} />
-            <Bar dataKey="value" cursor="pointer">
-              {statusData.map((e, i) => <Cell key={i} fill={e.color} />)}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <GoogleBarChart
+          title=""
+          columns={["Status", "Count"]}
+          data={statusData}
+          xKey="status"
+          yKeys={["count"]}
+          colors={["#1a73e8"]}
+          height="100px"
+          showTimeFrame={false}
+          onPointClick={p => onToggleFilter("status", String(p.status))}
+        />
       </div>
       <div className="gcp-card" style={{ padding: "12px 14px" }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Priority</div>
-        <ResponsiveContainer width="100%" height={100}>
-          <BarChart data={priorityData} barSize={24} onClick={(data) => data?.activeLabel && onToggleFilter("priority", data.activeLabel)}>
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-            <YAxis hide />
-            <Tooltip formatter={(v: number) => [v, "Count"]} contentStyle={{ fontSize: 11 }} />
-            <Bar dataKey="value" cursor="pointer">
-              {priorityData.map((e, i) => <Cell key={i} fill={e.color} />)}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <GoogleBarChart
+          title=""
+          columns={["Priority", "Count"]}
+          data={priorityData}
+          xKey="priority"
+          yKeys={["count"]}
+          colors={["#1a73e8"]}
+          height="100px"
+          showTimeFrame={false}
+          onPointClick={p => onToggleFilter("priority", String(p.priority))}
+        />
       </div>
     </div>
   );

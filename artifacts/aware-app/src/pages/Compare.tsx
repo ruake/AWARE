@@ -1,19 +1,14 @@
 import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { RUNS, DIFF_ROWS, setPromotionDecision } from "@/lib/data";
 import type { DiffRow } from "@/lib/types";
 import {
-  Link2, Github, Share2, Check, AlertTriangle, BarChart3,
-  ChevronLeft, ChevronRight, Zap, XCircle, Shield,
-  ArrowUpRight, Search,
+  Link2, Github, Share2, BarChart3, ChevronLeft, ChevronRight, Zap, XCircle, ArrowUpRight, Search,
 } from "lucide-react";
-
-const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 
 function copy(text: string) { navigator.clipboard.writeText(text).catch(() => {}); }
 
@@ -91,7 +86,6 @@ function SidePanel({ diff, diffs, selectedId, onSelect, navigate }: {
             </div>
           </div>
         </div>
-        {/* Filmstrip placeholder */}
         <div className="gcp-card" style={{ padding: 10 }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", marginBottom: 8 }}>Visual Diff (Filmstrip)</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -107,7 +101,7 @@ function SidePanel({ diff, diffs, selectedId, onSelect, navigate }: {
           <button onClick={() => navigate(`/analytics?testId=${diff.id}`)} className="gcp-button" style={{ fontSize: 11, justifyContent: "center" }}>
             <BarChart3 size={12} /> View Analytics <ArrowUpRight size={10} />
           </button>
-          <button onClick={() => { copy(`https://aware.example.com/tests/${diff.id}`); show("Test permalink copied"); }} className="gcp-button" style={{ fontSize: 11, justifyContent: "center" }}>
+          <button onClick={() => { copy(`https://proof.example.com/tests/${diff.id}`); show("Test permalink copied"); }} className="gcp-button" style={{ fontSize: 11, justifyContent: "center" }}>
             <Link2 size={12} /> Copy Test Permalink
           </button>
           <button onClick={() => { copy(`GitHub issue: Regression in ${diff.name}\nBaseline: ${diff.baseStatus} (${diff.durBase}ms)\nCandidate: ${diff.candStatus} (${diff.durCand}ms)`); show("GitHub issue template copied"); }}
@@ -131,43 +125,56 @@ export default function Compare() {
   const [selectedId, setSelectedId] = useSyncedUrlState<string | null>("sel", null);
   const [searchText, setSearchText] = useSyncedUrlState("q", "");
   const [regressionsOnly, setRegressionsOnly] = useSyncedUrlState("regressions", false);
+  const [swapped, setSwapped] = React.useState(false);
   const baselineRun = RUNS.find(r => r.id === baseline);
   const candidateRun = RUNS.find(r => r.id === candidate);
 
-  const [colFilters, setColFilters] = React.useState<Record<string, ColumnFilterState>>({});
-  const updateColFilter = (field: string) => (f: ColumnFilterState) => setColFilters(p => ({ ...p, [field]: f }));
+  if (!baselineRun || !candidateRun) {
+    return (
+      <AppLayout activeHref="/compare">
+        <div style={{ textAlign: "center", padding: 64 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--gcp-text-primary)" }}>No runs to compare</h2>
+          <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", marginTop: 8 }}>At least two runs are required for comparison.</p>
+          <button onClick={() => navigate("/runs")} className="gcp-button" style={{ fontSize: 13, marginTop: 16 }}>View Runs</button>
+        </div>
+      </AppLayout>
+    );
+  }
 
-  const diffs = DIFF_ROWS;
+  const diffs = React.useMemo(() => {
+    if (!swapped) return DIFF_ROWS;
+    return DIFF_ROWS.map(d => {
+      const state: DiffRow["state"] = d.state === "regression" ? "fixed" : d.state === "fixed" ? "regression" : d.state;
+      return { ...d, state, baseStatus: d.candStatus, candStatus: d.baseStatus, durBase: d.durCand, durCand: d.durBase };
+    });
+  }, [swapped]);
   const regressions = diffs.filter(d => d.state === "regression");
   const fixed = diffs.filter(d => d.state === "fixed");
   const duration = diffs.filter(d => d.state === "duration");
   const unchanged = diffs.filter(d => d.state === "unchanged");
-  const categories = [...new Set(diffs.map(d => d.category))];
-  const states: DiffRow["state"][] = ["regression", "fixed", "duration", "unchanged"];
+  const categories = [...new Set(DIFF_ROWS.map(d => d.category))];
+
+  const [colFilters, setColFilters] = React.useState<Record<string, string>>({});
 
   const filtered = React.useMemo(() => {
     return diffs.filter(d => {
       if (searchText && !d.name.toLowerCase().includes(searchText.toLowerCase())) return false;
       if (regressionsOnly && d.state !== "regression") return false;
-      const catF = colFilters.category;
-      if (catF?.selected.length && !catF.selected.includes(d.category)) return false;
-      if (catF?.text && !d.category.includes(catF.text)) return false;
-      const stateF = colFilters.state;
-      if (stateF?.selected.length && !stateF.selected.includes(d.state)) return false;
-      const baseF = colFilters.baseStatus;
-      if (baseF?.selected.length && !baseF.selected.includes(d.baseStatus)) return false;
-      const candF = colFilters.candStatus;
-      if (candF?.selected.length && !candF.selected.includes(d.candStatus)) return false;
+      for (const [field, val] of Object.entries(colFilters)) {
+        if (!val) continue;
+        const cell = String((d as unknown as Record<string, unknown>)[field] ?? "").toLowerCase();
+        if (!cell.includes(val.toLowerCase())) return false;
+      }
       return true;
     });
   }, [diffs, searchText, regressionsOnly, colFilters]);
 
   const selectedDiff = selectedId ? diffs.find(d => d.id === selectedId) ?? null : null;
-  const hasActiveFilters = Object.values(colFilters).some(f => f.text || f.selected.length > 0);
+  const hasActiveFilters = Object.values(colFilters).some(v => v);
 
   const confirmPromotion = (action: "promote" | "block") => {
     setPromotionDecision({ runId: candidate, decision: action, decidedBy: "you", decidedAt: new Date().toISOString(), note: `${action === "promote" ? "Approved" : "Blocked"} via comparison` });
-    show(action === "promote" ? "Promotion approved — Akamai config can be deployed" : "Promotion blocked — regressions must be fixed");
+    show(action === "promote" ? "Promotion approved — config can be deployed" : "Promotion blocked — regressions must be fixed");
   };
 
   return (
@@ -178,32 +185,32 @@ export default function Compare() {
         <div className="gcp-card" style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
           <div style={{ flex: "1 1 240px", minWidth: 200 }}>
             <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Baseline Run</label>
-            <select className="gcp-input" style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: 11 }} value={baseline} onChange={e => setBaseline(e.target.value)}>
-              {RUNS.map(r => <option key={r.id} value={r.id}>{r.id} · {r.env} · PM {r.pm} · EW {r.ew}</option>)}
+            <select className="gcp-input" style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: 11 }} value={baseline} onChange={e => { setBaseline(e.target.value); setSwapped(false); }}>
+              {RUNS.map(r => <option key={r.id} value={r.id}>{r.id} · {r.env} · Build {r.build} · Rev {r.rev}</option>)}
             </select>
             {baselineRun && (
               <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
                 <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{baselineRun.target}</span>
                 <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{baselineRun.env}</span>
                 <span className={`gcp-badge ${baselineRun.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{baselineRun.network}</span>
-                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>PM {baselineRun.pm}</span>
-                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>EW {baselineRun.ew}</span>
+                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>Build {baselineRun.build}</span>
+                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>Rev {baselineRun.rev}</span>
               </div>
             )}
           </div>
-          <button onClick={() => { const t = baseline; setBaseline(candidate); setCandidate(t); }} className="gcp-button" style={{ fontSize: 12, marginTop: 16 }}>⇄ Swap</button>
+          <button onClick={() => { const t = baseline; setBaseline(candidate); setCandidate(t); setSwapped(p => !p); }} className="gcp-button" style={{ fontSize: 12, marginTop: 16 }}>⇄ Swap</button>
           <div style={{ flex: "1 1 240px", minWidth: 200 }}>
             <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "var(--gcp-blue)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Candidate Run</label>
-            <select className="gcp-input" style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: 11, borderColor: "var(--gcp-blue)" }} value={candidate} onChange={e => setCandidate(e.target.value)}>
-              {RUNS.map(r => <option key={r.id} value={r.id}>{r.id} · {r.env} · PM {r.pm} · EW {r.ew}</option>)}
+            <select className="gcp-input" style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: 11, borderColor: "var(--gcp-blue)" }} value={candidate} onChange={e => { setCandidate(e.target.value); setSwapped(false); }}>
+              {RUNS.map(r => <option key={r.id} value={r.id}>{r.id} · {r.env} · Build {r.build} · Rev {r.rev}</option>)}
             </select>
             {candidateRun && (
               <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
                 <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{candidateRun.target}</span>
                 <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{candidateRun.env}</span>
                 <span className={`gcp-badge ${candidateRun.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{candidateRun.network}</span>
-                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>PM {candidateRun.pm}</span>
-                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>EW {candidateRun.ew}</span>
+                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>Build {candidateRun.build}</span>
+                <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>Rev {candidateRun.rev}</span>
               </div>
             )}
           </div>
@@ -222,7 +229,7 @@ export default function Compare() {
           </div>
         </div>
 
-        {/* Summary tiles */}
+        {/* Summary tiles — display-only */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
           {[
             { label: "New Failures", value: `+${regressions.length}`, color: "var(--gcp-red)", key: "regression" },
@@ -235,8 +242,6 @@ export default function Compare() {
               label={tile.label}
               value={tile.value}
               accentColor={tile.color}
-              active={colFilters.state?.selected.includes(tile.key)}
-              onClick={() => updateColFilter("state")({ text: "", selected: colFilters.state?.selected.includes(tile.key) ? [] : [tile.key] })}
             />
           ))}
         </div>
@@ -246,13 +251,13 @@ export default function Compare() {
           <span style={{ fontWeight: 600, color: "var(--gcp-text-secondary)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.3px" }}>Comparison</span>
           <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{baselineRun?.target} / {baselineRun?.env}</span>
           <span className={`gcp-badge ${baselineRun?.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{baselineRun?.network}</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>PM {baselineRun?.pm}</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>EW {baselineRun?.ew}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Build {baselineRun?.build}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Rev {baselineRun?.rev}</span>
           <span style={{ color: "var(--gcp-grey)", fontSize: 12 }}>|</span>
           <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{candidateRun?.target} / {candidateRun?.env}</span>
           <span className={`gcp-badge ${candidateRun?.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{candidateRun?.network}</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>PM {candidateRun?.pm}</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>EW {candidateRun?.ew}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Build {candidateRun?.build}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Rev {candidateRun?.rev}</span>
           <span style={{ flex: 1 }} />
           <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>{diffs.length} tests compared</span>
         </div>
@@ -261,7 +266,7 @@ export default function Compare() {
         {regressions.length > 0 ? (
           <div style={{ background: "var(--gcp-red-bg)", border: "1px solid var(--gcp-red)", borderRadius: 4, padding: "8px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <span className="gcp-badge gcp-badge-fail" style={{ fontSize: 10 }}>{regressions.length} regression{regressions.length !== 1 ? "s" : ""}</span>
-            <span style={{ fontSize: 12, flex: 1 }}><strong>Promotion blocked.</strong> Fix regressions before deploying to Akamai.</span>
+            <span style={{ fontSize: 12, flex: 1 }}><strong>Promotion blocked.</strong> Fix regressions before deploying.</span>
             <button onClick={() => confirmPromotion("block")} className="gcp-button" style={{ fontSize: 11, padding: "3px 10px", color: "var(--gcp-red)", borderColor: "var(--gcp-red)" }}>
               <XCircle size={11} /> Confirm Block
             </button>
@@ -273,7 +278,7 @@ export default function Compare() {
         ) : (
           <div style={{ background: "var(--gcp-green-bg)", border: "1px solid var(--gcp-green)", borderRadius: 4, padding: "8px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>All Clear</span>
-            <span style={{ fontSize: 12, flex: 1, fontWeight: 500 }}>No regressions — ready to promote to <strong>Akamai Production</strong></span>
+            <span style={{ fontSize: 12, flex: 1, fontWeight: 500 }}>No regressions — ready to promote to <strong>Production</strong></span>
             <button onClick={() => confirmPromotion("promote")} className="gcp-button-success" style={{ fontSize: 11, padding: "3px 10px" }}>
               <Zap size={11} /> Approve Promotion
             </button>
@@ -302,23 +307,38 @@ export default function Compare() {
             <div style={{ flex: 1, overflowY: "auto" }}>
               <table className="gcp-table">
                 <thead style={{ position: "sticky", top: 0, zIndex: 10, background: "var(--gcp-surface)" }}><tr>
+                  <th><input className="gcp-input" placeholder="Name" value={colFilters.name ?? ""} onChange={e => setColFilters(f => ({ ...f, name: e.target.value }))} style={{ width: "100%", fontSize: 10, padding: "2px 6px" }} /></th>
                   <th>
-                    <ColumnFilter label="Test Name" filter={colFilters.name ?? EMPTY_FILTER} onFilterChange={updateColFilter("name")} />
+                    <select className="gcp-input" style={{ fontSize: 10, padding: "2px 6px", width: "100%" }} value={colFilters.baseStatus ?? ""} onChange={e => setColFilters(f => ({ ...f, baseStatus: e.target.value }))}>
+                      <option value="">Baseline</option>
+                      <option value="PASS">PASS</option>
+                      <option value="FAIL">FAIL</option>
+                    </select>
                   </th>
                   <th>
-                    <ColumnFilter label="Baseline" allValues={["PASS", "FAIL"]} filter={colFilters.baseStatus ?? EMPTY_FILTER} onFilterChange={updateColFilter("baseStatus")} />
+                    <select className="gcp-input" style={{ fontSize: 10, padding: "2px 6px", width: "100%" }} value={colFilters.candStatus ?? ""} onChange={e => setColFilters(f => ({ ...f, candStatus: e.target.value }))}>
+                      <option value="">Candidate</option>
+                      <option value="PASS">PASS</option>
+                      <option value="FAIL">FAIL</option>
+                    </select>
+                  </th>
+                  <th style={{ textAlign: "right", fontSize: 10, color: "var(--gcp-text-secondary)", fontWeight: 600, whiteSpace: "nowrap" }}>Δ Duration</th>
+                  <th>
+                    <select className="gcp-input" style={{ fontSize: 10, padding: "2px 6px", width: "100%" }} value={colFilters.category ?? ""} onChange={e => setColFilters(f => ({ ...f, category: e.target.value }))}>
+                      <option value="">Category</option>
+                      {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
                   </th>
                   <th>
-                    <ColumnFilter label="Candidate" allValues={["PASS", "FAIL"]} filter={colFilters.candStatus ?? EMPTY_FILTER} onFilterChange={updateColFilter("candStatus")} />
+                    <select className="gcp-input" style={{ fontSize: 10, padding: "2px 6px", width: "100%" }} value={colFilters.state ?? ""} onChange={e => setColFilters(f => ({ ...f, state: e.target.value }))}>
+                      <option value="">State</option>
+                      <option value="regression">Regression</option>
+                      <option value="fixed">Fixed</option>
+                      <option value="duration">Duration ↑</option>
+                      <option value="unchanged">Unchanged</option>
+                    </select>
                   </th>
-                  <th style={{ textAlign: "right" }}>Δ Duration</th>
-                  <th>
-                    <ColumnFilter label="Category" allValues={categories} filter={colFilters.category ?? EMPTY_FILTER} onFilterChange={updateColFilter("category")} />
-                  </th>
-                  <th>
-                    <ColumnFilter label="State" allValues={states} filter={colFilters.state ?? EMPTY_FILTER} onFilterChange={updateColFilter("state")} />
-                  </th>
-                  <th style={{ textAlign: "center" }}>Actions</th>
+                  <th style={{ textAlign: "center", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Actions</th>
                 </tr></thead>
                 <tbody>
                   {filtered.map(d => {
@@ -362,7 +382,6 @@ export default function Compare() {
               </table>
             </div>
           </div>
-
           {selectedDiff && selectedId && (
             <SidePanel diff={selectedDiff} diffs={filtered} selectedId={selectedId} onSelect={setSelectedId} navigate={navigate} />
           )}

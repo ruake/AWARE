@@ -313,21 +313,21 @@ export function CopilotChatBubble() {
                         }}>
                           <ReactMarkdown
                             components={{
-                              code: ({ className, children, ...props }: any) => {
+                              code: ({ className, children, ...props }: React.ComponentPropsWithoutRef<"code"> & { className?: string }) => {
                                 if (!className) return <code style={{ background: "rgba(0,0,0,0.06)", padding: "1px 3px", borderRadius: 2, fontSize: 11 }} {...props}>{children}</code>;
                                 return <pre style={{ background: "rgba(0,0,0,0.06)", padding: 6, borderRadius: 4, overflowX: "auto", fontSize: 11, margin: "4px 0" }}><code className={className} {...props}>{children}</code></pre>;
                               },
-                              strong: ({ children }: any) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
-                              ul: ({ children }: any) => <ul style={{ paddingLeft: 14, margin: "2px 0" }}>{children}</ul>,
-                              ol: ({ children }: any) => <ol style={{ paddingLeft: 14, margin: "2px 0" }}>{children}</ol>,
-                              li: ({ children }: any) => <li style={{ marginBottom: 1 }}>{children}</li>,
-                              p: ({ children }: any) => <p style={{ margin: "2px 0" }}>{children}</p>,
-                              h1: ({ children }: any) => <div style={{ fontSize: 13, fontWeight: 700, margin: "6px 0 2px" }}>{children}</div>,
-                              h2: ({ children }: any) => <div style={{ fontSize: 12, fontWeight: 700, margin: "4px 0 2px" }}>{children}</div>,
-                              h3: ({ children }: any) => <div style={{ fontSize: 11, fontWeight: 700, margin: "3px 0 1px" }}>{children}</div>,
-                              table: ({ children }: any) => <div style={{ overflowX: "auto" }}><table style={{ borderCollapse: "collapse", width: "100%", fontSize: 10, margin: "4px 0" }}>{children}</table></div>,
-                              th: ({ children }: any) => <th style={{ border: "1px solid var(--gcp-grey)", padding: "2px 4px", background: "rgba(0,0,0,0.04)", fontWeight: 600 }}>{children}</th>,
-                              td: ({ children }: any) => <td style={{ border: "1px solid var(--gcp-grey)", padding: "2px 4px" }}>{children}</td>,
+                              strong: ({ children }: { children: React.ReactNode }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+                              ul: ({ children }: { children: React.ReactNode }) => <ul style={{ paddingLeft: 14, margin: "2px 0" }}>{children}</ul>,
+                              ol: ({ children }: { children: React.ReactNode }) => <ol style={{ paddingLeft: 14, margin: "2px 0" }}>{children}</ol>,
+                              li: ({ children }: { children: React.ReactNode }) => <li style={{ marginBottom: 1 }}>{children}</li>,
+                              p: ({ children }: { children: React.ReactNode }) => <p style={{ margin: "2px 0" }}>{children}</p>,
+                              h1: ({ children }: { children: React.ReactNode }) => <div style={{ fontSize: 13, fontWeight: 700, margin: "6px 0 2px" }}>{children}</div>,
+                              h2: ({ children }: { children: React.ReactNode }) => <div style={{ fontSize: 12, fontWeight: 700, margin: "4px 0 2px" }}>{children}</div>,
+                              h3: ({ children }: { children: React.ReactNode }) => <div style={{ fontSize: 11, fontWeight: 700, margin: "3px 0 1px" }}>{children}</div>,
+                              table: ({ children }: { children: React.ReactNode }) => <div style={{ overflowX: "auto" }}><table style={{ borderCollapse: "collapse", width: "100%", fontSize: 10, margin: "4px 0" }}>{children}</table></div>,
+                              th: ({ children }: { children: React.ReactNode }) => <th style={{ border: "1px solid var(--gcp-grey)", padding: "2px 4px", background: "rgba(0,0,0,0.04)", fontWeight: 600 }}>{children}</th>,
+                              td: ({ children }: { children: React.ReactNode }) => <td style={{ border: "1px solid var(--gcp-grey)", padding: "2px 4px" }}>{children}</td>,
                             }}
                           >
                             {a.content}

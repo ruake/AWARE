@@ -9,11 +9,14 @@ import {
 import { llmChat, getLLMConfig, setLLMConfig, clearChatHistory, syncChatHistory, getRegisteredSkills, checkWebLLM, setWebLLMProgressCallback, getChromeAIStatus, setChromeAIProgressCallback, extractTestConfigFromMessage, savePendingTestConfig } from "@/lib/llm";
 import { SKILLS, PROJECT_CONTEXT } from "@/lib/skills";
 import type { LLMConfig, LLMSkillDefinition, LLMChatMessage } from "@/lib/types";
-import { navTo } from "@/lib/nav";
+import { useLocation } from "wouter";
 import ReactMarkdown from "react-markdown";
 import { saveChatMessages, loadChatMessages, clearChatMessages } from "@/lib/chatStorage";
 import { ChatFormControls, parseFormBlocks } from "@/components/aware/ChatFormControls";
 import type { FormField } from "@/components/aware/ChatFormControls";
+import { linkifyText } from "@/lib/linkify";
+import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+import { MessageList, TypingIndicator } from "@chatscope/chat-ui-kit-react";
 
 function stripTestConfigBlock(content: string): string {
   const start = "---TEST_CONFIG_START---";
@@ -40,7 +43,20 @@ const MARKDOWN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   h2: ({ children }: any) => <h2 style={{ fontSize: 13, fontWeight: 700, margin: "6px 0 3px" }}>{children}</h2>,
   h3: ({ children }: any) => <h3 style={{ fontSize: 12, fontWeight: 700, margin: "4px 0 2px" }}>{children}</h3>,
   p: ({ children }: any) => <p style={{ margin: "4px 0" }}>{children}</p>,
-  a: ({ href, children }: any) => <a href={href} target="_blank" rel="noreferrer" style={{ color: "var(--gcp-blue)", textDecoration: "underline" }}>{children}</a>,
+  a: ({ href, children }: any) => {
+    const isInternal = href && (href.startsWith("/") || href.startsWith("#"));
+    return (
+      <a
+        href={href}
+        onClick={isInternal ? (e: React.MouseEvent) => { e.preventDefault(); window.location.href = href; } : undefined}
+        target={isInternal ? undefined : "_blank"}
+        rel={isInternal ? undefined : "noreferrer"}
+        style={{ color: "var(--gcp-blue)", textDecoration: "underline", cursor: "pointer" }}
+      >
+        {children}
+      </a>
+    );
+  },
   hr: () => <hr style={{ border: "none", borderTop: "1px solid var(--gcp-grey)", margin: "8px 0" }} />,
   table: ({ children }: any) => <div style={{ overflowX: "auto" }}><table style={{ borderCollapse: "collapse", width: "100%", fontSize: 11, margin: "4px 0" }}>{children}</table></div>,
   th: ({ children }: any) => <th style={{ border: "1px solid var(--gcp-grey)", padding: "4px 6px", background: "var(--gcp-grey-bg)", fontWeight: 600, textAlign: "left" }}>{children}</th>,
@@ -112,6 +128,7 @@ const SKILL_ICONS: Record<string, React.ComponentType<any>> = {
 };
 
 export default function Copilot() {
+  const [, navigate] = useLocation();
   const [messages, setMessages] = React.useState<LLMChatMessage[]>(() => {
     const loaded = loadChatMessages();
     syncChatHistory(loaded.map(m => ({ role: m.role as "system" | "user" | "assistant", content: m.content })));
@@ -131,7 +148,6 @@ export default function Copilot() {
   const [fullWindow, setFullWindow] = React.useState(false);
   const [submittedForms, setSubmittedForms] = React.useState<Set<string>>(new Set());
   const [threadInput, setThreadInput] = React.useState("");
-  const [threadLoading, setThreadLoading] = React.useState(false);
 
   const updateMessages = (fn: (prev: LLMChatMessage[]) => LLMChatMessage[]) => {
     setMessages(prev => {
@@ -180,45 +196,7 @@ export default function Copilot() {
     threadEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeThread, messages]);
 
-  const handleSend = async () => {
-    const text = input.trim();
-    if (!text || loading) return;
-    setInput("");
-    const userMsg: LLMChatMessage = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-      role: "user",
-      content: text,
-      timestamp: Date.now(),
-      skill: activeSkill,
-    };
-    updateMessages(prev => [...prev, userMsg]);
-    setLoading(true);
-    try {
-      const res = await llmChat(text, activeSkillDef?.systemPrompt ?? PROJECT_CONTEXT);
-      const assistantMsg: LLMChatMessage = {
-        id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-        role: "assistant",
-        content: res.content,
-        timestamp: Date.now(),
-        skill: activeSkill,
-      };
-      updateMessages(prev => [...prev, assistantMsg]);
-    } catch (err) {
-      updateMessages(prev => [...prev, {
-        id: `msg_${Date.now()}_err`,
-        role: "assistant",
-        content: `Error: ${err instanceof Error ? err.message : "Request failed"}`,
-        timestamp: Date.now(),
-      }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleThreadReply = async (parentId: string) => {
-    const text = threadInput.trim();
-    if (!text || threadLoading) return;
-    setThreadInput("");
+  const replyInThread = async (text: string, parentId: string) => {
     const replyMsg: LLMChatMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       role: "user",
@@ -228,7 +206,7 @@ export default function Copilot() {
       threadId: parentId,
     };
     updateMessages(prev => [...prev, replyMsg]);
-    setThreadLoading(true);
+    setLoading(true);
     try {
       const res = await llmChat(text, activeSkillDef?.systemPrompt ?? PROJECT_CONTEXT);
       const assistantReply: LLMChatMessage = {
@@ -250,16 +228,57 @@ export default function Copilot() {
         threadId: parentId,
       }]);
     } finally {
-      setThreadLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  const handleSend = async (text?: string) => {
+    const msg = text ?? input;
+    if (!msg.trim() || loading) return;
+    setInput("");
+    if (activeThread) {
+      return replyInThread(msg.trim(), activeThread);
+    }
+    const userMsg: LLMChatMessage = {
+      id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      role: "user",
+      content: msg.trim(),
+      timestamp: Date.now(),
+      skill: activeSkill,
+    };
+    updateMessages(prev => [...prev, userMsg]);
+    setLoading(true);
+    try {
+      const res = await llmChat(msg.trim(), activeSkillDef?.systemPrompt ?? PROJECT_CONTEXT);
+      const assistantMsg: LLMChatMessage = {
+        id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        role: "assistant",
+        content: res.content,
+        timestamp: Date.now(),
+        skill: activeSkill,
+      };
+      updateMessages(prev => [...prev, assistantMsg]);
+    } catch (err) {
+      updateMessages(prev => [...prev, {
+        id: `msg_${Date.now()}_err`,
+        role: "assistant",
+        content: `Error: ${err instanceof Error ? err.message : "Request failed"}`,
+        timestamp: Date.now(),
+      }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleThreadReply = async () => {
+    const text = threadInput.trim();
+    if (!text || loading) return;
+    setThreadInput("");
+    return replyInThread(text, activeThread!);
   };
 
   const handleThreadKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleThreadReply(activeThread!); }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleThreadReply(); }
   };
 
   const handleClear = () => {
@@ -274,12 +293,14 @@ export default function Copilot() {
   };
 
   const handleForkThread = (parentMsg: LLMChatMessage) => {
+    const parentSkill = parentMsg.skill ?? activeSkill;
+    if (parentSkill && parentSkill !== "none") setActiveSkill(parentSkill);
     const contextMsg: LLMChatMessage = {
       id: `msg_${Date.now()}_fork`,
       role: "user",
       content: `[Forked from previous message] Continuing from: ${parentMsg.content.substring(0, 300)}`,
       timestamp: Date.now(),
-      skill: activeSkill,
+      skill: parentSkill,
       parentId: undefined,
     };
     updateMessages(prev => [...prev, contextMsg]);
@@ -334,7 +355,7 @@ export default function Copilot() {
       return;
     }
     savePendingTestConfig(config);
-    navTo(`/tests`);
+    navigate(`/tests`);
   };
 
   const startExample = (skillId: SkillOption) => {
@@ -396,6 +417,14 @@ export default function Copilot() {
       </div>
     </div>
   );
+
+  const chatscopeTheme = `<style>
+      .cs-message-list { background: transparent !important; }
+      .cs-message-list__scroll-wrapper { padding: 4px 0 !important; }
+      .cs-typing-indicator { background: transparent !important; padding: 4px 0 !important; }
+      .cs-typing-indicator__text { color: var(--gcp-text-secondary) !important; font-size: 12px !important; }
+      .cs-typing-indicator__dot { background: var(--gcp-text-secondary) !important; }
+    </style>`;
 
   const mainContent = (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, height: fullWindow ? "100vh" : "calc(100vh - 56px - 40px)", minHeight: 0 }}>
@@ -476,9 +505,15 @@ export default function Copilot() {
 
         {/* Main message list */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 10, padding: "4px 0" }}>
+          <MessageList
+            autoScrollToBottom
+            scrollBehavior="smooth"
+            typingIndicator={loading ? <TypingIndicator content="Thinking..." /> : undefined}
+            style={{ flex: 1, "--message-list-background": "transparent" } as React.CSSProperties}
+          >
+            <MessageList.Content>
             {topLevelMessages.length === 0 && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12, color: "var(--gcp-text-secondary)" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12, color: "var(--gcp-text-secondary)", padding: 24 }}>
                 <Bot size={48} style={{ opacity: 0.3 }} />
                 <div style={{ textAlign: "center", maxWidth: 400 }}>
                   <p style={{ fontWeight: 600, fontSize: 14, color: "var(--gcp-text)", marginBottom: 4 }}>How can I help with CDN regression testing?</p>
@@ -508,13 +543,17 @@ export default function Copilot() {
                         {msg.role === "user" ? "You" : "AI Copilot"}{msg.skill ? ` · ${skills.find(s => s.id === msg.skill)?.name ?? msg.skill}` : ""}
                       </div>
                       <div style={{ overflowX: "auto" }} className="copilot-markdown">
-                        {msg.role === "user" ? msg.content : (() => {
+                        {msg.role === "user" ? (
+                          <ReactMarkdown components={MARKDOWN_COMPONENTS}>
+                            {linkifyText(msg.content)}
+                          </ReactMarkdown>
+                        ) : (() => {
                           const { text, blocks } = parseFormBlocks(stripTestConfigBlock(msg.content));
                           return (
                             <>
                               {text && (
                                 <ReactMarkdown components={MARKDOWN_COMPONENTS}>
-                                  {text}
+                                  {linkifyText(text)}
                                 </ReactMarkdown>
                               )}
                               {blocks.map((block, bi) => {
@@ -566,19 +605,9 @@ export default function Copilot() {
                 </div>
               );
             })}
-            {loading && (
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <div style={{ width: 28, height: 28, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--gcp-grey-bg)" }}>
-                  <Bot size={14} style={{ color: "var(--gcp-text-secondary)" }} />
-                </div>
-                <div style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid var(--gcp-grey)", fontSize: 12, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
-                  <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
-                  Thinking...
-                </div>
-              </div>
-            )}
             <div ref={msgEndRef} />
-          </div>
+            </MessageList.Content>
+          </MessageList>
 
           {/* Main input */}
           <div className="gcp-card" style={{ padding: "8px 12px", display: "flex", gap: 8, alignItems: "center", flexShrink: 0, marginTop: 8 }}>
@@ -588,10 +617,10 @@ export default function Copilot() {
               placeholder={activeSkillDef ? `Ask about ${activeSkillDef.name.toLowerCase()}...` : "Ask anything about CDN test results..."}
               value={input}
               onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
               disabled={loading}
             />
-            <button onClick={handleSend} disabled={loading || !input.trim()} className="gcp-button gcp-button-primary" style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", padding: 0, opacity: loading || !input.trim() ? 0.5 : 1 }}>
+            <button onClick={() => handleSend()} disabled={loading || !input.trim()} className="gcp-button gcp-button-primary" style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", padding: 0, opacity: loading || !input.trim() ? 0.5 : 1 }}>
               <Send size={14} />
             </button>
           </div>
@@ -624,7 +653,7 @@ export default function Copilot() {
                         </div>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 4 }}>{parent.role === "user" ? "You" : "AI Copilot"}</div>
-                          <ReactMarkdown components={MARKDOWN_COMPONENTS}>{stripTestConfigBlock(parent.content).substring(0, 500)}</ReactMarkdown>
+                          <ReactMarkdown components={MARKDOWN_COMPONENTS}>{linkifyText(stripTestConfigBlock(parent.content).substring(0, 500))}</ReactMarkdown>
                         </div>
                       </div>
                     )}
@@ -635,13 +664,30 @@ export default function Copilot() {
                         </div>
                         <div style={{ maxWidth: "85%", padding: "6px 10px", borderRadius: 6, background: r.role === "user" ? "var(--gcp-blue-bg)" : "var(--gcp-grey-bg)", fontSize: 11, lineHeight: 1.5 }}>
                           <div style={{ fontWeight: 600, fontSize: 9, color: "var(--gcp-text-secondary)", marginBottom: 2 }}>{r.role === "user" ? "You" : "AI Copilot"}</div>
-                          <ReactMarkdown components={MARKDOWN_COMPONENTS}>
-                            {r.content}
-                          </ReactMarkdown>
+                          {r.role === "assistant" ? (() => {
+                            const { text, blocks } = parseFormBlocks(stripTestConfigBlock(r.content));
+                            return (
+                              <>
+                                {text && <ReactMarkdown components={MARKDOWN_COMPONENTS}>{linkifyText(text)}</ReactMarkdown>}
+                                {blocks.map((block, bi) => {
+                                  if (submittedForms.has(`${r.id}_${bi}`)) return null;
+                                  return (
+                                    <ChatFormControls
+                                      key={bi}
+                                      fields={block.fields}
+                                      onSubmit={values => handleFormSubmit(`${r.id}_${bi}`, values)}
+                                    />
+                                  );
+                                })}
+                              </>
+                            );
+                          })() : (
+                            <ReactMarkdown components={MARKDOWN_COMPONENTS}>{linkifyText(r.content)}</ReactMarkdown>
+                          )}
                         </div>
                       </div>
                     ))}
-                    {threadLoading && (
+                    {loading && (
                       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                         <div style={{ width: 22, height: 22, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--gcp-grey-bg)" }}>
                           <Bot size={10} style={{ color: "var(--gcp-text-secondary)" }} />
@@ -666,9 +712,9 @@ export default function Copilot() {
                 value={threadInput}
                 onChange={e => setThreadInput(e.target.value)}
                 onKeyDown={handleThreadKeyDown}
-                disabled={threadLoading}
+                disabled={loading}
               />
-              <button onClick={() => handleThreadReply(activeThread)} disabled={threadLoading || !threadInput.trim()} className="gcp-button gcp-button-primary" style={{ width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", padding: 0, opacity: threadLoading || !threadInput.trim() ? 0.5 : 1 }}>
+              <button onClick={handleThreadReply} disabled={loading || !threadInput.trim()} className="gcp-button gcp-button-primary" style={{ width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", padding: 0, opacity: loading || !threadInput.trim() ? 0.5 : 1 }}>
                 <Send size={12} />
               </button>
             </div>
@@ -682,6 +728,7 @@ export default function Copilot() {
   if (fullWindow) {
     return (
       <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "var(--gcp-surface)" }}>
+        <div dangerouslySetInnerHTML={{ __html: chatscopeTheme }} />
         {mainContent}
       </div>
     );
@@ -689,6 +736,7 @@ export default function Copilot() {
 
   return (
     <AppLayout activeHref="/copilot">
+      <div dangerouslySetInnerHTML={{ __html: chatscopeTheme }} />
       {mainContent}
     </AppLayout>
   );

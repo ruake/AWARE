@@ -1,10 +1,10 @@
 # =============================================================================
-# AWARE — Akamai CDN Regression Test Configuration
-# Auto-generated from AWARE test registry
+# PROOF — Web App Test Configuration
+# Auto-generated from PROOF test registry
 # =============================================================================
 # 📋 INSTRUCTIONS:
-#   1. Save this file to your repository at: config/aware-test-config.yml
-#   2. Commit and push: git add config/aware-test-config.yml && git commit -m "update aware test config"
+#   1. Save this file to your repository at: config/proof-test-config.yml
+#   2. Commit and push: git add config/proof-test-config.yml && git commit -m "update test config"
 #   3. GitHub Actions will use this config when you dispatch a workflow run
 #
 # 🚀 TO TRIGGER A RUN:
@@ -20,8 +20,8 @@
 # =============================================================================
 
 version: '2.0'
-project: AWARE - Akamai Web Analyser & Kit for Evaluations
-description: Auto-generated CDN regression test configuration. Generated from AWARE test registry.
+project: PROOF - Web App Test Observability
+description: Auto-generated test configuration. Generated from PROOF test registry.
 suites:
   - name: Full Regression Suite
     testCount: 22
@@ -163,21 +163,25 @@ environments:
   - target: Prod
     env: Production
     network: production
+    baseUrl: https://www.example.com
   - target: Prod
     env: Staging
     network: staging
+    baseUrl: https://staging.example.com
   - target: UAT
     env: Production
     network: production
+    baseUrl: https://uat.example.com
   - target: UAT
     env: Staging
     network: staging
+    baseUrl: https://uat-staging.example.com
 workflow:
   file: run-tests.yml
   path: .github/workflows/run-tests.yml
   dispatch: gh workflow run run-tests.yml --field suite=<suite_name> --field target=<target> --field environment=<env>
 instructions: |-
-  1. Add this file to your repo at: config/aware-test-config.yml
+  1. Add this file to your repo at: config/proof-test-config.yml
   2. The GitHub Actions workflow at .github/workflows/run-tests.yml reads this config
-  3. When you update tests in AWARE, re-download this file and commit it to trigger CI
+  3. When you update tests in PROOF, re-download this file and commit it to trigger CI
   4. Run: gh workflow run run-tests.yml --field suite=<suite_name> --field target=<target> --field environment=<env>

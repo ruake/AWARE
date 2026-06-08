@@ -4,10 +4,10 @@ import {
   LayoutDashboard, List, GitCompare, Bug, Play,
   Activity, Bell, Search, Menu, Moon, Sun, ExternalLink,
   Check, AlertTriangle, Info, Bot, BarChart3, FolderTree,
-  Cpu, Monitor,
+  Cpu,
 } from "lucide-react";
 import { CommandPalette } from "./CommandPalette";
-import { CopilotChatBubble } from "./CopilotChatBubble";
+
 import { useLiveStatus } from "@/lib/useLiveStatus";
 
 interface NavItem {
@@ -25,7 +25,6 @@ const PRIMARY_NAV: NavItem[] = [
   { href: "/tests", label: "Tests", icon: Bug },
   { href: "/suites", label: "Suites", icon: FolderTree },
   { href: "/copilot", label: "Copilot", icon: Bot },
-  { href: "/desktop", label: "Desktop", icon: Monitor },
 ];
 
 const SECONDARY_NAV: NavItem[] = [
@@ -103,10 +102,10 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
           <div style={{ width: 30, height: 30, background: "var(--gcp-blue)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <span style={{ color: "white", fontWeight: 800, fontSize: 13, letterSpacing: "-0.5px" }}>AW</span>
+            <span style={{ color: "white", fontWeight: 800, fontSize: 13, letterSpacing: "-0.5px" }}>PR</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
-            <span style={{ fontWeight: 800, fontSize: 14, color: "var(--gcp-text)", letterSpacing: "-0.3px" }}>A.W.A.K.E.</span>
+            <span style={{ fontWeight: 800, fontSize: 14, color: "var(--gcp-text)", letterSpacing: "-0.3px" }}>PROOF</span>
             <span style={{ fontSize: 9, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>CDN Observability</span>
           </div>
         </div>
@@ -302,9 +301,6 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
 
       {/* Command Palette */}
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
-
-      {/* AI Copilot Chat Bubble */}
-      <CopilotChatBubble />
 
       {/* Live status toast */}
       {currentToast && (

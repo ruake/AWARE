@@ -1,13 +1,13 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { GoogleBarChart, GooglePieChart } from "@/components/aware/GoogleCharts";
 import { AppLayout } from "@/components/aware/AppLayout";
 import {
   createTestSuite, updateTestSuite, deleteTestSuite,
   addTestsToSuite, removeTestsFromSuite,
 } from "@/lib/data";
 import type { TestSuite } from "@/lib/types";
-import { CATEGORY_COLORS } from "@/lib/constants";
+
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useTestData } from "@/hooks/useTestData";
 import { SuiteTreeItem } from "@/components/aware/SuiteTreeItem";
@@ -71,11 +71,8 @@ export default function TestSuiteManager() {
   const priorityCounts: Record<string, number> = {};
   selectedTests.forEach(tc => { priorityCounts[tc.priority] = (priorityCounts[tc.priority] || 0) + 1; });
 
-  const categoryChart = Object.entries(catCounts).sort((a, b) => b[1] - a[1]).map(([k, v], i) => ({
-    name: k, value: v, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
-  }));
   const priorityChart = Object.entries(priorityCounts).sort().map(([k, v]) => ({
-    name: k, value: v,
+    priority: k, count: v,
     color: k === "P0" ? "#d93025" : k === "P1" ? "#e8710a" : k === "P2" ? "#1a73e8" : "#5f6368",
   }));
 
@@ -137,32 +134,25 @@ export default function TestSuiteManager() {
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-                  {categoryChart.length > 0 && (
-                    <div className="gcp-card" style={{ padding: 12, height: 180 }}>
+                  {Object.keys(catCounts).length > 0 && (
+                    <div className="gcp-card" style={{ padding: 12 }}>
                       <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 4 }}>Category Distribution</div>
-                      <ResponsiveContainer width="100%" height={140}>
-                        <PieChart>
-                          <Pie data={categoryChart} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={50} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                            {categoryChart.map((e, i) => <Cell key={i} fill={e.color} />)}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
+                      <GooglePieChart title="" data={catCounts} height="150px" />
                     </div>
                   )}
                   {priorityChart.length > 0 && (
                     <div className="gcp-card" style={{ padding: 12, height: 180 }}>
                       <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 4 }}>Priority Breakdown</div>
-                      <ResponsiveContainer width="100%" height={140}>
-                        <BarChart data={priorityChart}>
-                          <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                          <YAxis hide />
-                          <Tooltip contentStyle={{ fontSize: 11 }} />
-                          <Bar dataKey="value" barSize={40}>
-                            {priorityChart.map((e, i) => <Cell key={i} fill={e.color} />)}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
+                      <GoogleBarChart
+                        title=""
+                        columns={["Priority", "Count"]}
+                        data={priorityChart}
+                        xKey="priority"
+                        yKeys={["count"]}
+                        colors={["#1a73e8"]}
+                        height="140px"
+                        showTimeFrame={false}
+                      />
                     </div>
                   )}
                 </div>
@@ -211,7 +201,11 @@ export default function TestSuiteManager() {
                   {selectedTests.map(tc => (
                     <div key={tc.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 8, fontSize: 13 }}>
                       <span style={{ width: 8, height: 8, borderRadius: "50%", flexShrink: 0, background: tc.status === "active" ? "var(--gcp-green)" : tc.status === "disabled" ? "var(--gcp-yellow)" : "var(--gcp-red)" }} />
-                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)" }}>{tc.id}</span>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", cursor: "pointer", textDecoration: "underline", textDecorationColor: "transparent", transition: "text-decoration-color 0.15s" }}
+                        onClick={() => navigate(`/tests?sel=${tc.id}`)}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.textDecorationColor = "var(--gcp-blue)"}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.textDecorationColor = "transparent"}
+                      >{tc.id}</span>
                       <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tc.name}</span>
                       <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{tc.category}</span>
                       <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{tc.priority}</span>

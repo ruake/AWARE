@@ -17,7 +17,7 @@ interface Stage {
 const STAGES: Stage[] = [
   {
     id: "gha", title: "GitHub Actions", icon: Github,
-    desc: "Workflow runs CDN regression tests on every Akamai config change",
+    desc: "Workflow runs regression tests on every config change",
     detail: "Post-test step in CI pipeline\n→ Generates status.json with run results\n→ Commits or uploads to static hosting",
   },
   {
@@ -27,7 +27,7 @@ const STAGES: Stage[] = [
   },
   {
     id: "detect", title: "Portal Detects", icon: Eye,
-    desc: "AWARE portal polls for status.json updates every 30 seconds",
+    desc: "PROOF portal polls for status.json updates every 30 seconds",
     detail: "useLiveStatus() hook polls every 30s\n→ Compares ETag / last-modified\n→ New status detected → triggers notification",
   },
   {
@@ -42,7 +42,7 @@ const STAGES: Stage[] = [
   },
   {
     id: "display", title: "Promotion Decision", icon: LayoutDashboard,
-    desc: "Dashboard shows promotion readiness — approve or block Akamai deploy",
+    desc: "Dashboard shows promotion readiness — approve or block deploy",
     detail: "Charts re-render with latest run\n→ Promotion banner: Approve / Block CTA\n→ Decision recorded in localStorage",
     cta: { label: "Open Dashboard", href: "/", icon: LayoutDashboard },
   },
@@ -71,7 +71,7 @@ jobs:
       - run: pnpm install
       - run: pnpm test:regression --suite=\${{ inputs.suite }}
 
-      # Publish status to AWARE portal
+      # Publish status to PROOF portal
       - run: pnpm publish:status
       - uses: peaceiris/actions-gh-pages@v4
         with:
@@ -109,9 +109,9 @@ export default function Status() {
 
         {/* Header */}
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--gcp-text)" }}>How AWARE Works</h1>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--gcp-text)" }}>How PROOF Works</h1>
           <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", marginTop: 3 }}>
-            End-to-end pipeline: GitHub Actions → CDN test results → Akamai promotion decision
+            End-to-end pipeline: GitHub Actions → test results → promotion decision
           </p>
         </div>
 
@@ -178,7 +178,7 @@ export default function Status() {
           <div className="gcp-card" style={{ overflow: "hidden" }}>
             <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h3 style={{ fontSize: 13, fontWeight: 600 }}>Live GitHub Actions Runs</h3>
-              <a href="https://github.com/salesforce/aware/actions" target="_blank" rel="noopener" className="gcp-button" style={{ fontSize: 11, padding: "3px 9px" }}>
+              <a href="https://github.com/ruake/PROOF/actions" target="_blank" rel="noopener" className="gcp-button" style={{ fontSize: 11, padding: "3px 9px" }}>
                 <Github size={11} /> View all
               </a>
             </div>

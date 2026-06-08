@@ -9,7 +9,7 @@ export const RUNS: Run[] = Array.from({ length: 12 }).map((_, i) => {
   const passPct = status === "PASS" ? 100 : 100 - Math.floor(failCount / 10);
   return {
     id: `run_892_2341.1.0_prod_${1000 + i}`,
-    label: `Prod/Production · PM 892 · EW 2341.1.0`,
+    label: `Prod/Production · Build v892 · Rev 2341.1.0`,
     suite: i % 3 === 0 ? "full_suite" : "geo_gating",
     target: i % 2 === 0 ? "Prod" : "UAT",
     status,
@@ -18,8 +18,8 @@ export const RUNS: Run[] = Array.from({ length: 12 }).map((_, i) => {
     duration: `${45 + (i % 15)}m`,
     durationMs: (45 + (i % 15)) * 60000,
     started: `2026-06-0${6 - Math.floor(i / 4)}T${String(14 - (i % 6)).padStart(2, "0")}:${String(30 - (i % 30)).padStart(2, "0")}Z`,
-    pm: "v892",
-    ew: `2341.1.${i}`,
+    build: "v892",
+    rev: `2341.1.${i}`,
     env: ENVS[i % ENVS.length],
     network: (ENVS[i % ENVS.length].split("/")[1]?.toLowerCase() ?? "production") as "staging" | "production",
   };
@@ -102,13 +102,99 @@ export const PASS_RATE_CHART = RUNS.map((run, i) => ({
   runId: run.id,
 }));
 
-export const ENV_PASS_RATE_CHART = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"].map((day, d) => ({
-  day,
+function _envColor(env: string): string {
+  if (env.includes("Prod/Production")) return "#1a73e8";
+  if (env.includes("Prod/Staging")) return "#f9ab00";
+  if (env.includes("UAT/Production")) return "#1e8e3e";
+  if (env.includes("UAT/Staging")) return "#9334e6";
+  return "#5f6368";
+}
+
+const ENV_KEYS = ["Prod/Production", "Prod/Staging", "UAT/Production", "UAT/Staging"];
+
+// Per-environment pass rate data keyed by run index
+export const PER_ENV_PASS_RATE = ENV_KEYS.map(env => {
+  const envRuns = RUNS.filter(r => r.env === env);
+  return {
+    env,
+    color: _envColor(env),
+    data: envRuns.map((r, i) => ({
+      runId: r.id,
+      label: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"][i] || String(i),
+      passRate: r.passPct,
+    })),
+  };
+});
+
+export const ENV_PASS_RATE_CHART = RUNS.slice(0, 10).map((run, d) => ({
+  day: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"][d] || String(d),
+  runId: run.id,
   "Prod/Production": Math.max(70, 100 - d * 2 - (d === 4 ? 18 : 0)),
   "Prod/Staging": Math.max(70, 100 - d * 2 - (d === 4 ? 15 : 0)),
   "UAT/Production": Math.max(95, 100 - d * 1 - (d === 6 ? 5 : 0)),
   "UAT/Staging": Math.max(92, 100 - d * 1),
 }));
+
+export interface RunFrequency {
+  totalRuns: number;
+  daysCovered: number;
+  runsPerDay: number;
+  byDay: { date: string; count: number; envs: Record<string, number> }[];
+  byEnv: Record<string, number>;
+  byHour: Record<string, number>;
+  avgIntervalHours: number;
+  gaps: { date: string; gapDays: number }[];
+}
+
+export function computeRunFrequency(): RunFrequency {
+  const sorted = [...RUNS].sort((a, b) => new Date(a.started).getTime() - new Date(b.started).getTime());
+  const byDay: Map<string, { count: number; envs: Record<string, number> }> = new Map();
+  const byEnv: Record<string, number> = {};
+  const byHour: Record<string, number> = {};
+
+  for (const run of sorted) {
+    const d = new Date(run.started);
+    const day = d.toISOString().slice(0, 10);
+    const hour = String(d.getUTCHours());
+    const entry = byDay.get(day) ?? { count: 0, envs: {} };
+    entry.count++;
+    entry.envs[run.env] = (entry.envs[run.env] || 0) + 1;
+    byDay.set(day, entry);
+    byEnv[run.env] = (byEnv[run.env] || 0) + 1;
+    byHour[hour] = (byHour[hour] || 0) + 1;
+  }
+
+  const dayKeys = [...byDay.keys()].sort();
+  const daysCovered = dayKeys.length;
+  const runsPerDay = daysCovered > 0 ? Math.round((sorted.length / daysCovered) * 10) / 10 : 0;
+
+  let totalIntervalMs = 0;
+  let intervals = 0;
+  for (let i = 1; i < sorted.length; i++) {
+    totalIntervalMs += new Date(sorted[i].started).getTime() - new Date(sorted[i - 1].started).getTime();
+    intervals++;
+  }
+  const avgIntervalHours = intervals > 0 ? Math.round((totalIntervalMs / intervals / 3600000) * 10) / 10 : 0;
+
+  const gaps: { date: string; gapDays: number }[] = [];
+  for (let i = 1; i < dayKeys.length; i++) {
+    const prev = new Date(dayKeys[i - 1]);
+    const curr = new Date(dayKeys[i]);
+    const diffDays = Math.round((curr.getTime() - prev.getTime()) / 86400000);
+    if (diffDays > 1) gaps.push({ date: dayKeys[i], gapDays: diffDays - 1 });
+  }
+
+  return {
+    totalRuns: sorted.length,
+    daysCovered,
+    runsPerDay,
+    byDay: dayKeys.map(d => ({ date: d, count: byDay.get(d)!.count, envs: byDay.get(d)!.envs })),
+    byEnv,
+    byHour,
+    avgIntervalHours,
+    gaps,
+  };
+}
 
 export function getTestResultsForRun(runId: string): TestResult[] {
   const runIdx = RUNS.findIndex(r => r.id === runId);
