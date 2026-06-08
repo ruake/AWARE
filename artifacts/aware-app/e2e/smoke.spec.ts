@@ -24,7 +24,7 @@ test.describe("PROOF App Smoke Tests", () => {
 
   test("Copilot page loads and shows chat input", async ({ page }) => {
     await page.goto("/copilot");
-    await expect(page.locator("text=AI Copilot").or(page.locator("text=Copilot"))).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("AI Copilot").first()).toBeVisible({ timeout: 5000 });
     const input = page.locator("input[type='text'], textarea");
     await expect(input.first()).toBeVisible({ timeout: 5000 });
   });

@@ -122,13 +122,24 @@ describe("encode / decode test config for nav", () => {
 });
 
 describe("llmChat with skill routing (mock)", () => {
-  it("responds with form block on generate-tests request without details", async () => {
+  it("responds with test config on generate-tests request with category context", async () => {
+    // First message establishes conversation (mock returns greeting)
+    await llmChat("hello", "[SKILL:generate-tests]\nYou are a CDN test engineer.");
+    // Second message with request containing category context → mock generates config directly
     const res = await llmChat("I need to create a test for CDN caching", "[SKILL:generate-tests]\nYou are a CDN test engineer.");
-    expect(res.content).toContain("[FORM]");
+    expect(res.content).toContain("---TEST_CONFIG_START---");
+    expect(res.content).toContain("---TEST_CONFIG_END---");
+
+    const config = extractTestConfigFromMessage(res.content);
+    expect(config).not.toBeNull();
+    expect(config!.category).toBe("caching");
     expect(res.finishReason).toBe("stop");
   });
 
   it("responds with test config on complete form submission", async () => {
+    // Establish conversation
+    await llmChat("hello", "[SKILL:generate-tests]\nYou are a CDN test engineer.");
+
     const formData = [
       "name: CDN Cache HIT Verification",
       "category: caching",
@@ -149,32 +160,37 @@ describe("llmChat with skill routing (mock)", () => {
   });
 
   it("runs generate-script skill when [SKILL:generate-script] is set", async () => {
+    await llmChat("hello", "[SKILL:generate-script]\nYou are a test engineer.");
     const res = await llmChat("generate a script for cache HIT", "[SKILL:generate-script]\nYou are a test engineer.");
     expect(res.content).toContain("config:");
     expect(res.content).toContain("tests:");
   });
 
   it("runs analyze-results skill when [SKILL:analyze-results] is set", async () => {
+    await llmChat("hello", "[SKILL:analyze-results]\nYou are an analyst.");
     const res = await llmChat("my tests are failing", "[SKILL:analyze-results]\nYou are an analyst.");
     expect(res.content).toContain("Regression");
   });
 
   it("runs explain-diff skill when [SKILL:explain-diff] is set", async () => {
+    await llmChat("hello", "[SKILL:explain-diff]\nYou are a release engineer.");
     const res = await llmChat("compare baseline vs candidate", "[SKILL:explain-diff]\nYou are a release engineer.");
     expect(res.content).toContain("Comparison");
   });
 
   it("runs generate-suite skill when [SKILL:generate-suite] is set", async () => {
+    await llmChat("hello", "[SKILL:generate-suite]\nYou are an infrastructure engineer.");
     const res = await llmChat("create a suite for CDN", "[SKILL:generate-suite]\nYou are an infrastructure engineer.");
     expect(res.content).toContain("name:");
   });
 });
 
 describe("config persistence across chat", () => {
-  it("matches the complete copilot flow: form → config → localStorage bridge", async () => {
-    const formRes = await llmChat("Create a cache test", "[SKILL:generate-tests]\nYou are a CDN engineer.");
-    expect(formRes.content).toContain("[FORM]");
+  it("matches the complete copilot flow: greeting → config → localStorage bridge", async () => {
+    // Establish conversation
+    await llmChat("hello", "[SKILL:generate-tests]\nYou are a CDN engineer.");
 
+    // Second message with form data → mock generates config directly
     const formData = [
       "name: CDN Cache HIT Verification",
       "category: caching",
