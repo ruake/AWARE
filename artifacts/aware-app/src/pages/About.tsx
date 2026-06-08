@@ -24,6 +24,7 @@ interface DocEntry { id: string; icon: string; number: string; title: string; co
 
 function DocViewer({ sections }: { sections: DocEntry[] }) {
   const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
+  const [history, setHistory] = React.useState<string[]>([]);
   const [search, setSearch] = React.useState("");
   const [fullscreen, setFullscreen] = React.useState(false);
   const contentRef = React.useRef<HTMLDivElement>(null);
@@ -32,7 +33,23 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
     !search || s.title.toLowerCase().includes(search.toLowerCase()) || s.number.includes(search)
   );
 
-  const active = sections.find(s => s.id === activeId) ?? sections[0];
+  const activeIdx = sections.findIndex(s => s.id === activeId);
+  const active = sections[activeIdx] ?? sections[0];
+  const prev = activeIdx > 0 ? sections[activeIdx - 1] : null;
+  const next = activeIdx < sections.length - 1 ? sections[activeIdx + 1] : null;
+
+  const goTo = (id: string) => {
+    setHistory(prev => [activeId, ...prev].slice(0, 20));
+    setActiveId(id);
+  };
+
+  const goBack = () => {
+    if (history.length === 0) return;
+    const prevId = history[0];
+    setHistory(h => h.slice(1));
+    setActiveId(prevId);
+  };
+
   React.useEffect(() => { contentRef.current?.scrollTo(0, 0); }, [activeId]);
 
   const panel = (
@@ -66,7 +83,7 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
             return (
               <button
                 key={s.id}
-                onClick={() => { setActiveId(s.id); setSearch(""); }}
+                onClick={() => { goTo(s.id); setSearch(""); }}
                 style={{
                   width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "8px 14px",
                   border: "none", cursor: "pointer", fontSize: 11, textAlign: "left",
@@ -95,13 +112,37 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
       <div ref={contentRef} style={{ flex: 1, overflowY: "auto", padding: "24px 28px", fontSize: 12, lineHeight: 1.7, color: "var(--gcp-text-secondary)" }}>
         {active && (
           <div>
+            {/* Header bar */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, paddingBottom: 12, borderBottom: "1px solid var(--gcp-grey)" }}>
+              <button onClick={goBack} disabled={history.length === 0} style={{ border: "none", background: "none", cursor: history.length > 0 ? "pointer" : "default", color: history.length > 0 ? "var(--gcp-text)" : "var(--gcp-grey)", padding: "2px 6px", borderRadius: 4, display: "flex", alignItems: "center" }} title="Back to previous section">
+                <ChevronLeft size={14} />
+              </button>
               <span style={{ fontSize: 16 }}>{active.icon}</span>
               <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--gcp-text)", margin: 0 }}>{active.title}</h3>
-              <button onClick={() => setFullscreen(true)} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)", padding: "2px 6px", borderRadius: 4, display: "flex", alignItems: "center", gap: 3, fontSize: 11 }} title="Fullscreen"><Maximize2 size={12} /></button>
-              <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>Section {active.number}</span>
+              <button onClick={() => setFullscreen(true)} className="gcp-button" style={{ fontSize: 10, padding: "3px 8px", display: "flex", alignItems: "center", gap: 4 }} title="Open fullscreen documentation viewer">
+                <Maximize2 size={11} /> Fullscreen
+              </button>
+              <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)", marginLeft: "auto" }}>
+                {activeIdx + 1} / {sections.length}
+              </span>
             </div>
+
             {active.content()}
+
+            {/* Prev / Next footer */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28, paddingTop: 16, borderTop: "1px solid var(--gcp-grey)" }}>
+              {prev ? (
+                <button onClick={() => goTo(prev.id)} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "6px 12px", background: "transparent", cursor: "pointer", color: "var(--gcp-text)" }}>
+                  <ChevronLeft size={12} /> {prev.icon} {prev.title}
+                </button>
+              ) : <div />}
+              <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>{active.number} of {sections.length}</span>
+              {next ? (
+                <button onClick={() => goTo(next.id)} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "6px 12px", background: "transparent", cursor: "pointer", color: "var(--gcp-text)" }}>
+                  {next.icon} {next.title} <ChevronRight size={12} />
+                </button>
+              ) : <div />}
+            </div>
           </div>
         )}
       </div>
@@ -112,12 +153,15 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
     return (
       <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "var(--gcp-surface)", display: "flex", flexDirection: "column" }}>
         <div style={{ padding: "8px 16px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, background: "var(--gcp-grey-bg)" }}>
-          <button onClick={() => setFullscreen(false)} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 4, fontSize: 12, padding: "4px 8px", borderRadius: 4 }}>
+          <button onClick={() => setFullscreen(false)} className="gcp-button" style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
             <X size={14} /> Close
           </button>
           <span style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>|</span>
           <Book size={14} style={{ color: "var(--gcp-text-secondary)" }} />
           <span style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text)" }}>Documentation</span>
+          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", marginLeft: "auto", fontFamily: "var(--font-mono)" }}>
+            {activeIdx + 1} / {sections.length}
+          </span>
         </div>
         <div style={{ flex: 1, overflow: "hidden" }}>{panel}</div>
       </div>
@@ -522,7 +566,7 @@ const DOC_SECTIONS: DocEntry[] = [
       headers={["Page", "Path", "What to do here"]}
       rows={[
         ["Dashboard", "/", "Monitor pass rates across environments. Check the Run Frequency chart to see test cadence. The Env Health card shows alerts. Use CTA stat cards to jump to runs, compare, or analytics."],
-        ["Runs", "/runs", "Filter runs by environment, network, or status via the FilterBar. Click a row for the side panel with full run details, test results, and evidence. Use the export/share buttons."],
+        ["Runs", "/runs", "Filter runs by environment, network, or status via the FilterBar. Click a row for the side panel with full run details, test results, and evidence. Use the export/share buttons. Click 'Start New Run' to configure and dispatch a regression suite via GitHub Actions."],
         ["Run Detail", "/runs/:id", "Drill into a specific run. See pass/fail breakdown per test. Click evidence rows to expand assertions. Use the panel to navigate to related analytics or compare views."],
         ["Compare", "/compare", "Select baseline and candidate runs from the dropdowns. The diff table shows regressions, fixes, duration changes. Click a row for the side panel. Use column filters (status, env, duration). The green banner shows promotion readiness."],
         ["Test Manager", "/tests", "Full CRUD for test cases. The table has search, column toggles, and bulk actions (delete, change status/priority, add to suite). Use the + button to add a case with the tabbed form. Import auto-detects JSON/YAML/JUnit XML. Use the Generate Wizard to AI-generate tests."],
@@ -531,7 +575,6 @@ const DOC_SECTIONS: DocEntry[] = [
         ["Test Doc", "/testdoc", "Three-column layout: top bar with test metadata, sidebar with related tests and changelog, main area for documentation. Good for reviewing test intent and history."],
         ["Copilot", "/copilot", "AI chat with 5 built-in skills. Select a provider (Mock/OpenAI/WebLLM) in the config panel. Use skills to generate tests, write scripts, analyze results, explain diffs, or create suites. Chat history persists in localStorage."],
         ["Status", "/status", "System health overview. See environment statuses, service uptime indicators, and recent incidents."],
-        ["Start Run", "/start", "Form to configure a new test run. Fill in target, environment, network, build info. Copy the command preview to trigger a run in your CI pipeline."],
         ["Sharing", "/sharing", "Permalink viewer. Past a sharing link or ID to load a saved comparison or run view."],
         ["CI Pipeline", "/ci-pipeline", "Architecture diagram of the GitHub Actions integration. Shows how test runs flow from PR → CI → Results → Dashboard."],
       ]}

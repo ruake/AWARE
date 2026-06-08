@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
 import {
-  LayoutDashboard, List, GitCompare, Bug, Play,
+  LayoutDashboard, List, GitCompare, Bug,
   Activity, Bell, Search, Menu, Moon, Sun, ExternalLink,
   Check, AlertTriangle, Info, Bot, BarChart3, FolderTree,
   Cpu,
@@ -18,7 +18,6 @@ interface NavItem {
 
 const PRIMARY_NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/start", label: "New Run", icon: Play },
   { href: "/runs", label: "Runs", icon: List },
   { href: "/compare", label: "Compare", icon: GitCompare },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
