@@ -25,6 +25,7 @@ interface DocEntry { id: string; icon: string; number: string; title: string; co
 function DocViewer({ sections }: { sections: DocEntry[] }) {
   const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
   const [search, setSearch] = React.useState("");
+  const [fullscreen, setFullscreen] = React.useState(false);
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   const filtered = sections.filter(s =>
@@ -34,8 +35,8 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
   const active = sections.find(s => s.id === activeId) ?? sections[0];
   React.useEffect(() => { contentRef.current?.scrollTo(0, 0); }, [activeId]);
 
-  return (
-    <div style={{ display: "flex", gap: 0, border: "1px solid var(--gcp-grey)", borderRadius: 8, overflow: "hidden", background: "var(--gcp-surface)" }}>
+  const panel = (
+    <div style={{ display: "flex", gap: 0, border: "1px solid var(--gcp-grey)", borderRadius: 8, overflow: "hidden", background: "var(--gcp-surface)", height: "100%" }}>
       {/* Sidebar */}
       <div style={{ width: 260, flexShrink: 0, borderRight: "1px solid var(--gcp-grey)", display: "flex", flexDirection: "column", background: "var(--gcp-grey-bg)" }}>
         <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", gap: 6 }}>
@@ -91,13 +92,14 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
       </div>
 
       {/* Content */}
-      <div ref={contentRef} style={{ flex: 1, overflowY: "auto", padding: "24px 28px", maxHeight: "70vh", fontSize: 12, lineHeight: 1.7, color: "var(--gcp-text-secondary)" }}>
+      <div ref={contentRef} style={{ flex: 1, overflowY: "auto", padding: "24px 28px", fontSize: 12, lineHeight: 1.7, color: "var(--gcp-text-secondary)" }}>
         {active && (
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, paddingBottom: 12, borderBottom: "1px solid var(--gcp-grey)" }}>
               <span style={{ fontSize: 16 }}>{active.icon}</span>
               <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--gcp-text)", margin: 0 }}>{active.title}</h3>
-              <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)", marginLeft: "auto" }}>Section {active.number}</span>
+              <button onClick={() => setFullscreen(true)} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)", padding: "2px 6px", borderRadius: 4, display: "flex", alignItems: "center", gap: 3, fontSize: 11 }} title="Fullscreen"><Maximize2 size={12} /></button>
+              <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>Section {active.number}</span>
             </div>
             {active.content()}
           </div>
@@ -105,6 +107,24 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
       </div>
     </div>
   );
+
+  if (fullscreen) {
+    return (
+      <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "var(--gcp-surface)", display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "8px 16px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, background: "var(--gcp-grey-bg)" }}>
+          <button onClick={() => setFullscreen(false)} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 4, fontSize: 12, padding: "4px 8px", borderRadius: 4 }}>
+            <X size={14} /> Close
+          </button>
+          <span style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>|</span>
+          <Book size={14} style={{ color: "var(--gcp-text-secondary)" }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text)" }}>Documentation</span>
+        </div>
+        <div style={{ flex: 1, overflow: "hidden" }}>{panel}</div>
+      </div>
+    );
+  }
+
+  return panel;
 }
 
 const ICON_MAP = { GitCompare, Shield, Globe, Bug, Activity, Zap, BarChart3 } as const;
