@@ -58,7 +58,7 @@ function CopyBtn({ id, text, onClick }: { id: string; text: string; onClick: (ke
   const [copied, setCopied] = React.useState(false);
   const handle = () => { onClick(id, text); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   return (
-    <button onClick={handle} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: copied ? "var(--gcp-green)" : "var(--gcp-blue)", border: "none", background: "transparent", cursor: "pointer", flexShrink: 0 }}>
+    <button onClick={handle} className="gcp-button gcp-button-xs" style={{ color: copied ? "var(--gcp-green)" : "var(--gcp-blue)", flexShrink: 0 }}>
       {copied ? <Check size={11} /> : <Copy size={11} />}
       {copied ? "Copied" : "Copy"}
     </button>

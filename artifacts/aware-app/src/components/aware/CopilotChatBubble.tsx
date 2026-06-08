@@ -267,83 +267,47 @@ export function CopilotChatBubble() {
                 <p style={{ fontSize: 11 }}>Ask about test results, generate test cases, or analyze diffs.</p>
               </div>
             )}
-            {(() => {
-              const threads: { user: LLMChatMessage; assistant: LLMChatMessage[] }[] = [];
-              let curUser: LLMChatMessage | null = null;
-              let curAssistants: LLMChatMessage[] = [];
-              for (const m of messages) {
-                if (m.role === "user") {
-                  if (curUser) threads.push({ user: curUser, assistant: curAssistants });
-                  curUser = m;
-                  curAssistants = [];
-                } else {
-                  curAssistants.push(m);
-                }
-              }
-              if (curUser) threads.push({ user: curUser, assistant: curAssistants });
-              else if (curAssistants.length > 0) {
-                for (const a of curAssistants) threads.push({ user: a, assistant: [] });
-              }
-              return threads.map((t, ti) => (
-                <div key={t.user.id || ti} style={{ display: "flex", gap: 0, position: "relative" }}>
-                  {/* Thread line */}
-                  <div style={{ width: 24, display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, paddingTop: 4 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: t.user.role === "user" ? "var(--gcp-blue)" : "var(--gcp-grey-bg)", color: t.user.role === "user" ? "white" : "var(--gcp-text)", fontSize: 10 }}>
-                      {t.user.role === "user" ? "U" : <Bot size={12} />}
-                    </div>
-                    {t.assistant.length > 0 && <div style={{ width: 2, flex: 1, minHeight: 8, background: "var(--gcp-grey)", marginTop: 2, borderRadius: 1 }} />}
-                  </div>
-                  {/* Messages */}
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4, paddingLeft: 6 }}>
-                    <div key={t.user.id} style={{ display: "flex", flexDirection: "row-reverse" }}>
-                      <div style={{
-                        maxWidth: "82%", padding: "6px 10px", borderRadius: 8,
-                        background: "var(--gcp-blue-bg)",
-                        fontSize: 12, lineHeight: 1.5, overflowX: "auto",
-                      }}>
-                        {t.user.content}
-                      </div>
-                    </div>
-                    {t.assistant.map((a, ai) => (
-                      <div key={a.id} style={{ display: "flex", flexDirection: "row" }}>
-                        <div style={{
-                          maxWidth: "92%", padding: "6px 10px", borderRadius: 8,
-                          background: "var(--gcp-grey-bg)",
-                          fontSize: 12, lineHeight: 1.5, overflowX: "auto",
-                        }}>
-                          <ReactMarkdown
-                            components={{
-                              code: ({ className, children, ...props }: React.ComponentPropsWithoutRef<"code"> & { className?: string }) => {
-                                if (!className) return <code style={{ background: "rgba(0,0,0,0.06)", padding: "1px 3px", borderRadius: 2, fontSize: 11 }} {...props}>{children}</code>;
-                                return <pre style={{ background: "rgba(0,0,0,0.06)", padding: 6, borderRadius: 4, overflowX: "auto", fontSize: 11, margin: "4px 0" }}><code className={className} {...props}>{children}</code></pre>;
-                              },
-                              strong: ({ children }: { children: React.ReactNode }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
-                              ul: ({ children }: { children: React.ReactNode }) => <ul style={{ paddingLeft: 14, margin: "2px 0" }}>{children}</ul>,
-                              ol: ({ children }: { children: React.ReactNode }) => <ol style={{ paddingLeft: 14, margin: "2px 0" }}>{children}</ol>,
-                              li: ({ children }: { children: React.ReactNode }) => <li style={{ marginBottom: 1 }}>{children}</li>,
-                              p: ({ children }: { children: React.ReactNode }) => <p style={{ margin: "2px 0" }}>{children}</p>,
-                              h1: ({ children }: { children: React.ReactNode }) => <div style={{ fontSize: 13, fontWeight: 700, margin: "6px 0 2px" }}>{children}</div>,
-                              h2: ({ children }: { children: React.ReactNode }) => <div style={{ fontSize: 12, fontWeight: 700, margin: "4px 0 2px" }}>{children}</div>,
-                              h3: ({ children }: { children: React.ReactNode }) => <div style={{ fontSize: 11, fontWeight: 700, margin: "3px 0 1px" }}>{children}</div>,
-                              table: ({ children }: { children: React.ReactNode }) => <div style={{ overflowX: "auto" }}><table style={{ borderCollapse: "collapse", width: "100%", fontSize: 10, margin: "4px 0" }}>{children}</table></div>,
-                              th: ({ children }: { children: React.ReactNode }) => <th style={{ border: "1px solid var(--gcp-grey)", padding: "2px 4px", background: "rgba(0,0,0,0.04)", fontWeight: 600 }}>{children}</th>,
-                              td: ({ children }: { children: React.ReactNode }) => <td style={{ border: "1px solid var(--gcp-grey)", padding: "2px 4px" }}>{children}</td>,
-                            }}
-                          >
-                            {a.content}
-                          </ReactMarkdown>
-                          <div style={{ marginTop: 6, display: "flex", gap: 4 }}>
-                            <button onClick={() => handleCreateTests(a.content)} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, border: "1px solid var(--gcp-blue)", background: "var(--gcp-blue)", color: "white", cursor: "pointer" }}>
-                              <Sparkles size={10} style={{ display: "inline", marginRight: 3 }} />Add to Tests
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+            {messages.map(m => (
+              <div key={m.id} style={{ display: "flex", gap: 6, flexDirection: m.role === "user" ? "row-reverse" : "row", alignItems: "flex-start" }}>
+                <div style={{ width: 24, height: 24, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: m.role === "user" ? "var(--gcp-blue)" : "var(--gcp-grey-bg)", color: m.role === "user" ? "white" : "var(--gcp-text)", fontSize: 10 }}>
+                  {m.role === "user" ? "U" : <Bot size={12} />}
                 </div>
-              ));
-            })()}
+                <div style={{ maxWidth: "85%", padding: "6px 10px", borderRadius: 8, background: m.role === "user" ? "var(--gcp-blue-bg)" : "var(--gcp-grey-bg)", fontSize: 12, lineHeight: 1.5, overflowX: "auto" }}>
+                  {m.role === "assistant" ? (
+                    <ReactMarkdown
+                      components={{
+                        code: ({ className, children, ...props }: React.ComponentPropsWithoutRef<"code"> & { className?: string }) => {
+                          if (!className) return <code style={{ background: "rgba(0,0,0,0.06)", padding: "1px 3px", borderRadius: 2, fontSize: 11 }} {...props}>{children}</code>;
+                          return <pre style={{ background: "rgba(0,0,0,0.06)", padding: 6, borderRadius: 4, overflowX: "auto", fontSize: 11, margin: "4px 0" }}><code className={className} {...props}>{children}</code></pre>;
+                        },
+                        strong: ({ children }: { children: React.ReactNode }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+                        ul: ({ children }: { children: React.ReactNode }) => <ul style={{ paddingLeft: 14, margin: "2px 0" }}>{children}</ul>,
+                        ol: ({ children }: { children: React.ReactNode }) => <ol style={{ paddingLeft: 14, margin: "2px 0" }}>{children}</ol>,
+                        li: ({ children }: { children: React.ReactNode }) => <li style={{ marginBottom: 1 }}>{children}</li>,
+                        p: ({ children }: { children: React.ReactNode }) => <p style={{ margin: "2px 0" }}>{children}</p>,
+                        h1: ({ children }: { children: React.ReactNode }) => <div style={{ fontSize: 13, fontWeight: 700, margin: "6px 0 2px" }}>{children}</div>,
+                        h2: ({ children }: { children: React.ReactNode }) => <div style={{ fontSize: 12, fontWeight: 700, margin: "4px 0 2px" }}>{children}</div>,
+                        h3: ({ children }: { children: React.ReactNode }) => <div style={{ fontSize: 11, fontWeight: 700, margin: "3px 0 1px" }}>{children}</div>,
+                        table: ({ children }: { children: React.ReactNode }) => <div style={{ overflowX: "auto" }}><table style={{ borderCollapse: "collapse", width: "100%", fontSize: 10, margin: "4px 0" }}>{children}</table></div>,
+                        th: ({ children }: { children: React.ReactNode }) => <th style={{ border: "1px solid var(--gcp-grey)", padding: "2px 4px", background: "rgba(0,0,0,0.04)", fontWeight: 600 }}>{children}</th>,
+                        td: ({ children }: { children: React.ReactNode }) => <td style={{ border: "1px solid var(--gcp-grey)", padding: "2px 4px" }}>{children}</td>,
+                      }}
+                    >
+                      {m.content}
+                    </ReactMarkdown>
+                  ) : (
+                    m.content
+                  )}
+                  {m.role === "assistant" && (
+                    <div style={{ marginTop: 6, display: "flex", gap: 4 }}>
+                      <button onClick={() => handleCreateTests(m.content)} className="gcp-button gcp-button-xs" style={{ background: "var(--gcp-blue)", color: "white", borderColor: "var(--gcp-blue)" }}>
+                        <Sparkles size={10} /> Add to Tests
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
             {loading && (
               <div style={{ display: "flex", gap: 6, alignItems: "center", padding: "4px 0" }}>
                 <div style={{ width: 24, height: 24, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--gcp-grey-bg)" }}>

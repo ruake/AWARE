@@ -2,7 +2,7 @@ import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import {
-  RUNS, ENV_SUMMARY, ENV_PASS_RATE_CHART,
+  RUNS, DIFF_ROWS, ENV_SUMMARY, ENV_PASS_RATE_CHART,
   getAllPromotionDecisions, setPromotionDecision,
   computeRunFrequency,
 } from "@/lib/data";
@@ -16,7 +16,7 @@ import {
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { EnvironmentConfigPanel } from "@/components/aware/EnvironmentConfigPanel";
-import { GoogleFilterableTable, GoogleAreaChart, GoogleBarChart } from "@/components/aware/GoogleCharts";
+import { GoogleFilterableTable, GoogleAreaChart } from "@/components/aware/GoogleCharts";
 
 function statusBadge(status: Run["status"]) {
   const map: Record<string, { cls: string; label: string }> = {
@@ -62,7 +62,7 @@ function PromotionBanner({ latestRun }: { latestRun: Run }) {
             {existing.note} · {new Date(existing.decidedAt!).toLocaleString()}
           </div>
         </div>
-        <button onClick={() => { setPromotionDecision({ runId: latestRun.id, decision: "pending" }); setDecisions(getAllPromotionDecisions()); }} className="gcp-button" style={{ fontSize: 12 }}>
+        <button onClick={() => { setPromotionDecision({ runId: latestRun.id, decision: "pending" }); setDecisions(getAllPromotionDecisions()); }} className="gcp-button gcp-button-sm">
           <RefreshCw size={12} /> Reset Decision
         </button>
         {Toast}
@@ -89,7 +89,7 @@ function PromotionBanner({ latestRun }: { latestRun: Run }) {
         </div>
       </div>
       <div style={{ display: "flex", gap: 10, flexShrink: 0, flexWrap: "wrap" }}>
-        <button onClick={() => navigate("/compare")} className="gcp-button" style={{ fontSize: 12 }}>
+        <button onClick={() => navigate("/compare")} className="gcp-button gcp-button-sm">
           <GitCompare size={13} /> View Diff
         </button>
         {canPromote
@@ -115,8 +115,6 @@ export default function Dashboard() {
   const runFreq = React.useMemo(() => computeRunFrequency(), []);
   const recentRuns = RUNS.slice(0, 6);
   const overallPassRate = RUNS.length > 0 ? Math.round(RUNS.reduce((s, r) => s + r.passPct, 0) / RUNS.length) : 0;
-  const passRuns = RUNS.filter(r => r.status === "PASS").length;
-  const failRuns = RUNS.filter(r => r.status === "FAIL").length;
 
   if (!latestRun) {
     return (
@@ -144,10 +142,10 @@ export default function Dashboard() {
             <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", marginTop: 3 }}>Test analytics &amp; promotion readiness · Powered by GitHub Actions</p>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={() => setShowEnvConfig(!showEnvConfig)} className="gcp-button" style={{ fontSize: 12 }}>
+            <button onClick={() => setShowEnvConfig(!showEnvConfig)} className="gcp-button gcp-button-sm">
               <Settings size={13} /> Env Config
             </button>
-            <button onClick={() => show("Run data refreshed")} className="gcp-button" style={{ fontSize: 12 }}>
+            <button onClick={() => show("Run data refreshed")} className="gcp-button gcp-button-sm">
               <RefreshCw size={13} /> Refresh
             </button>
             <button onClick={() => navigate("/start")} className="gcp-button-primary" style={{ fontSize: 13 }}>
@@ -159,13 +157,13 @@ export default function Dashboard() {
         {/* Promotion Banner */}
         <PromotionBanner latestRun={latestRun} />
 
-        {/* KPI tiles — clickable */}
+        {/* Comparison Summary */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
           {[
-            { label: "Overall Pass Rate", value: `${overallPassRate}%`, sub: `${RUNS.length} runs`, color: "var(--gcp-blue)", icon: BarChart3, href: "/runs" },
-            { label: "Passing Runs (PASS)", value: passRuns, sub: "click to view", color: "var(--gcp-green)", icon: CheckCircle2, href: "/runs?status=PASS" },
-            { label: "Failing Runs (FAIL)", value: failRuns, sub: "needs attention", color: "var(--gcp-red)", icon: XCircle, href: "/runs?status=FAIL" },
-            { label: "Run Frequency", value: `${runFreq.runsPerDay}/day`, sub: `${runFreq.totalRuns} runs · ${runFreq.avgIntervalHours}h avg interval`, color: "var(--gcp-purple)", icon: Activity, href: "/runs" },
+            { label: "Pass Rate Trend", value: `${overallPassRate}%`, sub: `avg across ${RUNS.length} runs`, color: "var(--gcp-blue)", icon: BarChart3, href: "/runs" },
+            { label: "Active Regressions", value: DIFF_ROWS.filter(d => d.state === "regression").length, sub: "needs attention", color: "var(--gcp-red)", icon: XCircle, href: "/compare?regressions=1" },
+            { label: "Fixed", value: DIFF_ROWS.filter(d => d.state === "fixed").length, sub: "since last comparison", color: "var(--gcp-green)", icon: CheckCircle2, href: "/compare" },
+            { label: "Run Frequency", value: `${runFreq.runsPerDay}/day`, sub: `${runFreq.totalRuns} total · ${runFreq.avgIntervalHours}h avg`, color: "var(--gcp-purple)", icon: Activity, href: "/runs" },
           ].map(kpi => (
             <CTAStatCard
               key={kpi.label}
@@ -179,81 +177,20 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Charts row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-          <div className="gcp-card" style={{ padding: 16 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Pass Rate by Environment</h3>
-            <GoogleAreaChart
-              title=""
-              columns={["Day", "Prod/Production", "Prod/Staging", "UAT/Production"]}
-              data={ENV_PASS_RATE_CHART}
-              xKey="day"
-              yKeys={["Prod/Production", "Prod/Staging", "UAT/Production"]}
-              colors={["#1a73e8", "#f9ab00", "#1e8e3e"]}
-              height="220px"
-              showTimeFrame
-              onPointClick={p => { if (p.runId) navigate(`/runs/${p.runId}`); }}
-            />
-          </div>
-          <div className="gcp-card" style={{ padding: 16 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Aggregate by Day</h3>
-            <GoogleBarChart
-              title=""
-              columns={["Day", "Prod/Production", "Prod/Staging", "UAT/Production"]}
-              data={ENV_PASS_RATE_CHART}
-              xKey="day"
-              yKeys={["Prod/Production", "Prod/Staging", "UAT/Production"]}
-              colors={["#1a73e8", "#f9ab00", "#1e8e3e"]}
-              height="220px"
-              showTimeFrame
-              barType="grouped"
-              onPointClick={p => { if (p.runId) navigate(`/runs/${p.runId}`); }}
-            />
-          </div>
-        </div>
-
-        {/* Run Frequency */}
+        {/* Pass rate chart */}
         <div className="gcp-card" style={{ padding: 16 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12 }}>Run Frequency</h3>
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${runFreq.byDay.length + 1}, 1fr)`, gap: 12 }}>
-            {runFreq.byDay.map(day => {
-              const maxCount = Math.max(...runFreq.byDay.map(d => d.count));
-              return (
-                <div key={day.date} style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginBottom: 6 }}>{day.date.slice(5)}</div>
-                  <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", height: 60, gap: 3 }}>
-                    {Object.entries(day.envs).map(([env, cnt]) => {
-                      const h = Math.max(16, (cnt / maxCount) * 56);
-                      const colors: Record<string, string> = {
-                        "Prod/Production": "#1a73e8", "Prod/Staging": "#f9ab00",
-                        "UAT/Production": "#1e8e3e", "UAT/Staging": "#9334e6",
-                      };
-                      return <div key={env} style={{ width: 16, height: h, borderRadius: "3px 3px 0 0", background: colors[env] || "#5f6368" }} title={`${env}: ${cnt}`} />;
-                    })}
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text)", marginTop: 4 }}>{day.count}</div>
-                </div>
-              );
-            })}
-            <div style={{ borderLeft: "1px solid var(--gcp-grey)", paddingLeft: 12, display: "flex", flexDirection: "column", justifyContent: "center", gap: 4 }}>
-              <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>Totals by Env</div>
-              {Object.entries(runFreq.byEnv).map(([env, cnt]) => (
-                <div key={env} style={{ fontSize: 12, color: "var(--gcp-text)", display: "flex", justifyContent: "space-between", gap: 16 }}>
-                  <span>{env}</span>
-                  <span style={{ fontWeight: 600 }}>{cnt}</span>
-                </div>
-              ))}
-              <div style={{ fontSize: 12, color: "var(--gcp-text)", display: "flex", justifyContent: "space-between", gap: 16, borderTop: "1px solid var(--gcp-grey)", paddingTop: 4, fontWeight: 700 }}>
-                <span>Total</span>
-                <span>{runFreq.totalRuns}</span>
-              </div>
-            </div>
-          </div>
-          {runFreq.gaps.length > 0 && (
-            <div style={{ marginTop: 8, fontSize: 11, color: "var(--gcp-red)" }}>
-              ⚠ {runFreq.gaps.map(g => `${g.date} (${g.gapDays}d gap)`).join(", ")}
-            </div>
-          )}
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Pass Rate by Environment</h3>
+          <GoogleAreaChart
+            title=""
+            columns={["Day", "Prod/Production", "Prod/Staging", "UAT/Production"]}
+            data={ENV_PASS_RATE_CHART}
+            xKey="day"
+            yKeys={["Prod/Production", "Prod/Staging", "UAT/Production"]}
+            colors={["#1a73e8", "#f9ab00", "#1e8e3e"]}
+            height="220px"
+            showTimeFrame
+            onPointClick={p => { if (p.runId) navigate(`/runs/${p.runId}`); }}
+          />
         </div>
 
         {/* Env health + Recent runs */}
@@ -320,19 +257,19 @@ export default function Dashboard() {
         {/* Quick actions */}
         <div className="gcp-card" style={{ padding: "14px 18px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-text-secondary)", marginRight: 4 }}>QUICK ACTIONS:</span>
-          <button onClick={() => navigate("/start")} className="gcp-button-primary" style={{ fontSize: 12, padding: "6px 14px" }}>
+          <button onClick={() => navigate("/start")} className="gcp-button-primary" style={{ padding: "6px 14px" }}>
             <Play size={13} /> Run Full Regression Suite
           </button>
-          <button onClick={() => navigate("/compare")} className="gcp-button" style={{ fontSize: 12 }}>
+          <button onClick={() => navigate("/compare")} className="gcp-button gcp-button-sm">
             <GitCompare size={13} /> Compare Latest to Baseline
           </button>
           <button onClick={() => {
             const summary = `PROOF Regression Report\nOverall Pass Rate: ${overallPassRate}%\nProd/Production: ${ENV_SUMMARY[0].passRate}% (${ENV_SUMMARY[0].trend}%)\nActive Regressions: 7\nLatest Run: ${latestRun.id}`;
             navigator.clipboard.writeText(summary).then(() => show("Summary copied — paste into Slack/JIRA"));
-          }} className="gcp-button" style={{ fontSize: 12 }}>
+          }} className="gcp-button gcp-button-sm">
             <Share2 size={13} /> Export to Slack
           </button>
-          <a href="https://github.com/ruake/PROOF/actions" target="_blank" rel="noopener noreferrer" className="gcp-button" style={{ fontSize: 12, textDecoration: "none" }}>
+          <a href="https://github.com/ruake/PROOF/actions" target="_blank" rel="noopener noreferrer" className="gcp-button gcp-button-sm" style={{ textDecoration: "none" }}>
             <Github size={13} /> Open GitHub Actions
           </a>
         </div>

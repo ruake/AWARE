@@ -261,7 +261,7 @@ requests.post(
                 {t.label}
               </button>
             ))}
-            <button onClick={handleCopy} style={{ marginLeft: "auto", marginRight: 12, display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: copied ? "var(--gcp-green)" : "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer" }}>
+            <button onClick={handleCopy} className="gcp-button gcp-button-xs" style={{ marginLeft: "auto", marginRight: 12, color: copied ? "var(--gcp-green)" : "var(--gcp-blue)" }}>
               {copied ? <Check size={12} /> : <Copy size={12} />}
               {copied ? "Copied!" : "Copy"}
             </button>
@@ -277,7 +277,7 @@ requests.post(
           <span style={{ fontSize: 12, flex: 1, color: "var(--gcp-text)" }}>
             <strong>CI config.</strong> Download the <code style={{ fontSize: 11, background: "rgba(26,115,232,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "var(--font-mono)" }}>aware-test-config.yml</code> and commit to <code style={{ fontSize: 11, background: "rgba(26,115,232,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "var(--font-mono)" }}>config/</code> to sync GHA with your test registry.
           </span>
-          <button onClick={() => { downloadCiConfig(); }} className="gcp-button-primary" style={{ fontSize: 11, padding: "5px 12px", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 5 }}>
+          <button onClick={() => { downloadCiConfig(); }} className="gcp-button-primary gcp-button-xs">
             <Download size={12} /> Download YAML
           </button>
         </div>
@@ -285,14 +285,14 @@ requests.post(
         {/* Action bar */}
         <div className="gcp-card" style={{ padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, flexWrap: "wrap", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <Link href="/runs"><a className="gcp-button" style={{ fontSize: 12 }}><ArrowLeft size={13} /> Back to Runs</a></Link>
+            <Link href="/runs"><a className="gcp-button gcp-button-sm"><ArrowLeft size={13} /> Back to Runs</a></Link>
             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "var(--gcp-yellow)" }}>
               <AlertCircle size={13} />
               Requires <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>GH_TOKEN</span> with <strong>workflow</strong> scope
             </div>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button className="gcp-button" style={{ fontSize: 12 }}>
+            <button className="gcp-button gcp-button-sm">
               <Zap size={13} /> Save as Preset
             </button>
             <button onClick={handleTrigger} style={{

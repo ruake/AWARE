@@ -43,8 +43,8 @@ export function GenerateWizard({ allSuites, onClose, toast }: { allSuites: TestS
         </div>
 
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => setMode("template")} className="gcp-button" style={{ flex: 1, fontSize: 12, padding: "6px 0", background: mode === "template" ? "var(--gcp-blue)" : undefined, color: mode === "template" ? "white" : undefined, borderColor: mode === "template" ? "var(--gcp-blue)" : "var(--gcp-grey)" }}><FileCode size={12} style={{ marginRight: 4 }} /> Templates</button>
-          <button onClick={() => setMode("ai")} className="gcp-button" style={{ flex: 1, fontSize: 12, padding: "6px 0", background: mode === "ai" ? "var(--gcp-blue)" : undefined, color: mode === "ai" ? "white" : undefined, borderColor: mode === "ai" ? "var(--gcp-blue)" : "var(--gcp-grey)" }}><Sparkles size={12} style={{ marginRight: 4 }} /> AI-Powered</button>
+          <button onClick={() => setMode("template")} className="gcp-button gcp-button-sm" style={{ flex: 1, padding: "6px 0", background: mode === "template" ? "var(--gcp-blue)" : undefined, color: mode === "template" ? "white" : undefined, borderColor: mode === "template" ? "var(--gcp-blue)" : "var(--gcp-grey)" }}><FileCode size={12} style={{ marginRight: 4 }} /> Templates</button>
+          <button onClick={() => setMode("ai")} className="gcp-button gcp-button-sm" style={{ flex: 1, padding: "6px 0", background: mode === "ai" ? "var(--gcp-blue)" : undefined, color: mode === "ai" ? "white" : undefined, borderColor: mode === "ai" ? "var(--gcp-blue)" : "var(--gcp-grey)" }}><Sparkles size={12} style={{ marginRight: 4 }} /> AI-Powered</button>
         </div>
 
         {mode === "template" ? (
@@ -130,8 +130,8 @@ export function GenerateWizard({ allSuites, onClose, toast }: { allSuites: TestS
         )}
 
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button onClick={onClose} className="gcp-button" style={{ fontSize: 13 }}>Cancel</button>
-          <button onClick={handleGenerate} disabled={loading} className="gcp-button gcp-button-primary" style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+          <button onClick={onClose} className="gcp-button">Cancel</button>
+          <button onClick={handleGenerate} disabled={loading} className="gcp-button gcp-button-primary" style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Sparkles size={14} /> {loading ? "Generating..." : mode === "ai" ? "Generate with AI" : `Generate ${params.count} Tests`}
           </button>
         </div>

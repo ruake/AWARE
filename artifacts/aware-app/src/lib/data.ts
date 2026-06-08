@@ -69,6 +69,10 @@ export {
   reconcile, checkTestCaseInRepo, getCheckInSteps, generateYamlContent, onSyncStatusChange, fetchManifest,
 } from "./gitHubSync";
 
+export {
+  getFeatureFlags, updateFeatureFlag, subscribeToFeatureFlags, resetFeatureFlags,
+} from "./featureFlags";
+
 // ── Cross-cutting ────────────────────────────────────────────────────
 import { resetTestCasesStore } from "./testCases";
 import { resetTestSuitesStore } from "./testSuites";

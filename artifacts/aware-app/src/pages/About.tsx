@@ -3,11 +3,11 @@ import { AppLayout } from "@/components/aware/AppLayout";
 import { Link } from "wouter";
 import {
   Zap, BarChart3, GitCompare, Bug, Activity, Shield, Globe, Book,
-  ChevronDown, ChevronLeft, ChevronRight, CheckCircle2, Plus, Trash2,
-  Maximize2, Download, Copy, GripHorizontal, Edit3, X, Save,
-  Image, RotateCw, Search,
+  ChevronDown, ChevronLeft, ChevronRight, CheckCircle2,
+  Maximize2, X, Search, Settings, Bot,
 } from "lucide-react";
 import { RUNS, DIFF_ROWS } from "@/lib/data";
+import { getFeatureFlags, updateFeatureFlag, subscribeToFeatureFlags } from "@/lib/data";
 
 function DocTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
@@ -217,15 +217,10 @@ const ASPECTS = [
 ];
 
 function CarouselSlides() {
-  const [slides, setSlides] = React.useState<SlideData[]>(DEFAULT_SLIDES);
+  const [slides] = React.useState<SlideData[]>(DEFAULT_SLIDES);
   const [idx, setIdx] = React.useState(0);
   const [fullscreen, setFullscreen] = React.useState(false);
-  const [editing, setEditing] = React.useState(false);
-  const [editingPointIdx, setEditingPointIdx] = React.useState<number | null>(null);
   const [aspect, setAspect] = React.useState(0);
-  const [templates, setTemplates] = React.useState<SlideData[][]>(loadTemplates);
-  const [showTemplatePicker, setShowTemplatePicker] = React.useState(false);
-  const [dragOverIdx, setDragOverIdx] = React.useState<number | null>(null);
   const total = slides.length;
   const slide = slides[idx] || slides[0];
   const Icon = slide ? ICON_MAP[slide.icon] : Zap;
@@ -236,141 +231,6 @@ function CarouselSlides() {
     const t = setInterval(() => setIdx(prev => (prev + 1) % total), 5000);
     return () => clearInterval(t);
   }, [total]);
-
-  // ---- Slide CRUD ----
-  function addSlide() {
-    const newSlide: SlideData = {
-      id: genId(),
-      icon: SLIDE_ICONS[slides.length % SLIDE_ICONS.length],
-      title: `New Use Case ${slides.length + 1}`,
-      color: SLIDE_COLORS[slides.length % SLIDE_COLORS.length],
-      detail: "Describe how PROOF solves this use case...",
-      points: ["Key capability one", "Key capability two", "Key capability three"],
-    };
-    setSlides(prev => [...prev, newSlide]);
-    setIdx(slides.length);
-  }
-
-  function deleteSlide(id: string) {
-    if (slides.length <= 1) return;
-    const newSlides = slides.filter(s => s.id !== id);
-    setSlides(newSlides);
-    if (idx >= newSlides.length) setIdx(newSlides.length - 1);
-  }
-
-  function updateSlide(id: string, patch: Partial<SlideData>) {
-    setSlides(prev => prev.map(s => s.id === id ? { ...s, ...patch } : s));
-  }
-
-  // ---- Drag-to-reorder ----
-  function handleDragStart(e: React.DragEvent, i: number) {
-    e.dataTransfer.setData("text/plain", String(i));
-  }
-  function handleDragOver(e: React.DragEvent, i: number) {
-    e.preventDefault();
-    setDragOverIdx(i);
-  }
-  function handleDragLeave() { setDragOverIdx(null); }
-  function handleDrop(e: React.DragEvent, dropIdx: number) {
-    e.preventDefault();
-    setDragOverIdx(null);
-    const srcIdx = Number(e.dataTransfer.getData("text/plain"));
-    if (isNaN(srcIdx) || srcIdx === dropIdx) return;
-    const arr = [...slides];
-    const [removed] = arr.splice(srcIdx, 1);
-    arr.splice(dropIdx, 0, removed);
-    setSlides(arr);
-    setIdx(dropIdx);
-  }
-
-  // ---- Templates ----
-  function saveAsTemplate() {
-    const updated = loadTemplates();
-    updated.push(slides);
-    saveTemplates(updated);
-    setTemplates(updated);
-  }
-
-  function loadTemplate(t: SlideData[]) {
-    setSlides(t.map(s => ({ ...s, id: genId() })));
-    setIdx(0);
-    setShowTemplatePicker(false);
-  }
-
-  function deleteTemplate(i: number) {
-    const updated = loadTemplates();
-    updated.splice(i, 1);
-    saveTemplates(updated);
-    setTemplates(updated);
-  }
-
-  // ---- Export ----
-  function exportHtml() {
-    const lines = slides.map((s, i) => {
-      const pts = s.points.map(p => `      <li>${p}</li>`).join("\n");
-      return `    <div class="slide">
-      <h2>${s.title}</h2>
-      <p class="detail">${s.detail}</p>
-      <ul>${pts}</ul>
-    </div>`;
-    }).join("\n");
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>PROOF Use Cases</title><style>
-body { font-family: system-ui, sans-serif; max-width: 800px; margin: auto; padding: 40px; background: #f8f9fa; }
-.slide { background: #fff; border-radius: 12px; padding: 32px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.1); break-inside: avoid; }
-h2 { margin: 0 0 8px; font-size: 22px; }
-.detail { color: #5f6368; line-height: 1.6; margin-bottom: 16px; }
-ul { padding-left: 20px; }
-li { margin-bottom: 4px; color: #3c4043; }
-@media print { body { padding: 0; } .slide { box-shadow: none; border: 1px solid #ddd; } }
-</style></head><body>${lines}</body></html>`;
-    const w = window.open("", "_blank");
-    if (w) { w.document.write(html); w.document.close(); }
-  }
-
-  function copyAsText() {
-    const text = slides.map(s => `${s.title}\n${s.detail}\n${s.points.map(p => `  - ${p}`).join("\n")}`).join("\n\n---\n\n");
-    navigator.clipboard.writeText(text).catch(() => {});
-  }
-
-  function exportPng() {
-    const cur = slides[idx];
-    if (!cur) return;
-    const w = window.open("", "_blank");
-    if (!w) return;
-    const aspectLabel = curAspect.label.replace(":", "×");
-    const bg = cur.color.replace("var(--gcp-", "").replace(")", "");
-    const colorMap: Record<string, string> = { red: "#ea4335", orange: "#f9ab00", blue: "#1a73e8", green: "#1e8e3e", purple: "#9334e6", yellow: "#f9ab00", cyan: "#00bcd4", pink: "#e91e63", indigo: "#3f51b5" };
-    const bgColor = colorMap[bg] || "#1a73e8";
-    const pts = cur.points.map(p => `        <li style="margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:${bgColor};display:inline-block;flex-shrink:0"></span>${p}</li>`).join("\n");
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${cur.title}</title><style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f0f0f0; }
-.card { width: 580px; background: #fff; border-radius: 20px; padding: 48px; box-shadow: 0 4px 24px rgba(0,0,0,.1); }
-.icon { width: 48px; height: 48px; border-radius: 12px; background: ${bgColor}; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
-p { font-size: 14px; line-height: 1.7; color: #5f6368; margin-bottom: 24px; }
-ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
-li { font-size: 13px; color: #3c4043; display: flex; align-items: center; gap: 8px; }
-.footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #e8eaed; font-size: 11px; color: #9aa0a6; display: flex; justify-content: space-between; }
-.badge { background: ${bgColor}15; color: ${bgColor}; font-weight: 600; font-size: 11px; padding: 3px 10px; border-radius: 12px; border: 1px solid ${bgColor}40; }
-</style></head><body><div class="card"><div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><h1>${cur.title}</h1><p>${cur.detail}</p><ul>${pts}</ul><div class="footer"><span class="badge">${aspectLabel}</span><span>PROOF · ${cur.title}</span></div></div></body></html>`;
-    w.document.write(html);
-    w.document.close();
-    setTimeout(() => { w.print(); }, 500);
-  }
-
-  // ---- Inline editing helpers ----
-  function updatePoint(sid: string, pidx: number, val: string) {
-    setSlides(prev => prev.map(s => s.id === sid ? { ...s, points: s.points.map((p, i) => i === pidx ? val : p) } : s));
-  }
-
-  function addPoint(sid: string) {
-    setSlides(prev => prev.map(s => s.id === sid ? { ...s, points: [...s.points, "New capability"] } : s));
-  }
-
-  function removePoint(sid: string, pidx: number) {
-    setSlides(prev => prev.map(s => s.id === sid && s.points.length > 1 ? { ...s, points: s.points.filter((_, i) => i !== pidx) } : s));
-  }
 
   // ---- Fullscreen ----
   if (fullscreen && slide) {
@@ -409,115 +269,47 @@ li { font-size: 13px; color: #3c4043; display: flex; align-items: center; gap: 8
 
   return (
     <>
-      {/* Toolbar */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-        <button onClick={addSlide} style={tbStyle} title="Add slide"><Plus size={14} /> Add</button>
-        <div style={{ width: 1, height: 20, background: "var(--gcp-grey)", margin: "0 4px" }} />
-        <button onClick={() => setEditing(!editing)} style={{ ...tbStyle, background: editing ? "var(--gcp-blue)" : "transparent", color: editing ? "#fff" : "var(--gcp-text-secondary)", borderColor: editing ? "var(--gcp-blue)" : "var(--gcp-grey)" }} title="Toggle edit"><Edit3 size={14} /> Edit</button>
-        <div style={{ width: 1, height: 20, background: "var(--gcp-grey)", margin: "0 4px" }} />
-        <button onClick={() => setFullscreen(true)} style={tbStyle} title="Fullscreen preview"><Maximize2 size={14} /></button>
-        <select value={aspect} onChange={e => setAspect(Number(e.target.value))} style={{ fontSize: 11, padding: "4px 6px", border: "1px solid var(--gcp-grey)", borderRadius: 4, background: "transparent", color: "var(--gcp-text-secondary)", cursor: "pointer" }}>
-          {ASPECTS.map((a, i) => <option key={i} value={i}>{a.label}</option>)}
-        </select>
-        <div style={{ width: 1, height: 20, background: "var(--gcp-grey)", margin: "0 4px" }} />
-        <button onClick={exportHtml} style={tbStyle} title="Export as HTML (opens new tab)"><Download size={14} /> HTML</button>
-        <button onClick={exportPng} style={tbStyle} title="Print slide as PNG (opens new tab → Ctrl+P / Cmd+P)"><Image size={14} /> PNG</button>
-        <button onClick={copyAsText} style={tbStyle} title="Copy all slides as text"><Copy size={14} /></button>
-        <div style={{ width: 1, height: 20, background: "var(--gcp-grey)", margin: "0 4px" }} />
-        <button onClick={saveAsTemplate} style={tbStyle} title="Save current carousel as template"><Save size={14} /> Template</button>
-        {templates.length > 0 && (
-          <div style={{ position: "relative" }}>
-            <button onClick={() => setShowTemplatePicker(!showTemplatePicker)} style={tbStyle} title="Load template"><RotateCw size={14} /> Load</button>
-            {showTemplatePicker && (
-              <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 100, background: "#fff", border: "1px solid var(--gcp-grey)", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,.1)", minWidth: 200, padding: 8, marginTop: 4 }}>
-                <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", padding: "4px 8px 8px", borderBottom: "1px solid var(--gcp-grey)", marginBottom: 4 }}>Saved Templates</div>
-                {templates.map((t, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 8px", borderRadius: 4, cursor: "pointer", fontSize: 12, color: "var(--gcp-text)" }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "var(--gcp-grey-bg)")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-                    <span style={{ flex: 1 }} onClick={() => loadTemplate(t)}>{t.length} slides</span>
-                    <button onClick={() => deleteTemplate(i)} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-red)", padding: 2 }}><Trash2 size={12} /></button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Main slide + filmstrip layout (three-panel style) */}
+      {/* Main slide + filmstrip layout */}
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {/* Main preview */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 20, minHeight: 130 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 20, minHeight: 130, position: "relative" }}>
+          <button onClick={() => setFullscreen(true)} style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, border: "1px solid var(--gcp-grey)", borderRadius: 6, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gcp-text-secondary)" }} title="Fullscreen">
+            <Maximize2 size={14} />
+          </button>
           <div style={{ width: 44, height: 44, background: slide.color, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, opacity: 0.9 }}>
             <Icon size={22} color="white" />
           </div>
           <div style={{ flex: 1 }}>
-            {editing ? (
-              <input value={slide.title} onChange={e => updateSlide(slide.id, { title: e.target.value })}
-                style={{ fontSize: 16, fontWeight: 700, color: "var(--gcp-text)", border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "4px 8px", width: "100%", marginBottom: 8, background: "transparent" }} />
-            ) : (
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--gcp-text)", marginBottom: 4 }}>{slide.title}</h3>
-            )}
-            {editing ? (
-              <textarea value={slide.detail} onChange={e => updateSlide(slide.id, { detail: e.target.value })}
-                rows={2} style={{ fontSize: 13, color: "var(--gcp-text-secondary)", border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "4px 8px", width: "100%", marginBottom: 8, background: "transparent", resize: "vertical", fontFamily: "inherit", lineHeight: 1.6 }} />
-            ) : (
-              <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", lineHeight: 1.6, marginBottom: 12 }}>{slide.detail}</p>
-            )}
-            {editing ? (
-              <div>
-                {slide.points.map((p, pi) => (
-                  <div key={pi} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                    <input value={p} onChange={e => updatePoint(slide.id, pi, e.target.value)}
-                      style={{ flex: 1, fontSize: 12, color: "var(--gcp-text)", border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "3px 6px", background: "transparent" }} />
-                    <button onClick={() => removePoint(slide.id, pi)} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-red)", padding: 2 }}><Trash2 size={12} /></button>
-                  </div>
-                ))}
-                <button onClick={() => addPoint(slide.id)} style={{ fontSize: 11, border: "1px dashed var(--gcp-grey)", borderRadius: 4, padding: "3px 10px", background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)", marginTop: 4 }}>+ Add point</button>
-              </div>
-            ) : (
-              <ul style={{ padding: 0, margin: 0, listStyle: "none", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px 16px" }}>
-                {slide.points.map(p => (
-                  <li key={p} style={{ fontSize: 12, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
-                    <CheckCircle2 size={12} color={slide.color} style={{ flexShrink: 0 }} />
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--gcp-text)", marginBottom: 4 }}>{slide.title}</h3>
+            <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", lineHeight: 1.6, marginBottom: 12 }}>{slide.detail}</p>
+            <ul style={{ padding: 0, margin: 0, listStyle: "none", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px 16px" }}>
+              {slide.points.map(p => (
+                <li key={p} style={{ fontSize: 12, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
+                  <CheckCircle2 size={12} color={slide.color} style={{ flexShrink: 0 }} />
+                  {p}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        {/* Filmstrip with drag-to-reorder */}
+        {/* Filmstrip nav */}
         <div style={{ display: "flex", alignItems: "center", gap: 4, overflowX: "auto", padding: "4px 0" }}>
           {slides.map((s, i) => {
             const StripIcon = ICON_MAP[s.icon];
             const isActive = i === idx;
-            const isDragOver = i === dragOverIdx;
             return (
               <div key={s.id}
-                draggable
-                onDragStart={e => handleDragStart(e, i)}
-                onDragOver={e => handleDragOver(e, i)}
-                onDragLeave={handleDragLeave}
-                onDrop={e => handleDrop(e, i)}
                 onClick={() => setIdx(i)}
                 style={{
-                  display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 8, cursor: "grab",
-                  border: isDragOver ? "2px dashed var(--gcp-blue)" : isActive ? `2px solid ${s.color}` : "2px solid transparent",
+                  display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 8, cursor: "pointer",
+                  border: isActive ? `2px solid ${s.color}` : "2px solid transparent",
                   background: isActive ? s.color + "12" : "transparent", flexShrink: 0,
                   transition: "all 0.15s", userSelect: "none", fontSize: 11, color: "var(--gcp-text-secondary)"
                 }}>
-                <GripHorizontal size={12} style={{ opacity: 0.4, flexShrink: 0 }} />
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, flexShrink: 0 }} />
                 <StripIcon size={12} style={{ flexShrink: 0 }} />
                 <span style={{ whiteSpace: "nowrap", maxWidth: 80, overflow: "hidden", textOverflow: "ellipsis" }}>{s.title}</span>
-                {slides.length > 1 && (
-                  <button onClick={e => { e.stopPropagation(); deleteSlide(s.id); }} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-red)", padding: 1, opacity: 0.5, flexShrink: 0, display: isActive ? "block" : "none" }}>
-                    <X size={10} />
-                  </button>
-                )}
               </div>
             );
           })}
@@ -545,7 +337,6 @@ li { font-size: 13px; color: #3c4043; display: flex; align-items: center; gap: 8
   );
 }
 
-const tbStyle: React.CSSProperties = { display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", fontSize: 11, border: "1px solid var(--gcp-grey)", borderRadius: 4, background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)" };
 const navBtnStyle: React.CSSProperties = { width: 28, height: 28, border: "1px solid var(--gcp-grey)", borderRadius: 6, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gcp-text-secondary)" };
 
 const DOC_SECTIONS: DocEntry[] = [
@@ -764,6 +555,9 @@ export default function About() {
   ];
 
   const [showDocs, setShowDocs] = React.useState(false);
+  const [ff, setFf] = React.useState(getFeatureFlags);
+
+  React.useEffect(() => subscribeToFeatureFlags(() => setFf(getFeatureFlags())), []);
 
   return (
     <AppLayout>
@@ -789,6 +583,68 @@ export default function About() {
                   </span>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* What is PROOF? — Beginner overview */}
+        <div className="gcp-card" style={{ padding: 28, marginBottom: 24, background: "linear-gradient(135deg, #e8f0fe 0%, #fff 100%)" }}>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--gcp-text)", marginBottom: 10 }}>
+            What is PROOF?
+          </h2>
+          <p style={{ fontSize: 14, color: "var(--gcp-text-secondary)", lineHeight: 1.8, marginBottom: 20, maxWidth: 720 }}>
+            <strong>PROOF</strong> is a web dashboard that tracks your website's test health after every code change.
+            When your automated tests run (via GitHub Actions), PROOF shows you which tests passed, which failed,
+            and whether it's safe to deploy — across all your environments (production, staging, UAT).
+          </p>
+
+          {/* Architecture flow as SVG */}
+          <div style={{ margin: "16px 0", display: "flex", justifyContent: "center", overflow: "auto" }}>
+            <svg width="660" height="140" viewBox="0 0 660 140" style={{ maxWidth: "100%", display: "block" }}>
+              <defs>
+                <marker id="archArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                  <path d="M0 0 L10 5 L0 10 Z" fill="#5f6368"/>
+                </marker>
+              </defs>
+              <rect x="10" y="45" width="170" height="60" rx="8" fill="#e8f0fe" stroke="#1a73e8" strokeWidth="1.5"/>
+              <text x="95" y="70" textAnchor="middle" fontSize="13" fontWeight="bold" fill="#202124" fontFamily="system-ui, sans-serif">🤖 GitHub Actions</text>
+              <text x="95" y="88" textAnchor="middle" fontSize="10" fill="#5f6368" fontFamily="system-ui, sans-serif">Automated test runner</text>
+
+              <path d="M180 75 L225 75" stroke="#5f6368" strokeWidth="1.5" markerEnd="url(#archArrow)"/>
+              <text x="202" y="65" textAnchor="middle" fontSize="9" fill="#1a73e8" fontFamily="system-ui, sans-serif">triggers</text>
+
+              <rect x="235" y="45" width="170" height="60" rx="8" fill="#e6f4ea" stroke="#1e8e3e" strokeWidth="1.5"/>
+              <text x="320" y="70" textAnchor="middle" fontSize="13" fontWeight="bold" fill="#202124" fontFamily="system-ui, sans-serif">🌐 PROOF Portal</text>
+              <text x="320" y="88" textAnchor="middle" fontSize="10" fill="#5f6368" fontFamily="system-ui, sans-serif">Browser-based dashboard</text>
+
+              <path d="M405 75 L450 75" stroke="#5f6368" strokeWidth="1.5" markerEnd="url(#archArrow)"/>
+              <text x="427" y="65" textAnchor="middle" fontSize="9" fill="#1a73e8" fontFamily="system-ui, sans-serif">displays</text>
+
+              <rect x="460" y="45" width="190" height="60" rx="8" fill="#1a73e8" stroke="#1a73e8" strokeWidth="1.5"/>
+              <text x="555" y="70" textAnchor="middle" fontSize="13" fontWeight="bold" fill="white" fontFamily="system-ui, sans-serif">📊 Insights &amp; Actions</text>
+              <text x="555" y="88" textAnchor="middle" fontSize="10" fill="#e8f0fe" fontFamily="system-ui, sans-serif">Compare · Promote · Analyze</text>
+            </svg>
+          </div>
+
+          <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)", lineHeight: 1.6, margin: "8px 0 16px", fontStyle: "italic", textAlign: "center" }}>
+            Data lives entirely in your browser — no servers, no setup, no sign-up.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            <div style={{ textAlign: "center", padding: 16, background: "var(--gcp-surface)", borderRadius: 8, border: "1px solid var(--gcp-grey)" }}>
+              <div style={{ fontSize: 28, marginBottom: 6 }}>🔁</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--gcp-text)", marginBottom: 4 }}>Code Change</div>
+              <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", lineHeight: 1.5 }}>Developer pushes code → automated tests run</div>
+            </div>
+            <div style={{ textAlign: "center", padding: 16, background: "var(--gcp-surface)", borderRadius: 8, border: "1px solid var(--gcp-grey)" }}>
+              <div style={{ fontSize: 28, marginBottom: 6 }}>📈</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--gcp-text)", marginBottom: 4 }}>See Results</div>
+              <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", lineHeight: 1.5 }}>Dashboard shows pass/fail rates per environment</div>
+            </div>
+            <div style={{ textAlign: "center", padding: 16, background: "var(--gcp-blue)", borderRadius: 8 }}>
+              <div style={{ fontSize: 28, marginBottom: 6 }}>🚀</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "white", marginBottom: 4 }}>Deploy or Block</div>
+              <div style={{ fontSize: 11, color: "#e8f0fe", lineHeight: 1.5 }}>Compare baseline vs candidate — approve or block deployment</div>
             </div>
           </div>
         </div>
@@ -837,6 +693,37 @@ export default function About() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Settings */}
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--gcp-text)" }}>Settings</h2>
+        <div className="gcp-card" style={{ padding: 20, marginBottom: 28 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 36, height: 36, background: "var(--gcp-blue-bg)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Bot size={18} color="var(--gcp-blue)" />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2, color: "var(--gcp-text)" }}>Copilot</div>
+                  <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>AI chat assistant with test generation and analysis</div>
+                </div>
+              </div>
+              <button
+                onClick={() => updateFeatureFlag("copilot", !ff.copilot)}
+                style={{
+                  width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", position: "relative",
+                  background: ff.copilot ? "var(--gcp-blue)" : "#ccc",
+                  transition: "background 0.2s",
+                }}
+              >
+                <div style={{
+                  width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3,
+                  left: ff.copilot ? 23 : 3, transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                }} />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Project Documentation toggle */}

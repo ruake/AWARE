@@ -14,7 +14,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
         <span style={{ fontSize: 12, flex: 1, color: "var(--gcp-text)" }}>
           <strong>CI config changed.</strong> Download the updated <code style={{ fontSize: 11, background: "rgba(26,115,232,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "var(--font-mono)" }}>proof-test-config.yml</code> and commit it to trigger GitHub Actions.
         </span>
-        <button onClick={() => { downloadCiConfig(); }} className="gcp-button-primary" style={{ fontSize: 11, padding: "5px 12px", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 5 }}>
+        <button onClick={() => { downloadCiConfig(); }} className="gcp-button-primary gcp-button-xs">
           <Download size={12} /> Download Config
         </button>
         <button onClick={() => { setExpanded(!expanded); }} style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-blue)", padding: 4 }} title="Show instructions">

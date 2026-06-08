@@ -52,10 +52,10 @@ export function EnvironmentConfigPanel({ onClose }: { onClose: () => void }) {
           />
         )}
         <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-          <button onClick={() => setAdding(true)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 12px", fontSize: 11, fontWeight: 600, border: "1px dashed var(--gcp-grey)", borderRadius: 4, background: "var(--gcp-surface)", cursor: "pointer", color: "var(--gcp-blue)" }}>
+          <button onClick={() => setAdding(true)} className="gcp-button gcp-button-xs" style={{ flex: 1, justifyContent: "center", fontWeight: 600, borderStyle: "dashed", background: "var(--gcp-surface)", color: "var(--gcp-blue)" }}>
             <Plus size={12} /> Add Environment
           </button>
-          <button onClick={() => { resetEnvConfigs(); }} style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 10px", fontSize: 11, fontWeight: 600, border: "1px solid var(--gcp-grey)", borderRadius: 4, background: "var(--gcp-surface)", cursor: "pointer", color: "var(--gcp-text-secondary)" }}>
+          <button onClick={() => { resetEnvConfigs(); }} className="gcp-button gcp-button-xs" style={{ fontWeight: 600, background: "var(--gcp-surface)", color: "var(--gcp-text-secondary)" }}>
             <RotateCcw size={12} /> Reset
           </button>
         </div>
@@ -106,8 +106,8 @@ function EnvConfigForm({ initial, onSave, onCancel }: { initial: Partial<Environ
         </select>
       </div>
       <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-        <button onClick={onCancel} style={{ padding: "4px 10px", fontSize: 11, border: "1px solid var(--gcp-grey)", borderRadius: 3, background: "var(--gcp-surface)", cursor: "pointer" }}>Cancel</button>
-        <button onClick={() => onSave({ label, target, stage, baseUrl, ips: ips.split(",").map(s => s.trim()).filter(Boolean), network })} style={{ padding: "4px 10px", fontSize: 11, border: "none", borderRadius: 3, background: "var(--gcp-blue)", color: "#fff", cursor: "pointer" }}>Save</button>
+        <button onClick={onCancel} className="gcp-button gcp-button-xs" style={{ padding: "4px 10px" }}>Cancel</button>
+        <button onClick={() => onSave({ label, target, stage, baseUrl, ips: ips.split(",").map(s => s.trim()).filter(Boolean), network })} className="gcp-button gcp-button-xs" style={{ padding: "4px 10px", border: "none", background: "var(--gcp-blue)", color: "#fff" }}>Save</button>
       </div>
     </div>
   );

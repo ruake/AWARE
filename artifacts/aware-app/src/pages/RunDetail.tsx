@@ -129,7 +129,7 @@ export default function RunDetail() {
 
         {/* Breadcrumb */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button onClick={() => navigate("/runs")} className="gcp-button" style={{ fontSize: 12 }}><ArrowLeft size={13} /> Runs</button>
+          <button onClick={() => navigate("/runs")} className="gcp-button gcp-button-sm"><ArrowLeft size={13} /> Runs</button>
           <ChevronRight size={14} style={{ color: "var(--gcp-text-secondary)" }} />
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--gcp-text-secondary)" }}>{run.id}</span>
         </div>
@@ -146,13 +146,13 @@ export default function RunDetail() {
             </div>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={() => navigator.clipboard.writeText(window.location.href).then(() => show("Permalink copied"))} className="gcp-button" style={{ fontSize: 12 }}>
+            <button onClick={() => navigator.clipboard.writeText(window.location.href).then(() => show("Permalink copied"))} className="gcp-button gcp-button-sm">
               <Share2 size={13} /> Share
             </button>
-            <button onClick={() => navigate(`/compare?candidate=${run.id}&baseline=${RUNS[RUNS.length - 1]?.id}`)} className="gcp-button" style={{ fontSize: 12 }}>
+            <button onClick={() => navigate(`/compare?candidate=${run.id}&baseline=${RUNS[RUNS.length - 1]?.id}`)} className="gcp-button gcp-button-sm">
               <GitCompare size={13} /> Compare to Baseline
             </button>
-            <a href={`https://github.com/ruake/PROOF/actions/runs/${run.id}`} target="_blank" rel="noopener" className="gcp-button" style={{ fontSize: 12, textDecoration: "none" }}>
+            <a href={`https://github.com/ruake/PROOF/actions/runs/${run.id}`} target="_blank" rel="noopener" className="gcp-button gcp-button-sm" style={{ textDecoration: "none" }}>
               <Github size={13} /> Open in GitHub
             </a>
           </div>
@@ -184,7 +184,7 @@ export default function RunDetail() {
                 ? <button onClick={() => decide("promote")} className="gcp-button-success" style={{ fontSize: 13 }}><Zap size={14} /> Approve Promotion</button>
                 : <button onClick={() => decide("block")} className="gcp-button-danger" style={{ fontSize: 13 }}><XCircle size={14} /> Confirm Block</button>
             ) : (
-              <button onClick={() => { setPromotionDecision({ runId: run.id, decision: "pending" }); setDecision(undefined); }} className="gcp-button" style={{ fontSize: 12 }}>
+              <button onClick={() => { setPromotionDecision({ runId: run.id, decision: "pending" }); setDecision(undefined); }} className="gcp-button gcp-button-sm">
                 <RefreshCw size={13} /> Reset
               </button>
             )}
@@ -258,7 +258,7 @@ export default function RunDetail() {
                       <td><span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 7px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{r.category}</span></td>
                       <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)" }}>{r.duration}ms</td>
                       <td onClick={e => e.stopPropagation()}>
-                        <button onClick={() => navigate(`/analytics?testId=${r.id}`)} className="gcp-button" style={{ fontSize: 10, padding: "2px 7px" }}>Analytics</button>
+                        <button onClick={() => navigate(`/analytics?testId=${r.id}`)} className="gcp-button gcp-button-xs" style={{ padding: "2px 7px" }}>Analytics</button>
                       </td>
                     </tr>
                   ))}
@@ -333,7 +333,7 @@ export default function RunDetail() {
 
               {/* Footer actions */}
               <div style={{ padding: "8px 14px", borderTop: "1px solid var(--gcp-grey)", display: "flex", gap: 6, flexShrink: 0 }}>
-                <button onClick={() => navigate(`/analytics?testId=${selectedResult.id}`)} className="gcp-button" style={{ fontSize: 10, flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                <button onClick={() => navigate(`/analytics?testId=${selectedResult.id}`)} className="gcp-button gcp-button-xs" style={{ flex: 1 }}>
                   <BarChart3 size={11} /> Analytics
                 </button>
               </div>

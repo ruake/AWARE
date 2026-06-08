@@ -162,7 +162,7 @@ export default function Status() {
             </div>
             {STAGES[activeStage].cta && (
               <Link href={STAGES[activeStage].cta!.href}>
-                <a className="gcp-button-primary" style={{ fontSize: 12, flexShrink: 0 }}>
+                <a className="gcp-button-primary" style={{ flexShrink: 0 }}>
                   {React.createElement(STAGES[activeStage].cta!.icon, { size: 13 })}
                   {STAGES[activeStage].cta!.label}
                 </a>
@@ -178,7 +178,7 @@ export default function Status() {
           <div className="gcp-card" style={{ overflow: "hidden" }}>
             <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h3 style={{ fontSize: 13, fontWeight: 600 }}>Live GitHub Actions Runs</h3>
-              <a href="https://github.com/ruake/PROOF/actions" target="_blank" rel="noopener" className="gcp-button" style={{ fontSize: 11, padding: "3px 9px" }}>
+              <a href="https://github.com/ruake/PROOF/actions" target="_blank" rel="noopener" className="gcp-button gcp-button-xs">
                 <Github size={11} /> View all
               </a>
             </div>

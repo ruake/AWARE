@@ -8,6 +8,12 @@ export function SuiteEditor({ suite, allSuites, onSave, onClose }: {
   onSave: (data: Omit<TestSuite, "id" | "createdAt" | "updatedAt">) => void;
   onClose: () => void;
 }) {
+  React.useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
+
   const [form, setForm] = React.useState<Omit<TestSuite, "id" | "createdAt" | "updatedAt">>({
     name: suite?.name ?? "",
     description: suite?.description ?? "",
@@ -137,8 +143,8 @@ export function SuiteEditor({ suite, allSuites, onSave, onClose }: {
         </div>
 
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, paddingTop: 8, borderTop: "1px solid var(--gcp-grey)" }}>
-          <button onClick={onClose} className="gcp-button" style={{ fontSize: 13, padding: "8px 16px" }}>Cancel</button>
-          <button onClick={() => onSave(form)} className="gcp-button gcp-button-primary" style={{ fontSize: 13, padding: "8px 16px", display: "flex", alignItems: "center", gap: 6 }}>
+          <button onClick={onClose} className="gcp-button" style={{ padding: "8px 16px" }}>Cancel</button>
+          <button onClick={() => onSave(form)} className="gcp-button gcp-button-primary" style={{ padding: "8px 16px", display: "flex", alignItems: "center", gap: 6 }}>
             <Check size={14} /> {suite ? "Update" : "Create"}
           </button>
         </div>

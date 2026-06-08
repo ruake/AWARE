@@ -48,7 +48,11 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
           ].map(([k, v]) => (
             <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--gcp-grey)", fontSize: 12 }}>
               <span style={{ color: "var(--gcp-text-secondary)" }}>{k}</span>
-              <span style={{ fontFamily: k === "Script" || k === "Expected Status" ? "var(--font-mono)" : undefined, fontSize: 11 }}>{v}</span>
+              {k === "Script" && tc.scriptPath ? (
+                <a href={`https://github.com/ruake/AWARE/blob/main/${tc.scriptPath}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", textDecoration: "underline", textUnderlineOffset: 2 }}>{v}</a>
+              ) : (
+                <span style={{ fontFamily: k === "Script" || k === "Expected Status" ? "var(--font-mono)" : undefined, fontSize: 11 }}>{v}</span>
+              )}
             </div>
           ))}
         </div>
@@ -66,7 +70,7 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
           {editingDoc ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <textarea className="gcp-input" style={{ width: "100%", minHeight: 120, fontFamily: "var(--font-mono)", fontSize: 12 }} value={docText} onChange={e => setDocText(e.target.value)} />
-              <button onClick={handleSaveDoc} className="gcp-button gcp-button-primary" style={{ fontSize: 12, alignSelf: "flex-start" }}>Save</button>
+              <button onClick={handleSaveDoc} className="gcp-button gcp-button-primary gcp-button-sm" style={{ alignSelf: "flex-start" }}>Save</button>
             </div>
           ) : (
             <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{tc.documentation || "No documentation"}</div>
@@ -138,8 +142,8 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
           )}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => navigate(`/analytics?testId=${tc.id}`)} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><BarChart3 size={13} /> Analytics</button>
-          <button onClick={() => { navigator.clipboard.writeText(`https://proof.example.com/tests/${tc.id}`); toast("Link copied"); }} className="gcp-button" style={{ flex: 1, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><FileText size={13} /> Copy Link</button>
+          <button onClick={() => navigate(`/analytics?testId=${tc.id}`)} className="gcp-button gcp-button-sm" style={{ flex: 1 }}><BarChart3 size={13} /> Analytics</button>
+          <button onClick={() => { navigator.clipboard.writeText(`https://proof.example.com/tests/${tc.id}`); toast("Link copied"); }} className="gcp-button gcp-button-sm" style={{ flex: 1 }}><FileText size={13} /> Copy Link</button>
         </div>
       </div>
     </div>

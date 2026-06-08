@@ -21,7 +21,6 @@ const PRIMARY_NAV: NavItem[] = [
   { href: "/runs", label: "Runs", icon: List },
   { href: "/compare", label: "Compare", icon: GitCompare },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/tests", label: "Tests", icon: Bug },
   { href: "/suites", label: "Suites", icon: FolderTree },
   { href: "/copilot", label: "Copilot", icon: Bot },
 ];
@@ -39,6 +38,7 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
   const [sidebarExpanded, setSidebarExpanded] = React.useState(false);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
   const [showNotifs, setShowNotifs] = React.useState(false);
+  const [navSearch, setNavSearch] = React.useState("");
   const notifRef = React.useRef<HTMLDivElement>(null);
   const { updates, currentToast, dismissToast, pendingCount, clearCount } = useLiveStatus();
 
@@ -225,19 +225,33 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
           onMouseEnter={() => setSidebarExpanded(true)}
           onMouseLeave={() => setSidebarExpanded(false)}
         >
-          <div style={{ padding: "8px 0" }}>
+          <div style={{ padding: "6px 0", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <button
               onClick={() => setSidebarExpanded(e => !e)}
-              style={{ width: "100%", display: "flex", justifyContent: "center", padding: 12, border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)" }}
+              style={{ width: "100%", display: "flex", justifyContent: "center", padding: 10, border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)" }}
             >
               <Menu size={20} />
             </button>
           </div>
+          {sidebarExpanded && (
+            <div style={{ padding: "0 10px 6px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "4px 8px", background: "var(--gcp-grey-bg)" }}>
+                <Search size={12} style={{ color: "var(--gcp-text-secondary)", flexShrink: 0 }} />
+                <input
+                  value={navSearch}
+                  onChange={e => setNavSearch(e.target.value)}
+                  placeholder="Filter nav..."
+                  style={{ border: "none", outline: "none", fontSize: 11, background: "transparent", flex: 1, minWidth: 0, color: "var(--gcp-text)" }}
+                />
+              </div>
+            </div>
+          )}
           <div style={{ flex: 1, padding: "4px 0", display: "flex", flexDirection: "column", gap: 2 }}>
             {/* Primary nav */}
             {PRIMARY_NAV.map(item => {
               const active = isActive(item.href);
               const Icon = item.icon;
+              if (navSearch && !item.label.toLowerCase().includes(navSearch.toLowerCase())) return null;
               return (
                 <Link key={item.href} href={item.href} style={{
                   display: "flex", alignItems: "center",
@@ -261,12 +275,13 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
             })}
 
             {/* Divider between primary and secondary */}
-            <div style={{ margin: "6px 12px", borderTop: "1px solid var(--gcp-grey)", opacity: 0.6 }} />
+            {!navSearch && <div style={{ margin: "6px 12px", borderTop: "1px solid var(--gcp-grey)", opacity: 0.6 }} />}
 
             {/* Secondary nav */}
             {SECONDARY_NAV.map(item => {
               const active = isActive(item.href);
               const Icon = item.icon;
+              if (navSearch && !item.label.toLowerCase().includes(navSearch.toLowerCase())) return null;
               return (
                 <Link key={item.href} href={item.href} style={{
                   display: "flex", alignItems: "center",
@@ -276,7 +291,7 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
                   color: active ? "var(--gcp-blue)" : "var(--gcp-text-secondary)",
                   background: active ? "var(--gcp-blue-bg)" : "transparent",
                   transition: "background 0.15s, color 0.15s",
-                  opacity: 0.75,
+                  opacity: navSearch ? 1 : 0.75,
                 }}>
                   <Icon size={17} style={{ flexShrink: 0 }} />
                   <span style={{

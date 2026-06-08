@@ -86,6 +86,15 @@ body {
 .gcp-button:hover { background-color: var(--gcp-blue-bg); border-color: var(--gcp-blue); }
 .gcp-button:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.gcp-button-sm { padding: 4px 10px; font-size: 12px; }
+.gcp-button-xs { padding: 3px 8px; font-size: 11px; }
+.gcp-button-icon {
+  border: none; background: none; cursor: pointer;
+  padding: 4px; color: var(--gcp-text-secondary); border-radius: 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.gcp-button-icon:hover { background: var(--gcp-grey-bg); }
+
 .gcp-button-primary {
   background-color: var(--gcp-blue); color: white; border: none;
   padding: 8px 20px; border-radius: 4px; font-weight: 600; font-size: 13px;

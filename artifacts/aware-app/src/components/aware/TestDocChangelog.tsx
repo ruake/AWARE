@@ -83,7 +83,7 @@ export function TestDocChangelog({ testCase }: { testCase?: TestCase }) {
         <div className="gcp-card" style={{ padding: 12, background: "var(--gcp-surface-hover)", border: "1px dashed var(--gcp-grey)" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12 }}>
             <div style={{ color: "var(--gcp-text-secondary)" }}>File:</div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={testCase.scriptPath}>{testCase.scriptPath}</div>
+            <a href={`https://github.com/ruake/AWARE/blob/main/${testCase.scriptPath}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 11, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--gcp-blue)", textDecoration: "underline", textUnderlineOffset: 2 }} title={testCase.scriptPath}>{testCase.scriptPath}</a>
 
             <div style={{ color: "var(--gcp-text-secondary)" }}>Type:</div>
             <div style={{ textAlign: "right", textTransform: "capitalize" }}>{testCase.testType}</div>

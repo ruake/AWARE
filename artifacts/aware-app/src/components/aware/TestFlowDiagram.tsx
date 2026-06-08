@@ -434,7 +434,11 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
       >
         <Eye size={14} />
         <span>
-          Script: <code style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", fontSize: 10 }}>{testCase.scriptPath || "not set"}</code>
+          Script: {testCase.scriptPath ? (
+            <a href={`https://github.com/ruake/AWARE/blob/main/${testCase.scriptPath}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", fontSize: 10, textDecoration: "underline", textUnderlineOffset: 2 }}><code style={{ fontFamily: "inherit", color: "inherit", fontSize: "inherit" }}>{testCase.scriptPath}</code></a>
+          ) : (
+            <code style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", fontSize: 10 }}>not set</code>
+          )}
         </span>
         <span style={{ marginLeft: "auto", opacity: 0.5 }}>
           v{testCase.version} · {new Date(testCase.updatedAt).toLocaleDateString()}

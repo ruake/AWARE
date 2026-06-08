@@ -112,12 +112,11 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
       ))}
       <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 4 }}>
         {onCancel && (
-          <button onClick={onCancel} className="gcp-button" style={{ fontSize: 11 }}>Cancel</button>
+          <button onClick={onCancel} className="gcp-button gcp-button-xs">Cancel</button>
         )}
         <button
           onClick={() => onSubmit(values)}
-          className="gcp-button gcp-button-primary"
-          style={{ fontSize: 11 }}
+          className="gcp-button gcp-button-primary gcp-button-xs"
         >
           Submit
         </button>

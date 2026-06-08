@@ -69,13 +69,13 @@ export default function TestDoc() {
               {testCase && <RepoStatusBadge status={testCase.repoStatus} />}
             </div>
             <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={handleReconcile} disabled={syncing} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+              <button onClick={handleReconcile} disabled={syncing} className="gcp-button gcp-button-xs">
                 <RefreshCw size={12} /> {syncing ? "Syncing..." : "Re-sync"}
               </button>
-              <button onClick={handleShowCheckInSteps} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+              <button onClick={handleShowCheckInSteps} className="gcp-button gcp-button-xs">
                 <Github size={12} /> Check-in Steps
               </button>
-              <button onClick={handleDownloadYaml} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+              <button onClick={handleDownloadYaml} className="gcp-button gcp-button-xs">
                 <Download size={12} /> YAML
               </button>
             </div>

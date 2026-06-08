@@ -78,7 +78,7 @@ export default function TestAnalytics() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Link href={isTcMode ? "/tests" : "/compare"}>
-            <a className="gcp-button" style={{ fontSize: 12 }}><ArrowLeft size={13} /> {isTcMode ? "Tests" : "Compare"}</a>
+            <a className="gcp-button gcp-button-sm"><ArrowLeft size={13} /> {isTcMode ? "Tests" : "Compare"}</a>
           </Link>
           <ChevronRight size={14} style={{ color: "var(--gcp-text-secondary)" }} />
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -107,7 +107,7 @@ export default function TestAnalytics() {
           </div>
           <div style={{ display: "flex", gap: 10 }}>
             <button onClick={() => { navigator.clipboard.writeText(window.location.href).then(() => show("Permalink copied")); }}
-              className="gcp-button" style={{ fontSize: 12 }}>
+              className="gcp-button gcp-button-sm">
               <Share2 size={13} /> Share
             </button>
           </div>
@@ -119,7 +119,7 @@ export default function TestAnalytics() {
             <AlertTriangle size={14} style={{ color: "var(--gcp-red)" }} />
             <strong>Degrading trend</strong> — last 3 runs all FAIL. Investigate before promoting changes.
             <button onClick={() => { navigator.clipboard.writeText(`Test degrading: ${diff.name}\nLast 3 runs: FAIL\nPass Rate: ${detail.passRate}%`).then(() => show("Alert copied")); }}
-              className="gcp-button" style={{ fontSize: 11, marginLeft: "auto" }}>
+              className="gcp-button gcp-button-xs" style={{ marginLeft: "auto" }}>
               Copy Alert
             </button>
           </div>
@@ -214,7 +214,7 @@ export default function TestAnalytics() {
                     <td style={{ fontSize: 12 }}>{h.env}</td>
                     <td>
                       <Link href={`/runs/${h.runId}`}>
-                        <a className="gcp-button" style={{ fontSize: 10, padding: "2px 7px" }}>View Run</a>
+                        <a className="gcp-button gcp-button-xs" style={{ padding: "2px 7px" }}>View Run</a>
                       </Link>
                     </td>
                   </tr>

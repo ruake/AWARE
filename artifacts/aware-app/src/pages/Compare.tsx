@@ -98,16 +98,16 @@ function SidePanel({ diff, diffs, selectedId, onSelect, navigate }: {
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <button onClick={() => navigate(`/analytics?testId=${diff.id}`)} className="gcp-button" style={{ fontSize: 11, justifyContent: "center" }}>
-            <BarChart3 size={12} /> View Analytics <ArrowUpRight size={10} />
-          </button>
-          <button onClick={() => { copy(`https://proof.example.com/tests/${diff.id}`); show("Test permalink copied"); }} className="gcp-button" style={{ fontSize: 11, justifyContent: "center" }}>
-            <Link2 size={12} /> Copy Test Permalink
-          </button>
-          <button onClick={() => { copy(`GitHub issue: Regression in ${diff.name}\nBaseline: ${diff.baseStatus} (${diff.durBase}ms)\nCandidate: ${diff.candStatus} (${diff.durCand}ms)`); show("GitHub issue template copied"); }}
-            className="gcp-button" style={{ fontSize: 11, justifyContent: "center" }}>
-            <Github size={12} /> File GitHub Issue
-          </button>
+            <button onClick={() => navigate(`/analytics?testId=${diff.id}`)} className="gcp-button gcp-button-xs" style={{ justifyContent: "center" }}>
+              <BarChart3 size={12} /> View Analytics <ArrowUpRight size={10} />
+            </button>
+            <button onClick={() => { copy(`https://proof.example.com/tests/${diff.id}`); show("Test permalink copied"); }} className="gcp-button gcp-button-xs" style={{ justifyContent: "center" }}>
+              <Link2 size={12} /> Copy Test Permalink
+            </button>
+            <button onClick={() => { copy(`GitHub issue: Regression in ${diff.name}\nBaseline: ${diff.baseStatus} (${diff.durBase}ms)\nCandidate: ${diff.candStatus} (${diff.durCand}ms)`); show("GitHub issue template copied"); }}
+              className="gcp-button gcp-button-xs" style={{ justifyContent: "center" }}>
+              <Github size={12} /> File GitHub Issue
+            </button>
         </div>
       </div>
       {Toast}
@@ -125,6 +125,7 @@ export default function Compare() {
   const [selectedId, setSelectedId] = useSyncedUrlState<string | null>("sel", null);
   const [searchText, setSearchText] = useSyncedUrlState("q", "");
   const [regressionsOnly, setRegressionsOnly] = useSyncedUrlState("regressions", false);
+  const [activeFilter, setActiveFilter] = React.useState<string | null>(null);
   const [swapped, setSwapped] = React.useState(false);
   const baselineRun = RUNS.find(r => r.id === baseline);
   const candidateRun = RUNS.find(r => r.id === candidate);
@@ -160,6 +161,7 @@ export default function Compare() {
     return diffs.filter(d => {
       if (searchText && !d.name.toLowerCase().includes(searchText.toLowerCase())) return false;
       if (regressionsOnly && d.state !== "regression") return false;
+      if (activeFilter && d.state !== activeFilter) return false;
       for (const [field, val] of Object.entries(colFilters)) {
         if (!val) continue;
         const cell = String((d as unknown as Record<string, unknown>)[field] ?? "").toLowerCase();
@@ -167,7 +169,7 @@ export default function Compare() {
       }
       return true;
     });
-  }, [diffs, searchText, regressionsOnly, colFilters]);
+  }, [diffs, searchText, regressionsOnly, activeFilter, colFilters]);
 
   const selectedDiff = selectedId ? diffs.find(d => d.id === selectedId) ?? null : null;
   const hasActiveFilters = Object.values(colFilters).some(v => v);
@@ -198,7 +200,7 @@ export default function Compare() {
               </div>
             )}
           </div>
-          <button onClick={() => { const t = baseline; setBaseline(candidate); setCandidate(t); setSwapped(p => !p); }} className="gcp-button" style={{ fontSize: 12, marginTop: 16 }}>⇄ Swap</button>
+          <button onClick={() => { const t = baseline; setBaseline(candidate); setCandidate(t); setSwapped(p => !p); }} className="gcp-button gcp-button-sm" style={{ marginTop: 16 }}>⇄ Swap</button>
           <div style={{ flex: "1 1 240px", minWidth: 200 }}>
             <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "var(--gcp-blue)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>Candidate Run</label>
             <select className="gcp-input" style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: 11, borderColor: "var(--gcp-blue)" }} value={candidate} onChange={e => { setCandidate(e.target.value); setSwapped(false); }}>
@@ -215,21 +217,21 @@ export default function Compare() {
             )}
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0, marginTop: 16, flexWrap: "wrap" }}>
-            <button onClick={() => { copy(window.location.href); show("Permalink copied — URL always reflects current comparison"); }} className="gcp-button" style={{ fontSize: 12 }}>
+            <button onClick={() => { copy(window.location.href); show("Permalink copied — URL always reflects current comparison"); }} className="gcp-button gcp-button-sm">
               <Link2 size={13} /> Permalink
             </button>
             <button onClick={() => { copy(`Comparison: ${baseline} vs ${candidate}\nNew failures: ${regressions.length}\nFixed: ${fixed.length}\nDuration regressions: ${duration.length}`); show("Slack summary copied"); }}
-              className="gcp-button" style={{ fontSize: 12 }}>
+              className="gcp-button gcp-button-sm">
               <Share2 size={13} /> Share
             </button>
             <button onClick={() => { copy(`## Regression Report\n**Baseline:** ${baseline}\n**Candidate:** ${candidate}\n\n### Regressions (${regressions.length})\n${regressions.map(r => `- ${r.name}`).join("\n")}\n\n### Fixed (${fixed.length})\n${fixed.map(r => `- ${r.name}`).join("\n")}`); show("Markdown report copied"); }}
-              className="gcp-button" style={{ fontSize: 12 }}>
+              className="gcp-button gcp-button-sm">
               <Github size={13} /> Report
             </button>
           </div>
         </div>
 
-        {/* Summary tiles — display-only */}
+        {/* Summary tiles — clickable filters */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
           {[
             { label: "New Failures", value: `+${regressions.length}`, color: "var(--gcp-red)", key: "regression" },
@@ -242,6 +244,15 @@ export default function Compare() {
               label={tile.label}
               value={tile.value}
               accentColor={tile.color}
+              active={activeFilter === tile.key}
+              onClick={() => {
+                if (activeFilter === tile.key) {
+                  setActiveFilter(null);
+                } else {
+                  setActiveFilter(tile.key);
+                  setRegressionsOnly(false);
+                }
+              }}
             />
           ))}
         </div>
@@ -294,7 +305,7 @@ export default function Compare() {
                 <input className="gcp-input" placeholder="Search tests…" value={searchText} onChange={e => setSearchText(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
               </div>
               <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
-                <input type="checkbox" checked={regressionsOnly} onChange={e => setRegressionsOnly(e.target.checked)} />
+                <input type="checkbox" checked={regressionsOnly} onChange={e => { setRegressionsOnly(e.target.checked); setActiveFilter(null); }} />
                 Regressions only
               </label>
               {hasActiveFilters && (

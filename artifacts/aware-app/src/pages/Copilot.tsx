@@ -4,8 +4,9 @@ import {
   Bot, Send, Sparkles, FileCode, Search, GitCompare,
   FolderTree, Settings2, Trash2, Loader2,
   AlertTriangle, Lightbulb, Zap, Download,
-  GitBranch, Maximize2, Minimize2, MessageSquare, X, FileText,
+  Maximize2, Minimize2, FileText, Settings,
 } from "lucide-react";
+import { getFeatureFlags } from "@/lib/data";
 import { llmChat, getLLMConfig, setLLMConfig, clearChatHistory, syncChatHistory, getRegisteredSkills, checkWebLLM, setWebLLMProgressCallback, getChromeAIStatus, setChromeAIProgressCallback, extractTestConfigFromMessage, savePendingTestConfig } from "@/lib/llm";
 import { SKILLS, PROJECT_CONTEXT } from "@/lib/skills";
 import type { LLMConfig, LLMSkillDefinition, LLMChatMessage } from "@/lib/types";
@@ -113,7 +114,7 @@ function DraftTestCard({ config, onConfirm }: { config: Record<string, unknown>;
         </div>
       </div>
       <div style={{ padding: "8px 12px", borderTop: "1px solid var(--gcp-blue)", display: "flex", gap: 6 }}>
-        <button onClick={onConfirm} className="gcp-button gcp-button-primary" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+        <button onClick={onConfirm} className="gcp-button gcp-button-primary gcp-button-xs">
           <FileText size={12} /> Confirm & Open in Test Manager
         </button>
       </div>
@@ -129,6 +130,28 @@ const SKILL_ICONS: Record<string, React.ComponentType<any>> = {
 
 export default function Copilot() {
   const [, navigate] = useLocation();
+  const ff = React.useMemo(() => getFeatureFlags(), []);
+  if (!ff.copilot) {
+    return (
+      <AppLayout activeHref="/copilot">
+        <div style={{ maxWidth: 500, margin: "60px auto", textAlign: "center" }}>
+          <div style={{ width: 48, height: 48, background: "var(--gcp-blue-bg)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <Settings size={22} color="var(--gcp-blue)" />
+          </div>
+          <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Copilot Disabled</h2>
+          <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", lineHeight: 1.6, marginBottom: 20 }}>
+            The Copilot feature has been disabled in Settings. Visit the About page to enable it.
+          </p>
+          <button
+            onClick={() => navigate("/about")}
+            style={{ padding: "8px 20px", background: "var(--gcp-blue)", color: "white", border: "none", borderRadius: 4, fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+          >
+            Open Settings
+          </button>
+        </div>
+      </AppLayout>
+    );
+  }
   const [messages, setMessages] = React.useState<LLMChatMessage[]>(() => {
     const loaded = loadChatMessages();
     syncChatHistory(loaded.map(m => ({ role: m.role as "system" | "user" | "assistant", content: m.content })));
@@ -144,10 +167,8 @@ export default function Copilot() {
   const [webLlmProgress, setWebLlmProgress] = React.useState(0);
   const [webLlmStatusText, setWebLlmStatusText] = React.useState("");
   const [chromeAIStatus, setChromeAIStatus] = React.useState<"available" | "downloadable" | "downloading" | "unavailable" | "checking">("checking");
-  const [activeThread, setActiveThread] = React.useState<string | null>(null);
   const [fullWindow, setFullWindow] = React.useState(false);
   const [submittedForms, setSubmittedForms] = React.useState<Set<string>>(new Set());
-  const [threadInput, setThreadInput] = React.useState("");
 
   const updateMessages = (fn: (prev: LLMChatMessage[]) => LLMChatMessage[]) => {
     setMessages(prev => {
@@ -186,59 +207,15 @@ export default function Copilot() {
   const skills = getRegisteredSkills();
   const activeSkillDef = skills.find(s => s.id === activeSkill);
   const msgEndRef = React.useRef<HTMLDivElement>(null);
-  const threadEndRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     msgEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  React.useEffect(() => {
-    threadEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [activeThread, messages]);
-
-  const replyInThread = async (text: string, parentId: string) => {
-    const replyMsg: LLMChatMessage = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-      role: "user",
-      content: text,
-      timestamp: Date.now(),
-      parentId,
-      threadId: parentId,
-    };
-    updateMessages(prev => [...prev, replyMsg]);
-    setLoading(true);
-    try {
-      const res = await llmChat(text, activeSkillDef?.systemPrompt ?? PROJECT_CONTEXT);
-      const assistantReply: LLMChatMessage = {
-        id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-        role: "assistant",
-        content: res.content,
-        timestamp: Date.now(),
-        parentId,
-        threadId: parentId,
-      };
-      updateMessages(prev => [...prev, assistantReply]);
-    } catch (err) {
-      updateMessages(prev => [...prev, {
-        id: `msg_${Date.now()}_err`,
-        role: "assistant",
-        content: `Error: ${err instanceof Error ? err.message : "Request failed"}`,
-        timestamp: Date.now(),
-        parentId,
-        threadId: parentId,
-      }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSend = async (text?: string) => {
     const msg = text ?? input;
     if (!msg.trim() || loading) return;
     setInput("");
-    if (activeThread) {
-      return replyInThread(msg.trim(), activeThread);
-    }
     const userMsg: LLMChatMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       role: "user",
@@ -270,17 +247,6 @@ export default function Copilot() {
     }
   };
 
-  const handleThreadReply = async () => {
-    const text = threadInput.trim();
-    if (!text || loading) return;
-    setThreadInput("");
-    return replyInThread(text, activeThread!);
-  };
-
-  const handleThreadKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleThreadReply(); }
-  };
-
   const handleClear = () => {
     clearChatHistory();
     clearChatMessages();
@@ -290,21 +256,6 @@ export default function Copilot() {
   const handleConfigSave = () => {
     setLLMConfig(config);
     setShowConfig(false);
-  };
-
-  const handleForkThread = (parentMsg: LLMChatMessage) => {
-    const parentSkill = parentMsg.skill ?? activeSkill;
-    if (parentSkill && parentSkill !== "none") setActiveSkill(parentSkill);
-    const contextMsg: LLMChatMessage = {
-      id: `msg_${Date.now()}_fork`,
-      role: "user",
-      content: `[Forked from previous message] Continuing from: ${parentMsg.content.substring(0, 300)}`,
-      timestamp: Date.now(),
-      skill: parentSkill,
-      parentId: undefined,
-    };
-    updateMessages(prev => [...prev, contextMsg]);
-    setInput("");
   };
 
   const handleFormSubmit = async (msgId: string, values: Record<string, unknown>) => {
@@ -371,14 +322,6 @@ export default function Copilot() {
     if (skillId !== "none") setInput(examples[skillId] ?? "");
   };
 
-  const getThreadReplies = (parentId: string) =>
-    messages.filter(m => m.parentId === parentId).sort((a, b) => a.timestamp - b.timestamp);
-
-  const topLevelMessages = React.useMemo(
-    () => messages.filter(m => !m.parentId),
-    [messages]
-  );
-
   const configPanel = showConfig && (
     <div className="gcp-card" style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10, flexShrink: 0, border: "1px solid var(--gcp-blue)" }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
@@ -411,8 +354,8 @@ export default function Copilot() {
           <input type="number" min={0} max={2} step={0.1} className="gcp-input" style={{ width: "100%", fontSize: 11 }} value={config.temperature} onChange={e => setConfig(p => ({ ...p, temperature: Number(e.target.value) }))} />
         </div>
         <div style={{ display: "flex", alignItems: "flex-end", gap: 6 }}>
-          <button onClick={handleConfigSave} className="gcp-button gcp-button-primary" style={{ fontSize: 11 }}>Apply</button>
-          <button onClick={() => { setConfig(getLLMConfig()); setShowConfig(false); }} className="gcp-button" style={{ fontSize: 11 }}>Cancel</button>
+          <button onClick={handleConfigSave} className="gcp-button gcp-button-primary gcp-button-xs">Apply</button>
+          <button onClick={() => { setConfig(getLLMConfig()); setShowConfig(false); }} className="gcp-button gcp-button-xs">Cancel</button>
         </div>
       </div>
     </div>
@@ -439,14 +382,14 @@ export default function Copilot() {
           </span>
         </div>
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <button onClick={() => setShowConfig(p => !p)} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+          <button onClick={() => setShowConfig(p => !p)} className="gcp-button gcp-button-xs">
             <Settings2 size={12} /> Config
           </button>
-          <button onClick={() => setFullWindow(p => !p)} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+          <button onClick={() => setFullWindow(p => !p)} className="gcp-button gcp-button-xs">
             {fullWindow ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
             {fullWindow ? "Minimize" : "Full Window"}
           </button>
-          <button onClick={handleClear} className="gcp-button" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
+          <button onClick={handleClear} className="gcp-button gcp-button-xs">
             <Trash2 size={12} /> Clear
           </button>
         </div>
@@ -478,8 +421,8 @@ export default function Copilot() {
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", flexShrink: 0 }}>
         <button
           onClick={() => setActiveSkill("none")}
-          className="gcp-button"
-          style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4, background: activeSkill === "none" ? "var(--gcp-blue)" : undefined, color: activeSkill === "none" ? "white" : undefined, borderColor: activeSkill === "none" ? "var(--gcp-blue)" : undefined }}
+          className="gcp-button gcp-button-xs"
+          style={{ background: activeSkill === "none" ? "var(--gcp-blue)" : undefined, color: activeSkill === "none" ? "white" : undefined, borderColor: activeSkill === "none" ? "var(--gcp-blue)" : undefined }}
         >
           <Zap size={12} /> General
         </button>
@@ -490,9 +433,9 @@ export default function Copilot() {
             <button
               key={skill.id}
               onClick={() => startExample(skill.id)}
-              className="gcp-button"
+              className="gcp-button gcp-button-xs"
               title={skill.description}
-              style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4, background: isActive ? "var(--gcp-blue)" : undefined, color: isActive ? "white" : undefined, borderColor: isActive ? "var(--gcp-blue)" : undefined }}
+              style={{ background: isActive ? "var(--gcp-blue)" : undefined, color: isActive ? "white" : undefined, borderColor: isActive ? "var(--gcp-blue)" : undefined }}
             >
               <Icon size={12} /> {skill.name}
             </button>
@@ -500,10 +443,10 @@ export default function Copilot() {
         })}
       </div>
 
-      {/* Chat area: main messages + optional thread panel */}
-      <div style={{ flex: 1, display: "flex", gap: 0, overflow: "hidden", minHeight: 0 }}>
+      {/* Chat area */}
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
 
-        {/* Main message list */}
+        {/* Message list */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <MessageList
             autoScrollToBottom
@@ -512,7 +455,7 @@ export default function Copilot() {
             style={{ flex: 1, "--message-list-background": "transparent" } as React.CSSProperties}
           >
             <MessageList.Content>
-            {topLevelMessages.length === 0 && (
+            {messages.length === 0 && (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12, color: "var(--gcp-text-secondary)", padding: 24 }}>
                 <Bot size={48} style={{ opacity: 0.3 }} />
                 <div style={{ textAlign: "center", maxWidth: 400 }}>
@@ -529,11 +472,10 @@ export default function Copilot() {
                 </div>
               </div>
             )}
-            {topLevelMessages.map(msg => {
-              const replies = getThreadReplies(msg.id);
+            {messages.map(msg => {
               const testConfig = msg.role === "assistant" ? extractTestConfigFromMessage(msg.content) : null;
               return (
-                <div key={msg.id}>
+                <div key={msg.id} style={{ marginBottom: 8 }}>
                   <div style={{ display: "flex", gap: 8, flexDirection: msg.role === "user" ? "row-reverse" : "row", alignItems: "flex-start" }}>
                     <div style={{ width: 28, height: 28, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: msg.role === "user" ? "var(--gcp-blue)" : "var(--gcp-grey-bg)", color: msg.role === "user" ? "white" : "var(--gcp-text)" }}>
                       {msg.role === "user" ? <Lightbulb size={14} /> : <Bot size={14} />}
@@ -577,31 +519,13 @@ export default function Copilot() {
                       )}
                       <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
                         {msg.role === "assistant" && testConfig && (
-                          <button onClick={() => handleCreateTestCase(msg.content)} className="gcp-button" style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 4 }}>
+                          <button onClick={() => handleCreateTestCase(msg.content)} className="gcp-button gcp-button-xs">
                             <FileText size={10} /> Save to Test Manager
                           </button>
                         )}
-                        <button
-                          onClick={() => setActiveThread(msg.id)}
-                          className="gcp-button"
-                          style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 4 }}
-                        >
-                          <MessageSquare size={10} /> Reply in Thread
-                        </button>
-                        <button onClick={() => handleForkThread(msg)} className="gcp-button" style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 4 }}>
-                          <GitBranch size={10} /> Fork
-                        </button>
                       </div>
                     </div>
                   </div>
-                  {replies.length > 0 && (
-                    <div
-                      onClick={() => setActiveThread(msg.id)}
-                      style={{ marginLeft: 36, marginTop: 4, fontSize: 11, color: "var(--gcp-blue)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 4, width: "fit-content" }}
-                    >
-                      <MessageSquare size={12} /> {replies.length} {replies.length === 1 ? "reply" : "replies"} — View thread
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -625,101 +549,6 @@ export default function Copilot() {
             </button>
           </div>
         </div>
-
-        {/* Thread panel */}
-        {activeThread && (
-          <div style={{ width: 380, marginLeft: 12, borderLeft: "1px solid var(--gcp-grey)", paddingLeft: 12, display: "flex", flexDirection: "column", flexShrink: 0, overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 8, borderBottom: "1px solid var(--gcp-grey)", flexShrink: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <MessageSquare size={14} style={{ color: "var(--gcp-text-secondary)" }} />
-                <span style={{ fontSize: 12, fontWeight: 700 }}>
-                  Thread · @{(messages.find(m => m.id === activeThread)?.role === "user" ? "You" : "AI Copilot")}
-                </span>
-              </div>
-              <button onClick={() => { setActiveThread(null); setThreadInput(""); }} className="gcp-button" style={{ fontSize: 10, padding: "2px 6px", border: "none", background: "transparent", cursor: "pointer" }}>
-                <X size={14} />
-              </button>
-            </div>
-            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, padding: "8px 0" }}>
-              {(() => {
-                const parent = messages.find(m => m.id === activeThread);
-                const replies = getThreadReplies(activeThread);
-                return (
-                  <>
-                    {parent && (
-                      <div key={parent.id} style={{ display: "flex", gap: 8, padding: "8px 10px", borderRadius: 6, background: "var(--gcp-surface)", border: "1px solid var(--gcp-grey)", fontSize: 12, lineHeight: 1.5 }}>
-                        <div style={{ width: 24, height: 24, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: parent.role === "user" ? "var(--gcp-blue)" : "var(--gcp-grey-bg)", color: parent.role === "user" ? "white" : "var(--gcp-text)" }}>
-                          {parent.role === "user" ? <Lightbulb size={12} /> : <Bot size={12} />}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 4 }}>{parent.role === "user" ? "You" : "AI Copilot"}</div>
-                          <ReactMarkdown components={MARKDOWN_COMPONENTS}>{linkifyText(stripTestConfigBlock(parent.content).substring(0, 500))}</ReactMarkdown>
-                        </div>
-                      </div>
-                    )}
-                    {replies.map(r => (
-                      <div key={r.id} style={{ display: "flex", gap: 6, flexDirection: r.role === "user" ? "row-reverse" : "row", alignItems: "flex-start" }}>
-                        <div style={{ width: 22, height: 22, borderRadius: 11, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: r.role === "user" ? "var(--gcp-blue)" : "var(--gcp-grey-bg)", color: r.role === "user" ? "white" : "var(--gcp-text)" }}>
-                          {r.role === "user" ? "U" : <Bot size={10} />}
-                        </div>
-                        <div style={{ maxWidth: "85%", padding: "6px 10px", borderRadius: 6, background: r.role === "user" ? "var(--gcp-blue-bg)" : "var(--gcp-grey-bg)", fontSize: 11, lineHeight: 1.5 }}>
-                          <div style={{ fontWeight: 600, fontSize: 9, color: "var(--gcp-text-secondary)", marginBottom: 2 }}>{r.role === "user" ? "You" : "AI Copilot"}</div>
-                          {r.role === "assistant" ? (() => {
-                            const { text, blocks } = parseFormBlocks(stripTestConfigBlock(r.content));
-                            return (
-                              <>
-                                {text && <ReactMarkdown components={MARKDOWN_COMPONENTS}>{linkifyText(text)}</ReactMarkdown>}
-                                {blocks.map((block, bi) => {
-                                  if (submittedForms.has(`${r.id}_${bi}`)) return null;
-                                  return (
-                                    <ChatFormControls
-                                      key={bi}
-                                      fields={block.fields}
-                                      onSubmit={values => handleFormSubmit(`${r.id}_${bi}`, values)}
-                                    />
-                                  );
-                                })}
-                              </>
-                            );
-                          })() : (
-                            <ReactMarkdown components={MARKDOWN_COMPONENTS}>{linkifyText(r.content)}</ReactMarkdown>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {loading && (
-                      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                        <div style={{ width: 22, height: 22, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--gcp-grey-bg)" }}>
-                          <Bot size={10} style={{ color: "var(--gcp-text-secondary)" }} />
-                        </div>
-                        <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 4 }}>
-                          <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
-                          Thinking...
-                        </div>
-                      </div>
-                    )}
-                    <div ref={threadEndRef} />
-                  </>
-                );
-              })()}
-            </div>
-            {/* Thread input */}
-            <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0, padding: "8px 0", borderTop: "1px solid var(--gcp-grey)" }}>
-              <input
-                className="gcp-input"
-                style={{ flex: 1, border: "none", fontSize: 12, outline: "none", background: "transparent" }}
-                placeholder="Reply in thread..."
-                value={threadInput}
-                onChange={e => setThreadInput(e.target.value)}
-                onKeyDown={handleThreadKeyDown}
-                disabled={loading}
-              />
-              <button onClick={handleThreadReply} disabled={loading || !threadInput.trim()} className="gcp-button gcp-button-primary" style={{ width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", padding: 0, opacity: loading || !threadInput.trim() ? 0.5 : 1 }}>
-                <Send size={12} />
-              </button>
-            </div>
-          </div>
-        )}
 
       </div>
     </div>

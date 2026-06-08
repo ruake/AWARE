@@ -4,6 +4,12 @@ import type { TestCase } from "@/lib/types";
 export function AddTestsModal({ suiteId, allTestCases, onClose, onAdd }: {
   suiteId: string; allTestCases: TestCase[]; onClose: () => void; onAdd: (suiteId: string, testIds: string[]) => void;
 }) {
+  React.useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
+
   const [selected, setSelected] = React.useState<Set<string>>(new Set());
 
   return (
@@ -25,9 +31,9 @@ export function AddTestsModal({ suiteId, allTestCases, onClose, onAdd }: {
           ))}
         </div>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, paddingTop: 8 }}>
-          <button onClick={onClose} className="gcp-button" style={{ fontSize: 13 }}>Cancel</button>
+          <button onClick={onClose} className="gcp-button">Cancel</button>
           <button onClick={() => onAdd(suiteId, [...selected])} disabled={selected.size === 0}
-            className="gcp-button gcp-button-primary" style={{ fontSize: 13, opacity: selected.size === 0 ? 0.5 : 1 }}>Add Selected</button>
+            className="gcp-button gcp-button-primary" style={{ opacity: selected.size === 0 ? 0.5 : 1 }}>Add Selected</button>
         </div>
       </div>
     </div>
