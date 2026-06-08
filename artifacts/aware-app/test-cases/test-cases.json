@@ -1,2418 +1,2842 @@
 [
   {
-    "id": "tc_0",
-    "name": "Verify GEO match for us-east users",
-    "description": "Automated test verifying geo-match behavior for endpoint group 0. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
+    "id": "ad_0",
+    "name": "Test Us East Users Resolve To Ashburn",
+    "description": "Verify us-east users resolve to the Ashburn (IAD) edge PoP.",
+    "testType": "api",
     "category": "geo-match",
     "priority": "P0",
     "severity": "critical",
     "status": "active",
     "tags": [
-      "regression"
+      "geo-match"
     ],
-    "owner": "alice@co.com",
+    "owner": "auto@discovery",
     "suiteIds": [
-      "suite_full",
-      "suite_geo"
+      "suite_auto"
     ],
     "automated": true,
-    "scriptPath": "tests/aware/geo-match/tc_0.yaml",
-    "preconditions": "- API credentials configured\n- geo-match test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct geo-match headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Verify GEO match for us-east users\n\nValidates geo-match behavior for endpoint group 0.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_1",
-      "tc_2"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0",
-      "X-Geo-Hint": "us-east"
-    },
-    "cookies": {
-      "session": "tok_0_abc123",
-      "ab_test": "control",
-      "geo_override": "enabled"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": true,
-      "threshold": 0.98,
-      "region": "full",
-      "ignoreAreas": [
-        ".analytics-banner",
-        ".cookie-notice"
-      ]
-    },
-    "predicates": [
-      {
-        "id": "pred_0_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_0_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_0_2",
-        "type": "headerContains",
-        "field": "X-Region",
-        "expected": "",
-        "operator": "exists",
-        "description": "Region header present"
-      },
-      {
-        "id": "pred_0_3",
-        "type": "cookieEquals",
-        "field": "geo_override",
-        "expected": "enabled",
-        "operator": "equals",
-        "description": "Geo override cookie set"
-      }
-    ],
-    "version": 1,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-01-01T10:00:00Z",
-        "author": "alice@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-01-01T10:00:00Z",
-    "updatedAt": "2026-01-01T14:30:00Z"
-  },
-  {
-    "id": "tc_1",
-    "name": "Validate locale splitting for fr-CA",
-    "description": "Automated test verifying locale-split behavior for endpoint group 1. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "locale-split",
-    "priority": "P1",
-    "severity": "major",
-    "status": "active",
-    "tags": [
-      "caching",
-      "security"
-    ],
-    "owner": "bob@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/locale-split/tc_1.yaml",
-    "preconditions": "- API credentials configured\n- locale-split test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct locale-split headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Validate locale splitting for fr-CA\n\nValidates locale-split behavior for endpoint group 1.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_2",
-      "tc_3"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0",
-      "Accept-Language": "en-US"
-    },
-    "cookies": {
-      "session": "tok_1_abc123"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.99,
-      "region": "viewport",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_1_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_1_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_1_2",
-        "type": "headerContains",
-        "field": "X-Region",
-        "expected": "",
-        "operator": "exists",
-        "description": "Region header present"
-      },
-      {
-        "id": "pred_1_3",
-        "type": "cookieEquals",
-        "field": "geo_override",
-        "expected": "enabled",
-        "operator": "equals",
-        "description": "Geo override cookie set"
-      }
-    ],
-    "version": 2,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-02-02T10:00:00Z",
-        "author": "bob@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-02-02T10:00:00Z",
-    "updatedAt": "2026-02-02T14:30:00Z"
-  },
-  {
-    "id": "tc_2",
-    "name": "Cache HIT ratio above 90%",
-    "description": "Automated test verifying url-health behavior for endpoint group 2. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "url-health",
-    "priority": "P2",
-    "severity": "minor",
-    "status": "active",
-    "tags": [
-      "security",
-      "geo",
-      "performance"
-    ],
-    "owner": "carol@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/url-health/tc_2.yaml",
-    "preconditions": "- API credentials configured\n- url-health test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct url-health headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Cache HIT ratio above 90%\n\nValidates url-health behavior for endpoint group 2.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_3",
-      "tc_4"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_2_abc123"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age",
-      "X-RateLimit-Remaining"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 1,
-      "region": "full",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_2_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_2_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      }
-    ],
-    "version": 3,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-03-03T10:00:00Z",
-        "author": "carol@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-03-03T10:00:00Z",
-    "updatedAt": "2026-03-03T14:30:00Z"
-  },
-  {
-    "id": "tc_3",
-    "name": "Geo-Routing consistency APAC",
-    "description": "Automated test verifying security behavior for endpoint group 3. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "security",
-    "priority": "P3",
-    "severity": "trivial",
-    "status": "active",
-    "tags": [
-      "geo"
-    ],
-    "owner": "dave@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/security/tc_3.yaml",
-    "preconditions": "- API credentials configured\n- security test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct security headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Geo-Routing consistency APAC\n\nValidates security behavior for endpoint group 3.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_4",
-      "tc_5"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0",
-      "X-Forwarded-For": "192.168.3.1"
-    },
-    "cookies": {
-      "session": "tok_3_abc123",
-      "ab_test": "control"
-    },
-    "expectedStatus": 403,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age",
-      "Set-Cookie"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.98,
-      "region": "viewport",
-      "ignoreAreas": [
-        ".analytics-banner",
-        ".cookie-notice"
-      ]
-    },
-    "predicates": [
-      {
-        "id": "pred_3_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_3_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_3_2",
-        "type": "headerContains",
-        "field": "X-Frame-Options",
-        "expected": "DENY",
-        "operator": "contains",
-        "description": "X-Frame-Options is DENY"
-      },
-      {
-        "id": "pred_3_3",
-        "type": "headerContains",
-        "field": "Content-Security-Policy",
-        "expected": "default-src",
-        "operator": "contains",
-        "description": "CSP header present"
-      }
-    ],
-    "version": 1,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-04-04T10:00:00Z",
-        "author": "dave@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-04-04T10:00:00Z",
-    "updatedAt": "2026-04-04T14:30:00Z"
-  },
-  {
-    "id": "tc_4",
-    "name": "Origin shield fallback behavior",
-    "description": "Automated test verifying performance behavior for endpoint group 4. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "performance",
-    "priority": "P0",
-    "severity": "critical",
-    "status": "active",
-    "tags": [
-      "performance",
-      "e2e"
-    ],
-    "owner": "eve@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/performance/tc_4.yaml",
-    "preconditions": "- API credentials configured\n- performance test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct performance headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Origin shield fallback behavior\n\nValidates performance behavior for endpoint group 4.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_5",
-      "tc_6"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_4_abc123"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": true,
-      "threshold": 0.99,
-      "region": "full",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_4_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_4_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_4_2",
-        "type": "headerContains",
-        "field": "Content-Encoding",
-        "expected": "gzip",
-        "operator": "equals",
-        "description": "gzip encoding enabled"
-      }
-    ],
-    "version": 2,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-05-05T10:00:00Z",
-        "author": "eve@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-05-05T10:00:00Z",
-    "updatedAt": "2026-05-05T14:30:00Z"
-  },
-  {
-    "id": "tc_5",
-    "name": "TLS 1.3 handshake latency",
-    "description": "Automated test verifying caching behavior for endpoint group 5. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "caching",
-    "priority": "P1",
-    "severity": "major",
-    "status": "active",
-    "tags": [
-      "e2e",
-      "health",
-      "cdn"
-    ],
-    "owner": "alice@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/caching/tc_5.yaml",
-    "preconditions": "- API credentials configured\n- caching test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct caching headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## TLS 1.3 handshake latency\n\nValidates caching behavior for endpoint group 5.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_6",
-      "tc_7"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_5_abc123",
-      "geo_override": "enabled"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 1,
-      "region": "viewport",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_5_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_5_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_5_2",
-        "type": "headerEquals",
-        "field": "X-Cache",
-        "expected": "HIT",
-        "operator": "equals",
-        "description": "Edge cache HIT"
-      },
-      {
-        "id": "pred_5_3",
-        "type": "headerContains",
-        "field": "Age",
-        "expected": "",
-        "operator": "exists",
-        "description": "Age header present"
-      }
-    ],
-    "version": 3,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-06-06T10:00:00Z",
-        "author": "alice@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-06-06T10:00:00Z",
-    "updatedAt": "2026-06-06T14:30:00Z"
-  },
-  {
-    "id": "tc_6",
-    "name": "WAF rate limiting threshold",
-    "description": "Automated test verifying routing behavior for endpoint group 6. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "routing",
-    "priority": "P2",
-    "severity": "minor",
-    "status": "active",
-    "tags": [
-      "health"
-    ],
-    "owner": "bob@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/routing/tc_6.yaml",
-    "preconditions": "- API credentials configured\n- routing test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct routing headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## WAF rate limiting threshold\n\nValidates routing behavior for endpoint group 6.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_7",
-      "tc_8"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_6_abc123",
-      "ab_test": "control"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age",
-      "X-RateLimit-Remaining"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.98,
-      "region": "full",
-      "ignoreAreas": [
-        ".analytics-banner",
-        ".cookie-notice"
-      ]
-    },
-    "predicates": [
-      {
-        "id": "pred_6_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_6_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      }
-    ],
-    "version": 1,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-07-07T10:00:00Z",
-        "author": "bob@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-07-07T10:00:00Z",
-    "updatedAt": "2026-07-07T14:30:00Z"
-  },
-  {
-    "id": "tc_7",
-    "name": "DDoS mitigation trigger",
-    "description": "Automated test verifying tls behavior for endpoint group 7. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "tls",
-    "priority": "P3",
-    "severity": "trivial",
-    "status": "active",
-    "tags": [
-      "cdn",
-      "mobile"
-    ],
-    "owner": "carol@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/tls/tc_7.yaml",
-    "preconditions": "- API credentials configured\n- tls test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct tls headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## DDoS mitigation trigger\n\nValidates tls behavior for endpoint group 7.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_8",
-      "tc_9"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_7_abc123"
-    },
-    "expectedStatus": 302,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.99,
-      "region": "viewport",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_7_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_7_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      }
-    ],
-    "version": 2,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-08-01T10:00:00Z",
-        "author": "carol@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-08-01T10:00:00Z",
-    "updatedAt": "2026-08-01T14:30:00Z"
-  },
-  {
-    "id": "tc_8",
-    "name": "Cache purge propagation",
-    "description": "Automated test verifying ddos behavior for endpoint group 8. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "ddos",
-    "priority": "P0",
-    "severity": "critical",
-    "status": "active",
-    "tags": [
-      "mobile",
-      "url-health"
-    ],
-    "owner": "dave@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/ddos/tc_8.yaml",
-    "preconditions": "- API credentials configured\n- ddos test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct ddos headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Cache purge propagation\n\nValidates ddos behavior for endpoint group 8.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_9",
-      "tc_10"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_8_abc123"
-    },
-    "expectedStatus": 429,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": true,
-      "threshold": 1,
-      "region": "full",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_8_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_8_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_8_2",
-        "type": "headerContains",
-        "field": "X-Frame-Options",
-        "expected": "DENY",
-        "operator": "contains",
-        "description": "X-Frame-Options is DENY"
-      },
-      {
-        "id": "pred_8_3",
-        "type": "headerContains",
-        "field": "Content-Security-Policy",
-        "expected": "default-src",
-        "operator": "contains",
-        "description": "CSP header present"
-      }
-    ],
-    "version": 3,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-09-02T10:00:00Z",
-        "author": "dave@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-09-02T10:00:00Z",
-    "updatedAt": "2026-09-02T14:30:00Z"
-  },
-  {
-    "id": "tc_9",
-    "name": "Edge redirect chain depth",
-    "description": "Automated test verifying geo-match behavior for endpoint group 9. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "geo-match",
-    "priority": "P1",
-    "severity": "major",
-    "status": "active",
-    "tags": [
-      "url-health"
-    ],
-    "owner": "eve@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/geo-match/tc_9.yaml",
-    "preconditions": "- API credentials configured\n- geo-match test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct geo-match headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Edge redirect chain depth\n\nValidates geo-match behavior for endpoint group 9.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_10",
-      "tc_11"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0",
-      "X-Geo-Hint": "us-east"
-    },
-    "cookies": {
-      "session": "tok_9_abc123",
-      "ab_test": "control"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.98,
-      "region": "viewport",
-      "ignoreAreas": [
-        ".analytics-banner",
-        ".cookie-notice"
-      ]
-    },
-    "predicates": [
-      {
-        "id": "pred_9_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_9_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_9_2",
-        "type": "headerContains",
-        "field": "X-Region",
-        "expected": "",
-        "operator": "exists",
-        "description": "Region header present"
-      },
-      {
-        "id": "pred_9_3",
-        "type": "cookieEquals",
-        "field": "geo_override",
-        "expected": "enabled",
-        "operator": "equals",
-        "description": "Geo override cookie set"
-      }
-    ],
-    "version": 1,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-01-03T10:00:00Z",
-        "author": "eve@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-01-03T10:00:00Z",
-    "updatedAt": "2026-01-03T14:30:00Z"
-  },
-  {
-    "id": "tc_10",
-    "name": "Signed URL token validation",
-    "description": "Automated test verifying locale-split behavior for endpoint group 10. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "locale-split",
-    "priority": "P2",
-    "severity": "minor",
-    "status": "active",
-    "tags": [
-      "regression",
-      "caching"
-    ],
-    "owner": "alice@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/locale-split/tc_10.yaml",
-    "preconditions": "- API credentials configured\n- locale-split test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct locale-split headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Signed URL token validation\n\nValidates locale-split behavior for endpoint group 10.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_11",
-      "tc_12"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0",
-      "Accept-Language": "fr-CA"
-    },
-    "cookies": {
-      "session": "tok_10_abc123",
-      "geo_override": "enabled"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age",
-      "X-RateLimit-Remaining"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.99,
-      "region": "full",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_10_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_10_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_10_2",
-        "type": "headerContains",
-        "field": "X-Region",
-        "expected": "",
-        "operator": "exists",
-        "description": "Region header present"
-      },
-      {
-        "id": "pred_10_3",
-        "type": "cookieEquals",
-        "field": "geo_override",
-        "expected": "enabled",
-        "operator": "equals",
-        "description": "Geo override cookie set"
-      }
-    ],
-    "version": 2,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-02-04T10:00:00Z",
-        "author": "alice@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-02-04T10:00:00Z",
-    "updatedAt": "2026-02-04T14:30:00Z"
-  },
-  {
-    "id": "tc_11",
-    "name": "Custom error page serving",
-    "description": "Automated test verifying url-health behavior for endpoint group 11. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "url-health",
-    "priority": "P3",
-    "severity": "trivial",
-    "status": "active",
-    "tags": [
-      "caching",
-      "security",
-      "geo"
-    ],
-    "owner": "bob@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/url-health/tc_11.yaml",
-    "preconditions": "- API credentials configured\n- url-health test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct url-health headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Custom error page serving\n\nValidates url-health behavior for endpoint group 11.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_12",
-      "tc_13"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_11_abc123"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 1,
-      "region": "viewport",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_11_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_11_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      }
-    ],
-    "version": 3,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-03-05T10:00:00Z",
-        "author": "bob@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-03-05T10:00:00Z",
-    "updatedAt": "2026-03-05T14:30:00Z"
-  },
-  {
-    "id": "tc_12",
-    "name": "Gzip compression enabled",
-    "description": "Automated test verifying security behavior for endpoint group 12. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "security",
-    "priority": "P0",
-    "severity": "critical",
-    "status": "active",
-    "tags": [
-      "security"
-    ],
-    "owner": "carol@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/security/tc_12.yaml",
-    "preconditions": "- API credentials configured\n- security test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct security headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Gzip compression enabled\n\nValidates security behavior for endpoint group 12.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_13",
-      "tc_14"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0",
-      "X-Forwarded-For": "192.168.12.1"
-    },
-    "cookies": {
-      "session": "tok_12_abc123",
-      "ab_test": "control"
-    },
-    "expectedStatus": 403,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": true,
-      "threshold": 0.98,
-      "region": "full",
-      "ignoreAreas": [
-        ".analytics-banner",
-        ".cookie-notice"
-      ]
-    },
-    "predicates": [
-      {
-        "id": "pred_12_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_12_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_12_2",
-        "type": "headerContains",
-        "field": "X-Frame-Options",
-        "expected": "DENY",
-        "operator": "contains",
-        "description": "X-Frame-Options is DENY"
-      },
-      {
-        "id": "pred_12_3",
-        "type": "headerContains",
-        "field": "Content-Security-Policy",
-        "expected": "default-src",
-        "operator": "contains",
-        "description": "CSP header present"
-      }
-    ],
-    "version": 1,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-04-06T10:00:00Z",
-        "author": "carol@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-04-06T10:00:00Z",
-    "updatedAt": "2026-04-06T14:30:00Z"
-  },
-  {
-    "id": "tc_13",
-    "name": "Security headers present",
-    "description": "Automated test verifying performance behavior for endpoint group 13. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "performance",
-    "priority": "P1",
-    "severity": "major",
-    "status": "active",
-    "tags": [
-      "geo",
-      "performance"
-    ],
-    "owner": "dave@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/performance/tc_13.yaml",
-    "preconditions": "- API credentials configured\n- performance test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct performance headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Security headers present\n\nValidates performance behavior for endpoint group 13.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_14",
-      "tc_15"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_13_abc123"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.99,
-      "region": "viewport",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_13_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_13_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_13_2",
-        "type": "headerContains",
-        "field": "Content-Encoding",
-        "expected": "gzip",
-        "operator": "equals",
-        "description": "gzip encoding enabled"
-      }
-    ],
-    "version": 2,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-05-07T10:00:00Z",
-        "author": "dave@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-05-07T10:00:00Z",
-    "updatedAt": "2026-05-07T14:30:00Z"
-  },
-  {
-    "id": "tc_14",
-    "name": "Cookie-based session stickiness",
-    "description": "Automated test verifying caching behavior for endpoint group 14. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "caching",
-    "priority": "P2",
-    "severity": "minor",
-    "status": "active",
-    "tags": [
-      "performance",
-      "e2e",
-      "health"
-    ],
-    "owner": "eve@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/caching/tc_14.yaml",
-    "preconditions": "- API credentials configured\n- caching test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct caching headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Cookie-based session stickiness\n\nValidates caching behavior for endpoint group 14.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_15",
-      "tc_16"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_14_abc123"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age",
-      "X-RateLimit-Remaining"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 1,
-      "region": "full",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_14_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_14_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_14_2",
-        "type": "headerEquals",
-        "field": "X-Cache",
-        "expected": "HIT",
-        "operator": "equals",
-        "description": "Edge cache HIT"
-      },
-      {
-        "id": "pred_14_3",
-        "type": "headerContains",
-        "field": "Age",
-        "expected": "",
-        "operator": "exists",
-        "description": "Age header present"
-      }
-    ],
-    "version": 3,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-06-01T10:00:00Z",
-        "author": "eve@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-06-01T10:00:00Z",
-    "updatedAt": "2026-06-01T14:30:00Z"
-  },
-  {
-    "id": "tc_15",
-    "name": "Health check endpoint 200",
-    "description": "Automated test verifying routing behavior for endpoint group 15. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "routing",
-    "priority": "P3",
-    "severity": "trivial",
-    "status": "active",
-    "tags": [
-      "e2e"
-    ],
-    "owner": "alice@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/routing/tc_15.yaml",
-    "preconditions": "- API credentials configured\n- routing test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct routing headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Health check endpoint 200\n\nValidates routing behavior for endpoint group 15.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_16",
-      "tc_17"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_15_abc123",
-      "ab_test": "control",
-      "geo_override": "enabled"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age",
-      "Set-Cookie"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.98,
-      "region": "viewport",
-      "ignoreAreas": [
-        ".analytics-banner",
-        ".cookie-notice"
-      ]
-    },
-    "predicates": [
-      {
-        "id": "pred_15_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_15_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      }
-    ],
-    "version": 1,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-07-02T10:00:00Z",
-        "author": "alice@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-07-02T10:00:00Z",
-    "updatedAt": "2026-07-02T14:30:00Z"
-  },
-  {
-    "id": "tc_16",
-    "name": "DNS failover latency",
-    "description": "Automated test verifying tls behavior for endpoint group 16. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "tls",
-    "priority": "P0",
-    "severity": "critical",
-    "status": "active",
-    "tags": [
-      "health",
-      "cdn"
-    ],
-    "owner": "bob@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/tls/tc_16.yaml",
-    "preconditions": "- API credentials configured\n- tls test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct tls headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## DNS failover latency\n\nValidates tls behavior for endpoint group 16.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_17",
-      "tc_18"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_16_abc123"
-    },
-    "expectedStatus": 302,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": true,
-      "threshold": 0.99,
-      "region": "full",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_16_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_16_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      }
-    ],
-    "version": 2,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-08-03T10:00:00Z",
-        "author": "bob@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-08-03T10:00:00Z",
-    "updatedAt": "2026-08-03T14:30:00Z"
-  },
-  {
-    "id": "tc_17",
-    "name": "Origin response timeout",
-    "description": "Automated test verifying ddos behavior for endpoint group 17. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "ddos",
-    "priority": "P1",
-    "severity": "major",
-    "status": "active",
-    "tags": [
-      "cdn",
-      "mobile",
-      "url-health"
-    ],
-    "owner": "carol@co.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/ddos/tc_17.yaml",
-    "preconditions": "- API credentials configured\n- ddos test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct ddos headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Origin response timeout\n\nValidates ddos behavior for endpoint group 17.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_18",
-      "tc_19"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_17_abc123"
-    },
-    "expectedStatus": 429,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 1,
-      "region": "viewport",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_17_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_17_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_17_2",
-        "type": "headerContains",
-        "field": "X-Frame-Options",
-        "expected": "DENY",
-        "operator": "contains",
-        "description": "X-Frame-Options is DENY"
-      },
-      {
-        "id": "pred_17_3",
-        "type": "headerContains",
-        "field": "Content-Security-Policy",
-        "expected": "default-src",
-        "operator": "contains",
-        "description": "CSP header present"
-      }
-    ],
-    "version": 3,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-09-04T10:00:00Z",
-        "author": "carol@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-09-04T10:00:00Z",
-    "updatedAt": "2026-09-04T14:30:00Z"
-  },
-  {
-    "id": "tc_18",
-    "name": "CORS header propagation",
-    "description": "Automated test verifying geo-match behavior for endpoint group 18. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "geo-match",
-    "priority": "P2",
-    "severity": "minor",
-    "status": "active",
-    "tags": [
-      "mobile"
-    ],
-    "owner": "dave@co.com",
-    "suiteIds": [
-      "suite_full"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/geo-match/tc_18.yaml",
-    "preconditions": "- API credentials configured\n- geo-match test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct geo-match headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## CORS header propagation\n\nValidates geo-match behavior for endpoint group 18.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_19",
-      "tc_20"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0",
-      "X-Geo-Hint": "us-east"
-    },
-    "cookies": {
-      "session": "tok_18_abc123",
-      "ab_test": "control"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age",
-      "X-RateLimit-Remaining"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.98,
-      "region": "full",
-      "ignoreAreas": [
-        ".analytics-banner",
-        ".cookie-notice"
-      ]
-    },
-    "predicates": [
-      {
-        "id": "pred_18_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_18_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_18_2",
-        "type": "headerContains",
-        "field": "X-Region",
-        "expected": "",
-        "operator": "exists",
-        "description": "Region header present"
-      },
-      {
-        "id": "pred_18_3",
-        "type": "cookieEquals",
-        "field": "geo_override",
-        "expected": "enabled",
-        "operator": "equals",
-        "description": "Geo override cookie set"
-      }
-    ],
-    "version": 1,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-01-05T10:00:00Z",
-        "author": "dave@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-01-05T10:00:00Z",
-    "updatedAt": "2026-01-05T14:30:00Z"
-  },
-  {
-    "id": "tc_19",
-    "name": "WebSocket upgrade path",
-    "description": "Automated test verifying locale-split behavior for endpoint group 19. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "locale-split",
-    "priority": "P3",
-    "severity": "trivial",
-    "status": "active",
-    "tags": [
-      "url-health"
-    ],
-    "owner": "eve@co.com",
-    "suiteIds": [
-      "suite_full"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/locale-split/tc_19.yaml",
-    "preconditions": "- API credentials configured\n- locale-split test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct locale-split headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## WebSocket upgrade path\n\nValidates locale-split behavior for endpoint group 19.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_20",
-      "tc_21"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0",
-      "Accept-Language": "en-US"
-    },
-    "cookies": {
-      "session": "tok_19_abc123"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.99,
-      "region": "viewport",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_19_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_19_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_19_2",
-        "type": "headerContains",
-        "field": "X-Region",
-        "expected": "",
-        "operator": "exists",
-        "description": "Region header present"
-      },
-      {
-        "id": "pred_19_3",
-        "type": "cookieEquals",
-        "field": "geo_override",
-        "expected": "enabled",
-        "operator": "equals",
-        "description": "Geo override cookie set"
-      }
-    ],
-    "version": 2,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-02-06T10:00:00Z",
-        "author": "eve@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-02-06T10:00:00Z",
-    "updatedAt": "2026-02-06T14:30:00Z"
-  },
-  {
-    "id": "tc_20",
-    "name": "Cache key normalization",
-    "description": "Automated test verifying url-health behavior for endpoint group 20. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "url-health",
-    "priority": "P0",
-    "severity": "critical",
-    "status": "active",
-    "tags": [
-      "regression",
-      "caching",
-      "security"
-    ],
-    "owner": "alice@co.com",
-    "suiteIds": [
-      "suite_full"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/url-health/tc_20.yaml",
-    "preconditions": "- API credentials configured\n- url-health test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct url-health headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Cache key normalization\n\nValidates url-health behavior for endpoint group 20.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_21",
-      "tc_22"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_20_abc123",
-      "geo_override": "enabled"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": true,
-      "threshold": 1,
-      "region": "full",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_20_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_20_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      }
-    ],
-    "version": 3,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-03-07T10:00:00Z",
-        "author": "alice@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-03-07T10:00:00Z",
-    "updatedAt": "2026-03-07T14:30:00Z"
-  },
-  {
-    "id": "tc_21",
-    "name": "Vary header routing correctness",
-    "description": "Automated test verifying security behavior for endpoint group 21. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "security",
-    "priority": "P1",
-    "severity": "major",
-    "status": "active",
-    "tags": [
-      "caching"
-    ],
-    "owner": "bob@co.com",
-    "suiteIds": [
-      "suite_full"
-    ],
-    "automated": true,
-    "scriptPath": "tests/aware/security/tc_21.yaml",
-    "preconditions": "- API credentials configured\n- security test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct security headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Vary header routing correctness\n\nValidates security behavior for endpoint group 21.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_22",
-      "tc_23"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0",
-      "X-Forwarded-For": "192.168.21.1"
-    },
-    "cookies": {
-      "session": "tok_21_abc123",
-      "ab_test": "control"
-    },
-    "expectedStatus": 403,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.98,
-      "region": "viewport",
-      "ignoreAreas": [
-        ".analytics-banner",
-        ".cookie-notice"
-      ]
-    },
-    "predicates": [
-      {
-        "id": "pred_21_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_21_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_21_2",
-        "type": "headerContains",
-        "field": "X-Frame-Options",
-        "expected": "DENY",
-        "operator": "contains",
-        "description": "X-Frame-Options is DENY"
-      },
-      {
-        "id": "pred_21_3",
-        "type": "headerContains",
-        "field": "Content-Security-Policy",
-        "expected": "default-src",
-        "operator": "contains",
-        "description": "CSP header present"
-      }
-    ],
-    "version": 1,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-04-01T10:00:00Z",
-        "author": "bob@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-04-01T10:00:00Z",
-    "updatedAt": "2026-04-01T14:30:00Z"
-  },
-  {
-    "id": "tc_22",
-    "name": "Deprecated TLS version",
-    "description": "Automated test verifying performance behavior for endpoint group 22. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "performance",
-    "priority": "P2",
-    "severity": "minor",
-    "status": "disabled",
-    "tags": [
-      "security",
-      "geo"
-    ],
-    "owner": "carol@co.com",
-    "suiteIds": [],
-    "automated": true,
-    "scriptPath": "tests/aware/performance/tc_22.yaml",
-    "preconditions": "- API credentials configured\n- performance test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct performance headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Deprecated TLS version\n\nValidates performance behavior for endpoint group 22.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_23",
-      "tc_24"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_22_abc123"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age",
-      "X-RateLimit-Remaining"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 0.99,
-      "region": "full",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_22_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_22_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_22_2",
-        "type": "headerContains",
-        "field": "Content-Encoding",
-        "expected": "gzip",
-        "operator": "equals",
-        "description": "gzip encoding enabled"
-      }
-    ],
-    "version": 2,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-05-02T10:00:00Z",
-        "author": "carol@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-05-02T10:00:00Z",
-    "updatedAt": "2026-05-02T14:30:00Z"
-  },
-  {
-    "id": "tc_23",
-    "name": "Multi-CDN failover",
-    "description": "Automated test verifying caching behavior for endpoint group 23. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "caching",
-    "priority": "P3",
-    "severity": "trivial",
-    "status": "deprecated",
-    "tags": [
-      "geo",
-      "performance",
-      "e2e"
-    ],
-    "owner": "dave@co.com",
-    "suiteIds": [],
-    "automated": true,
-    "scriptPath": "tests/aware/caching/tc_23.yaml",
-    "preconditions": "- API credentials configured\n- caching test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct caching headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Multi-CDN failover\n\nValidates caching behavior for endpoint group 23.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_24",
-      "tc_0"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_23_abc123"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status",
-      "Age"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": false,
-      "threshold": 1,
-      "region": "viewport",
-      "ignoreAreas": []
-    },
-    "predicates": [
-      {
-        "id": "pred_23_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_23_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      },
-      {
-        "id": "pred_23_2",
-        "type": "headerEquals",
-        "field": "X-Cache",
-        "expected": "HIT",
-        "operator": "equals",
-        "description": "Edge cache HIT"
-      },
-      {
-        "id": "pred_23_3",
-        "type": "headerContains",
-        "field": "Age",
-        "expected": "",
-        "operator": "exists",
-        "description": "Age header present"
-      }
-    ],
-    "version": 3,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-06-03T10:00:00Z",
-        "author": "dave@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-06-03T10:00:00Z",
-    "updatedAt": "2026-06-03T14:30:00Z"
-  },
-  {
-    "id": "tc_24",
-    "name": "Edge function execution time",
-    "description": "Automated test verifying routing behavior for endpoint group 24. Ensures correct behavior across web application deployment with configurable thresholds and alerting.",
-    "category": "routing",
-    "priority": "P0",
-    "severity": "critical",
-    "status": "deprecated",
-    "tags": [
-      "performance"
-    ],
-    "owner": "eve@co.com",
-    "suiteIds": [],
-    "automated": true,
-    "scriptPath": "tests/aware/routing/tc_24.yaml",
-    "preconditions": "- API credentials configured\n- routing test data seeded\n- Target environment reachable",
-    "expectedBehavior": "- Response status 200\n- Correct routing headers present\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "documentation": "## Edge function execution time\n\nValidates routing behavior for endpoint group 24.\n\n### Test Steps\n1. Send HTTP GET request\n2. Validate response headers\n3. Check response time\n4. Confirm cache behavior\n5. Run predicates\n\n### Expected Results\n- Status: 200 OK\n- Response time < 500ms\n- Cache HIT ratio > 0.8",
-    "relatedTestIds": [
-      "tc_0",
-      "tc_1"
-    ],
-    "requestHeaders": {
-      "Accept": "application/json",
-      "User-Agent": "AWARE-TestRunner/2.0"
-    },
-    "cookies": {
-      "session": "tok_24_abc123",
-      "ab_test": "control"
-    },
-    "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "X-Cache",
-      "X-Request-ID",
-      "X-Cache-Status"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
-    "filmstrip": {
-      "enabled": true,
-      "threshold": 0.98,
-      "region": "full",
-      "ignoreAreas": [
-        ".analytics-banner",
-        ".cookie-notice"
-      ]
-    },
-    "predicates": [
-      {
-        "id": "pred_24_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "Response status is 200"
-      },
-      {
-        "id": "pred_24_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "1000",
-        "operator": "lt",
-        "description": "Response time < 1000ms"
-      }
-    ],
-    "version": 1,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-07-04T10:00:00Z",
-        "author": "eve@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
-    ],
-    "createdAt": "2026-07-04T10:00:00Z",
-    "updatedAt": "2026-07-04T14:30:00Z"
-  },
-  {
-    "id": "tc_25",
-    "name": "google.com HTTP 200",
-    "description": "Simple connectivity test verifying google.com returns HTTP 200 OK. Useful for validating that the test runner has general internet access and can reach external endpoints.",
-    "category": "url-health",
-    "priority": "P0",
-    "severity": "critical",
-    "status": "active",
-    "tags": [
-      "google",
-      "url-health",
-      "external",
-      "smoke"
-    ],
-    "owner": "sre@co.com",
-    "suiteIds": [
-      "suite_full"
-    ],
-    "automated": true,
-    "scriptPath": "tests/smoke/google.yaml",
-    "preconditions": "- Internet access available\n- No firewall blocking google.com\n- DNS resolution working",
-    "expectedBehavior": "- Response status 200\n- Response time < 2000ms\n- Content-Type header present",
-    "documentation": "## google.com HTTP 200\n\nSimple smoke test to verify internet connectivity and basic HTTP functionality.\n\n### Steps\n1. Send HTTP GET to https://google.com\n2. Assert status code is 200\n3. Assert response time under 2000ms\n4. Capture Content-Type header",
+    "scriptPath": "tests/test_geo_matching.py::test_us_east_users_resolve_to_ashburn",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Us East Users Resolve To Ashburn\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P0",
+    "documentation": "Verify us-east users resolve to the Ashburn (IAD) edge PoP.\n\nEnsures geo-DNS returns the correct regional endpoint for requests\noriginating from the US East Coast.",
     "relatedTestIds": [],
-    "requestHeaders": {
-      "Accept": "text/html",
-      "User-Agent": "AWARE-HealthCheck/1.0"
-    },
+    "requestHeaders": {},
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "Server",
-      "Date"
-    ],
-    "testType": "web",
-    "config": {},
-    "assertions": [],
+    "captureResponseHeaders": [],
     "filmstrip": {
       "enabled": false,
-      "threshold": 0.99
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
     },
-    "predicates": [
-      {
-        "id": "pred_25_0",
-        "type": "statusCode",
-        "field": "",
-        "expected": "200",
-        "operator": "equals",
-        "description": "google.com returns 200"
-      },
-      {
-        "id": "pred_25_1",
-        "type": "responseTime",
-        "field": "duration",
-        "expected": "2000",
-        "operator": "lt",
-        "description": "Response time under 2s"
-      },
-      {
-        "id": "pred_25_2",
-        "type": "headerContains",
-        "field": "Content-Type",
-        "expected": "",
-        "operator": "exists",
-        "description": "Content-Type header is present"
-      }
-    ],
+    "predicates": [],
+    "config": {},
+    "assertions": [],
     "version": 1,
-    "changelog": [
-      {
-        "version": 1,
-        "timestamp": "2026-06-07T10:00:00Z",
-        "author": "sre@co.com",
-        "summary": "Initial creation",
-        "changes": [
-          "Test case created"
-        ]
-      }
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036443Z",
+    "updatedAt": "2026-06-08T13:37:50.036443Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_1",
+    "name": "Test Us West Users Resolve To Portland",
+    "description": "Verify us-west users resolve to the Portland (PDX) edge PoP.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "geo-match"
     ],
-    "createdAt": "2026-06-07T10:00:00Z",
-    "updatedAt": "2026-06-07T10:00:00Z"
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_us_west_users_resolve_to_portland",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Us West Users Resolve To Portland\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P0",
+    "documentation": "Verify us-west users resolve to the Portland (PDX) edge PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036498Z",
+    "updatedAt": "2026-06-08T13:37:50.036498Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_2",
+    "name": "Test Eu West Users Resolve To Dublin",
+    "description": "Verify EU-west users resolve to the Dublin (DUB) edge PoP.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_eu_west_users_resolve_to_dublin",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Eu West Users Resolve To Dublin\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P1",
+    "documentation": "Verify EU-west users resolve to the Dublin (DUB) edge PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036516Z",
+    "updatedAt": "2026-06-08T13:37:50.036516Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_3",
+    "name": "Test Ap Southeast Users Resolve To Singapore",
+    "description": "Verify AP-southeast users resolve to the Singapore (SIN) edge PoP.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_ap_southeast_users_resolve_to_singapore",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Ap Southeast Users Resolve To Singapore\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P1",
+    "documentation": "Verify AP-southeast users resolve to the Singapore (SIN) edge PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036589Z",
+    "updatedAt": "2026-06-08T13:37:50.036589Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_4",
+    "name": "Test Geo Endpoints Return 200[_api_v1_data_200]",
+    "description": "Verify all geo-aware API endpoints return HTTP 200.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_geo_endpoints_return_200",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Geo Endpoints Return 200[_api_v1_data_200]\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P2",
+    "documentation": "Verify all geo-aware API endpoints return HTTP 200.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036696Z",
+    "updatedAt": "2026-06-08T13:37:50.036696Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_5",
+    "name": "Test Geo Endpoints Return 200[_api_v1_config_200]",
+    "description": "Verify all geo-aware API endpoints return HTTP 200.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_geo_endpoints_return_200",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Geo Endpoints Return 200[_api_v1_config_200]\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P2",
+    "documentation": "Verify all geo-aware API endpoints return HTTP 200.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036707Z",
+    "updatedAt": "2026-06-08T13:37:50.036707Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_6",
+    "name": "Test Geo Endpoints Return 200[_api_v1_status_200]",
+    "description": "Verify all geo-aware API endpoints return HTTP 200.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_geo_endpoints_return_200",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Geo Endpoints Return 200[_api_v1_status_200]\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P2",
+    "documentation": "Verify all geo-aware API endpoints return HTTP 200.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036714Z",
+    "updatedAt": "2026-06-08T13:37:50.036714Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_7",
+    "name": "Test Geo Routing Table[us-east_iad]",
+    "description": "Validate the geo-routing table maps each region to the correct PoP.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Geo Routing Table[us-east_iad]\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P2",
+    "documentation": "Validate the geo-routing table maps each region to the correct PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036745Z",
+    "updatedAt": "2026-06-08T13:37:50.036745Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_8",
+    "name": "Test Geo Routing Table[us-west_pdx]",
+    "description": "Validate the geo-routing table maps each region to the correct PoP.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Geo Routing Table[us-west_pdx]\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P2",
+    "documentation": "Validate the geo-routing table maps each region to the correct PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036753Z",
+    "updatedAt": "2026-06-08T13:37:50.036753Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_9",
+    "name": "Test Geo Routing Table[eu-west_dub]",
+    "description": "Validate the geo-routing table maps each region to the correct PoP.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Geo Routing Table[eu-west_dub]\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P2",
+    "documentation": "Validate the geo-routing table maps each region to the correct PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036759Z",
+    "updatedAt": "2026-06-08T13:37:50.036759Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_10",
+    "name": "Test Geo Routing Table[ap-southeast_sin]",
+    "description": "Validate the geo-routing table maps each region to the correct PoP.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Geo Routing Table[ap-southeast_sin]\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P2",
+    "documentation": "Validate the geo-routing table maps each region to the correct PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036767Z",
+    "updatedAt": "2026-06-08T13:37:50.036767Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_11",
+    "name": "Test Failover To Secondary Pop",
+    "description": "Verify traffic fails over to the secondary PoP within 5 seconds.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "geo-match",
+      "geofailover"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::TestGeoFailover::test_failover_to_secondary_pop",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Failover To Secondary Pop\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P0",
+    "documentation": "Verify traffic fails over to the secondary PoP within 5 seconds.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036797Z",
+    "updatedAt": "2026-06-08T13:37:50.036797Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_12",
+    "name": "Test Failover Logs Alert",
+    "description": "Verify failover events are logged and trigger an alert.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "geo-match",
+      "geofailover"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::TestGeoFailover::test_failover_logs_alert",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Failover Logs Alert\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P1",
+    "documentation": "Verify failover events are logged and trigger an alert.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036810Z",
+    "updatedAt": "2026-06-08T13:37:50.036810Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_13",
+    "name": "Test Failover Health Check Resumes",
+    "description": "Verify health checks resume after failover and primary recovers.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "geo-match",
+      "geofailover"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::TestGeoFailover::test_failover_health_check_resumes",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Failover Health Check Resumes\nSource: tests/test_geo_matching.py\nCategory: geo-match\nPriority: P2",
+    "documentation": "Verify health checks resume after failover and primary recovers.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.036819Z",
+    "updatedAt": "2026-06-08T13:37:50.036819Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_14",
+    "name": "Test Cache Hit Ratio Exceeds 80 Percent",
+    "description": "Verify cache HIT ratio exceeds 80% for static assets.",
+    "testType": "api",
+    "category": "caching",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "caching",
+      "cachebehavior"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_hit_ratio_exceeds_80_percent",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Cache Hit Ratio Exceeds 80 Percent\nSource: tests/test_performance.py\nCategory: caching\nPriority: P0",
+    "documentation": "Verify cache HIT ratio exceeds 80% for static assets.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037375Z",
+    "updatedAt": "2026-06-08T13:37:50.037375Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_15",
+    "name": "Test Cache Ttl Respects Origin Max Age",
+    "description": "Verify CDN respects origin Cache-Control max-age directive.",
+    "testType": "api",
+    "category": "caching",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "caching",
+      "cachebehavior"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_ttl_respects_origin_max_age",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Cache Ttl Respects Origin Max Age\nSource: tests/test_performance.py\nCategory: caching\nPriority: P1",
+    "documentation": "Verify CDN respects origin Cache-Control max-age directive.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037387Z",
+    "updatedAt": "2026-06-08T13:37:50.037387Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_16",
+    "name": "Test Cache Purge Invalidates Content",
+    "description": "Verify CDN purge invalidates cached content within 5 seconds.",
+    "testType": "api",
+    "category": "caching",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "caching",
+      "cachebehavior"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_purge_invalidates_content",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Cache Purge Invalidates Content\nSource: tests/test_performance.py\nCategory: caching\nPriority: P1",
+    "documentation": "Verify CDN purge invalidates cached content within 5 seconds.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037395Z",
+    "updatedAt": "2026-06-08T13:37:50.037395Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_17",
+    "name": "Test Vary Header Respected",
+    "description": "Verify Vary: Accept-Encoding header is respected for cached responses.",
+    "testType": "api",
+    "category": "caching",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "caching",
+      "cachebehavior"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_vary_header_respected",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Vary Header Respected\nSource: tests/test_performance.py\nCategory: caching\nPriority: P2",
+    "documentation": "Verify Vary: Accept-Encoding header is respected for cached responses.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037402Z",
+    "updatedAt": "2026-06-08T13:37:50.037402Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_18",
+    "name": "Test P95 Latency Under 200Ms",
+    "description": "Verify p95 response latency is under 200ms for API endpoints.",
+    "testType": "api",
+    "category": "performance",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "performance",
+      "latency"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestLatency::test_p95_latency_under_200ms",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test P95 Latency Under 200Ms\nSource: tests/test_performance.py\nCategory: performance\nPriority: P0",
+    "documentation": "Verify p95 response latency is under 200ms for API endpoints.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037416Z",
+    "updatedAt": "2026-06-08T13:37:50.037416Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_19",
+    "name": "Test Static Assets Under 50Ms",
+    "description": "Verify static asset delivery latency is under 50ms at p95.",
+    "testType": "api",
+    "category": "performance",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "performance",
+      "latency"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestLatency::test_static_assets_under_50ms",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Static Assets Under 50Ms\nSource: tests/test_performance.py\nCategory: performance\nPriority: P0",
+    "documentation": "Verify static asset delivery latency is under 50ms at p95.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037423Z",
+    "updatedAt": "2026-06-08T13:37:50.037423Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_20",
+    "name": "Test Dynamic Content Under 500Ms",
+    "description": "Verify dynamic content delivery latency is under 500ms at p95.",
+    "testType": "api",
+    "category": "performance",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "performance",
+      "latency"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestLatency::test_dynamic_content_under_500ms",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Dynamic Content Under 500Ms\nSource: tests/test_performance.py\nCategory: performance\nPriority: P1",
+    "documentation": "Verify dynamic content delivery latency is under 500ms at p95.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037430Z",
+    "updatedAt": "2026-06-08T13:37:50.037430Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_21",
+    "name": "Test Regional Latency Within Bounds[us-east_50]",
+    "description": "Verify regional latency stays within acceptable bounds.",
+    "testType": "api",
+    "category": "performance",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "performance",
+      "latency"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Regional Latency Within Bounds[us-east_50]\nSource: tests/test_performance.py\nCategory: performance\nPriority: P2",
+    "documentation": "Verify regional latency stays within acceptable bounds.\n\nEach region has a maximum acceptable latency based on distance\nfrom the nearest edge PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037455Z",
+    "updatedAt": "2026-06-08T13:37:50.037455Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_22",
+    "name": "Test Regional Latency Within Bounds[us-west_80]",
+    "description": "Verify regional latency stays within acceptable bounds.",
+    "testType": "api",
+    "category": "performance",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "performance",
+      "latency"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Regional Latency Within Bounds[us-west_80]\nSource: tests/test_performance.py\nCategory: performance\nPriority: P2",
+    "documentation": "Verify regional latency stays within acceptable bounds.\n\nEach region has a maximum acceptable latency based on distance\nfrom the nearest edge PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037461Z",
+    "updatedAt": "2026-06-08T13:37:50.037461Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_23",
+    "name": "Test Regional Latency Within Bounds[eu-west_120]",
+    "description": "Verify regional latency stays within acceptable bounds.",
+    "testType": "api",
+    "category": "performance",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "performance",
+      "latency"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Regional Latency Within Bounds[eu-west_120]\nSource: tests/test_performance.py\nCategory: performance\nPriority: P2",
+    "documentation": "Verify regional latency stays within acceptable bounds.\n\nEach region has a maximum acceptable latency based on distance\nfrom the nearest edge PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037466Z",
+    "updatedAt": "2026-06-08T13:37:50.037466Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_24",
+    "name": "Test Regional Latency Within Bounds[ap-southeast_200]",
+    "description": "Verify regional latency stays within acceptable bounds.",
+    "testType": "api",
+    "category": "performance",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "performance",
+      "latency"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Regional Latency Within Bounds[ap-southeast_200]\nSource: tests/test_performance.py\nCategory: performance\nPriority: P2",
+    "documentation": "Verify regional latency stays within acceptable bounds.\n\nEach region has a maximum acceptable latency based on distance\nfrom the nearest edge PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037471Z",
+    "updatedAt": "2026-06-08T13:37:50.037471Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_25",
+    "name": "Test Gzip Compression For Text Assets",
+    "description": "Verify gzip compression is applied to text-based assets.",
+    "testType": "api",
+    "category": "performance",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "performance",
+      "compression"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCompression::test_gzip_compression_for_text_assets",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Gzip Compression For Text Assets\nSource: tests/test_performance.py\nCategory: performance\nPriority: P1",
+    "documentation": "Verify gzip compression is applied to text-based assets.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037485Z",
+    "updatedAt": "2026-06-08T13:37:50.037485Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_26",
+    "name": "Test Brotli Compression Preferred",
+    "description": "Verify Brotli compression is preferred when Accept-Encoding includes br.",
+    "testType": "api",
+    "category": "performance",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "performance",
+      "compression"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCompression::test_brotli_compression_preferred",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Brotli Compression Preferred\nSource: tests/test_performance.py\nCategory: performance\nPriority: P1",
+    "documentation": "Verify Brotli compression is preferred when Accept-Encoding includes br.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037492Z",
+    "updatedAt": "2026-06-08T13:37:50.037492Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_27",
+    "name": "Test Compression Ratio Exceeds 5X",
+    "description": "Verify compression ratio exceeds 5x for text assets.",
+    "testType": "api",
+    "category": "performance",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "performance",
+      "compression"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCompression::test_compression_ratio_exceeds_5x",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Compression Ratio Exceeds 5X\nSource: tests/test_performance.py\nCategory: performance\nPriority: P2",
+    "documentation": "Verify compression ratio exceeds 5x for text assets.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037501Z",
+    "updatedAt": "2026-06-08T13:37:50.037501Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_28",
+    "name": "Test Strict Transport Security Header",
+    "description": "Verify Strict-Transport-Security header is set with max-age >= 31536000.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "security",
+      "securityheaders"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_strict_transport_security_header",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Strict Transport Security Header\nSource: tests/test_security.py\nCategory: security\nPriority: P0",
+    "documentation": "Verify Strict-Transport-Security header is set with max-age >= 31536000.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037932Z",
+    "updatedAt": "2026-06-08T13:37:50.037932Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_29",
+    "name": "Test Content Security Policy Header",
+    "description": "Verify Content-Security-Policy header blocks inline scripts.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "security",
+      "securityheaders"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_content_security_policy_header",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Content Security Policy Header\nSource: tests/test_security.py\nCategory: security\nPriority: P0",
+    "documentation": "Verify Content-Security-Policy header blocks inline scripts.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037942Z",
+    "updatedAt": "2026-06-08T13:37:50.037942Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_30",
+    "name": "Test X Frame Options Deny",
+    "description": "Verify X-Frame-Options is set to DENY to prevent clickjacking.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security",
+      "securityheaders"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_x_frame_options_deny",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test X Frame Options Deny\nSource: tests/test_security.py\nCategory: security\nPriority: P1",
+    "documentation": "Verify X-Frame-Options is set to DENY to prevent clickjacking.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037950Z",
+    "updatedAt": "2026-06-08T13:37:50.037950Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_31",
+    "name": "Test X Content Type Options Nosniff",
+    "description": "Verify X-Content-Type-Options is set to nosniff.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security",
+      "securityheaders"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_x_content_type_options_nosniff",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test X Content Type Options Nosniff\nSource: tests/test_security.py\nCategory: security\nPriority: P1",
+    "documentation": "Verify X-Content-Type-Options is set to nosniff.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037957Z",
+    "updatedAt": "2026-06-08T13:37:50.037957Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_32",
+    "name": "Test Referrer Policy Strict Origin",
+    "description": "Verify Referrer-Policy is set to strict-origin-when-cross-origin.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security",
+      "securityheaders"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_referrer_policy_strict_origin",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Referrer Policy Strict Origin\nSource: tests/test_security.py\nCategory: security\nPriority: P1",
+    "documentation": "Verify Referrer-Policy is set to strict-origin-when-cross-origin.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037963Z",
+    "updatedAt": "2026-06-08T13:37:50.037963Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_33",
+    "name": "Test Waf Blocks Sql Injection",
+    "description": "Verify WAF blocks SQL injection attempts in query parameters.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "security",
+      "wafrules"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_sql_injection",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Waf Blocks Sql Injection\nSource: tests/test_security.py\nCategory: security\nPriority: P0",
+    "documentation": "Verify WAF blocks SQL injection attempts in query parameters.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037975Z",
+    "updatedAt": "2026-06-08T13:37:50.037975Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_34",
+    "name": "Test Waf Blocks Xss Attempts",
+    "description": "Verify WAF blocks cross-site scripting attempts in request body.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "security",
+      "wafrules"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_xss_attempts",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Waf Blocks Xss Attempts\nSource: tests/test_security.py\nCategory: security\nPriority: P0",
+    "documentation": "Verify WAF blocks cross-site scripting attempts in request body.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037982Z",
+    "updatedAt": "2026-06-08T13:37:50.037982Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_35",
+    "name": "Test Waf Blocks Path Traversal",
+    "description": "Verify WAF blocks path traversal attacks (../etc/passwd).",
+    "testType": "api",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security",
+      "wafrules"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_path_traversal",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Waf Blocks Path Traversal\nSource: tests/test_security.py\nCategory: security\nPriority: P1",
+    "documentation": "Verify WAF blocks path traversal attacks (../etc/passwd).",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037988Z",
+    "updatedAt": "2026-06-08T13:37:50.037988Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_36",
+    "name": "Test Waf Blocks Large Payloads",
+    "description": "Verify WAF blocks requests with payloads exceeding 10KB.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security",
+      "wafrules"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_large_payloads",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Waf Blocks Large Payloads\nSource: tests/test_security.py\nCategory: security\nPriority: P1",
+    "documentation": "Verify WAF blocks requests with payloads exceeding 10KB.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.037995Z",
+    "updatedAt": "2026-06-08T13:37:50.037995Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_37",
+    "name": "Test Rate Limiting 100 Req Per Min",
+    "description": "Verify rate limiter blocks requests exceeding 100 req/min per IP.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::test_rate_limiting_100_req_per_min",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Rate Limiting 100 Req Per Min\nSource: tests/test_security.py\nCategory: security\nPriority: P2",
+    "documentation": "Verify rate limiter blocks requests exceeding 100 req/min per IP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.038001Z",
+    "updatedAt": "2026-06-08T13:37:50.038001Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_38",
+    "name": "Test Jwt Expiry Returns 401",
+    "description": "Verify expired JWT tokens return HTTP 401 Unauthorized.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::test_jwt_expiry_returns_401",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Jwt Expiry Returns 401\nSource: tests/test_security.py\nCategory: security\nPriority: P2",
+    "documentation": "Verify expired JWT tokens return HTTP 401 Unauthorized.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.038009Z",
+    "updatedAt": "2026-06-08T13:37:50.038009Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_39",
+    "name": "Test Cors Validates Origin",
+    "description": "Verify CORS headers only allow approved origins.",
+    "testType": "api",
+    "category": "security",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_auto"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::test_cors_validates_origin",
+    "preconditions": "Auto-discovered via pytest AST traversal",
+    "expectedBehavior": "Auto-discovered test: Test Cors Validates Origin\nSource: tests/test_security.py\nCategory: security\nPriority: P2",
+    "documentation": "Verify CORS headers only allow approved origins.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.038015Z",
+    "updatedAt": "2026-06-08T13:37:50.038015Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "pw_0",
+    "name": "Checkboxes and Dropdown > check and uncheck checkboxes",
+    "description": "check and uncheck checkboxes",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/checkboxes-dropdown.spec.ts::Checkboxes and Dropdown > check and uncheck checkboxes",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: Checkboxes and Dropdown > check and uncheck checkboxes\nSource: e2e/checkboxes-dropdown.spec.ts\nCategory: general",
+    "documentation": "check and uncheck checkboxes",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.122Z",
+    "updatedAt": "2026-06-08T13:37:50.122Z",
+    "githubPath": "e2e/checkboxes-dropdown.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_1",
+    "name": "select dropdown option by label",
+    "description": "select dropdown option by label",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/checkboxes-dropdown.spec.ts::select dropdown option by label",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: select dropdown option by label\nSource: e2e/checkboxes-dropdown.spec.ts\nCategory: general",
+    "documentation": "select dropdown option by label",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/checkboxes-dropdown.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_2",
+    "name": "dropdown defaults to first option",
+    "description": "dropdown defaults to first option",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/checkboxes-dropdown.spec.ts::dropdown defaults to first option",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: dropdown defaults to first option\nSource: e2e/checkboxes-dropdown.spec.ts\nCategory: general",
+    "documentation": "dropdown defaults to first option",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/checkboxes-dropdown.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_3",
+    "name": "Dynamic Content and Loading > dynamic loading hidden element appears",
+    "description": "dynamic loading hidden element appears",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/dynamic-content.spec.ts::Dynamic Content and Loading > dynamic loading hidden element appears",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: Dynamic Content and Loading > dynamic loading hidden element appears\nSource: e2e/dynamic-content.spec.ts\nCategory: general",
+    "documentation": "dynamic loading hidden element appears",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/dynamic-content.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_4",
+    "name": "dynamic loading rendered after fetch",
+    "description": "dynamic loading rendered after fetch",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/dynamic-content.spec.ts::dynamic loading rendered after fetch",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: dynamic loading rendered after fetch\nSource: e2e/dynamic-content.spec.ts\nCategory: general",
+    "documentation": "dynamic loading rendered after fetch",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/dynamic-content.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_5",
+    "name": "dynamic content has at least one element",
+    "description": "dynamic content has at least one element",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/dynamic-content.spec.ts::dynamic content has at least one element",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: dynamic content has at least one element\nSource: e2e/dynamic-content.spec.ts\nCategory: general",
+    "documentation": "dynamic content has at least one element",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/dynamic-content.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_6",
+    "name": "floating menu disappears on scroll",
+    "description": "floating menu disappears on scroll",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/dynamic-content.spec.ts::floating menu disappears on scroll",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: floating menu disappears on scroll\nSource: e2e/dynamic-content.spec.ts\nCategory: general",
+    "documentation": "floating menu disappears on scroll",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/dynamic-content.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_7",
+    "name": "Frames and Windows > type in iframe editor",
+    "description": "type in iframe editor",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/frames-windows.spec.ts::Frames and Windows > type in iframe editor",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: Frames and Windows > type in iframe editor\nSource: e2e/frames-windows.spec.ts\nCategory: general",
+    "documentation": "type in iframe editor",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/frames-windows.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_8",
+    "name": "nested frames contain text",
+    "description": "nested frames contain text",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/frames-windows.spec.ts::nested frames contain text",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: nested frames contain text\nSource: e2e/frames-windows.spec.ts\nCategory: general",
+    "documentation": "nested frames contain text",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/frames-windows.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_9",
+    "name": "open new window tab",
+    "description": "open new window tab",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/frames-windows.spec.ts::open new window tab",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: open new window tab\nSource: e2e/frames-windows.spec.ts\nCategory: general",
+    "documentation": "open new window tab",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/frames-windows.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_10",
+    "name": "JavaScript Alerts > accept JS alert",
+    "description": "accept JS alert",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/javascript-alerts.spec.ts::JavaScript Alerts > accept JS alert",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: JavaScript Alerts > accept JS alert\nSource: e2e/javascript-alerts.spec.ts\nCategory: general",
+    "documentation": "accept JS alert",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/javascript-alerts.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_11",
+    "name": "accept JS confirm",
+    "description": "accept JS confirm",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/javascript-alerts.spec.ts::accept JS confirm",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: accept JS confirm\nSource: e2e/javascript-alerts.spec.ts\nCategory: general",
+    "documentation": "accept JS confirm",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/javascript-alerts.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_12",
+    "name": "dismiss JS confirm",
+    "description": "dismiss JS confirm",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/javascript-alerts.spec.ts::dismiss JS confirm",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: dismiss JS confirm\nSource: e2e/javascript-alerts.spec.ts\nCategory: general",
+    "documentation": "dismiss JS confirm",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/javascript-alerts.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_13",
+    "name": "type in JS prompt",
+    "description": "type in JS prompt",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/javascript-alerts.spec.ts::type in JS prompt",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: type in JS prompt\nSource: e2e/javascript-alerts.spec.ts\nCategory: general",
+    "documentation": "type in JS prompt",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/javascript-alerts.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_14",
+    "name": "dismiss JS prompt returns null",
+    "description": "dismiss JS prompt returns null",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/javascript-alerts.spec.ts::dismiss JS prompt returns null",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: dismiss JS prompt returns null\nSource: e2e/javascript-alerts.spec.ts\nCategory: general",
+    "documentation": "dismiss JS prompt returns null",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.123Z",
+    "updatedAt": "2026-06-08T13:37:50.123Z",
+    "githubPath": "e2e/javascript-alerts.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_15",
+    "name": "Login Page Authentication > successful login with valid credentials",
+    "description": "successful login with valid credentials",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/login-auth.spec.ts::Login Page Authentication > successful login with valid credentials",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: Login Page Authentication > successful login with valid credentials\nSource: e2e/login-auth.spec.ts\nCategory: general",
+    "documentation": "successful login with valid credentials",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/login-auth.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_16",
+    "name": "failed login with invalid password",
+    "description": "failed login with invalid password",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/login-auth.spec.ts::failed login with invalid password",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: failed login with invalid password\nSource: e2e/login-auth.spec.ts\nCategory: general",
+    "documentation": "failed login with invalid password",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/login-auth.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_17",
+    "name": "failed login with empty username",
+    "description": "failed login with empty username",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/login-auth.spec.ts::failed login with empty username",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: failed login with empty username\nSource: e2e/login-auth.spec.ts\nCategory: general",
+    "documentation": "failed login with empty username",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/login-auth.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_18",
+    "name": "logout from secure area",
+    "description": "logout from secure area",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/login-auth.spec.ts::logout from secure area",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: logout from secure area\nSource: e2e/login-auth.spec.ts\nCategory: general",
+    "documentation": "logout from secure area",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/login-auth.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_19",
+    "name": "login page displays correct title",
+    "description": "login page displays correct title",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/login-auth.spec.ts::login page displays correct title",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: login page displays correct title\nSource: e2e/login-auth.spec.ts\nCategory: general",
+    "documentation": "login page displays correct title",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/login-auth.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_20",
+    "name": "PROOF App Smoke Tests > Dashboard loads with KPI tiles",
+    "description": "Dashboard loads with KPI tiles",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/smoke.spec.ts::PROOF App Smoke Tests > Dashboard loads with KPI tiles",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: PROOF App Smoke Tests > Dashboard loads with KPI tiles\nSource: e2e/smoke.spec.ts\nCategory: general",
+    "documentation": "Dashboard loads with KPI tiles",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/smoke.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_21",
+    "name": "Runs page shows run table",
+    "description": "Runs page shows run table",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/smoke.spec.ts::Runs page shows run table",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: Runs page shows run table\nSource: e2e/smoke.spec.ts\nCategory: general",
+    "documentation": "Runs page shows run table",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/smoke.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_22",
+    "name": "Test Manager loads test list",
+    "description": "Test Manager loads test list",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/smoke.spec.ts::Test Manager loads test list",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: Test Manager loads test list\nSource: e2e/smoke.spec.ts\nCategory: general",
+    "documentation": "Test Manager loads test list",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/smoke.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_23",
+    "name": "Copilot page loads and shows chat input",
+    "description": "Copilot page loads and shows chat input",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/smoke.spec.ts::Copilot page loads and shows chat input",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: Copilot page loads and shows chat input\nSource: e2e/smoke.spec.ts\nCategory: general",
+    "documentation": "Copilot page loads and shows chat input",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/smoke.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_24",
+    "name": "About page shows system stats",
+    "description": "About page shows system stats",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/smoke.spec.ts::About page shows system stats",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: About page shows system stats\nSource: e2e/smoke.spec.ts\nCategory: general",
+    "documentation": "About page shows system stats",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/smoke.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_25",
+    "name": "Compare page shows diff table",
+    "description": "Compare page shows diff table",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/smoke.spec.ts::Compare page shows diff table",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: Compare page shows diff table\nSource: e2e/smoke.spec.ts\nCategory: general",
+    "documentation": "Compare page shows diff table",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/smoke.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
+  },
+  {
+    "id": "pw_26",
+    "name": "Test Analytics loads with search params",
+    "description": "Test Analytics loads with search params",
+    "testType": "web",
+    "category": "general",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "general"
+    ],
+    "owner": "auto@playwright",
+    "suiteIds": [
+      "suite_e2e"
+    ],
+    "automated": true,
+    "scriptPath": "e2e/smoke.spec.ts::Test Analytics loads with search params",
+    "preconditions": "Auto-discovered via Playwright file traversal",
+    "expectedBehavior": "Playwright test: Test Analytics loads with search params\nSource: e2e/smoke.spec.ts\nCategory: general",
+    "documentation": "Test Analytics loads with search params",
+    "version": 1,
+    "changelog": [],
+    "createdAt": "2026-06-08T13:37:50.124Z",
+    "updatedAt": "2026-06-08T13:37:50.124Z",
+    "githubPath": "e2e/smoke.spec.ts",
+    "repoStatus": "synced",
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": []
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "relatedTestIds": []
   }
 ]
