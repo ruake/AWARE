@@ -13,7 +13,7 @@ import { RepoStatusBadge } from "@/components/aware/RepoStatusBadge";
 import { CATEGORIES, PRIORITIES, STATUSES, OWNERS } from "@/lib/constants";
 import {
   getTestCases, getTestSuites,
-  computeTestStats,
+  computeTestStats, getAutoDiscoverySummary,
 } from "@/lib/data";
 import { importAuto, exportAsXML, exportAndDownload, downloadFile } from "@/lib/testImportExport";
 import type { TestCase, TestSuite, TestStats } from "@/lib/types";
@@ -235,6 +235,22 @@ export default function TestManager() {
           </div>
         </div>
         <StatsDashboard stats={stats} colFilters={colFilters} onToggleFilter={handleStatFilter} />
+        {(() => {
+          const s = getAutoDiscoverySummary();
+          if (s.total === 0) return null;
+          return (
+            <div style={{ display: "flex", gap: 12, marginBottom: 14, fontSize: 12, color: "var(--gcp-text-secondary)" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <Beaker size={13} style={{ color: "var(--gcp-blue)" }} />
+                <strong style={{ color: "var(--gcp-blue)" }}>{s.total}</strong> auto-discovered
+              </span>
+              <span>·</span>
+              <span>{s.sourceFiles} pytest files</span>
+              <span>·</span>
+              <span>{Object.entries(s.byCategory).length} categories</span>
+            </div>
+          );
+        })()}
         <CiConfigBanner show={configChanged} onDismiss={() => setConfigChanged(false)} />
         <BulkActionsBar
           selected={selectedIds}

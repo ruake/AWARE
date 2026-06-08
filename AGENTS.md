@@ -2,8 +2,8 @@
 
 ## Project
 - React 19 + TypeScript 5.9 + Vite 7 SPA (Tailwind CSS 4 in index.css only, pages use inline `style={{}}`)
-- Single app at `artifacts/aware-app/` — mockup fully removed
-- Configurable web app test observability dashboard
+- Single app at `artifacts/aware-app/` — fully read-only, no CRUD, no localStorage writes
+- Static-site test observability dashboard; all data from JSON seed files committed in repo
 - Live: https://ruake.github.io/AWARE | Repo: https://github.com/ruake/AWARE
 
 ## Commands
@@ -13,82 +13,80 @@ pnpm install
 pnpm dev                    # dev server at :5173
 pnpm build                  # prod build → dist/public/
 pnpm run typecheck          # TS check (MUST pass before commit)
+pnpm discover:tests         # Run test discovery (pytest + Playwright → auto-tests.json)
+pnpm test                   # Unit tests
+pnpm test:e2e               # Playwright browser tests
 ```
 
 ## Architecture
 - **Routing**: wouter (`<Switch>` / `<Route>` / `<Link>`) with `base` from `import.meta.env.BASE_URL`
-- **Data layer**: `src/lib/` — 15 modules. Barrel re-exported through `data.ts`. localStorage-persisted CRUD store (`aware_test_cases_v2`, `aware_test_suites_v2`); subscription system (`_notify()`, `_tcListeners`, `_tsListeners`) for reactive updates. Modules: `store.ts`, `runs.ts`, `testCases.ts`, `testSuites.ts`, `promotions.ts`, `testImportExport.ts`, `constants.ts`, `utils.ts`
-- **Types**: `src/lib/types.ts` — all type interfaces (TestCase, TestSuite, Predicate, GenerateParams, LLM types, error classes, etc.)
-- **Charts**: Google Charts via `react-google-charts` (wrappers in `GoogleCharts.tsx`: `GoogleFilterableTable`, `GoogleAreaChart`, `GoogleBarChart`)
-- **Env Config**: `src/lib/envConfig.ts` — configurable environment system with localStorage CRUD, subscription reactivity, defaults for 4 envs each with `baseUrl`/`ips`
+- **Data layer**: `src/lib/` — all read-only. Seed JSON files loaded at import time; auto-discovered tests merged in. Modules: `store.ts`, `runs.ts`, `testCases.ts`, `testSuites.ts`, `promotions.ts`, `testDiscovery.ts`, `constants.ts`, `utils.ts`
+- **Types**: `src/lib/types.ts` — all type interfaces (TestCase, TestSuite, Predicate, FilmstripConfig, LLM types, error classes, etc.)
+- **Charts**: Google Charts via `react-google-charts` (wrappers in `GoogleCharts.tsx`)
 - **Styling**: Inline `style={{}}` with `var(--gcp-*)` CSS variables from `src/_group.css`; shadcn/ui via `class-variance-authority` + `components.json`
-- **LLM/AI**: `src/lib/llm.ts` — provider abstraction (Mock, OpenAI, WebLLM) + singleton service; `src/lib/skills.ts` — 5 skill registry for code gen, test analysis, diff explanation
 - **Error handling**: `classifyError()`, `FetchError`, `TimeoutError`, `ValidationError` in `types.ts`; `ErrorBoundary` at `src/components/aware/ErrorBoundary.tsx`
+
+## Test Discovery
+- **Unified orchestrator**: `scripts/discover-all.mjs` — runs both Python AST-based pytest discovery (`discover-tests.py`) and Playwright spec discovery (`discover-playwright.mjs`), merges into single `src/data/auto-tests.json`
+- **Preserves filmstrip/screenshot config** across re-discovery runs by matching on `scriptPath`
+- **pytest discovery** (`scripts/discover-tests.py`): parses `test_*.py` files for function names, docstrings, decorators (category, priority markers), parametrize variants
+- **Playwright discovery** (`scripts/discover-playwright.mjs`): parses `.spec.ts`/`.test.ts` files for `test()` names, `test.describe()` blocks, inline tags
+- **40 pytest tests** from `tests/` (geo-match, security, performance, caching categories)
+- **27 Playwright tests** from `e2e/` targeting `https://the-internet.herokuapp.com` (login, checkboxes, dropdowns, dynamic loading, alerts, frames/windows)
+- **App integration**: `src/lib/testDiscovery.ts` loads `auto-tests.json`, provides `getAutoDiscoveredTests()` and `getAutoDiscoverySummary()` with stable snapshot caching; `testCases.ts` concatenates into `testCasesStore` (no seed `tc_*` tests — all data comes from discovery)
 
 ## File Layout
 ```
 artifacts/aware-app/src/
-├── lib/                   # data.ts (barrel), store, runs, testCases, testSuites, promotions, constants, testImportExport, utils, llm, skills, types, nav, urlState, useLiveStatus, envConfig
+├── lib/                   # data.ts (barrel), store, runs, testCases, testSuites, promotions, testDiscovery, constants, utils
 ├── components/
-│   ├── aware/             # AppLayout, ColumnFilter, CTAStatCard, FilterBar, StatusBadge, SectionHeader, GenerateWizard, StatsDashboard, TestCard, TestManagerSidePanel, SuiteTreeItem, SuiteEditor, AddTestsModal, YamlPreview, TestDocTopBar, TestDocSidebar, TestDocChangelog, CommandPalette, ErrorBoundary, EnvironmentConfigPanel, GoogleCharts
+│   ├── aware/             # AppLayout, ColumnFilter, CTAStatCard, FilterBar, StatusBadge, SectionHeader, StatsDashboard, TestCard, TestManagerSidePanel, SuiteTreeItem, YamlPreview, TestDocTopBar, TestDocSidebar, TestDocChangelog, CommandPalette, ErrorBoundary, GoogleCharts
 │   └── ui/                # shadcn/ui components (button, card, badge, dialog, etc.)
 ├── pages/
-│   ├── Dashboard.tsx      # Multi-env Google Charts, alerts, promotion banner, env config panel
+│   ├── Dashboard.tsx      # Multi-env Google Charts, alerts
 │   ├── Runs.tsx           # Filterable run table + side panel CTAs
 │   ├── RunDetail.tsx      # Test results + evidence viewer
 │   ├── Compare.tsx        # Baseline vs candidate diff + CTA stat cards
-│   ├── TestManager.tsx    # Test case CRUD, bulk actions, multi-format import, stats dashboard, generate wizard
-│   ├── TestSuiteManager.tsx # Suite tree + editor + YAML export + Google Charts
-│   ├── TestAnalytics.tsx  # Per-test analytics (works with tc_N and diff_N IDs)
+│   ├── TestManager.tsx    # Test case browser with stats dashboard + auto-discovery badge
+│   ├── TestSuiteManager.tsx # Suite tree + YAML preview + Google Charts
+│   ├── TestAnalytics.tsx  # Per-test analytics (works with tr_N, diff_N, ad_N, pw_N IDs)
 │   ├── TestDoc.tsx        # Per-test documentation + 3-column layout
 │   ├── SearchDemo.tsx     # Full-page search wired to real testCasesStore, RUNS, DIFF_ROWS
-│   ├── StartRun.tsx       # New run form + command preview
+│   ├── StartRun.tsx       # Placeholder
 │   ├── Sharing.tsx        # Permalink/share page
 │   ├── Status.tsx         # System status dashboard
-│   ├── Copilot.tsx        # AI chat with skill selector + WebLLM unavailable banner
+│   ├── Copilot.tsx        # Placeholder
 │   ├── About.tsx          # Project info + stat cards
 │   └── not-found.tsx      # 404 handler
 ├── hooks/
-│   ├── useSimpleToast.tsx # Shared toast (all pages)
-│   ├── useTestData.ts     # Subscribes to test cases + suites
-│   └── useSyncedUrlState  # (in lib/urlState.ts, supports function updaters)
+│   ├── useSimpleToast.tsx # Shared toast
+│   └── useTestData.ts     # Subscribes to test cases + suites
 ├── App.tsx                # wouter Router with all routes
 ├── main.tsx               # Entry point
 ├── _group.css             # GCP CSS variables
 └── index.css              # Tailwind imports
 ```
 
-## LLM / AI Copilot
-- **Provider system** in `src/lib/llm.ts`: `MockLLMProvider` (offline), `OpenAILLMProvider` (OpenAI-compatible), `WebLLMProvider` (requires `@mlc-ai/web-llm` + WebGPU — shows user-friendly "not available" message when missing)
-- **Config**: `LLMConfig` in `types.ts` — `provider`, `apiKey`, `apiUrl`, `model`, `temperature`, `maxTokens`
-- **Skills**: `src/lib/skills.ts` — 5 built-in skills: `generate-tests`, `generate-script`, `analyze-results`, `explain-diff`, `generate-suite`
-- **Generate tests with LLM**: `generateTestsWithLLM(params)` — sends prompt, parses JSON, persists via `createTestCase()`
-- **Chat**: `llmChat(message, skillSystemPrompt?)` — rolling history (last 50)
-- **Copilot page** at `/copilot`: Chat UI, skill selector, provider config panel, WebLLM availability check
-- `checkWebLLM()` exported — pre-checks if `@mlc-ai/web-llm` loads
+## Data Files
+- `src/data/auto-tests.json` — 67 auto-discovered tests (40 `ad_*` pytest + 27 `pw_*` Playwright)
+- `src/data/test-suites.json` — 10 suites (referencing `ad_*` and `pw_*` IDs)
+- `src/data/runs.json` — 12 seed runs
+- `src/data/diff-rows.json` — 15 seed diff rows
+- `src/data/promotions.json` — seed promotion history
+- No seed `test-cases.json` — all test cases come from auto-discovery
 
-## Key Features
-- **Bulk actions in TestManager**: Multi-select checkboxes, batch delete, batch status change, batch priority change, batch add-to-suite, bulk export (JSON/CSV/JUnit)
-- **Multi-format import**: Auto-detects JSON, YAML, and JUnit XML via `importAuto()` from `testImportExport.ts`
-- **Wired Search**: SearchDemo queries real `testCasesStore`, `RUNS`, and `DIFF_ROWS` instead of hardcoded arrays
-- **Test Analytics**: Accepts both `testId` (tc_N) and `diffId` (diff_N) search params — shows test case metadata when available
-- **CTA Pattern**: Stat cards toggle column filters across Compare, Analytics, Runs, Dashboard, About
-- **Test scripts**: `.yaml` extension on all scriptPath fields (portable YAML schema, not Playwright TS)
+## GitHub Actions
+- `deploy.yml`: CI → E2E → `pnpm discover:tests` → build → deploy to Pages
+- `sync-data-branches.yml`: pushes extracted data to `test-cases`, `test-runs`, `stats`, `discovered-tests` branches
 
 ## Gotchas
 - All pages use inline `style={{}}` NOT Tailwind `className`
-- All charts use Google Charts (`GoogleAreaChart`, `GoogleBarChart`, `GoogleFilterableTable`); Recharts has been fully removed
+- Charts use Google Charts (`GoogleAreaChart`, `GoogleBarChart`, `GoogleFilterableTable`)
 - `useSyncedUrlState` setter supports function updaters: `setState(prev => ({ ...prev, field: val }))`
 - `navTo()` in `src/lib/nav.ts` uses `window.location.href` (full nav); use wouter's `useLocation()` for SPA navigation
 - `import.meta.env.BASE_URL` = `/` dev, `/AWARE/` production
-- GitHub Actions at repo root `.github/workflows/`
 - `"packageManager": "pnpm@10.26.1"` in `package.json` for CI
-- `_notify()` + `saveToStorage()` called by public API (createTestCase, etc.) — don't call manually
-- `testType`, `config`, `assertions` fields on `TestCase` are legacy — new code uses `predicates` + `filmstrip`
-
-## Data
-- 12 runs: `run_892_2341.1.0_prod_<1000-1011>` (in `lib/runs.ts`)
-- 15 diff rows: `diff_0`–`diff_14` (in `lib/runs.ts`)
-- Test cases seed: 25 `tc_0`–`tc_24` (in `lib/testCases.ts`)
-- Test suites: 8 seed suites (in `lib/testSuites.ts`)
-- Environments: Prod/Production, Prod/Staging, UAT/Production, UAT/Staging
+- `getTestSuites()` and `getTestCases()` both use `_snapshot` caching for stable `useSyncExternalStore` references
+- TestAnalytics `tr_` ID resolution: `tr_{runIdx}_{resultIdx}` rewrites to matching test case ID via IIFE
+- Discovery scripts require Python 3 (pytest AST) and Node.js (Playwright spec parsing)
+- Filmstrip/screenshot config is preserved across re-discovery runs by `discover-all.mjs`

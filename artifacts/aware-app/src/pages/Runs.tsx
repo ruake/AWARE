@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
+import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { RUNS } from "@/lib/data";
 import { getEnvLabels } from "@/lib/envConfig";
 import { useSyncedUrlState } from "@/lib/urlState";
@@ -76,27 +77,12 @@ export default function Runs() {
           </div>
         </div>
 
-        {/* Stats — clickable to filter */}
+        {/* Stats — clickable CTA cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
-          {[
-            { label: "Total Runs", value: RUNS.length, icon: BarChart3, color: "var(--gcp-blue)", filter: () => { setStatusFilter("all"); setEnvFilter("all"); setSuiteFilter("all"); setSearch(""); } },
-            { label: "Passing", value: RUNS.filter(r => r.status === "PASS").length, icon: CheckCircle2, color: "var(--gcp-green)", filter: () => setStatusFilter(statusFilter === "PASS" ? "all" : "PASS") },
-            { label: "Failing", value: RUNS.filter(r => r.status === "FAIL").length, icon: XCircle, color: "var(--gcp-red)", filter: () => setStatusFilter(statusFilter === "FAIL" ? "all" : "FAIL") },
-            { label: "Avg Duration", value: `${Math.round(RUNS.reduce((s, r) => s + r.durationMs, 0) / RUNS.length / 60000)}m`, icon: Clock, color: "var(--gcp-text-secondary)", filter: () => {} },
-          ].map(s => {
-            const Icon = s.icon;
-            return (
-              <div key={s.label} onClick={s.filter} style={{ cursor: s.filter !== (() => {}) ? "pointer" : "default", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, border: `1px solid ${statusFilter === s.label ? "var(--gcp-blue)" : "var(--gcp-grey)"}`, borderRadius: 6, background: "var(--gcp-surface)", transition: "box-shadow 0.15s" }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.1)"}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}>
-                <Icon size={20} style={{ color: s.color }} />
-                <div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: s.color }}>{s.value}</div>
-                  <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{s.label}</div>
-                </div>
-              </div>
-            );
-          })}
+          <CTAStatCard label="Total Runs" value={RUNS.length} subtitle="all environments" accentColor="var(--gcp-blue)" icon={<BarChart3 size={16} />} onClick={() => { setStatusFilter("all"); setEnvFilter("all"); setSuiteFilter("all"); setSearch(""); navigate("/runs"); }} active={statusFilter === "all" && envFilter === "all" && suiteFilter === "all" && search === ""} />
+          <CTAStatCard label="Passing" value={RUNS.filter(r => r.status === "PASS").length} subtitle="successful runs" accentColor="var(--gcp-green)" icon={<CheckCircle2 size={16} />} onClick={() => navigate(`/runs?status=PASS`)} active={statusFilter === "PASS"} />
+          <CTAStatCard label="Failing" value={RUNS.filter(r => r.status === "FAIL").length} subtitle="need attention" accentColor="var(--gcp-red)" icon={<XCircle size={16} />} onClick={() => navigate(`/runs?status=FAIL`)} active={statusFilter === "FAIL"} />
+          <CTAStatCard label="Avg Duration" value={`${Math.round(RUNS.reduce((s, r) => s + r.durationMs, 0) / RUNS.length / 60000)}m`} subtitle="per run" accentColor="var(--gcp-text-secondary)" icon={<Clock size={16} />} />
         </div>
 
         {/* Filters */}

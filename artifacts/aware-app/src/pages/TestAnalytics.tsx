@@ -3,7 +3,7 @@ import { Link, useLocation, useSearch } from "wouter";
 import { GoogleBarChart, GoogleAreaChart } from "@/components/aware/GoogleCharts";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
-import { DIFF_ROWS, TEST_DETAILS, generateTestHistory } from "@/lib/data";
+import { DIFF_ROWS, TEST_DETAILS, generateTestHistory, RUNS, getTestResultsForRun } from "@/lib/data";
 import { getEnvLabels } from "@/lib/envConfig";
 import { ENVS } from "@/lib/constants";
 import { useTestData } from "@/hooks/useTestData";
@@ -20,7 +20,22 @@ export default function TestAnalytics() {
   const { show, Toast } = useSimpleToast();
   const { tcs } = useTestData();
 
-  const rawTestId = params.get("testId") ?? "";
+  const rawTestId = (() => {
+    const id = params.get("testId") ?? "";
+    // Resolve tr_* test result IDs to the matching test case
+    if (id.startsWith("tr_")) {
+      const parts = id.replace("tr_", "").split("_");
+      const runIdx = Math.min(parseInt(parts[0] ?? "0", 10), RUNS.length - 1);
+      const resultIdx = parseInt(parts[1] ?? "0", 10);
+      const results = getTestResultsForRun(RUNS[runIdx]?.id ?? "");
+      const result = results[Math.min(resultIdx, results.length - 1)];
+      if (result) {
+        const tc = tcs.find(t => t.name === result.name);
+        if (tc) return tc.id;
+      }
+    }
+    return id;
+  })();
   const rawDiffId = params.get("diffId") ?? "diff_0";
   const isTcMode = rawTestId.startsWith("tc_");
 

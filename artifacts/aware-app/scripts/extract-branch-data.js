@@ -22,7 +22,7 @@ function ensureDir(dir) {
 }
 
 function extractTestCases() {
-  const src = path.resolve(ROOT, "src", "data", "test-cases.json");
+  const src = path.resolve(ROOT, "src", "data", "auto-tests.json");
   const data = JSON.parse(fs.readFileSync(src, "utf8"));
   const outDir = path.resolve(OUT, "test-cases");
   ensureDir(outDir);
@@ -102,7 +102,7 @@ function extractTestRuns() {
 }
 
 function extractStats() {
-  const src = path.resolve(ROOT, "src", "data", "test-cases.json");
+  const src = path.resolve(ROOT, "src", "data", "auto-tests.json");
   const data = JSON.parse(fs.readFileSync(src, "utf8"));
 
   const byStatus = {};

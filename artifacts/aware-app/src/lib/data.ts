@@ -57,4 +57,8 @@ export {
   subscribeToEnvConfigs,
 } from "./envConfig";
 
+export {
+  getAutoDiscoveredTests, getAutoDiscoverySummary,
+} from "./testDiscovery";
+
 

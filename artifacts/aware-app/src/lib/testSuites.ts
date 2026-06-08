@@ -10,8 +10,11 @@ let testSuitesStore: TestSuite[] = [...BASE_TEST_SUITES];
 
 export function getTestSuitesStore(): TestSuite[] { return testSuitesStore; }
 
+let _tsSnapshot: TestSuite[] = [];
+function _dropTSSnapshot() { _tsSnapshot = []; }
 export function getTestSuites(): TestSuite[] {
-  return [...testSuitesStore];
+  if (_tsSnapshot.length === 0) _tsSnapshot = [...testSuitesStore];
+  return _tsSnapshot;
 }
 
 export function getTestSuiteById(id: string): TestSuite | undefined {

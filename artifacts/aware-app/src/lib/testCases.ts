@@ -1,12 +1,11 @@
 import type { TestCase, TestCaseFilter, TestChangeLogEntry, TestStats } from "./types";
 import { CATEGORIES } from "./constants";
 import { subscribeToTestCases } from "./store";
-import testCasesSeed from "@/data/test-cases.json";
+import { getAutoDiscoveredTests } from "./testDiscovery";
 
 export { subscribeToTestCases };
 
-const BASE_TEST_CASES = testCasesSeed as unknown as TestCase[];
-let testCasesStore: TestCase[] = [...BASE_TEST_CASES];
+let testCasesStore: TestCase[] = [...getAutoDiscoveredTests()];
 
 let _tcSnapshot: TestCase[] = [];
 function _dropTCSnapshot() { _tcSnapshot = []; }

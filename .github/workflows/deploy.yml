@@ -82,20 +82,25 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Generate test manifest from seed data
+      - name: Run test discovery
+        run: pnpm discover:tests
+        env:
+          TZ: UTC
+
+      - name: Generate test manifest from discovered tests
         run: |
           echo "Generating test manifest..."
           mkdir -p dist/public
           node -e "
             const fs = require('fs');
-            const seed = JSON.parse(fs.readFileSync('src/data/test-cases.json','utf8'));
+            const tests = JSON.parse(fs.readFileSync('src/data/auto-tests.json','utf8'));
             const manifest = {
               generated: new Date().toISOString(),
-              totalTests: seed.length,
-              suites: [...new Set(seed.flatMap(t => t.suiteIds || []))],
-              categories: [...new Set(seed.map(t => t.category))],
-              automated: seed.filter(t => t.automated).length,
-              manual: seed.filter(t => !t.automated).length,
+              totalTests: tests.length,
+              suites: [...new Set(tests.flatMap(t => t.suiteIds || []))],
+              categories: [...new Set(tests.map(t => t.category))],
+              automated: tests.filter(t => t.automated).length,
+              manual: tests.filter(t => !t.automated).length,
             };
             fs.writeFileSync('public/test-manifest.json', JSON.stringify(manifest, null, 2));
             console.log('Manifest:', JSON.stringify(manifest, null, 2));
