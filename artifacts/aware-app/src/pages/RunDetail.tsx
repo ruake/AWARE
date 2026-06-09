@@ -266,7 +266,7 @@ export default function RunDetail() {
                         </div>
                         {/* Response headers */}
                         {e.response.headers && Object.keys(e.response.headers).length > 0 && (
-                          <details style={{ marginTop:8, fontSize:11 }}>
+                          <details open style={{ marginTop:8, fontSize:11 }}>
                             <summary style={{ cursor:'pointer', color:'var(--proof-text-secondary)', fontWeight:600, fontSize:10, textTransform:'uppercase', letterSpacing:'0.5px' }}>Response Headers ({Object.keys(e.response.headers).length})</summary>
                             <div style={{ marginTop:4, display:'flex', flexDirection:'column', gap:2 }}>
                               {Object.entries(e.response.headers).map(([k, v]) => (
@@ -280,7 +280,7 @@ export default function RunDetail() {
                         )}
                         {/* Request headers */}
                         {e.request.headers && Object.keys(e.request.headers).length > 0 && (
-                          <details style={{ marginTop:6, fontSize:11 }}>
+                          <details open style={{ marginTop:6, fontSize:11 }}>
                             <summary style={{ cursor:'pointer', color:'var(--proof-text-secondary)', fontWeight:600, fontSize:10, textTransform:'uppercase', letterSpacing:'0.5px' }}>Request Headers ({Object.keys(e.request.headers).length})</summary>
                             <div style={{ marginTop:4, display:'flex', flexDirection:'column', gap:2 }}>
                               {Object.entries(e.request.headers).map(([k, v]) => (
@@ -294,7 +294,7 @@ export default function RunDetail() {
                         )}
                         {/* Cookies */}
                         {e.response.cookies && e.response.cookies.length > 0 && (
-                          <details style={{ marginTop:6, fontSize:11 }}>
+                          <details open style={{ marginTop:6, fontSize:11 }}>
                             <summary style={{ cursor:'pointer', color:'var(--proof-text-secondary)', fontWeight:600, fontSize:10, textTransform:'uppercase', letterSpacing:'0.5px' }}>Cookies ({e.response.cookies.length})</summary>
                             <div style={{ marginTop:4, display:'flex', flexDirection:'column', gap:2 }}>
                               {e.response.cookies.map((c, i) => (
