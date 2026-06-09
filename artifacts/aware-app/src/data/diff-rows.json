@@ -1,1 +1,72 @@
-[]
+[
+  {
+    "id": "diff_ad_00",
+    "name": "test_geo_match_coordinates",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 234,
+    "durCand": 267,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_ad_01",
+    "name": "test_security_headers_present",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 145,
+    "durCand": 132,
+    "category": "security",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_ad_02",
+    "name": "test_cache_control_strategy",
+    "baseStatus": "PASS",
+    "candStatus": "FAIL",
+    "durBase": 89,
+    "durCand": 312,
+    "category": "performance",
+    "state": "regression"
+  },
+  {
+    "id": "diff_pw_00",
+    "name": "login with valid credentials",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1200,
+    "durCand": 1150,
+    "category": "e2e",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_pw_01",
+    "name": "dynamic loading completes",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 3400,
+    "durCand": 2800,
+    "category": "e2e",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_pw_02",
+    "name": "geolocation prompt triggers",
+    "baseStatus": "FAIL",
+    "candStatus": "PASS",
+    "durBase": 5000,
+    "durCand": 2100,
+    "category": "e2e",
+    "state": "fixed"
+  },
+  {
+    "id": "diff_tr_00",
+    "name": "test_performance_response_time",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 430,
+    "durCand": 675,
+    "category": "performance",
+    "state": "duration"
+  }
+]
