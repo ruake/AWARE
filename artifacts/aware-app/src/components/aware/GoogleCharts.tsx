@@ -33,20 +33,28 @@ export interface GoogleFilterableTableProps {
 }
 
 export function GoogleFilterableTable({
-  columns, rows, title, height = "400px", pageSize = 25,
-  onRowClick, searchPlaceholder = "Search...", options = {},
+  columns,
+  rows,
+  title,
+  height = "400px",
+  pageSize = 25,
+  onRowClick,
+  searchPlaceholder = "Search...",
+  options = {},
 }: GoogleFilterableTableProps) {
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [globalSearch, setGlobalSearch] = React.useState("");
 
   const filteredRows = React.useMemo(() => {
-    return rows.filter(row => {
+    return rows.filter((row) => {
       // Global search
       if (globalSearch) {
         const q = globalSearch.toLowerCase();
-        const matches = columns.some(col => {
+        const matches = columns.some((col) => {
           const val = row[col.field];
-          return String(val ?? "").toLowerCase().includes(q);
+          return String(val ?? "")
+            .toLowerCase()
+            .includes(q);
         });
         if (!matches) return false;
       }
@@ -62,12 +70,12 @@ export function GoogleFilterableTable({
   }, [rows, filters, globalSearch, columns]);
 
   const dataTable = React.useMemo(() => {
-    const header = columns.map(c => c.label);
-    const body = filteredRows.map(row =>
-      columns.map(col => {
+    const header = columns.map((c) => c.label);
+    const body = filteredRows.map((row) =>
+      columns.map((col) => {
         const val = row[col.field];
         return col.format ? col.format(val) : val;
-      })
+      }),
     );
     return [header, ...body];
   }, [columns, filteredRows]);
@@ -86,7 +94,9 @@ export function GoogleFilterableTable({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {title && (
-        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text-secondary)" }}>{title}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text-secondary)" }}>
+          {title}
+        </div>
       )}
       {/* Filters row */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
@@ -95,24 +105,36 @@ export function GoogleFilterableTable({
           style={{ width: 200, fontSize: 11, padding: "4px 8px" }}
           placeholder={searchPlaceholder}
           value={globalSearch}
-          onChange={e => setGlobalSearch(e.target.value)}
+          onChange={(e) => setGlobalSearch(e.target.value)}
         />
-        {columns.filter(c => c.filterType === "select" && c.options && c.options.length > 0).map(col => (
-          <select
-            key={col.field}
-            className="gcp-input"
-            style={{ fontSize: 11, padding: "4px 8px", width: "auto" }}
-            value={filters[col.field] || ""}
-            onChange={e => setFilters(f => ({ ...f, [col.field]: e.target.value }))}
-          >
-            <option value="">{col.label}</option>
-            {col.options!.map(o => <option key={o} value={o}>{o}</option>)}
-          </select>
-        ))}
-        {Object.keys(filters).some(k => filters[k]) && (
+        {columns
+          .filter((c) => c.filterType === "select" && c.options && c.options.length > 0)
+          .map((col) => (
+            <select
+              key={col.field}
+              className="gcp-input"
+              style={{ fontSize: 11, padding: "4px 8px", width: "auto" }}
+              value={filters[col.field] || ""}
+              onChange={(e) => setFilters((f) => ({ ...f, [col.field]: e.target.value }))}
+            >
+              <option value="">{col.label}</option>
+              {col.options!.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+            </select>
+          ))}
+        {Object.keys(filters).some((k) => filters[k]) && (
           <button
             onClick={() => setFilters({})}
-            style={{ fontSize: 11, color: "var(--proof-red)", background: "none", border: "none", cursor: "pointer" }}
+            style={{
+              fontSize: 11,
+              color: "var(--proof-red)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             Clear filters
           </button>
@@ -124,19 +146,23 @@ export function GoogleFilterableTable({
         data={dataTable}
         options={chartOptions}
         chartEvents={
-          onRowClick ? [{
-            eventName: "select",
-            callback: ({ chartWrapper }) => {
-              const chart = chartWrapper?.getChart();
-              const selection = chart?.getSelection();
-              if (selection && selection.length > 0) {
-                const rowIdx = selection[0].row;
-                if (rowIdx !== undefined && rowIdx !== null && filteredRows[rowIdx]) {
-                  onRowClick(filteredRows[rowIdx]);
-                }
-              }
-            },
-          }] : undefined
+          onRowClick
+            ? [
+                {
+                  eventName: "select",
+                  callback: ({ chartWrapper }) => {
+                    const chart = chartWrapper?.getChart();
+                    const selection = chart?.getSelection();
+                    if (selection && selection.length > 0) {
+                      const rowIdx = selection[0].row;
+                      if (rowIdx !== undefined && rowIdx !== null && filteredRows[rowIdx]) {
+                        onRowClick(filteredRows[rowIdx]);
+                      }
+                    }
+                  },
+                },
+              ]
+            : undefined
         }
         chartLanguage="en"
         chartPackages={["table", "controls"]}
@@ -163,21 +189,47 @@ export interface GoogleAreaChartProps {
 }
 
 export function GoogleAreaChart({
-  title, columns, data, xKey, yKeys, colors,
-  height = "250px", showTimeFrame = true, onPointClick,
+  title,
+  columns,
+  data,
+  xKey,
+  yKeys,
+  colors,
+  height = "250px",
+  showTimeFrame = true,
+  onPointClick,
 }: GoogleAreaChartProps) {
   const [timeRange, setTimeRange] = React.useState(12);
 
+  const safeData = Array.isArray(data) ? data : [];
+
   const filteredData = React.useMemo(() => {
-    if (!showTimeFrame || timeRange >= data.length) return data;
-    return data.slice(-timeRange);
-  }, [data, timeRange, showTimeFrame]);
+    if (!showTimeFrame || timeRange >= safeData.length) return safeData;
+    return safeData.slice(-timeRange);
+  }, [safeData, timeRange, showTimeFrame]);
+
+  if (filteredData.length === 0) {
+    return (
+      <div
+        style={{
+          height,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--proof-text-secondary)",
+          fontSize: 12,
+        }}
+      >
+        No data
+      </div>
+    );
+  }
 
   const dataTable = React.useMemo(() => {
     const header = [columns[0], ...yKeys];
-    const body = filteredData.map(row => [
+    const body = filteredData.map((row) => [
       String(row[xKey] ?? ""),
-      ...yKeys.map(k => Number(row[k]) || 0),
+      ...yKeys.map((k) => Number(row[k]) || 0),
     ]);
     return [header, ...body];
   }, [columns, filteredData, xKey, yKeys]);
@@ -193,7 +245,7 @@ export function GoogleAreaChart({
     hAxis: { textStyle: { fontSize: 10 } },
     vAxis: { textStyle: { fontSize: 10 } },
     backgroundColor: "transparent",
-    chartArea: { width: "85%", height: "70%" },
+    chartArea: { width: "90%", height: "75%" },
     lineWidth: 2,
     areaOpacity: 0.08,
     enableInteractivity: true,
@@ -204,13 +256,18 @@ export function GoogleAreaChart({
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {showTimeFrame && (
         <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600 }}>Time Range:</span>
-          {[5, 10, 25, 50, 100].map(n => (
+          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600 }}>
+            Time Range:
+          </span>
+          {[5, 10, 25, 50, 100].map((n) => (
             <button
               key={n}
               onClick={() => setTimeRange(n)}
               style={{
-                padding: "2px 10px", fontSize: 10, borderRadius: 4, cursor: "pointer",
+                padding: "2px 10px",
+                fontSize: 10,
+                borderRadius: 4,
+                cursor: "pointer",
                 border: `1px solid ${timeRange === n ? "var(--proof-blue)" : "var(--proof-grey)"}`,
                 background: timeRange === n ? "var(--proof-blue)" : "transparent",
                 color: timeRange === n ? "white" : "var(--proof-text-secondary)",
@@ -229,19 +286,23 @@ export function GoogleAreaChart({
         width="100%"
         height={height}
         chartEvents={
-          onPointClick ? [{
-            eventName: "select",
-            callback: ({ chartWrapper }) => {
-              const chart = chartWrapper?.getChart();
-              const selection = chart?.getSelection();
-              if (selection && selection.length > 0) {
-                const rowIdx = selection[0].row;
-                if (rowIdx !== undefined && rowIdx !== null && filteredData[rowIdx]) {
-                  onPointClick(filteredData[rowIdx]);
-                }
-              }
-            },
-          }] : undefined
+          onPointClick
+            ? [
+                {
+                  eventName: "select",
+                  callback: ({ chartWrapper }) => {
+                    const chart = chartWrapper?.getChart();
+                    const selection = chart?.getSelection();
+                    if (selection && selection.length > 0) {
+                      const rowIdx = selection[0].row;
+                      if (rowIdx !== undefined && rowIdx !== null && filteredData[rowIdx]) {
+                        onPointClick(filteredData[rowIdx]);
+                      }
+                    }
+                  },
+                },
+              ]
+            : undefined
         }
         chartLanguage="en"
         chartPackages={["corechart", "controls"]}
@@ -267,23 +328,49 @@ export interface GoogleBarChartProps {
 }
 
 export function GoogleBarChart({
-  title, columns, data, xKey, yKeys, colors,
-  height = "250px", showTimeFrame = true,
-  barType = "grouped", isHorizontal = false,
+  title,
+  columns,
+  data,
+  xKey,
+  yKeys,
+  colors,
+  height = "250px",
+  showTimeFrame = true,
+  barType = "grouped",
+  isHorizontal = false,
   onPointClick,
 }: GoogleBarChartProps) {
   const [timeRange, setTimeRange] = React.useState(10);
 
+  const safeData = Array.isArray(data) ? data : [];
+
   const filteredData = React.useMemo(() => {
-    if (!showTimeFrame || timeRange >= data.length) return data;
-    return data.slice(-timeRange);
-  }, [data, timeRange, showTimeFrame]);
+    if (!showTimeFrame || timeRange >= safeData.length) return safeData;
+    return safeData.slice(-timeRange);
+  }, [safeData, timeRange, showTimeFrame]);
+
+  if (filteredData.length === 0) {
+    return (
+      <div
+        style={{
+          height,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--proof-text-secondary)",
+          fontSize: 12,
+        }}
+      >
+        No data
+      </div>
+    );
+  }
 
   const dataTable = React.useMemo(() => {
     const header = [columns[0], ...yKeys];
-    const body = filteredData.map(row => [
+    const body = filteredData.map((row) => [
       String(row[xKey] ?? ""),
-      ...yKeys.map(k => Number(row[k]) || 0),
+      ...yKeys.map((k) => Number(row[k]) || 0),
     ]);
     return [header, ...body];
   }, [columns, filteredData, xKey, yKeys]);
@@ -300,20 +387,25 @@ export function GoogleBarChart({
     hAxis: { textStyle: { fontSize: 10 } },
     vAxis: { textStyle: { fontSize: 10 } },
     backgroundColor: "transparent",
-    chartArea: { width: "85%", height: "70%" },
+    chartArea: { width: "90%", height: "75%" },
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {showTimeFrame && (
         <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600 }}>Time Range:</span>
-          {[5, 10, 20, 50, 100].map(n => (
+          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600 }}>
+            Time Range:
+          </span>
+          {[5, 10, 20, 50, 100].map((n) => (
             <button
               key={n}
               onClick={() => setTimeRange(n)}
               style={{
-                padding: "2px 10px", fontSize: 10, borderRadius: 4, cursor: "pointer",
+                padding: "2px 10px",
+                fontSize: 10,
+                borderRadius: 4,
+                cursor: "pointer",
                 border: `1px solid ${timeRange === n ? "var(--proof-blue)" : "var(--proof-grey)"}`,
                 background: timeRange === n ? "var(--proof-blue)" : "transparent",
                 color: timeRange === n ? "white" : "var(--proof-text-secondary)",
@@ -332,19 +424,23 @@ export function GoogleBarChart({
         width="100%"
         height={height}
         chartEvents={
-          onPointClick ? [{
-            eventName: "select",
-            callback: ({ chartWrapper }) => {
-              const chart = chartWrapper?.getChart();
-              const selection = chart?.getSelection();
-              if (selection && selection.length > 0) {
-                const rowIdx = selection[0].row;
-                if (rowIdx !== undefined && rowIdx !== null && filteredData[rowIdx]) {
-                  onPointClick(filteredData[rowIdx]);
-                }
-              }
-            },
-          }] : undefined
+          onPointClick
+            ? [
+                {
+                  eventName: "select",
+                  callback: ({ chartWrapper }) => {
+                    const chart = chartWrapper?.getChart();
+                    const selection = chart?.getSelection();
+                    if (selection && selection.length > 0) {
+                      const rowIdx = selection[0].row;
+                      if (rowIdx !== undefined && rowIdx !== null && filteredData[rowIdx]) {
+                        onPointClick(filteredData[rowIdx]);
+                      }
+                    }
+                  },
+                },
+              ]
+            : undefined
         }
         chartLanguage="en"
         chartPackages={["corechart", "controls"]}
@@ -363,7 +459,13 @@ export interface GooglePieChartProps {
   colors?: string[];
 }
 
-export function GooglePieChart({ title, data, height = "200px", isDonut = false, colors }: GooglePieChartProps) {
+export function GooglePieChart({
+  title,
+  data,
+  height = "200px",
+  isDonut = false,
+  colors,
+}: GooglePieChartProps) {
   const dataTable = React.useMemo(() => {
     const header = ["Key", "Value"];
     const body = Object.entries(data).map(([k, v]) => [k, v]);
@@ -408,10 +510,16 @@ export interface GoogleGaugeProps {
 }
 
 export function GoogleGauge({
-  value, max = 100, min = 0, label,
-  greenFrom = 80, greenTo = 100,
-  yellowFrom = 50, yellowTo = 80,
-  redFrom = 0, redTo = 50,
+  value,
+  max = 100,
+  min = 0,
+  label,
+  greenFrom = 80,
+  greenTo = 100,
+  yellowFrom = 50,
+  yellowTo = 80,
+  redFrom = 0,
+  redTo = 50,
   height = "120px",
 }: GoogleGaugeProps) {
   return (

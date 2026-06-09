@@ -8,8 +8,8 @@ import type { AnomalyScore } from "./types";
 export function computeAnomalyScores(): AnomalyScore[] {
   if (RUNS.length < 3) return [];
 
-  const passRates = RUNS.map(r => r.passPct);
-  const durations = RUNS.map(r => r.durationMs);
+  const passRates = RUNS.map((r) => r.passPct);
+  const durations = RUNS.map((r) => r.durationMs);
   const n = RUNS.length;
 
   const passMean = passRates.reduce((s, v) => s + v, 0) / n;
@@ -26,11 +26,19 @@ export function computeAnomalyScores(): AnomalyScore[] {
     if (passRateZ > 2) flags.push("pass-rate-drop");
     if (passRateZ > 3) flags.push("critical-pass-rate-drop");
     if (durationZ > 2) flags.push("slow-run");
-    if (run.failures > RUNS.reduce((s, r) => s + r.failures, 0) / n * 2) flags.push("high-failures");
+    if (run.failures > (RUNS.reduce((s, r) => s + r.failures, 0) / n) * 2)
+      flags.push("high-failures");
 
-    const overallAnomaly = Math.min(1, Math.max(0,
-      (passRateZ * 0.4 + durationZ * 0.3 + (run.failures / (Math.max(...RUNS.map(r => r.failures)) || 1)) * 0.3) / 3
-    ));
+    const overallAnomaly = Math.min(
+      1,
+      Math.max(
+        0,
+        (passRateZ * 0.4 +
+          durationZ * 0.3 +
+          (run.failures / (Math.max(...RUNS.map((r) => r.failures)) || 1)) * 0.3) /
+          3,
+      ),
+    );
 
     return { runId: run.id, passRateZ, durationZ, overallAnomaly, flags };
   });
@@ -38,6 +46,6 @@ export function computeAnomalyScores(): AnomalyScore[] {
 
 export function getLatestAnomalies(threshold = 0.5): AnomalyScore[] {
   const scores = computeAnomalyScores();
-  const latest = scores.slice(-5).filter(s => s.overallAnomaly > threshold);
+  const latest = scores.slice(-5).filter((s) => s.overallAnomaly > threshold);
   return latest.sort((a, b) => b.overallAnomaly - a.overallAnomaly);
 }

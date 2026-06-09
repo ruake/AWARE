@@ -1,10 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import {
-  clearChatHistory,
-  getLLMConfig,
-  setLLMConfig,
-  getProvider,
-} from "./llm";
+import { clearChatHistory, getLLMConfig, setLLMConfig, getProvider } from "./llm";
 import "./skills";
 
 beforeEach(() => {

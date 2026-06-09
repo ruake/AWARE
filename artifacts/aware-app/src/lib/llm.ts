@@ -74,7 +74,7 @@ class OpenAILLMProvider implements ILLMProvider {
 
 // ── WebLLM Provider (requires @mlc-ai/web-llm package + WebGPU) ─────
 
-let _webLlmProgressCallback: ((progress: number, text: string) => void) | null = null;
+const _webLlmProgressCallback: ((progress: number, text: string) => void) | null = null;
 
 export function checkWebLLM(): Promise<boolean> {
   return Promise.resolve(false);
@@ -139,7 +139,7 @@ class WebLLMProvider implements ILLMProvider {
 
 // ── Chrome Built-in AI Provider (LanguageModel API, Chrome 148+) ────
 
-let _chromeAIProgressCallback: ((progress: number, text: string) => void) | null = null;
+const _chromeAIProgressCallback: ((progress: number, text: string) => void) | null = null;
 
 export async function checkChromeAI(): Promise<boolean> {
   try {

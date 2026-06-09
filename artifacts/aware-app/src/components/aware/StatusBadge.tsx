@@ -19,9 +19,5 @@ const STATUS_MAP: Record<string, string> = {
 
 export function StatusBadge({ status, label }: StatusBadgeProps) {
   const cls = STATUS_MAP[status] ?? "gcp-badge-skip";
-  return (
-    <span className={`gcp-badge ${cls}`}>
-      {label ?? status}
-    </span>
-  );
+  return <span className={`gcp-badge ${cls}`}>{label ?? status}</span>;
 }

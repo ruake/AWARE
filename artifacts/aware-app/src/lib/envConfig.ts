@@ -44,15 +44,15 @@ export function getEnvConfigs(): EnvironmentConfig[] {
 }
 
 export function getEnvLabels(): string[] {
-  return DEFAULT_ENVIRONMENTS.map(e => e.label);
+  return DEFAULT_ENVIRONMENTS.map((e) => e.label);
 }
 
 export function getEnvConfig(label: string): EnvironmentConfig | undefined {
-  return DEFAULT_ENVIRONMENTS.find(e => e.label === label);
+  return DEFAULT_ENVIRONMENTS.find((e) => e.label === label);
 }
 
 export function getEnvConfigById(id: string): EnvironmentConfig | undefined {
-  return DEFAULT_ENVIRONMENTS.find(e => e.id === id);
+  return DEFAULT_ENVIRONMENTS.find((e) => e.id === id);
 }
 
 export function subscribeToEnvConfigs(_cb: () => void): () => void {

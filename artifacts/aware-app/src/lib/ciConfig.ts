@@ -41,23 +41,31 @@ export function generateCiConfig(): CiConfig {
   return {
     version: "2.0",
     project: "PROOF - Pipeline for Regression Observation and Output Framework",
-    description: "Auto-generated regression test configuration. Generated from PROOF test registry.",
-    suites: suites.map(s => {
-      const suiteTests = tests.filter(t => s.testIds.includes(t.id));
-      const cats = [...new Set(suiteTests.map(t => t.category))];
+    description:
+      "Auto-generated regression test configuration. Generated from PROOF test registry.",
+    suites: suites.map((s) => {
+      const suiteTests = tests.filter((t) => s.testIds.includes(t.id));
+      const cats = [...new Set(suiteTests.map((t) => t.category))];
       return {
         name: s.name,
         testCount: suiteTests.length,
-        testIds: suiteTests.map(t => t.id),
+        testIds: suiteTests.map((t) => t.id),
         categories: cats,
       };
     }),
-    environments: envConfigs.length > 0
-      ? envConfigs.map(c => ({ target: c.target, env: c.stage, network: c.network, baseUrl: c.baseUrl, ips: c.ips.length > 0 ? c.ips : undefined }))
-      : ENVS.map(e => {
-          const [target, env] = e.split("/");
-          return { target, env, network: env?.toLowerCase() ?? "production" };
-        }),
+    environments:
+      envConfigs.length > 0
+        ? envConfigs.map((c) => ({
+            target: c.target,
+            env: c.stage,
+            network: c.network,
+            baseUrl: c.baseUrl,
+            ips: c.ips.length > 0 ? c.ips : undefined,
+          }))
+        : ENVS.map((e) => {
+            const [target, env] = e.split("/");
+            return { target, env, network: env?.toLowerCase() ?? "production" };
+          }),
     workflow: {
       file: "run-tests.yml",
       path: ".github/workflows/run-tests.yml",
