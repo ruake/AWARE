@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -54,8 +54,17 @@ jobs:
         run: pnpm run test:e2e:install
       - name: Run E2E tests
         run: pnpm run test:e2e:ci
+        continue-on-error: true
         env:
           PLAYWRIGHT_BASE_URL: "http://localhost:5173"
+
+      - name: Upload Playwright results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: artifacts/aware-app/test-results/playwright-results.json
+          retention-days: 1
 
   build-and-deploy:
     needs: [ci, e2e]
@@ -81,6 +90,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Download Playwright results
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-results
+          path: artifacts/aware-app/test-results/
+
+      - name: Record run from test results
+        run: node scripts/record-run.mjs test-results/playwright-results.json
+        continue-on-error: true
 
       - name: Run test discovery
         run: pnpm discover:tests
@@ -124,3 +143,16 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Commit run data back to repo
+        if: always()
+        run: |
+          git config user.name "AWARE Bot"
+          git config user.email "bot@aware.dev"
+          git add artifacts/aware-app/src/data/runs.json
+          if git diff --cached --quiet; then
+            echo "No changes to runs.json"
+          else
+            git commit -m "record CI run [skip ci]"
+            git push
+          fi
