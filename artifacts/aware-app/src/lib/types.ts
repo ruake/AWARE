@@ -15,16 +15,30 @@ export interface Run {
   network: "staging" | "production";
 }
 
+// ── Data Contract: TestResult ──────────────────────────────────────────
+// All test results MUST conform to this interface exactly.
+// Fields marked REQUIRED are always present (null never allowed).
+// Fields marked OPTIONAL may be absent or undefined.
 export interface TestResult {
+  /** REQUIRED — Unique result ID (e.g. tr_run_20260609_mq69skci_0, pw_0) */
   id: string;
+  /** REQUIRED — Human-readable test name */
   name: string;
+  /** REQUIRED — Test outcome */
   status: "PASS" | "FAIL";
+  /** REQUIRED — Duration in milliseconds */
   duration: number;
+  /** REQUIRED — Category grouping (e.g. Security, Functional, Performance) */
   category: string;
+  /** REQUIRED — Suite/spec file name */
   suite: string;
+  /** OPTIONAL — Error message from a failing test */
   error?: string;
-  assertions?: TestAssertionResult[];
-  evidence?: TestEvidence;
+  /** REQUIRED — List of assertion results (empty array if none) */
+  assertions: TestAssertionResult[];
+  /** REQUIRED — HTTP request/response evidence */
+  evidence: TestEvidence;
+  /** OPTIONAL — Screenshot filmstrip frames from Playwright */
   filmstrip?: FilmstripFrame[];
 }
 

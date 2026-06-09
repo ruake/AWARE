@@ -30,6 +30,8 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install
+      - name: Validate data contracts
+        run: pnpm run validate:data
       - name: TypeScript check
         run: pnpm run typecheck
       - name: Run unit tests

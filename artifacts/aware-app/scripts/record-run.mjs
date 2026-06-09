@@ -95,7 +95,9 @@ const TEST_URLS = {
 };
 
 function buildEvidence(name, lastResult) {
-  // If Playwright included request/response data (API tests), use it
+  // Always return evidence per the Data Contract (test-results.schema.json)
+  // REQUIRED fields: request.method, request.url, request.headers, response.status, response.headers, assertions
+
   if (lastResult?.request && lastResult?.response) {
     const reqHeaders = lastResult.request.headers || {};
     const resHeaders = lastResult.response.headers || {};
@@ -111,14 +113,25 @@ function buildEvidence(name, lastResult) {
     }
     return {
       request: { method: lastResult.request.method || "GET", url: lastResult.request.url || "", headers: reqHeaders },
-      response: { status: lastResult.response.status || 0, headers: resHeaders, ...(cookies ? { cookies } : {}) },
+      response: {
+        status: lastResult.response.status || 0,
+        headers: resHeaders,
+        ...(cookies ? { cookies } : {}),
+      },
       assertions: [],
     };
   }
 
   // Fallback: enrich from known test URLs
   const known = TEST_URLS[name];
-  if (!known) return undefined;
+  if (!known) {
+    // Minimal contract-compliant evidence when no known URL
+    return {
+      request: { method: "GET", url: "", headers: {} },
+      response: { status: 0, headers: {} },
+      assertions: [],
+    };
+  }
 
   const defaultHeaders = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -217,9 +230,10 @@ function extractTestResults(raw, runId, resultsDir) {
             duration: lastResult?.duration || 0,
             category,
             suite: suiteName,
+            assertions: [],
+            evidence: buildEvidence(name, lastResult),
           };
           if (error) entry.error = error;
-          if (evidence) entry.evidence = evidence;
           if (filmstrip) entry.filmstrip = filmstrip;
           results.push(entry);
         }

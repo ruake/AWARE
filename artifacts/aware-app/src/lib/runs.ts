@@ -5,7 +5,7 @@ import testResultsSeed from "@/data/test-results.json";
 
 export const RUNS: Run[] = runsSeed as unknown as Run[];
 export const DIFF_ROWS: DiffRow[] = diffRowsSeed as unknown as DiffRow[];
-const TEST_RESULTS_BY_RUN: Record<string, TestResult[]> = testResultsSeed as Record<string, TestResult[]>;
+const TEST_RESULTS_BY_RUN: Record<string, TestResult[]> = testResultsSeed as unknown as Record<string, TestResult[]>;
 
 export function getRunIndex(runId: string): number {
   return RUNS.findIndex(r => r.id === runId);

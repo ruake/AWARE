@@ -11,8 +11,9 @@
 cd artifacts/aware-app
 pnpm install
 pnpm dev                    # dev server at :5173
-pnpm build                  # prod build → dist/public/
+pnpm build                  # prod build → dist/public/ (auto-runs validate:data)
 pnpm run typecheck          # TS check (MUST pass before commit)
+pnpm run validate:data      # Schema contract validation for all JSON data files
 pnpm discover:tests         # Run test discovery (pytest + Playwright → auto-tests.json)
 pnpm test                   # Unit tests
 pnpm test:e2e               # Playwright browser tests
@@ -67,16 +68,26 @@ artifacts/aware-app/src/
 └── index.css              # Tailwind imports
 ```
 
-## Data Files
-- `src/data/auto-tests.json` — 67 auto-discovered tests (40 `ad_*` pytest + 27 `pw_*` Playwright)
-- `src/data/test-suites.json` — 10 suites (referencing `ad_*` and `pw_*` IDs)
-- `src/data/runs.json` — 12 seed runs
-- `src/data/diff-rows.json` — 15 seed diff rows
-- `src/data/promotions.json` — seed promotion history
-- No seed `test-cases.json` — all test cases come from auto-discovery
+## Data Files  
+- `src/data/auto-tests.json` — 67 auto-discovered tests (40 `ad_*` pytest + 27 `pw_*` Playwright)  
+- `src/data/test-suites.json` — 10 suites (referencing `ad_*` and `pw_*` IDs)  
+- `src/data/runs.json` — 12 seed runs  
+- `src/data/diff-rows.json` — 15 seed diff rows  
+- `src/data/promotions.json` — seed promotion history  
+- `src/data/schemas/test-results.schema.json` — JSON Schema contract for TestResult data  
+- No seed `test-cases.json` — all test cases come from auto-discovery  
+
+## Data Contract  
+Every JSON data file must conform to its type definition in `src/lib/types.ts`.  
+The `TestResult` interface is the authoritative contract — REQUIRED fields must always be present in seed data AND in `record-run.mjs` output.  
+- `assertions: []` is REQUIRED (empty array if none)  
+- `evidence` is REQUIRED — all test results must have HTTP evidence  
+- `record-run.mjs` always emits all REQUIRED fields, never conditionally  
+- `validate-data.mjs` checks every field against the schema and cross-references IDs  
+- `prebuild` hook runs `validate:data` automatically before every build  
 
 ## GitHub Actions
-- `deploy.yml`: CI → E2E → `pnpm discover:tests` → build → deploy to Pages
+- `deploy.yml`: validate data → typecheck → unit tests → E2E → `pnpm discover:tests` → build → deploy to Pages
 - `sync-data-branches.yml`: pushes extracted data to `test-cases`, `test-runs`, `stats`, `discovered-tests` branches
 
 ## Gotchas
