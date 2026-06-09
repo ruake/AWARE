@@ -12,12 +12,11 @@ export default function TestDoc() {
   const params = new URLSearchParams(location.split("?")[1] || "");
   const testId = params.get("testId") || "";
   const diffRow = DIFF_ROWS.find(d => d.id === testId);
-  const testName = diffRow?.name ?? (testId || "test_geo_match_us_locale_prod[/us/]");
-  const testStatus = diffRow?.candStatus ?? "FAIL";
-  const testCategory = diffRow?.category ?? "geo-match";
-  const testSuite = "full_suite";
-
   const testCase = React.useMemo(() => getTestCaseById(testId), [testId]);
+  const testName = testCase?.name ?? diffRow?.name ?? (testId || "test_geo_match_us_locale_prod[/us/]");
+  const testStatus = diffRow?.candStatus ?? "FAIL";
+  const testCategory = testCase?.category ?? diffRow?.category ?? "geo-match";
+  const testSuite = "full_suite";
 
   return (
     <AppLayout activeHref="/tests">

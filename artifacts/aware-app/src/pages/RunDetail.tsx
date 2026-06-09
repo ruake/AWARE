@@ -1,14 +1,14 @@
 import React from "react";
-import { useParams, useLocation } from "wouter";
+import { useParams, useLocation, useSearch } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
-import { getRunById, getTestResultsForRun, RUNS, getPromotionDecision } from "@/lib/data";
+import { getRunById, getTestResultsForRun, RUNS, getPromotionDecision, getTestCaseById } from "@/lib/data";
 import type { TestResult, TestAssertionResult, TestCookie } from "@/lib/types";
 import {
   ArrowLeft, GitCompare, CheckCircle2, XCircle, Github,
   Share2, AlertTriangle, Shield, Zap, RefreshCw,
   Search, ChevronRight, ChevronLeft,
-  Check, BarChart3,
+  Check, BarChart3, FileText,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
@@ -27,6 +27,7 @@ function AssertionRow({ a }: { a: TestAssertionResult }) {
 export default function RunDetail() {
   const params = useParams<{ runId: string }>();
   const [, navigate] = useLocation();
+  const urlSearch = useSearch();
   const runId = params.runId ?? "";
   const { show, Toast } = useSimpleToast();
 
@@ -73,12 +74,24 @@ export default function RunDetail() {
     return { category: cat.slice(0, 8), pass: catResults.filter(r => r.status === "PASS").length, fail: catResults.filter(r => r.status === "FAIL").length };
   });
 
-  const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(null);
+  const urlTestId = React.useMemo(() => new URLSearchParams(urlSearch).get("testId"), [urlSearch]);
+  const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(() => {
+    if (urlTestId) return results.find(r => r.id === urlTestId) ?? null;
+    return null;
+  });
+
   const selIdx = selectedResult ? filtered.findIndex(r => r.id === selectedResult.id) : -1;
+
+  const setSelectedResultSyncUrl = (r: TestResult | null) => {
+    setSelectedResult(r);
+    const base = `/runs/${run.id}`;
+    if (r) navigate(`${base}?testId=${r.id}`, { replace: true });
+    else navigate(base, { replace: true });
+  };
 
   const navigateDetail = (dir: -1 | 1) => {
     const next = selIdx + dir;
-    if (next >= 0 && next < filtered.length) setSelectedResult(filtered[next]);
+    if (next >= 0 && next < filtered.length) setSelectedResultSyncUrl(filtered[next]);
   };
 
   const hasDecision = decision && decision.decision !== "pending";
@@ -161,7 +174,7 @@ export default function RunDetail() {
                   <tbody>
                     {filtered.map(r => (
                       <tr key={r.id}
-                        onClick={() => setSelectedResult(selectedResult?.id === r.id ? null : r)}
+                        onClick={() => setSelectedResultSyncUrl(selectedResult?.id === r.id ? null : r)}
                         style={{ cursor: "pointer", background: selectedResult?.id === r.id ? "var(--proof-blue-bg)" : r.status === "FAIL" ? "rgba(217,48,37,0.03)" : undefined, outline: selectedResult?.id === r.id ? "2px solid var(--proof-blue) inset" : undefined }}>
                         <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</td>
                         <td><span className={`gcp-badge ${r.status === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{r.status}</span></td>
@@ -169,6 +182,7 @@ export default function RunDetail() {
                         <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)" }}>{r.duration}ms</td>
                         <td onClick={e => e.stopPropagation()}>
                           <button onClick={() => navigate(`/analytics?testId=${r.id}`)} className="gcp-button gcp-button-xs" style={{ padding: "2px 7px" }}>Analytics</button>
+                          <button onClick={() => navigate(`/testdoc?testId=${r.id}`)} className="gcp-button gcp-button-xs" style={{ padding: "2px 7px", marginLeft: 4 }}><FileText size={10} /> Def</button>
                         </td>
                       </tr>
                     ))}
@@ -190,7 +204,7 @@ export default function RunDetail() {
                     <button disabled={selIdx >= filtered.length - 1} onClick={() => navigateDetail(1)} style={{ padding: "4px 7px", border: "none", background: "transparent", cursor: selIdx < filtered.length - 1 ? "pointer" : "not-allowed", color: selIdx < filtered.length - 1 ? "var(--proof-blue)" : "var(--proof-grey)" }}><ChevronRight size={13} /></button>
                   </div>
                   <span style={{ fontSize: 12, fontWeight: 600, color: selectedResult.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)", flex: 1 }}>{selectedResult.status}</span>
-                  <button onClick={() => setSelectedResult(null)} style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--proof-text-secondary)", fontSize: 18, lineHeight: 1 }}>×</button>
+                  <button onClick={() => setSelectedResultSyncUrl(null)} style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--proof-text-secondary)", fontSize: 18, lineHeight: 1 }}>×</button>
                 </div>
 
                 <div style={{ flex: 1, overflowY: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 12 }}>
@@ -218,9 +232,15 @@ export default function RunDetail() {
                     </div>
                   )}
 
-                  {/* HTTP Evidence */}
-                  {selectedResult.evidence && (() => {
-                    const e = selectedResult.evidence!;
+                  {/* HTTP Exchange — always visible */}
+                  {(() => {
+                    const e = selectedResult.evidence;
+                    if (!e) return (
+                      <div>
+                        <div style={{ fontSize:10, fontWeight:600, color:'var(--proof-text-secondary)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:6 }}>HTTP Exchange</div>
+                        <div style={{ fontSize:11, color:'var(--proof-text-secondary)', fontStyle:'italic' }}>No HTTP data captured</div>
+                      </div>
+                    );
                     const rows: { label: string; val: string }[] = [];
                     rows.push({ label: 'Method', val: e.request.method });
                     rows.push({ label: 'URL', val: e.request.url });
@@ -323,6 +343,9 @@ export default function RunDetail() {
                 <div style={{ padding: "8px 14px", borderTop: "1px solid var(--proof-grey)", display: "flex", gap: 6, flexShrink: 0 }}>
                   <button onClick={() => navigate(`/analytics?testId=${selectedResult.id}`)} className="gcp-button gcp-button-xs" style={{ flex: 1 }}>
                     <BarChart3 size={11} /> Analytics
+                  </button>
+                  <button onClick={() => navigate(`/testdoc?testId=${selectedResult.id}`)} className="gcp-button gcp-button-xs" style={{ flex: 1 }}>
+                    <FileText size={11} /> Definition
                   </button>
                 </div>
               </div>

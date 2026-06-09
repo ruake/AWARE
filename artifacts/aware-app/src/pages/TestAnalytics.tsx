@@ -10,7 +10,7 @@ import { useTestData } from "@/hooks/useTestData";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import {
   ArrowLeft, BarChart3, Clock, Activity, AlertTriangle,
-  Search, Share2, ChevronRight,
+  Search, Share2, ChevronRight, FileText,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 
@@ -38,12 +38,13 @@ export default function TestAnalytics() {
     return id;
   })();
   const rawDiffId = params.get("diffId") ?? "diff_0";
-  const isTcMode = rawTestId.startsWith("tc_");
+  const isTcMode = rawTestId !== "" && tcs.some(t => t.id === rawTestId);
 
-  const testCase = isTcMode ? tcs.find(t => t.id === rawTestId) : null;
+  const testCase = isTcMode ? tcs.find(t => t.id === rawTestId) ?? null : null;
   const selectedTestId = isTcMode ? rawTestId : rawDiffId;
 
-  const idx = isTcMode ? Math.abs((testCase ? parseInt(testCase.id.replace("tc_", "")) : 0) % DIFF_ROWS.length) : Number(selectedTestId.replace("diff_", ""));
+  const tcIdx = isTcMode ? tcs.findIndex(t => t.id === rawTestId) : -1;
+  const idx = isTcMode ? Math.abs(tcIdx % DIFF_ROWS.length) : Number(selectedTestId.replace("diff_", ""));
   const diffs = DIFF_ROWS;
   if (diffs.length === 0) {
     return (
@@ -124,6 +125,11 @@ export default function TestAnalytics() {
             </div>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
+            {isTcMode && testCase && (
+              <button onClick={() => navigate(`/testdoc?testId=${testCase.id}`)} className="gcp-button gcp-button-sm">
+                <FileText size={13} /> Definition
+              </button>
+            )}
             <button onClick={() => { navigator.clipboard.writeText(window.location.href).then(() => show("Permalink copied")); }}
               className="gcp-button gcp-button-sm">
               <Share2 size={13} /> Share
