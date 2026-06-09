@@ -58,13 +58,11 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: "http://localhost:5173"
 
-      - name: Upload Playwright results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-results
-          path: artifacts/aware-app/test-results/playwright-results.json
-          retention-days: 1
+      - name: Record run from E2E results
+        run: |
+          pnpm exec playwright test --reporter=json 2>/dev/null > /tmp/playwright-results.json
+          node scripts/record-run.mjs /tmp/playwright-results.json
+        continue-on-error: true
 
   build-and-deploy:
     needs: [ci, e2e]
@@ -90,16 +88,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-
-      - name: Download Playwright results
-        uses: actions/download-artifact@v4
-        with:
-          name: playwright-results
-          path: artifacts/aware-app/test-results/
-
-      - name: Record run from test results
-        run: node scripts/record-run.mjs test-results/playwright-results.json
-        continue-on-error: true
 
       - name: Run test discovery
         run: pnpm discover:tests

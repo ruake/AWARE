@@ -90,8 +90,10 @@ jobs:
         run: pnpm run test:e2e:ci
         continue-on-error: true
 
-      - name: Record run from test results
-        run: node scripts/record-run.mjs test-results/playwright-results.json
+      - name: Record run from E2E results
+        run: |
+          pnpm exec playwright test --reporter=json 2>/dev/null > /tmp/playwright-results.json
+          node scripts/record-run.mjs /tmp/playwright-results.json
         continue-on-error: true
 
       - name: Commit run data back to repo
