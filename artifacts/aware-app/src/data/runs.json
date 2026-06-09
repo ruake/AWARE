@@ -1,5 +1,21 @@
 [
   {
+    "id": "run_20260609_mq6tigez",
+    "label": "CI — Jun 9, 2026",
+    "suite": "suite_full",
+    "target": "Prod",
+    "status": "PASS",
+    "passPct": 100,
+    "failures": 0,
+    "duration": "0m 04s",
+    "durationMs": 4453,
+    "started": "2026-06-09T15:51:57.850Z",
+    "build": "f9314ed",
+    "rev": "f9314edb2c592158b96361fd9472da087e4e066e",
+    "env": "production",
+    "network": "production"
+  },
+  {
     "id": "run_20260609_mq6nxlug",
     "label": "CI — Jun 9, 2026",
     "suite": "suite_full",
