@@ -26,48 +26,47 @@ export function TestDocChangelog({ testCase }: { testCase?: TestCase }) {
   const changelog = testCase ? getTestChangelog(testCase.id) : [];
 
   return (
-    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto", paddingRight: 8, paddingBottom: 32, height: "calc(100vh - 150px)" }}>
-      <div className="gcp-card" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-        <div style={{ padding: 16, borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-surface-hover)", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 10 }}>
-          <h2 style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: 8 }}>
-            <GitCommit size={18} style={{ color: "var(--proof-text-secondary)" }} />
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-surface-hover)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ fontWeight: 500, fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <GitCommit size={14} style={{ color: "var(--proof-text-secondary)" }} />
             Change History
           </h2>
-          <span style={{ fontSize: 11, background: "var(--proof-grey)", color: "var(--proof-text)", padding: "2px 8px", borderRadius: 12, fontWeight: 500 }}>
+          <span style={{ fontSize: 10, background: "var(--proof-grey)", color: "var(--proof-text)", padding: "1px 6px", borderRadius: 10, fontWeight: 500 }}>
             v{testCase?.version ?? "?"}
           </span>
         </div>
 
-        <div style={{ padding: 20, flex: 1 }}>
+        <div style={{ padding: 12 }}>
           {changelog.length === 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: 40, color: "var(--proof-text-secondary)" }}>
-              <History size={24} style={{ opacity: 0.3 }} />
-              <p style={{ fontSize: 13 }}>No change history</p>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: 24, color: "var(--proof-text-secondary)" }}>
+              <History size={20} style={{ opacity: 0.3 }} />
+              <p style={{ fontSize: 12 }}>No change history</p>
             </div>
           ) : (
-            <div style={{ position: "relative", borderLeft: "2px solid var(--proof-grey)", marginLeft: 12, paddingLeft: 24, paddingBottom: 16, display: "flex", flexDirection: "column", gap: 32 }}>
+            <div style={{ position: "relative", borderLeft: "2px solid var(--proof-grey)", marginLeft: 8, paddingLeft: 18, paddingBottom: 4, display: "flex", flexDirection: "column", gap: 20 }}>
               {changelog.map((entry, ei) => {
                 const initials = entry.author.split(/[@\s_]/).filter(Boolean).map(s => s[0].toUpperCase()).slice(0, 2).join("");
                 return (
                   <div key={entry.version} style={{ position: "relative" }}>
-                    <div style={{ position: "absolute", left: -31, top: 4, width: 16, height: 16, borderRadius: "50%", background: ei === 0 ? "var(--proof-blue)" : "var(--proof-grey)", border: "4px solid var(--proof-surface)", boxShadow: "0 1px 3px rgba(0,0,0,0.15)" }} />
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ position: "absolute", left: -25, top: 3, width: 12, height: 12, borderRadius: "50%", background: ei === 0 ? "var(--proof-blue)" : "var(--proof-grey)", border: "3px solid var(--proof-surface)", boxShadow: "0 1px 2px rgba(0,0,0,0.15)" }} />
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--proof-text-secondary)", fontWeight: 600 }}>v{entry.version}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)", fontWeight: 600 }}>v{entry.version}</span>
                           <Timestamp ts={entry.timestamp} />
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                          <div style={{ width: 20, height: 20, borderRadius: "50%", background: colorFromName(entry.author), color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700 }}>{initials}</div>
-                          <span style={{ fontSize: 12, fontWeight: 500 }}>@{entry.author}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                          <div style={{ width: 16, height: 16, borderRadius: "50%", background: colorFromName(entry.author), color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700 }}>{initials}</div>
                         </div>
                       </div>
-                      <p style={{ fontSize: 13, fontWeight: 500, color: "var(--proof-text)" }}>{entry.summary}</p>
+                      <p style={{ fontSize: 12, fontWeight: 500, color: "var(--proof-text)", lineHeight: 1.4 }}>{entry.summary}</p>
 
                       {entry.changes.length > 0 && (
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
                           {entry.changes.map((change, ci) => (
-                            <span key={ci} style={{ display: "inline-block", padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 500, background: "var(--proof-grey-bg)", color: "var(--proof-text-secondary)", border: "1px solid var(--proof-grey)" }}>{change}</span>
+                            <span key={ci} style={{ display: "inline-block", padding: "1px 6px", borderRadius: 3, fontSize: 10, fontWeight: 500, background: "var(--proof-grey-bg)", color: "var(--proof-text-secondary)", border: "1px solid var(--proof-grey)" }}>{change}</span>
                           ))}
                         </div>
                       )}
@@ -81,10 +80,10 @@ export function TestDocChangelog({ testCase }: { testCase?: TestCase }) {
       </div>
 
       {testCase && (
-        <div className="gcp-card" style={{ padding: 12, background: "var(--proof-surface-hover)", border: "1px dashed var(--proof-grey)" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12 }}>
+        <div className="gcp-card" style={{ padding: "10px 12px", background: "var(--proof-surface-hover)", border: "1px dashed var(--proof-grey)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 10px", fontSize: 11 }}>
             <div style={{ color: "var(--proof-text-secondary)" }}>File:</div>
-            <a href={getGitHubUrl(testCase)} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 11, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--proof-blue)", textDecoration: "underline", textUnderlineOffset: 2 }} title={cleanScriptPath(testCase)}>{cleanScriptPath(testCase)}</a>
+            <a href={getGitHubUrl(testCase)} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 10, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--proof-blue)", textDecoration: "underline", textUnderlineOffset: 2 }} title={cleanScriptPath(testCase)}>{cleanScriptPath(testCase)}</a>
 
             <div style={{ color: "var(--proof-text-secondary)" }}>Type:</div>
             <div style={{ textAlign: "right", textTransform: "capitalize" }}>{testCase.testType}</div>

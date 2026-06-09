@@ -6,6 +6,7 @@ import { TestDocTopBar } from "@/components/aware/TestDocTopBar";
 import { TestDocSidebar } from "@/components/aware/TestDocSidebar";
 import { TestDocChangelog } from "@/components/aware/TestDocChangelog";
 import { TestFlowDiagram } from "@/components/aware/TestFlowDiagram";
+import { StatusBadge } from "@/components/aware/StatusBadge";
 
 export default function TestDoc() {
   const [location] = useLocation();
@@ -20,20 +21,25 @@ export default function TestDoc() {
 
   return (
     <AppLayout activeHref="/tests">
-      <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 80px)", maxWidth: 1800, margin: "0 auto", gap: 16 }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 80px)", maxWidth: 1800, margin: "0 auto", gap: 12 }}>
         <TestDocTopBar testId={testId} testName={testName} testStatus={testStatus} testCategory={testCategory} testSuite={testSuite} testCase={testCase} />
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, overflow: "hidden" }}>
-          <TestDocSidebar testCase={testCase} />
+        <div style={{ display: "grid", gridTemplateColumns: "280px 1fr 300px", gap: 12, flex: 1, overflow: "hidden", minHeight: 0 }}>
+          {/* Left sidebar — test metadata */}
+          <div style={{ overflowY: "auto", paddingRight: 4 }}>
+            <TestDocSidebar testCase={testCase} />
+          </div>
 
-          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto", paddingRight: 8, paddingBottom: 32, height: "calc(100vh - 150px)" }}>
+          {/* Main content — flow diagram + charts */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, overflowY: "auto", paddingRight: 4, paddingBottom: 32 }}>
             {testCase && <TestFlowDiagram testCase={testCase} />}
+
             <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: 16, borderBottom: "1px solid var(--proof-grey)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--proof-surface-hover)" }}>
+              <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--proof-grey)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--proof-surface-hover)" }}>
                 <h2 style={{ fontWeight: 500, fontSize: 13 }}>Pass Rate Over Time (7d)</h2>
                 <span style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-green)" }}>94.8%</span>
               </div>
-              <div style={{ padding: 20, height: 192, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ padding: "16px 20px", height: 180, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="none" style={{ overflow: "visible" }}>
                   <defs>
                     <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
@@ -72,19 +78,19 @@ export default function TestDoc() {
             </div>
 
             <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: 12, borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-surface-hover)" }}>
+              <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-surface-hover)" }}>
                 <h2 style={{ fontWeight: 500, fontSize: 13 }}>Recent Executions</h2>
               </div>
               <div style={{ overflowX: "auto" }}>
                 <table className="gcp-table" style={{ width: "100%", fontSize: 12 }}>
                   <thead>
                     <tr>
-                      <th style={{ padding: "8px 0" }}>Run</th>
-                      <th style={{ padding: "8px 0" }}>Date</th>
-                      <th style={{ padding: "8px 0" }}>Status</th>
-                      <th style={{ padding: "8px 0", textAlign: "right" }}>Duration</th>
-                      <th style={{ padding: "8px 0" }}>Build</th>
-                      <th style={{ padding: "8px 0" }}>Rev</th>
+                      <th style={{ padding: "8px 12px" }}>Run</th>
+                      <th style={{ padding: "8px 12px" }}>Date</th>
+                      <th style={{ padding: "8px 12px" }}>Status</th>
+                      <th style={{ padding: "8px 12px", textAlign: "right" }}>Duration</th>
+                      <th style={{ padding: "8px 12px" }}>Build</th>
+                      <th style={{ padding: "8px 12px" }}>Rev</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -102,9 +108,7 @@ export default function TestDoc() {
                         <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)" }}>{row.run}</td>
                         <td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{row.date}</td>
                         <td>
-                          <span className={`gcp-badge ${row.status === 'FAIL' ? 'gcp-badge-fail' : 'gcp-badge-pass'}`} style={{ fontSize: 9, padding: "2px 6px" }}>
-                            {row.status}
-                          </span>
+                          <StatusBadge status={row.status as "PASS" | "FAIL"} />
                         </td>
                         <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11 }}>
                           {(row as any).spike ? <span style={{ background: "#fef08a", color: "#713f12", padding: "1px 4px", borderRadius: 4, fontWeight: 700 }}>{row.dur}</span> : row.dur}
@@ -119,11 +123,11 @@ export default function TestDoc() {
             </div>
 
             <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: 12, borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-surface-hover)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-surface-hover)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h2 style={{ fontWeight: 500, fontSize: 13 }}>Duration Trend</h2>
                 <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>Avg: 145ms</span>
               </div>
-              <div style={{ padding: 16, height: 96, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+              <div style={{ padding: "12px 16px", height: 80, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
                 <svg width="100%" height="100%" viewBox="0 0 300 50" preserveAspectRatio="none">
                   <path d="M0,40 L30,42 L60,38 L90,41 L120,40 L150,45 L180,39 L210,10 L240,40 L270,38 L300,42" fill="none" stroke="var(--proof-blue)" strokeWidth="2" strokeLinejoin="round" />
                   <circle cx="210" cy="10" r="4" fill="var(--proof-yellow)" stroke="white" strokeWidth="1" />
@@ -133,7 +137,10 @@ export default function TestDoc() {
             </div>
           </div>
 
-          <TestDocChangelog testCase={testCase} />
+          {/* Right sidebar — changelog */}
+          <div style={{ overflowY: "auto", paddingLeft: 4 }}>
+            <TestDocChangelog testCase={testCase} />
+          </div>
         </div>
       </div>
     </AppLayout>

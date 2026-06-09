@@ -1,8 +1,41 @@
 import React from "react";
-import { FileText, CheckCircle2, AlertTriangle, AlertCircle, GitBranch } from "lucide-react";
+import { FileText, CheckCircle2, AlertTriangle, AlertCircle, GitBranch, ChevronDown, ChevronRight } from "lucide-react";
 import { getTestCaseById } from "@/lib/data";
 import { DIFF_ROWS } from "@/lib/runs";
 import type { TestCase } from "@/lib/types";
+
+const collapseBtn: React.CSSProperties = {
+  background: "none", border: "none", cursor: "pointer",
+  color: "var(--proof-text-secondary)", padding: 0,
+  display: "flex", alignItems: "center",
+  transition: "transform 0.2s",
+};
+
+function CollapsibleSection({ title, icon, defaultOpen = true, children, badge }: {
+  title: string; icon: React.ReactNode; defaultOpen?: boolean; children: React.ReactNode; badge?: React.ReactNode;
+}) {
+  const [open, setOpen] = React.useState(defaultOpen);
+  return (
+    <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          padding: "10px 12px", borderBottom: open ? "1px solid var(--proof-grey)" : "none",
+          background: "var(--proof-surface-hover)", cursor: "pointer",
+          display: "flex", alignItems: "center", gap: 6,
+          fontSize: 12, fontWeight: 500, color: "var(--proof-text)",
+          border: "none", textAlign: "left", width: "100%",
+        }}
+      >
+        {icon}
+        <span style={{ flex: 1 }}>{title}</span>
+        {badge}
+        {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+      </button>
+      {open && children}
+    </div>
+  );
+}
 
 function RelatedTests({ testCase }: { testCase: TestCase }) {
   const relatedIds = testCase.relatedTestIds ?? [];
@@ -12,7 +45,7 @@ function RelatedTests({ testCase }: { testCase: TestCase }) {
 
   if (related.length === 0) {
     return (
-      <div style={{ padding: 20, textAlign: "center", fontSize: 12, color: "var(--proof-text-secondary)" }}>
+      <div style={{ padding: 16, textAlign: "center", fontSize: 12, color: "var(--proof-text-secondary)" }}>
         No related tests
       </div>
     );
@@ -28,17 +61,42 @@ function RelatedTests({ testCase }: { testCase: TestCase }) {
             const isFail = status === "FAIL" || status === "deprecated";
             return (
               <tr key={rel.tc?.id ?? rel.diff?.id} style={{ cursor: "pointer", background: isFail ? "var(--proof-red-bg)" : "transparent" }}>
-                <td style={{ padding: "10px 12px" }}>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", maxWidth: 200, whiteSpace: "nowrap" }} title={name}>{name}</div>
+                <td style={{ padding: "8px 10px" }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, overflow: "hidden", textOverflow: "ellipsis", maxWidth: 180, whiteSpace: "nowrap" }} title={name}>{name}</div>
                 </td>
-                <td style={{ padding: "10px 12px", textAlign: "right" }}>
-                  <span className={`gcp-badge ${isFail ? "gcp-badge-fail" : "gcp-badge-pass"}`} style={{ fontSize: 10 }}>{status}</span>
+                <td style={{ padding: "8px 10px", textAlign: "right" }}>
+                  <span className={`gcp-badge ${isFail ? "gcp-badge-fail" : "gcp-badge-pass"}`} style={{ fontSize: 9 }}>{status}</span>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function StripSection({ title, icon, color, defaultOpen = true, children }: {
+  title: string; icon: React.ReactNode; color: string; defaultOpen?: boolean; children: React.ReactNode;
+}) {
+  const [open, setOpen] = React.useState(defaultOpen);
+  return (
+    <div style={{ background: `color-mix(in srgb, ${color} 8%, var(--proof-surface))`, borderRadius: 6, border: `1px solid ${color}` }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          padding: "8px 10px", cursor: "pointer",
+          display: "flex", alignItems: "center", gap: 4,
+          fontSize: 10, fontWeight: 700, textTransform: "uppercase",
+          letterSpacing: "0.5px", color,
+          border: "none", background: "transparent", textAlign: "left", width: "100%",
+        }}
+      >
+        {icon}
+        <span style={{ flex: 1 }}>{title}</span>
+        {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+      </button>
+      {open && children}
     </div>
   );
 }
@@ -50,98 +108,101 @@ export function TestDocSidebar({ testCase }: { testCase?: TestCase }) {
   const precondLines = preconditions ? preconditions.split("\n").filter(l => l.trim()) : [];
 
   return (
-    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto", paddingRight: 8, paddingBottom: 32, height: "calc(100vh - 150px)" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {testCase?.documentation && (
-        <div className="gcp-card" style={{ padding: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>
-            <FileText size={12} style={{ marginRight: 4, display: "inline", verticalAlign: "middle" }} />
-            Auto-generated Documentation
-          </div>
-          <div style={{ fontSize: 11, lineHeight: 1.6, whiteSpace: "pre-wrap", color: "var(--proof-text)", background: "var(--proof-grey-bg)", padding: 12, borderRadius: 6, maxHeight: 400, overflowY: "auto" }}>
-            {testCase.documentation}
-          </div>
-          {testCase.documentation.toLowerCase().includes("auto-generated") && (
-            <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginTop: 4, fontStyle: "italic" }}>
-              Auto-generated by AI on first creation
+        <CollapsibleSection
+          title="Auto-generated Documentation"
+          icon={<FileText size={14} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />}
+          defaultOpen={false}
+        >
+          <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ fontSize: 11, lineHeight: 1.6, whiteSpace: "pre-wrap", color: "var(--proof-text)", background: "var(--proof-grey-bg)", padding: "8px 10px", borderRadius: 6, maxHeight: 250, overflowY: "auto" }}>
+              {testCase.documentation}
             </div>
-          )}
-        </div>
+            {testCase.documentation.toLowerCase().includes("auto-generated") && (
+              <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontStyle: "italic" }}>
+                Auto-generated by AI on first creation
+              </div>
+            )}
+          </div>
+        </CollapsibleSection>
       )}
-      <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
-        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-surface-hover)" }}>
-          <h2 style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: 8 }}>
-            <FileText size={18} style={{ color: "var(--proof-blue)" }} />
-            Test Documentation
-          </h2>
-        </div>
-        <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 24 }}>
+
+      <CollapsibleSection
+        title="Test Documentation"
+        icon={<FileText size={14} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />}
+        badge={tags.length > 0 ? (
+          <span style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-blue)", marginRight: 4 }}>
+            {tags.length}
+          </span>
+        ) : undefined}
+      >
+        <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
             {testCase?.description ? (
-              <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 12 }}>{testCase.description}</p>
+              <p style={{ fontSize: 12, lineHeight: 1.6, marginBottom: 8 }}>{testCase.description}</p>
             ) : (
-              <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 12, color: "var(--proof-text-secondary)", fontStyle: "italic" }}>No description</p>
+              <p style={{ fontSize: 12, lineHeight: 1.6, marginBottom: 8, color: "var(--proof-text-secondary)", fontStyle: "italic" }}>No description</p>
             )}
             {tags.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {tags.map(tag => (
-                  <span key={tag} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 12, background: "var(--proof-blue-bg)", color: "var(--proof-blue)", border: "1px solid var(--proof-blue)", fontWeight: 500 }}>#{tag}</span>
+                  <span key={tag} style={{ fontSize: 10, padding: "1px 6px", borderRadius: 10, background: "var(--proof-blue-bg)", color: "var(--proof-blue)", border: "1px solid var(--proof-blue)", fontWeight: 500 }}>#{tag}</span>
                 ))}
               </div>
             )}
           </div>
 
           {predicates.length > 0 && (
-            <div>
-              <h3 style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Validates</h3>
-              <ul style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {predicates.map(p => (
-                  <li key={p.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13 }}>
-                    <CheckCircle2 size={16} style={{ color: "var(--proof-green)", flexShrink: 0, marginTop: 2 }} />
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{p.description || `${p.field} ${p.operator} ${p.expected}`}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <StripSection title="Validates" icon={<CheckCircle2 size={12} />} color="var(--proof-green)" defaultOpen={true}>
+              <div style={{ padding: "0 8px 8px" }}>
+                <ul style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                  {predicates.map(p => (
+                    <li key={p.id} style={{ display: "flex", alignItems: "flex-start", gap: 5, fontSize: 12 }}>
+                      <CheckCircle2 size={13} style={{ color: "var(--proof-green)", flexShrink: 0, marginTop: 2 }} />
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{p.description || `${p.field} ${p.operator} ${p.expected}`}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </StripSection>
           )}
 
           {precondLines.length > 0 && (
-            <div style={{ background: "var(--proof-yellow-bg)", padding: 12, borderRadius: 6, border: "1px solid var(--proof-yellow)" }}>
-              <h3 style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-yellow)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
-                <AlertTriangle size={14} /> Preconditions
-              </h3>
-              <ul style={{ paddingLeft: 20, display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "var(--proof-text)", listStyle: "disc" }}>
-                {precondLines.map((line, i) => <li key={i}>{line}</li>)}
-              </ul>
-            </div>
+            <StripSection title="Preconditions" icon={<AlertTriangle size={12} />} color="var(--proof-yellow)" defaultOpen={true}>
+              <div style={{ padding: "0 8px 8px" }}>
+                <ul style={{ paddingLeft: 16, display: "flex", flexDirection: "column", gap: 3, fontSize: 12, listStyle: "disc" }}>
+                  {precondLines.map((line, i) => <li key={i}>{line}</li>)}
+                </ul>
+              </div>
+            </StripSection>
           )}
 
-          <div style={{ background: "var(--proof-red-bg)", padding: 12, borderRadius: 6, border: "1px solid var(--proof-red)" }}>
-            <h3 style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-red)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8, display: "flex", alignItems: "center", gap: 4 }}>
-              <AlertCircle size={14} /> Known Flakiness
-            </h3>
-            <div style={{ fontSize: 13 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+          <StripSection title="Known Flakiness" icon={<AlertCircle size={12} />} color="var(--proof-red)" defaultOpen={true}>
+            <div style={{ padding: "0 8px 8px", fontSize: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
                 <span style={{ fontWeight: 500 }}>Flake rate:</span>
                 <span style={{ fontFamily: "var(--font-mono)", color: "var(--proof-red)", fontWeight: 700 }}>N/A</span>
-                <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>(last 90d)</span>
+                <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>(last 90d)</span>
               </div>
-              <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 4 }}>
+              <p style={{ fontSize: 12, color: "var(--proof-text-secondary)", marginTop: 3 }}>
                 Tracked per-run in test history
               </p>
             </div>
-          </div>
+          </StripSection>
         </div>
-      </div>
+      </CollapsibleSection>
 
-      <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
-        <div style={{ padding: 12, borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-surface-hover)" }}>
-          <h2 style={{ fontWeight: 500, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
-            <GitBranch size={16} style={{ color: "var(--proof-text-secondary)" }} />
-            Related Tests
-          </h2>
-        </div>
-        {testCase ? <RelatedTests testCase={testCase} /> : null}
-      </div>
+      <CollapsibleSection
+        title="Related Tests"
+        icon={<GitBranch size={14} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />}
+      >
+        {testCase ? <RelatedTests testCase={testCase} /> : (
+          <div style={{ padding: 16, textAlign: "center", fontSize: 12, color: "var(--proof-text-secondary)" }}>
+            No test case selected
+          </div>
+        )}
+      </CollapsibleSection>
     </div>
   );
 }
