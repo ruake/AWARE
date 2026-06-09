@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("PROOF App Smoke Tests", () => {
-  test("Dashboard loads and shows empty state", async ({ page }) => {
+  test("Dashboard loads and shows data", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("No runs available")).toBeVisible({ timeout: 10000 });
-    await expect(page.getByRole("button", { name: "New Regression Run" })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("heading", { name: /Regression Dashboard/ })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Pass Rate Trend")).toBeVisible({ timeout: 5000 });
   });
 
   test("Runs page loads", async ({ page }) => {
