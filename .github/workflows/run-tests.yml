@@ -78,13 +78,27 @@ jobs:
           node-version: 22
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
+      - name: Restore cached node_modules
+        id: nm-cache
+        uses: actions/cache@v4
+        with:
+          path: artifacts/aware-app/node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install dependencies
-        run: pnpm install
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile --prefer-offline
       - name: TypeScript check
         run: pnpm run typecheck
       - name: Run unit tests
         run: pnpm test || echo "No unit tests"
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('artifacts/aware-app/pnpm-lock.yaml') }}
       - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm run test:e2e:install
       - name: Run E2E smoke tests
         run: pnpm exec playwright test e2e/smoke.spec.ts
