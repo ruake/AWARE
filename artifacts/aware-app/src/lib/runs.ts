@@ -1,9 +1,11 @@
 import type { Run, TestResult, TestDetail, DiffRow } from "./types";
 import runsSeed from "@/data/runs.json";
 import diffRowsSeed from "@/data/diff-rows.json";
+import testResultsSeed from "@/data/test-results.json";
 
 export const RUNS: Run[] = runsSeed as unknown as Run[];
 export const DIFF_ROWS: DiffRow[] = diffRowsSeed as unknown as DiffRow[];
+const TEST_RESULTS_BY_RUN: Record<string, TestResult[]> = testResultsSeed as Record<string, TestResult[]>;
 
 export function getRunIndex(runId: string): number {
   return RUNS.findIndex(r => r.id === runId);
@@ -84,6 +86,6 @@ export function computeRunFrequency(): RunFrequency {
   };
 }
 
-export function getTestResultsForRun(_runId: string): TestResult[] {
-  return [];
+export function getTestResultsForRun(runId: string): TestResult[] {
+  return TEST_RESULTS_BY_RUN[runId] ?? [];
 }

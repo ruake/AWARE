@@ -1,0 +1,2808 @@
+{
+  "run_20260605_001": [
+    {
+      "id": "ad_0",
+      "name": "Test Us East Users Resolve To Ashburn",
+      "status": "PASS",
+      "duration": 2264,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_1",
+      "name": "Test Us West Users Resolve To Portland",
+      "status": "PASS",
+      "duration": 2304,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_2",
+      "name": "Test Eu West Users Resolve To Dublin",
+      "status": "PASS",
+      "duration": 2671,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_3",
+      "name": "Test Ap Southeast Users Resolve To Singapore",
+      "status": "PASS",
+      "duration": 1669,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_4",
+      "name": "Test Geo Endpoints Return 200[_api_v1_data_200]",
+      "status": "PASS",
+      "duration": 909,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_5",
+      "name": "Test Geo Endpoints Return 200[_api_v1_config_200]",
+      "status": "PASS",
+      "duration": 3124,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_6",
+      "name": "Test Geo Endpoints Return 200[_api_v1_status_200]",
+      "status": "PASS",
+      "duration": 2886,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_7",
+      "name": "Test Geo Routing Table[us-east_iad]",
+      "status": "PASS",
+      "duration": 1505,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_8",
+      "name": "Test Geo Routing Table[us-west_pdx]",
+      "status": "PASS",
+      "duration": 720,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_9",
+      "name": "Test Geo Routing Table[eu-west_dub]",
+      "status": "PASS",
+      "duration": 2683,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_10",
+      "name": "Test Geo Routing Table[ap-southeast_sin]",
+      "status": "PASS",
+      "duration": 1629,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_11",
+      "name": "Test Failover To Secondary Pop",
+      "status": "PASS",
+      "duration": 2900,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_12",
+      "name": "Test Failover Logs Alert",
+      "status": "PASS",
+      "duration": 598,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_13",
+      "name": "Test Failover Health Check Resumes",
+      "status": "PASS",
+      "duration": 1091,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_14",
+      "name": "Test Cache Hit Ratio Exceeds 80 Percent",
+      "status": "PASS",
+      "duration": 991,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_15",
+      "name": "Test Cache Ttl Respects Origin Max Age",
+      "status": "PASS",
+      "duration": 512,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_16",
+      "name": "Test Cache Purge Invalidates Content",
+      "status": "PASS",
+      "duration": 2454,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_17",
+      "name": "Test Vary Header Respected",
+      "status": "PASS",
+      "duration": 1872,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_18",
+      "name": "Test P95 Latency Under 200Ms",
+      "status": "PASS",
+      "duration": 2399,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_19",
+      "name": "Test Static Assets Under 50Ms",
+      "status": "PASS",
+      "duration": 1908,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_20",
+      "name": "Test Dynamic Content Under 500Ms",
+      "status": "PASS",
+      "duration": 3043,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_21",
+      "name": "Test Regional Latency Within Bounds[us-east_50]",
+      "status": "PASS",
+      "duration": 669,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_22",
+      "name": "Test Regional Latency Within Bounds[us-west_80]",
+      "status": "PASS",
+      "duration": 1830,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_23",
+      "name": "Test Regional Latency Within Bounds[eu-west_120]",
+      "status": "PASS",
+      "duration": 316,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_24",
+      "name": "Test Regional Latency Within Bounds[ap-southeast_200]",
+      "status": "PASS",
+      "duration": 2560,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_25",
+      "name": "Test Gzip Compression For Text Assets",
+      "status": "PASS",
+      "duration": 663,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_26",
+      "name": "Test Brotli Compression Preferred",
+      "status": "PASS",
+      "duration": 1011,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_27",
+      "name": "Test Compression Ratio Exceeds 5X",
+      "status": "PASS",
+      "duration": 2629,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_28",
+      "name": "Test Strict Transport Security Header",
+      "status": "PASS",
+      "duration": 2856,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_29",
+      "name": "Test Content Security Policy Header",
+      "status": "PASS",
+      "duration": 2886,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_30",
+      "name": "Test X Frame Options Deny",
+      "status": "PASS",
+      "duration": 1797,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_31",
+      "name": "Test X Content Type Options Nosniff",
+      "status": "PASS",
+      "duration": 2326,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_32",
+      "name": "Test Referrer Policy Strict Origin",
+      "status": "PASS",
+      "duration": 1390,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_33",
+      "name": "Test Waf Blocks Sql Injection",
+      "status": "PASS",
+      "duration": 983,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_34",
+      "name": "Test Waf Blocks Xss Attempts",
+      "status": "PASS",
+      "duration": 1949,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_35",
+      "name": "Test Waf Blocks Path Traversal",
+      "status": "PASS",
+      "duration": 1189,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_36",
+      "name": "Test Waf Blocks Large Payloads",
+      "status": "PASS",
+      "duration": 3107,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_37",
+      "name": "Test Rate Limiting 100 Req Per Min",
+      "status": "PASS",
+      "duration": 2156,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_38",
+      "name": "Test Jwt Expiry Returns 401",
+      "status": "PASS",
+      "duration": 2796,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_39",
+      "name": "Test Cors Validates Origin",
+      "status": "PASS",
+      "duration": 206,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "pw_0",
+      "name": "Checkboxes and Dropdown > check and uncheck checkboxes",
+      "status": "PASS",
+      "duration": 2335,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_1",
+      "name": "select dropdown option by label",
+      "status": "PASS",
+      "duration": 2758,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_2",
+      "name": "dropdown defaults to first option",
+      "status": "PASS",
+      "duration": 3026,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_3",
+      "name": "Dynamic Content and Loading > dynamic loading hidden element appears",
+      "status": "PASS",
+      "duration": 729,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_4",
+      "name": "dynamic loading rendered after fetch",
+      "status": "PASS",
+      "duration": 478,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_5",
+      "name": "dynamic content has at least one element",
+      "status": "PASS",
+      "duration": 2308,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_6",
+      "name": "floating menu disappears on scroll",
+      "status": "PASS",
+      "duration": 1004,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_7",
+      "name": "Frames and Windows > type in iframe editor",
+      "status": "PASS",
+      "duration": 3011,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_8",
+      "name": "nested frames contain text",
+      "status": "PASS",
+      "duration": 1611,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_9",
+      "name": "open new window tab",
+      "status": "PASS",
+      "duration": 1096,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_10",
+      "name": "JavaScript Alerts > accept JS alert",
+      "status": "PASS",
+      "duration": 2538,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_11",
+      "name": "accept JS confirm",
+      "status": "PASS",
+      "duration": 2354,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_12",
+      "name": "dismiss JS confirm",
+      "status": "PASS",
+      "duration": 278,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_13",
+      "name": "type in JS prompt",
+      "status": "PASS",
+      "duration": 3187,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_14",
+      "name": "dismiss JS prompt returns null",
+      "status": "PASS",
+      "duration": 1441,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_15",
+      "name": "Login Page Authentication > successful login with valid credentials",
+      "status": "PASS",
+      "duration": 1961,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_16",
+      "name": "failed login with invalid password",
+      "status": "PASS",
+      "duration": 806,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_17",
+      "name": "failed login with empty username",
+      "status": "PASS",
+      "duration": 1936,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_18",
+      "name": "logout from secure area",
+      "status": "PASS",
+      "duration": 674,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_19",
+      "name": "login page displays correct title",
+      "status": "PASS",
+      "duration": 1586,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_20",
+      "name": "PROOF App Smoke Tests > Dashboard loads with KPI tiles",
+      "status": "PASS",
+      "duration": 1903,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_21",
+      "name": "Runs page shows run table",
+      "status": "PASS",
+      "duration": 2184,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_22",
+      "name": "Test Manager loads test list",
+      "status": "PASS",
+      "duration": 1512,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_23",
+      "name": "Copilot page loads and shows chat input",
+      "status": "PASS",
+      "duration": 3169,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_24",
+      "name": "About page shows system stats",
+      "status": "PASS",
+      "duration": 1276,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_25",
+      "name": "Compare page shows diff table",
+      "status": "PASS",
+      "duration": 1899,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_26",
+      "name": "Test Analytics loads with search params",
+      "status": "PASS",
+      "duration": 388,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    }
+  ],
+  "run_20260606_001": [
+    {
+      "id": "ad_0",
+      "name": "Test Us East Users Resolve To Ashburn",
+      "status": "PASS",
+      "duration": 2011,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_1",
+      "name": "Test Us West Users Resolve To Portland",
+      "status": "PASS",
+      "duration": 2271,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_2",
+      "name": "Test Eu West Users Resolve To Dublin",
+      "status": "PASS",
+      "duration": 2848,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_3",
+      "name": "Test Ap Southeast Users Resolve To Singapore",
+      "status": "PASS",
+      "duration": 582,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_4",
+      "name": "Test Geo Endpoints Return 200[_api_v1_data_200]",
+      "status": "PASS",
+      "duration": 441,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_5",
+      "name": "Test Geo Endpoints Return 200[_api_v1_config_200]",
+      "status": "PASS",
+      "duration": 1840,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_6",
+      "name": "Test Geo Endpoints Return 200[_api_v1_status_200]",
+      "status": "PASS",
+      "duration": 1085,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_7",
+      "name": "Test Geo Routing Table[us-east_iad]",
+      "status": "PASS",
+      "duration": 2459,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_8",
+      "name": "Test Geo Routing Table[us-west_pdx]",
+      "status": "PASS",
+      "duration": 2376,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_9",
+      "name": "Test Geo Routing Table[eu-west_dub]",
+      "status": "PASS",
+      "duration": 1716,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_10",
+      "name": "Test Geo Routing Table[ap-southeast_sin]",
+      "status": "PASS",
+      "duration": 929,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_11",
+      "name": "Test Failover To Secondary Pop",
+      "status": "PASS",
+      "duration": 859,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_12",
+      "name": "Test Failover Logs Alert",
+      "status": "PASS",
+      "duration": 280,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_13",
+      "name": "Test Failover Health Check Resumes",
+      "status": "PASS",
+      "duration": 2160,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_14",
+      "name": "Test Cache Hit Ratio Exceeds 80 Percent",
+      "status": "PASS",
+      "duration": 2954,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_15",
+      "name": "Test Cache Ttl Respects Origin Max Age",
+      "status": "PASS",
+      "duration": 1996,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_16",
+      "name": "Test Cache Purge Invalidates Content",
+      "status": "PASS",
+      "duration": 2092,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_17",
+      "name": "Test Vary Header Respected",
+      "status": "PASS",
+      "duration": 1281,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_18",
+      "name": "Test P95 Latency Under 200Ms",
+      "status": "PASS",
+      "duration": 2389,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_19",
+      "name": "Test Static Assets Under 50Ms",
+      "status": "PASS",
+      "duration": 2079,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_20",
+      "name": "Test Dynamic Content Under 500Ms",
+      "status": "PASS",
+      "duration": 1816,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_21",
+      "name": "Test Regional Latency Within Bounds[us-east_50]",
+      "status": "PASS",
+      "duration": 776,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_22",
+      "name": "Test Regional Latency Within Bounds[us-west_80]",
+      "status": "PASS",
+      "duration": 1324,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_23",
+      "name": "Test Regional Latency Within Bounds[eu-west_120]",
+      "status": "PASS",
+      "duration": 667,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_24",
+      "name": "Test Regional Latency Within Bounds[ap-southeast_200]",
+      "status": "PASS",
+      "duration": 891,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_25",
+      "name": "Test Gzip Compression For Text Assets",
+      "status": "PASS",
+      "duration": 1424,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_26",
+      "name": "Test Brotli Compression Preferred",
+      "status": "PASS",
+      "duration": 1372,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_27",
+      "name": "Test Compression Ratio Exceeds 5X",
+      "status": "PASS",
+      "duration": 674,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_28",
+      "name": "Test Strict Transport Security Header",
+      "status": "PASS",
+      "duration": 1509,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_29",
+      "name": "Test Content Security Policy Header",
+      "status": "PASS",
+      "duration": 818,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_30",
+      "name": "Test X Frame Options Deny",
+      "status": "PASS",
+      "duration": 2199,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_31",
+      "name": "Test X Content Type Options Nosniff",
+      "status": "PASS",
+      "duration": 2216,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_32",
+      "name": "Test Referrer Policy Strict Origin",
+      "status": "PASS",
+      "duration": 2510,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_33",
+      "name": "Test Waf Blocks Sql Injection",
+      "status": "PASS",
+      "duration": 2232,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_34",
+      "name": "Test Waf Blocks Xss Attempts",
+      "status": "PASS",
+      "duration": 259,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_35",
+      "name": "Test Waf Blocks Path Traversal",
+      "status": "PASS",
+      "duration": 923,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_36",
+      "name": "Test Waf Blocks Large Payloads",
+      "status": "PASS",
+      "duration": 412,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_37",
+      "name": "Test Rate Limiting 100 Req Per Min",
+      "status": "PASS",
+      "duration": 1540,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_38",
+      "name": "Test Jwt Expiry Returns 401",
+      "status": "PASS",
+      "duration": 3146,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_39",
+      "name": "Test Cors Validates Origin",
+      "status": "PASS",
+      "duration": 1605,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "pw_0",
+      "name": "Checkboxes and Dropdown > check and uncheck checkboxes",
+      "status": "PASS",
+      "duration": 291,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_1",
+      "name": "select dropdown option by label",
+      "status": "PASS",
+      "duration": 543,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_2",
+      "name": "dropdown defaults to first option",
+      "status": "PASS",
+      "duration": 993,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_3",
+      "name": "Dynamic Content and Loading > dynamic loading hidden element appears",
+      "status": "PASS",
+      "duration": 1666,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_4",
+      "name": "dynamic loading rendered after fetch",
+      "status": "PASS",
+      "duration": 1503,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_5",
+      "name": "dynamic content has at least one element",
+      "status": "PASS",
+      "duration": 2025,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_6",
+      "name": "floating menu disappears on scroll",
+      "status": "PASS",
+      "duration": 522,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_7",
+      "name": "Frames and Windows > type in iframe editor",
+      "status": "PASS",
+      "duration": 1255,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_8",
+      "name": "nested frames contain text",
+      "status": "PASS",
+      "duration": 2124,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_9",
+      "name": "open new window tab",
+      "status": "PASS",
+      "duration": 1008,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_10",
+      "name": "JavaScript Alerts > accept JS alert",
+      "status": "PASS",
+      "duration": 712,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_11",
+      "name": "accept JS confirm",
+      "status": "PASS",
+      "duration": 661,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_12",
+      "name": "dismiss JS confirm",
+      "status": "PASS",
+      "duration": 3110,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_13",
+      "name": "type in JS prompt",
+      "status": "PASS",
+      "duration": 1447,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_14",
+      "name": "dismiss JS prompt returns null",
+      "status": "PASS",
+      "duration": 1994,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_15",
+      "name": "Login Page Authentication > successful login with valid credentials",
+      "status": "PASS",
+      "duration": 2350,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_16",
+      "name": "failed login with invalid password",
+      "status": "PASS",
+      "duration": 277,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_17",
+      "name": "failed login with empty username",
+      "status": "PASS",
+      "duration": 2005,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_18",
+      "name": "logout from secure area",
+      "status": "FAIL",
+      "duration": 718,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_19",
+      "name": "login page displays correct title",
+      "status": "FAIL",
+      "duration": 312,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_20",
+      "name": "PROOF App Smoke Tests > Dashboard loads with KPI tiles",
+      "status": "FAIL",
+      "duration": 1634,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_21",
+      "name": "Runs page shows run table",
+      "status": "FAIL",
+      "duration": 1625,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_22",
+      "name": "Test Manager loads test list",
+      "status": "FAIL",
+      "duration": 380,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_23",
+      "name": "Copilot page loads and shows chat input",
+      "status": "FAIL",
+      "duration": 1699,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_24",
+      "name": "About page shows system stats",
+      "status": "FAIL",
+      "duration": 539,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_25",
+      "name": "Compare page shows diff table",
+      "status": "FAIL",
+      "duration": 2407,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_26",
+      "name": "Test Analytics loads with search params",
+      "status": "FAIL",
+      "duration": 2809,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    }
+  ],
+  "run_20260607_001": [
+    {
+      "id": "ad_0",
+      "name": "Test Us East Users Resolve To Ashburn",
+      "status": "PASS",
+      "duration": 2338,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_1",
+      "name": "Test Us West Users Resolve To Portland",
+      "status": "PASS",
+      "duration": 401,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_2",
+      "name": "Test Eu West Users Resolve To Dublin",
+      "status": "PASS",
+      "duration": 907,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_3",
+      "name": "Test Ap Southeast Users Resolve To Singapore",
+      "status": "PASS",
+      "duration": 1420,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_4",
+      "name": "Test Geo Endpoints Return 200[_api_v1_data_200]",
+      "status": "PASS",
+      "duration": 3117,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_5",
+      "name": "Test Geo Endpoints Return 200[_api_v1_config_200]",
+      "status": "PASS",
+      "duration": 2487,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_6",
+      "name": "Test Geo Endpoints Return 200[_api_v1_status_200]",
+      "status": "PASS",
+      "duration": 2498,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_7",
+      "name": "Test Geo Routing Table[us-east_iad]",
+      "status": "PASS",
+      "duration": 3015,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_8",
+      "name": "Test Geo Routing Table[us-west_pdx]",
+      "status": "PASS",
+      "duration": 401,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_9",
+      "name": "Test Geo Routing Table[eu-west_dub]",
+      "status": "PASS",
+      "duration": 2661,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_10",
+      "name": "Test Geo Routing Table[ap-southeast_sin]",
+      "status": "PASS",
+      "duration": 245,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_11",
+      "name": "Test Failover To Secondary Pop",
+      "status": "PASS",
+      "duration": 2420,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_12",
+      "name": "Test Failover Logs Alert",
+      "status": "PASS",
+      "duration": 435,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_13",
+      "name": "Test Failover Health Check Resumes",
+      "status": "PASS",
+      "duration": 863,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_14",
+      "name": "Test Cache Hit Ratio Exceeds 80 Percent",
+      "status": "PASS",
+      "duration": 653,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_15",
+      "name": "Test Cache Ttl Respects Origin Max Age",
+      "status": "PASS",
+      "duration": 1453,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_16",
+      "name": "Test Cache Purge Invalidates Content",
+      "status": "PASS",
+      "duration": 2092,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_17",
+      "name": "Test Vary Header Respected",
+      "status": "PASS",
+      "duration": 2359,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_18",
+      "name": "Test P95 Latency Under 200Ms",
+      "status": "PASS",
+      "duration": 3118,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_19",
+      "name": "Test Static Assets Under 50Ms",
+      "status": "PASS",
+      "duration": 2844,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_20",
+      "name": "Test Dynamic Content Under 500Ms",
+      "status": "PASS",
+      "duration": 2931,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_21",
+      "name": "Test Regional Latency Within Bounds[us-east_50]",
+      "status": "PASS",
+      "duration": 335,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_22",
+      "name": "Test Regional Latency Within Bounds[us-west_80]",
+      "status": "PASS",
+      "duration": 1600,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_23",
+      "name": "Test Regional Latency Within Bounds[eu-west_120]",
+      "status": "PASS",
+      "duration": 2055,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_24",
+      "name": "Test Regional Latency Within Bounds[ap-southeast_200]",
+      "status": "PASS",
+      "duration": 2555,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_25",
+      "name": "Test Gzip Compression For Text Assets",
+      "status": "PASS",
+      "duration": 779,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_26",
+      "name": "Test Brotli Compression Preferred",
+      "status": "PASS",
+      "duration": 2312,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_27",
+      "name": "Test Compression Ratio Exceeds 5X",
+      "status": "PASS",
+      "duration": 1688,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_28",
+      "name": "Test Strict Transport Security Header",
+      "status": "PASS",
+      "duration": 2710,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_29",
+      "name": "Test Content Security Policy Header",
+      "status": "PASS",
+      "duration": 2588,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_30",
+      "name": "Test X Frame Options Deny",
+      "status": "PASS",
+      "duration": 3160,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_31",
+      "name": "Test X Content Type Options Nosniff",
+      "status": "PASS",
+      "duration": 1575,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_32",
+      "name": "Test Referrer Policy Strict Origin",
+      "status": "PASS",
+      "duration": 547,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_33",
+      "name": "Test Waf Blocks Sql Injection",
+      "status": "PASS",
+      "duration": 1539,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_34",
+      "name": "Test Waf Blocks Xss Attempts",
+      "status": "PASS",
+      "duration": 882,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_35",
+      "name": "Test Waf Blocks Path Traversal",
+      "status": "PASS",
+      "duration": 2706,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_36",
+      "name": "Test Waf Blocks Large Payloads",
+      "status": "PASS",
+      "duration": 1619,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_37",
+      "name": "Test Rate Limiting 100 Req Per Min",
+      "status": "PASS",
+      "duration": 2329,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_38",
+      "name": "Test Jwt Expiry Returns 401",
+      "status": "PASS",
+      "duration": 614,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_39",
+      "name": "Test Cors Validates Origin",
+      "status": "PASS",
+      "duration": 298,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "pw_0",
+      "name": "Checkboxes and Dropdown > check and uncheck checkboxes",
+      "status": "PASS",
+      "duration": 2049,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_1",
+      "name": "select dropdown option by label",
+      "status": "PASS",
+      "duration": 2545,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_2",
+      "name": "dropdown defaults to first option",
+      "status": "PASS",
+      "duration": 2434,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_3",
+      "name": "Dynamic Content and Loading > dynamic loading hidden element appears",
+      "status": "PASS",
+      "duration": 1581,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_4",
+      "name": "dynamic loading rendered after fetch",
+      "status": "PASS",
+      "duration": 1184,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_5",
+      "name": "dynamic content has at least one element",
+      "status": "PASS",
+      "duration": 2852,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_6",
+      "name": "floating menu disappears on scroll",
+      "status": "PASS",
+      "duration": 277,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_7",
+      "name": "Frames and Windows > type in iframe editor",
+      "status": "PASS",
+      "duration": 611,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_8",
+      "name": "nested frames contain text",
+      "status": "PASS",
+      "duration": 1392,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_9",
+      "name": "open new window tab",
+      "status": "PASS",
+      "duration": 2428,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_10",
+      "name": "JavaScript Alerts > accept JS alert",
+      "status": "PASS",
+      "duration": 2443,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_11",
+      "name": "accept JS confirm",
+      "status": "PASS",
+      "duration": 1559,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_12",
+      "name": "dismiss JS confirm",
+      "status": "PASS",
+      "duration": 2144,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_13",
+      "name": "type in JS prompt",
+      "status": "PASS",
+      "duration": 774,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_14",
+      "name": "dismiss JS prompt returns null",
+      "status": "PASS",
+      "duration": 1195,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_15",
+      "name": "Login Page Authentication > successful login with valid credentials",
+      "status": "PASS",
+      "duration": 704,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_16",
+      "name": "failed login with invalid password",
+      "status": "PASS",
+      "duration": 2044,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_17",
+      "name": "failed login with empty username",
+      "status": "PASS",
+      "duration": 2314,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_18",
+      "name": "logout from secure area",
+      "status": "PASS",
+      "duration": 610,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_19",
+      "name": "login page displays correct title",
+      "status": "PASS",
+      "duration": 1910,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_20",
+      "name": "PROOF App Smoke Tests > Dashboard loads with KPI tiles",
+      "status": "PASS",
+      "duration": 2869,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_21",
+      "name": "Runs page shows run table",
+      "status": "PASS",
+      "duration": 3090,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_22",
+      "name": "Test Manager loads test list",
+      "status": "PASS",
+      "duration": 938,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_23",
+      "name": "Copilot page loads and shows chat input",
+      "status": "PASS",
+      "duration": 2815,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_24",
+      "name": "About page shows system stats",
+      "status": "FAIL",
+      "duration": 3131,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_25",
+      "name": "Compare page shows diff table",
+      "status": "FAIL",
+      "duration": 2723,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_26",
+      "name": "Test Analytics loads with search params",
+      "status": "FAIL",
+      "duration": 1006,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    }
+  ],
+  "run_20260608_001": [
+    {
+      "id": "ad_0",
+      "name": "Test Us East Users Resolve To Ashburn",
+      "status": "PASS",
+      "duration": 1036,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_1",
+      "name": "Test Us West Users Resolve To Portland",
+      "status": "PASS",
+      "duration": 1769,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_2",
+      "name": "Test Eu West Users Resolve To Dublin",
+      "status": "PASS",
+      "duration": 2950,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_3",
+      "name": "Test Ap Southeast Users Resolve To Singapore",
+      "status": "PASS",
+      "duration": 2090,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_4",
+      "name": "Test Geo Endpoints Return 200[_api_v1_data_200]",
+      "status": "PASS",
+      "duration": 2907,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_5",
+      "name": "Test Geo Endpoints Return 200[_api_v1_config_200]",
+      "status": "PASS",
+      "duration": 2101,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_6",
+      "name": "Test Geo Endpoints Return 200[_api_v1_status_200]",
+      "status": "PASS",
+      "duration": 1368,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_7",
+      "name": "Test Geo Routing Table[us-east_iad]",
+      "status": "PASS",
+      "duration": 1854,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_8",
+      "name": "Test Geo Routing Table[us-west_pdx]",
+      "status": "PASS",
+      "duration": 2570,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_9",
+      "name": "Test Geo Routing Table[eu-west_dub]",
+      "status": "PASS",
+      "duration": 1732,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_10",
+      "name": "Test Geo Routing Table[ap-southeast_sin]",
+      "status": "PASS",
+      "duration": 958,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_11",
+      "name": "Test Failover To Secondary Pop",
+      "status": "PASS",
+      "duration": 661,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_12",
+      "name": "Test Failover Logs Alert",
+      "status": "PASS",
+      "duration": 446,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_13",
+      "name": "Test Failover Health Check Resumes",
+      "status": "PASS",
+      "duration": 2473,
+      "category": "geo-match",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_14",
+      "name": "Test Cache Hit Ratio Exceeds 80 Percent",
+      "status": "PASS",
+      "duration": 377,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_15",
+      "name": "Test Cache Ttl Respects Origin Max Age",
+      "status": "PASS",
+      "duration": 1527,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_16",
+      "name": "Test Cache Purge Invalidates Content",
+      "status": "PASS",
+      "duration": 2667,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_17",
+      "name": "Test Vary Header Respected",
+      "status": "PASS",
+      "duration": 324,
+      "category": "caching",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_18",
+      "name": "Test P95 Latency Under 200Ms",
+      "status": "PASS",
+      "duration": 1487,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_19",
+      "name": "Test Static Assets Under 50Ms",
+      "status": "PASS",
+      "duration": 2106,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_20",
+      "name": "Test Dynamic Content Under 500Ms",
+      "status": "PASS",
+      "duration": 1860,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_21",
+      "name": "Test Regional Latency Within Bounds[us-east_50]",
+      "status": "PASS",
+      "duration": 875,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_22",
+      "name": "Test Regional Latency Within Bounds[us-west_80]",
+      "status": "PASS",
+      "duration": 2840,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_23",
+      "name": "Test Regional Latency Within Bounds[eu-west_120]",
+      "status": "PASS",
+      "duration": 448,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_24",
+      "name": "Test Regional Latency Within Bounds[ap-southeast_200]",
+      "status": "PASS",
+      "duration": 1105,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_25",
+      "name": "Test Gzip Compression For Text Assets",
+      "status": "PASS",
+      "duration": 2044,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_26",
+      "name": "Test Brotli Compression Preferred",
+      "status": "PASS",
+      "duration": 1475,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_27",
+      "name": "Test Compression Ratio Exceeds 5X",
+      "status": "PASS",
+      "duration": 965,
+      "category": "performance",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_28",
+      "name": "Test Strict Transport Security Header",
+      "status": "PASS",
+      "duration": 2998,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_29",
+      "name": "Test Content Security Policy Header",
+      "status": "PASS",
+      "duration": 2838,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_30",
+      "name": "Test X Frame Options Deny",
+      "status": "PASS",
+      "duration": 1239,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_31",
+      "name": "Test X Content Type Options Nosniff",
+      "status": "PASS",
+      "duration": 2213,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_32",
+      "name": "Test Referrer Policy Strict Origin",
+      "status": "PASS",
+      "duration": 1506,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_33",
+      "name": "Test Waf Blocks Sql Injection",
+      "status": "PASS",
+      "duration": 359,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_34",
+      "name": "Test Waf Blocks Xss Attempts",
+      "status": "PASS",
+      "duration": 1111,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_35",
+      "name": "Test Waf Blocks Path Traversal",
+      "status": "PASS",
+      "duration": 2699,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_36",
+      "name": "Test Waf Blocks Large Payloads",
+      "status": "PASS",
+      "duration": 661,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_37",
+      "name": "Test Rate Limiting 100 Req Per Min",
+      "status": "PASS",
+      "duration": 2345,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_38",
+      "name": "Test Jwt Expiry Returns 401",
+      "status": "PASS",
+      "duration": 578,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "ad_39",
+      "name": "Test Cors Validates Origin",
+      "status": "PASS",
+      "duration": 2407,
+      "category": "security",
+      "suite": "Auto-Discovered Tests"
+    },
+    {
+      "id": "pw_0",
+      "name": "Checkboxes and Dropdown > check and uncheck checkboxes",
+      "status": "PASS",
+      "duration": 2305,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_1",
+      "name": "select dropdown option by label",
+      "status": "PASS",
+      "duration": 1785,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_2",
+      "name": "dropdown defaults to first option",
+      "status": "PASS",
+      "duration": 1366,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_3",
+      "name": "Dynamic Content and Loading > dynamic loading hidden element appears",
+      "status": "PASS",
+      "duration": 325,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_4",
+      "name": "dynamic loading rendered after fetch",
+      "status": "PASS",
+      "duration": 2988,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_5",
+      "name": "dynamic content has at least one element",
+      "status": "PASS",
+      "duration": 1489,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_6",
+      "name": "floating menu disappears on scroll",
+      "status": "PASS",
+      "duration": 264,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_7",
+      "name": "Frames and Windows > type in iframe editor",
+      "status": "PASS",
+      "duration": 1610,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_8",
+      "name": "nested frames contain text",
+      "status": "PASS",
+      "duration": 1070,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_9",
+      "name": "open new window tab",
+      "status": "PASS",
+      "duration": 2240,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_10",
+      "name": "JavaScript Alerts > accept JS alert",
+      "status": "PASS",
+      "duration": 598,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_11",
+      "name": "accept JS confirm",
+      "status": "PASS",
+      "duration": 3039,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_12",
+      "name": "dismiss JS confirm",
+      "status": "PASS",
+      "duration": 576,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_13",
+      "name": "type in JS prompt",
+      "status": "PASS",
+      "duration": 2613,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_14",
+      "name": "dismiss JS prompt returns null",
+      "status": "PASS",
+      "duration": 403,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_15",
+      "name": "Login Page Authentication > successful login with valid credentials",
+      "status": "PASS",
+      "duration": 2879,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_16",
+      "name": "failed login with invalid password",
+      "status": "PASS",
+      "duration": 1737,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_17",
+      "name": "failed login with empty username",
+      "status": "PASS",
+      "duration": 1264,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_18",
+      "name": "logout from secure area",
+      "status": "PASS",
+      "duration": 1259,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_19",
+      "name": "login page displays correct title",
+      "status": "PASS",
+      "duration": 1314,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_20",
+      "name": "PROOF App Smoke Tests > Dashboard loads with KPI tiles",
+      "status": "PASS",
+      "duration": 2801,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_21",
+      "name": "Runs page shows run table",
+      "status": "PASS",
+      "duration": 1896,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_22",
+      "name": "Test Manager loads test list",
+      "status": "PASS",
+      "duration": 733,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_23",
+      "name": "Copilot page loads and shows chat input",
+      "status": "PASS",
+      "duration": 1076,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_24",
+      "name": "About page shows system stats",
+      "status": "PASS",
+      "duration": 3111,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_25",
+      "name": "Compare page shows diff table",
+      "status": "FAIL",
+      "duration": 2455,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    },
+    {
+      "id": "pw_26",
+      "name": "Test Analytics loads with search params",
+      "status": "FAIL",
+      "duration": 2407,
+      "category": "general",
+      "suite": "E2E Browser Tests"
+    }
+  ],
+  "run_20260609_mq69skci": [
+    {
+      "id": "pw_0",
+      "name": "login page loads",
+      "status": "PASS",
+      "duration": 207,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_1",
+      "name": "login with valid credentials succeeds",
+      "status": "PASS",
+      "duration": 855,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_2",
+      "name": "login with invalid credentials shows error",
+      "status": "PASS",
+      "duration": 1268,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_3",
+      "name": "checkboxes page loads",
+      "status": "PASS",
+      "duration": 511,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_4",
+      "name": "checkboxes can be toggled",
+      "status": "PASS",
+      "duration": 1239,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_5",
+      "name": "dropdown page loads",
+      "status": "PASS",
+      "duration": 1328,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_6",
+      "name": "dropdown options are selectable",
+      "status": "PASS",
+      "duration": 147,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_7",
+      "name": "dynamic loading page loads",
+      "status": "PASS",
+      "duration": 726,
+      "category": "Performance",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_8",
+      "name": "dynamic loading shows hidden element",
+      "status": "PASS",
+      "duration": 1381,
+      "category": "Performance",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_9",
+      "name": "JavaScript alerts page loads",
+      "status": "PASS",
+      "duration": 585,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_10",
+      "name": "JS alert can be accepted",
+      "status": "PASS",
+      "duration": 261,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_11",
+      "name": "JS confirm can be accepted",
+      "status": "PASS",
+      "duration": 1172,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_12",
+      "name": "JS confirm can be dismissed",
+      "status": "PASS",
+      "duration": 1092,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_13",
+      "name": "JS prompt can be filled",
+      "status": "PASS",
+      "duration": 1086,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_14",
+      "name": "frames page loads",
+      "status": "PASS",
+      "duration": 1113,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_15",
+      "name": "nested frames contain text",
+      "status": "PASS",
+      "duration": 1290,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_16",
+      "name": "left frame has correct content",
+      "status": "PASS",
+      "duration": 712,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_17",
+      "name": "middle frame has correct content",
+      "status": "PASS",
+      "duration": 1123,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_18",
+      "name": "right frame has correct content",
+      "status": "PASS",
+      "duration": 485,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_19",
+      "name": "bottom frame has correct content",
+      "status": "PASS",
+      "duration": 355,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_20",
+      "name": "multiple windows page loads",
+      "status": "PASS",
+      "duration": 245,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_21",
+      "name": "new window opens on click",
+      "status": "PASS",
+      "duration": 873,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_22",
+      "name": "key presses page loads",
+      "status": "PASS",
+      "duration": 1129,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_23",
+      "name": "key press triggers result",
+      "status": "PASS",
+      "duration": 188,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_24",
+      "name": "file upload page loads",
+      "status": "PASS",
+      "duration": 192,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_25",
+      "name": "file can be uploaded",
+      "status": "PASS",
+      "duration": 178,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_26",
+      "name": "drag and drop page loads",
+      "status": "PASS",
+      "duration": 227,
+      "category": "Functional",
+      "suite": "herokuapp"
+    }
+  ],
+  "run_20260609_mq69zzjx": [
+    {
+      "id": "pw_0",
+      "name": "login page loads",
+      "status": "PASS",
+      "duration": 330,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_1",
+      "name": "login with valid credentials succeeds",
+      "status": "PASS",
+      "duration": 499,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_2",
+      "name": "login with invalid credentials shows error",
+      "status": "PASS",
+      "duration": 365,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_3",
+      "name": "checkboxes page loads",
+      "status": "PASS",
+      "duration": 1029,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_4",
+      "name": "checkboxes can be toggled",
+      "status": "PASS",
+      "duration": 896,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_5",
+      "name": "dropdown page loads",
+      "status": "PASS",
+      "duration": 1473,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_6",
+      "name": "dropdown options are selectable",
+      "status": "PASS",
+      "duration": 1228,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_7",
+      "name": "dynamic loading page loads",
+      "status": "PASS",
+      "duration": 392,
+      "category": "Performance",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_8",
+      "name": "dynamic loading shows hidden element",
+      "status": "PASS",
+      "duration": 1381,
+      "category": "Performance",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_9",
+      "name": "JavaScript alerts page loads",
+      "status": "PASS",
+      "duration": 644,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_10",
+      "name": "JS alert can be accepted",
+      "status": "PASS",
+      "duration": 369,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_11",
+      "name": "JS confirm can be accepted",
+      "status": "PASS",
+      "duration": 564,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_12",
+      "name": "JS confirm can be dismissed",
+      "status": "PASS",
+      "duration": 690,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_13",
+      "name": "JS prompt can be filled",
+      "status": "PASS",
+      "duration": 248,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_14",
+      "name": "frames page loads",
+      "status": "PASS",
+      "duration": 1049,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_15",
+      "name": "nested frames contain text",
+      "status": "PASS",
+      "duration": 1017,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_16",
+      "name": "left frame has correct content",
+      "status": "PASS",
+      "duration": 1274,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_17",
+      "name": "middle frame has correct content",
+      "status": "PASS",
+      "duration": 1297,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_18",
+      "name": "right frame has correct content",
+      "status": "PASS",
+      "duration": 1235,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_19",
+      "name": "bottom frame has correct content",
+      "status": "PASS",
+      "duration": 293,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_20",
+      "name": "multiple windows page loads",
+      "status": "PASS",
+      "duration": 531,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_21",
+      "name": "new window opens on click",
+      "status": "PASS",
+      "duration": 1101,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_22",
+      "name": "key presses page loads",
+      "status": "PASS",
+      "duration": 877,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_23",
+      "name": "key press triggers result",
+      "status": "PASS",
+      "duration": 480,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_24",
+      "name": "file upload page loads",
+      "status": "PASS",
+      "duration": 647,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_25",
+      "name": "file can be uploaded",
+      "status": "PASS",
+      "duration": 931,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_26",
+      "name": "drag and drop page loads",
+      "status": "PASS",
+      "duration": 376,
+      "category": "Functional",
+      "suite": "herokuapp"
+    }
+  ],
+  "run_20260609_mq6a2ndz": [
+    {
+      "id": "pw_0",
+      "name": "login page loads",
+      "status": "PASS",
+      "duration": 898,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_1",
+      "name": "login with valid credentials succeeds",
+      "status": "PASS",
+      "duration": 1102,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_2",
+      "name": "login with invalid credentials shows error",
+      "status": "PASS",
+      "duration": 198,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_3",
+      "name": "checkboxes page loads",
+      "status": "PASS",
+      "duration": 1008,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_4",
+      "name": "checkboxes can be toggled",
+      "status": "PASS",
+      "duration": 574,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_5",
+      "name": "dropdown page loads",
+      "status": "PASS",
+      "duration": 240,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_6",
+      "name": "dropdown options are selectable",
+      "status": "PASS",
+      "duration": 964,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_7",
+      "name": "dynamic loading page loads",
+      "status": "PASS",
+      "duration": 1418,
+      "category": "Performance",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_8",
+      "name": "dynamic loading shows hidden element",
+      "status": "PASS",
+      "duration": 817,
+      "category": "Performance",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_9",
+      "name": "JavaScript alerts page loads",
+      "status": "PASS",
+      "duration": 1265,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_10",
+      "name": "JS alert can be accepted",
+      "status": "PASS",
+      "duration": 464,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_11",
+      "name": "JS confirm can be accepted",
+      "status": "PASS",
+      "duration": 417,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_12",
+      "name": "JS confirm can be dismissed",
+      "status": "PASS",
+      "duration": 894,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_13",
+      "name": "JS prompt can be filled",
+      "status": "PASS",
+      "duration": 106,
+      "category": "Security",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_14",
+      "name": "frames page loads",
+      "status": "PASS",
+      "duration": 1294,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_15",
+      "name": "nested frames contain text",
+      "status": "PASS",
+      "duration": 237,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_16",
+      "name": "left frame has correct content",
+      "status": "PASS",
+      "duration": 857,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_17",
+      "name": "middle frame has correct content",
+      "status": "PASS",
+      "duration": 929,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_18",
+      "name": "right frame has correct content",
+      "status": "PASS",
+      "duration": 1039,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_19",
+      "name": "bottom frame has correct content",
+      "status": "PASS",
+      "duration": 1253,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_20",
+      "name": "multiple windows page loads",
+      "status": "PASS",
+      "duration": 410,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_21",
+      "name": "new window opens on click",
+      "status": "PASS",
+      "duration": 1307,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_22",
+      "name": "key presses page loads",
+      "status": "PASS",
+      "duration": 1331,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_23",
+      "name": "key press triggers result",
+      "status": "PASS",
+      "duration": 1089,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_24",
+      "name": "file upload page loads",
+      "status": "PASS",
+      "duration": 951,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_25",
+      "name": "file can be uploaded",
+      "status": "PASS",
+      "duration": 587,
+      "category": "Functional",
+      "suite": "herokuapp"
+    },
+    {
+      "id": "pw_26",
+      "name": "drag and drop page loads",
+      "status": "PASS",
+      "duration": 342,
+      "category": "Functional",
+      "suite": "herokuapp"
+    }
+  ]
+}
