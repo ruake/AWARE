@@ -89,6 +89,11 @@ function extractTestResults(raw, runId) {
         for (const t of spec.tests) {
           const ok = t.results?.some(r => r.status === "passed");
           const lastResult = t.results?.[t.results.length - 1];
+          let error = "";
+          if (!ok && lastResult) {
+            const err = lastResult.error || (lastResult.errors && lastResult.errors[0]);
+            if (err) error = err.message || String(err);
+          }
           results.push({
             id: `tr_${runId}_${results.length}`,
             name,
@@ -96,6 +101,7 @@ function extractTestResults(raw, runId) {
             duration: lastResult?.duration || 0,
             category,
             suite: suiteName,
+            ...(error ? { error } : {}),
           });
         }
       }

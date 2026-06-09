@@ -250,6 +250,30 @@ export default function RunDetail() {
                     <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>{selectedResult.duration}ms</span>
                   </div>
                 </div>
+
+                {/* Assertions */}
+                {selectedResult.assertions && selectedResult.assertions.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>Assertions</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {selectedResult.assertions.map((a, i) => (
+                        <AssertionRow key={i} a={a} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Error message */}
+                {selectedResult.error && (
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>Error</div>
+                    <pre style={{
+                      fontSize: 10, lineHeight: 1.5, whiteSpace: "pre-wrap", wordBreak: "break-all",
+                      background: "var(--gcp-red-bg)", border: "1px solid var(--gcp-red)", borderRadius: 4,
+                      padding: 10, margin: 0, color: "var(--gcp-red)", fontFamily: "var(--font-mono)",
+                    }}>{selectedResult.error}</pre>
+                  </div>
+                )}
               </div>
 
               {/* Footer actions */}

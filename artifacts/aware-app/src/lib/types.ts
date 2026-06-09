@@ -22,6 +22,8 @@ export interface TestResult {
   duration: number;
   category: string;
   suite: string;
+  error?: string;
+  assertions?: TestAssertionResult[];
 }
 
 export interface TestAssertionResult {
