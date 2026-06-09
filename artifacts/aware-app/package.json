@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:ci": "playwright test --reporter=github",
+    "test:e2e:ci": "playwright test",
     "test:e2e:install": "playwright install chromium --with-deps",
     "extract:branch-data": "node scripts/extract-branch-data.js",
     "discover:tests": "node scripts/discover-all.mjs"

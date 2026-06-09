@@ -53,7 +53,7 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm run test:e2e:install
       - name: Run E2E tests
-        run: pnpm exec playwright test --reporter=github --reporter=json:outputFile=test-results/playwright-results.json
+        run: pnpm run test:e2e:ci
         continue-on-error: true
         env:
           PLAYWRIGHT_BASE_URL: "http://localhost:5173"

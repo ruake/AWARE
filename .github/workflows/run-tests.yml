@@ -87,7 +87,7 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm run test:e2e:install
       - name: Run E2E smoke tests
-        run: pnpm exec playwright test --reporter=github --reporter=json:outputFile=test-results/playwright-results.json e2e/smoke.spec.ts
+        run: pnpm exec playwright test e2e/smoke.spec.ts
         continue-on-error: true
         env:
           PLAYWRIGHT_BASE_URL: "http://localhost:5173"
