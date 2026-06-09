@@ -2,53 +2,15 @@ import React from "react";
 import { useParams, useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
-import { getRunById, getTestResultsForRun, RUNS, getPromotionDecision, getTestCases } from "@/lib/data";
-import type { TestResult, TestEvidence, TestAssertionResult } from "@/lib/types";
+import { getRunById, getTestResultsForRun, RUNS, getPromotionDecision } from "@/lib/data";
+import type { TestResult, TestAssertionResult } from "@/lib/types";
 import {
   ArrowLeft, GitCompare, CheckCircle2, XCircle, Github,
   Share2, AlertTriangle, Shield, Zap, RefreshCw,
-  Search, ChevronRight, ChevronLeft, X,
-  FileText, Check, AlertCircle, BarChart3,
+  Search, ChevronRight, ChevronLeft,
+  Check, BarChart3,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
-
-function generateEvidence(result: TestResult): TestEvidence {
-  const tcs = getTestCases();
-  const tc = tcs.find(t => t.name === result.name) ?? tcs[0];
-  const body = result.status === "PASS"
-    ? JSON.stringify({ status: "ok", data: { id: 123, name: "example" } }, null, 2)
-    : JSON.stringify({ error: "timeout", message: "Origin did not respond within 5000ms" }, null, 2);
-  return {
-    request: {
-      method: "GET",
-      url: `https://cdn.example.com${tc ? "/api/v1/" + tc.category.replace("-", "/") : "/api/v1/data"}`,
-      headers: {
-        ...(tc?.requestHeaders ?? {}),
-        "Host": "cdn.example.com",
-        "Accept": "application/json",
-      },
-    },
-    response: {
-      status: result.status === "PASS" ? 200 : 503,
-      headers: {
-        "Content-Type": "application/json",
-        "X-Cache": result.status === "PASS" ? "HIT" : "MISS",
-        "X-Request-ID": `req_${result.id}_${Math.random().toString(36).slice(2, 8)}`,
-        "Age": result.status === "PASS" ? "127" : "0",
-        "X-Cache-Status": result.status === "PASS" ? "HIT from a72-48" : "MISS from a72-48",
-      },
-      body,
-    },
-    assertions: [
-      { assertion: "Response status 200", expected: "200", actual: String(result.status === "PASS" ? 200 : 503), passed: result.status === "PASS" },
-      { assertion: "Response time < 5000ms", expected: "< 5000ms", actual: `${result.duration}ms`, passed: result.duration < 5000 },
-      { assertion: "X-Cache is HIT", expected: "HIT", actual: result.status === "PASS" ? "HIT" : "MISS", passed: result.status === "PASS" },
-      { assertion: "X-Request-ID present", expected: "non-empty", actual: "req_" + result.id.slice(-4), passed: true },
-      { assertion: "Age header > 0", expected: "> 0", actual: result.status === "PASS" ? "127" : "0", passed: result.status === "PASS" },
-      { assertion: "Cache status contains HIT", expected: "contains HIT", actual: result.status === "PASS" ? "HIT from a72-48" : "MISS from a72-48", passed: result.status === "PASS" },
-    ],
-  };
-}
 
 function AssertionRow({ a }: { a: TestAssertionResult }) {
   return (
@@ -111,7 +73,6 @@ export default function RunDetail() {
   });
 
   const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(null);
-  const evidence = selectedResult ? generateEvidence(selectedResult) : null;
   const selIdx = selectedResult ? filtered.findIndex(r => r.id === selectedResult.id) : -1;
 
   const navigateDetail = (dir: -1 | 1) => {
@@ -267,7 +228,7 @@ export default function RunDetail() {
           </div>
 
           {/* Test Detail Panel */}
-          {selectedResult && evidence && (
+          {selectedResult && (
             <div className="gcp-card" style={{ width: 380, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", borderLeft: `3px solid ${selectedResult.status === "PASS" ? "var(--gcp-green)" : "var(--gcp-red)"}` }}>
               {/* Panel header */}
               <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", gap: 8, background: "var(--gcp-blue-bg)", flexShrink: 0 }}>
@@ -287,45 +248,6 @@ export default function RunDetail() {
                   <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
                     <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{selectedResult.category}</span>
                     <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>{selectedResult.duration}ms</span>
-                  </div>
-                </div>
-
-                {/* HTTP Request */}
-                <div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
-                    <FileText size={11} /> Request
-                  </div>
-                  <div style={{ background: "#1e293b", color: "#e2e8f0", borderRadius: 6, padding: 10, fontFamily: "var(--font-mono)", fontSize: 10, lineHeight: 1.7 }}>
-                    <div><span style={{ color: "#60a5fa" }}>{evidence.request.method}</span> {evidence.request.url}</div>
-                    {Object.entries(evidence.request.headers).map(([k, v]) => (
-                      <div key={k}><span style={{ color: "#f59e0b" }}>{k}:</span> {v}</div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* HTTP Response */}
-                <div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
-                    <FileText size={11} /> Response
-                  </div>
-                  <div style={{ background: "#1e293b", color: "#e2e8f0", borderRadius: 6, padding: 10, fontFamily: "var(--font-mono)", fontSize: 10, lineHeight: 1.7 }}>
-                    <div><span style={{ color: evidence.response.status === 200 ? "#4ade80" : "#f87171" }}>{evidence.response.status}</span></div>
-                    {Object.entries(evidence.response.headers).map(([k, v]) => (
-                      <div key={k}><span style={{ color: "#f59e0b" }}>{k}:</span> {v}</div>
-                    ))}
-                    {evidence.response.body && (
-                      <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #334155", whiteSpace: "pre-wrap" }}>{evidence.response.body}</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Assertions */}
-                <div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
-                    <AlertCircle size={11} /> Assertions ({evidence.assertions.filter(a => a.passed).length}/{evidence.assertions.length} passed)
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    {evidence.assertions.map((a, i) => <AssertionRow key={i} a={a} />)}
                   </div>
                 </div>
               </div>

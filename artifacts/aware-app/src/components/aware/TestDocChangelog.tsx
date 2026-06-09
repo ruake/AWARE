@@ -3,6 +3,7 @@ import { repo } from "@/lib/nav";
 import { getTestChangelog } from "@/lib/data";
 import { GitCommit, ExternalLink, History } from "lucide-react";
 import type { TestCase } from "@/lib/types";
+import { getGitHubUrl, cleanScriptPath } from "@/lib/utils";
 
 function colorFromName(name: string) {
   const colors = ["#9c27b0", "#1976d2", "#e65100", "#2e7d32", "#c62828", "#558b2f", "#6a1b9a", "#283593"];
@@ -83,7 +84,7 @@ export function TestDocChangelog({ testCase }: { testCase?: TestCase }) {
         <div className="gcp-card" style={{ padding: 12, background: "var(--gcp-surface-hover)", border: "1px dashed var(--gcp-grey)" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", fontSize: 12 }}>
             <div style={{ color: "var(--gcp-text-secondary)" }}>File:</div>
-            <a href={`https://github.com/ruake/AWARE/blob/main/${testCase.scriptPath}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 11, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--gcp-blue)", textDecoration: "underline", textUnderlineOffset: 2 }} title={testCase.scriptPath}>{testCase.scriptPath}</a>
+            <a href={getGitHubUrl(testCase)} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 11, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--gcp-blue)", textDecoration: "underline", textUnderlineOffset: 2 }} title={cleanScriptPath(testCase)}>{cleanScriptPath(testCase)}</a>
 
             <div style={{ color: "var(--gcp-text-secondary)" }}>Type:</div>
             <div style={{ textAlign: "right", textTransform: "capitalize" }}>{testCase.testType}</div>

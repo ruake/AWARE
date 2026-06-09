@@ -1,5 +1,6 @@
 import React from "react";
 import { getTestChangelog } from "@/lib/data";
+import { getGitHubUrl, cleanScriptPath } from "@/lib/utils";
 import type { TestCase } from "@/lib/types";
 import { TagBadge, TestCaseStatusBadge, priorityColor } from "@/components/aware/TestCard";
 import { RepoStatusBadge } from "./RepoStatusBadge";
@@ -39,7 +40,7 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
           {[
             ["Owner", tc.owner],
-            ["Script", tc.scriptPath],
+            ["Script", cleanScriptPath(tc)],
             ["Expected Status", String(tc.expectedStatus)],
             ["Predicates", `${tc.predicates.length} rules`],
             ["Updated", new Date(tc.updatedAt).toLocaleDateString()],
@@ -47,7 +48,7 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
             <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--gcp-grey)", fontSize: 12 }}>
               <span style={{ color: "var(--gcp-text-secondary)" }}>{k}</span>
               {k === "Script" && tc.scriptPath ? (
-                <a href={`https://github.com/ruake/AWARE/blob/main/${tc.scriptPath}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", textDecoration: "underline", textUnderlineOffset: 2 }}>{v}</a>
+                <a href={getGitHubUrl(tc)} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", textDecoration: "underline", textUnderlineOffset: 2 }}>{v}</a>
               ) : (
                 <span style={{ fontFamily: k === "Script" || k === "Expected Status" ? "var(--font-mono)" : undefined, fontSize: 11 }}>{v}</span>
               )}
@@ -122,8 +123,8 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
           <div style={{ fontSize: 11, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>Repository</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <RepoStatusBadge status={tc.repoStatus} />
-            {tc.repoStatus === "synced" && tc.githubUrl && (
-              <a href={tc.githubUrl} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--gcp-blue)", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+            {tc.repoStatus === "synced" && tc.scriptPath && (
+              <a href={getGitHubUrl(tc)} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--gcp-blue)", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
                 <Github size={12} /> View <ExternalLink size={10} />
               </a>
             )}
@@ -141,7 +142,7 @@ export function TestManagerSidePanel({ tc, onClose, toast, navigate }: { tc: Tes
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={() => navigate(`/analytics?testId=${tc.id}`)} className="gcp-button gcp-button-sm" style={{ flex: 1 }}><BarChart3 size={13} /> Analytics</button>
-          <button onClick={() => { navigator.clipboard.writeText(`https://proof.example.com/tests/${tc.id}`); toast("Link copied"); }} className="gcp-button gcp-button-sm" style={{ flex: 1 }}><FileText size={13} /> Copy Link</button>
+          <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/tests/${tc.id}`); toast("Link copied"); }} className="gcp-button gcp-button-sm" style={{ flex: 1 }}><FileText size={13} /> Copy Link</button>
         </div>
       </div>
     </div>

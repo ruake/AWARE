@@ -18,7 +18,7 @@ export {
 } from "./store";
 
 export {
-  RUNS, getRunIndex, getRunById, generateTestHistory, detectAnomaly,
+  RUNS, getRunIndex, getRunById,
   DIFF_ROWS, TEST_DETAILS, ENV_SUMMARY,
   PASS_RATE_CHART, ENV_PASS_RATE_CHART, PER_ENV_PASS_RATE, getTestResultsForRun,
   computeRunFrequency,

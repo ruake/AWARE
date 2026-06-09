@@ -101,7 +101,7 @@ function SidePanel({ diff, diffs, selectedId, onSelect, navigate }: {
             <button onClick={() => navigate(`/analytics?testId=${diff.id}`)} className="gcp-button gcp-button-xs" style={{ justifyContent: "center" }}>
               <BarChart3 size={12} /> View Analytics <ArrowUpRight size={10} />
             </button>
-            <button onClick={() => { copy(`https://proof.example.com/tests/${diff.id}`); show("Test permalink copied"); }} className="gcp-button gcp-button-xs" style={{ justifyContent: "center" }}>
+            <button onClick={() => { copy(`${window.location.origin}/tests/${diff.id}`); show("Test permalink copied"); }} className="gcp-button gcp-button-xs" style={{ justifyContent: "center" }}>
               <Link2 size={12} /> Copy Test Permalink
             </button>
             <button onClick={() => { copy(`GitHub issue: Regression in ${diff.name}\nBaseline: ${diff.baseStatus} (${diff.durBase}ms)\nCandidate: ${diff.candStatus} (${diff.durCand}ms)`); show("GitHub issue template copied"); }}

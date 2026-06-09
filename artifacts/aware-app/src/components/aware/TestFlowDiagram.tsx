@@ -1,5 +1,6 @@
 import React from "react";
 import type { TestCase } from "@/lib/types";
+import { getGitHubUrl, cleanScriptPath } from "@/lib/utils";
 import { Beaker, ArrowDown, Globe, ShieldCheck, Image, Eye, FileCode } from "lucide-react";
 
 const stepLabelStyle: React.CSSProperties = {
@@ -435,7 +436,7 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
         <Eye size={14} />
         <span>
           Script: {testCase.scriptPath ? (
-            <a href={`https://github.com/ruake/AWARE/blob/main/${testCase.scriptPath}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", fontSize: 10, textDecoration: "underline", textUnderlineOffset: 2 }}><code style={{ fontFamily: "inherit", color: "inherit", fontSize: "inherit" }}>{testCase.scriptPath}</code></a>
+            <a href={getGitHubUrl(testCase)} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", fontSize: 10, textDecoration: "underline", textUnderlineOffset: 2 }}><code style={{ fontFamily: "inherit", color: "inherit", fontSize: "inherit" }}>{cleanScriptPath(testCase)}</code></a>
           ) : (
             <code style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", fontSize: 10 }}>not set</code>
           )}

@@ -111,7 +111,6 @@ jobs:
         env:
           BASE_PATH: /AWARE
           PORT: "1"
-          VITE_USE_MOCK: "false"
           NODE_ENV: production
 
       - name: SPA fallback — copy index.html as 404.html

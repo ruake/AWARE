@@ -1,34 +1,35 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import {
   clearChatHistory,
-  llmChat,
+  getLLMConfig,
   setLLMConfig,
+  getProvider,
 } from "./llm";
 import "./skills";
 
 beforeEach(() => {
   clearChatHistory();
   localStorage.clear();
-  setLLMConfig({ provider: "mock" });
 });
 
-describe("llmChat with skill routing (mock)", () => {
-  it("runs generate-script skill when [SKILL:generate-script] is set", async () => {
-    await llmChat("hello", "[SKILL:generate-script]\nYou are a test engineer.");
-    const res = await llmChat("generate a script for cache HIT", "[SKILL:generate-script]\nYou are a test engineer.");
-    expect(res.content).toContain("config:");
-    expect(res.content).toContain("tests:");
+describe("LLM module", () => {
+  it("has default config with chrome provider", () => {
+    const config = getLLMConfig();
+    expect(config.provider).toBe("chrome");
+    expect(config.model).toBeTruthy();
   });
 
-  it("runs analyze-results skill when [SKILL:analyze-results] is set", async () => {
-    await llmChat("hello", "[SKILL:analyze-results]\nYou are an analyst.");
-    const res = await llmChat("my tests are failing", "[SKILL:analyze-results]\nYou are an analyst.");
-    expect(res.content).toContain("Regression");
+  it("setLLMConfig updates config", () => {
+    const updated = setLLMConfig({ temperature: 0.5 });
+    expect(updated.temperature).toBe(0.5);
   });
 
-  it("runs explain-diff skill when [SKILL:explain-diff] is set", async () => {
-    await llmChat("hello", "[SKILL:explain-diff]\nYou are a release engineer.");
-    const res = await llmChat("compare baseline vs candidate", "[SKILL:explain-diff]\nYou are a release engineer.");
-    expect(res.content).toContain("Comparison");
+  it("getProvider returns a provider instance", () => {
+    const provider = getProvider();
+    expect(provider.type).toBe("chrome");
+  });
+
+  it("clearChatHistory does not throw", () => {
+    expect(() => clearChatHistory()).not.toThrow();
   });
 });

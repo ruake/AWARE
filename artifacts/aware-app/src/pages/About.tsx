@@ -188,7 +188,7 @@ const DEFAULT_SLIDES: SlideData[] = [
   { id: "s3", icon: "Globe", title: "Cross-Environment Testing", color: "var(--gcp-blue)", detail: "Compare test behavior across Prod/Production, Prod/Staging, UAT/Production, and UAT/Staging.", points: ["Per-environment pass-rate charts", "Environment-specific config and IP mapping", "Multi-env run history with filtering", "Side-by-side env health dashboard"] },
   { id: "s4", icon: "Bug", title: "Test Case Lifecycle", color: "var(--gcp-green)", detail: "Create, organize, import/export, and AI-generate test cases and suites.", points: ["Tabbed CRUD form with docs & HTTP config", "Multi-format import (JSON, YAML, JUnit XML)", "Bulk actions: delete, status change, add to suite", "AI-powered test generation from prompts"] },
   { id: "s5", icon: "Activity", title: "CI/CD Observability", color: "var(--gcp-purple)", detail: "Monitor GitHub Actions run history, pass rates, failure trends, and run frequency.", points: ["Filterable run table with detail side panels", "Pass-rate charts by day and environment", "Run frequency tracking with gap detection", "Export and Slack sharing for team communication"] },
-  { id: "s6", icon: "Zap", title: "AI-Powered Analysis", color: "var(--gcp-yellow)", detail: "Use LLM to analyze test failures, explain diffs, generate test scripts, and generate suites.", points: ["Multi-provider: Mock, OpenAI, WebLLM", "5 built-in skills for code gen & analysis", "Rolling chat history with skill context", "WebLLM support for fully offline operation"] },
+  { id: "s6", icon: "Zap", title: "AI-Powered Analysis", color: "var(--gcp-yellow)", detail: "Use LLM to analyze test failures, explain diffs, generate test scripts, and generate suites.",         points: ["Multi-provider: OpenAI, WebLLM, Chrome Built-in AI", "5 built-in skills for code gen & analysis", "Rolling chat history with skill context", "WebLLM support for fully offline operation"] },
 ];
 
 const SLIDE_COLORS = ["var(--gcp-red)", "var(--gcp-orange)", "var(--gcp-blue)", "var(--gcp-green)", "var(--gcp-purple)", "var(--gcp-yellow)", "var(--gcp-cyan)", "var(--gcp-pink)", "var(--gcp-indigo)", "#5f6368"];
@@ -341,7 +341,7 @@ const navBtnStyle: React.CSSProperties = { width: 28, height: 28, border: "1px s
 const DOC_SECTIONS: DocEntry[] = [
   { id: "quickstart", icon: "🚀", number: "1", title: "Quick Start", content: () => (
     <>
-      <p><strong>PROOF</strong> is a web-based observability dashboard for your GitHub Actions test pipeline. It runs entirely in your browser with pre-loaded seed data — no backend or API setup needed.</p>
+      <p><strong>PROOF</strong> is a web-based observability dashboard for your GitHub Actions test pipeline. It runs entirely in your browser — no backend or API setup needed.</p>
       <ol style={{ paddingLeft: 18, margin: "8px 0" }}>
         <li><strong>Open the Dashboard</strong> (<code>/</code>) — See pass-rate charts per environment, run frequency, recent alerts, and promotion status at a glance.</li>
         <li><strong>Browse Runs</strong> (<code>/runs</code>) — Explore past test runs. Click any run to see individual test results and evidence.</li>
@@ -363,7 +363,7 @@ const DOC_SECTIONS: DocEntry[] = [
         ["Test Suites", "/suites", "Tree view of all suites. Click to edit suite metadata, manage test membership, and export as YAML. Use Add Tests modal to bulk-add from the full test list."],
         ["Test Analytics", "/analytics", "Pass-rate trend chart and flakiness analysis for a specific test. Accepts <code>?testId=tc_N</code> or <code>?diffId=diff_N</code> params. CTA cards link to run history and comparisons."],
         ["Test Doc", "/testdoc", "Three-column layout: top bar with test metadata, sidebar with related tests and changelog, main area for documentation. Good for reviewing test intent and history."],
-        ["Copilot", "/copilot", "AI chat with 5 built-in skills. Select a provider (Mock/OpenAI/WebLLM) in the config panel. Use skills to generate tests, write scripts, analyze results, explain diffs, or create suites. Chat history persists in localStorage."],
+        ["Copilot", "/copilot", "AI chat with 5 built-in skills. Select a provider (OpenAI/WebLLM/Chrome Built-in AI) in the config panel. Use skills to generate tests, write scripts, analyze results, explain diffs, or create suites. Chat history persists in localStorage."],
         ["Status", "/status", "System health overview. See environment statuses, service uptime indicators, and recent incidents."],
         ["Sharing", "/sharing", "Permalink viewer. Past a sharing link or ID to load a saved comparison or run view."],
         ["CI Pipeline", "/ci-pipeline", "Architecture diagram of the GitHub Actions integration. Shows how test runs flow from PR → CI → Results → Dashboard."],
@@ -420,7 +420,7 @@ const DOC_SECTIONS: DocEntry[] = [
     <>
       <p>The app ships with 4 environment targets: <strong>Prod/Production</strong>, <strong>Prod/Staging</strong>, <strong>UAT/Production</strong>, <strong>UAT/Staging</strong>. Each environment has:</p>
       <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-        <li><strong>Base URL</strong> — The endpoint used for test requests (e.g. <code>https://prod.example.com</code>)</li>
+        <li><strong>Base URL</strong> — The endpoint used for test requests</li>
         <li><strong>Target</strong> — Logical grouping (Prod, UAT)</li>
         <li><strong>Network</strong> — Network tier (production, staging)</li>
         <li><strong>IP Addresses</strong> — Optional list of IPs for network-level filtering</li>
@@ -433,7 +433,7 @@ const DOC_SECTIONS: DocEntry[] = [
     <>
       <p><strong>Providers:</strong></p>
       <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-        <li><strong>Mock</strong> — Built-in, works offline. Returns pre-programmed responses. Best for testing the UI flow without API keys. Set <code>provider: "mock"</code> in config.</li>
+        <li><strong>Chrome Built-in AI</strong> — Uses Gemini Nano via Chrome's LanguageModel API. Requires Chrome 148+. No API key needed.</li>
         <li><strong>OpenAI</strong> — Connects to any OpenAI-compatible API (OpenAI, Azure, local LLMs). Requires <code>apiKey</code> and optional <code>apiUrl</code> (defaults to OpenAI). Configure model, temperature, max tokens.</li>
         <li><strong>WebLLM</strong> — Runs a model in-browser via WebGPU. Requires Chrome with WebGPU support and the <code>@mlc-ai/web-llm</code> package. Shows "not available" message when unsupported.</li>
       </ul>
@@ -464,18 +464,18 @@ const DOC_SECTIONS: DocEntry[] = [
           ["aware_carousel_templates", "Saved carousel slide templates (About page)"],
         ]}
       />
-      <p><strong>Reset:</strong> Use the "Reset All Data" option in the Dashboard to clear test cases, suites, and promotion decisions and reload seed data. Individual resets are available for env configs and chat history.</p>
-      <p><strong>Seed Data:</strong> The app ships with {RUNS.length} runs, {DIFF_ROWS.length} diff rows, 25 test cases, and 8 suites.</p>
+      <p><strong>Reset:</strong> Use the "Reset All Data" option in the Dashboard to clear test cases, suites, and promotion decisions. Individual resets are available for env configs and chat history.</p>
+      <p><strong>Data:</strong> Auto-discovered tests from CI pipeline. Currently {RUNS.length} runs and {DIFF_ROWS.length} diff rows loaded.</p>
     </>
   )},
   { id: "troubleshooting", icon: "❓", number: "10", title: "Troubleshooting & FAQ", content: () => (
     <>
       <p><strong>Q: My changes disappeared after refresh.</strong><br />A: localStorage only persists on the same browser/device. If you cleared site data or switched browsers, data resets. Export your test cases before clearing storage.</p>
-      <p><strong>Q: The Copilot says "API Error 401".</strong><br />A: Your OpenAI API key is invalid or missing. Go to the Copilot config panel and set a valid key. Or switch to Mock provider for offline use.</p>
-      <p><strong>Q: Charts show no data.</strong><br />A: The seed data includes runs from specific dates. If you're viewing outside that date range, use the time frame selector on the chart. If all data was cleared, perform a reset from the Dashboard.</p>
+      <p><strong>Q: The Copilot says "API Error 401".</strong><br />A: Your OpenAI API key is invalid or missing. Go to the Copilot config panel and set a valid key.</p>
+      <p><strong>Q: Charts show no data.</strong><br />A: Ensure CI pipeline runs are populating the data store. Check that your GitHub Actions workflow is pushing results to the configured endpoints.</p>
       <p><strong>Q: I accidentally deleted a test case.</strong><br />A: There's no undo. Export your test cases regularly via the Export button in Test Manager as a backup.</p>
-      <p><strong>Q: How do I add real GitHub Actions data?</strong><br />A: The app is designed to work with mock data out of the box. To connect real data, replace the <code>RUNS</code>, <code>DIFF_ROWS</code>, and store functions in <code>lib/</code> with API calls to your CI system.</p>
-      <p><strong>Q: The Compare page shows no runs in the dropdown.</strong><br />A: You need at least 2 runs to compare. The seed data has {RUNS.length} runs. If empty, reset data from the Dashboard.</p>
+      <p><strong>Q: How do I add real GitHub Actions data?</strong><br />A: Configure your CI pipeline to push results to the data endpoints. The <code>RUNS</code> and <code>DIFF_ROWS</code> modules in <code>lib/</code> load data from JSON seed files committed in the repo.</p>
+      <p><strong>Q: The Compare page shows no runs in the dropdown.</strong><br />A: You need at least 2 runs to compare. Currently there are {RUNS.length} runs loaded.</p>
       <p><strong>Q: WebLLM shows "Not Available".</strong><br />A: WebLLM requires Chrome with WebGPU support. Check <code>chrome://gpu</code> for WebGPU availability. The <code>@mlc-ai/web-llm</code> package must be installed.</p>
     </>
   )},
@@ -483,7 +483,7 @@ const DOC_SECTIONS: DocEntry[] = [
     <>
       <p>The app lives in <code>artifacts/aware-app/src/</code>. Everything is split into three folders:</p>
       <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
-        <li><strong><code>lib/</code></strong> — data layer: types, store, seed data, helpers</li>
+        <li><strong><code>lib/</code></strong> — data layer: types, store, helpers</li>
         <li><strong><code>pages/</code></strong> — one file per route (Dashboard, Runs, Compare, etc.)</li>
         <li><strong><code>components/</code></strong> — reusable UI pieces: <code>aware/</code> for app-specific, <code>ui/</code> for shadcn</li>
       </ul>
@@ -497,7 +497,7 @@ const DOC_SECTIONS: DocEntry[] = [
       <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
         <li><code>getTestCases()</code> — returns all test cases from the store</li>
         <li><code>createTestCase(data)</code> — adds a new test case, saves to localStorage</li>
-        <li><code>getTestResultsForRun(runId)</code> — generates mock test results for a run</li>
+        <li><code>getTestResultsForRun(runId)</code> — returns test results for a run from CI data</li>
         <li><code>getRunById(id)</code> — looks up a single run</li>
       </ul>
       <p>When data changes, the store calls <code>_notify()</code> which triggers listeners, so any component using <code>useTestData()</code> re-renders automatically.</p>

@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { DIFF_ROWS } from "@/lib/data";
 import { ArrowLeft, Pin, Github, ExternalLink, Search } from "lucide-react";
 import { RepoStatusBadge } from "./RepoStatusBadge";
+import { getGitHubUrl } from "@/lib/utils";
 import { StatusBadge } from "./StatusBadge";
 import type { TestCase, DiffRow } from "@/lib/types";
 
@@ -45,8 +46,8 @@ export function TestDocTopBar({ testId, testName, testStatus, testCategory, test
           <Pin size={18} />
         </button>
         <RepoStatusBadge status={testCase?.repoStatus} />
-        {testCase?.repoStatus === "synced" && testCase?.githubUrl ? (
-          <a href={testCase.githubUrl} target="_blank" rel="noreferrer" className="gcp-button" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+        {testCase?.repoStatus === "synced" && testCase?.scriptPath ? (
+          <a href={getGitHubUrl(testCase)} target="_blank" rel="noreferrer" className="gcp-button" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
             <Github size={16} />
             View in GitHub
             <ExternalLink size={14} />

@@ -4,6 +4,7 @@ import { GoogleBarChart, GooglePieChart } from "@/components/aware/GoogleCharts"
 import { AppLayout } from "@/components/aware/AppLayout";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useTestData } from "@/hooks/useTestData";
+import { getGitHubUrl, cleanScriptPath } from "@/lib/utils";
 import { SuiteTreeItem } from "@/components/aware/SuiteTreeItem";
 import {
   FolderTree, PlayCircle,
@@ -111,7 +112,7 @@ export default function TestSuiteManager() {
                 )}
                 <div className="gcp-card" style={{ padding: 12, marginBottom: 12 }}>
                   <h4 style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--gcp-text-secondary)", fontWeight: 600, marginBottom: 6 }}>Script</h4>
-                  <a href={`https://github.com/ruake/AWARE/blob/main/${selectedTest.scriptPath}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", textDecoration: "underline", textUnderlineOffset: 2 }}>{selectedTest.scriptPath}</a>
+                  <a href={getGitHubUrl(selectedTest)} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", textDecoration: "underline", textUnderlineOffset: 2 }}>{cleanScriptPath(selectedTest)}</a>
                 </div>
               </div>
             </>

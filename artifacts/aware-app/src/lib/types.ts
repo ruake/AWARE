@@ -256,7 +256,7 @@ export interface PromotionDecision {
 
 // ── LLM / AI Copilot Types ──────────────────────────────────────────
 
-export type LLMProviderType = "mock" | "openai" | "webllm" | "chrome";
+export type LLMProviderType = "openai" | "webllm" | "chrome";
 
 export type LLMRole = "system" | "user" | "assistant";
 

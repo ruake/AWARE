@@ -1,6 +1,8 @@
 name: Run Tests
 
 on:
+  schedule:
+    - cron: "*/30 * * * *"
   push:
     branches: [main]
     paths:
@@ -60,7 +62,7 @@ on:
 jobs:
   # ── On push/PR: typecheck + unit tests + E2E smoke ──
   verify:
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     defaults:
       run:

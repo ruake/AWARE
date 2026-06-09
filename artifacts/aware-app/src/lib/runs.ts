@@ -1,4 +1,4 @@
-import type { Run, TestResult, TestRunPoint, TestDetail, DiffRow } from "./types";
+import type { Run, TestResult, TestDetail, DiffRow } from "./types";
 import runsSeed from "@/data/runs.json";
 import diffRowsSeed from "@/data/diff-rows.json";
 
@@ -13,37 +13,7 @@ export function getRunById(id: string): Run | undefined {
   return RUNS.find(r => r.id === id);
 }
 
-export function generateTestHistory(_testIndex: number): TestDetail {
-  const history: TestRunPoint[] = RUNS.map((run) => ({
-    runId: run.id,
-    status: "PASS",
-    duration: 0,
-    env: run.env,
-  }));
-  const passCount = history.filter(h => h.status === "PASS").length;
-  const passRate = history.length > 0 ? Math.round((passCount / history.length) * 100) : 0;
-  const flips = 0;
-  const flakinessScore = 0;
-  const avgDuration = history.length > 0 ? Math.round(history.reduce((s, h) => s + h.duration, 0) / history.length) : 0;
-  return { history, passRate, flakinessScore, avgDuration };
-}
-
-export function detectAnomaly(detail: TestDetail): boolean {
-  const { passRate, flakinessScore, history } = detail;
-  if (history.length < 3) return false;
-  if (flakinessScore > 30) return true;
-  if (passRate < 70) return true;
-  const recent = history.slice(-3);
-  const old = history.slice(0, -3);
-  if (old.length >= 3) {
-    const recentRate = recent.filter(h => h.status === "PASS").length / recent.length;
-    const oldRate = old.filter(h => h.status === "PASS").length / old.length;
-    if (oldRate - recentRate > 0.25) return true;
-  }
-  return false;
-}
-
-export const TEST_DETAILS: TestDetail[] = DIFF_ROWS.map((_, i) => generateTestHistory(i));
+export const TEST_DETAILS: TestDetail[] = [];
 
 export const ENV_SUMMARY: { label: string; passRate: number; trend: number; failures: number; color: string; alert: string | null }[] = [];
 

@@ -93,7 +93,7 @@ Key store functions:
 - getTestCases(), getTestCaseById(id), updateTestCase(id, patch), deleteTestCase(id)
 - getTestSuites(), getTestSuiteById(id), createTestSuite(data), deleteSuite(id)
 - addTestsToSuite(suiteId, testIds), removeTestsFromSuite(suiteId, testIds)
-- RUNS (constant array), DIFF_ROWS (constant array), TEST_DETAILS (generated history)
+- RUNS (constant array), DIFF_ROWS (constant array), TEST_DETAILS (history from CI data)
 
 Generate YAML test scripts with .yaml extension. Use predicates for validation assertions.
 `;

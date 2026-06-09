@@ -180,7 +180,7 @@ export default function Dashboard() {
             <GitCompare size={13} /> Compare Latest to Baseline
           </button>
           <button onClick={() => {
-            const summary = `PROOF Regression Report\nOverall Pass Rate: ${overallPassRate}%\nProd/Production: ${ENV_SUMMARY[0].passRate}% (${ENV_SUMMARY[0].trend}%)\nActive Regressions: 7\nLatest Run: ${latestRun.id}`;
+            const summary = `PROOF Regression Report\nOverall Pass Rate: ${overallPassRate}%\nActive Regressions: ${DIFF_ROWS.filter(d => d.state === "regression").length}\nLatest Run: ${latestRun.id}`;
             navigator.clipboard.writeText(summary).then(() => show("Summary copied — paste into Slack/JIRA"));
           }} className="gcp-button gcp-button-sm">
             <Share2 size={13} /> Export to Slack

@@ -6,8 +6,8 @@ const DEFAULT_ENVIRONMENTS: EnvironmentConfig[] = [
     label: "Prod/Production",
     target: "Prod",
     stage: "Production",
-    baseUrl: "https://www.example.com",
-    ips: ["203.0.113.1", "203.0.113.2"],
+    baseUrl: "https://the-internet.herokuapp.com",
+    ips: ["3.209.172.72", "23.22.130.173"],
     network: "production",
   },
   {
@@ -15,8 +15,8 @@ const DEFAULT_ENVIRONMENTS: EnvironmentConfig[] = [
     label: "Prod/Staging",
     target: "Prod",
     stage: "Staging",
-    baseUrl: "https://staging.example.com",
-    ips: ["198.51.100.1"],
+    baseUrl: "https://the-internet.herokuapp.com",
+    ips: ["54.243.238.66"],
     network: "staging",
   },
   {
@@ -24,8 +24,8 @@ const DEFAULT_ENVIRONMENTS: EnvironmentConfig[] = [
     label: "UAT/Production",
     target: "UAT",
     stage: "Production",
-    baseUrl: "https://uat.example.com",
-    ips: ["203.0.113.10"],
+    baseUrl: "https://the-internet.herokuapp.com",
+    ips: ["107.22.57.98"],
     network: "production",
   },
   {
@@ -33,8 +33,8 @@ const DEFAULT_ENVIRONMENTS: EnvironmentConfig[] = [
     label: "UAT/Staging",
     target: "UAT",
     stage: "Staging",
-    baseUrl: "https://uat-staging.example.com",
-    ips: ["198.51.100.10"],
+    baseUrl: "https://the-internet.herokuapp.com",
+    ips: ["3.209.172.72"],
     network: "staging",
   },
 ];

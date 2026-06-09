@@ -3,7 +3,7 @@ import { Link, useLocation, useSearch } from "wouter";
 import { GoogleBarChart, GoogleAreaChart } from "@/components/aware/GoogleCharts";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
-import { DIFF_ROWS, TEST_DETAILS, generateTestHistory, RUNS, getTestResultsForRun } from "@/lib/data";
+import { DIFF_ROWS, TEST_DETAILS, RUNS, getTestResultsForRun } from "@/lib/data";
 import { getEnvLabels } from "@/lib/envConfig";
 import { ENVS } from "@/lib/constants";
 import { useTestData } from "@/hooks/useTestData";
@@ -56,7 +56,9 @@ export default function TestAnalytics() {
     );
   }
   const diff = diffs[Math.min(idx, diffs.length - 1)] ?? diffs[0];
-  const detail = TEST_DETAILS.length > 0 ? (TEST_DETAILS[idx % TEST_DETAILS.length] ?? generateTestHistory(idx)) : generateTestHistory(idx);
+  const detail = TEST_DETAILS.length > 0
+    ? TEST_DETAILS[idx % TEST_DETAILS.length]
+    : { history: [], passRate: 0, flakinessScore: 0, avgDuration: 0 };
   const selectorItems = isTcMode
     ? tcs.map(t => ({ id: t.id, name: t.name }))
     : diffs.map(d => ({ id: d.id, name: d.name }));
