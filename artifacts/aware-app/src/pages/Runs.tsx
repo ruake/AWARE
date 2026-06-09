@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation } from "wouter";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { RUNS } from "@/lib/data";
@@ -56,14 +57,23 @@ export default function Runs() {
 
   const hasActiveFilters = statusFilter !== "all" || suiteFilter !== "all" || envFilter !== "all" || search !== "";
 
+  const tableContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: filtered.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => 48,
+    overscan: 5,
+  });
+
   return (
     <AppLayout activeHref="/runs">
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, minHeight: "100%", flex: 1 }}>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700 }}>Regression Runs</h1>
-            <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", marginTop: 3 }}>{RUNS.length} runs · All GitHub Actions executions</p>
+            <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 3 }}>{RUNS.length} runs · All GitHub Actions executions</p>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
             {comparePair && (
@@ -79,20 +89,20 @@ export default function Runs() {
 
         {/* Stats — clickable CTA cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
-          <CTAStatCard label="Total Runs" value={RUNS.length} subtitle="all environments" accentColor="var(--gcp-blue)" icon={<BarChart3 size={16} />} onClick={() => { setStatusFilter("all"); setEnvFilter("all"); setSuiteFilter("all"); setSearch(""); navigate("/runs"); }} active={statusFilter === "all" && envFilter === "all" && suiteFilter === "all" && search === ""} />
-          <CTAStatCard label="Passing" value={RUNS.filter(r => r.status === "PASS").length} subtitle="successful runs" accentColor="var(--gcp-green)" icon={<CheckCircle2 size={16} />} onClick={() => navigate(`/runs?status=PASS`)} active={statusFilter === "PASS"} />
-          <CTAStatCard label="Failing" value={RUNS.filter(r => r.status === "FAIL").length} subtitle="need attention" accentColor="var(--gcp-red)" icon={<XCircle size={16} />} onClick={() => navigate(`/runs?status=FAIL`)} active={statusFilter === "FAIL"} />
-          <CTAStatCard label="Avg Duration" value={`${Math.round(RUNS.reduce((s, r) => s + r.durationMs, 0) / RUNS.length / 60000)}m`} subtitle="per run" accentColor="var(--gcp-text-secondary)" icon={<Clock size={16} />} />
+          <CTAStatCard label="Total Runs" value={RUNS.length} subtitle="all environments" accentColor="var(--proof-blue)" icon={<BarChart3 size={16} />} onClick={() => { setStatusFilter("all"); setEnvFilter("all"); setSuiteFilter("all"); setSearch(""); navigate("/runs"); }} active={statusFilter === "all" && envFilter === "all" && suiteFilter === "all" && search === ""} />
+          <CTAStatCard label="Passing" value={RUNS.filter(r => r.status === "PASS").length} subtitle="successful runs" accentColor="var(--proof-green)" icon={<CheckCircle2 size={16} />} onClick={() => navigate(`/runs?status=PASS`)} active={statusFilter === "PASS"} />
+          <CTAStatCard label="Failing" value={RUNS.filter(r => r.status === "FAIL").length} subtitle="need attention" accentColor="var(--proof-red)" icon={<XCircle size={16} />} onClick={() => navigate(`/runs?status=FAIL`)} active={statusFilter === "FAIL"} />
+          <CTAStatCard label="Avg Duration" value={`${Math.round(RUNS.reduce((s, r) => s + r.durationMs, 0) / RUNS.length / 60000)}m`} subtitle="per run" accentColor="var(--proof-text-secondary)" icon={<Clock size={16} />} />
         </div>
 
         {/* Filters */}
         <div className="gcp-card" style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flex: "1 1 200px", minWidth: 160 }}>
-            <Search size={14} style={{ color: "var(--gcp-text-secondary)", flexShrink: 0 }} />
+            <Search size={14} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
             <input className="gcp-input" placeholder="Search run ID, env, suite, target…" value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Filter size={13} style={{ color: "var(--gcp-text-secondary)" }} />
+            <Filter size={13} style={{ color: "var(--proof-text-secondary)" }} />
             <select className="gcp-input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
               <option value="all">All statuses</option>
               <option value="PASS">PASS</option>
@@ -110,11 +120,11 @@ export default function Runs() {
             {envs.map(e => <option key={e} value={e}>{e}</option>)}
           </select>
           {hasActiveFilters && (
-            <button onClick={() => { setStatusFilter("all"); setSuiteFilter("all"); setEnvFilter("all"); setSearch(""); }} style={{ fontSize: 11, color: "var(--gcp-red)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 3 }}>
+            <button onClick={() => { setStatusFilter("all"); setSuiteFilter("all"); setEnvFilter("all"); setSearch(""); }} style={{ fontSize: 11, color: "var(--proof-red)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 3 }}>
               <X size={12} /> Clear filters
             </button>
           )}
-          <span style={{ fontSize: 12, color: "var(--gcp-text-secondary)", marginLeft: "auto" }}>
+          <span style={{ fontSize: 12, color: "var(--proof-text-secondary)", marginLeft: "auto" }}>
             {filtered.length} of {RUNS.length} runs{selectedIds.size > 0 && ` · ${selectedIds.size} selected`}
           </span>
         </div>
@@ -122,7 +132,7 @@ export default function Runs() {
         {/* Active filter badges */}
         {(statusFilter !== "all" || suiteFilter !== "all" || envFilter !== "all") && (
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>Active filters:</span>
+            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>Active filters:</span>
             {statusFilter !== "all" && (
               <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10, cursor: "pointer" }} onClick={() => setStatusFilter("all")}>
                 status={statusFilter} <X size={10} style={{ marginLeft: 3 }} />
@@ -142,67 +152,77 @@ export default function Runs() {
         )}
 
         {/* Table */}
-        <div className="gcp-card" style={{ overflow: "hidden" }}>
-          <table className="gcp-table">
-            <thead><tr>
-              <th style={{ width: 36 }}>
-                <input type="checkbox" style={{ cursor: "pointer" }}
-                  checked={selectedIds.size === filtered.length && filtered.length > 0}
-                  onChange={e => setSelectedIds(e.target.checked ? new Set(filtered.map(r => r.id)) : new Set())}
-                />
-              </th>
-              <th>Run ID</th><th>Suite</th><th>Target</th><th>Env / Network</th><th>Status</th>
-              <th style={{ textAlign: "right" }}>Pass %</th>
-              <th style={{ textAlign: "right" }}>Failures</th>
-              <th style={{ textAlign: "right" }}>Duration</th>
-              <th>Started</th><th>Build Config</th><th>Actions</th>
-            </tr></thead>
-            <tbody>
-              {filtered.map(run => {
-                const isSelected = selectedIds.has(run.id);
-                return (
-                  <tr key={run.id} style={{ background: isSelected ? "var(--gcp-blue-bg)" : undefined, outline: isSelected ? "2px solid var(--gcp-blue)" : "none", outlineOffset: -2 }}>
-                    <td><input type="checkbox" style={{ cursor: "pointer" }} checked={isSelected} onChange={() => toggleSelect(run.id)} /></td>
-                    <td>
-                      <button onClick={() => navigate(`/runs/${run.id}`)} style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer", fontWeight: 500, padding: 0, textAlign: "left" }}>
-                        {run.id}
-                      </button>
-                    </td>
-                    <td><span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{run.suite}</span></td>
-                    <td style={{ fontSize: 12, fontWeight: 500 }}>{run.target}</td>
-                    <td>
-                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <span style={{ fontSize: 12 }}>{run.env}</span>
-                        <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.3px", background: run.network === "production" ? "var(--gcp-green-bg)" : "var(--gcp-yellow-bg)", color: run.network === "production" ? "var(--gcp-green)" : "#e37400", padding: "1px 5px", borderRadius: 3, border: `1px solid ${run.network === "production" ? "var(--gcp-green)" : "#f9ab00"}` }}>{run.network}</span>
-                      </div>
-                    </td>
-                    <td>{statusBadge(run.status)}</td>
-                    <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 13, color: run.passPct === 100 ? "var(--gcp-green)" : run.passPct < 90 ? "var(--gcp-red)" : "var(--gcp-text)" }}>{run.passPct}%</td>
-                    <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 12, color: run.failures > 0 ? "var(--gcp-red)" : "var(--gcp-text-secondary)" }}>{run.failures || "—"}</td>
-                    <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)" }}>{run.duration}</td>
-                    <td style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>
-                      {new Date(run.started).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                    </td>
-                    <td>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text)" }}>Build {run.build}</span>
-                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--gcp-text-secondary)" }}>Rev {run.rev}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <button onClick={() => navigate(`/runs/${run.id}`)} className="gcp-button" style={{ fontSize: 11, padding: "3px 8px" }}>Detail</button>
-                        <button onClick={() => navigate(`/compare?baseline=${RUNS[RUNS.length-1]?.id}&candidate=${run.id}`)} className="gcp-button" style={{ fontSize: 11, padding: "3px 8px" }}>
-                          <GitCompare size={11} /> Compare
+        <div className="gcp-card" style={{ overflow: "hidden", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <div ref={tableContainerRef} style={{ flex: 1, overflow: "auto", position: "relative" }}>
+            <table className="gcp-table" style={{ position: "relative" }}>
+              <thead><tr>
+                <th style={{ width: 36 }}>
+                  <input type="checkbox" style={{ cursor: "pointer" }}
+                    checked={selectedIds.size === filtered.length && filtered.length > 0}
+                    onChange={e => setSelectedIds(e.target.checked ? new Set(filtered.map(r => r.id)) : new Set())}
+                  />
+                </th>
+                <th>Run ID</th><th>Suite</th><th>Target</th><th>Env / Network</th><th>Status</th>
+                <th style={{ textAlign: "right" }}>Pass %</th>
+                <th style={{ textAlign: "right" }}>Failures</th>
+                <th style={{ textAlign: "right" }}>Duration</th>
+                <th>Started</th><th>Build Config</th><th>Actions</th>
+              </tr></thead>
+              <tbody style={{ position: "relative", height: rowVirtualizer.getTotalSize() }}>
+                {rowVirtualizer.getVirtualItems().map(virtualRow => {
+                  const run = filtered[virtualRow.index];
+                  const isSelected = selectedIds.has(run.id);
+                  return (
+                    <tr key={run.id} style={{
+                      position: "absolute", top: 0, left: 0, width: "100%",
+                      height: virtualRow.size,
+                      transform: `translateY(${virtualRow.start}px)`,
+                      background: isSelected ? "var(--proof-blue-bg)" : undefined,
+                      outline: isSelected ? "2px solid var(--proof-blue)" : "none",
+                      outlineOffset: -2,
+                    }}>
+                      <td><input type="checkbox" style={{ cursor: "pointer" }} checked={isSelected} onChange={() => toggleSelect(run.id)} /></td>
+                      <td>
+                        <button onClick={() => navigate(`/runs/${run.id}`)} style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)", background: "none", border: "none", cursor: "pointer", fontWeight: 500, padding: 0, textAlign: "left" }}>
+                          {run.id}
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {filtered.length === 0 && <tr><td colSpan={11} style={{ textAlign: "center", padding: "32px", color: "var(--gcp-text-secondary)", fontSize: 13 }}>No runs match your filters</td></tr>}
-            </tbody>
-          </table>
+                      </td>
+                      <td><span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{run.suite}</span></td>
+                      <td style={{ fontSize: 12, fontWeight: 500 }}>{run.target}</td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <span style={{ fontSize: 12 }}>{run.env}</span>
+                          <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.3px", background: run.network === "production" ? "var(--proof-green-bg)" : "var(--proof-yellow-bg)", color: run.network === "production" ? "var(--proof-green)" : "#d97706", padding: "1px 5px", borderRadius: 3, border: `1px solid ${run.network === "production" ? "var(--proof-green)" : "#f59e0b"}` }}>{run.network}</span>
+                        </div>
+                      </td>
+                      <td>{statusBadge(run.status)}</td>
+                      <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 13, color: run.passPct === 100 ? "var(--proof-green)" : run.passPct < 90 ? "var(--proof-red)" : "var(--proof-text)" }}>{run.passPct}%</td>
+                      <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 12, color: run.failures > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)" }}>{run.failures || "—"}</td>
+                      <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)" }}>{run.duration}</td>
+                      <td style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+                        {new Date(run.started).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text)" }}>Build {run.build}</span>
+                          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--proof-text-secondary)" }}>Rev {run.rev}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button onClick={() => navigate(`/runs/${run.id}`)} className="gcp-button" style={{ fontSize: 11, padding: "3px 8px" }}>Detail</button>
+                          <button onClick={() => navigate(`/compare?baseline=${RUNS[RUNS.length-1]?.id}&candidate=${run.id}`)} className="gcp-button" style={{ fontSize: 11, padding: "3px 8px" }}>
+                            <GitCompare size={11} /> Compare
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filtered.length === 0 && <tr style={{ position: "absolute", top: 0, left: 0, width: "100%" }}><td colSpan={11} style={{ textAlign: "center", padding: "32px", color: "var(--proof-text-secondary)", fontSize: 13 }}>No runs match your filters</td></tr>}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Bulk actions */}

@@ -7,20 +7,20 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
   if (!show) return null;
 
   return (
-    <div style={{ background: "var(--gcp-blue-bg)", border: "1px solid var(--gcp-blue)", borderRadius: 6, overflow: "hidden", marginBottom: 14 }}>
+    <div style={{ background: "var(--proof-blue-bg)", border: "1px solid var(--proof-blue)", borderRadius: 6, overflow: "hidden", marginBottom: 14 }}>
       {/* Header row */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px" }}>
-        <FileText size={15} style={{ color: "var(--gcp-blue)", flexShrink: 0 }} />
-        <span style={{ fontSize: 12, flex: 1, color: "var(--gcp-text)" }}>
+        <FileText size={15} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
+        <span style={{ fontSize: 12, flex: 1, color: "var(--proof-text)" }}>
           <strong>CI config changed.</strong> Download the updated <code style={{ fontSize: 11, background: "rgba(26,115,232,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "var(--font-mono)" }}>proof-test-config.yml</code> and commit it to trigger GitHub Actions.
         </span>
         <button onClick={() => { downloadCiConfig(); }} className="gcp-button-primary gcp-button-xs">
           <Download size={12} /> Download Config
         </button>
-        <button onClick={() => { setExpanded(!expanded); }} style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-blue)", padding: 4 }} title="Show instructions">
+        <button onClick={() => { setExpanded(!expanded); }} style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--proof-blue)", padding: 4 }} title="Show instructions">
           <ChevronDown size={14} style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
         </button>
-        <button onClick={onDismiss} style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--gcp-text-secondary)", padding: 4, fontSize: 16, lineHeight: 1 }}>×</button>
+        <button onClick={onDismiss} style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--proof-text-secondary)", padding: 4, fontSize: 16, lineHeight: 1 }}>×</button>
       </div>
 
       {/* Expanded instructions */}
@@ -28,7 +28,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
         <div style={{ padding: "0 14px 12px", borderTop: "1px solid rgba(26,115,232,0.2)", marginTop: 0 }}>
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap", paddingTop: 10 }}>
             <div style={{ flex: "1 1 280px" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
                 <TerminalSquare size={12} /> Where to commit
               </div>
               <div style={{ background: "#1e293b", borderRadius: 4, padding: "8px 12px", fontFamily: "var(--font-mono)", fontSize: 10, lineHeight: 1.8, color: "#e2e8f0" }}>
@@ -39,7 +39,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
               </div>
             </div>
             <div style={{ flex: "1 1 280px" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
                 <GitCompare size={12} /> How GHA reads it
               </div>
               <div style={{ background: "#1e293b", borderRadius: 4, padding: "8px 12px", fontFamily: "var(--font-mono)", fontSize: 10, lineHeight: 1.8, color: "#e2e8f0" }}>

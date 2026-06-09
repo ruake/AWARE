@@ -274,6 +274,16 @@ export interface PromotionDecision {
   note?: string;
 }
 
+// ── Anomaly Detection Types ────────────────────────────────────────
+
+export interface AnomalyScore {
+  runId: string;
+  passRateZ: number;
+  durationZ: number;
+  overallAnomaly: number;
+  flags: string[];
+}
+
 // ── LLM / AI Copilot Types ──────────────────────────────────────────
 
 export type LLMProviderType = "openai" | "webllm" | "chrome";

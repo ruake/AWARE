@@ -1,101 +1,178 @@
 import React from "react";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { Bot, FileText, MessageSquare, Zap, Code2, BarChart3, GitCompare } from "lucide-react";
+import { Send, Bot, User, AlertCircle } from "lucide-react";
 
-const SKILLS = [
-  { id: "generate-tests", icon: Code2, name: "Generate Tests", description: "Create test cases from natural language descriptions", color: "var(--gcp-blue)" },
-  { id: "generate-script", icon: FileText, name: "Generate Script", description: "Write YAML test scripts for automated testing", color: "var(--gcp-green)" },
-  { id: "analyze-results", icon: BarChart3, name: "Analyze Results", description: "Review test failures and identify regressions", color: "var(--gcp-orange)" },
-  { id: "explain-diff", icon: GitCompare, name: "Explain Diff", description: "Compare baseline vs candidate runs", color: "var(--gcp-purple)" },
-  { id: "generate-suite", icon: Zap, name: "Generate Suite", description: "Create a test suite from requirements", color: "var(--gcp-yellow)" },
-];
+declare global {
+  interface Window {
+    ai?: {
+      languageModel: {
+        capabilities: () => Promise<{ available: string }>;
+        create: (options?: { systemPrompt?: string }) => Promise<{
+          prompt: (text: string) => Promise<string>;
+          promptStreaming: (text: string) => AsyncIterable<string>;
+          destroy: () => void;
+        }>;
+      };
+    };
+  }
+}
 
 export default function Copilot() {
-  const [input, setInput] = React.useState("");
+  const [aiReady, setAiReady] = React.useState(false);
+  const [session, setSession] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
   const [messages, setMessages] = React.useState<{ role: string; content: string }[]>([]);
-  const [selectedSkill, setSelectedSkill] = React.useState(SKILLS[0]);
+  const [input, setInput] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    initAI();
+    async function initAI() {
+      try {
+        if (typeof window !== "undefined" && (window as any).ai?.languageModel) {
+          const caps = await (window as any).ai.languageModel.capabilities();
+          if (caps.available !== "no") {
+            const s = await (window as any).ai.languageModel.create({
+              systemPrompt: "You are PROOF Copilot, an AI assistant for a CDN observability dashboard. Answer questions about test runs, deployment health, and CDN performance. Be concise and technical.",
+            });
+            setSession(s);
+            setAiReady(true);
+            setMessages([{ role: "assistant", content: "Hello! I'm PROOF Copilot, powered by Chrome's built-in AI. Ask me about test runs, CDN health, or deployment status." }]);
+          }
+        }
+      } catch (e) {
+        console.warn("Chrome built-in AI not available:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    return () => { session?.destroy(); };
+  }, []);
 
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    setMessages(prev => [...prev, { role: "user", content: input }]);
-    setMessages(prev => [...prev, { role: "assistant", content: `Configure an OpenAI-compatible provider in Settings to use the ${selectedSkill.name} skill.` }]);
+  const handleSend = async () => {
+    if (!input.trim() || busy || !session) return;
+    const userMsg = input.trim();
     setInput("");
+    setMessages(prev => [...prev, { role: "user", content: userMsg }]);
+    setBusy(true);
+    try {
+      let response: string;
+      if (typeof session.promptStreaming === "function") {
+        const stream = await session.promptStreaming(userMsg);
+        setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+        for await (const chunk of stream) {
+          response = chunk;
+          setMessages(prev => {
+            const next = [...prev];
+            next[next.length - 1] = { role: "assistant", content: response };
+            return next;
+          });
+        }
+      } else {
+        response = await session.prompt(userMsg);
+        setMessages(prev => [...prev, { role: "assistant", content: response }]);
+      }
+    } catch (e: any) {
+      setMessages(prev => [...prev, { role: "assistant", content: `Error: ${e.message}` }]);
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const SkillIcon = selectedSkill.icon;
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  if (loading) {
+    return (
+      <AppLayout activeHref="/copilot">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+          <div className="proof-skeleton" style={{ width: 36, height: 36, borderRadius: "50%" }} />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!aiReady) {
+    return (
+      <AppLayout activeHref="/copilot">
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16, padding: 32 }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--proof-yellow-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <AlertCircle size={28} style={{ color: "var(--proof-yellow)" }} />
+          </div>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text)", margin: 0 }}>Chrome Built-in AI Not Available</h2>
+          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", maxWidth: 480, textAlign: "center", lineHeight: 1.6 }}>
+            PROOF Copilot requires Chrome 128+ with the built-in Gemini Nano LLM enabled.
+            Open <code style={{ background: "var(--proof-grey-bg)", padding: "2px 6px", borderRadius: 3, fontFamily: "var(--font-mono)" }}>chrome://flags/#optimization-guide-on-device-model</code>
+            and set it to <strong>Enabled BypassPrefRequirement</strong>, then restart Chrome.
+          </p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout activeHref="/copilot">
-      <div style={{ display: "flex", gap: 16, height: "calc(100vh - 100px)" }}>
-        {/* Sidebar */}
-        <div className="gcp-card" style={{ width: 240, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", gap: 6 }}>
-            <Bot size={16} style={{ color: "var(--gcp-blue)" }} />
-            <span style={{ fontSize: 13, fontWeight: 700 }}>Copilot</span>
-          </div>
-          <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--gcp-grey)", fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-            Skills
-          </div>
-          <div style={{ flex: 1, overflowY: "auto", padding: "6px 0" }}>
-            {SKILLS.map(skill => {
-              const Icon = skill.icon;
-              const isActive = skill.id === selectedSkill.id;
-              return (
-                <button key={skill.id} onClick={() => setSelectedSkill(skill)}
-                  style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", border: "none", cursor: "pointer", fontSize: 12, textAlign: "left", background: isActive ? skill.color + "18" : "transparent", color: "var(--gcp-text)", fontWeight: isActive ? 600 : 400 }}>
-                  <Icon size={16} style={{ color: skill.color }} />
-                  <span style={{ flex: 1 }}>{skill.name}</span>
-                </button>
-              );
-            })}
-          </div>
+      <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 96px)", maxWidth: 800, margin: "0 auto", gap: 0 }}>
+        <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12, padding: "16px 0" }}>
+          {messages.map((msg, i) => (
+            <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", alignSelf: msg.role === "user" ? "flex-end" : "flex-start", maxWidth: "80%" }}>
+              {msg.role === "assistant" && (
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--proof-blue-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Bot size={14} style={{ color: "var(--proof-blue)" }} />
+                </div>
+              )}
+              <div style={{
+                padding: "10px 14px", borderRadius: 10, fontSize: 13, lineHeight: 1.6,
+                background: msg.role === "user" ? "var(--proof-blue)" : "var(--proof-grey-bg)",
+                color: msg.role === "user" ? "white" : "var(--proof-text)",
+                border: msg.role === "user" ? "none" : "1px solid var(--proof-grey)",
+              }}>
+                {msg.content || (busy && i === messages.length - 1 ? "..." : "")}
+              </div>
+              {msg.role === "user" && (
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--proof-blue)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <User size={14} style={{ color: "white" }} />
+                </div>
+              )}
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
         </div>
-
-        {/* Chat area */}
-        <div className="gcp-card" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", gap: 8, background: "var(--gcp-grey-bg)" }}>
-            <SkillIcon size={16} style={{ color: selectedSkill.color }} />
-            <span style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>{selectedSkill.name}</span>
-            <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{selectedSkill.description}</span>
-          </div>
-
-          <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-            {messages.length === 0 && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "60px 20px", color: "var(--gcp-text-secondary)" }}>
-                <Bot size={40} style={{ color: "var(--gcp-blue)", opacity: 0.3 }} />
-                <p style={{ fontSize: 14, fontWeight: 600, color: "var(--gcp-text)" }}>Select a skill and describe what you need</p>
-                <p style={{ fontSize: 12, textAlign: "center", maxWidth: 400, lineHeight: 1.6 }}>
-                  {selectedSkill.description}. Requires an OpenAI-compatible API provider configured in Settings.
-                </p>
-              </div>
-            )}
-            {messages.map((msg, i) => (
-              <div key={i} style={{ display: "flex", gap: 8, padding: "10px 14px", borderRadius: 8, background: msg.role === "user" ? "var(--gcp-blue-bg)" : "var(--gcp-surface)", border: `1px solid ${msg.role === "user" ? "var(--gcp-blue)" : "var(--gcp-grey)"}`, fontSize: 12, lineHeight: 1.6 }}>
-                <span style={{ fontWeight: 700, color: msg.role === "user" ? "var(--gcp-blue)" : "var(--gcp-text-secondary)", flexShrink: 0, textTransform: "capitalize" }}>{msg.role}:</span>
-                <span style={{ whiteSpace: "pre-wrap" }}>{msg.content}</span>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <div style={{ padding: "12px 16px", borderTop: "1px solid var(--gcp-grey)", display: "flex", gap: 8 }}>
-            <input
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
-              placeholder={`Describe what you want ${selectedSkill.name.toLowerCase()} to do...`}
-              className="gcp-input"
-              style={{ flex: 1, fontSize: 13 }}
-            />
-            <button onClick={handleSend} className="gcp-button-primary" style={{ fontSize: 13 }}>
-              <MessageSquare size={14} /> Send
-            </button>
-          </div>
+        <div style={{ display: "flex", gap: 8, padding: "12px 0", borderTop: "1px solid var(--proof-grey)" }}>
+          <textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask about test runs, CDN health..."
+            rows={2}
+            style={{
+              flex: 1, padding: "10px 14px", fontSize: 13, borderRadius: 8,
+              border: "1px solid var(--proof-grey)", resize: "none",
+              background: "var(--proof-surface)", color: "var(--proof-text)",
+              fontFamily: "var(--font-sans)", outline: "none",
+            }}
+          />
+          <button
+            onClick={handleSend}
+            disabled={busy || !input.trim()}
+            style={{
+              alignSelf: "flex-end", padding: "10px 16px", borderRadius: 8,
+              background: busy || !input.trim() ? "var(--proof-grey)" : "var(--proof-blue)",
+              color: "white", border: "none", cursor: busy || !input.trim() ? "not-allowed" : "pointer",
+              display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500,
+            }}
+          >
+            <Send size={14} /> Send
+          </button>
         </div>
       </div>
     </AppLayout>

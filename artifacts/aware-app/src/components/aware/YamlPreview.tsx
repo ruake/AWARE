@@ -38,10 +38,10 @@ export function YamlPreview({ yaml }: { yaml: string }) {
   const { show, Toast } = useSimpleToast();
 
   return (
-    <div style={{ borderBottom: "1px solid var(--gcp-grey)", background: "#1e1e1e", color: "#c9d1d9", padding: 16 }}>
+    <div style={{ borderBottom: "1px solid var(--proof-grey)", background: "#1e1e1e", color: "#c9d1d9", padding: 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <span style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px", color: "#8b949e" }}>GitHub Actions Workflow</span>
-        <button onClick={() => { navigator.clipboard.writeText(yaml); show("YAML copied"); }} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer" }}><Copy size={12} /> Copy</button>
+        <button onClick={() => { navigator.clipboard.writeText(yaml); show("YAML copied"); }} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--proof-blue)", background: "none", border: "none", cursor: "pointer" }}><Copy size={12} /> Copy</button>
       </div>
       <pre style={{ fontSize: 11, fontFamily: "var(--font-mono)", lineHeight: 1.6, overflow: "auto", maxHeight: 200, whiteSpace: "pre-wrap" }}>{yaml}</pre>
       {Toast}

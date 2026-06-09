@@ -14,7 +14,9 @@
     "test:e2e:ci": "playwright test",
     "test:e2e:install": "playwright install chromium --with-deps",
     "extract:branch-data": "node scripts/extract-branch-data.js",
-    "discover:tests": "node scripts/discover-all.mjs"
+    "discover:tests": "node scripts/discover-all.mjs",
+    "validate:data": "node scripts/validate-data.mjs",
+    "badge": "node scripts/generate-badge.mjs"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -63,7 +65,6 @@
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
-    "framer-motion": "catalog:",
     "happy-dom": "^20.10.1",
     "input-otp": "^1.4.2",
     "lucide-react": "catalog:",
@@ -89,7 +90,9 @@
     "@chatscope/chat-ui-kit-react": "^2.1.1",
     "@chatscope/chat-ui-kit-styles": "^1.4.0",
     "@mlc-ai/web-llm": "^0.2.84",
+    "@tanstack/react-virtual": "^3.14.2",
     "@types/js-yaml": "^4.0.9",
+    "fuse.js": "^7.4.2",
     "js-yaml": "^4.2.0",
     "react-google-charts": "^5.2.1",
     "react-markdown": "^10.1.0",

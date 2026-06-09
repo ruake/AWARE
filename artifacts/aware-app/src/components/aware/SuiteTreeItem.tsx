@@ -43,8 +43,8 @@ export function SuiteTreeItem({
           display: "flex", alignItems: "center", gap: 8,
           padding: "10px 12px", cursor: "pointer", borderRadius: 8,
           paddingLeft: `${12 + depth * 20}px`,
-          background: selectedId === suite.id ? "var(--gcp-blue-bg)" : "transparent",
-          boxShadow: selectedId === suite.id ? "inset 0 0 0 1px var(--gcp-blue)" : "none",
+          background: selectedId === suite.id ? "var(--proof-blue-bg)" : "transparent",
+          boxShadow: selectedId === suite.id ? "inset 0 0 0 1px var(--proof-blue)" : "none",
           transition: "background 0.15s",
         }}
         onClick={() => onSelect(suite)}
@@ -52,15 +52,15 @@ export function SuiteTreeItem({
         {hasChildren ? (
           <span
             onClick={e => { e.stopPropagation(); onToggle(suite.id); }}
-            style={{ padding: 2, color: "var(--gcp-text-secondary)", cursor: "pointer", display: "flex", alignItems: "center" }}
+            style={{ padding: 2, color: "var(--proof-text-secondary)", cursor: "pointer", display: "flex", alignItems: "center" }}
           >
             {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </span>
         ) : <span style={{ width: 14 }} />}
-        <FolderTree size={14} style={{ color: "var(--gcp-blue)", flexShrink: 0 }} />
+        <FolderTree size={14} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{suite.name}</div>
-          <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 6, marginTop: 1 }}>
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", display: "flex", alignItems: "center", gap: 6, marginTop: 1 }}>
             <span>{suite.testIds.length} tests</span>
             {suite.schedule && <span style={{ display: "flex", alignItems: "center", gap: 2 }}><Clock size={10} />{suite.schedule}</span>}
           </div>
@@ -77,15 +77,15 @@ export function SuiteTreeItem({
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "6px 12px", cursor: "pointer",
                 paddingLeft: `${26 + depth * 20}px`,
-                background: selectedId === tc.id ? "var(--gcp-blue-bg)" : "transparent",
-                fontSize: 12, color: "var(--gcp-text-secondary)", borderRadius: 6,
+                background: selectedId === tc.id ? "var(--proof-blue-bg)" : "transparent",
+                fontSize: 12, color: "var(--proof-text-secondary)", borderRadius: 6,
               }}
-              onMouseEnter={e => { if (selectedId !== tc.id) e.currentTarget.style.background = "var(--gcp-grey-bg)"; }}
+              onMouseEnter={e => { if (selectedId !== tc.id) e.currentTarget.style.background = "var(--proof-grey-bg)"; }}
               onMouseLeave={e => { if (selectedId !== tc.id) e.currentTarget.style.background = "transparent"; }}
             >
-              <Bug size={12} style={{ flexShrink: 0, color: "var(--gcp-text-secondary)" }} />
+              <Bug size={12} style={{ flexShrink: 0, color: "var(--proof-text-secondary)" }} />
               <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tc.name}</span>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", flexShrink: 0, background: tc.status === "active" ? "var(--gcp-green)" : "var(--gcp-yellow)" }} />
+              <span style={{ width: 8, height: 8, borderRadius: "50%", flexShrink: 0, background: tc.status === "active" ? "var(--proof-green)" : "var(--proof-yellow)" }} />
             </div>
           ))}
           {filteredChildren.map(child => (

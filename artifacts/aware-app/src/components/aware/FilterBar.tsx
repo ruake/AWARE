@@ -43,7 +43,7 @@ export function FilterBar({
           minWidth: 160,
         }}
       >
-        <Search size={14} style={{ color: "var(--gcp-text-secondary)", flexShrink: 0 }} />
+        <Search size={14} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
         <input
           className="gcp-input"
           placeholder={searchPlaceholder}
@@ -63,7 +63,7 @@ export function FilterBar({
           }}
         >
           {i === 0 && (
-            <Filter size={13} style={{ color: "var(--gcp-text-secondary)" }} />
+            <Filter size={13} style={{ color: "var(--proof-text-secondary)" }} />
           )}
           <select
             className="gcp-input"
@@ -83,7 +83,7 @@ export function FilterBar({
         <span
           style={{
             fontSize: 12,
-            color: "var(--gcp-text-secondary)",
+            color: "var(--proof-text-secondary)",
             marginLeft: "auto",
           }}
         >

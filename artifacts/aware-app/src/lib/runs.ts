@@ -61,13 +61,13 @@ function envLabel(run: Run): string {
 }
 
 const ENV_COLOR_MAP: Record<string, string> = {
-  "Prod/Production": "#1a73e8",
-  "Prod/Staging":    "#f9ab00",
-  "UAT/Production":  "#1e8e3e",
-  "UAT/Staging":     "#9334e6",
+  "Prod/Production": "#5b8af5",
+  "Prod/Staging":    "#f59e0b",
+  "UAT/Production":  "#22c55e",
+  "UAT/Staging":     "#a855f7",
 };
 function envColor(label: string): string {
-  return ENV_COLOR_MAP[label] ?? "#5f6368";
+  return ENV_COLOR_MAP[label] ?? "#9aa0a6";
 }
 
 // ── ENV_SUMMARY ──────────────────────────────────────────────────────
@@ -92,7 +92,7 @@ export const ENV_SUMMARY: {
       sorted.reduce((s, r) => s + r.passPct, 0) / sorted.length
     );
     const trend = previous ? Math.round(latest.passPct - previous.passPct) : 0;
-    const color = avgPassRate >= 90 ? "#1e8e3e" : avgPassRate >= 70 ? "#f9ab00" : "#d93025";
+    const color = avgPassRate >= 90 ? "#22c55e" : avgPassRate >= 70 ? "#f59e0b" : "#ef4444";
     const alert = latest.failures > 0
       ? `${latest.failures} failure${latest.failures !== 1 ? "s" : ""} in last run`
       : null;

@@ -86,7 +86,7 @@ export function GoogleFilterableTable({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {title && (
-        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text-secondary)" }}>{title}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text-secondary)" }}>{title}</div>
       )}
       {/* Filters row */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
@@ -112,7 +112,7 @@ export function GoogleFilterableTable({
         {Object.keys(filters).some(k => filters[k]) && (
           <button
             onClick={() => setFilters({})}
-            style={{ fontSize: 11, color: "var(--gcp-red)", background: "none", border: "none", cursor: "pointer" }}
+            style={{ fontSize: 11, color: "var(--proof-red)", background: "none", border: "none", cursor: "pointer" }}
           >
             Clear filters
           </button>
@@ -141,7 +141,7 @@ export function GoogleFilterableTable({
         chartLanguage="en"
         chartPackages={["table", "controls"]}
       />
-      <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)", textAlign: "right" }}>
+      <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", textAlign: "right" }}>
         Showing {filteredRows.length} of {rows.length} rows
       </div>
     </div>
@@ -184,9 +184,9 @@ export function GoogleAreaChart({
 
   const chartOptions = {
     title,
-    titleTextStyle: { fontSize: 13, color: "#5f6368" },
+    titleTextStyle: { fontSize: 13, color: "#9aa0a6" },
     legend: { position: "bottom", textStyle: { fontSize: 11 } },
-    colors: colors || ["#1a73e8", "#f9ab00", "#1e8e3e", "#9334e6"],
+    colors: colors || ["#5b8af5", "#f59e0b", "#22c55e", "#a855f7"],
     curveType: "function",
     pointSize: 4,
     focusTarget: "category",
@@ -204,16 +204,16 @@ export function GoogleAreaChart({
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {showTimeFrame && (
         <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontWeight: 600 }}>Time Range:</span>
+          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600 }}>Time Range:</span>
           {[5, 10, 25, 50, 100].map(n => (
             <button
               key={n}
               onClick={() => setTimeRange(n)}
               style={{
                 padding: "2px 10px", fontSize: 10, borderRadius: 4, cursor: "pointer",
-                border: `1px solid ${timeRange === n ? "var(--gcp-blue)" : "var(--gcp-grey)"}`,
-                background: timeRange === n ? "var(--gcp-blue)" : "transparent",
-                color: timeRange === n ? "white" : "var(--gcp-text-secondary)",
+                border: `1px solid ${timeRange === n ? "var(--proof-blue)" : "var(--proof-grey)"}`,
+                background: timeRange === n ? "var(--proof-blue)" : "transparent",
+                color: timeRange === n ? "white" : "var(--proof-text-secondary)",
                 fontWeight: timeRange === n ? 600 : 400,
               }}
             >
@@ -292,9 +292,9 @@ export function GoogleBarChart({
 
   const chartOptions = {
     title,
-    titleTextStyle: { fontSize: 13, color: "#5f6368" },
+    titleTextStyle: { fontSize: 13, color: "#9aa0a6" },
     legend: { position: "bottom", textStyle: { fontSize: 11 } },
-    colors: colors || ["#1a73e8", "#f9ab00", "#1e8e3e", "#9334e6"],
+    colors: colors || ["#5b8af5", "#f59e0b", "#22c55e", "#a855f7"],
     isStacked: barType === "stacked",
     focusTarget: "category",
     hAxis: { textStyle: { fontSize: 10 } },
@@ -307,16 +307,16 @@ export function GoogleBarChart({
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {showTimeFrame && (
         <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontWeight: 600 }}>Time Range:</span>
+          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600 }}>Time Range:</span>
           {[5, 10, 20, 50, 100].map(n => (
             <button
               key={n}
               onClick={() => setTimeRange(n)}
               style={{
                 padding: "2px 10px", fontSize: 10, borderRadius: 4, cursor: "pointer",
-                border: `1px solid ${timeRange === n ? "var(--gcp-blue)" : "var(--gcp-grey)"}`,
-                background: timeRange === n ? "var(--gcp-blue)" : "transparent",
-                color: timeRange === n ? "white" : "var(--gcp-text-secondary)",
+                border: `1px solid ${timeRange === n ? "var(--proof-blue)" : "var(--proof-grey)"}`,
+                background: timeRange === n ? "var(--proof-blue)" : "transparent",
+                color: timeRange === n ? "white" : "var(--proof-text-secondary)",
                 fontWeight: timeRange === n ? 600 : 400,
               }}
             >
@@ -376,9 +376,9 @@ export function GooglePieChart({ title, data, height = "200px", isDonut = false,
       data={dataTable}
       options={{
         title,
-        titleTextStyle: { fontSize: 13, color: "#5f6368" },
+        titleTextStyle: { fontSize: 13, color: "#9aa0a6" },
         pieHole: isDonut ? 0.4 : 0,
-        colors: colors || ["#1a73e8", "#f9ab00", "#1e8e3e", "#d93025", "#9334e6"],
+        colors: colors || ["#5b8af5", "#f59e0b", "#22c55e", "#ef4444", "#a855f7"],
         legend: { position: "right", textStyle: { fontSize: 10 } },
         backgroundColor: "transparent",
         chartArea: { width: "90%", height: "80%" },

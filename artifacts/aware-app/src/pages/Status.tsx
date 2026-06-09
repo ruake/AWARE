@@ -7,6 +7,8 @@ import {
   Code2, Copy,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
+import { HeatmapCalendar } from "@/components/aware/HeatmapCalendar";
+import { computeRunFrequency } from "@/lib/data";
 
 interface Stage {
   id: string; title: string; icon: React.ElementType;
@@ -99,6 +101,8 @@ export default function Status() {
     return () => clearInterval(interval);
   }, []);
 
+  const freq = React.useMemo(() => computeRunFrequency(), []);
+
   const copyYaml = () => {
     navigator.clipboard.writeText(YAML_SPEC).then(() => { setYamlCopied(true); setTimeout(() => setYamlCopied(false), 2000); });
   };
@@ -109,15 +113,15 @@ export default function Status() {
 
         {/* Header */}
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--gcp-text)" }}>How PROOF Works</h1>
-          <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", marginTop: 3 }}>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)" }}>How PROOF Works</h1>
+          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 3 }}>
             End-to-end pipeline: GitHub Actions → test results → promotion decision
           </p>
         </div>
 
         {/* Pipeline visualization */}
         <div className="gcp-card" style={{ padding: 24 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 20 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 20 }}>
             CI/CD → Promotion Pipeline
           </h2>
           <div style={{ display: "flex", alignItems: "center", gap: 0, overflowX: "auto", paddingBottom: 8 }}>
@@ -134,13 +138,13 @@ export default function Status() {
                       animation: isActive ? "float 2s ease-in-out infinite" : "none",
                     }}>
                       {isCompleted
-                        ? <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--gcp-green)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        ? <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--proof-green)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <Check size={16} color="white" />
                           </div>
-                        : <Icon size={20} style={{ color: isActive ? "var(--gcp-blue)" : "var(--gcp-text-secondary)", transition: "color 0.3s" }} />
+                        : <Icon size={20} style={{ color: isActive ? "var(--proof-blue)" : "var(--proof-text-secondary)", transition: "color 0.3s" }} />
                       }
                     </div>
-                    <span style={{ fontSize: 11, fontWeight: isActive ? 700 : 500, color: isActive ? "var(--gcp-blue)" : isCompleted ? "var(--gcp-green)" : "var(--gcp-text-secondary)", textAlign: "center", lineHeight: 1.3 }}>
+                    <span style={{ fontSize: 11, fontWeight: isActive ? 700 : 500, color: isActive ? "var(--proof-blue)" : isCompleted ? "var(--proof-green)" : "var(--proof-text-secondary)", textAlign: "center", lineHeight: 1.3 }}>
                       {stage.title}
                     </span>
                   </div>
@@ -153,12 +157,12 @@ export default function Status() {
           </div>
 
           {/* Active stage detail */}
-          <div style={{ marginTop: 16, padding: 14, background: "var(--gcp-blue-bg)", borderRadius: 6, border: "1px solid var(--gcp-blue)", display: "flex", gap: 14, alignItems: "flex-start" }}>
-            {React.createElement(STAGES[activeStage].icon, { size: 18, style: { color: "var(--gcp-blue)", flexShrink: 0, marginTop: 2 } })}
+          <div style={{ marginTop: 16, padding: 14, background: "var(--proof-blue-bg)", borderRadius: 6, border: "1px solid var(--proof-blue)", display: "flex", gap: 14, alignItems: "flex-start" }}>
+            {React.createElement(STAGES[activeStage].icon, { size: 18, style: { color: "var(--proof-blue)", flexShrink: 0, marginTop: 2 } })}
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: 14, color: "var(--gcp-blue)", marginBottom: 4 }}>{STAGES[activeStage].title}</div>
-              <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)", marginBottom: 6 }}>{STAGES[activeStage].desc}</div>
-              <pre style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text)", whiteSpace: "pre-line", margin: 0 }}>{STAGES[activeStage].detail}</pre>
+              <div style={{ fontWeight: 700, fontSize: 14, color: "var(--proof-blue)", marginBottom: 4 }}>{STAGES[activeStage].title}</div>
+              <div style={{ fontSize: 12, color: "var(--proof-text-secondary)", marginBottom: 6 }}>{STAGES[activeStage].desc}</div>
+              <pre style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text)", whiteSpace: "pre-line", margin: 0 }}>{STAGES[activeStage].detail}</pre>
             </div>
             {STAGES[activeStage].cta && (
               <Link href={STAGES[activeStage].cta!.href}>
@@ -176,7 +180,7 @@ export default function Status() {
 
           {/* GitHub Actions runs */}
           <div className="gcp-card" style={{ overflow: "hidden" }}>
-            <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-grey-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h3 style={{ fontSize: 13, fontWeight: 600 }}>Live GitHub Actions Runs</h3>
               <a href="https://github.com/ruake/PROOF/actions" target="_blank" rel="noopener" className="gcp-button gcp-button-xs">
                 <Github size={11} /> View all
@@ -194,9 +198,9 @@ export default function Status() {
                   <tr key={run.id}>
                     <td>
                       <div style={{ fontSize: 12, fontWeight: 500 }}>{run.name}</div>
-                      <div style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>by {run.actor}</div>
+                      <div style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>by {run.actor}</div>
                     </td>
-                    <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)" }}>{run.branch}</td>
+                    <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)" }}>{run.branch}</td>
                     <td>
                       <span className={`gcp-badge ${
                         run.status === "completed" ? "gcp-badge-pass" :
@@ -205,7 +209,7 @@ export default function Status() {
                         "gcp-badge-skip"
                       }`}>{run.status}</span>
                     </td>
-                    <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)" }}>{run.duration}</td>
+                    <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)" }}>{run.duration}</td>
                   </tr>
                 ))}
               </tbody>
@@ -214,11 +218,11 @@ export default function Status() {
 
           {/* YAML spec */}
           <div className="gcp-card" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-grey-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h3 style={{ fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
                 <Code2 size={14} /> regression.yml
               </h3>
-              <button onClick={copyYaml} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: yamlCopied ? "var(--gcp-green)" : "var(--gcp-blue)", background: "none", border: "none", cursor: "pointer" }}>
+              <button onClick={copyYaml} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: yamlCopied ? "var(--proof-green)" : "var(--proof-blue)", background: "none", border: "none", cursor: "pointer" }}>
                 {yamlCopied ? <Check size={11} /> : <Copy size={11} />}
                 {yamlCopied ? "Copied!" : "Copy"}
               </button>
@@ -231,7 +235,7 @@ export default function Status() {
 
         {/* Quick nav */}
         <div className="gcp-card" style={{ padding: "14px 18px" }}>
-          <h3 style={{ fontSize: 12, fontWeight: 700, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12 }}>Quick Navigation</h3>
+          <h3 style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12 }}>Quick Navigation</h3>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {[
               { href: "/", label: "Dashboard", icon: LayoutDashboard, desc: "Promotion readiness overview" },
@@ -242,20 +246,38 @@ export default function Status() {
               const Icon = nav.icon;
               return (
                 <Link key={nav.href} href={nav.href}
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 4, border: "1px solid var(--gcp-grey)", background: "var(--gcp-surface)", textDecoration: "none", transition: "all 0.15s", minWidth: 160 }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.borderColor = "var(--gcp-blue)"; e.currentTarget.style.background = "var(--gcp-blue-bg)"; }}
-                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.borderColor = "var(--gcp-grey)"; e.currentTarget.style.background = "var(--gcp-surface)"; }}
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 4, border: "1px solid var(--proof-grey)", background: "var(--proof-surface)", textDecoration: "none", transition: "all 0.15s", minWidth: 160 }}
+                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.borderColor = "var(--proof-blue)"; e.currentTarget.style.background = "var(--proof-blue-bg)"; }}
+                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.borderColor = "var(--proof-grey)"; e.currentTarget.style.background = "var(--proof-surface)"; }}
                 >
-                  <Icon size={16} style={{ color: "var(--gcp-blue)" }} />
+                  <Icon size={16} style={{ color: "var(--proof-blue)" }} />
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text)" }}>{nav.label}</div>
-                    <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{nav.desc}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>{nav.label}</div>
+                    <div style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>{nav.desc}</div>
                   </div>
-                  <ChevronRight size={14} style={{ color: "var(--gcp-text-secondary)", marginLeft: "auto" }} />
+                  <ChevronRight size={14} style={{ color: "var(--proof-text-secondary)", marginLeft: "auto" }} />
                 </Link>
               );
             })}
           </div>
+        </div>
+
+        {/* Run Frequency Heatmap */}
+        <div className="gcp-card" style={{ padding: 16 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <span>📅</span> Run Frequency
+            <span style={{ fontSize: 11, fontWeight: 400, color: "var(--proof-text-secondary)", marginLeft: "auto" }}>
+              {freq.totalRuns} runs · avg {freq.runsPerDay}/day · ~{freq.avgIntervalHours}h between
+            </span>
+          </h3>
+          <HeatmapCalendar
+            data={freq.byDay}
+            onDayClick={day => {
+              if (day) {
+                Object.entries(day.envs).map(([env, count]) => `${env}: ${count}`).join(", ");
+              }
+            }}
+          />
         </div>
       </div>
       {Toast}

@@ -30,50 +30,50 @@ export default function TestDoc() {
           <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto", paddingRight: 8, paddingBottom: 32, height: "calc(100vh - 150px)" }}>
             {testCase && <TestFlowDiagram testCase={testCase} />}
             <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: 16, borderBottom: "1px solid var(--gcp-grey)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--gcp-surface-hover)" }}>
+              <div style={{ padding: 16, borderBottom: "1px solid var(--proof-grey)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--proof-surface-hover)" }}>
                 <h2 style={{ fontWeight: 500, fontSize: 13 }}>Pass Rate Over Time (7d)</h2>
-                <span style={{ fontSize: 20, fontWeight: 700, color: "var(--gcp-green)" }}>94.8%</span>
+                <span style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-green)" }}>94.8%</span>
               </div>
               <div style={{ padding: 20, height: 192, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="none" style={{ overflow: "visible" }}>
                   <defs>
                     <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--gcp-green)" stopOpacity="0.2" />
-                      <stop offset="100%" stopColor="var(--gcp-green)" stopOpacity="0" />
+                      <stop offset="0%" stopColor="var(--proof-green)" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="var(--proof-green)" stopOpacity="0" />
                     </linearGradient>
                   </defs>
-                  <line x1="0" y1="20" x2="400" y2="20" stroke="var(--gcp-grey)" strokeWidth="1" strokeDasharray="4 4" />
-                  <line x1="0" y1="60" x2="400" y2="60" stroke="var(--gcp-grey)" strokeWidth="1" strokeDasharray="4 4" />
-                  <line x1="0" y1="100" x2="400" y2="100" stroke="var(--gcp-grey)" strokeWidth="1" strokeDasharray="4 4" />
+                  <line x1="0" y1="20" x2="400" y2="20" stroke="var(--proof-grey)" strokeWidth="1" strokeDasharray="4 4" />
+                  <line x1="0" y1="60" x2="400" y2="60" stroke="var(--proof-grey)" strokeWidth="1" strokeDasharray="4 4" />
+                  <line x1="0" y1="100" x2="400" y2="100" stroke="var(--proof-grey)" strokeWidth="1" strokeDasharray="4 4" />
                   <path d="M0,20 L30,20 L60,20 L90,100 L120,20 L150,20 L180,20 L210,20 L240,20 L270,100 L300,20 L330,20 L360,20 L400,20 L400,120 L0,120 Z" fill="url(#areaGradient)" />
-                  <path d="M0,20 L30,20 L60,20 L90,100 L120,20 L150,20 L180,20 L210,20 L240,20 L270,100 L300,20 L330,20 L360,20 L400,20" fill="none" stroke="var(--gcp-green)" strokeWidth="3" strokeLinejoin="round" />
-                  <circle cx="30" cy="20" r="4" fill="var(--gcp-green)" />
-                  <circle cx="60" cy="20" r="4" fill="var(--gcp-green)" />
-                  <circle cx="90" cy="100" r="6" fill="var(--gcp-red)" stroke="white" strokeWidth="2" />
+                  <path d="M0,20 L30,20 L60,20 L90,100 L120,20 L150,20 L180,20 L210,20 L240,20 L270,100 L300,20 L330,20 L360,20 L400,20" fill="none" stroke="var(--proof-green)" strokeWidth="3" strokeLinejoin="round" />
+                  <circle cx="30" cy="20" r="4" fill="var(--proof-green)" />
+                  <circle cx="60" cy="20" r="4" fill="var(--proof-green)" />
+                  <circle cx="90" cy="100" r="6" fill="var(--proof-red)" stroke="white" strokeWidth="2" />
                   <g transform="translate(90, 115)">
-                    <rect x="-40" y="0" width="80" height="20" fill="var(--gcp-surface)" stroke="var(--gcp-red)" rx="2" />
-                      <text x="0" y="14" fontSize="10" fontFamily="var(--font-mono)" fill="var(--gcp-red)" textAnchor="middle" fontWeight="bold">FAIL - Build 889</text>
+                    <rect x="-40" y="0" width="80" height="20" fill="var(--proof-surface)" stroke="var(--proof-red)" rx="2" />
+                      <text x="0" y="14" fontSize="10" fontFamily="var(--font-mono)" fill="var(--proof-red)" textAnchor="middle" fontWeight="bold">FAIL - Build 889</text>
                   </g>
-                  <circle cx="120" cy="20" r="4" fill="var(--gcp-green)" />
-                  <circle cx="150" cy="20" r="4" fill="var(--gcp-green)" />
-                  <circle cx="180" cy="20" r="4" fill="var(--gcp-green)" />
-                  <circle cx="210" cy="20" r="4" fill="var(--gcp-green)" />
-                  <circle cx="240" cy="20" r="4" fill="var(--gcp-green)" />
-                  <circle cx="270" cy="100" r="6" fill="var(--gcp-red)" stroke="white" strokeWidth="2" />
+                  <circle cx="120" cy="20" r="4" fill="var(--proof-green)" />
+                  <circle cx="150" cy="20" r="4" fill="var(--proof-green)" />
+                  <circle cx="180" cy="20" r="4" fill="var(--proof-green)" />
+                  <circle cx="210" cy="20" r="4" fill="var(--proof-green)" />
+                  <circle cx="240" cy="20" r="4" fill="var(--proof-green)" />
+                  <circle cx="270" cy="100" r="6" fill="var(--proof-red)" stroke="white" strokeWidth="2" />
                   <g transform="translate(270, 115)">
-                    <rect x="-40" y="0" width="80" height="20" fill="var(--gcp-surface)" stroke="var(--gcp-red)" rx="2" />
-                      <text x="0" y="14" fontSize="10" fontFamily="var(--font-mono)" fill="var(--gcp-red)" textAnchor="middle" fontWeight="bold">FAIL - Build 891</text>
+                    <rect x="-40" y="0" width="80" height="20" fill="var(--proof-surface)" stroke="var(--proof-red)" rx="2" />
+                      <text x="0" y="14" fontSize="10" fontFamily="var(--font-mono)" fill="var(--proof-red)" textAnchor="middle" fontWeight="bold">FAIL - Build 891</text>
                   </g>
-                  <circle cx="300" cy="20" r="4" fill="var(--gcp-green)" />
-                  <circle cx="330" cy="20" r="4" fill="var(--gcp-green)" />
-                  <circle cx="360" cy="20" r="4" fill="var(--gcp-green)" />
-                  <circle cx="400" cy="20" r="4" fill="var(--gcp-green)" />
+                  <circle cx="300" cy="20" r="4" fill="var(--proof-green)" />
+                  <circle cx="330" cy="20" r="4" fill="var(--proof-green)" />
+                  <circle cx="360" cy="20" r="4" fill="var(--proof-green)" />
+                  <circle cx="400" cy="20" r="4" fill="var(--proof-green)" />
                 </svg>
               </div>
             </div>
 
             <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: 12, borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-surface-hover)" }}>
+              <div style={{ padding: 12, borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-surface-hover)" }}>
                 <h2 style={{ fontWeight: 500, fontSize: 13 }}>Recent Executions</h2>
               </div>
               <div style={{ overflowX: "auto" }}>
@@ -99,8 +99,8 @@ export default function TestDoc() {
                       { run: "run_886_prod", date: "Jun 6", status: "PASS", dur: "450ms", build: "v886", rev: "2340.2.1", spike: true },
                       { run: "run_885_prod", date: "Jun 5", status: "PASS", dur: "135ms", build: "v885", rev: "2340.2.1" },
                     ].map((row, i) => (
-                      <tr key={i} style={{ cursor: "pointer", background: row.status === 'FAIL' ? "var(--gcp-red-bg)" : "transparent" }}>
-                        <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)" }}>{row.run}</td>
+                      <tr key={i} style={{ cursor: "pointer", background: row.status === 'FAIL' ? "var(--proof-red-bg)" : "transparent" }}>
+                        <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)" }}>{row.run}</td>
                         <td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{row.date}</td>
                         <td>
                           <span className={`gcp-badge ${row.status === 'FAIL' ? 'gcp-badge-fail' : 'gcp-badge-pass'}`} style={{ fontSize: 9, padding: "2px 6px" }}>
@@ -111,7 +111,7 @@ export default function TestDoc() {
                           {(row as any).spike ? <span style={{ background: "#fef08a", color: "#713f12", padding: "1px 4px", borderRadius: 4, fontWeight: 700 }}>{row.dur}</span> : row.dur}
                         </td>
                         <td style={{ fontSize: 11 }}>{row.build}</td>
-                        <td style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)" }}>{row.rev}</td>
+                        <td style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--proof-text-secondary)" }}>{row.rev}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -120,15 +120,15 @@ export default function TestDoc() {
             </div>
 
             <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: 12, borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-surface-hover)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ padding: 12, borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-surface-hover)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h2 style={{ fontWeight: 500, fontSize: 13 }}>Duration Trend</h2>
-                <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>Avg: 145ms</span>
+                <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>Avg: 145ms</span>
               </div>
               <div style={{ padding: 16, height: 96, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
                 <svg width="100%" height="100%" viewBox="0 0 300 50" preserveAspectRatio="none">
-                  <path d="M0,40 L30,42 L60,38 L90,41 L120,40 L150,45 L180,39 L210,10 L240,40 L270,38 L300,42" fill="none" stroke="var(--gcp-blue)" strokeWidth="2" strokeLinejoin="round" />
-                  <circle cx="210" cy="10" r="4" fill="var(--gcp-yellow)" stroke="white" strokeWidth="1" />
-                  <text x="210" y="25" fontSize="10" textAnchor="middle" fill="var(--gcp-text-secondary)">450ms anomaly</text>
+                  <path d="M0,40 L30,42 L60,38 L90,41 L120,40 L150,45 L180,39 L210,10 L240,40 L270,38 L300,42" fill="none" stroke="var(--proof-blue)" strokeWidth="2" strokeLinejoin="round" />
+                  <circle cx="210" cy="10" r="4" fill="var(--proof-yellow)" stroke="white" strokeWidth="1" />
+                  <text x="210" y="25" fontSize="10" textAnchor="middle" fill="var(--proof-text-secondary)">450ms anomaly</text>
                 </svg>
               </div>
             </div>

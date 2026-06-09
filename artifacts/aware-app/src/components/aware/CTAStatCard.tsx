@@ -16,7 +16,7 @@ export function CTAStatCard({
   subtitle,
   onClick,
   active,
-  accentColor = "var(--gcp-blue)",
+  accentColor = "var(--proof-blue)",
   icon,
 }: CTAStatCardProps) {
   const borderStyle = active
@@ -47,14 +47,14 @@ export function CTAStatCard({
           </div>
         )}
         <div>
-          <div style={{ fontSize: 12, fontWeight: 500, color: "var(--gcp-text-secondary)" }}>
+          <div style={{ fontSize: 12, fontWeight: 500, color: "var(--proof-text-secondary)" }}>
             {label}
           </div>
           <div style={{ fontSize: 24, fontWeight: 700, color: accentColor }}>
             {value}
           </div>
           {subtitle && (
-            <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>
+            <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>
               {subtitle}
             </div>
           )}

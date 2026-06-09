@@ -11,22 +11,22 @@ export const STATUSES = ["active", "disabled", "deprecated"] as const;
 export const OWNERS: string[] = [];
 
 export const TAG_COLORS: Record<string, string> = {
-  geo: "#1a73e8", locale: "#9334e6", health: "#e8710a",
-  security: "#d93025", performance: "#1e8e3e", regression: "#f9ab00",
-  smoke: "#185abc", e2e: "#c5221f", automated: "#1e8e3e",
+  geo: "#5b8af5", locale: "#a855f7", health: "#f97316",
+  security: "#ef4444", performance: "#22c55e", regression: "#f59e0b",
+  smoke: "#3b82f6", e2e: "#dc2626", automated: "#22c55e",
 };
 
-export const CATEGORY_COLORS = ["#1a73e8", "#e8710a", "#1e8e3e", "#d93025", "#9334e6", "#f9ab00", "#185abc", "#c5221f", "#5f6368"];
+export const CATEGORY_COLORS = ["#5b8af5", "#f97316", "#22c55e", "#ef4444", "#a855f7", "#f59e0b", "#3b82f6", "#dc2626", "#9aa0a6"];
 
 export const TEST_TAGS = [
-  { id: "tag_geo", name: "geo", color: "#1a73e8" },
-  { id: "tag_locale", name: "locale", color: "#9334e6" },
-  { id: "tag_health", name: "health", color: "#e8710a" },
-  { id: "tag_security", name: "security", color: "#d93025" },
-  { id: "tag_perf", name: "performance", color: "#1e8e3e" },
-  { id: "tag_regression", name: "regression", color: "#f9ab00" },
-  { id: "tag_smoke", name: "smoke", color: "#185abc" },
-  { id: "tag_e2e", name: "e2e", color: "#c5221f" },
+  { id: "tag_geo", name: "geo", color: "#5b8af5" },
+  { id: "tag_locale", name: "locale", color: "#a855f7" },
+  { id: "tag_health", name: "health", color: "#f97316" },
+  { id: "tag_security", name: "security", color: "#ef4444" },
+  { id: "tag_perf", name: "performance", color: "#22c55e" },
+  { id: "tag_regression", name: "regression", color: "#f59e0b" },
+  { id: "tag_smoke", name: "smoke", color: "#3b82f6" },
+  { id: "tag_e2e", name: "e2e", color: "#dc2626" },
 ];
 
 export const TEST_NAMES = [

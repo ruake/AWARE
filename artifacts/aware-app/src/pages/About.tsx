@@ -52,25 +52,25 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
   React.useEffect(() => { contentRef.current?.scrollTo(0, 0); }, [activeId]);
 
   const panel = (
-    <div style={{ display: "flex", gap: 0, border: "1px solid var(--gcp-grey)", borderRadius: 8, overflow: "hidden", background: "var(--gcp-surface)", height: "100%" }}>
+    <div style={{ display: "flex", gap: 0, border: "1px solid var(--proof-grey)", borderRadius: 8, overflow: "hidden", background: "var(--proof-surface)", height: "100%" }}>
       {/* Sidebar */}
-      <div style={{ width: 260, flexShrink: 0, borderRight: "1px solid var(--gcp-grey)", display: "flex", flexDirection: "column", background: "var(--gcp-grey-bg)" }}>
-        <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", gap: 6 }}>
-          <Book size={14} style={{ color: "var(--gcp-text-secondary)" }} />
-          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--gcp-text)", flex: 1 }}>Documentation</span>
-          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", background: "var(--gcp-surface)", padding: "1px 6px", borderRadius: 4 }}>{sections.length}</span>
+      <div style={{ width: 260, flexShrink: 0, borderRight: "1px solid var(--proof-grey)", display: "flex", flexDirection: "column", background: "var(--proof-grey-bg)" }}>
+        <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--proof-grey)", display: "flex", alignItems: "center", gap: 6 }}>
+          <Book size={14} style={{ color: "var(--proof-text-secondary)" }} />
+          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)", flex: 1 }}>Documentation</span>
+          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", background: "var(--proof-surface)", padding: "1px 6px", borderRadius: 4 }}>{sections.length}</span>
         </div>
-        <div style={{ padding: "6px 10px", borderBottom: "1px solid var(--gcp-grey)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)", background: "var(--gcp-surface)" }}>
-            <Search size={12} style={{ color: "var(--gcp-text-secondary)", flexShrink: 0 }} />
+        <div style={{ padding: "6px 10px", borderBottom: "1px solid var(--proof-grey)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 4, border: "1px solid var(--proof-grey)", background: "var(--proof-surface)" }}>
+            <Search size={12} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
             <input
               placeholder="Filter sections..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ border: "none", outline: "none", fontSize: 11, background: "transparent", flex: 1, minWidth: 0, color: "var(--gcp-text)" }}
+              style={{ border: "none", outline: "none", fontSize: 11, background: "transparent", flex: 1, minWidth: 0, color: "var(--proof-text)" }}
             />
             {search && (
-              <button onClick={() => setSearch("")} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--gcp-text-secondary)", padding: 0, lineHeight: 1 }}>
+              <button onClick={() => setSearch("")} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--proof-text-secondary)", padding: 0, lineHeight: 1 }}>
                 <X size={10} />
               </button>
             )}
@@ -86,11 +86,11 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
                 style={{
                   width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "8px 14px",
                   border: "none", cursor: "pointer", fontSize: 11, textAlign: "left",
-                  background: isActive ? "var(--gcp-blue)" : "transparent",
-                  color: isActive ? "#fff" : "var(--gcp-text)", fontWeight: isActive ? 600 : 400,
+                  background: isActive ? "var(--proof-blue)" : "transparent",
+                  color: isActive ? "#fff" : "var(--proof-text)", fontWeight: isActive ? 600 : 400,
                   transition: "background 0.1s",
                 }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--gcp-surface)"; }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "var(--proof-surface)"; }}
                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
               >
                 <span style={{ fontSize: 14, lineHeight: 1, flexShrink: 0 }}>{s.icon}</span>
@@ -100,7 +100,7 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
             );
           })}
           {filtered.length === 0 && (
-            <div style={{ padding: "24px 14px", textAlign: "center", fontSize: 11, color: "var(--gcp-text-secondary)" }}>
+            <div style={{ padding: "24px 14px", textAlign: "center", fontSize: 11, color: "var(--proof-text-secondary)" }}>
               No sections match "{search}"
             </div>
           )}
@@ -108,20 +108,20 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
       </div>
 
       {/* Content */}
-      <div ref={contentRef} style={{ flex: 1, overflowY: "auto", padding: "24px 28px", fontSize: 12, lineHeight: 1.7, color: "var(--gcp-text-secondary)" }}>
+      <div ref={contentRef} style={{ flex: 1, overflowY: "auto", padding: "24px 28px", fontSize: 12, lineHeight: 1.7, color: "var(--proof-text-secondary)" }}>
         {active && (
           <div>
             {/* Header bar */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, paddingBottom: 12, borderBottom: "1px solid var(--gcp-grey)" }}>
-              <button onClick={goBack} disabled={history.length === 0} style={{ border: "none", background: "none", cursor: history.length > 0 ? "pointer" : "default", color: history.length > 0 ? "var(--gcp-text)" : "var(--gcp-grey)", padding: "2px 6px", borderRadius: 4, display: "flex", alignItems: "center" }} title="Back to previous section">
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, paddingBottom: 12, borderBottom: "1px solid var(--proof-grey)" }}>
+              <button onClick={goBack} disabled={history.length === 0} style={{ border: "none", background: "none", cursor: history.length > 0 ? "pointer" : "default", color: history.length > 0 ? "var(--proof-text)" : "var(--proof-grey)", padding: "2px 6px", borderRadius: 4, display: "flex", alignItems: "center" }} title="Back to previous section">
                 <ChevronLeft size={14} />
               </button>
               <span style={{ fontSize: 16 }}>{active.icon}</span>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--gcp-text)", margin: 0 }}>{active.title}</h3>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--proof-text)", margin: 0 }}>{active.title}</h3>
               <button onClick={() => setFullscreen(true)} className="gcp-button" style={{ fontSize: 10, padding: "3px 8px", display: "flex", alignItems: "center", gap: 4 }} title="Open fullscreen documentation viewer">
                 <Maximize2 size={11} /> Fullscreen
               </button>
-              <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)", marginLeft: "auto" }}>
+              <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)", marginLeft: "auto" }}>
                 {activeIdx + 1} / {sections.length}
               </span>
             </div>
@@ -129,15 +129,15 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
             {active.content()}
 
             {/* Prev / Next footer */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28, paddingTop: 16, borderTop: "1px solid var(--gcp-grey)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28, paddingTop: 16, borderTop: "1px solid var(--proof-grey)" }}>
               {prev ? (
-                <button onClick={() => goTo(prev.id)} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "6px 12px", background: "transparent", cursor: "pointer", color: "var(--gcp-text)" }}>
+                <button onClick={() => goTo(prev.id)} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, border: "1px solid var(--proof-grey)", borderRadius: 4, padding: "6px 12px", background: "transparent", cursor: "pointer", color: "var(--proof-text)" }}>
                   <ChevronLeft size={12} /> {prev.icon} {prev.title}
                 </button>
               ) : <div />}
-              <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>{active.number} of {sections.length}</span>
+              <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>{active.number} of {sections.length}</span>
               {next ? (
-                <button onClick={() => goTo(next.id)} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, border: "1px solid var(--gcp-grey)", borderRadius: 4, padding: "6px 12px", background: "transparent", cursor: "pointer", color: "var(--gcp-text)" }}>
+                <button onClick={() => goTo(next.id)} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, border: "1px solid var(--proof-grey)", borderRadius: 4, padding: "6px 12px", background: "transparent", cursor: "pointer", color: "var(--proof-text)" }}>
                   {next.icon} {next.title} <ChevronRight size={12} />
                 </button>
               ) : <div />}
@@ -150,15 +150,15 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
 
   if (fullscreen) {
     return (
-      <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "var(--gcp-surface)", display: "flex", flexDirection: "column" }}>
-        <div style={{ padding: "8px 16px", borderBottom: "1px solid var(--gcp-grey)", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, background: "var(--gcp-grey-bg)" }}>
+      <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "var(--proof-surface)", display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "8px 16px", borderBottom: "1px solid var(--proof-grey)", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, background: "var(--proof-grey-bg)" }}>
           <button onClick={() => setFullscreen(false)} className="gcp-button" style={{ fontSize: 11, padding: "4px 10px", display: "flex", alignItems: "center", gap: 4 }}>
             <X size={14} /> Close
           </button>
-          <span style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>|</span>
-          <Book size={14} style={{ color: "var(--gcp-text-secondary)" }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text)" }}>Documentation</span>
-          <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)", marginLeft: "auto", fontFamily: "var(--font-mono)" }}>
+          <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>|</span>
+          <Book size={14} style={{ color: "var(--proof-text-secondary)" }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>Documentation</span>
+          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginLeft: "auto", fontFamily: "var(--font-mono)" }}>
             {activeIdx + 1} / {sections.length}
           </span>
         </div>
@@ -183,15 +183,15 @@ interface SlideData {
 }
 
 const DEFAULT_SLIDES: SlideData[] = [
-  { id: "s1", icon: "GitCompare", title: "Regression Detection", color: "var(--gcp-red)", detail: "Catch regressions before they reach production with baseline-vs-candidate diff analysis.", points: ["Side-by-side test result comparison", "Column filters for status, duration, environment", "Permalink sharing for team review", "One-click GitHub issue filing"] },
-  { id: "s2", icon: "Shield", title: "Promotion Gating", color: "var(--gcp-orange)", detail: "Block or approve deployments based on per-environment pass-rate thresholds and regression checks.", points: ["Pass-rate comparison across env tiers", "Version drift tracking between builds", "Alert triage with run history drill-down", "Automated promotion decision support"] },
-  { id: "s3", icon: "Globe", title: "Cross-Environment Testing", color: "var(--gcp-blue)", detail: "Compare test behavior across Prod/Production, Prod/Staging, UAT/Production, and UAT/Staging.", points: ["Per-environment pass-rate charts", "Environment-specific config and IP mapping", "Multi-env run history with filtering", "Side-by-side env health dashboard"] },
-  { id: "s4", icon: "Bug", title: "Test Case Lifecycle", color: "var(--gcp-green)", detail: "Create, organize, import/export, and AI-generate test cases and suites.", points: ["Tabbed CRUD form with docs & HTTP config", "Multi-format import (JSON, YAML, JUnit XML)", "Bulk actions: delete, status change, add to suite", "AI-powered test generation from prompts"] },
-  { id: "s5", icon: "Activity", title: "CI/CD Observability", color: "var(--gcp-purple)", detail: "Monitor GitHub Actions run history, pass rates, failure trends, and run frequency.", points: ["Filterable run table with detail side panels", "Pass-rate charts by day and environment", "Run frequency tracking with gap detection", "Export and Slack sharing for team communication"] },
-  { id: "s6", icon: "Zap", title: "AI-Powered Analysis", color: "var(--gcp-yellow)", detail: "Use LLM to analyze test failures, explain diffs, generate test scripts, and generate suites.",         points: ["Multi-provider: OpenAI, WebLLM, Chrome Built-in AI", "5 built-in skills for code gen & analysis", "Rolling chat history with skill context", "WebLLM support for fully offline operation"] },
+  { id: "s1", icon: "GitCompare", title: "Regression Detection", color: "var(--proof-red)", detail: "Catch regressions before they reach production with baseline-vs-candidate diff analysis.", points: ["Side-by-side test result comparison", "Column filters for status, duration, environment", "Permalink sharing for team review", "One-click GitHub issue filing"] },
+  { id: "s2", icon: "Shield", title: "Promotion Gating", color: "var(--proof-orange)", detail: "Block or approve deployments based on per-environment pass-rate thresholds and regression checks.", points: ["Pass-rate comparison across env tiers", "Version drift tracking between builds", "Alert triage with run history drill-down", "Automated promotion decision support"] },
+  { id: "s3", icon: "Globe", title: "Cross-Environment Testing", color: "var(--proof-blue)", detail: "Compare test behavior across Prod/Production, Prod/Staging, UAT/Production, and UAT/Staging.", points: ["Per-environment pass-rate charts", "Environment-specific config and IP mapping", "Multi-env run history with filtering", "Side-by-side env health dashboard"] },
+  { id: "s4", icon: "Bug", title: "Test Case Lifecycle", color: "var(--proof-green)", detail: "Create, organize, import/export, and AI-generate test cases and suites.", points: ["Tabbed CRUD form with docs & HTTP config", "Multi-format import (JSON, YAML, JUnit XML)", "Bulk actions: delete, status change, add to suite", "AI-powered test generation from prompts"] },
+  { id: "s5", icon: "Activity", title: "CI/CD Observability", color: "var(--proof-purple)", detail: "Monitor GitHub Actions run history, pass rates, failure trends, and run frequency.", points: ["Filterable run table with detail side panels", "Pass-rate charts by day and environment", "Run frequency tracking with gap detection", "Export and Slack sharing for team communication"] },
+  { id: "s6", icon: "Zap", title: "AI-Powered Analysis", color: "var(--proof-yellow)", detail: "Use LLM to analyze test failures, explain diffs, generate test scripts, and generate suites.",         points: ["Multi-provider: OpenAI, WebLLM, Chrome Built-in AI", "5 built-in skills for code gen & analysis", "Rolling chat history with skill context", "WebLLM support for fully offline operation"] },
 ];
 
-const SLIDE_COLORS = ["var(--gcp-red)", "var(--gcp-orange)", "var(--gcp-blue)", "var(--gcp-green)", "var(--gcp-purple)", "var(--gcp-yellow)", "var(--gcp-cyan)", "var(--gcp-pink)", "var(--gcp-indigo)", "#5f6368"];
+const SLIDE_COLORS = ["var(--proof-red)", "var(--proof-orange)", "var(--proof-blue)", "var(--proof-green)", "var(--proof-purple)", "var(--proof-yellow)", "var(--proof-cyan)", "var(--proof-pink)", "var(--proof-indigo)", "#9aa0a6"];
 const SLIDE_ICONS: SlideIcon[] = ["GitCompare", "Shield", "Globe", "Bug", "Activity", "Zap", "BarChart3"];
 
 function genId() { return `s${Date.now()}`; }
@@ -237,17 +237,17 @@ function CarouselSlides() {
     return (
       <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }} onClick={() => setFullscreen(false)}>
         <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, maxWidth: 700, width: "100%", padding: "48px 52px", position: "relative", boxShadow: "0 8px 40px rgba(0,0,0,.3)" }}>
-          <button onClick={() => setFullscreen(false)} style={{ position: "absolute", top: 16, right: 16, width: 32, height: 32, border: "none", borderRadius: 8, background: "var(--gcp-grey-bg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gcp-text-secondary)" }}><X size={16} /></button>
+          <button onClick={() => setFullscreen(false)} style={{ position: "absolute", top: 16, right: 16, width: 32, height: 32, border: "none", borderRadius: 8, background: "var(--proof-grey-bg)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--proof-text-secondary)" }}><X size={16} /></button>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
             <div style={{ width: 52, height: 52, background: slide.color, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <FsIcon size={26} color="white" />
             </div>
             <div style={{ flex: 1 }}>
-              <h2 style={{ fontSize: 22, fontWeight: 800, color: "var(--gcp-text)", marginBottom: 8 }}>{slide.title}</h2>
-              <p style={{ fontSize: 14, color: "var(--gcp-text-secondary)", lineHeight: 1.7, marginBottom: 20 }}>{slide.detail}</p>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: "var(--proof-text)", marginBottom: 8 }}>{slide.title}</h2>
+              <p style={{ fontSize: 14, color: "var(--proof-text-secondary)", lineHeight: 1.7, marginBottom: 20 }}>{slide.detail}</p>
               <ul style={{ padding: 0, margin: 0, listStyle: "none", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 20px" }}>
                 {slide.points.map(p => (
-                  <li key={p} style={{ fontSize: 13, color: "var(--gcp-text)", display: "flex", alignItems: "center", gap: 8 }}>
+                  <li key={p} style={{ fontSize: 13, color: "var(--proof-text)", display: "flex", alignItems: "center", gap: 8 }}>
                     <CheckCircle2 size={14} color={slide.color} style={{ flexShrink: 0 }} />
                     {p}
                   </li>
@@ -255,7 +255,7 @@ function CarouselSlides() {
               </ul>
             </div>
           </div>
-          <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid var(--gcp-grey)", display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--gcp-text-secondary)" }}>
+          <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid var(--proof-grey)", display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--proof-text-secondary)" }}>
             <span style={{ background: slide.color + "20", color: slide.color, padding: "3px 10px", borderRadius: 12, fontWeight: 600 }}>{ASPECTS[aspect].label}</span>
             <span>PROOF · {slide.title}</span>
           </div>
@@ -272,18 +272,18 @@ function CarouselSlides() {
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {/* Main preview */}
         <div style={{ display: "flex", alignItems: "flex-start", gap: 20, minHeight: 130, position: "relative" }}>
-          <button onClick={() => setFullscreen(true)} style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, border: "1px solid var(--gcp-grey)", borderRadius: 6, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gcp-text-secondary)" }} title="Fullscreen">
+          <button onClick={() => setFullscreen(true)} style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, border: "1px solid var(--proof-grey)", borderRadius: 6, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--proof-text-secondary)" }} title="Fullscreen">
             <Maximize2 size={14} />
           </button>
           <div style={{ width: 44, height: 44, background: slide.color, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, opacity: 0.9 }}>
             <Icon size={22} color="white" />
           </div>
           <div style={{ flex: 1 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--gcp-text)", marginBottom: 4 }}>{slide.title}</h3>
-            <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", lineHeight: 1.6, marginBottom: 12 }}>{slide.detail}</p>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--proof-text)", marginBottom: 4 }}>{slide.title}</h3>
+            <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", lineHeight: 1.6, marginBottom: 12 }}>{slide.detail}</p>
             <ul style={{ padding: 0, margin: 0, listStyle: "none", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px 16px" }}>
               {slide.points.map(p => (
-                <li key={p} style={{ fontSize: 12, color: "var(--gcp-text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
+                <li key={p} style={{ fontSize: 12, color: "var(--proof-text-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
                   <CheckCircle2 size={12} color={slide.color} style={{ flexShrink: 0 }} />
                   {p}
                 </li>
@@ -304,7 +304,7 @@ function CarouselSlides() {
                   display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 8, cursor: "pointer",
                   border: isActive ? `2px solid ${s.color}` : "2px solid transparent",
                   background: isActive ? s.color + "12" : "transparent", flexShrink: 0,
-                  transition: "all 0.15s", userSelect: "none", fontSize: 11, color: "var(--gcp-text-secondary)"
+                  transition: "all 0.15s", userSelect: "none", fontSize: 11, color: "var(--proof-text-secondary)"
                 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, flexShrink: 0 }} />
                 <StripIcon size={12} style={{ flexShrink: 0 }} />
@@ -323,7 +323,7 @@ function CarouselSlides() {
             {slides.map((s, i) => (
               <button key={s.id} onClick={() => setIdx(i)} style={{
                 width: 8, height: 8, borderRadius: "50%", border: "none", cursor: "pointer",
-                background: i === idx ? slide.color : "var(--gcp-grey)", padding: 0, transition: "background 0.2s"
+                background: i === idx ? slide.color : "var(--proof-grey)", padding: 0, transition: "background 0.2s"
               }} aria-label={`Slide ${i + 1}`} />
             ))}
           </div>
@@ -336,7 +336,7 @@ function CarouselSlides() {
   );
 }
 
-const navBtnStyle: React.CSSProperties = { width: 28, height: 28, border: "1px solid var(--gcp-grey)", borderRadius: 6, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gcp-text-secondary)" };
+const navBtnStyle: React.CSSProperties = { width: 28, height: 28, border: "1px solid var(--proof-grey)", borderRadius: 6, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--proof-text-secondary)" };
 
 const DOC_SECTIONS: DocEntry[] = [
   { id: "quickstart", icon: "🚀", number: "1", title: "Quick Start", content: () => (
@@ -524,7 +524,7 @@ const DOC_SECTIONS: DocEntry[] = [
       <p><strong>Design Rules:</strong></p>
       <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
         <li>All pages use inline <code>style={}</code> — NOT Tailwind classes</li>
-        <li>CSS variables like <code>var(--gcp-blue)</code> are defined in <code>_group.css</code></li>
+        <li>CSS variables like <code>var(--proof-blue)</code> are defined in <code>_group.css</code></li>
         <li>Script paths use <code>.yaml</code> extension</li>
         <li>Use wouter's <code>useLocation()</code> for SPA navigation</li>
         <li>Charts use Google Charts (wrappers in <code>GoogleCharts.tsx</code>)</li>
@@ -560,21 +560,21 @@ export default function About() {
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
         {/* Hero */}
-        <div className="gcp-card" style={{ padding: "32px 36px", marginBottom: 24, borderLeft: "4px solid var(--gcp-blue)", position: "relative", overflow: "hidden" }}>
+        <div className="gcp-card" style={{ padding: "32px 36px", marginBottom: 24, borderLeft: "4px solid var(--proof-blue)", position: "relative", overflow: "hidden" }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
-            <div style={{ width: 56, height: 56, background: "var(--gcp-blue)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <div style={{ width: 56, height: 56, background: "var(--proof-blue)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <Zap size={28} color="white" />
             </div>
             <div>
-              <h1 style={{ fontSize: 26, fontWeight: 800, color: "var(--gcp-text)", marginBottom: 6, letterSpacing: "-0.5px" }}>PROOF</h1>
-              <p style={{ fontSize: 14, color: "var(--gcp-text-secondary)", lineHeight: 1.6, maxWidth: 600 }}>
+              <h1 style={{ fontSize: 26, fontWeight: 800, color: "var(--proof-text)", marginBottom: 6, letterSpacing: "-0.5px" }}>PROOF</h1>
+              <p style={{ fontSize: 14, color: "var(--proof-text-secondary)", lineHeight: 1.6, maxWidth: 600 }}>
                 <strong>Pipeline for Regression Observation and Output Framework</strong> — a web application regression testing platform
                 for GitHub Actions. Observe pass rates, compare baseline vs candidate, manage test cases, and
                 gate promotions with confidence.
               </p>
               <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {["GHA Observability", "Regression Testing", "Promotion Gating", "Cross-Environment"].map(tag => (
-                  <span key={tag} style={{ fontSize: 11, padding: "3px 10px", background: "var(--gcp-blue-bg)", color: "var(--gcp-blue)", borderRadius: 12, fontWeight: 600, border: "1px solid var(--gcp-blue)" }}>
+                  <span key={tag} style={{ fontSize: 11, padding: "3px 10px", background: "var(--proof-blue-bg)", color: "var(--proof-blue)", borderRadius: 12, fontWeight: 600, border: "1px solid var(--proof-blue)" }}>
                     {tag}
                   </span>
                 ))}
@@ -584,11 +584,11 @@ export default function About() {
         </div>
 
         {/* What is PROOF? — Beginner overview */}
-        <div className="gcp-card" style={{ padding: 28, marginBottom: 24, background: "linear-gradient(135deg, #e8f0fe 0%, #fff 100%)" }}>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--gcp-text)", marginBottom: 10 }}>
+        <div className="gcp-card" style={{ padding: 28, marginBottom: 24, background: "linear-gradient(135deg, rgba(91,138,245,0.06) 0%, var(--proof-surface) 100%)" }}>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--proof-text)", marginBottom: 10 }}>
             What is PROOF?
           </h2>
-          <p style={{ fontSize: 14, color: "var(--gcp-text-secondary)", lineHeight: 1.8, marginBottom: 20, maxWidth: 720 }}>
+          <p style={{ fontSize: 14, color: "var(--proof-text-secondary)", lineHeight: 1.8, marginBottom: 20, maxWidth: 720 }}>
             <strong>PROOF</strong> is a web dashboard that tracks your website's test health after every code change.
             When your automated tests run (via GitHub Actions), PROOF shows you which tests passed, which failed,
             and whether it's safe to deploy — across all your environments (production, staging, UAT).
@@ -599,71 +599,71 @@ export default function About() {
             <svg width="660" height="140" viewBox="0 0 660 140" style={{ maxWidth: "100%", display: "block" }}>
               <defs>
                 <marker id="archArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-                  <path d="M0 0 L10 5 L0 10 Z" fill="#5f6368"/>
+                  <path d="M0 0 L10 5 L0 10 Z" fill="#9aa0a6"/>
                 </marker>
               </defs>
-              <rect x="10" y="45" width="170" height="60" rx="8" fill="#e8f0fe" stroke="#1a73e8" strokeWidth="1.5"/>
-              <text x="95" y="70" textAnchor="middle" fontSize="13" fontWeight="bold" fill="#202124" fontFamily="system-ui, sans-serif">🤖 GitHub Actions</text>
-              <text x="95" y="88" textAnchor="middle" fontSize="10" fill="#5f6368" fontFamily="system-ui, sans-serif">Automated test runner</text>
+              <rect x="10" y="45" width="170" height="60" rx="8" fill="rgba(91,138,245,0.1)" stroke="#5b8af5" strokeWidth="1.5"/>
+              <text x="95" y="70" textAnchor="middle" fontSize="13" fontWeight="bold" fill="#e8eaed" fontFamily="system-ui, sans-serif">🤖 GitHub Actions</text>
+              <text x="95" y="88" textAnchor="middle" fontSize="10" fill="#9aa0a6" fontFamily="system-ui, sans-serif">Automated test runner</text>
 
-              <path d="M180 75 L225 75" stroke="#5f6368" strokeWidth="1.5" markerEnd="url(#archArrow)"/>
-              <text x="202" y="65" textAnchor="middle" fontSize="9" fill="#1a73e8" fontFamily="system-ui, sans-serif">triggers</text>
+              <path d="M180 75 L225 75" stroke="#9aa0a6" strokeWidth="1.5" markerEnd="url(#archArrow)"/>
+              <text x="202" y="65" textAnchor="middle" fontSize="9" fill="#5b8af5" fontFamily="system-ui, sans-serif">triggers</text>
 
-              <rect x="235" y="45" width="170" height="60" rx="8" fill="#e6f4ea" stroke="#1e8e3e" strokeWidth="1.5"/>
-              <text x="320" y="70" textAnchor="middle" fontSize="13" fontWeight="bold" fill="#202124" fontFamily="system-ui, sans-serif">🌐 PROOF Portal</text>
-              <text x="320" y="88" textAnchor="middle" fontSize="10" fill="#5f6368" fontFamily="system-ui, sans-serif">Browser-based dashboard</text>
+              <rect x="235" y="45" width="170" height="60" rx="8" fill="rgba(34,197,94,0.1)" stroke="#22c55e" strokeWidth="1.5"/>
+              <text x="320" y="70" textAnchor="middle" fontSize="13" fontWeight="bold" fill="#e8eaed" fontFamily="system-ui, sans-serif">🌐 PROOF Portal</text>
+              <text x="320" y="88" textAnchor="middle" fontSize="10" fill="#9aa0a6" fontFamily="system-ui, sans-serif">Browser-based dashboard</text>
 
-              <path d="M405 75 L450 75" stroke="#5f6368" strokeWidth="1.5" markerEnd="url(#archArrow)"/>
-              <text x="427" y="65" textAnchor="middle" fontSize="9" fill="#1a73e8" fontFamily="system-ui, sans-serif">displays</text>
+              <path d="M405 75 L450 75" stroke="#9aa0a6" strokeWidth="1.5" markerEnd="url(#archArrow)"/>
+              <text x="427" y="65" textAnchor="middle" fontSize="9" fill="#5b8af5" fontFamily="system-ui, sans-serif">displays</text>
 
-              <rect x="460" y="45" width="190" height="60" rx="8" fill="#1a73e8" stroke="#1a73e8" strokeWidth="1.5"/>
+              <rect x="460" y="45" width="190" height="60" rx="8" fill="#5b8af5" stroke="#5b8af5" strokeWidth="1.5"/>
               <text x="555" y="70" textAnchor="middle" fontSize="13" fontWeight="bold" fill="white" fontFamily="system-ui, sans-serif">📊 Insights &amp; Actions</text>
-              <text x="555" y="88" textAnchor="middle" fontSize="10" fill="#e8f0fe" fontFamily="system-ui, sans-serif">Compare · Promote · Analyze</text>
+              <text x="555" y="88" textAnchor="middle" fontSize="10" fill="rgba(232,234,237,0.8)" fontFamily="system-ui, sans-serif">Compare · Promote · Analyze</text>
             </svg>
           </div>
 
-          <p style={{ fontSize: 12, color: "var(--gcp-text-secondary)", lineHeight: 1.6, margin: "8px 0 16px", fontStyle: "italic", textAlign: "center" }}>
+          <p style={{ fontSize: 12, color: "var(--proof-text-secondary)", lineHeight: 1.6, margin: "8px 0 16px", fontStyle: "italic", textAlign: "center" }}>
             Data lives entirely in your browser — no servers, no setup, no sign-up.
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-            <div style={{ textAlign: "center", padding: 16, background: "var(--gcp-surface)", borderRadius: 8, border: "1px solid var(--gcp-grey)" }}>
+            <div style={{ textAlign: "center", padding: 16, background: "var(--proof-surface)", borderRadius: 8, border: "1px solid var(--proof-grey)" }}>
               <div style={{ fontSize: 28, marginBottom: 6 }}>🔁</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--gcp-text)", marginBottom: 4 }}>Code Change</div>
-              <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", lineHeight: 1.5 }}>Developer pushes code → automated tests run</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)", marginBottom: 4 }}>Code Change</div>
+              <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", lineHeight: 1.5 }}>Developer pushes code → automated tests run</div>
             </div>
-            <div style={{ textAlign: "center", padding: 16, background: "var(--gcp-surface)", borderRadius: 8, border: "1px solid var(--gcp-grey)" }}>
+            <div style={{ textAlign: "center", padding: 16, background: "var(--proof-surface)", borderRadius: 8, border: "1px solid var(--proof-grey)" }}>
               <div style={{ fontSize: 28, marginBottom: 6 }}>📈</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--gcp-text)", marginBottom: 4 }}>See Results</div>
-              <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", lineHeight: 1.5 }}>Dashboard shows pass/fail rates per environment</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)", marginBottom: 4 }}>See Results</div>
+              <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", lineHeight: 1.5 }}>Dashboard shows pass/fail rates per environment</div>
             </div>
-            <div style={{ textAlign: "center", padding: 16, background: "var(--gcp-blue)", borderRadius: 8 }}>
+            <div style={{ textAlign: "center", padding: 16, background: "var(--proof-blue)", borderRadius: 8 }}>
               <div style={{ fontSize: 28, marginBottom: 6 }}>🚀</div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "white", marginBottom: 4 }}>Deploy or Block</div>
-              <div style={{ fontSize: 11, color: "#e8f0fe", lineHeight: 1.5 }}>Compare baseline vs candidate — approve or block deployment</div>
+              <div style={{ fontSize: 11, color: "rgba(232,234,237,0.8)", lineHeight: 1.5 }}>Compare baseline vs candidate — approve or block deployment</div>
             </div>
           </div>
         </div>
 
         {/* Use Case Carousel */}
-        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--gcp-text)" }}>Use Cases</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--proof-text)" }}>Use Cases</h2>
         <div className="gcp-card" style={{ padding: 24, marginBottom: 24, position: "relative", overflow: "hidden" }}>
           <CarouselSlides />
         </div>
 
         {/* Features grid */}
-        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--gcp-text)" }}>Platform Features</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--proof-text)" }}>Platform Features</h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16, marginBottom: 28 }}>
           {features.map(f => {
             const Icon = f.icon;
             return (
               <div key={f.title} className="gcp-card" style={{ padding: 20, display: "flex", gap: 14 }}>
-                <div style={{ width: 36, height: 36, background: "var(--gcp-blue-bg)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Icon size={18} color="var(--gcp-blue)" />
+                <div style={{ width: 36, height: 36, background: "var(--proof-blue-bg)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Icon size={18} color="var(--proof-blue)" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4, color: "var(--gcp-text)" }}>{f.title}</div>
-                  <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)", lineHeight: 1.5 }}>{f.desc}</div>
+                  <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4, color: "var(--proof-text)" }}>{f.title}</div>
+                  <div style={{ fontSize: 12, color: "var(--proof-text-secondary)", lineHeight: 1.5 }}>{f.desc}</div>
                 </div>
               </div>
             );
@@ -671,7 +671,7 @@ export default function About() {
         </div>
 
         {/* Tech stack */}
-        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--gcp-text)" }}>Tech Stack</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--proof-text)" }}>Tech Stack</h2>
         <div className="gcp-card" style={{ overflow: "hidden", marginBottom: 28 }}>
           <table className="gcp-table" style={{ margin: 0 }}>
             <thead>
@@ -684,7 +684,7 @@ export default function About() {
               {stack.map(([tech, role]) => (
                 <tr key={tech}>
                   <td style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 600 }}>{tech}</td>
-                  <td style={{ color: "var(--gcp-text-secondary)", fontSize: 12 }}>{role}</td>
+                  <td style={{ color: "var(--proof-text-secondary)", fontSize: 12 }}>{role}</td>
                 </tr>
               ))}
             </tbody>
@@ -693,7 +693,7 @@ export default function About() {
 
         {/* Project Documentation toggle */}
         <div style={{ marginBottom: 28 }}>
-          <button onClick={() => setShowDocs(!showDocs)} className="gcp-card" style={{ width: "100%", padding: "14px 20px", display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", background: "var(--gcp-blue-bg)", fontSize: 14, fontWeight: 700, color: "var(--gcp-blue)" }}>
+          <button onClick={() => setShowDocs(!showDocs)} className="gcp-card" style={{ width: "100%", padding: "14px 20px", display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", background: "var(--proof-blue-bg)", fontSize: 14, fontWeight: 700, color: "var(--proof-blue)" }}>
             <Book size={18} />
             <span style={{ flex: 1, textAlign: "left" }}>{showDocs ? "Hide Project Documentation" : "📖 View Project Documentation — how this app works"}</span>
             <ChevronDown size={16} style={{ transform: showDocs ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
@@ -708,19 +708,19 @@ export default function About() {
         <div className="gcp-card" style={{ padding: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Ready to explore?</div>
-            <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>Start with the Dashboard for a pass-rate summary, or dive into the Test Manager to manage your suite.</div>
+            <div style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>Start with the Dashboard for a pass-rate summary, or dive into the Test Manager to manage your suite.</div>
           </div>
           <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
-            <Link href="/" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", background: "var(--gcp-blue)", color: "white", borderRadius: 4, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+            <Link href="/" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", background: "var(--proof-blue)", color: "white", borderRadius: 4, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
               <BarChart3 size={14} /> Dashboard
             </Link>
-            <Link href="/tests" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", border: "1px solid var(--gcp-blue)", color: "var(--gcp-blue)", borderRadius: 4, fontWeight: 600, fontSize: 13, textDecoration: "none", background: "var(--gcp-blue-bg)" }}>
+            <Link href="/tests" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", border: "1px solid var(--proof-blue)", color: "var(--proof-blue)", borderRadius: 4, fontWeight: 600, fontSize: 13, textDecoration: "none", background: "var(--proof-blue-bg)" }}>
               <Bug size={14} /> Test Manager
             </Link>
           </div>
         </div>
 
-        <div style={{ marginTop: 20, fontSize: 11, color: "var(--gcp-text-secondary)", textAlign: "center" }}>
+        <div style={{ marginTop: 20, fontSize: 11, color: "var(--proof-text-secondary)", textAlign: "center" }}>
           PROOF — Pipeline for Regression Observation and Output Framework · v2.0.0 · GHA Observability Platform
         </div>
       </div>

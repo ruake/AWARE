@@ -20,10 +20,10 @@ export function useSimpleToast(timeoutMs = 5000) {
   };
   const Toast = state ? (
     <div className="gcp-toast">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gcp-green)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--proof-green)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
       {state.msg}
       {state.action && (
-        <button onClick={() => { state.action!.onClick(); dismiss(); }} className="gcp-button gcp-button-xs" style={{ color: "var(--gcp-blue)", borderColor: "var(--gcp-blue)" }}>
+        <button onClick={() => { state.action!.onClick(); dismiss(); }} className="gcp-button gcp-button-xs" style={{ color: "var(--proof-blue)", borderColor: "var(--proof-blue)" }}>
           {state.action.label}
         </button>
       )}

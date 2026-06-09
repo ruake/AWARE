@@ -39,10 +39,10 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8, padding: 12, background: "var(--gcp-surface)", border: "1px solid var(--gcp-grey)", borderRadius: 8 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8, padding: 12, background: "var(--proof-surface)", border: "1px solid var(--proof-grey)", borderRadius: 8 }}>
       {fields.map(f => (
         <div key={f.id}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6, color: "var(--gcp-text)" }}>{f.question}</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6, color: "var(--proof-text)" }}>{f.question}</div>
           {f.type === "select" && (
             <select
               className="gcp-input"
@@ -65,9 +65,9 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
                     onClick={() => setValues(p => ({ ...p, [f.id]: o.value }))}
                     style={{
                       padding: "5px 12px", borderRadius: 6, fontSize: 11, cursor: "pointer",
-                      border: `1px solid ${active ? "var(--gcp-blue)" : "var(--gcp-grey)"}`,
-                      background: active ? "var(--gcp-blue)" : "transparent",
-                      color: active ? "white" : "var(--gcp-text-secondary)",
+                      border: `1px solid ${active ? "var(--proof-blue)" : "var(--proof-grey)"}`,
+                      background: active ? "var(--proof-blue)" : "transparent",
+                      color: active ? "white" : "var(--proof-text-secondary)",
                       fontWeight: active ? 600 : 400,
                       transition: "all 0.15s",
                     }}
@@ -93,7 +93,7 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
                 onClick={() => setValues(p => ({ ...p, [f.id]: !p[f.id] }))}
                 style={{
                   width: 36, height: 20, borderRadius: 10,
-                  background: values[f.id] ? "var(--gcp-blue)" : "var(--gcp-grey)",
+                  background: values[f.id] ? "var(--proof-blue)" : "var(--proof-grey)",
                   position: "relative", cursor: "pointer", transition: "background 0.2s", flexShrink: 0,
                 }}
               >
@@ -103,7 +103,7 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
                   left: values[f.id] ? 18 : 2,
                 }} />
               </span>
-              <span style={{ fontSize: 12, color: "var(--gcp-text-secondary)" }}>
+              <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>
                 {values[f.id] ? "Yes" : "No"}
               </span>
             </div>

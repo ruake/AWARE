@@ -1,4 +1,5 @@
 import React from "react";
+import Fuse from "fuse.js";
 import { useLocation } from "wouter";
 import { getTestCases, getTestSuites, RUNS, DIFF_ROWS } from "@/lib/data";
 
@@ -72,11 +73,21 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const q = query.toLowerCase();
-  const filtered = ALL_RESULTS.filter(r => {
-    if (typeFilter && r.type !== typeFilter) return false;
-    return !q || r.label.toLowerCase().includes(q) || r.description.toLowerCase().includes(q);
-  });
+  const fuse = React.useMemo(() => new Fuse(ALL_RESULTS, {
+    keys: ["label", "description"],
+    threshold: 0.3,
+    includeScore: true,
+  }), []);
+
+  const q = query.trim();
+  const filtered = React.useMemo(() => {
+    let items = ALL_RESULTS;
+    if (typeFilter) {
+      items = items.filter(r => r.type === typeFilter);
+    }
+    if (!q) return items;
+    return fuse.search(q).map(r => r.item).filter(r => !typeFilter || r.type === typeFilter);
+  }, [q, typeFilter, fuse]);
 
   React.useEffect(() => {
     if (activeIdx >= filtered.length) setActiveIdx(0);
@@ -95,10 +106,10 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
   ALL_RESULTS.forEach(r => { if (r.type in typeCounts) typeCounts[r.type as keyof typeof typeCounts]++; });
 
   const typeColor = (type: string) => {
-    if (type === "test") return { bg: "#f3e8ff", color: "#9334e6" };
-    if (type === "suite") return { bg: "#fef9c3", color: "#854d0e" };
-    if (type === "run") return { bg: "#dbeafe", color: "#1a73e8" };
-    return { bg: "#dcfce7", color: "#1e8e3e" };
+    if (type === "test") return { bg: "rgba(168,85,247,0.15)", color: "#a855f7" };
+    if (type === "suite") return { bg: "rgba(245,158,11,0.15)", color: "#f59e0b" };
+    if (type === "run") return { bg: "rgba(91,138,245,0.15)", color: "#5b8af5" };
+    return { bg: "rgba(34,197,94,0.15)", color: "#22c55e" };
   };
 
   return (
@@ -107,29 +118,29 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        style={{ position: "relative", width: "min(640px, 92vw)", background: "var(--gcp-surface)", borderRadius: 12, boxShadow: "0 20px 60px rgba(0,0,0,0.3)", border: "1px solid var(--gcp-grey)", overflow: "hidden" }}
+        style={{ position: "relative", width: "min(640px, 92vw)", background: "var(--proof-surface)", borderRadius: 12, boxShadow: "0 20px 60px rgba(0,0,0,0.3)", border: "1px solid var(--proof-grey)", overflow: "hidden" }}
         onClick={e => e.stopPropagation()}
       >
         {/* Search input */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderBottom: "1px solid var(--gcp-grey)" }}>
-          <span style={{ fontSize: 16, color: "var(--gcp-text-secondary)" }}>🔍</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderBottom: "1px solid var(--proof-grey)" }}>
+          <span style={{ fontSize: 16, color: "var(--proof-text-secondary)" }}>🔍</span>
           <input
             ref={inputRef}
             type="text"
             placeholder="Search tests, runs, comparisons..."
             style={{
               flex: 1, background: "transparent", border: "none", outline: "none",
-              fontSize: 15, color: "var(--gcp-text)", fontFamily: "var(--font-sans)",
+              fontSize: 15, color: "var(--proof-text)", fontFamily: "var(--font-sans)",
             }}
             value={query}
             onChange={e => { setQuery(e.target.value); setActiveIdx(0); }}
             onKeyDown={handleKey}
           />
-          <kbd style={{ fontSize: 11, padding: "2px 6px", background: "var(--gcp-grey-bg)", border: "1px solid var(--gcp-grey)", borderRadius: 4, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>ESC</kbd>
+          <kbd style={{ fontSize: 11, padding: "2px 6px", background: "var(--proof-grey-bg)", border: "1px solid var(--proof-grey)", borderRadius: 4, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)" }}>ESC</kbd>
         </div>
 
         {/* Filter chips */}
-        <div style={{ display: "flex", gap: 6, padding: "8px 18px", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, padding: "8px 18px", borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-grey-bg)", flexWrap: "wrap" }}>
           {(["test", "suite", "run", "compare"] as const).map(type => (
             <button
               key={type}
@@ -137,9 +148,9 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
               style={{
                 fontSize: 11, padding: "3px 10px", borderRadius: 12, fontWeight: 600, cursor: "pointer",
                 border: "1px solid",
-                background: typeFilter === type ? "var(--gcp-blue)" : "var(--gcp-surface)",
-                color: typeFilter === type ? "white" : "var(--gcp-text-secondary)",
-                borderColor: typeFilter === type ? "var(--gcp-blue)" : "var(--gcp-grey)",
+                background: typeFilter === type ? "var(--proof-blue)" : "var(--proof-surface)",
+                color: typeFilter === type ? "white" : "var(--proof-text-secondary)",
+                borderColor: typeFilter === type ? "var(--proof-blue)" : "var(--proof-grey)",
                 transition: "all 0.15s",
               }}
             >
@@ -147,14 +158,14 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
             </button>
           ))}
           {typeFilter && (
-            <button onClick={() => setTypeFilter(null)} style={{ fontSize: 11, padding: "3px 10px", color: "var(--gcp-red)", background: "none", border: "none", cursor: "pointer" }}>Clear</button>
+            <button onClick={() => setTypeFilter(null)} style={{ fontSize: 11, padding: "3px 10px", color: "var(--proof-red)", background: "none", border: "none", cursor: "pointer" }}>Clear</button>
           )}
         </div>
 
         {/* Results */}
         <div style={{ maxHeight: 360, overflowY: "auto" }}>
           {filtered.length === 0 ? (
-            <div style={{ padding: "40px 18px", textAlign: "center", color: "var(--gcp-text-secondary)", fontSize: 13 }}>No results for "{query}"</div>
+            <div style={{ padding: "40px 18px", textAlign: "center", color: "var(--proof-text-secondary)", fontSize: 13 }}>No results for "{query}"</div>
           ) : (
             filtered.map((r, i) => {
               const tc = typeColor(r.type);
@@ -164,7 +175,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
                   style={{
                     display: "flex", alignItems: "center", gap: 10,
                     padding: "10px 18px", cursor: "pointer",
-                    background: i === activeIdx ? "var(--gcp-blue-bg)" : "transparent",
+                    background: i === activeIdx ? "var(--proof-blue-bg)" : "transparent",
                     transition: "background 0.1s",
                   }}
                   onClick={() => { navigate(r.href); onClose(); }}
@@ -179,8 +190,8 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
                     {r.icon}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: "var(--gcp-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.label}</div>
-                    <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.description}</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: "var(--proof-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.label}</div>
+                    <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.description}</div>
                   </div>
                   <span style={{
                     fontSize: 10, padding: "2px 7px", borderRadius: 4, fontWeight: 600,
@@ -193,10 +204,10 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Footer */}
-        <div style={{ padding: "8px 18px", borderTop: "1px solid var(--gcp-grey)", display: "flex", gap: 14, fontSize: 11, color: "var(--gcp-text-secondary)" }}>
+        <div style={{ padding: "8px 18px", borderTop: "1px solid var(--proof-grey)", display: "flex", gap: 14, fontSize: 11, color: "var(--proof-text-secondary)" }}>
           {[["↑↓", "Navigate"], ["↵", "Open"], ["⌘K", "Toggle"], ["ESC", "Close"]].map(([key, label]) => (
             <span key={key}>
-              <kbd style={{ padding: "1px 5px", background: "var(--gcp-grey-bg)", border: "1px solid var(--gcp-grey)", borderRadius: 3, fontFamily: "var(--font-mono)", fontSize: 10 }}>{key}</kbd>
+              <kbd style={{ padding: "1px 5px", background: "var(--proof-grey-bg)", border: "1px solid var(--proof-grey)", borderRadius: 3, fontFamily: "var(--font-mono)", fontSize: 10 }}>{key}</kbd>
               {" "}{label}
             </span>
           ))}

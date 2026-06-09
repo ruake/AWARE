@@ -7,6 +7,7 @@ import { DIFF_ROWS, TEST_DETAILS, RUNS, getTestResultsForRun } from "@/lib/data"
 import { getEnvLabels } from "@/lib/envConfig";
 import { ENVS } from "@/lib/constants";
 import { useTestData } from "@/hooks/useTestData";
+import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import {
   ArrowLeft, BarChart3, Clock, Activity, AlertTriangle,
   Search, Share2, ChevronRight,
@@ -48,8 +49,8 @@ export default function TestAnalytics() {
     return (
       <AppLayout activeHref="/analytics">
         <div style={{ textAlign: "center", padding: 64 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--gcp-text-primary)" }}>No test data available</h2>
-          <p style={{ fontSize: 13, color: "var(--gcp-text-secondary)", marginTop: 8 }}>Run a comparison first to see analytics.</p>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>No test data available</h2>
+          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>Run a comparison first to see analytics.</p>
           <button onClick={() => navigate("/compare")} className="gcp-button" style={{ fontSize: 13, marginTop: 16 }}>Go to Compare</button>
         </div>
       </AppLayout>
@@ -97,9 +98,9 @@ export default function TestAnalytics() {
           <Link href={isTcMode ? "/tests" : "/compare"}>
             <a className="gcp-button gcp-button-sm"><ArrowLeft size={13} /> {isTcMode ? "Tests" : "Compare"}</a>
           </Link>
-          <ChevronRight size={14} style={{ color: "var(--gcp-text-secondary)" }} />
+          <ChevronRight size={14} style={{ color: "var(--proof-text-secondary)" }} />
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Search size={13} style={{ color: "var(--gcp-text-secondary)" }} />
+            <Search size={13} style={{ color: "var(--proof-text-secondary)" }} />
             <select className="gcp-input" style={{ fontFamily: "var(--font-mono)", fontSize: 11, maxWidth: 340 }}
               value={selectedTestId} onChange={e => handleSelectChange(e.target.value)}>
               {selectorItems.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -109,17 +110,17 @@ export default function TestAnalytics() {
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, color: "var(--gcp-text)", maxWidth: 700 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-text)", maxWidth: 700 }}>
               {isTcMode && testCase ? testCase.name : diff.name}
-              {isTcMode && testCase && <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)", fontWeight: 400, marginLeft: 8, fontFamily: "var(--font-mono)" }}>{testCase.id} · v{testCase.version}</span>}
+              {isTcMode && testCase && <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontWeight: 400, marginLeft: 8, fontFamily: "var(--font-mono)" }}>{testCase.id} · v{testCase.version}</span>}
             </h1>
             <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-              <span style={{ fontSize: 11, background: "var(--gcp-grey-bg)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--gcp-grey)" }}>{isTcMode && testCase ? testCase.category : diff.category}</span>
-              {isTcMode && testCase && <span style={{ fontSize: 11, fontWeight: 600, color: testCase.priority === "P0" ? "var(--gcp-red)" : "var(--gcp-text-secondary)" }}>{testCase.priority}</span>}
-              {!isTcMode && <span style={{ fontSize: 11, fontWeight: 600, color: isFlaky ? "var(--gcp-yellow)" : "var(--gcp-green)" }}>
+              <span style={{ fontSize: 11, background: "var(--proof-grey-bg)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--proof-grey)" }}>{isTcMode && testCase ? testCase.category : diff.category}</span>
+              {isTcMode && testCase && <span style={{ fontSize: 11, fontWeight: 600, color: testCase.priority === "P0" ? "var(--proof-red)" : "var(--proof-text-secondary)" }}>{testCase.priority}</span>}
+              {!isTcMode && <span style={{ fontSize: 11, fontWeight: 600, color: isFlaky ? "var(--proof-yellow)" : "var(--proof-green)" }}>
                 {isFlaky ? "⚠ Flaky" : "✓ Stable"}
               </span>}
-              <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)" }}>{detail.history.length} runs tracked</span>
+              <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>{detail.history.length} runs tracked</span>
             </div>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
@@ -132,8 +133,8 @@ export default function TestAnalytics() {
 
         {/* Trend alert */}
         {trend === "degrading" && (
-          <div style={{ background: "var(--gcp-red-bg)", border: "1px solid var(--gcp-red)", borderRadius: 4, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, fontSize: 12 }}>
-            <AlertTriangle size={14} style={{ color: "var(--gcp-red)" }} />
+          <div style={{ background: "var(--proof-red-bg)", border: "1px solid var(--proof-red)", borderRadius: 4, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, fontSize: 12 }}>
+            <AlertTriangle size={14} style={{ color: "var(--proof-red)" }} />
             <strong>Degrading trend</strong> — last 3 runs all FAIL. Investigate before promoting changes.
             <button onClick={() => { navigator.clipboard.writeText(`Test degrading: ${diff.name}\nLast 3 runs: FAIL\nPass Rate: ${detail.passRate}%`).then(() => show("Alert copied")); }}
               className="gcp-button gcp-button-xs" style={{ marginLeft: "auto" }}>
@@ -144,50 +145,54 @@ export default function TestAnalytics() {
 
         {/* KPI tiles */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
-          <CTAStatCard label="Pass Rate" value={`${detail.passRate}%`} subtitle={`${detail.history.length} runs`} accentColor="var(--gcp-blue)" />
-          <CTAStatCard label="Flakiness" value={`${detail.flakinessScore}%`} subtitle="status changes" accentColor={isFlaky ? "var(--gcp-yellow)" : "var(--gcp-green)"} />
-          <CTAStatCard label="Avg Duration" value={`${detail.avgDuration}ms`} subtitle="across all runs" accentColor="var(--gcp-green)" />
-          <CTAStatCard label="Environments" value={ENVS.length} subtitle="tested across" accentColor="var(--gcp-text-secondary)" />
+          <CTAStatCard label="Pass Rate" value={`${detail.passRate}%`} subtitle={`${detail.history.length} runs`} accentColor="var(--proof-blue)" />
+          <CTAStatCard label="Flakiness" value={`${detail.flakinessScore}%`} subtitle="status changes" accentColor={isFlaky ? "var(--proof-yellow)" : "var(--proof-green)"} />
+          <CTAStatCard label="Avg Duration" value={`${detail.avgDuration}ms`} subtitle="across all runs" accentColor="var(--proof-green)" />
+          <CTAStatCard label="Environments" value={ENVS.length} subtitle="tested across" accentColor="var(--proof-text-secondary)" />
         </div>
 
         {/* Charts */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
 
-          <div className="gcp-card" style={{ padding: 16 }}>
-            <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-              <Activity size={13} /> Pass/Fail Across Runs
-            </h3>
-            <GoogleBarChart
-              title=""
-              columns={["Run", "Pass", "Fail"]}
-              data={historyChartData}
-              xKey="runId"
-              yKeys={["pass", "fail"]}
-              colors={["#1e8e3e", "#d93025"]}
-              height="180px"
-              showTimeFrame={false}
-            />
-          </div>
+          <PanelErrorBoundary label="History chart">
+            <div className="gcp-card" style={{ padding: 16 }}>
+              <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                <Activity size={13} /> Pass/Fail Across Runs
+              </h3>
+              <GoogleBarChart
+                title=""
+                columns={["Run", "Pass", "Fail"]}
+                data={historyChartData}
+                xKey="runId"
+                yKeys={["pass", "fail"]}
+                colors={["#22c55e", "#ef4444"]}
+                height="180px"
+                showTimeFrame={false}
+              />
+            </div>
+          </PanelErrorBoundary>
 
-          <div className="gcp-card" style={{ padding: 16 }}>
-            <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-              <Clock size={13} /> Duration Trend (ms)
-            </h3>
-            <GoogleAreaChart
-              title=""
-              columns={["Run", "Duration"]}
-              data={historyChartData}
-              xKey="runId"
-              yKeys={["duration"]}
-              colors={["#1a73e8"]}
-              height="180px"
-              showTimeFrame={false}
-            />
-          </div>
+          <PanelErrorBoundary label="Duration chart">
+            <div className="gcp-card" style={{ padding: 16 }}>
+              <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                <Clock size={13} /> Duration Trend (ms)
+              </h3>
+              <GoogleAreaChart
+                title=""
+                columns={["Run", "Duration"]}
+                data={historyChartData}
+                xKey="runId"
+                yKeys={["duration"]}
+                colors={["#5b8af5"]}
+                height="180px"
+                showTimeFrame={false}
+              />
+            </div>
+          </PanelErrorBoundary>
 
           {/* Env breakdown */}
           <div className="gcp-card" style={{ padding: 16, gridColumn: "1 / -1" }}>
-            <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
               <BarChart3 size={13} /> Pass/Fail by Environment
             </h3>
             <GoogleBarChart
@@ -196,7 +201,7 @@ export default function TestAnalytics() {
               data={envStatus}
               xKey="env"
               yKeys={["pass", "fail"]}
-              colors={["#1e8e3e", "#d93025"]}
+              colors={["#22c55e", "#ef4444"]}
               height="140px"
               showTimeFrame={false}
               isHorizontal={true}
@@ -206,8 +211,8 @@ export default function TestAnalytics() {
 
         {/* Run history table */}
         <div className="gcp-card" style={{ overflow: "hidden" }}>
-          <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--gcp-grey)", background: "var(--gcp-grey-bg)" }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text)" }}>Run History</h3>
+          <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-grey-bg)" }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>Run History</h3>
           </div>
           <div style={{ overflowX: "auto" }}>
             <table className="gcp-table">
@@ -223,11 +228,11 @@ export default function TestAnalytics() {
                   <tr key={h.runId} style={{ cursor: "pointer" }}>
                     <td>
                       <Link href={`/runs/${h.runId}`}>
-                        <a style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-blue)", textDecoration: "none" }}>{h.runId}</a>
+                        <a style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)", textDecoration: "none" }}>{h.runId}</a>
                       </Link>
                     </td>
                     <td><span className={`gcp-badge ${h.status === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}>{h.status}</span></td>
-                    <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--gcp-text-secondary)" }}>{h.duration}ms</td>
+                    <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)" }}>{h.duration}ms</td>
                     <td style={{ fontSize: 12 }}>{h.env}</td>
                     <td>
                       <Link href={`/runs/${h.runId}`}>

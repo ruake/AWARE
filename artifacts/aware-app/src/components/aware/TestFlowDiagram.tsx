@@ -8,7 +8,7 @@ const stepLabelStyle: React.CSSProperties = {
   fontWeight: 700,
   textTransform: "uppercase",
   letterSpacing: "0.5px",
-  color: "var(--gcp-text-secondary)",
+  color: "var(--proof-text-secondary)",
   marginBottom: 6,
 };
 
@@ -25,12 +25,12 @@ function FlowStep({ icon, title, label, color, children }: {
         border: `1px solid ${color}`,
         borderRadius: 8,
         padding: 12,
-        background: `color-mix(in srgb, ${color} 6%, var(--gcp-surface))`,
+        background: `color-mix(in srgb, ${color} 6%, var(--proof-surface))`,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
         <span style={{ color }}>{icon}</span>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--gcp-text)" }}>{title}</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text)" }}>{title}</span>
         {label && (
           <span
             style={{
@@ -55,7 +55,7 @@ function FlowStep({ icon, title, label, color, children }: {
 
 function ArrowConnector() {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "4px 0", color: "var(--gcp-text-secondary)" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "4px 0", color: "var(--proof-text-secondary)" }}>
       <ArrowDown size={16} />
     </div>
   );
@@ -72,12 +72,12 @@ function Pill({ label, value, color }: { label: string; value: string; color?: s
         borderRadius: 4,
         fontSize: 11,
         fontFamily: "var(--font-mono)",
-        background: color ? `${color}15` : "var(--gcp-grey-bg)",
-        border: `1px solid ${color || "var(--gcp-grey)"}`,
-        color: color || "var(--gcp-text)",
+        background: color ? `${color}15` : "var(--proof-grey-bg)",
+        border: `1px solid ${color || "var(--proof-grey)"}`,
+        color: color || "var(--proof-text)",
       }}
     >
-      <span style={{ fontWeight: 500, color: "var(--gcp-text-secondary)" }}>{label}:</span>
+      <span style={{ fontWeight: 500, color: "var(--proof-text-secondary)" }}>{label}:</span>
       <span style={{ fontWeight: 600 }}>{value}</span>
     </div>
   );
@@ -104,7 +104,7 @@ function PredicateRow({ label, expected, operator, status }: {
         padding: "4px 8px",
         fontSize: 11,
         fontFamily: "var(--font-mono)",
-        borderBottom: "1px solid var(--gcp-grey)",
+        borderBottom: "1px solid var(--proof-grey)",
       }}
     >
       <span
@@ -112,25 +112,25 @@ function PredicateRow({ label, expected, operator, status }: {
           width: 6,
           height: 6,
           borderRadius: "50%",
-          background: status === "pass" ? "var(--gcp-green)" : status === "fail" ? "var(--gcp-red)" : "var(--gcp-grey)",
+          background: status === "pass" ? "var(--proof-green)" : status === "fail" ? "var(--proof-red)" : "var(--proof-grey)",
           flexShrink: 0,
         }}
       />
-      <span style={{ color: "var(--gcp-text-secondary)", flexShrink: 0 }}>{label}</span>
-      <span style={{ color: "var(--gcp-blue)", fontWeight: 600 }}>{opSymbol}</span>
-      <span style={{ color: "var(--gcp-text)", fontWeight: 600 }}>{expected}</span>
+      <span style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }}>{label}</span>
+      <span style={{ color: "var(--proof-blue)", fontWeight: 600 }}>{opSymbol}</span>
+      <span style={{ color: "var(--proof-text)", fontWeight: 600 }}>{expected}</span>
     </div>
   );
 }
 
 export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
   const typeColors: Record<string, string> = {
-    web: "var(--gcp-blue)",
-    api: "var(--gcp-green)",
-    edgeworker: "var(--gcp-yellow)",
-    transaction: "var(--gcp-purple, #9334e6)",
+    web: "var(--proof-blue)",
+    api: "var(--proof-green)",
+    edgeworker: "var(--proof-yellow)",
+    transaction: "var(--proof-purple, #a855f7)",
   };
-  const color = typeColors[testCase.testType] || "var(--gcp-blue)";
+  const color = typeColors[testCase.testType] || "var(--proof-blue)";
 
   const hasHeaders = Object.keys(testCase.requestHeaders).length > 0;
   const hasCookies = Object.keys(testCase.cookies).length > 0;
@@ -151,7 +151,7 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <Beaker size={16} style={{ color }} />
-        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--gcp-text)" }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>
           Test Flow: {testCase.name}
         </span>
         <span
@@ -191,7 +191,7 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
             <Pill
               label="Auto"
               value={testCase.automated ? "Yes" : "No"}
-              color={testCase.automated ? "var(--gcp-green)" : "var(--gcp-yellow)"}
+              color={testCase.automated ? "var(--proof-green)" : "var(--proof-yellow)"}
             />
           )}
         </div>
@@ -200,7 +200,7 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 4 }}>
           {hasHeaders && (
             <div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 4 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
                 Headers ({Object.keys(testCase.requestHeaders).length})
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -211,21 +211,21 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
                       fontSize: 10,
                       fontFamily: "var(--font-mono)",
                       padding: "2px 6px",
-                      background: "var(--gcp-surface)",
+                      background: "var(--proof-surface)",
                       borderRadius: 3,
-                      border: "1px solid var(--gcp-grey)",
+                      border: "1px solid var(--proof-grey)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
                     }}
                     title={`${k}: ${v}`}
                   >
-                    <span style={{ color: "var(--gcp-blue)" }}>{k}</span>
-                    <span style={{ color: "var(--gcp-text-secondary)" }}>: {String(v)}</span>
+                    <span style={{ color: "var(--proof-blue)" }}>{k}</span>
+                    <span style={{ color: "var(--proof-text-secondary)" }}>: {String(v)}</span>
                   </div>
                 ))}
                 {Object.keys(testCase.requestHeaders).length > 4 && (
-                  <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>
+                  <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
                     +{Object.keys(testCase.requestHeaders).length - 4} more
                   </span>
                 )}
@@ -234,7 +234,7 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
           )}
           {hasCookies && (
             <div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 4 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
                 Cookies ({Object.keys(testCase.cookies).length})
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -245,17 +245,17 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
                       fontSize: 10,
                       fontFamily: "var(--font-mono)",
                       padding: "2px 6px",
-                      background: "var(--gcp-surface)",
+                      background: "var(--proof-surface)",
                       borderRadius: 3,
-                      border: "1px solid var(--gcp-grey)",
+                      border: "1px solid var(--proof-grey)",
                     }}
                   >
-                    <span style={{ color: "var(--gcp-yellow)" }}>{k}</span>
-                    <span style={{ color: "var(--gcp-text-secondary)" }}>={String(v)}</span>
+                    <span style={{ color: "var(--proof-yellow)" }}>{k}</span>
+                    <span style={{ color: "var(--proof-text-secondary)" }}>={String(v)}</span>
                   </div>
                 ))}
                 {Object.keys(testCase.cookies).length > 3 && (
-                  <span style={{ fontSize: 10, color: "var(--gcp-text-secondary)" }}>
+                  <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
                     +{Object.keys(testCase.cookies).length - 3} more
                   </span>
                 )}
@@ -272,9 +272,9 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
               padding: "6px 8px",
               fontSize: 10,
               fontFamily: "var(--font-mono)",
-              background: "var(--gcp-grey-bg)",
+              background: "var(--proof-grey-bg)",
               borderRadius: 4,
-              color: "var(--gcp-text-secondary)",
+              color: "var(--proof-text-secondary)",
               lineHeight: 1.5,
               maxHeight: 48,
               overflow: "hidden",
@@ -292,17 +292,17 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
       <FlowStep
         icon={<ShieldCheck size={14} />}
         title="Validation Rules"
-        color="var(--gcp-green)"
+        color="var(--proof-green)"
         label={String((hasPredicates ? testCase.predicates.length : 0) + (hasAssertions ? testCase.assertions.length : 0))}
       >
         {hasPredicates ? (
           <div>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 4 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
               Predicates
             </div>
             <div
               style={{
-                border: "1px solid var(--gcp-grey)",
+                border: "1px solid var(--proof-grey)",
                 borderRadius: 4,
                 overflow: "hidden",
               }}
@@ -319,12 +319,12 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
           </div>
         ) : hasAssertions ? (
           <div>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 4 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
               Assertions
             </div>
             <div
               style={{
-                border: "1px solid var(--gcp-grey)",
+                border: "1px solid var(--proof-grey)",
                 borderRadius: 4,
                 overflow: "hidden",
               }}
@@ -340,14 +340,14 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
             </div>
           </div>
         ) : (
-          <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", fontStyle: "italic", padding: "4px 0" }}>
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontStyle: "italic", padding: "4px 0" }}>
             No validation rules defined
           </div>
         )}
 
         {hasCaptureHeaders && (
           <div style={{ marginTop: 8 }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 4 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
               Captured Response Headers
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -358,10 +358,10 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
                     fontSize: 10,
                     fontFamily: "var(--font-mono)",
                     padding: "2px 6px",
-                    background: "var(--gcp-blue-bg)",
+                    background: "var(--proof-blue-bg)",
                     borderRadius: 3,
-                    color: "var(--gcp-blue)",
-                    border: "1px solid var(--gcp-blue)",
+                    color: "var(--proof-blue)",
+                    border: "1px solid var(--proof-blue)",
                   }}
                 >
                   {h}
@@ -379,7 +379,7 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
         <FlowStep
           icon={<Image size={14} />}
           title="Visual Comparison"
-          color="var(--gcp-purple, #9334e6)"
+          color="var(--proof-purple, #a855f7)"
           label={`${Math.round(testCase.filmstrip.threshold * 100)}%`}
         >
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -399,14 +399,14 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
           <FlowStep
             icon={<FileCode size={14} />}
             title="Preconditions"
-            color="var(--gcp-yellow)"
+            color="var(--proof-yellow)"
           >
             <div
               style={{
                 fontSize: 10,
                 fontFamily: "var(--font-mono)",
                 lineHeight: 1.6,
-                color: "var(--gcp-text-secondary)",
+                color: "var(--proof-text-secondary)",
                 whiteSpace: "pre-wrap",
                 maxHeight: 80,
                 overflow: "hidden",
@@ -424,21 +424,21 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
           marginTop: 10,
           padding: "8px 12px",
           borderRadius: 6,
-          background: "var(--gcp-grey-bg)",
+          background: "var(--proof-grey-bg)",
           display: "flex",
           alignItems: "center",
           gap: 8,
           fontSize: 11,
-          color: "var(--gcp-text-secondary)",
-          border: "1px dashed var(--gcp-grey)",
+          color: "var(--proof-text-secondary)",
+          border: "1px dashed var(--proof-grey)",
         }}
       >
         <Eye size={14} />
         <span>
           Script: {testCase.scriptPath ? (
-            <a href={getGitHubUrl(testCase)} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", fontSize: 10, textDecoration: "underline", textUnderlineOffset: 2 }}><code style={{ fontFamily: "inherit", color: "inherit", fontSize: "inherit" }}>{cleanScriptPath(testCase)}</code></a>
+            <a href={getGitHubUrl(testCase)} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--font-mono)", color: "var(--proof-blue)", fontSize: 10, textDecoration: "underline", textUnderlineOffset: 2 }}><code style={{ fontFamily: "inherit", color: "inherit", fontSize: "inherit" }}>{cleanScriptPath(testCase)}</code></a>
           ) : (
-            <code style={{ fontFamily: "var(--font-mono)", color: "var(--gcp-blue)", fontSize: 10 }}>not set</code>
+            <code style={{ fontFamily: "var(--font-mono)", color: "var(--proof-blue)", fontSize: 10 }}>not set</code>
           )}
         </span>
         <span style={{ marginLeft: "auto", opacity: 0.5 }}>

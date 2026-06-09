@@ -3,9 +3,9 @@ import type { TestStats } from "@/lib/types";
 import type { ColumnFilterState } from "@/components/aware/ColumnFilter";
 
 const CATEGORY_COLORS = [
-  "#1a73e8", "#f9ab00", "#1e8e3e", "#ea4335", "#9334e6",
-  "#00bcd4", "#e91e63", "#ff5722", "#4caf50", "#3f51b5",
-  "#9c27b0", "#ff9800", "#795548", "#607d8b", "#cddc39",
+  "#5b8af5", "#f59e0b", "#22c55e", "#ef4444", "#a855f7",
+  "#06b6d4", "#ec4899", "#f97316", "#34d399", "#6366f1",
+  "#d946ef", "#fbbf24", "#78716c", "#6b7280", "#a3e635",
 ];
 
 export function StatsDashboard({ stats, colFilters, onToggleFilter }: {
@@ -28,53 +28,53 @@ export function StatsDashboard({ stats, colFilters, onToggleFilter }: {
     <>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 14 }}>
         <div className="gcp-card" style={{ padding: 16, textAlign: "center", cursor: "pointer" }} onClick={() => onToggleFilter("_clear", "")}>
-          <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-blue)" }}>{stats.total}</div>
-          <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Total Tests</div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: "var(--proof-blue)" }}>{stats.total}</div>
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>Total Tests</div>
         </div>
         <div className="gcp-card" style={{ padding: 16, textAlign: "center", cursor: "pointer" }} onClick={() => onToggleFilter("automated", "true")}>
-          <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-green)" }}>{stats.automated}</div>
-          <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Automated</div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: "var(--proof-green)" }}>{stats.automated}</div>
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>Automated</div>
         </div>
         <div className="gcp-card" style={{ padding: 16, textAlign: "center" }}>
-          <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-text)" }}>{stats.coverage}%</div>
-          <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Category Coverage</div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: "var(--proof-text)" }}>{stats.coverage}%</div>
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>Category Coverage</div>
         </div>
         <div className="gcp-card" style={{ padding: 16, textAlign: "center" }}>
-          <div style={{ fontSize: 28, fontWeight: 800, color: "var(--gcp-text)" }}>{stats.avgVersion}</div>
-          <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginTop: 2 }}>Avg Version</div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: "var(--proof-text)" }}>{stats.avgVersion}</div>
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>Avg Version</div>
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 16 }}>
         <div className="gcp-card" style={{ padding: "12px 14px" }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Status</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Status</div>
           <GoogleBarChart
             title=""
             columns={["Status", "Count"]}
             data={statusData}
             xKey="status"
             yKeys={["count"]}
-            colors={["#1a73e8"]}
+            colors={["#5b8af5"]}
             height="100px"
             showTimeFrame={false}
             onPointClick={p => onToggleFilter("status", String(p.status))}
           />
         </div>
         <div className="gcp-card" style={{ padding: "12px 14px" }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Priority</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Priority</div>
           <GoogleBarChart
             title=""
             columns={["Priority", "Count"]}
             data={priorityData}
             xKey="priority"
             yKeys={["count"]}
-            colors={["#1a73e8"]}
+            colors={["#5b8af5"]}
             height="100px"
             showTimeFrame={false}
             onPointClick={p => onToggleFilter("priority", String(p.priority))}
           />
         </div>
         <div className="gcp-card" style={{ padding: "12px 14px" }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--gcp-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Category</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>By Category</div>
           <GooglePieChart
             title=""
             data={categoryData}
