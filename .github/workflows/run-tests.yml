@@ -100,12 +100,10 @@ jobs:
           PLAYWRIGHT_BASE_URL: "http://localhost:5173"
 
       - name: Run Puppeteer tests
-        run: pnpm run test:puppeteer
-        continue-on-error: true
+        run: node scripts/run-puppeteer.mjs
 
       - name: Run HTTP tests
-        run: pnpm run test:http
-        continue-on-error: true
+        run: node scripts/run-http.mjs
 
       - name: Record run from Playwright results
         run: node scripts/record-run.mjs test-results/playwright-results.json --label "(Playwright)" --suffix pw

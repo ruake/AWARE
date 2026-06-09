@@ -3,15 +3,21 @@ import { useParams, useLocation, useSearch } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
 import { getRunById, getTestResultsForRun, RUNS, getPromotionDecision, getTestCaseById } from "@/lib/data";
-import type { TestResult, TestAssertionResult, TestCookie } from "@/lib/types";
+import type { TestResult, TestAssertionResult, TestCookie, FilmstripFrame } from "@/lib/types";
 import {
   ArrowLeft, GitCompare, CheckCircle2, XCircle, Github,
   Share2, AlertTriangle, Shield, Zap, RefreshCw,
   Search, ChevronRight, ChevronLeft,
-  Check, BarChart3, FileText,
+  Check, BarChart3, FileText, Maximize2,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function AssertionRow({ a }: { a: TestAssertionResult }) {
   return (
@@ -37,6 +43,7 @@ export default function RunDetail() {
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [catFilter, setCatFilter] = React.useState<string>("all");
   const [decision, setDecision] = React.useState(run ? getPromotionDecision(run.id) : null);
+  const [expandScreenshot, setExpandScreenshot] = React.useState<FilmstripFrame | null>(null);
 
   if (!run) {
     return (
@@ -224,13 +231,32 @@ export default function RunDetail() {
                       <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4 }}>
                         {selectedResult.filmstrip.map(f => (
                           <div key={f.id} style={{ flexShrink:0, width:140 }}>
-                            <img src={f.dataUri} alt={f.label} style={{ width:'100%', borderRadius:4, border:'1px solid var(--proof-grey)', display:'block' }} />
-                            <div style={{ fontSize:9, color:'var(--proof-text-secondary)', marginTop:2, textAlign:'center' }}>{f.label}</div>
+                            <button onClick={() => setExpandScreenshot(f)} style={{ padding:0, border:'none', background:'none', cursor:'pointer', display:'block', width:'100%' }}>
+                              <img src={f.dataUri} alt={f.label} style={{ width:'100%', borderRadius:4, border:'1px solid var(--proof-grey)', display:'block' }} />
+                            </button>
+                            <div style={{ fontSize:9, color:'var(--proof-text-secondary)', marginTop:2, textAlign:'center', display:'flex', alignItems:'center', justifyContent:'center', gap:2 }}>
+                              {f.label}
+                              <Maximize2 size={9} style={{ color:'var(--proof-text-secondary)' }} />
+                            </div>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
+
+                  {/* Screenshot lightbox */}
+                  <Dialog open={!!expandScreenshot} onOpenChange={(open) => { if (!open) setExpandScreenshot(null); }}>
+                    <DialogContent style={{ maxWidth:'90vw', width:'auto', background:'var(--proof-surface)', border:'1px solid var(--proof-grey)', padding:0 }}>
+                      <DialogTitle style={{ fontSize:11, fontWeight:600, padding:'8px 12px', borderBottom:'1px solid var(--proof-grey)', color:'var(--proof-text-secondary)', textTransform:'uppercase', letterSpacing:'0.5px' }}>
+                        {expandScreenshot?.label ?? 'Screenshot'}
+                      </DialogTitle>
+                      {expandScreenshot && (
+                        <div style={{ padding:12, display:'flex', justifyContent:'center', alignItems:'center', maxHeight:'80vh', overflow:'auto' }}>
+                          <img src={expandScreenshot.dataUri} alt={expandScreenshot.label} style={{ maxWidth:'100%', maxHeight:'70vh', borderRadius:4, display:'block' }} />
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
 
                   {/* HTTP Exchange — always visible */}
                   {(() => {

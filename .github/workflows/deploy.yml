@@ -71,14 +71,12 @@ jobs:
           PLAYWRIGHT_BASE_URL: "http://localhost:5173"
 
       - name: Run Puppeteer tests
-        run: pnpm run test:puppeteer
-        continue-on-error: true
+        run: node scripts/run-puppeteer.mjs
         env:
           BASE_URL: "https://the-internet.herokuapp.com"
 
       - name: Run HTTP tests
-        run: pnpm run test:http
-        continue-on-error: true
+        run: node scripts/run-http.mjs
         env:
           BASE_URL: "https://the-internet.herokuapp.com"
 

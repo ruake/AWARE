@@ -1,7 +1,8 @@
 import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { DIFF_ROWS, getTestCaseById } from "@/lib/data";
+import { DIFF_ROWS, getTestCaseById, RUNS, getTestResultsForRun } from "@/lib/data";
+import type { TestResult } from "@/lib/types";
 import { TestDocTopBar } from "@/components/aware/TestDocTopBar";
 import { TestDocSidebar } from "@/components/aware/TestDocSidebar";
 import { TestDocChangelog } from "@/components/aware/TestDocChangelog";
@@ -14,6 +15,16 @@ export default function TestDoc() {
   const testId = params.get("testId") || "";
   const diffRow = DIFF_ROWS.find(d => d.id === testId);
   const testCase = React.useMemo(() => getTestCaseById(testId), [testId]);
+  const latestResult = React.useMemo(() => {
+    const name = testCase?.name ?? diffRow?.name;
+    if (!name) return null;
+    for (const run of RUNS) {
+      const results = getTestResultsForRun(run.id);
+      const match = results.find(r => r.name === name);
+      if (match) return match;
+    }
+    return null;
+  }, [testCase, diffRow]);
   const testName = testCase?.name ?? diffRow?.name ?? (testId || "test_geo_match_us_locale_prod[/us/]");
   const testStatus = diffRow?.candStatus ?? "FAIL";
   const testCategory = testCase?.category ?? diffRow?.category ?? "geo-match";
@@ -135,6 +146,80 @@ export default function TestDoc() {
                 </svg>
               </div>
             </div>
+
+            {/* HTTP Evidence */}
+            {(() => {
+              const e = latestResult?.evidence;
+              if (!e) return null;
+              const rows: { label: string; val: string }[] = [];
+              rows.push({ label: 'Method', val: e.request.method });
+              rows.push({ label: 'URL', val: e.request.url });
+              rows.push({ label: 'Status', val: String(e.response.status) });
+              const ct = e.response.headers?.['Content-Type'] ?? '';
+              if (ct) rows.push({ label: 'Content-Type', val: ct });
+              const cl = e.response.headers?.['Content-Length'] ?? '';
+              if (cl) rows.push({ label: 'Size', val: cl + ' bytes' });
+              const cache = e.response.headers?.['Cache-Control'] ?? '';
+              if (cache) rows.push({ label: 'Cache', val: cache });
+              return (
+                <div className="gcp-card" style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--proof-grey)', background: 'var(--proof-surface-hover)' }}>
+                    <h2 style={{ fontWeight: 500, fontSize: 13 }}>HTTP Evidence (latest run)</h2>
+                  </div>
+                  <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 3, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
+                    {rows.map(r => (
+                      <div key={r.label} style={{ display: 'flex', gap: 8 }}>
+                        <span style={{ color: 'var(--proof-text-secondary)', width: 100, flexShrink: 0 }}>{r.label}</span>
+                        <span style={{ color: 'var(--proof-text)', wordBreak: 'break-all' }}>{r.val}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {e.response.headers && Object.keys(e.response.headers).length > 0 && (
+                    <details open style={{ margin: '0 16px 12px', fontSize: 12 }}>
+                      <summary style={{ cursor: 'pointer', color: 'var(--proof-text-secondary)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Response Headers ({Object.keys(e.response.headers).length})</summary>
+                      <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {Object.entries(e.response.headers).map(([k, v]) => (
+                          <div key={k} style={{ display: 'flex', gap: 6, fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                            <span style={{ color: 'var(--proof-blue)', minWidth: 160 }}>{k}</span>
+                            <span style={{ color: 'var(--proof-text)', wordBreak: 'break-all' }}>{v}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                  {e.request.headers && Object.keys(e.request.headers).length > 0 && (
+                    <details open style={{ margin: '0 16px 12px', fontSize: 12 }}>
+                      <summary style={{ cursor: 'pointer', color: 'var(--proof-text-secondary)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Request Headers ({Object.keys(e.request.headers).length})</summary>
+                      <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {Object.entries(e.request.headers).map(([k, v]) => (
+                          <div key={k} style={{ display: 'flex', gap: 6, fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                            <span style={{ color: 'var(--proof-purple)', minWidth: 160 }}>{k}</span>
+                            <span style={{ color: 'var(--proof-text)', wordBreak: 'break-all' }}>{v}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                  {e.response.cookies && e.response.cookies.length > 0 && (
+                    <details open style={{ margin: '0 16px 12px', fontSize: 12 }}>
+                      <summary style={{ cursor: 'pointer', color: 'var(--proof-text-secondary)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cookies ({e.response.cookies.length})</summary>
+                      <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {e.response.cookies.map((c, i) => (
+                          <div key={i} style={{ display: 'flex', gap: 6, fontFamily: 'var(--font-mono)', fontSize: 11, padding: '4px 6px', background: 'var(--proof-grey-bg)', borderRadius: 4 }}>
+                            <span style={{ color: 'var(--proof-orange)', fontWeight: 600 }}>{c.name}</span>
+                            <span style={{ color: 'var(--proof-text)', wordBreak: 'break-all' }}>= {c.value}</span>
+                            {c.domain && <span style={{ color: 'var(--proof-text-secondary)' }}>domain={c.domain}</span>}
+                            {c.path && <span style={{ color: 'var(--proof-text-secondary)' }}>path={c.path}</span>}
+                            {c.httpOnly && <span style={{ color: 'var(--proof-green)' }}>HttpOnly</span>}
+                            {c.secure && <span style={{ color: 'var(--proof-green)' }}>Secure</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Right sidebar — changelog */}
