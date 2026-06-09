@@ -87,13 +87,13 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm run test:e2e:install
       - name: Run E2E smoke tests
-        run: pnpm run test:e2e:ci
+        run: pnpm exec playwright test --reporter=github --reporter=json:outputFile=test-results/playwright-results.json e2e/smoke.spec.ts
         continue-on-error: true
+        env:
+          PLAYWRIGHT_BASE_URL: "http://localhost:5173"
 
       - name: Record run from E2E results
-        run: |
-          pnpm exec playwright test --reporter=json 2>/dev/null > /tmp/playwright-results.json
-          node scripts/record-run.mjs /tmp/playwright-results.json
+        run: node scripts/record-run.mjs test-results/playwright-results.json
         continue-on-error: true
 
       - name: Commit run data back to repo
