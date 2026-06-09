@@ -63,14 +63,18 @@ export default function Dashboard() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--proof-text)", letterSpacing: "-0.3px" }}>PROOF — Regression Dashboard</h1>
-            <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 3 }}>Test analytics &amp; promotion readiness · Powered by GitHub Actions</p>
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--proof-text)", letterSpacing: "-0.6px", lineHeight: 1.2 }}>
+              Regression Dashboard
+            </h1>
+            <p style={{ fontSize: 12.5, color: "var(--proof-text-secondary)", marginTop: 4, letterSpacing: "-0.1px" }}>
+              Test analytics &amp; promotion readiness · Powered by GitHub Actions
+            </p>
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => show("Run data refreshed")} className="gcp-button gcp-button-sm">
               <RefreshCw size={13} /> Refresh
             </button>
-            <button onClick={() => navigate("/start")} className="gcp-button-primary" style={{ fontSize: 13 }}>
+            <button onClick={() => navigate("/start")} className="gcp-button-primary">
               <Play size={14} /> New Regression Run
             </button>
           </div>
@@ -125,7 +129,10 @@ export default function Dashboard() {
         {/* Pass rate chart */}
         <PanelErrorBoundary label="Pass rate chart">
           <div className="gcp-card" style={{ padding: 16 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Pass Rate by Environment</h3>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <div style={{ width: 3, height: 16, borderRadius: 2, background: "linear-gradient(180deg, var(--proof-blue) 0%, var(--proof-purple) 100%)" }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)", letterSpacing: "0.3px", textTransform: "uppercase" }}>Pass Rate by Environment</span>
+            </div>
             {PER_ENV_PASS_RATE.length > 0 ? (
               <GoogleAreaChart
                 title=""
@@ -149,30 +156,40 @@ export default function Dashboard() {
         {/* Env health + Recent runs */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 14 }}>
           <div className="gcp-card" style={{ padding: 0, overflow: "hidden" }}>
-            <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--proof-grey)", background: "var(--proof-grey-bg)" }}>
-              <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>Environment Health</h3>
+            <div style={{ padding: "13px 16px", borderBottom: "1px solid var(--proof-border)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 3, height: 14, borderRadius: 2, background: "linear-gradient(180deg, var(--proof-green) 0%, var(--proof-blue) 100%)" }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)", letterSpacing: "0.3px", textTransform: "uppercase" }}>Environment Health</span>
+              </div>
             </div>
-            {ENV_SUMMARY.map(env => (
-              <div key={env.label} onClick={() => navigate(`/runs?env=${encodeURIComponent(env.label)}`)} style={{ cursor: "pointer", padding: "12px 16px", borderBottom: "1px solid var(--proof-grey)", display: "flex", flexDirection: "column", gap: 6, transition: "background 0.1s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "var(--proof-grey-bg)"}
-                onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+            {ENV_SUMMARY.map((env, i) => (
+              <div key={env.label} onClick={() => navigate(`/runs?env=${encodeURIComponent(env.label)}`)}
+                style={{ cursor: "pointer", padding: "13px 16px", borderBottom: i < ENV_SUMMARY.length - 1 ? "1px solid var(--proof-border)" : "none", display: "flex", flexDirection: "column", gap: 7, transition: "background 0.15s" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.025)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+              >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>{env.label}</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 12.5, fontWeight: 500, color: "var(--proof-text)" }}>{env.label}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     {env.trend !== 0 && (
                       <span style={{ fontSize: 11, fontWeight: 600, color: env.trend < 0 ? "var(--proof-red)" : "var(--proof-green)", display: "flex", alignItems: "center", gap: 2 }}>
                         {env.trend < 0 ? <TrendingDown size={11} /> : <TrendingUp size={11} />}
-                        {env.trend}%
+                        {Math.abs(env.trend)}%
                       </span>
                     )}
-                    <span style={{ fontSize: 14, fontWeight: 700, color: env.color }}>{env.passRate}%</span>
+                    <span style={{ fontSize: 15, fontWeight: 800, color: env.color, letterSpacing: "-0.5px", fontVariantNumeric: "tabular-nums" }}>{env.passRate}%</span>
                   </div>
                 </div>
-                <div style={{ height: 6, background: "var(--proof-grey-bg)", borderRadius: 3, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${env.passRate}%`, background: env.color, borderRadius: 3 }} />
+                <div style={{ height: 5, background: "rgba(255,255,255,0.06)", borderRadius: 99, overflow: "hidden" }}>
+                  <div style={{
+                    height: "100%", width: `${env.passRate}%`,
+                    background: `linear-gradient(90deg, ${env.color}cc, ${env.color})`,
+                    borderRadius: 99,
+                    boxShadow: `0 0 8px ${env.color}50`,
+                  }} />
                 </div>
                 {env.alert && (
-                  <div style={{ fontSize: 10, fontWeight: 700, color: "var(--proof-red)", display: "flex", alignItems: "center", gap: 4 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--proof-red)", display: "flex", alignItems: "center", gap: 4 }}>
                     <AlertTriangle size={10} /> {env.alert}
                   </div>
                 )}
@@ -183,9 +200,12 @@ export default function Dashboard() {
 
           <PanelErrorBoundary label="Recent runs table">
             <div className="gcp-card" style={{ padding: 16 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <h3 style={{ fontSize: 13, fontWeight: 600 }}>Recent Runs</h3>
-                <button onClick={() => navigate("/runs")} style={{ fontSize: 12, color: "var(--proof-blue)", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 3, height: 14, borderRadius: 2, background: "linear-gradient(180deg, var(--proof-blue) 0%, var(--proof-purple) 100%)" }} />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)", letterSpacing: "0.3px", textTransform: "uppercase" }}>Recent Runs</span>
+                </div>
+                <button onClick={() => navigate("/runs")} style={{ fontSize: 12, color: "var(--proof-blue)", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontWeight: 500 }}>
                   View all <ChevronRight size={12} />
                 </button>
               </div>
@@ -210,8 +230,9 @@ export default function Dashboard() {
         </div>
 
         {/* Quick actions */}
-        <div className="gcp-card" style={{ padding: "14px 18px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text-secondary)", marginRight: 4 }}>QUICK ACTIONS:</span>
+        <div className="gcp-card" style={{ padding: "13px 18px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", borderTop: "3px solid rgba(91,138,245,0.2)" }}>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: "var(--proof-text-secondary)", letterSpacing: "0.6px", textTransform: "uppercase", marginRight: 2 }}>Quick Actions</span>
+          <div style={{ width: 1, height: 16, background: "var(--proof-border)", marginRight: 2 }} />
           <button onClick={() => navigate("/start")} className="gcp-button-primary" style={{ padding: "6px 14px" }}>
             <Play size={13} /> Run Full Regression Suite
           </button>

@@ -128,19 +128,24 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
 
       {/* Top Nav */}
       <header style={{
-        height: 56, background: "var(--proof-surface)",
-        borderBottom: "1px solid var(--proof-grey)",
+        height: 54, background: "var(--proof-surface)",
+        borderBottom: "1px solid var(--proof-border)",
         display: "flex", alignItems: "center", padding: "0 16px", gap: 12,
         position: "sticky", top: 0, zIndex: 100, flexShrink: 0,
-        boxShadow: "0 1px 3px rgba(60,64,67,0.12)",
+        boxShadow: "0 1px 12px rgba(0,0,0,0.3)",
       }}>
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          <div style={{ width: 30, height: 30, background: "var(--proof-blue)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <span style={{ color: "white", fontWeight: 800, fontSize: 13, letterSpacing: "-0.5px" }}>PR</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
+          <div style={{
+            width: 30, height: 30,
+            background: "linear-gradient(135deg, var(--proof-blue) 0%, #7aa2f7 100%)",
+            borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, boxShadow: "0 2px 8px rgba(91,138,245,0.4)",
+          }}>
+            <span style={{ color: "white", fontWeight: 900, fontSize: 12, letterSpacing: "-0.5px" }}>PR</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
-            <span style={{ fontWeight: 800, fontSize: 14, color: "var(--proof-text)", letterSpacing: "-0.3px" }}>PROOF</span>
+            <span style={{ fontWeight: 800, fontSize: 14, color: "var(--proof-text)", letterSpacing: "-0.4px" }}>PROOF</span>
             <span style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>CDN Observability</span>
           </div>
         </div>
@@ -172,15 +177,17 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
             onClick={() => setPaletteOpen(true)}
             style={{
               display: "flex", alignItems: "center", gap: 6,
-              padding: "5px 10px", fontSize: 12, cursor: "pointer",
-              border: "1px solid var(--proof-grey)", borderRadius: 4,
-              background: "var(--proof-grey-bg)", color: "var(--proof-text-secondary)",
-              whiteSpace: "nowrap",
+              padding: "5px 12px", fontSize: 12, cursor: "pointer",
+              border: "1px solid var(--proof-border-strong)", borderRadius: 7,
+              background: "rgba(255,255,255,0.04)", color: "var(--proof-text-secondary)",
+              whiteSpace: "nowrap", transition: "all 0.15s ease",
             }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "var(--proof-text)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.color = "var(--proof-text-secondary)"; }}
           >
-            <Search size={12} />
-            <span>Search</span>
-            <kbd style={{ fontSize: 10, border: "1px solid var(--proof-grey)", borderRadius: 3, padding: "0 4px", fontFamily: "var(--font-mono)", lineHeight: "16px" }}>⌘K</kbd>
+            <Search size={13} />
+            <span style={{ fontWeight: 500 }}>Search</span>
+            <kbd style={{ fontSize: 10, border: "1px solid var(--proof-border-strong)", borderRadius: 4, padding: "1px 5px", fontFamily: "var(--font-mono)", lineHeight: "15px", background: "rgba(255,255,255,0.04)" }}>⌘K</kbd>
           </button>
 
           {/* Bell + Notification dropdown */}
@@ -291,16 +298,19 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
               return (
                 <Link key={item.href} href={item.href} style={{
                   display: "flex", alignItems: "center",
-                  padding: "10px 16px", cursor: "pointer",
+                  padding: "9px 16px", cursor: "pointer",
                   overflow: "hidden", whiteSpace: "nowrap",
                   textDecoration: "none",
                   color: active ? "var(--proof-blue)" : "var(--proof-text-secondary)",
-                  background: active ? "var(--proof-blue-bg)" : "transparent",
-                  transition: "background 0.15s, color 0.15s",
+                  background: active ? "rgba(91,138,245,0.10)" : "transparent",
+                  boxShadow: active ? "inset 3px 0 0 var(--proof-blue)" : "none",
+                  borderRadius: "0 8px 8px 0",
+                  marginRight: 6,
+                  transition: "background 0.15s, color 0.15s, box-shadow 0.15s",
                 }}>
-                  <Icon size={20} style={{ flexShrink: 0 }} />
+                  <Icon size={18} style={{ flexShrink: 0 }} />
                   <span style={{
-                    marginLeft: 14, fontSize: 13, fontWeight: active ? 600 : 400,
+                    marginLeft: 13, fontSize: 13, fontWeight: active ? 600 : 400,
                     opacity: sidebarExpanded ? 1 : 0,
                     transition: "opacity 0.2s",
                   }}>
@@ -311,7 +321,7 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
             })}
 
             {/* Divider between primary and secondary */}
-            {!navSearch && <div style={{ margin: "6px 12px", borderTop: "1px solid var(--proof-grey)", opacity: 0.6 }} />}
+            {!navSearch && <div style={{ margin: "6px 10px", borderTop: "1px solid var(--proof-border)", opacity: 0.5 }} />}
 
             {/* Secondary nav */}
             {SECONDARY_NAV.map(item => {
@@ -325,13 +335,16 @@ export function AppLayout({ children, activeHref }: { children: React.ReactNode;
                   overflow: "hidden", whiteSpace: "nowrap",
                   textDecoration: "none",
                   color: active ? "var(--proof-blue)" : "var(--proof-text-secondary)",
-                  background: active ? "var(--proof-blue-bg)" : "transparent",
-                  transition: "background 0.15s, color 0.15s",
-                  opacity: navSearch ? 1 : 0.75,
+                  background: active ? "rgba(91,138,245,0.10)" : "transparent",
+                  boxShadow: active ? "inset 3px 0 0 var(--proof-blue)" : "none",
+                  borderRadius: "0 8px 8px 0",
+                  marginRight: 6,
+                  opacity: active ? 1 : 0.7,
+                  transition: "background 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.15s",
                 }}>
-                  <Icon size={17} style={{ flexShrink: 0 }} />
+                  <Icon size={16} style={{ flexShrink: 0 }} />
                   <span style={{
-                    marginLeft: 14, fontSize: 12, fontWeight: active ? 600 : 400,
+                    marginLeft: 13, fontSize: 12, fontWeight: active ? 600 : 400,
                     opacity: sidebarExpanded ? 1 : 0,
                     transition: "opacity 0.2s",
                   }}>

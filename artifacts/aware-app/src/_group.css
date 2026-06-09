@@ -182,3 +182,27 @@
   background-image: radial-gradient(circle, var(--proof-grey) 0.5px, transparent 0.5px);
   background-size: 20px 20px;
 }
+
+/* Light mode (toggled via .light on html) — placed last so it overrides :root */
+.light {
+  --proof-blue: #1a73e8;
+  --proof-blue-hover: #1557b0;
+  --proof-blue-bg: #e8f0fe;
+  --proof-green: #16a34a;
+  --proof-green-bg: #dcfce7;
+  --proof-red: #dc2626;
+  --proof-red-bg: #fee2e2;
+  --proof-yellow: #d97706;
+  --proof-yellow-bg: #fef3c7;
+  --proof-orange: #ea580c;
+  --proof-orange-bg: #ffedd5;
+  --proof-purple: #9333ea;
+  --proof-grey: #d1d5db;
+  --proof-grey-bg: #f3f4f6;
+  --proof-text: #111827;
+  --proof-text-secondary: #6b7280;
+  --proof-surface: #ffffff;
+  --proof-surface-hover: #f9fafb;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
