@@ -1,21 +1,5 @@
 [
   {
-    "id": "run_20260609_mq6t6gx5",
-    "label": "CI — Jun 9, 2026",
-    "suite": "suite_full",
-    "target": "Prod",
-    "status": "FLAKY",
-    "passPct": 86,
-    "failures": 1,
-    "duration": "0m 29s",
-    "durationMs": 28650,
-    "started": "2026-06-09T15:42:38.633Z",
-    "build": "0dc7a22",
-    "rev": "0dc7a2219cc8a1a89d89beac5dafe8c39ab97228",
-    "env": "production",
-    "network": "production"
-  },
-  {
     "id": "run_20260609_mq6nxlug",
     "label": "CI — Jun 9, 2026",
     "suite": "suite_full",
