@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.resolve-tests.outputs.test-matrix) }}
-      max-parallel: ${{ github.event.inputs.parallelism }}
+      max-parallel: 4
     steps:
       - uses: actions/checkout@v6
         with:
