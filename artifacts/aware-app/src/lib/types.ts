@@ -24,6 +24,7 @@ export interface TestResult {
   suite: string;
   error?: string;
   assertions?: TestAssertionResult[];
+  evidence?: TestEvidence;
 }
 
 export interface TestAssertionResult {
@@ -33,9 +34,18 @@ export interface TestAssertionResult {
   passed: boolean;
 }
 
+export interface TestCookie {
+  name: string;
+  value: string;
+  domain?: string;
+  path?: string;
+  httpOnly?: boolean;
+  secure?: boolean;
+}
+
 export interface TestEvidence {
   request: { method: string; url: string; headers: Record<string, string>; body?: string };
-  response: { status: number; headers: Record<string, string>; body?: string };
+  response: { status: number; headers: Record<string, string>; body?: string; cookies?: TestCookie[] };
   assertions: TestAssertionResult[];
 }
 

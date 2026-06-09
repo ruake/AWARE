@@ -191,7 +191,7 @@ export function GoogleAreaChart({
     pointSize: 4,
     focusTarget: "category",
     hAxis: { textStyle: { fontSize: 10 } },
-    vAxis: { textStyle: { fontSize: 10 }, viewWindow: { min: 40, max: 105 } },
+    vAxis: { textStyle: { fontSize: 10 } },
     backgroundColor: "transparent",
     chartArea: { width: "85%", height: "70%" },
     lineWidth: 2,

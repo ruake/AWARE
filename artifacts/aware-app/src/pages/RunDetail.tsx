@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
 import { getRunById, getTestResultsForRun, RUNS, getPromotionDecision } from "@/lib/data";
-import type { TestResult, TestAssertionResult } from "@/lib/types";
+import type { TestResult, TestAssertionResult, TestCookie } from "@/lib/types";
 import {
   ArrowLeft, GitCompare, CheckCircle2, XCircle, Github,
   Share2, AlertTriangle, Shield, Zap, RefreshCw,
@@ -250,6 +250,82 @@ export default function RunDetail() {
                     <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>{selectedResult.duration}ms</span>
                   </div>
                 </div>
+
+                {/* HTTP Evidence */}
+                {selectedResult.evidence && (() => {
+                  const e = selectedResult.evidence!;
+                  const rows: { label: string; val: string }[] = [];
+                  rows.push({ label: 'Method', val: e.request.method });
+                  rows.push({ label: 'URL', val: e.request.url });
+                  rows.push({ label: 'Status', val: String(e.response.status) });
+                  const ct = e.response.headers?.['Content-Type'] ?? '';
+                  if (ct) rows.push({ label: 'Content-Type', val: ct });
+                  const cl = e.response.headers?.['Content-Length'] ?? '';
+                  if (cl) rows.push({ label: 'Size', val: cl + ' bytes' });
+                  const cache = e.response.headers?.['Cache-Control'] ?? '';
+                  if (cache) rows.push({ label: 'Cache', val: cache });
+                  return (
+                    <div>
+                      <div style={{ fontSize:10, fontWeight:600, color:'var(--gcp-text-secondary)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:6 }}>
+                        HTTP Exchange
+                      </div>
+                      <div style={{ display:'flex', flexDirection:'column', gap:3, fontSize:11, fontFamily:'var(--font-mono)' }}>
+                        {rows.map(r => (
+                          <div key={r.label} style={{ display:'flex', gap:6 }}>
+                            <span style={{ color:'var(--gcp-text-secondary)', width:80, flexShrink:0 }}>{r.label}</span>
+                            <span style={{ color:'var(--gcp-text)', wordBreak:'break-all' }}>{r.val}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Response headers */}
+                      {e.response.headers && Object.keys(e.response.headers).length > 0 && (
+                        <details style={{ marginTop:8, fontSize:11 }}>
+                          <summary style={{ cursor:'pointer', color:'var(--gcp-text-secondary)', fontWeight:600, fontSize:10, textTransform:'uppercase', letterSpacing:'0.5px' }}>Response Headers ({Object.keys(e.response.headers).length})</summary>
+                          <div style={{ marginTop:4, display:'flex', flexDirection:'column', gap:2 }}>
+                            {Object.entries(e.response.headers).map(([k, v]) => (
+                              <div key={k} style={{ display:'flex', gap:6, fontFamily:'var(--font-mono)', fontSize:10 }}>
+                                <span style={{ color:'var(--gcp-blue)', minWidth:140 }}>{k}</span>
+                                <span style={{ color:'var(--gcp-text)', wordBreak:'break-all' }}>{v}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )}
+                      {/* Request headers */}
+                      {e.request.headers && Object.keys(e.request.headers).length > 0 && (
+                        <details style={{ marginTop:6, fontSize:11 }}>
+                          <summary style={{ cursor:'pointer', color:'var(--gcp-text-secondary)', fontWeight:600, fontSize:10, textTransform:'uppercase', letterSpacing:'0.5px' }}>Request Headers ({Object.keys(e.request.headers).length})</summary>
+                          <div style={{ marginTop:4, display:'flex', flexDirection:'column', gap:2 }}>
+                            {Object.entries(e.request.headers).map(([k, v]) => (
+                              <div key={k} style={{ display:'flex', gap:6, fontFamily:'var(--font-mono)', fontSize:10 }}>
+                                <span style={{ color:'var(--gcp-purple)', minWidth:140 }}>{k}</span>
+                                <span style={{ color:'var(--gcp-text)', wordBreak:'break-all' }}>{v}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )}
+                      {/* Cookies */}
+                      {e.response.cookies && e.response.cookies.length > 0 && (
+                        <details style={{ marginTop:6, fontSize:11 }}>
+                          <summary style={{ cursor:'pointer', color:'var(--gcp-text-secondary)', fontWeight:600, fontSize:10, textTransform:'uppercase', letterSpacing:'0.5px' }}>Cookies ({e.response.cookies.length})</summary>
+                          <div style={{ marginTop:4, display:'flex', flexDirection:'column', gap:2 }}>
+                            {e.response.cookies.map((c, i) => (
+                              <div key={i} style={{ display:'flex', gap:6, fontFamily:'var(--font-mono)', fontSize:10, padding:'4px 6px', background:'var(--gcp-grey-bg)', borderRadius:4 }}>
+                                <span style={{ color:'var(--gcp-orange)', fontWeight:600 }}>{c.name}</span>
+                                <span style={{ color:'var(--gcp-text)', wordBreak:'break-all' }}>= {c.value}</span>
+                                {c.domain && <span style={{ color:'var(--gcp-text-secondary)' }}>domain={c.domain}</span>}
+                                {c.path && <span style={{ color:'var(--gcp-text-secondary)' }}>path={c.path}</span>}
+                                {c.httpOnly && <span style={{ color:'var(--gcp-green)' }}>HttpOnly</span>}
+                                {c.secure && <span style={{ color:'var(--gcp-green)' }}>Secure</span>}
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Assertions */}
                 {selectedResult.assertions && selectedResult.assertions.length > 0 && (

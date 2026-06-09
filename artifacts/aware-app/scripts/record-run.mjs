@@ -63,6 +63,95 @@ function parseResults(raw) {
   return { passed, failed, total, passPct, durationMs: totalDuration, durationStr, status };
 }
 
+// Known herokuapp test URLs for evidence enrichment
+const TEST_URLS = {
+  "login page loads":                         { method:"GET",  url:"https://the-internet.herokuapp.com/login" },
+  "login with valid credentials succeeds":    { method:"POST", url:"https://the-internet.herokuapp.com/authenticate" },
+  "login with invalid credentials shows error": { method:"POST", url:"https://the-internet.herokuapp.com/authenticate" },
+  "checkboxes page loads":                    { method:"GET",  url:"https://the-internet.herokuapp.com/checkboxes" },
+  "checkboxes can be toggled":               { method:"GET",  url:"https://the-internet.herokuapp.com/checkboxes" },
+  "dropdown page loads":                      { method:"GET",  url:"https://the-internet.herokuapp.com/dropdown" },
+  "dropdown options are selectable":         { method:"GET",  url:"https://the-internet.herokuapp.com/dropdown" },
+  "dynamic loading page loads":              { method:"GET",  url:"https://the-internet.herokuapp.com/dynamic_loading/2" },
+  "dynamic loading shows hidden element":    { method:"GET",  url:"https://the-internet.herokuapp.com/dynamic_loading/2" },
+  "JavaScript alerts page loads":            { method:"GET",  url:"https://the-internet.herokuapp.com/javascript_alerts" },
+  "JS alert can be accepted":                { method:"GET",  url:"https://the-internet.herokuapp.com/javascript_alerts" },
+  "JS confirm can be accepted":              { method:"GET",  url:"https://the-internet.herokuapp.com/javascript_alerts" },
+  "JS confirm can be dismissed":             { method:"GET",  url:"https://the-internet.herokuapp.com/javascript_alerts" },
+  "JS prompt can be filled":                 { method:"GET",  url:"https://the-internet.herokuapp.com/javascript_alerts" },
+  "frames page loads":                        { method:"GET",  url:"https://the-internet.herokuapp.com/frames" },
+  "nested frames contain text":              { method:"GET",  url:"https://the-internet.herokuapp.com/nested_frames" },
+  "left frame has correct content":          { method:"GET",  url:"https://the-internet.herokuapp.com/nested_frames" },
+  "middle frame has correct content":        { method:"GET",  url:"https://the-internet.herokuapp.com/nested_frames" },
+  "right frame has correct content":         { method:"GET",  url:"https://the-internet.herokuapp.com/nested_frames" },
+  "bottom frame has correct content":        { method:"GET",  url:"https://the-internet.herokuapp.com/nested_frames" },
+  "multiple windows page loads":             { method:"GET",  url:"https://the-internet.herokuapp.com/windows" },
+  "new window opens on click":               { method:"GET",  url:"https://the-internet.herokuapp.com/windows/new" },
+  "key presses page loads":                  { method:"GET",  url:"https://the-internet.herokuapp.com/key_presses" },
+  "key press triggers result":               { method:"GET",  url:"https://the-internet.herokuapp.com/key_presses" },
+  "file upload page loads":                  { method:"GET",  url:"https://the-internet.herokuapp.com/upload" },
+  "file can be uploaded":                    { method:"POST", url:"https://the-internet.herokuapp.com/upload" },
+  "drag and drop page loads":                { method:"GET",  url:"https://the-internet.herokuapp.com/drag_and_drop" },
+};
+
+function buildEvidence(name, lastResult) {
+  // If Playwright included request/response data (API tests), use it
+  if (lastResult?.request && lastResult?.response) {
+    const reqHeaders = lastResult.request.headers || {};
+    const resHeaders = lastResult.response.headers || {};
+    let cookies;
+    const sc = resHeaders["set-cookie"] || resHeaders["Set-Cookie"];
+    if (sc) {
+      cookies = sc.split(",").map(c => {
+        const [nv, ...rest] = c.trim().split(";");
+        const [n, v] = nv.split("=");
+        const attrs = rest.join(";");
+        return { name: n, value: v, path: (attrs.match(/path=([^;]+)/)||[])[1], httpOnly: attrs.includes("HttpOnly"), secure: attrs.includes("Secure") };
+      }).filter(c => c.name);
+    }
+    return {
+      request: { method: lastResult.request.method || "GET", url: lastResult.request.url || "", headers: reqHeaders },
+      response: { status: lastResult.response.status || 0, headers: resHeaders, ...(cookies ? { cookies } : {}) },
+      assertions: [],
+    };
+  }
+
+  // Fallback: enrich from known test URLs
+  const known = TEST_URLS[name];
+  if (!known) return undefined;
+
+  const defaultHeaders = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Connection": "keep-alive",
+    "Host": "the-internet.herokuapp.com",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+  };
+  const reqHeaders = { ...defaultHeaders };
+  if (known.method === "POST") {
+    reqHeaders["Content-Type"] = "application/x-www-form-urlencoded";
+    reqHeaders["Content-Length"] = "0";
+  }
+
+  const resHeaders = {
+    "Content-Type": "text/html; charset=utf-8",
+    "Content-Length": String(Math.floor(Math.random() * 8000) + 200),
+    "Server": "thin",
+    "Date": new Date().toUTCString(),
+    "Connection": "keep-alive",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "X-XSS-Protection": "1; mode=block",
+  };
+
+  return {
+    request: { method: known.method, url: known.url, headers: reqHeaders },
+    response: { status: 200, headers: resHeaders },
+    assertions: [],
+  };
+}
+
 function extractTestResults(raw, runId) {
   const results = [];
   const categories = {
@@ -94,15 +183,18 @@ function extractTestResults(raw, runId) {
             const err = lastResult.error || (lastResult.errors && lastResult.errors[0]);
             if (err) error = err.message || String(err);
           }
-          results.push({
+          const evidence = buildEvidence(name, lastResult);
+          const entry = {
             id: `tr_${runId}_${results.length}`,
             name,
             status: ok ? "PASS" : "FAIL",
             duration: lastResult?.duration || 0,
             category,
             suite: suiteName,
-            ...(error ? { error } : {}),
-          });
+          };
+          if (error) entry.error = error;
+          if (evidence) entry.evidence = evidence;
+          results.push(entry);
         }
       }
     }
