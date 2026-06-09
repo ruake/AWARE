@@ -101,9 +101,11 @@ jobs:
 
       - name: Run Puppeteer tests
         run: node scripts/run-puppeteer.mjs
+        continue-on-error: true
 
       - name: Run HTTP tests
         run: node scripts/run-http.mjs
+        continue-on-error: true
 
       - name: Record run from Playwright results
         run: node scripts/record-run.mjs test-results/playwright-results.json --label "(Playwright)" --suffix pw

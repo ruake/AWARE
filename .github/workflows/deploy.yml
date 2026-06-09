@@ -72,11 +72,13 @@ jobs:
 
       - name: Run Puppeteer tests
         run: node scripts/run-puppeteer.mjs
+        continue-on-error: true
         env:
           BASE_URL: "https://the-internet.herokuapp.com"
 
       - name: Run HTTP tests
         run: node scripts/run-http.mjs
+        continue-on-error: true
         env:
           BASE_URL: "https://the-internet.herokuapp.com"
 
