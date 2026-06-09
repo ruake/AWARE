@@ -2,7 +2,7 @@ import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import {
-  RUNS, DIFF_ROWS, ENV_SUMMARY, ENV_PASS_RATE_CHART,
+  RUNS, DIFF_ROWS, ENV_SUMMARY, ENV_PASS_RATE_CHART, PER_ENV_PASS_RATE,
   computeRunFrequency,
 } from "@/lib/data";
 import type { Run } from "@/lib/types";
@@ -96,17 +96,23 @@ export default function Dashboard() {
         {/* Pass rate chart */}
         <div className="gcp-card" style={{ padding: 16 }}>
           <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--gcp-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Pass Rate by Environment</h3>
-          <GoogleAreaChart
-            title=""
-            columns={["Day", "Prod/Production", "Prod/Staging", "UAT/Production"]}
-            data={ENV_PASS_RATE_CHART}
-            xKey="day"
-            yKeys={["Prod/Production", "Prod/Staging", "UAT/Production"]}
-            colors={["#1a73e8", "#f9ab00", "#1e8e3e"]}
-            height="220px"
-            showTimeFrame
-            onPointClick={p => { if (p.runId) navigate(`/runs/${p.runId}`); }}
-          />
+          {PER_ENV_PASS_RATE.length > 0 ? (
+            <GoogleAreaChart
+              title=""
+              columns={["Day", ...PER_ENV_PASS_RATE.map(e => e.env)]}
+              data={ENV_PASS_RATE_CHART}
+              xKey="day"
+              yKeys={PER_ENV_PASS_RATE.map(e => e.env)}
+              colors={PER_ENV_PASS_RATE.map(e => e.color)}
+              height="220px"
+              showTimeFrame
+              onPointClick={p => { if (p.runId) navigate(`/runs/${String(p.runId)}`); }}
+            />
+          ) : (
+            <div style={{ height: 220, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gcp-text-secondary)", fontSize: 13 }}>
+              No run data yet
+            </div>
+          )}
         </div>
 
         {/* Env health + Recent runs */}

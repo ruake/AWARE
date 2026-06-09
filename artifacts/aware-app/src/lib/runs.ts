@@ -55,13 +55,106 @@ function computeTestDetails(): TestDetail[] {
 
 export const TEST_DETAILS: TestDetail[] = computeTestDetails();
 
-export const ENV_SUMMARY: { label: string; passRate: number; trend: number; failures: number; color: string; alert: string | null }[] = [];
+// ── Env label helper ──────────────────────────────────────────────────
+function envLabel(run: Run): string {
+  return `${run.target}/${run.env.charAt(0).toUpperCase()}${run.env.slice(1)}`;
+}
 
-export const PASS_RATE_CHART: { label: string; passRate: number; runId: string }[] = [];
+const ENV_COLOR_MAP: Record<string, string> = {
+  "Prod/Production": "#1a73e8",
+  "Prod/Staging":    "#f9ab00",
+  "UAT/Production":  "#1e8e3e",
+  "UAT/Staging":     "#9334e6",
+};
+function envColor(label: string): string {
+  return ENV_COLOR_MAP[label] ?? "#5f6368";
+}
 
-export const PER_ENV_PASS_RATE: { env: string; color: string; data: { runId: string; label: string; passRate: number }[] }[] = [];
+// ── ENV_SUMMARY ──────────────────────────────────────────────────────
+export const ENV_SUMMARY: {
+  label: string; passRate: number; trend: number;
+  failures: number; color: string; alert: string | null;
+}[] = (() => {
+  const groups = new Map<string, Run[]>();
+  for (const run of RUNS) {
+    const key = envLabel(run);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(run);
+  }
+  const result: typeof ENV_SUMMARY = [];
+  for (const [label, runs] of groups) {
+    const sorted = [...runs].sort(
+      (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()
+    );
+    const latest   = sorted[0];
+    const previous = sorted[1];
+    const avgPassRate = Math.round(
+      sorted.reduce((s, r) => s + r.passPct, 0) / sorted.length
+    );
+    const trend = previous ? Math.round(latest.passPct - previous.passPct) : 0;
+    const color = avgPassRate >= 90 ? "#1e8e3e" : avgPassRate >= 70 ? "#f9ab00" : "#d93025";
+    const alert = latest.failures > 0
+      ? `${latest.failures} failure${latest.failures !== 1 ? "s" : ""} in last run`
+      : null;
+    result.push({ label, passRate: avgPassRate, trend, failures: latest.failures, color, alert });
+  }
+  // stable order: Prod/Production first
+  result.sort((a, b) => a.label.localeCompare(b.label));
+  return result;
+})();
 
-export const ENV_PASS_RATE_CHART: { day: string; runId: string; "Prod/Production": number; "Prod/Staging": number; "UAT/Production": number; "UAT/Staging": number }[] = [];
+// ── PASS_RATE_CHART ──────────────────────────────────────────────────
+export const PASS_RATE_CHART: { label: string; passRate: number; runId: string }[] =
+  [...RUNS]
+    .sort((a, b) => new Date(a.started).getTime() - new Date(b.started).getTime())
+    .map(r => ({ label: r.started.slice(0, 10), passRate: r.passPct, runId: r.id }));
+
+// ── PER_ENV_PASS_RATE ────────────────────────────────────────────────
+export const PER_ENV_PASS_RATE: {
+  env: string; color: string;
+  data: { runId: string; label: string; passRate: number }[];
+}[] = (() => {
+  const groups = new Map<string, { runId: string; label: string; passRate: number }[]>();
+  const sorted = [...RUNS].sort(
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime()
+  );
+  for (const run of sorted) {
+    const key = envLabel(run);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push({ runId: run.id, label: run.started.slice(0, 10), passRate: run.passPct });
+  }
+  return [...groups.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([env, data]) => ({ env, color: envColor(env), data }));
+})();
+
+// ── ENV_PASS_RATE_CHART ──────────────────────────────────────────────
+// Per-day record keyed by env label. Used by the area chart on the dashboard.
+export const ENV_PASS_RATE_CHART: Record<string, unknown>[] = (() => {
+  const envLabels = [...new Set(RUNS.map(envLabel))].sort();
+  const dayMap = new Map<string, Record<string, unknown>>();
+
+  const sorted = [...RUNS].sort(
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime()
+  );
+
+  for (const run of sorted) {
+    const day = run.started.slice(0, 10);
+    const key = envLabel(run);
+    if (!dayMap.has(day)) {
+      const entry: Record<string, unknown> = { day, runId: run.id };
+      for (const l of envLabels) entry[l] = 0;
+      dayMap.set(day, entry);
+    }
+    const entry = dayMap.get(day)!;
+    entry[key] = run.passPct;
+    entry.runId = run.id; // last run of the day wins for click-through
+  }
+
+  return [...dayMap.values()].sort((a, b) =>
+    String(a.day).localeCompare(String(b.day))
+  );
+})();
 
 export interface RunFrequency {
   totalRuns: number;
