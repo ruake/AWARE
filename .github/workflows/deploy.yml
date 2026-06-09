@@ -31,14 +31,7 @@ jobs:
           node-version: 22
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - name: Restore cached node_modules
-        id: nm-cache
-        uses: actions/cache@v4
-        with:
-          path: artifacts/aware-app/node_modules
-          key: nm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install dependencies
-        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Validate data contracts
         run: pnpm run validate:data
@@ -60,35 +53,40 @@ jobs:
           node-version: 22
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - name: Restore cached node_modules
-        id: nm-cache
-        uses: actions/cache@v4
-        with:
-          path: artifacts/aware-app/node_modules
-          key: nm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install dependencies
-        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Cache Playwright browsers
         id: pw-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('artifacts/aware-app/pnpm-lock.yaml') }}
+          key: pw-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Playwright browsers
         if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm run test:e2e:install
-      - name: Run E2E tests
+      - name: Run E2E tests (Playwright)
         run: pnpm run test:e2e:ci
         continue-on-error: true
         env:
           PLAYWRIGHT_BASE_URL: "http://localhost:5173"
 
-      - name: Upload Playwright results and screenshots
+      - name: Run Puppeteer tests
+        run: pnpm run test:puppeteer
+        continue-on-error: true
+        env:
+          BASE_URL: "https://the-internet.herokuapp.com"
+
+      - name: Run HTTP tests
+        run: pnpm run test:http
+        continue-on-error: true
+        env:
+          BASE_URL: "https://the-internet.herokuapp.com"
+
+      - name: Upload E2E results and screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-results
+          name: e2e-results
           path: artifacts/aware-app/test-results/
           retention-days: 1
           if-no-files-found: warn
@@ -112,22 +110,25 @@ jobs:
           node-version: 22
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - name: Restore cached node_modules
-        uses: actions/cache@v4
-        with:
-          path: artifacts/aware-app/node_modules
-          key: nm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
 
-      - name: Download Playwright results
+      - name: Download E2E results
         uses: actions/download-artifact@v4
         with:
-          name: playwright-results
+          name: e2e-results
           path: artifacts/aware-app/test-results/
 
-      - name: Record run from E2E results
-        run: node scripts/record-run.mjs test-results/playwright-results.json
+      - name: Record run from Playwright results
+        run: node scripts/record-run.mjs test-results/playwright-results.json --label "(Playwright)" --suffix pw
+        continue-on-error: true
+
+      - name: Record run from Puppeteer results
+        run: node scripts/record-run.mjs test-results/puppeteer-results.json --label "(Puppeteer)" --suffix pu
+        continue-on-error: true
+
+      - name: Record run from HTTP results
+        run: node scripts/record-run.mjs test-results/http-results.json --label "(HTTP)" --suffix ht
         continue-on-error: true
 
       - name: Run test discovery

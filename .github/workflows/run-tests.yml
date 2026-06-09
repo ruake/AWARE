@@ -78,14 +78,7 @@ jobs:
           node-version: 22
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - name: Restore cached node_modules
-        id: nm-cache
-        uses: actions/cache@v4
-        with:
-          path: artifacts/aware-app/node_modules
-          key: nm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install dependencies
-        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: TypeScript check
         run: pnpm run typecheck
@@ -96,7 +89,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('artifacts/aware-app/pnpm-lock.yaml') }}
+          key: pw-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Playwright browsers
         if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm run test:e2e:install
@@ -106,8 +99,24 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: "http://localhost:5173"
 
-      - name: Record run from E2E results
-        run: node scripts/record-run.mjs test-results/playwright-results.json
+      - name: Run Puppeteer tests
+        run: pnpm run test:puppeteer
+        continue-on-error: true
+
+      - name: Run HTTP tests
+        run: pnpm run test:http
+        continue-on-error: true
+
+      - name: Record run from Playwright results
+        run: node scripts/record-run.mjs test-results/playwright-results.json --label "(Playwright)" --suffix pw
+        continue-on-error: true
+
+      - name: Record run from Puppeteer results
+        run: node scripts/record-run.mjs test-results/puppeteer-results.json --label "(Puppeteer)" --suffix pu
+        continue-on-error: true
+
+      - name: Record run from HTTP results
+        run: node scripts/record-run.mjs test-results/http-results.json --label "(HTTP)" --suffix ht
         continue-on-error: true
 
       - name: Commit run data back to repo
@@ -115,7 +124,7 @@ jobs:
         run: |
           git config user.name "AWARE Bot"
           git config user.email "bot@aware.dev"
-          git add src/data/runs.json
+          git add src/data/runs.json src/data/test-results.json
           if git diff --cached --quiet; then
             echo "No changes to runs.json"
           else
