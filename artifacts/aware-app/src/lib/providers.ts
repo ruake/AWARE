@@ -24,7 +24,11 @@ export interface TestRunProvider {
   parseSummary(raw: unknown): ProviderRunSummary;
   parseResults(raw: unknown): ProviderTestResult[];
   /** Extract filmstrip screenshots from a test result's attachments. Returns data URIs. */
-  extractFilmstrip?(result: ProviderTestResult, raw: unknown, attachmentsDir?: string): { id: string; label: string; dataUri: string }[];
+  extractFilmstrip?(
+    result: ProviderTestResult,
+    raw: unknown,
+    attachmentsDir?: string,
+  ): { id: string; label: string; dataUri: string }[];
 }
 
 export function getTestRunProvider(name: string): TestRunProvider | undefined {
@@ -73,16 +77,38 @@ registerProvider({
     let status = "PASS";
     if (failed > 0 && passed > 0) status = failed > passed / 2 ? "FAIL" : "FLAKY";
     else if (failed > 0) status = "FAIL";
-    return { passed, failed, total, passPct, durationMs: totalDuration, durationStr: `${minutes}m ${seconds.toString().padStart(2, "0")}s`, status };
+    return {
+      passed,
+      failed,
+      total,
+      passPct,
+      durationMs: totalDuration,
+      durationStr: `${minutes}m ${seconds.toString().padStart(2, "0")}s`,
+      status,
+    };
   },
 
   parseResults(raw: any) {
     const results: ProviderTestResult[] = [];
-    const catMap: Record<string, string> = { smoke:"Smoke", login:"Security", checkboxes:"Functional", dropdown:"Functional", dynamic:"Performance", alerts:"Security", frames:"Functional", windows:"Functional" };
+    const catMap: Record<string, string> = {
+      smoke: "Smoke",
+      login: "Security",
+      checkboxes: "Functional",
+      dropdown: "Functional",
+      dynamic: "Performance",
+      alerts: "Security",
+      frames: "Functional",
+      windows: "Functional",
+    };
     function walk(suite: any) {
       const sn = (suite.title || "").toLowerCase();
       let cat = "General";
-      for (const [kw, c] of Object.entries(catMap)) { if (sn.includes(kw)) { cat = c; break; } }
+      for (const [kw, c] of Object.entries(catMap)) {
+        if (sn.includes(kw)) {
+          cat = c;
+          break;
+        }
+      }
       if (suite.specs) {
         for (const spec of suite.specs) {
           const name = spec.title || "unknown";
@@ -94,11 +120,20 @@ registerProvider({
               const err = last.error || (last.errors && last.errors[0]);
               if (err) error = err.message || String(err);
             }
-            results.push({ name, status: ok ? "PASS" : "FAIL", duration: last?.duration || 0, category: cat, suite: suite.title || "", ...(error ? { error } : {}) });
+            results.push({
+              name,
+              status: ok ? "PASS" : "FAIL",
+              duration: last?.duration || 0,
+              category: cat,
+              suite: suite.title || "",
+              ...(error ? { error } : {}),
+            });
           }
         }
       }
-      if (suite.suites) { for (const s of suite.suites) walk(s); }
+      if (suite.suites) {
+        for (const s of suite.suites) walk(s);
+      }
     }
     for (const suite of (raw as any).suites || []) walk(suite);
     return results;
@@ -111,9 +146,16 @@ registerProvider({
     for (const t of spec.tests || []) {
       for (const tr of t.results || []) {
         for (const att of tr.attachments || []) {
-          if (att.contentType?.startsWith("image/png") || att.contentType?.startsWith("image/jpeg")) {
+          if (
+            att.contentType?.startsWith("image/png") ||
+            att.contentType?.startsWith("image/jpeg")
+          ) {
             if (att.body) {
-              frames.push({ id: `ss_${frames.length}`, label: att.name || `screenshot-${frames.length}`, dataUri: `data:${att.contentType};base64,${att.body}` });
+              frames.push({
+                id: `ss_${frames.length}`,
+                label: att.name || `screenshot-${frames.length}`,
+                dataUri: `data:${att.contentType};base64,${att.body}`,
+              });
             } else if (att.path && attachmentsDir) {
               try {
                 const fs = require("fs");
@@ -121,7 +163,11 @@ registerProvider({
                 const fullPath = p.resolve(attachmentsDir, att.path);
                 if (fs.existsSync(fullPath)) {
                   const buf = fs.readFileSync(fullPath);
-                  frames.push({ id: `ss_${frames.length}`, label: att.name || `screenshot-${frames.length}`, dataUri: `data:${att.contentType || "image/png"};base64,${buf.toString("base64")}` });
+                  frames.push({
+                    id: `ss_${frames.length}`,
+                    label: att.name || `screenshot-${frames.length}`,
+                    dataUri: `data:${att.contentType || "image/png"};base64,${buf.toString("base64")}`,
+                  });
                 }
               } catch {}
             }
@@ -143,9 +189,17 @@ function specForTestName(raw: any, testName: string): any {
         }
       }
     }
-    if (suite.suites) { for (const s of suite.suites) { const found = walk(s); if (found) return found; } }
+    if (suite.suites) {
+      for (const s of suite.suites) {
+        const found = walk(s);
+        if (found) return found;
+      }
+    }
     return null;
   }
-  for (const suite of (raw as any).suites || []) { const found = walk(suite); if (found) return found; }
+  for (const suite of (raw as any).suites || []) {
+    const found = walk(suite);
+    if (found) return found;
+  }
   return null;
 }

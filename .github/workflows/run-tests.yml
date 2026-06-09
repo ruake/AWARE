@@ -80,6 +80,12 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Validate data contracts
+        run: pnpm run validate:data
+      - name: Lint
+        run: pnpm run lint
+      - name: Format check
+        run: pnpm run format
       - name: TypeScript check
         run: pnpm run typecheck
       - name: Run unit tests

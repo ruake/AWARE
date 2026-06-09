@@ -1,6 +1,6 @@
 import type { PromotionDecision } from "./types";
 
-let promotionDecisions: PromotionDecision[] = [];
+const promotionDecisions: PromotionDecision[] = [];
 
 export function getPromotionDecision(runId: string): PromotionDecision | undefined {
   return promotionDecisions.find(d => d.runId === runId);

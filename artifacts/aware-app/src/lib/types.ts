@@ -67,7 +67,12 @@ export interface FilmstripFrame {
 
 export interface TestEvidence {
   request: { method: string; url: string; headers: Record<string, string>; body?: string };
-  response: { status: number; headers: Record<string, string>; body?: string; cookies?: TestCookie[] };
+  response: {
+    status: number;
+    headers: Record<string, string>;
+    body?: string;
+    cookies?: TestCookie[];
+  };
   assertions: TestAssertionResult[];
 }
 
@@ -402,7 +407,9 @@ export function classifyError(err: unknown): ServiceError {
   }
   if (err instanceof FetchError) {
     return {
-      code: "HTTP", message: err.message, url: err.url,
+      code: "HTTP",
+      message: err.message,
+      url: err.url,
       status: err.status,
       retryable: err.status >= 500 || err.status === 429,
     };
@@ -429,14 +436,21 @@ export class FetchError extends Error {
 }
 
 export class TimeoutError extends Error {
-  constructor(public readonly url: string, public readonly timeoutMs: number) {
+  constructor(
+    public readonly url: string,
+    public readonly timeoutMs: number,
+  ) {
     super(`Request timed out after ${timeoutMs}ms: ${url}`);
     this.name = "TimeoutError";
   }
 }
 
 export class ValidationError extends Error {
-  constructor(message: string, public readonly url: string, public readonly data: unknown) {
+  constructor(
+    message: string,
+    public readonly url: string,
+    public readonly data: unknown,
+  ) {
     super(message);
     this.name = "ValidationError";
   }

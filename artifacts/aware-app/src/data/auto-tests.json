@@ -8,13 +8,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_us_east_users_resolve_to_ashburn",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -50,13 +46,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_us_west_users_resolve_to_portland",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -92,13 +84,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_eu_west_users_resolve_to_dublin",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -134,13 +122,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_ap_southeast_users_resolve_to_singapore",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -176,13 +160,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_endpoints_return_200",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -218,13 +198,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_endpoints_return_200",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -260,13 +236,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_endpoints_return_200",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -302,13 +274,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -344,13 +312,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -386,13 +350,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -428,13 +388,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -470,14 +426,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "geo-match",
-      "geofailover"
-    ],
+    "tags": ["geo-match", "geofailover"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::TestGeoFailover::test_failover_to_secondary_pop",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -513,14 +464,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "geo-match",
-      "geofailover"
-    ],
+    "tags": ["geo-match", "geofailover"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::TestGeoFailover::test_failover_logs_alert",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -556,14 +502,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "geo-match",
-      "geofailover"
-    ],
+    "tags": ["geo-match", "geofailover"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::TestGeoFailover::test_failover_health_check_resumes",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -599,14 +540,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "caching",
-      "cachebehavior"
-    ],
+    "tags": ["caching", "cachebehavior"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_hit_ratio_exceeds_80_percent",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -642,14 +578,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "caching",
-      "cachebehavior"
-    ],
+    "tags": ["caching", "cachebehavior"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_ttl_respects_origin_max_age",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -685,14 +616,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "caching",
-      "cachebehavior"
-    ],
+    "tags": ["caching", "cachebehavior"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_purge_invalidates_content",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -728,14 +654,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "caching",
-      "cachebehavior"
-    ],
+    "tags": ["caching", "cachebehavior"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_vary_header_respected",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -771,14 +692,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "performance",
-      "latency"
-    ],
+    "tags": ["performance", "latency"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_p95_latency_under_200ms",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -814,14 +730,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "performance",
-      "latency"
-    ],
+    "tags": ["performance", "latency"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_static_assets_under_50ms",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -857,14 +768,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "performance",
-      "latency"
-    ],
+    "tags": ["performance", "latency"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_dynamic_content_under_500ms",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -900,14 +806,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "performance",
-      "latency"
-    ],
+    "tags": ["performance", "latency"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -943,14 +844,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "performance",
-      "latency"
-    ],
+    "tags": ["performance", "latency"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -986,14 +882,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "performance",
-      "latency"
-    ],
+    "tags": ["performance", "latency"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1029,14 +920,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "performance",
-      "latency"
-    ],
+    "tags": ["performance", "latency"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1072,14 +958,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "performance",
-      "compression"
-    ],
+    "tags": ["performance", "compression"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCompression::test_gzip_compression_for_text_assets",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1115,14 +996,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "performance",
-      "compression"
-    ],
+    "tags": ["performance", "compression"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCompression::test_brotli_compression_preferred",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1158,14 +1034,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "performance",
-      "compression"
-    ],
+    "tags": ["performance", "compression"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCompression::test_compression_ratio_exceeds_5x",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1201,14 +1072,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "security",
-      "securityheaders"
-    ],
+    "tags": ["security", "securityheaders"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_strict_transport_security_header",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1244,14 +1110,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "security",
-      "securityheaders"
-    ],
+    "tags": ["security", "securityheaders"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_content_security_policy_header",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1287,14 +1148,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "security",
-      "securityheaders"
-    ],
+    "tags": ["security", "securityheaders"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_x_frame_options_deny",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1330,14 +1186,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "security",
-      "securityheaders"
-    ],
+    "tags": ["security", "securityheaders"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_x_content_type_options_nosniff",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1373,14 +1224,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "security",
-      "securityheaders"
-    ],
+    "tags": ["security", "securityheaders"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_referrer_policy_strict_origin",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1416,14 +1262,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "security",
-      "wafrules"
-    ],
+    "tags": ["security", "wafrules"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_sql_injection",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1459,14 +1300,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "security",
-      "wafrules"
-    ],
+    "tags": ["security", "wafrules"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_xss_attempts",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1502,14 +1338,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "security",
-      "wafrules"
-    ],
+    "tags": ["security", "wafrules"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_path_traversal",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1545,14 +1376,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "security",
-      "wafrules"
-    ],
+    "tags": ["security", "wafrules"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_large_payloads",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1588,13 +1414,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "security"
-    ],
+    "tags": ["security"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::test_rate_limiting_100_req_per_min",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1630,13 +1452,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "security"
-    ],
+    "tags": ["security"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::test_jwt_expiry_returns_401",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1672,13 +1490,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "security"
-    ],
+    "tags": ["security"],
     "owner": "auto@discovery",
-    "suiteIds": [
-      "suite_auto"
-    ],
+    "suiteIds": ["suite_auto"],
     "automated": true,
     "scriptPath": "tests/test_security.py::test_cors_validates_origin",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1714,13 +1528,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/checkboxes-dropdown.spec.ts::Checkboxes and Dropdown > check and uncheck checkboxes",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1756,13 +1566,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/checkboxes-dropdown.spec.ts::select dropdown option by label",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1798,13 +1604,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/checkboxes-dropdown.spec.ts::dropdown defaults to first option",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1840,13 +1642,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/dynamic-content.spec.ts::Dynamic Content and Loading > dynamic loading hidden element appears",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1882,13 +1680,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/dynamic-content.spec.ts::dynamic loading rendered after fetch",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1924,13 +1718,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/dynamic-content.spec.ts::dynamic content has at least one element",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1966,13 +1756,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/dynamic-content.spec.ts::floating menu disappears on scroll",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2008,13 +1794,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/frames-windows.spec.ts::Frames and Windows > type in iframe editor",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2050,13 +1832,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/frames-windows.spec.ts::nested frames contain text",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2092,13 +1870,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/frames-windows.spec.ts::open new window tab",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2134,13 +1908,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/javascript-alerts.spec.ts::JavaScript Alerts > accept JS alert",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2176,13 +1946,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/javascript-alerts.spec.ts::accept JS confirm",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2218,13 +1984,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/javascript-alerts.spec.ts::dismiss JS confirm",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2260,13 +2022,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/javascript-alerts.spec.ts::type in JS prompt",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2302,13 +2060,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/javascript-alerts.spec.ts::dismiss JS prompt returns null",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2344,13 +2098,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/login-auth.spec.ts::Login Page Authentication > successful login with valid credentials",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2386,13 +2136,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/login-auth.spec.ts::failed login with invalid password",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2428,13 +2174,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/login-auth.spec.ts::failed login with empty username",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2470,13 +2212,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/login-auth.spec.ts::logout from secure area",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2512,13 +2250,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/login-auth.spec.ts::login page displays correct title",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2554,13 +2288,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::PROOF App Smoke Tests > Dashboard loads with KPI tiles",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2596,13 +2326,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::Runs page shows run table",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2638,13 +2364,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::Test Manager loads test list",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2680,13 +2402,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::Copilot page loads and shows chat input",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2722,13 +2440,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::About page shows system stats",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2764,13 +2478,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::Compare page shows diff table",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2806,13 +2516,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "general"
-    ],
+    "tags": ["general"],
     "owner": "auto@playwright",
-    "suiteIds": [
-      "suite_e2e"
-    ],
+    "suiteIds": ["suite_e2e"],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::Test Analytics loads with search params",
     "preconditions": "Auto-discovered via Playwright file traversal",

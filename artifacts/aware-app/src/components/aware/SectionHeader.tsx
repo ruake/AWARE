@@ -19,9 +19,7 @@ export function SectionHeader({ title, subtitle, actions, children }: SectionHea
       }}
     >
       <div>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)" }}>
-          {title}
-        </h1>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)" }}>{title}</h1>
         {subtitle && (
           <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 3 }}>
             {subtitle}

@@ -23,8 +23,24 @@ const queryClient = new QueryClient();
 
 function PageLoader() {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "var(--proof-grey-bg)" }}>
-      <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        background: "var(--proof-grey-bg)",
+      }}
+    >
+      <div
+        style={{
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 16,
+        }}
+      >
         <div className="proof-skeleton" style={{ width: 48, height: 48, borderRadius: "50%" }} />
         <div className="proof-skeleton" style={{ width: 200, height: 16, borderRadius: 4 }} />
         <div className="proof-skeleton" style={{ width: 140, height: 12, borderRadius: 4 }} />
