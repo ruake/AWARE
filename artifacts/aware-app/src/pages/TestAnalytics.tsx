@@ -58,8 +58,8 @@ export default function TestAnalytics() {
     );
   }
   const diff = diffs[Math.min(idx, diffs.length - 1)] ?? diffs[0];
-  const detail = TEST_DETAILS.length > 0
-    ? TEST_DETAILS[idx % TEST_DETAILS.length]
+  const detail = Array.isArray(TEST_DETAILS) && TEST_DETAILS.length > 0
+    ? TEST_DETAILS[idx % TEST_DETAILS.length] ?? { history: [], passRate: 0, flakinessScore: 0, avgDuration: 0 }
     : { history: [], passRate: 0, flakinessScore: 0, avgDuration: 0 };
   const selectorItems = isTcMode
     ? tcs.map(t => ({ id: t.id, name: t.name }))
