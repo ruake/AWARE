@@ -152,7 +152,32 @@ function buildEvidence(name, lastResult) {
   };
 }
 
-function extractTestResults(raw, runId) {
+function extractScreenshots(spec, resultsDir) {
+  const frames = [];
+  for (const t of spec.tests || []) {
+    for (const tr of t.results || []) {
+      for (const att of tr.attachments || []) {
+        if (!att.contentType?.startsWith("image/")) continue;
+        let dataUri = null;
+        if (att.body) {
+          dataUri = `data:${att.contentType};base64,${att.body}`;
+        } else if (att.path && resultsDir) {
+          const fullPath = path.resolve(resultsDir, att.path);
+          try {
+            const buf = fs.readFileSync(fullPath);
+            dataUri = `data:${att.contentType || "image/png"};base64,${buf.toString("base64")}`;
+          } catch {}
+        }
+        if (dataUri) {
+          frames.push({ id: `ss_${frames.length}`, label: att.name || `screenshot-${frames.length}`, dataUri });
+        }
+      }
+    }
+  }
+  return frames.length > 0 ? frames : undefined;
+}
+
+function extractTestResults(raw, runId, resultsDir) {
   const results = [];
   const categories = {
     "smoke": "Smoke",
@@ -184,6 +209,7 @@ function extractTestResults(raw, runId) {
             if (err) error = err.message || String(err);
           }
           const evidence = buildEvidence(name, lastResult);
+          const filmstrip = extractScreenshots(spec, resultsDir);
           const entry = {
             id: `tr_${runId}_${results.length}`,
             name,
@@ -194,6 +220,7 @@ function extractTestResults(raw, runId) {
           };
           if (error) entry.error = error;
           if (evidence) entry.evidence = evidence;
+          if (filmstrip) entry.filmstrip = filmstrip;
           results.push(entry);
         }
       }
@@ -226,7 +253,8 @@ const now = new Date();
 const runId = `run_${now.toISOString().slice(0, 10).replace(/-/g, "")}_${Date.now().toString(36)}`;
 const raw = JSON.parse(fs.readFileSync(resultsPath, "utf8"));
 const results = parseResults(raw);
-const testResults = extractTestResults(raw, runId);
+const resultsDir = path.dirname(path.resolve(resultsPath));
+const testResults = extractTestResults(raw, runId, resultsDir);
 
 const run = {
   id: runId,

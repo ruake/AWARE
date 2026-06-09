@@ -58,12 +58,12 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: "http://localhost:5173"
 
-      - name: Upload Playwright results
+      - name: Upload Playwright results and screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-results
-          path: artifacts/aware-app/test-results/playwright-results.json
+          path: artifacts/aware-app/test-results/
           retention-days: 1
           if-no-files-found: warn
 
@@ -150,9 +150,9 @@ jobs:
         run: |
           git config user.name "AWARE Bot"
           git config user.email "bot@aware.dev"
-          git add src/data/runs.json
+          git add src/data/runs.json src/data/test-results.json src/data/screenshots/ 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "No changes to runs.json"
+            echo "No changes to run data"
           else
             git commit -m "record CI run [skip ci]"
             git push

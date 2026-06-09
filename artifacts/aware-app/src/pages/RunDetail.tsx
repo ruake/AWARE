@@ -87,84 +87,32 @@ export default function RunDetail() {
     <AppLayout activeHref="/runs">
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-        {/* Breadcrumb */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button onClick={() => navigate("/runs")} className="gcp-button gcp-button-sm"><ArrowLeft size={13} /> Runs</button>
-          <ChevronRight size={14} style={{ color: "var(--gcp-text-secondary)" }} />
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--gcp-text-secondary)" }}>{run.id}</span>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-          <div>
-            <h1 style={{ fontSize: 20, fontWeight: 700 }}>Run Detail</h1>
-            <div style={{ fontSize: 12, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)", marginTop: 3 }}>
-              <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10, marginRight: 6 }}>{run.target}</span>
-              <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10, marginRight: 6 }}>{run.env}</span>
-              <span className={`gcp-badge ${run.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 10, marginRight: 6 }}>{run.network}</span>
-              <span style={{ marginRight: 6 }}>Build {run.build}</span>
-              <span>Rev {run.rev}</span>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={() => navigator.clipboard.writeText(window.location.href).then(() => show("Permalink copied"))} className="gcp-button gcp-button-sm">
-              <Share2 size={13} /> Share
-            </button>
-            <button onClick={() => navigate(`/compare?candidate=${run.id}&baseline=${RUNS[RUNS.length - 1]?.id}`)} className="gcp-button gcp-button-sm">
-              <GitCompare size={13} /> Compare to Baseline
-            </button>
-            <a href={`https://github.com/ruake/PROOF/actions/runs/${run.id}`} target="_blank" rel="noopener" className="gcp-button gcp-button-sm" style={{ textDecoration: "none" }}>
-              <Github size={13} /> Open in GitHub
-            </a>
-          </div>
-        </div>
-
-        {/* Promotion banner */}
-        <div style={{
-          background: hasDecision ? (decisionIsPromote ? "var(--gcp-green-bg)" : "var(--gcp-red-bg)") : canPromote ? "var(--gcp-green-bg)" : "var(--gcp-red-bg)",
-          border: `2px solid ${hasDecision ? (decisionIsPromote ? "var(--gcp-green)" : "var(--gcp-red)") : canPromote ? "var(--gcp-green)" : "var(--gcp-red)"}`,
-          borderRadius: 6, padding: "14px 18px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap",
-        }}>
-          {canPromote ? <Shield size={20} style={{ color: "var(--gcp-green)" }} /> : <AlertTriangle size={20} style={{ color: "var(--gcp-red)" }} />}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: hasDecision ? (decisionIsPromote ? "var(--gcp-green)" : "var(--gcp-red)") : canPromote ? "var(--gcp-green)" : "var(--gcp-red)" }}>
-              {hasDecision ? (decisionIsPromote ? "Promotion Approved" : "Promotion Blocked") : canPromote ? "Ready to Promote" : `${failCount} regression${failCount !== 1 ? "s" : ""} — Promotion Blocked`}
-            </div>
-            <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
-              <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{run.suite}</span>
-              <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>{run.env}</span>
-              <span className={`gcp-badge ${run.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`} style={{ fontSize: 9 }}>{run.network}</span>
-              <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>Build {run.build}</span>
-              <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)", background: "var(--gcp-grey-bg)", padding: "1px 5px", borderRadius: 3, border: "1px solid var(--gcp-grey)" }}>Rev {run.rev}</span>
-              <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--gcp-text-secondary)" }}>{run.duration}</span>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
+        {/* Top bar: breadcrumb + promotion + actions + KPI inline */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <button onClick={() => navigate("/runs")} className="gcp-button gcp-button-xs"><ArrowLeft size={11} /> Runs</button>
+          <span style={{ fontFamily:"var(--font-mono)", fontSize:11, color:"var(--gcp-text-secondary)" }}>{run.id}</span>
+          <span style={{ width:1, height:16, background:"var(--gcp-grey)" }} />
+          <span className={`gcp-badge ${run.status === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`} style={{ fontSize:10 }}>{run.status}</span>
+          <span className={`gcp-badge ${canPromote ? "gcp-badge-pass" : "gcp-badge-fail"}`} style={{ fontSize:10 }}>
+            {hasDecision ? (decisionIsPromote ? "Approved" : "Blocked") : canPromote ? "Ready to Promote" : `${failCount} failed`}
+          </span>
+          <span style={{ fontSize:10, color:"var(--gcp-text-secondary)" }}>Pass <b style={{ color: passRate === 100 ? "var(--gcp-green)" : "var(--gcp-red)" }}>{passRate}%</b></span>
+          <span style={{ fontSize:10, color:"var(--gcp-text-secondary)" }}>✓{passCount}  ✗{failCount}</span>
+          <span style={{ fontSize:10, color:"var(--gcp-text-secondary)" }}>{run.duration}</span>
+          <span style={{ width:1, height:16, background:"var(--gcp-grey)" }} />
+          <span style={{ fontSize:10, fontFamily:"var(--font-mono)", color:"var(--gcp-text-secondary)" }}>{run.target} · {run.env} · Build {run.build}</span>
+          <div style={{ marginLeft:"auto", display:"flex", gap:6, alignItems:"center" }}>
+            <button onClick={() => { navigator.clipboard.writeText(window.location.href).then(() => show("Permalink copied")); }} className="gcp-button gcp-button-xs"><Share2 size={11} /></button>
+            <button onClick={() => navigate(`/compare?candidate=${run.id}&baseline=${RUNS[RUNS.length - 1]?.id}`)} className="gcp-button gcp-button-xs"><GitCompare size={11} /> Compare</button>
+            <a href={`https://github.com/ruake/PROOF/actions/runs/${run.id}`} target="_blank" rel="noopener" className="gcp-button gcp-button-xs" style={{ textDecoration:"none" }}><Github size={11} /></a>
             {!hasDecision ? (
               canPromote
-                ? <button onClick={() => decide("promote")} className="gcp-button-success" style={{ fontSize: 13 }}><Zap size={14} /> Approve Promotion</button>
-                : <button onClick={() => decide("block")} className="gcp-button-danger" style={{ fontSize: 13 }}><XCircle size={14} /> Confirm Block</button>
+                ? <button onClick={() => decide("promote")} className="gcp-button-success" style={{ fontSize:10, padding:"3px 8px" }}><Zap size={11} /> Approve</button>
+                : <button onClick={() => decide("block")} className="gcp-button-danger" style={{ fontSize:10, padding:"3px 8px" }}><XCircle size={11} /> Block</button>
             ) : (
-              <button onClick={() => { setDecision(undefined); }} className="gcp-button gcp-button-sm">
-                <RefreshCw size={13} /> Reset
-              </button>
+              <button onClick={() => { setDecision(undefined); }} className="gcp-button gcp-button-xs" style={{ fontSize:10 }}><RefreshCw size={10} /> Reset</button>
             )}
           </div>
-        </div>
-
-        {/* KPI row */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12 }}>
-          {[
-            { label: "Status", value: <span className={`gcp-badge ${run.status === "PASS" ? "gcp-badge-pass" : run.status === "FAIL" ? "gcp-badge-fail" : "gcp-badge-partial"}`} style={{ fontSize: 14, padding: "4px 10px" }}>{run.status}</span> },
-            { label: "Pass Rate", value: <span style={{ fontSize: 22, fontWeight: 700, color: passRate === 100 ? "var(--gcp-green)" : passRate < 90 ? "var(--gcp-red)" : "var(--gcp-text)" }}>{passRate}%</span> },
-            { label: "Tests Passed", value: <span style={{ fontSize: 22, fontWeight: 700, color: "var(--gcp-green)" }}>{passCount}</span> },
-            { label: "Tests Failed", value: <span style={{ fontSize: 22, fontWeight: 700, color: failCount > 0 ? "var(--gcp-red)" : "var(--gcp-text-secondary)" }}>{failCount}</span> },
-            { label: "Duration", value: <span style={{ fontSize: 18, fontWeight: 600 }}>{run.duration}</span> },
-          ].map(k => (
-            <div key={k.label} className="gcp-card" style={{ padding: "12px 16px", textAlign: "center" }}>
-              <div style={{ fontSize: 11, color: "var(--gcp-text-secondary)", marginBottom: 8, textTransform: "uppercase", fontWeight: 600, letterSpacing: "0.5px" }}>{k.label}</div>
-              {k.value}
-            </div>
-          ))}
         </div>
 
         {/* Chart + results table */}
@@ -250,6 +198,21 @@ export default function RunDetail() {
                     <span style={{ fontSize: 11, color: "var(--gcp-text-secondary)", fontFamily: "var(--font-mono)" }}>{selectedResult.duration}ms</span>
                   </div>
                 </div>
+
+                {/* Filmstrip */}
+                {selectedResult.filmstrip && selectedResult.filmstrip.length > 0 && (
+                  <div>
+                    <div style={{ fontSize:10, fontWeight:600, color:'var(--gcp-text-secondary)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:6 }}>Filmstrip ({selectedResult.filmstrip.length})</div>
+                    <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4 }}>
+                      {selectedResult.filmstrip.map(f => (
+                        <div key={f.id} style={{ flexShrink:0, width:140 }}>
+                          <img src={f.dataUri} alt={f.label} style={{ width:'100%', borderRadius:4, border:'1px solid var(--gcp-grey)', display:'block' }} />
+                          <div style={{ fontSize:9, color:'var(--gcp-text-secondary)', marginTop:2, textAlign:'center' }}>{f.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* HTTP Evidence */}
                 {selectedResult.evidence && (() => {

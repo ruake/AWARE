@@ -25,6 +25,7 @@ export interface TestResult {
   error?: string;
   assertions?: TestAssertionResult[];
   evidence?: TestEvidence;
+  filmstrip?: FilmstripFrame[];
 }
 
 export interface TestAssertionResult {
@@ -41,6 +42,13 @@ export interface TestCookie {
   path?: string;
   httpOnly?: boolean;
   secure?: boolean;
+}
+
+export interface FilmstripFrame {
+  id: string;
+  label: string;
+  dataUri: string;
+  timestamp?: number;
 }
 
 export interface TestEvidence {
