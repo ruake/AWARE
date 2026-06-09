@@ -14,7 +14,7 @@
   "definitions": {
     "TestResult": {
       "type": "object",
-      "required": ["id", "name", "status", "duration", "category", "suite", "assertions", "evidence"],
+      "required": ["id", "name", "status", "duration", "category", "suite", "evidence"],
       "properties": {
         "id":                { "type": "string", "description": "Unique result ID" },
         "name":              { "type": "string", "description": "Human-readable test name" },

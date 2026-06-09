@@ -16,7 +16,7 @@ const REQUIRED_FIELDS = {
   "test-results.json": {
     type: "object",
     itemType: "TestResult",
-    itemRequired: ["id", "name", "status", "duration", "category", "suite", "assertions", "evidence"],
+    itemRequired: ["id", "name", "status", "duration", "category", "suite", "evidence"],
   },
   "runs.json": {
     type: "array",

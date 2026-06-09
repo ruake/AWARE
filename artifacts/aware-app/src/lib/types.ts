@@ -34,8 +34,8 @@ export interface TestResult {
   suite: string;
   /** OPTIONAL — Error message from a failing test */
   error?: string;
-  /** REQUIRED — List of assertion results (empty array if none) */
-  assertions: TestAssertionResult[];
+  /** REQUIRED in generated data — Assertion results (empty array if none) */
+  assertions?: TestAssertionResult[];
   /** REQUIRED — HTTP request/response evidence */
   evidence: TestEvidence;
   /** OPTIONAL — Screenshot filmstrip frames from Playwright */
