@@ -19,10 +19,10 @@ test.describe("PROOF App Smoke Tests", () => {
     await expect(table.first()).toBeVisible({ timeout: 5000 });
   });
 
-  test("Copilot page loads and shows skills", async ({ page }) => {
+  test("Copilot page loads and shows fallback when AI unavailable", async ({ page }) => {
     await page.goto("/copilot");
     await expect(page.getByText("Copilot").first()).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText("Generate Tests").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("Chrome Built-in AI Not Available").first()).toBeVisible({ timeout: 5000 });
   });
 
   test("About page loads", async ({ page }) => {
