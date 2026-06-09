@@ -5,23 +5,26 @@ import testResultsSeed from "@/data/test-results.json";
 
 export const RUNS: Run[] = runsSeed as unknown as Run[];
 export const DIFF_ROWS: DiffRow[] = diffRowsSeed as unknown as DiffRow[];
-const TEST_RESULTS_BY_RUN: Record<string, TestResult[]> = testResultsSeed as Record<string, TestResult[]>;
+const TEST_RESULTS_BY_RUN: Record<string, TestResult[]> = testResultsSeed as Record<
+  string,
+  TestResult[]
+>;
 
 export function getRunIndex(runId: string): number {
-  return RUNS.findIndex(r => r.id === runId);
+  return RUNS.findIndex((r) => r.id === runId);
 }
 
 export function getRunById(id: string): Run | undefined {
-  return RUNS.find(r => r.id === id);
+  return RUNS.find((r) => r.id === id);
 }
 
 function computeTestDetails(): TestDetail[] {
-  return DIFF_ROWS.map(diff => {
+  return DIFF_ROWS.map((diff) => {
     const diffName = diff.name.toLowerCase().replace(/_/g, " ");
     const history: TestRunPoint[] = [];
     for (const run of RUNS) {
       const results = getTestResultsForRun(run.id);
-      const match = results.find(r => {
+      const match = results.find((r) => {
         const rn = r.name.toLowerCase();
         return rn === diffName || rn.includes(diffName) || diffName.includes(rn);
       });
@@ -35,22 +38,62 @@ function computeTestDetails(): TestDetail[] {
       }
     }
     history.sort((a, b) => {
-      const ra = RUNS.find(r => r.id === a.runId);
-      const rb = RUNS.find(r => r.id === b.runId);
+      const ra = RUNS.find((r) => r.id === a.runId);
+      const rb = RUNS.find((r) => r.id === b.runId);
       return new Date(ra?.started ?? 0).getTime() - new Date(rb?.started ?? 0).getTime();
     });
-    const passCount = history.filter(h => h.status === "PASS").length;
+    const passCount = history.filter((h) => h.status === "PASS").length;
     const passRate = history.length > 0 ? Math.round((passCount / history.length) * 100) : 0;
     let flips = 0;
     for (let i = 1; i < history.length; i++) {
       if (history[i].status !== history[i - 1].status) flips++;
     }
-    const flakinessScore = history.length > 1 ? Math.round((flips / (history.length - 1)) * 100) : 0;
-    const avgDuration = history.length > 0
-      ? Math.round(history.reduce((s, h) => s + h.duration, 0) / history.length)
-      : 0;
+    const flakinessScore =
+      history.length > 1 ? Math.round((flips / (history.length - 1)) * 100) : 0;
+    const avgDuration =
+      history.length > 0
+        ? Math.round(history.reduce((s, h) => s + h.duration, 0) / history.length)
+        : 0;
     return { history, passRate, flakinessScore, avgDuration };
   });
+}
+
+export function computeTestDetailForName(name: string): TestDetail {
+  const target = name.toLowerCase().replace(/_/g, " ");
+  const history: TestRunPoint[] = [];
+  for (const run of RUNS) {
+    const results = getTestResultsForRun(run.id);
+    const match = results.find((r) => {
+      const rn = r.name.toLowerCase();
+      return rn === target || rn.includes(target) || target.includes(rn);
+    });
+    if (match) {
+      history.push({
+        runId: run.id,
+        status: match.status === "PASS" ? "PASS" : "FAIL",
+        duration: match.duration,
+        env: run.env,
+      });
+    }
+  }
+  history.sort((a, b) => {
+    const ra = RUNS.find((r) => r.id === a.runId);
+    const rb = RUNS.find((r) => r.id === b.runId);
+    return new Date(ra?.started ?? 0).getTime() - new Date(rb?.started ?? 0).getTime();
+  });
+  const passCount = history.filter((h) => h.status === "PASS").length;
+  const passRate = history.length > 0 ? Math.round((passCount / history.length) * 100) : 0;
+  let flips = 0;
+  for (let i = 1; i < history.length; i++) {
+    if (history[i].status !== history[i - 1].status) flips++;
+  }
+  const flakinessScore =
+    history.length > 1 ? Math.round((flips / (history.length - 1)) * 100) : 0;
+  const avgDuration =
+    history.length > 0
+      ? Math.round(history.reduce((s, h) => s + h.duration, 0) / history.length)
+      : 0;
+  return { history, passRate, flakinessScore, avgDuration };
 }
 
 export const TEST_DETAILS: TestDetail[] = computeTestDetails();
@@ -62,9 +105,9 @@ function envLabel(run: Run): string {
 
 const ENV_COLOR_MAP: Record<string, string> = {
   "Prod/Production": "#5b8af5",
-  "Prod/Staging":    "#f59e0b",
-  "UAT/Production":  "#22c55e",
-  "UAT/Staging":     "#a855f7",
+  "Prod/Staging": "#f59e0b",
+  "UAT/Production": "#22c55e",
+  "UAT/Staging": "#a855f7",
 };
 function envColor(label: string): string {
   return ENV_COLOR_MAP[label] ?? "#9aa0a6";
@@ -72,8 +115,12 @@ function envColor(label: string): string {
 
 // ── ENV_SUMMARY ──────────────────────────────────────────────────────
 export const ENV_SUMMARY: {
-  label: string; passRate: number; trend: number;
-  failures: number; color: string; alert: string | null;
+  label: string;
+  passRate: number;
+  trend: number;
+  failures: number;
+  color: string;
+  alert: string | null;
 }[] = (() => {
   const groups = new Map<string, Run[]>();
   for (const run of RUNS) {
@@ -84,18 +131,17 @@ export const ENV_SUMMARY: {
   const result: typeof ENV_SUMMARY = [];
   for (const [label, runs] of groups) {
     const sorted = [...runs].sort(
-      (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()
+      (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
     );
-    const latest   = sorted[0];
+    const latest = sorted[0];
     const previous = sorted[1];
-    const avgPassRate = Math.round(
-      sorted.reduce((s, r) => s + r.passPct, 0) / sorted.length
-    );
+    const avgPassRate = Math.round(sorted.reduce((s, r) => s + r.passPct, 0) / sorted.length);
     const trend = previous ? Math.round(latest.passPct - previous.passPct) : 0;
     const color = avgPassRate >= 90 ? "#22c55e" : avgPassRate >= 70 ? "#f59e0b" : "#ef4444";
-    const alert = latest.failures > 0
-      ? `${latest.failures} failure${latest.failures !== 1 ? "s" : ""} in last run`
-      : null;
+    const alert =
+      latest.failures > 0
+        ? `${latest.failures} failure${latest.failures !== 1 ? "s" : ""} in last run`
+        : null;
     result.push({ label, passRate: avgPassRate, trend, failures: latest.failures, color, alert });
   }
   // stable order: Prod/Production first
@@ -104,24 +150,26 @@ export const ENV_SUMMARY: {
 })();
 
 // ── PASS_RATE_CHART ──────────────────────────────────────────────────
-export const PASS_RATE_CHART: { label: string; passRate: number; runId: string }[] =
-  [...RUNS]
-    .sort((a, b) => new Date(a.started).getTime() - new Date(b.started).getTime())
-    .map(r => ({ label: r.started.slice(0, 10), passRate: r.passPct, runId: r.id }));
+export const PASS_RATE_CHART: { label: string; passRate: number; runId: string }[] = [...RUNS]
+  .sort((a, b) => new Date(a.started).getTime() - new Date(b.started).getTime())
+  .map((r) => ({ label: r.started.slice(0, 10), passRate: r.passPct, runId: r.id }));
 
 // ── PER_ENV_PASS_RATE ────────────────────────────────────────────────
 export const PER_ENV_PASS_RATE: {
-  env: string; color: string;
+  env: string;
+  color: string;
   data: { runId: string; label: string; passRate: number }[];
 }[] = (() => {
   const groups = new Map<string, { runId: string; label: string; passRate: number }[]>();
   const sorted = [...RUNS].sort(
-    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime()
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
   );
   for (const run of sorted) {
     const key = envLabel(run);
     if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push({ runId: run.id, label: run.started.slice(0, 10), passRate: run.passPct });
+    groups
+      .get(key)!
+      .push({ runId: run.id, label: run.started.slice(0, 10), passRate: run.passPct });
   }
   return [...groups.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
@@ -135,7 +183,7 @@ export const ENV_PASS_RATE_CHART: Record<string, unknown>[] = (() => {
   const dayMap = new Map<string, Record<string, unknown>>();
 
   const sorted = [...RUNS].sort(
-    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime()
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
   );
 
   for (const run of sorted) {
@@ -151,9 +199,7 @@ export const ENV_PASS_RATE_CHART: Record<string, unknown>[] = (() => {
     entry.runId = run.id; // last run of the day wins for click-through
   }
 
-  return [...dayMap.values()].sort((a, b) =>
-    String(a.day).localeCompare(String(b.day))
-  );
+  return [...dayMap.values()].sort((a, b) => String(a.day).localeCompare(String(b.day)));
 })();
 
 export interface RunFrequency {
@@ -168,7 +214,9 @@ export interface RunFrequency {
 }
 
 export function computeRunFrequency(): RunFrequency {
-  const sorted = [...RUNS].sort((a, b) => new Date(a.started).getTime() - new Date(b.started).getTime());
+  const sorted = [...RUNS].sort(
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
+  );
   const byDay: Map<string, { count: number; envs: Record<string, number> }> = new Map();
   const byEnv: Record<string, number> = {};
   const byHour: Record<string, number> = {};
@@ -192,10 +240,12 @@ export function computeRunFrequency(): RunFrequency {
   let totalIntervalMs = 0;
   let intervals = 0;
   for (let i = 1; i < sorted.length; i++) {
-    totalIntervalMs += new Date(sorted[i].started).getTime() - new Date(sorted[i - 1].started).getTime();
+    totalIntervalMs +=
+      new Date(sorted[i].started).getTime() - new Date(sorted[i - 1].started).getTime();
     intervals++;
   }
-  const avgIntervalHours = intervals > 0 ? Math.round((totalIntervalMs / intervals / 3600000) * 10) / 10 : 0;
+  const avgIntervalHours =
+    intervals > 0 ? Math.round((totalIntervalMs / intervals / 3600000) * 10) / 10 : 0;
 
   const gaps: { date: string; gapDays: number }[] = [];
   for (let i = 1; i < dayKeys.length; i++) {
@@ -209,7 +259,7 @@ export function computeRunFrequency(): RunFrequency {
     totalRuns: sorted.length,
     daysCovered,
     runsPerDay,
-    byDay: dayKeys.map(d => ({ date: d, count: byDay.get(d)!.count, envs: byDay.get(d)!.envs })),
+    byDay: dayKeys.map((d) => ({ date: d, count: byDay.get(d)!.count, envs: byDay.get(d)!.envs })),
     byEnv,
     byHour,
     avgIntervalHours,

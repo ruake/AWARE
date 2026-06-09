@@ -32,7 +32,20 @@ const LEVEL_COLORS = [
 ];
 
 const DAY_LABELS = ["Mon", "", "Wed", "", "Fri", "", ""];
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 export function HeatmapCalendar({ data, startDate, endDate, onDayClick }: Props) {
   const today = endDate ? new Date(endDate) : new Date();
@@ -70,25 +83,48 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick }: Props)
     }
   }
 
-  const maxCount = Math.max(1, ...data.map(d => d.count));
+  const maxCount = Math.max(1, ...data.map((d) => d.count));
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <div style={{ display: "flex", gap: 0, paddingLeft: 32, fontSize: 10, color: "var(--proof-text-secondary)", height: 14 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 0,
+          paddingLeft: 32,
+          fontSize: 10,
+          color: "var(--proof-text-secondary)",
+          height: 14,
+        }}
+      >
         {weeks.map((week, wi) => {
           const midDay = week[Math.floor(week.length / 2)];
           if (!midDay || !midDay.day.getTime()) return null;
           const month = midDay.day.getMonth();
-          const prevMonth = wi > 0 && weeks[wi - 1][Math.floor(weeks[wi - 1].length / 2)]?.day.getMonth();
+          const prevMonth =
+            wi > 0 && weeks[wi - 1][Math.floor(weeks[wi - 1].length / 2)]?.day.getMonth();
           if (month === prevMonth) return <span key={wi} style={{ width: 14 }} />;
-          return <span key={wi} style={{ width: 14, fontSize: 9 }}>{MONTH_LABELS[month].slice(0, 1)}</span>;
+          return (
+            <span key={wi} style={{ width: 14, fontSize: 9 }}>
+              {MONTH_LABELS[month].slice(0, 1)}
+            </span>
+          );
         })}
       </div>
 
       <div style={{ display: "flex", gap: 2 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2, paddingRight: 4 }}>
           {DAY_LABELS.map((label, i) => (
-            <div key={i} style={{ height: 14, fontSize: 10, lineHeight: "14px", color: "var(--proof-text-secondary)", textAlign: "right" }}>
+            <div
+              key={i}
+              style={{
+                height: 14,
+                fontSize: 10,
+                lineHeight: "14px",
+                color: "var(--proof-text-secondary)",
+                textAlign: "right",
+              }}
+            >
               {label}
             </div>
           ))}
@@ -107,7 +143,10 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick }: Props)
                     title={day.data ? `${day.date}: ${day.data.count} runs` : day.date}
                     onClick={() => onDayClick?.(day.data)}
                     style={{
-                      width: 14, height: 14, borderRadius: 2, cursor: day.data ? "pointer" : "default",
+                      width: 14,
+                      height: 14,
+                      borderRadius: 2,
+                      cursor: day.data ? "pointer" : "default",
                       backgroundColor: LEVEL_COLORS[level],
                       border: level === 0 ? "1px solid var(--proof-grey)" : "none",
                       transition: "background-color 0.1s",
@@ -120,10 +159,29 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick }: Props)
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 4, justifyContent: "flex-end", fontSize: 10, color: "var(--proof-text-secondary)", marginTop: 4 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          justifyContent: "flex-end",
+          fontSize: 10,
+          color: "var(--proof-text-secondary)",
+          marginTop: 4,
+        }}
+      >
         <span>Less</span>
         {LEVEL_COLORS.map((c, i) => (
-          <div key={i} style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: c || "transparent", border: i === 0 ? "1px solid var(--proof-grey)" : "none" }} />
+          <div
+            key={i}
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: 2,
+              backgroundColor: c || "transparent",
+              border: i === 0 ? "1px solid var(--proof-grey)" : "none",
+            }}
+          />
         ))}
         <span>More</span>
       </div>

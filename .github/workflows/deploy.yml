@@ -35,10 +35,16 @@ jobs:
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Validate data contracts
         run: pnpm run validate:data
+      - name: Lint
+        run: pnpm run lint
+      - name: Format check
+        run: pnpm run format
       - name: TypeScript check
         run: pnpm run typecheck
       - name: Run unit tests
         run: pnpm test || echo "No unit tests"
+      - name: Production audit
+        run: pnpm run audit
 
   e2e:
     runs-on: ubuntu-latest

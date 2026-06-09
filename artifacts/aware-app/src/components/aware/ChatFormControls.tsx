@@ -14,15 +14,17 @@ interface ChatFormControlsProps {
   onCancel?: () => void;
 }
 
-function normalizeOptions(opts?: string[] | { value: string; label: string }[]): { value: string; label: string }[] {
+function normalizeOptions(
+  opts?: string[] | { value: string; label: string }[],
+): { value: string; label: string }[] {
   if (!opts) return [];
-  return opts.map(o => typeof o === "string" ? { value: o, label: o } : o);
+  return opts.map((o) => (typeof o === "string" ? { value: o, label: o } : o));
 }
 
 export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControlsProps) {
   const [values, setValues] = React.useState<Record<string, unknown>>(() => {
     const init: Record<string, unknown> = {};
-    fields.forEach(f => {
+    fields.forEach((f) => {
       if (f.type === "toggle") init[f.id] = f.default ?? false;
       else if (f.options && f.options.length > 0) {
         const opts = normalizeOptions(f.options);
@@ -32,39 +34,59 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
     return init;
   });
 
-  const done = fields.every(f => {
+  const done = fields.every((f) => {
     const v = values[f.id];
     if (f.type === "toggle") return true;
     return v !== "" && v !== undefined && v !== null;
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8, padding: 12, background: "var(--proof-surface)", border: "1px solid var(--proof-grey)", borderRadius: 8 }}>
-      {fields.map(f => (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        marginTop: 8,
+        padding: 12,
+        background: "var(--proof-surface)",
+        border: "1px solid var(--proof-grey)",
+        borderRadius: 8,
+      }}
+    >
+      {fields.map((f) => (
         <div key={f.id}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6, color: "var(--proof-text)" }}>{f.question}</div>
+          <div
+            style={{ fontSize: 12, fontWeight: 600, marginBottom: 6, color: "var(--proof-text)" }}
+          >
+            {f.question}
+          </div>
           {f.type === "select" && (
             <select
               className="gcp-input"
               style={{ width: "100%", fontSize: 12 }}
               value={String(values[f.id] ?? "")}
-              onChange={e => setValues(p => ({ ...p, [f.id]: e.target.value }))}
+              onChange={(e) => setValues((p) => ({ ...p, [f.id]: e.target.value }))}
             >
-              {normalizeOptions(f.options).map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+              {normalizeOptions(f.options).map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
               ))}
             </select>
           )}
           {f.type === "radio" && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {normalizeOptions(f.options).map(o => {
+              {normalizeOptions(f.options).map((o) => {
                 const active = values[f.id] === o.value;
                 return (
                   <span
                     key={o.value}
-                    onClick={() => setValues(p => ({ ...p, [f.id]: o.value }))}
+                    onClick={() => setValues((p) => ({ ...p, [f.id]: o.value }))}
                     style={{
-                      padding: "5px 12px", borderRadius: 6, fontSize: 11, cursor: "pointer",
+                      padding: "5px 12px",
+                      borderRadius: 6,
+                      fontSize: 11,
+                      cursor: "pointer",
                       border: `1px solid ${active ? "var(--proof-blue)" : "var(--proof-grey)"}`,
                       background: active ? "var(--proof-blue)" : "transparent",
                       color: active ? "white" : "var(--proof-text-secondary)",
@@ -83,25 +105,37 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
               className="gcp-input"
               style={{ width: "100%", fontSize: 12 }}
               value={String(values[f.id] ?? "")}
-              onChange={e => setValues(p => ({ ...p, [f.id]: e.target.value }))}
+              onChange={(e) => setValues((p) => ({ ...p, [f.id]: e.target.value }))}
               placeholder="Type your answer..."
             />
           )}
           {f.type === "toggle" && (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span
-                onClick={() => setValues(p => ({ ...p, [f.id]: !p[f.id] }))}
+                onClick={() => setValues((p) => ({ ...p, [f.id]: !p[f.id] }))}
                 style={{
-                  width: 36, height: 20, borderRadius: 10,
+                  width: 36,
+                  height: 20,
+                  borderRadius: 10,
                   background: values[f.id] ? "var(--proof-blue)" : "var(--proof-grey)",
-                  position: "relative", cursor: "pointer", transition: "background 0.2s", flexShrink: 0,
+                  position: "relative",
+                  cursor: "pointer",
+                  transition: "background 0.2s",
+                  flexShrink: 0,
                 }}
               >
-                <span style={{
-                  position: "absolute", top: 2, width: 16, height: 16, borderRadius: 8,
-                  background: "white", transition: "left 0.2s",
-                  left: values[f.id] ? 18 : 2,
-                }} />
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 2,
+                    width: 16,
+                    height: 16,
+                    borderRadius: 8,
+                    background: "white",
+                    transition: "left 0.2s",
+                    left: values[f.id] ? 18 : 2,
+                  }}
+                />
               </span>
               <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>
                 {values[f.id] ? "Yes" : "No"}
@@ -112,7 +146,9 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
       ))}
       <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 4 }}>
         {onCancel && (
-          <button onClick={onCancel} className="gcp-button gcp-button-xs">Cancel</button>
+          <button onClick={onCancel} className="gcp-button gcp-button-xs">
+            Cancel
+          </button>
         )}
         <button
           onClick={() => onSubmit(values)}
@@ -125,7 +161,10 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
   );
 }
 
-export function parseFormBlocks(content: string): { text: string; blocks: { fields: FormField[] }[] } {
+export function parseFormBlocks(content: string): {
+  text: string;
+  blocks: { fields: FormField[] }[];
+} {
   const parts: string[] = [];
   const blocks: { fields: FormField[] }[] = [];
   let remaining = content;
@@ -148,7 +187,7 @@ export function parseFormBlocks(content: string): { text: string; blocks: { fiel
     const jsonStr = remaining.substring(0, endIdx).trim();
     try {
       const parsed = JSON.parse(jsonStr);
-      const fieldsArray = Array.isArray(parsed) ? parsed : parsed.fields ?? [];
+      const fieldsArray = Array.isArray(parsed) ? parsed : (parsed.fields ?? []);
       blocks.push({ fields: fieldsArray });
     } catch {
       parts.push(`[FORM]${jsonStr}[/FORM]`);

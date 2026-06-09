@@ -1,6 +1,16 @@
 export const ENVS = ["Prod/Production", "Prod/Staging", "UAT/Production", "UAT/Staging"];
 
-export const CATEGORIES = ["geo-match", "locale-split", "url-health", "security", "performance", "caching", "routing", "tls", "ddos"];
+export const CATEGORIES = [
+  "geo-match",
+  "locale-split",
+  "url-health",
+  "security",
+  "performance",
+  "caching",
+  "routing",
+  "tls",
+  "ddos",
+];
 
 export const PRIORITIES: string[] = ["P0", "P1", "P2", "P3"];
 
@@ -11,12 +21,28 @@ export const STATUSES = ["active", "disabled", "deprecated"] as const;
 export const OWNERS: string[] = [];
 
 export const TAG_COLORS: Record<string, string> = {
-  geo: "#5b8af5", locale: "#a855f7", health: "#f97316",
-  security: "#ef4444", performance: "#22c55e", regression: "#f59e0b",
-  smoke: "#3b82f6", e2e: "#dc2626", automated: "#22c55e",
+  geo: "#5b8af5",
+  locale: "#a855f7",
+  health: "#f97316",
+  security: "#ef4444",
+  performance: "#22c55e",
+  regression: "#f59e0b",
+  smoke: "#3b82f6",
+  e2e: "#dc2626",
+  automated: "#22c55e",
 };
 
-export const CATEGORY_COLORS = ["#5b8af5", "#f97316", "#22c55e", "#ef4444", "#a855f7", "#f59e0b", "#3b82f6", "#dc2626", "#9aa0a6"];
+export const CATEGORY_COLORS = [
+  "#5b8af5",
+  "#f97316",
+  "#22c55e",
+  "#ef4444",
+  "#a855f7",
+  "#f59e0b",
+  "#3b82f6",
+  "#dc2626",
+  "#9aa0a6",
+];
 
 export const TEST_TAGS = [
   { id: "tag_geo", name: "geo", color: "#5b8af5" },
@@ -56,5 +82,3 @@ export const TEST_NAMES = [
   "Validate DDoS mitigation triggers at 10000 req/s threshold",
   "Check A/B testing cookie routing for /api/v1/experiments",
 ];
-
-

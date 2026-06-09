@@ -1,5 +1,12 @@
 import yaml from "js-yaml";
-import type { TestCase, TestAssertion, TestConfig, TransactionStep, FilmstripConfig, Predicate } from "./types";
+import type {
+  TestCase,
+  TestAssertion,
+  TestConfig,
+  TransactionStep,
+  FilmstripConfig,
+  Predicate,
+} from "./types";
 
 export type ExportFormat = "json" | "yaml" | "xml";
 
@@ -29,32 +36,34 @@ function escapeXML(s: string): string {
 function objToXML(obj: unknown, indent: string): string {
   if (obj === null || obj === undefined) return "";
   if (Array.isArray(obj)) {
-    return obj.map(item => {
-      if (typeof item === "object" && item !== null) {
-        return `${indent}<item>\n${objToXML(item, indent + "  ")}${indent}</item>\n`;
-      }
-      return `${indent}<item>${escapeXML(String(item))}</item>\n`;
-    }).join("");
+    return obj
+      .map((item) => {
+        if (typeof item === "object" && item !== null) {
+          return `${indent}<item>\n${objToXML(item, indent + "  ")}${indent}</item>\n`;
+        }
+        return `${indent}<item>${escapeXML(String(item))}</item>\n`;
+      })
+      .join("");
   }
   if (typeof obj === "object") {
-    return Object.entries(obj as Record<string, unknown>).map(([k, v]) => {
-      if (v === null || v === undefined) return "";
-      if (Array.isArray(v)) {
-        return `${indent}<${k}>\n${objToXML(v, indent + "  ")}${indent}</${k}>\n`;
-      }
-      if (typeof v === "object") {
-        return `${indent}<${k}>\n${objToXML(v, indent + "  ")}${indent}</${k}>\n`;
-      }
-      return `${indent}<${k}>${escapeXML(String(v))}</${k}>\n`;
-    }).join("");
+    return Object.entries(obj as Record<string, unknown>)
+      .map(([k, v]) => {
+        if (v === null || v === undefined) return "";
+        if (Array.isArray(v)) {
+          return `${indent}<${k}>\n${objToXML(v, indent + "  ")}${indent}</${k}>\n`;
+        }
+        if (typeof v === "object") {
+          return `${indent}<${k}>\n${objToXML(v, indent + "  ")}${indent}</${k}>\n`;
+        }
+        return `${indent}<${k}>${escapeXML(String(v))}</${k}>\n`;
+      })
+      .join("");
   }
   return escapeXML(String(obj));
 }
 
 export function exportAsXML(tests: TestCase[]): string {
-  const body = tests.map(t =>
-    `  <testCase>\n${objToXML(t, "    ")}  </testCase>\n`
-  ).join("");
+  const body = tests.map((t) => `  <testCase>\n${objToXML(t, "    ")}  </testCase>\n`).join("");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<testCases>\n${body}</testCases>`;
 }
 
@@ -102,17 +111,17 @@ function coerceTestCase(raw: Record<string, unknown>): TestCase {
     documentation: String(raw.documentation ?? ""),
     relatedTestIds: Array.isArray(raw.relatedTestIds) ? raw.relatedTestIds.map(String) : [],
     config: (raw.config as TestConfig) ?? {},
-    assertions: Array.isArray(raw.assertions)
-      ? (raw.assertions as TestAssertion[])
-      : [],
+    assertions: Array.isArray(raw.assertions) ? (raw.assertions as TestAssertion[]) : [],
     requestHeaders: (raw.requestHeaders as Record<string, string>) ?? {},
     cookies: (raw.cookies as Record<string, string>) ?? {},
     expectedStatus: Number(raw.expectedStatus ?? 200),
-    captureResponseHeaders: Array.isArray(raw.captureResponseHeaders) ? raw.captureResponseHeaders.map(String) : [],
+    captureResponseHeaders: Array.isArray(raw.captureResponseHeaders)
+      ? raw.captureResponseHeaders.map(String)
+      : [],
     filmstrip: (raw.filmstrip as FilmstripConfig) ?? { enabled: false, threshold: 0.99 },
-    predicates: Array.isArray(raw.predicates) ? raw.predicates as Predicate[] : [],
+    predicates: Array.isArray(raw.predicates) ? (raw.predicates as Predicate[]) : [],
     version: Number(raw.version ?? 1),
-    changelog: Array.isArray(raw.changelog) ? raw.changelog as TestCase["changelog"] : [],
+    changelog: Array.isArray(raw.changelog) ? (raw.changelog as TestCase["changelog"]) : [],
     createdAt: String(raw.createdAt ?? now),
     updatedAt: now,
   };
@@ -179,14 +188,21 @@ function xmlNodeToObj(node: Element): Record<string, unknown> {
     if (grandChildren.length === 0) {
       const txt = child.textContent ?? "";
       const num = Number(txt);
-      result[key] = txt === "true" ? true : txt === "false" ? false : !isNaN(num) && txt !== "" ? num : txt;
-    } else if (grandChildren.every(c => c.tagName === "item")) {
-      result[key] = grandChildren.map(c => {
+      result[key] =
+        txt === "true" ? true : txt === "false" ? false : !isNaN(num) && txt !== "" ? num : txt;
+    } else if (grandChildren.every((c) => c.tagName === "item")) {
+      result[key] = grandChildren.map((c) => {
         const grandGrand = Array.from(c.children);
         if (grandGrand.length === 0) {
           const txt = c.textContent ?? "";
           const num = Number(txt);
-          return txt === "true" ? true : txt === "false" ? false : !isNaN(num) && txt !== "" ? num : txt;
+          return txt === "true"
+            ? true
+            : txt === "false"
+              ? false
+              : !isNaN(num) && txt !== ""
+                ? num
+                : txt;
         }
         return xmlNodeToObj(c);
       });

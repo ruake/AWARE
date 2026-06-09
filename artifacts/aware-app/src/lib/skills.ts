@@ -5,7 +5,8 @@ export const SKILLS: LLMSkillDefinition[] = [
   {
     id: "generate-script",
     name: "Generate Test Script",
-    description: "Generate a YAML test script with request/expect blocks, portable across CDN test runners",
+    description:
+      "Generate a YAML test script with request/expect blocks, portable across CDN test runners",
     icon: "FileCode",
     systemPrompt: `You are a test engineer writing portable YAML test definitions for web application testing.
 
@@ -42,12 +43,14 @@ Guidelines:
 - One request per test block
 - Document each test with a clear description`,
     responseFormat: "code",
-    userPromptHint: "What test scenario should the script cover? (e.g., cache behavior, geo-routing, TLS handshake)",
+    userPromptHint:
+      "What test scenario should the script cover? (e.g., cache behavior, geo-routing, TLS handshake)",
   },
   {
     id: "analyze-results",
     name: "Analyze Test Results",
-    description: "Analyze test run results, identify regressions, and suggest root causes with severity",
+    description:
+      "Analyze test run results, identify regressions, and suggest root causes with severity",
     icon: "Search",
     systemPrompt: `You are a regression analyst reviewing test results.
 
@@ -63,7 +66,8 @@ Be specific about CDN behavior: edge routing, cache policies, origin shielding, 
   {
     id: "explain-diff",
     name: "Explain Comparison Diff",
-    description: "Analyze differences between baseline and candidate runs with promotion recommendations",
+    description:
+      "Analyze differences between baseline and candidate runs with promotion recommendations",
     icon: "GitCompare",
     systemPrompt: `You are a release engineer comparing baseline vs candidate test runs.
 
@@ -98,7 +102,9 @@ Key store functions:
 Generate YAML test scripts with .yaml extension. Use predicates for validation assertions.
 `;
 
-registerSkills(SKILLS.map(s => ({
-  ...s,
-  systemPrompt: `[SKILL:${s.id}]\n` + PROJECT_CONTEXT + "\n\n" + s.systemPrompt,
-})));
+registerSkills(
+  SKILLS.map((s) => ({
+    ...s,
+    systemPrompt: `[SKILL:${s.id}]\n` + PROJECT_CONTEXT + "\n\n" + s.systemPrompt,
+  })),
+);

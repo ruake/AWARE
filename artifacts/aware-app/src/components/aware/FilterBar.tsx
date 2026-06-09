@@ -48,7 +48,7 @@ export function FilterBar({
           className="gcp-input"
           placeholder={searchPlaceholder}
           value={search}
-          onChange={e => onSearchChange(e.target.value)}
+          onChange={(e) => onSearchChange(e.target.value)}
           style={{ flex: 1, minWidth: 0 }}
         />
       </div>
@@ -62,15 +62,13 @@ export function FilterBar({
             gap: 6,
           }}
         >
-          {i === 0 && (
-            <Filter size={13} style={{ color: "var(--proof-text-secondary)" }} />
-          )}
+          {i === 0 && <Filter size={13} style={{ color: "var(--proof-text-secondary)" }} />}
           <select
             className="gcp-input"
             value={filter.value}
-            onChange={e => filter.onChange(e.target.value)}
+            onChange={(e) => filter.onChange(e.target.value)}
           >
-            {filter.options.map(opt => (
+            {filter.options.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
