@@ -2,14 +2,7 @@ import React from "react";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { copyToClipboard } from "@/lib/nav";
 import "../_group.css";
-import {
-  Link2,
-  Copy,
-  Check,
-  Github,
-  Shield,
-  Share2,
-} from "lucide-react";
+import { Link2, Copy, Check, Github, Shield, Share2 } from "lucide-react";
 
 export default function Sharing() {
   const copy = (text: string) => {
