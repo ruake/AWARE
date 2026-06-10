@@ -89,6 +89,7 @@ export async function checkWebLLM(): Promise<boolean> {
 
 class WebLLMProvider implements ILLMProvider {
   readonly type: LLMProviderType = "webllm";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private engine: any = null;
   private _initPromise: Promise<void> | null = null;
 
@@ -152,6 +153,7 @@ const _chromeAIProgressCallback: ((progress: number, text: string) => void) | nu
 export async function checkChromeAI(): Promise<boolean> {
   try {
     if (!("LanguageModel" in self)) return false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const availability: string = await (self as any).LanguageModel.availability();
     return availability !== "unavailable";
   } catch {
@@ -161,6 +163,7 @@ export async function checkChromeAI(): Promise<boolean> {
 
 class ChromeBuiltinLLMProvider implements ILLMProvider {
   readonly type: LLMProviderType = "chrome";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private session: any = null;
   private _initPromise: Promise<void> | null = null;
 
@@ -200,9 +203,12 @@ class ChromeBuiltinLLMProvider implements ILLMProvider {
   }
 
   private async _init() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.session = await (self as any).LanguageModel.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       monitor: (m: any) => {
         if (_chromeAIProgressCallback) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           m.addEventListener("downloadprogress", (e: any) => {
             _chromeAIProgressCallback!(e.loaded, `Downloading Gemini Nano model...`);
           });

@@ -34,12 +34,6 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
     return init;
   });
 
-  const done = fields.every((f) => {
-    const v = values[f.id];
-    if (f.type === "toggle") return true;
-    return v !== "" && v !== undefined && v !== null;
-  });
-
   return (
     <div
       style={{

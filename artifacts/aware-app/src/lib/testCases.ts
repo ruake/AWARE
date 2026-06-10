@@ -8,9 +8,6 @@ export { subscribeToTestCases };
 const testCasesStore: TestCase[] = [...getAutoDiscoveredTests()];
 
 let _tcSnapshot: TestCase[] = [];
-function _dropTCSnapshot() {
-  _tcSnapshot = [];
-}
 export function getTestCasesStore(): TestCase[] {
   return testCasesStore;
 }

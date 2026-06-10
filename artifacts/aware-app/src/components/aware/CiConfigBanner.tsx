@@ -1,6 +1,6 @@
 import React from "react";
-import { Download, FileText, GitCompare, ChevronDown, TerminalSquare, X } from "lucide-react";
-import { generateCiConfigYaml, downloadCiConfig } from "@/lib/ciConfig";
+import { Download, FileText, GitCompare, ChevronDown, TerminalSquare } from "lucide-react";
+import { downloadCiConfig } from "@/lib/ciConfig";
 
 export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: () => void }) {
   const [expanded, setExpanded] = React.useState(false);

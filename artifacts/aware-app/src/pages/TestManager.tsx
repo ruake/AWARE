@@ -17,15 +17,14 @@ import {
 import { StatsDashboard } from "@/components/aware/StatsDashboard";
 import { TestManagerSidePanel } from "@/components/aware/TestManagerSidePanel";
 import { RepoStatusBadge } from "@/components/aware/RepoStatusBadge";
-import { CATEGORIES, CATEGORY_COLORS, PRIORITIES, STATUSES, OWNERS } from "@/lib/constants";
-import { getTestCases, getTestSuites, computeTestStats, getAutoDiscoverySummary } from "@/lib/data";
+import { CATEGORIES, CATEGORY_COLORS, PRIORITIES, STATUSES } from "@/lib/constants";
+import { getTestCases, computeTestStats, getAutoDiscoverySummary } from "@/lib/data";
 import { importAuto, exportAsXML, exportAndDownload, downloadFile } from "@/lib/testImportExport";
-import type { TestCase, TestSuite, TestStats } from "@/lib/types";
+import type { TestCase, TestSuite } from "@/lib/types";
 import {
   Search,
   Check,
   Trash2,
-  Tag,
   RotateCcw,
   Upload,
   Download,
@@ -34,11 +33,7 @@ import {
   FileCode,
   X,
   Beaker,
-  BarChart3,
-  Clock,
-  FileText,
   FolderTree,
-  RefreshCw,
   History,
 } from "lucide-react";
 
@@ -397,18 +392,10 @@ function applyFilters(
   });
 }
 
-function downloadString(content: string, filename: string) {
-  const blob = new Blob([content], { type: "text/plain" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-}
-
 export default function TestManager() {
   const [, navigate] = useLocation();
   const { tcs, suites } = useTestData();
-  const stats = React.useMemo(() => computeTestStats(), [tcs]);
+  const stats = React.useMemo(() => computeTestStats(), []);
   const { show: toast, Toast } = useSimpleToast();
 
   const [searchText, setSearchText] = React.useState("");
@@ -452,11 +439,12 @@ export default function TestManager() {
 
   const filtered = React.useMemo(
     () => applyFilters(tcs, colFilters, searchText),
-    [tcs, colFilters, searchText],
+    [colFilters, searchText, tcs],
   );
 
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: filtered.length,
     getScrollElement: () => tableContainerRef.current,
@@ -607,7 +595,7 @@ export default function TestManager() {
             setSelectedIds(new Set());
             toast(`Updated tests to ${p}`);
           }}
-          onAddToSuite={(suiteId) => {
+          onAddToSuite={(_suiteId) => {
             setSelectedIds(new Set());
             toast(`Added tests to suite`);
           }}

@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   List,
   GitCompare,
-  Bug,
   Activity,
   Bell,
   Search,
@@ -47,7 +46,6 @@ const SECONDARY_NAV: NavItem[] = [
   { href: "/about", label: "About", icon: Info },
 ];
 
-const NAV_ITEMS = [...PRIMARY_NAV, ...SECONDARY_NAV];
 
 export function AppLayout({
   children,
@@ -89,7 +87,7 @@ export function AppLayout({
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  }, [navigate]);
 
   React.useEffect(() => {
     if (isDark) {
@@ -157,7 +155,7 @@ export function AppLayout({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [navigate]);
 
   const toggleTheme = () => {
     const next = !isDark;

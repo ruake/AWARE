@@ -441,7 +441,7 @@ export default function Compare() {
     if (clampedIdx >= 0 && clampedIdx < filtered.length) {
       setSelectedId(filtered[clampedIdx].id);
     }
-  }, [clampedIdx, filtered, setSelectedId]);
+  }, [clampedIdx, filtered, setSelectedId, selectedIdx]);
 
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -467,7 +467,7 @@ export default function Compare() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [filtered, navigate, setRegressionsOnly, setActiveFilter]);
+  }, [filtered, navigate, setRegressionsOnly, setActiveFilter, selectedIdx]);
 
   if (!baselineRun || !candidateRun) {
     return (

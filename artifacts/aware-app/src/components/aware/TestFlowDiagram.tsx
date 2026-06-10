@@ -3,15 +3,6 @@ import type { TestCase } from "@/lib/types";
 import { getGitHubUrl, cleanScriptPath } from "@/lib/utils";
 import { Beaker, ArrowDown, Globe, ShieldCheck, Image, Eye, FileCode } from "lucide-react";
 
-const stepLabelStyle: React.CSSProperties = {
-  fontSize: 10,
-  fontWeight: 700,
-  textTransform: "uppercase",
-  letterSpacing: "0.5px",
-  color: "var(--proof-text-secondary)",
-  marginBottom: 6,
-};
-
 function FlowStep({
   icon,
   title,

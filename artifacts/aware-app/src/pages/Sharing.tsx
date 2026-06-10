@@ -7,10 +7,6 @@ import {
   Copy,
   Check,
   Github,
-  PlayCircle,
-  Hash,
-  GitCompare,
-  FileText,
   Shield,
   Share2,
 } from "lucide-react";

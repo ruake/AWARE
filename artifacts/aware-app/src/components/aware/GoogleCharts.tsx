@@ -201,12 +201,11 @@ export function GoogleAreaChart({
 }: GoogleAreaChartProps) {
   const [timeRange, setTimeRange] = React.useState(12);
 
-  const safeData = Array.isArray(data) ? data : [];
-
   const filteredData = React.useMemo(() => {
-    if (!showTimeFrame || timeRange >= safeData.length) return safeData;
-    return safeData.slice(-timeRange);
-  }, [safeData, timeRange, showTimeFrame]);
+    const safe = Array.isArray(data) ? data : [];
+    if (!showTimeFrame || timeRange >= safe.length) return safe;
+    return safe.slice(-timeRange);
+  }, [data, timeRange, showTimeFrame]);
 
   const dataTable = React.useMemo(() => {
     if (filteredData.length === 0) return [];
@@ -343,12 +342,11 @@ export function GoogleBarChart({
 }: GoogleBarChartProps) {
   const [timeRange, setTimeRange] = React.useState(10);
 
-  const safeData = Array.isArray(data) ? data : [];
-
   const filteredData = React.useMemo(() => {
-    if (!showTimeFrame || timeRange >= safeData.length) return safeData;
-    return safeData.slice(-timeRange);
-  }, [safeData, timeRange, showTimeFrame]);
+    const safe = Array.isArray(data) ? data : [];
+    if (!showTimeFrame || timeRange >= safe.length) return safe;
+    return safe.slice(-timeRange);
+  }, [data, timeRange, showTimeFrame]);
 
   const dataTable = React.useMemo(() => {
     if (filteredData.length === 0) return [];

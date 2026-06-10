@@ -2,7 +2,6 @@ import React from "react";
 import Fuse from "fuse.js";
 import { useLocation } from "wouter";
 import { getTestCases, getTestSuites, RUNS, DIFF_ROWS } from "@/lib/data";
-import { repo } from "@/lib/nav";
 
 type SearchResult = {
   id: string;
@@ -101,7 +100,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
   const testCases = getTestCases();
   const suites = getTestSuites();
 
-  const ALL_RESULTS: SearchResult[] = [
+  const ALL_RESULTS: SearchResult[] = React.useMemo(() => [
     ...suites.map((s) => ({
       id: s.id,
       label: s.name,
@@ -191,7 +190,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       icon: "ℹ",
     },
     ...ACTION_COMMANDS,
-  ];
+  ], [testCases, suites]);
 
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(0);
@@ -214,10 +213,11 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         threshold: 0.3,
         includeScore: true,
       }),
-    [],
+    [ALL_RESULTS],
   );
 
   const q = query.trim();
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const filtered = React.useMemo(() => {
     if (q.startsWith(">")) {
       const search = q.slice(1).trim().toLowerCase();
@@ -236,7 +236,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       .search(q)
       .map((r) => r.item)
       .filter((r) => !typeFilter || r.type === typeFilter);
-  }, [q, typeFilter, fuse]);
+  }, [q, typeFilter, fuse, ALL_RESULTS]);
 
   const safeActiveIdx = Math.min(activeIdx, Math.max(0, filtered.length - 1));
 

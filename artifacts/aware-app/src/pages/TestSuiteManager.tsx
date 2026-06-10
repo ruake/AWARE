@@ -123,6 +123,7 @@ export default function TestSuiteManager() {
     [suites, tcs, expandedIds, suiteSearch],
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const suiteVirtualizer = useVirtualizer({
     count: flatVisibleItems.length,
     getScrollElement: () => suiteContainerRef.current,

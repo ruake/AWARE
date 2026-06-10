@@ -1,5 +1,4 @@
-import type { TestResult } from "./types";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ProviderTestResult {
   name: string;
   status: "PASS" | "FAIL";
@@ -47,13 +46,11 @@ registerProvider({
     let passed = 0;
     let failed = 0;
     let totalDuration = 0;
-    let testCount = 0;
 
     function walk(suite: any) {
       if (suite.specs) {
         for (const spec of suite.specs) {
           for (const t of spec.tests) {
-            testCount++;
             const ok = t.results?.some((r: any) => r.status === "passed");
             if (ok) passed++;
             else failed++;

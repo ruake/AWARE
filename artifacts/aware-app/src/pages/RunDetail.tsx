@@ -7,18 +7,15 @@ import {
   getTestResultsForRun,
   RUNS,
   getPromotionDecision,
-  getTestCaseById,
+
 } from "@/lib/data";
-import type { TestResult, TestAssertionResult, TestCookie, FilmstripFrame } from "@/lib/types";
+import type { TestResult, TestAssertionResult, FilmstripFrame } from "@/lib/types";
 import {
   ArrowLeft,
   GitCompare,
-  CheckCircle2,
   XCircle,
   Github,
   Share2,
-  AlertTriangle,
-  Shield,
   Zap,
   RefreshCw,
   Search,
@@ -31,7 +28,7 @@ import {
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 function AssertionRow({ a }: { a: TestAssertionResult }) {
   return (

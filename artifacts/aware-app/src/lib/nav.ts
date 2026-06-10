@@ -21,6 +21,7 @@ export function copyToClipboard(text: string) {
 }
 
 export function showToast(msg: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).__showToast?.(msg);
 }
 

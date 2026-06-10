@@ -4,7 +4,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { RUNS } from "@/lib/data";
-import { getEnvLabels } from "@/lib/envConfig";
+
 import { useSyncedUrlState } from "@/lib/urlState";
 import type { Run } from "@/lib/types";
 import {
@@ -47,8 +47,6 @@ export default function Runs() {
 
   const envs = [...new Set(RUNS.map((r) => r.env))];
   const suites = [...new Set(RUNS.map((r) => r.suite))];
-  const envLabels = getEnvLabels();
-
   const filtered = RUNS.filter((r) => {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
     if (suiteFilter !== "all" && r.suite !== suiteFilter) return false;
@@ -82,6 +80,7 @@ export default function Runs() {
 
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: filtered.length,
     getScrollElement: () => tableContainerRef.current,

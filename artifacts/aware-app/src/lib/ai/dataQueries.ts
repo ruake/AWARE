@@ -1,9 +1,9 @@
 import type { DataQuery } from "./types";
 import { RUNS, DIFF_ROWS, getRunById, getTestResultsForRun } from "@/lib/runs";
 import { getTestCases, getTestCaseById } from "@/lib/testCases";
-import { getTestSuites, getTestSuiteById } from "@/lib/testSuites";
+import { getTestSuites } from "@/lib/testSuites";
 import { getAllPromotionDecisions } from "@/lib/promotions";
-import type { Run, TestResult, TestCase, TestSuite, DiffRow } from "@/lib/types";
+import type { Run } from "@/lib/types";
 
 export const DATA_QUERIES: DataQuery[] = [
   {
@@ -74,7 +74,7 @@ export const DATA_QUERIES: DataQuery[] = [
     id: "get_runs_by_env",
     name: "Get Runs by Environment",
     description: "Returns runs filtered by environment (production/staging)",
-    query: async (params) => RUNS.filter(r => r.env === (params.env as string)),
+    query: async (params) => RUNS.filter((r) => r.env === (params.env as string)),
     exampleParams: { env: "production" },
   },
   {
@@ -84,7 +84,7 @@ export const DATA_QUERIES: DataQuery[] = [
     query: async (params) => {
       const start = new Date(params.start as string).getTime();
       const end = new Date(params.end as string).getTime();
-      return RUNS.filter(r => {
+      return RUNS.filter((r) => {
         const t = new Date(r.started).getTime();
         return t >= start && t <= end;
       });
@@ -119,9 +119,9 @@ export const DATA_QUERIES: DataQuery[] = [
     description: "Identifies tests that flip between PASS and FAIL across recent runs",
     query: async (params) => {
       const lookback = (params.lookbackRuns as number) || 5;
-      const recentRuns = [...RUNS].sort(
-        (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()
-      ).slice(0, lookback);
+      const recentRuns = [...RUNS]
+        .sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())
+        .slice(0, lookback);
       const testHistory: Record<string, { statuses: string[]; runIds: string[] }> = {};
       for (const run of recentRuns) {
         const results = getTestResultsForRun(run.id);
@@ -145,7 +145,11 @@ export const DATA_QUERIES: DataQuery[] = [
           flips: h.statuses.filter((s, i) => i > 0 && s !== h.statuses[i - 1]).length,
           totalRuns: h.statuses.length,
           statusSequence: h.statuses.join(" → "),
-          flakinessScore: Math.round((h.statuses.filter((s, i) => i > 0 && s !== h.statuses[i - 1]).length / (h.statuses.length - 1)) * 100),
+          flakinessScore: Math.round(
+            (h.statuses.filter((s, i) => i > 0 && s !== h.statuses[i - 1]).length /
+              (h.statuses.length - 1)) *
+              100,
+          ),
           runIds: h.runIds,
         }))
         .sort((a, b) => b.flakinessScore - a.flakinessScore);
@@ -158,10 +162,10 @@ export const DATA_QUERIES: DataQuery[] = [
     description: "Computes pass rate trend over recent runs",
     query: async (params) => {
       const lookback = (params.lookbackRuns as number) || 10;
-      const recentRuns = [...RUNS].sort(
-        (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime()
-      ).slice(-lookback);
-      return recentRuns.map(r => ({
+      const recentRuns = [...RUNS]
+        .sort((a, b) => new Date(a.started).getTime() - new Date(b.started).getTime())
+        .slice(-lookback);
+      return recentRuns.map((r) => ({
         runId: r.id,
         label: r.started.slice(0, 16),
         passRate: r.passPct,
@@ -184,7 +188,7 @@ export const DATA_QUERIES: DataQuery[] = [
       }
       return Object.entries(groups).map(([label, runs]) => {
         const sorted = [...runs].sort(
-          (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()
+          (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
         );
         const latest = sorted[0];
         const avgPassRate = Math.round(sorted.reduce((s, r) => s + r.passPct, 0) / sorted.length);
@@ -200,10 +204,16 @@ export const DATA_QUERIES: DataQuery[] = [
     description: "Returns history of a specific test across all runs",
     query: async (params) => {
       const testId = params.testId as string;
-      const history: { runId: string; status: string; duration: number; env: string; started: string }[] = [];
+      const history: {
+        runId: string;
+        status: string;
+        duration: number;
+        env: string;
+        started: string;
+      }[] = [];
       for (const run of RUNS) {
         const results = getTestResultsForRun(run.id);
-        const match = results.find(r => r.id === testId);
+        const match = results.find((r) => r.id === testId);
         if (match) {
           history.push({
             runId: run.id,
@@ -215,12 +225,15 @@ export const DATA_QUERIES: DataQuery[] = [
         }
       }
       history.sort((a, b) => new Date(a.started).getTime() - new Date(b.started).getTime());
-      const passes = history.filter(h => h.status === "PASS").length;
+      const passes = history.filter((h) => h.status === "PASS").length;
       return {
         testId,
         totalRuns: history.length,
         passRate: history.length > 0 ? Math.round((passes / history.length) * 100) : 0,
-        avgDuration: history.length > 0 ? Math.round(history.reduce((s, h) => s + h.duration, 0) / history.length) : 0,
+        avgDuration:
+          history.length > 0
+            ? Math.round(history.reduce((s, h) => s + h.duration, 0) / history.length)
+            : 0,
         history,
       };
     },
@@ -228,12 +241,15 @@ export const DATA_QUERIES: DataQuery[] = [
   },
 ];
 
-export async function executeDataQuery(queryId: string, params: Record<string, unknown>): Promise<unknown> {
-  const q = DATA_QUERIES.find(dq => dq.id === queryId);
+export async function executeDataQuery(
+  queryId: string,
+  params: Record<string, unknown>,
+): Promise<unknown> {
+  const q = DATA_QUERIES.find((dq) => dq.id === queryId);
   if (!q) throw new Error(`Unknown data query: ${queryId}`);
   return q.query(params);
 }
 
 export function getDataQueryById(id: string): DataQuery | undefined {
-  return DATA_QUERIES.find(q => q.id === id);
+  return DATA_QUERIES.find((q) => q.id === id);
 }
