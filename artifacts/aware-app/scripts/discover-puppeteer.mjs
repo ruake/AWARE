@@ -23,12 +23,12 @@ const PROJECT_ROOT = path.resolve(__dirname, "..");
 function inferCategory(filePath, describeBlocks) {
   const lower = filePath.toLowerCase();
   const combined = [lower, ...describeBlocks.map(d => d.toLowerCase())].join(" ");
-  if (combined.includes("screenshot")) return "Screenshots";
-  if (combined.includes("network")) return "Network";
-  if (combined.includes("perf") || combined.includes("performance")) return "Performance";
-  if (combined.includes("security")) return "Security";
-  if (combined.includes("auth") || combined.includes("login")) return "Security";
-  return "General";
+  if (combined.includes("screenshot")) return "screenshots";
+  if (combined.includes("network")) return "network";
+  if (combined.includes("perf") || combined.includes("performance")) return "performance";
+  if (combined.includes("security")) return "security";
+  if (combined.includes("auth") || combined.includes("login")) return "security";
+  return "general";
 }
 
 function discoverPuppeteerTests(directory) {

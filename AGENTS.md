@@ -101,3 +101,7 @@ The `TestResult` interface is the authoritative contract — REQUIRED fields mus
 - TestAnalytics `tr_` ID resolution: `tr_{runIdx}_{resultIdx}` rewrites to matching test case ID via IIFE
 - Discovery scripts require Python 3 (pytest AST) and Node.js (Playwright spec parsing)
 - Filmstrip/screenshot config is preserved across re-discovery runs by `discover-all.mjs`
+
+## Skills
+- **validate-loop** (`.agents/skills/validate-loop/`): 7-step validation pipeline — validate:data → typecheck → lint → format → test → discover:tests → build. Use when asked to "validate", "verify", or "run checks". Loops on failure, restarts from step 1 after each fix.
+- **monitoring-expert** (`.agents/skills/monitoring-expert/`): Prometheus/Grafana dashboards, alerting, distributed tracing, load testing with k6/Artillery. Not directly project-specific but available for observability work.

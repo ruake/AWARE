@@ -1,72 +1,152 @@
 [
   {
-    "id": "diff_ad_00",
-    "name": "test_geo_match_coordinates",
+    "id": "diff_ad_0",
+    "name": "Test Us East Users Resolve To Ashburn",
     "baseStatus": "PASS",
     "candStatus": "PASS",
-    "durBase": 234,
-    "durCand": 267,
+    "durBase": 1100,
+    "durCand": 270,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_ad_1",
+    "name": "Test Us West Users Resolve To Portland",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 350,
+    "durCand": 815,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_ad_2",
+    "name": "Test Eu West Users Resolve To Dublin",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 542,
+    "durCand": 792,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_ad_3",
+    "name": "Test Ap Southeast Users Resolve To Singapore",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1083,
+    "durCand": 1101,
     "category": "geo-match",
     "state": "unchanged"
   },
   {
-    "id": "diff_ad_01",
-    "name": "test_security_headers_present",
+    "id": "diff_ad_4",
+    "name": "Test Geo Endpoints Return 200[_api_v1_data_200]",
     "baseStatus": "PASS",
     "candStatus": "PASS",
-    "durBase": 145,
-    "durCand": 132,
-    "category": "security",
+    "durBase": 1195,
+    "durCand": 1232,
+    "category": "geo-match",
     "state": "unchanged"
   },
   {
-    "id": "diff_ad_02",
-    "name": "test_cache_control_strategy",
-    "baseStatus": "PASS",
-    "candStatus": "FAIL",
-    "durBase": 89,
-    "durCand": 312,
-    "category": "performance",
-    "state": "regression"
-  },
-  {
-    "id": "diff_pw_00",
-    "name": "login with valid credentials",
+    "id": "diff_ad_5",
+    "name": "Test Geo Endpoints Return 200[_api_v1_config_200]",
     "baseStatus": "PASS",
     "candStatus": "PASS",
-    "durBase": 1200,
-    "durCand": 1150,
-    "category": "e2e",
-    "state": "unchanged"
-  },
-  {
-    "id": "diff_pw_01",
-    "name": "dynamic loading completes",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 3400,
-    "durCand": 2800,
-    "category": "e2e",
-    "state": "unchanged"
-  },
-  {
-    "id": "diff_pw_02",
-    "name": "geolocation prompt triggers",
-    "baseStatus": "FAIL",
-    "candStatus": "PASS",
-    "durBase": 5000,
-    "durCand": 2100,
-    "category": "e2e",
-    "state": "fixed"
-  },
-  {
-    "id": "diff_tr_00",
-    "name": "test_performance_response_time",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 430,
-    "durCand": 675,
-    "category": "performance",
+    "durBase": 1122,
+    "durCand": 383,
+    "category": "geo-match",
     "state": "duration"
+  },
+  {
+    "id": "diff_ad_6",
+    "name": "Test Geo Endpoints Return 200[_api_v1_status_200]",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 889,
+    "durCand": 147,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_ad_7",
+    "name": "Test Geo Routing Table[us-east_iad]",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1466,
+    "durCand": 222,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_ad_8",
+    "name": "Test Geo Routing Table[us-west_pdx]",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1445,
+    "durCand": 743,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_ad_9",
+    "name": "Test Geo Routing Table[eu-west_dub]",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1455,
+    "durCand": 941,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_ad_10",
+    "name": "Test Geo Routing Table[ap-southeast_sin]",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1064,
+    "durCand": 1305,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_ad_11",
+    "name": "Test Failover To Secondary Pop",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 644,
+    "durCand": 131,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_ad_12",
+    "name": "Test Failover Logs Alert",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 722,
+    "durCand": 977,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_ad_13",
+    "name": "Test Failover Health Check Resumes",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 927,
+    "durCand": 489,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_ad_14",
+    "name": "Test Cache Hit Ratio Exceeds 80 Percent",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 524,
+    "durCand": 443,
+    "category": "caching",
+    "state": "unchanged"
   }
 ]

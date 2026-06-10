@@ -61,7 +61,7 @@ export default function Sharing() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
           <div
-            className="gcp-card"
+            className="proof-card"
             style={{ padding: 16, display: "flex", flexDirection: "column", gap: 16 }}
           >
             <h2
@@ -120,7 +120,7 @@ export default function Sharing() {
                     setCopiedUrl(true);
                     setTimeout(() => setCopiedUrl(false), 2000);
                   }}
-                  className="gcp-button gcp-button-xs"
+                  className="proof-button proof-button-xs"
                   style={{
                     color: copiedUrl ? "var(--proof-green)" : "var(--proof-blue)",
                     flexShrink: 0,
@@ -145,7 +145,7 @@ export default function Sharing() {
           </div>
 
           <div
-            className="gcp-card"
+            className="proof-card"
             style={{ padding: 16, display: "flex", flexDirection: "column", gap: 16 }}
           >
             <h2
@@ -202,7 +202,7 @@ export default function Sharing() {
           </div>
 
           <div
-            className="gcp-card"
+            className="proof-card"
             style={{ padding: 16, display: "flex", flexDirection: "column", gap: 16 }}
           >
             <h2

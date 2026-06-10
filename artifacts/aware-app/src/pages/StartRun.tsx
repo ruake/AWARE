@@ -28,7 +28,7 @@ export default function StartRun() {
         </div>
 
         <div
-          className="gcp-card"
+          className="proof-card"
           style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}
         >
           <div
@@ -55,7 +55,7 @@ export default function StartRun() {
               href="https://github.com/ruake/PROOF/actions"
               target="_blank"
               rel="noopener noreferrer"
-              className="gcp-button gcp-button-sm"
+              className="proof-button proof-button-sm"
               style={{ textDecoration: "none" }}
             >
               Open Actions <ExternalLink size={12} />
@@ -84,7 +84,7 @@ export default function StartRun() {
             </div>
             <a
               href="/compare"
-              className="gcp-button gcp-button-sm"
+              className="proof-button proof-button-sm"
               style={{ textDecoration: "none" }}
             >
               Compare <ExternalLink size={12} />

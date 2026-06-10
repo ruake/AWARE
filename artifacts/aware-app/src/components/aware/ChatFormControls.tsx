@@ -62,7 +62,7 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
           </div>
           {f.type === "select" && (
             <select
-              className="gcp-input"
+              className="proof-input"
               style={{ width: "100%", fontSize: 12 }}
               value={String(values[f.id] ?? "")}
               onChange={(e) => setValues((p) => ({ ...p, [f.id]: e.target.value }))}
@@ -102,7 +102,7 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
           )}
           {f.type === "text" && (
             <input
-              className="gcp-input"
+              className="proof-input"
               style={{ width: "100%", fontSize: 12 }}
               value={String(values[f.id] ?? "")}
               onChange={(e) => setValues((p) => ({ ...p, [f.id]: e.target.value }))}
@@ -146,13 +146,13 @@ export function ChatFormControls({ fields, onSubmit, onCancel }: ChatFormControl
       ))}
       <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 4 }}>
         {onCancel && (
-          <button onClick={onCancel} className="gcp-button gcp-button-xs">
+          <button onClick={onCancel} className="proof-button proof-button-xs">
             Cancel
           </button>
         )}
         <button
           onClick={() => onSubmit(values)}
-          className="gcp-button gcp-button-primary gcp-button-xs"
+          className="proof-button proof-button-primary proof-button-xs"
         >
           Submit
         </button>

@@ -38,7 +38,7 @@ function CollapsibleSection({
 }) {
   const [open, setOpen] = React.useState(defaultOpen);
   return (
-    <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
+    <div className="proof-card" style={{ display: "flex", flexDirection: "column" }}>
       <button
         onClick={() => setOpen((o) => !o)}
         style={{
@@ -90,7 +90,7 @@ function RelatedTests({ testCase }: { testCase: TestCase }) {
 
   return (
     <div style={{ padding: 0 }}>
-      <table className="gcp-table" style={{ width: "100%" }}>
+      <table className="proof-table" style={{ width: "100%" }}>
         <tbody>
           {related.map((rel) => {
             const name = rel.tc?.name ?? rel.diff?.name ?? rel.diff?.id ?? "";
@@ -121,7 +121,7 @@ function RelatedTests({ testCase }: { testCase: TestCase }) {
                 </td>
                 <td style={{ padding: "8px 10px", textAlign: "right" }}>
                   <span
-                    className={`gcp-badge ${isFail ? "gcp-badge-fail" : "gcp-badge-pass"}`}
+                    className={`proof-badge ${isFail ? "proof-badge-fail" : "proof-badge-pass"}`}
                     style={{ fontSize: 9 }}
                   >
                     {status}

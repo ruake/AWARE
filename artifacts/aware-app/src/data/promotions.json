@@ -1,1 +1,101 @@
-[]
+[
+  {
+    "runId": "run_20260610_yixwd9ng",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-10T16:45:11.838Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260610_uvycb4y1",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-10T13:00:06.773Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260610_59rlbr66",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-10T10:15:37.761Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260610_e8at6ywl",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-10T08:30:09.502Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260610_t4z1lbtc",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-10T05:00:11.480Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260609_4xl80ac1",
+    "decision": "block",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-09T16:20:46.730Z",
+    "note": "Blocked: 29 failures (72% pass rate)"
+  },
+  {
+    "runId": "run_20260609_pn3mogt7",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-09T13:45:33.798Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260609_r0acomrc",
+    "decision": "pending"
+  },
+  {
+    "runId": "run_20260609_y6h9ive6",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-09T08:15:27.878Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260609_jtoc3wqm",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-09T06:30:07.701Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260608_4ab6feob",
+    "decision": "pending"
+  },
+  {
+    "runId": "run_20260608_tqlkw9yk",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-08T15:30:18.109Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260608_haeczwm8",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-08T12:00:56.471Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260608_8ls1oztb",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-08T09:45:07.241Z",
+    "note": "All quality gates passed"
+  },
+  {
+    "runId": "run_20260608_84ebu1nu",
+    "decision": "promote",
+    "decidedBy": "ci-bot@aware.dev",
+    "decidedAt": "2026-06-08T07:12:40.600Z",
+    "note": "All quality gates passed"
+  }
+]

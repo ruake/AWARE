@@ -18,6 +18,8 @@ const Sharing = React.lazy(() => import("@/pages/Sharing"));
 const Status = React.lazy(() => import("@/pages/Status"));
 const About = React.lazy(() => import("@/pages/About"));
 const Copilot = React.lazy(() => import("@/pages/Copilot"));
+const Pulse = React.lazy(() => import("@/pages/Pulse"));
+const Home = React.lazy(() => import("@/pages/Home"));
 
 const queryClient = new QueryClient();
 
@@ -52,6 +54,11 @@ function PageLoader() {
 function Router() {
   return (
     <Switch>
+      <Route path="/home">
+        <React.Suspense fallback={<PageLoader />}>
+          <Home />
+        </React.Suspense>
+      </Route>
       <Route path="/">
         <React.Suspense fallback={<PageLoader />}>
           <Dashboard />
@@ -95,6 +102,11 @@ function Router() {
       <Route path="/copilot">
         <React.Suspense fallback={<PageLoader />}>
           <Copilot />
+        </React.Suspense>
+      </Route>
+      <Route path="/pulse">
+        <React.Suspense fallback={<PageLoader />}>
+          <Pulse />
         </React.Suspense>
       </Route>
       <Route path="/ci-pipeline">

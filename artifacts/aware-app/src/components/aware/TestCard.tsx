@@ -35,10 +35,10 @@ export function TagBadge({ tagId }: { tagId: string }) {
 
 export function TestCaseStatusBadge({ s }: { s: TestCase["status"] }) {
   const map = {
-    active: "gcp-badge-pass",
-    disabled: "gcp-badge-flaky",
-    deprecated: "gcp-badge-fail",
+    active: "proof-badge-pass",
+    disabled: "proof-badge-flaky",
+    deprecated: "proof-badge-fail",
   };
   const labels = { active: "Active", disabled: "Disabled", deprecated: "Deprecated" };
-  return <span className={`gcp-badge ${map[s]}`}>{labels[s]}</span>;
+  return <span className={`proof-badge ${map[s]}`}>{labels[s]}</span>;
 }

@@ -157,6 +157,7 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
   const typeColors: Record<string, string> = {
     web: "var(--proof-blue)",
     api: "var(--proof-green)",
+    http: "#00bcd4",
     edgeworker: "var(--proof-yellow)",
     transaction: "var(--proof-purple, #a855f7)",
   };
@@ -171,7 +172,7 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
 
   return (
     <div
-      className="gcp-card"
+      className="proof-card"
       style={{
         padding: 16,
         display: "flex",

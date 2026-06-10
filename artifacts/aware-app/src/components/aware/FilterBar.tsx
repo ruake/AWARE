@@ -25,7 +25,7 @@ export function FilterBar({
 }: FilterBarProps) {
   return (
     <div
-      className="gcp-card"
+      className="proof-card"
       style={{
         padding: "10px 14px",
         display: "flex",
@@ -45,7 +45,7 @@ export function FilterBar({
       >
         <Search size={14} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
         <input
-          className="gcp-input"
+          className="proof-input"
           placeholder={searchPlaceholder}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
@@ -64,7 +64,7 @@ export function FilterBar({
         >
           {i === 0 && <Filter size={13} style={{ color: "var(--proof-text-secondary)" }} />}
           <select
-            className="gcp-input"
+            className="proof-input"
             value={filter.value}
             onChange={(e) => filter.onChange(e.target.value)}
           >

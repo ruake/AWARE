@@ -22,7 +22,7 @@ import { RUNS, DIFF_ROWS } from "@/lib/data";
 
 function DocTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
-    <table className="gcp-table" style={{ margin: "8px 0", fontSize: 11 }}>
+    <table className="proof-table" style={{ margin: "8px 0", fontSize: 11 }}>
       <thead>
         <tr>
           {headers.map((h) => (
@@ -291,7 +291,7 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
               </h3>
               <button
                 onClick={() => setFullscreen(true)}
-                className="gcp-button"
+                className="proof-button"
                 style={{
                   fontSize: 10,
                   padding: "3px 8px",
@@ -405,7 +405,7 @@ function DocViewer({ sections }: { sections: DocEntry[] }) {
         >
           <button
             onClick={() => setFullscreen(false)}
-            className="gcp-button"
+            className="proof-button"
             style={{
               fontSize: 11,
               padding: "4px 10px",
@@ -1618,7 +1618,7 @@ export default function About() {
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
         {/* Hero */}
         <div
-          className="gcp-card"
+          className="proof-card"
           style={{
             padding: "32px 36px",
             marginBottom: 24,
@@ -1696,7 +1696,7 @@ export default function About() {
 
         {/* What is PROOF? — Beginner overview */}
         <div
-          className="gcp-card"
+          className="proof-card"
           style={{
             padding: 28,
             marginBottom: 24,
@@ -1970,7 +1970,7 @@ export default function About() {
           Use Cases
         </h2>
         <div
-          className="gcp-card"
+          className="proof-card"
           style={{ padding: 24, marginBottom: 24, position: "relative", overflow: "hidden" }}
         >
           <CarouselSlides />
@@ -1993,7 +1993,7 @@ export default function About() {
             return (
               <div
                 key={f.title}
-                className="gcp-card"
+                className="proof-card"
                 style={{ padding: 20, display: "flex", gap: 14 }}
               >
                 <div
@@ -2036,8 +2036,8 @@ export default function About() {
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--proof-text)" }}>
           Tech Stack
         </h2>
-        <div className="gcp-card" style={{ overflow: "hidden", marginBottom: 28 }}>
-          <table className="gcp-table" style={{ margin: 0 }}>
+        <div className="proof-card" style={{ overflow: "hidden", marginBottom: 28 }}>
+          <table className="proof-table" style={{ margin: 0 }}>
             <thead>
               <tr>
                 <th>Technology</th>
@@ -2061,7 +2061,7 @@ export default function About() {
         <div style={{ marginBottom: 28 }}>
           <button
             onClick={() => setShowDocs(!showDocs)}
-            className="gcp-card"
+            className="proof-card"
             style={{
               width: "100%",
               padding: "14px 20px",
@@ -2096,7 +2096,7 @@ export default function About() {
 
         {/* CTA */}
         <div
-          className="gcp-card"
+          className="proof-card"
           style={{
             padding: 24,
             display: "flex",

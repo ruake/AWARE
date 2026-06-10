@@ -38,7 +38,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
           onClick={() => {
             downloadCiConfig();
           }}
-          className="gcp-button-primary gcp-button-xs"
+          className="proof-button-primary proof-button-xs"
         >
           <Download size={12} /> Download Config
         </button>

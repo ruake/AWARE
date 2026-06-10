@@ -35,11 +35,12 @@ function inferCategory(filePath, tags, describeBlocks) {
   const lower = filePath.toLowerCase();
   const combined = [lower, ...tags.map(t => t.toLowerCase()), ...describeBlocks.map(d => d.toLowerCase())].join(" ");
   if (combined.includes("geo")) return "geo-match";
-  if (combined.includes("security") || combined.includes("waf")) return "security";
-  if (combined.includes("perf") || combined.includes("latency") || combined.includes("cache")) return "performance";
+  if (combined.includes("security") || combined.includes("waf") || combined.includes("alert") || combined.includes("login") || combined.includes("auth")) return "security";
+  if (combined.includes("perf") || combined.includes("latency") || combined.includes("cache") || combined.includes("dynamic")) return "performance";
   if (combined.includes("routing") || combined.includes("dns")) return "routing";
   if (combined.includes("tls") || combined.includes("ssl")) return "tls";
   if (combined.includes("locale") || combined.includes("i18n")) return "locale-split";
+  if (combined.includes("checkbox") || combined.includes("dropdown") || combined.includes("frame") || combined.includes("window")) return "functional";
   return "general";
 }
 
@@ -79,8 +80,11 @@ function discoverPlaywrightTests(directories) {
     const files = fs.readdirSync(dirPath, { recursive: true })
       .filter(f => {
         const lower = f.toLowerCase();
-        return lower.endsWith(".spec.ts") || lower.endsWith(".spec.js") ||
-               lower.endsWith(".test.ts") || lower.endsWith(".test.js");
+        if (!lower.endsWith(".spec.ts") && !lower.endsWith(".spec.js") &&
+            !lower.endsWith(".test.ts") && !lower.endsWith(".test.js")) return false;
+        // Exclude Puppeteer and HTTP test directories (handled by dedicated discovery scripts)
+        if (lower.startsWith("http") || lower.startsWith("puppeteer")) return false;
+        return true;
       })
       .sort();
 

@@ -43,7 +43,7 @@ export function SkeletonCard({ height = 120, count = 1 }: { height?: number; cou
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="gcp-card"
+          className="proof-card"
           style={{
             padding: 16,
             display: "flex",
@@ -110,7 +110,7 @@ export function SkeletonTable({ rows = 5, cols = 4 }: { rows?: number; cols?: nu
 export function SkeletonChart({ height = 200 }: { height?: number }) {
   return (
     <div
-      className="gcp-card"
+      className="proof-card"
       style={{ padding: 16, minHeight: height, display: "flex", flexDirection: "column", gap: 12 }}
     >
       <SkeletonBox width="30%" height={14} />

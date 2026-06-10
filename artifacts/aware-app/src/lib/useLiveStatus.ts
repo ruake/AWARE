@@ -1,4 +1,5 @@
 import React from "react";
+import { getNotifications } from "./notifications";
 
 export interface LiveUpdate {
   id: string;
@@ -8,12 +9,13 @@ export interface LiveUpdate {
 }
 
 export function useLiveStatus() {
-  const [updates] = React.useState<LiveUpdate[]>([]);
-  const [pendingCount] = React.useState(0);
+  const notifs = React.useMemo(() => getNotifications(), []);
+  const [updates] = React.useState<LiveUpdate[]>(notifs);
+  const [pendingCount] = React.useState(notifs.length);
   const [currentToast] = React.useState<LiveUpdate | null>(null);
 
   const dismissToast = React.useCallback(() => {}, []);
-  const clearCount = React.useCallback(() => {}, []);
+  const clearCount = React.useCallback(() => [], []);
 
   return { updates, pendingCount, currentToast, dismissToast, clearCount };
 }

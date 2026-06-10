@@ -158,7 +158,9 @@ registerProvider({
               });
             } else if (att.path && attachmentsDir) {
               try {
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
                 const fs = require("fs");
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
                 const p = require("path");
                 const fullPath = p.resolve(attachmentsDir, att.path);
                 if (fs.existsSync(fullPath)) {
@@ -169,7 +171,9 @@ registerProvider({
                     dataUri: `data:${att.contentType || "image/png"};base64,${buf.toString("base64")}`,
                   });
                 }
-              } catch {}
+              } catch {
+                /* ignore file read errors */
+              }
             }
           }
         }
