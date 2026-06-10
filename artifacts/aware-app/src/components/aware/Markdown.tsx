@@ -23,21 +23,24 @@ const LINK_PATTERNS = [
 ];
 
 function linkifyContent(text: string): string {
-  // Split text into segments: code spans, existing links, and plain text
   const segments: { type: "skip" | "text"; content: string; codeContent?: string }[] = [];
   let lastIndex = 0;
-  const skipRe = /(`([^`]*)`)|(\[[^\]]*\]\([^)]*\))/g;
+  const skipRe = /```[\s\S]*?```|(`([^`]*)`)|(\[[^\]]*\]\([^)]*\))/g;
   let match: RegExpExecArray | null;
 
   while ((match = skipRe.exec(text)) !== null) {
     if (match.index > lastIndex) {
       segments.push({ type: "text", content: text.slice(lastIndex, match.index) });
     }
-    const backtickContent = match[2];
-    if (backtickContent) {
-      segments.push({ type: "skip", content: match[0], codeContent: backtickContent });
-    } else {
+    if (match[0].startsWith("```")) {
       segments.push({ type: "skip", content: match[0] });
+    } else {
+      const backtickContent = match[3];
+      if (backtickContent) {
+        segments.push({ type: "skip", content: match[0], codeContent: backtickContent });
+      } else {
+        segments.push({ type: "skip", content: match[0] });
+      }
     }
     lastIndex = match.index + match[0].length;
   }
@@ -55,7 +58,6 @@ function linkifyContent(text: string): string {
 
   return segments
     .map((seg) => {
-      // If this is a backtick code span containing an ID, unwrap it to a markdown link
       if (seg.type === "skip" && seg.codeContent) {
         const linked = linkifyStr(seg.codeContent);
         if (linked !== seg.codeContent) return linked;
@@ -85,8 +87,23 @@ const components = {
     if (lang === "chart") {
       try {
         const config = JSON.parse(String(children).trim());
+        const rows = config.rows || [];
+        if (rows.length === 0) {
+          return (
+            <div
+              style={{
+                padding: 12,
+                fontSize: 11,
+                color: "var(--proof-text-secondary)",
+                textAlign: "center",
+              }}
+            >
+              No data
+            </div>
+          );
+        }
         const chartType = config.type || "ColumnChart";
-        const data = [config.headers || ["X", "Y"], ...(config.rows || [])];
+        const data = [config.headers || ["X", "Y"], ...rows];
         return (
           <Chart
             chartType={chartType}
