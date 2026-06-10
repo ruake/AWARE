@@ -2,13 +2,7 @@ import React from "react";
 import { useParams, useLocation, useSearch } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
-import {
-  getRunById,
-  getTestResultsForRun,
-  RUNS,
-  getPromotionDecision,
-
-} from "@/lib/data";
+import { getRunById, getTestResultsForRun, RUNS, getPromotionDecision } from "@/lib/data";
 import type { TestResult, TestAssertionResult, FilmstripFrame } from "@/lib/types";
 import {
   ArrowLeft,

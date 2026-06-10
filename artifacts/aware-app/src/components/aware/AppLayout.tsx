@@ -46,7 +46,6 @@ const SECONDARY_NAV: NavItem[] = [
   { href: "/about", label: "About", icon: Info },
 ];
 
-
 export function AppLayout({
   children,
   activeHref,

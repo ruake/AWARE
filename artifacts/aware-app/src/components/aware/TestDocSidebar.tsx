@@ -12,7 +12,6 @@ import { getTestCaseById } from "@/lib/data";
 import { DIFF_ROWS } from "@/lib/runs";
 import type { TestCase } from "@/lib/types";
 
-
 function CollapsibleSection({
   title,
   icon,

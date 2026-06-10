@@ -195,7 +195,7 @@ export default function Copilot() {
         ...prev,
         { role: "assistant", content: resultText, type: "analysis" },
       ]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,
@@ -216,7 +216,7 @@ export default function Copilot() {
       const provider = getProvider();
       let response: string;
       try {
-          const ctx = buildAIContext();
+        const ctx = buildAIContext();
         const completion = await provider.complete({
           messages: [
             { role: "system", content: buildSystemPrompt(ctx) },
@@ -233,7 +233,7 @@ export default function Copilot() {
         response = `I'm running in offline analysis mode. Here's the data I can share:\n\n**Last run:** ${lastRun?.id} — "${lastRun?.label}"\n   Status: ${lastRun?.status} | Pass rate: ${lastRun?.passPct}% | Failures: ${lastRun?.failures}\n   Environment: ${lastRun?.env} | Target: ${lastRun?.target}\n   Duration: ${lastRun?.duration} | Build: ${lastRun?.build}\n\n**Overall:** 15 runs across 3 days, avg 96% pass rate.\n\nTry a specific question or select an analysis type from the sidebar.`;
       }
       setMessages((prev) => [...prev, { role: "assistant", content: response, type: "chat" }]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,

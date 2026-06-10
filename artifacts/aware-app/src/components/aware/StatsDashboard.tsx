@@ -5,11 +5,11 @@ import { CATEGORY_COLORS } from "@/lib/constants";
 
 export function StatsDashboard({
   stats,
-  _colFilters,
+  colFilters: _colFilters,
   onToggleFilter,
 }: {
   stats: TestStats;
-  _colFilters: Record<string, ColumnFilterState>;
+  colFilters: Record<string, ColumnFilterState>;
   onToggleFilter: (field: string, value: string) => void;
 }) {
   const statusData = Object.entries(stats.byStatus).map(([k, v]) => ({

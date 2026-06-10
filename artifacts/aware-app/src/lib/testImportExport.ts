@@ -1,11 +1,5 @@
 import yaml from "js-yaml";
-import type {
-  TestCase,
-  TestAssertion,
-  TestConfig,
-  FilmstripConfig,
-  Predicate,
-} from "./types";
+import type { TestCase, TestAssertion, TestConfig, FilmstripConfig, Predicate } from "./types";
 
 export type ExportFormat = "json" | "yaml" | "xml";
 
