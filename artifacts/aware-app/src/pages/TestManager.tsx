@@ -1,4 +1,5 @@
 import React from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { CiConfigBanner } from "@/components/aware/CiConfigBanner";
@@ -16,7 +17,7 @@ import {
 import { StatsDashboard } from "@/components/aware/StatsDashboard";
 import { TestManagerSidePanel } from "@/components/aware/TestManagerSidePanel";
 import { RepoStatusBadge } from "@/components/aware/RepoStatusBadge";
-import { CATEGORIES, PRIORITIES, STATUSES, OWNERS } from "@/lib/constants";
+import { CATEGORIES, CATEGORY_COLORS, PRIORITIES, STATUSES, OWNERS } from "@/lib/constants";
 import { getTestCases, getTestSuites, computeTestStats, getAutoDiscoverySummary } from "@/lib/data";
 import { importAuto, exportAsXML, exportAndDownload, downloadFile } from "@/lib/testImportExport";
 import type { TestCase, TestSuite, TestStats } from "@/lib/types";
@@ -120,7 +121,7 @@ function ImportModal({ onClose, toast }: { onClose: () => void; toast: (m: strin
           </code>
         </p>
         <textarea
-          className="gcp-input"
+          className="proof-input"
           style={{ width: "100%", minHeight: 180, fontFamily: "var(--font-mono)", fontSize: 12 }}
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -149,13 +150,13 @@ function ImportModal({ onClose, toast }: { onClose: () => void; toast: (m: strin
           </div>
         )}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button onClick={onClose} className="gcp-button">
+          <button onClick={onClose} className="proof-button">
             Close
           </button>
           <button
             onClick={handleImport}
             disabled={loading || !text.trim()}
-            className="gcp-button gcp-button-primary"
+            className="proof-button proof-button-primary"
             style={{ display: "flex", alignItems: "center", gap: 6 }}
           >
             <Upload size={14} /> {loading ? "Importing..." : "Import"}
@@ -454,6 +455,15 @@ export default function TestManager() {
     [tcs, colFilters, searchText],
   );
 
+  const tableContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: filtered.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => 48,
+    overscan: 10,
+  });
+
   const allChanges = React.useMemo(() => {
     const entries = tcs.flatMap((tc) =>
       tc.changelog.map((entry) => ({ ...entry, testId: tc.id, testName: tc.name })),
@@ -503,17 +513,7 @@ export default function TestManager() {
   const allValues = {
     status: STATUSES as unknown as string[],
     priority: PRIORITIES as string[],
-    category: [
-      "geo-match",
-      "locale-split",
-      "url-health",
-      "security",
-      "performance",
-      "caching",
-      "routing",
-      "tls",
-      "ddos",
-    ],
+    category: CATEGORIES,
     automated: ["true", "false"],
   };
 
@@ -524,7 +524,7 @@ export default function TestManager() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 16,
+          gap: 8,
           height: "calc(100vh - 100px)",
           maxWidth: 1600,
           margin: "0 auto",
@@ -538,25 +538,23 @@ export default function TestManager() {
             flexShrink: 0,
           }}
         >
-          <div>
-            <h1
-              style={{ fontSize: 20, fontWeight: 800, color: "var(--proof-text)", marginBottom: 2 }}
-            >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 800, color: "var(--proof-text)" }}>
               Test Manager
             </h1>
-            <p style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>
-              {tcs.length} test cases across {suites.length} suites
-            </p>
+            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+              {tcs.length} tests · {suites.length} suites
+            </span>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => setShowImport(true)} className="gcp-button gcp-button-sm">
-              <Upload size={13} /> Import
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={() => setShowImport(true)} className="proof-button proof-button-sm">
+              <Upload size={12} /> Import
             </button>
-            <button onClick={() => handleExport("json")} className="gcp-button gcp-button-sm">
-              <Download size={13} /> Export
+            <button onClick={() => handleExport("json")} className="proof-button proof-button-sm">
+              <Download size={12} /> Export
             </button>
-            <button onClick={() => setShowChanges(true)} className="gcp-button gcp-button-sm">
-              <History size={13} /> Changes
+            <button onClick={() => setShowChanges(true)} className="proof-button proof-button-sm">
+              <History size={12} /> Changes
             </button>
             <button
               onClick={() => {
@@ -564,9 +562,9 @@ export default function TestManager() {
                   toast("Store reset");
                 }
               }}
-              className="gcp-button gcp-button-sm"
+              className="proof-button proof-button-sm"
             >
-              <RotateCcw size={13} /> Reset
+              <RotateCcw size={12} /> Reset
             </button>
           </div>
         </div>
@@ -580,14 +578,14 @@ export default function TestManager() {
             <div
               style={{
                 display: "flex",
-                gap: 12,
-                marginBottom: 14,
-                fontSize: 12,
+                gap: 8,
+                fontSize: 11,
                 color: "var(--proof-text-secondary)",
+                flexShrink: 0,
               }}
             >
-              <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <Beaker size={13} style={{ color: "var(--proof-blue)" }} />
+              <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                <Beaker size={12} style={{ color: "var(--proof-blue)" }} />
                 <strong style={{ color: "var(--proof-blue)" }}>{s.total}</strong> auto-discovered
               </span>
               <span>·</span>
@@ -628,7 +626,7 @@ export default function TestManager() {
               }}
             />
             <input
-              className="gcp-input"
+              className="proof-input"
               style={{ width: "100%", paddingLeft: 32 }}
               placeholder="Search test name, description, ID…"
               value={searchText}
@@ -660,10 +658,13 @@ export default function TestManager() {
           <PanelErrorBoundary label="Test list">
             <div
               style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}
-              className="gcp-card"
+              className="proof-card"
             >
-              <div style={{ flex: 1, overflowY: "auto" }}>
-                <table className="gcp-table" style={{ margin: 0 }}>
+              <div
+                ref={tableContainerRef}
+                style={{ flex: 1, overflow: "auto", position: "relative" }}
+              >
+                <table className="proof-table" style={{ margin: 0, position: "relative" }}>
                   <thead
                     style={{
                       position: "sticky",
@@ -718,8 +719,9 @@ export default function TestManager() {
                       <th style={{ width: 80, textAlign: "center" }}>Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {filtered.map((tc) => {
+                  <tbody style={{ position: "relative", height: rowVirtualizer.getTotalSize() }}>
+                    {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                      const tc = filtered[virtualRow.index];
                       const isSelected = selectedIds.has(tc.id);
                       const isPanelOpen = selectedPanelId === tc.id;
                       return (
@@ -727,6 +729,12 @@ export default function TestManager() {
                           key={tc.id}
                           onClick={() => setSelectedPanelId(isPanelOpen ? null : tc.id)}
                           style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: virtualRow.size,
+                            transform: `translateY(${virtualRow.start}px)`,
                             cursor: "pointer",
                             background: isPanelOpen
                               ? "var(--proof-blue-bg)"
@@ -742,7 +750,8 @@ export default function TestManager() {
                               checked={isSelected}
                               onChange={(e) => {
                                 const next = new Set(selectedIds);
-                                e.target.checked ? next.add(tc.id) : next.delete(tc.id);
+                                if (e.target.checked) next.add(tc.id);
+                                else next.delete(tc.id);
                                 setSelectedIds(next);
                               }}
                               style={{ accentColor: "var(--proof-blue)" }}
@@ -794,9 +803,22 @@ export default function TestManager() {
                               style={{
                                 fontSize: 11,
                                 padding: "2px 8px",
-                                background: "var(--proof-surface)",
-                                border: "1px solid var(--proof-grey)",
+                                background:
+                                  (CATEGORY_COLORS[
+                                    CATEGORIES.indexOf(tc.category) % CATEGORY_COLORS.length
+                                  ] ?? "#9aa0a6") + "20",
+                                border:
+                                  "1px solid " +
+                                  (CATEGORY_COLORS[
+                                    CATEGORIES.indexOf(tc.category) % CATEGORY_COLORS.length
+                                  ] ?? "#9aa0a6") +
+                                  "40",
                                 borderRadius: 4,
+                                color:
+                                  CATEGORY_COLORS[
+                                    CATEGORIES.indexOf(tc.category) % CATEGORY_COLORS.length
+                                  ] ?? "#9aa0a6",
+                                fontWeight: 600,
                               }}
                             >
                               {tc.category}
@@ -852,7 +874,7 @@ export default function TestManager() {
                       );
                     })}
                     {filtered.length === 0 && (
-                      <tr>
+                      <tr style={{ position: "absolute", top: 0, left: 0, width: "100%" }}>
                         <td
                           colSpan={9}
                           style={{
@@ -887,14 +909,14 @@ export default function TestManager() {
                 <div style={{ display: "flex", gap: 8 }}>
                   <button
                     onClick={() => handleExport("csv")}
-                    className="gcp-button gcp-button-xs"
+                    className="proof-button proof-button-xs"
                     style={{ color: "var(--proof-blue)", background: "none", border: "none" }}
                   >
                     Export CSV
                   </button>
                   <button
                     onClick={() => handleExport("junit_xml")}
-                    className="gcp-button gcp-button-xs"
+                    className="proof-button proof-button-xs"
                     style={{ color: "var(--proof-blue)", background: "none", border: "none" }}
                   >
                     Export JUnit XML
@@ -962,7 +984,7 @@ function ChangesPanel({
       }}
     >
       <div
-        className="gcp-card"
+        className="proof-card"
         style={{
           width: 640,
           maxHeight: "80vh",
@@ -1010,13 +1032,13 @@ function ChangesPanel({
             flexShrink: 0,
           }}
         >
-          <button onClick={() => onExport("json")} className="gcp-button gcp-button-xs">
+          <button onClick={() => onExport("json")} className="proof-button proof-button-xs">
             <FileJson size={12} /> JSON
           </button>
-          <button onClick={() => onExport("csv")} className="gcp-button gcp-button-xs">
+          <button onClick={() => onExport("csv")} className="proof-button proof-button-xs">
             <FileSpreadsheet size={12} /> CSV
           </button>
-          <button onClick={() => onExport("junit_xml")} className="gcp-button gcp-button-xs">
+          <button onClick={() => onExport("junit_xml")} className="proof-button proof-button-xs">
             <FileCode size={12} /> JUnit XML
           </button>
           <span style={{ flex: 1 }} />

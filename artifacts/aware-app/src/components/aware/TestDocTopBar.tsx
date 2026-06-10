@@ -5,6 +5,7 @@ import { ArrowLeft, Pin, Github, ExternalLink, Search } from "lucide-react";
 import { RepoStatusBadge } from "./RepoStatusBadge";
 import { getGitHubUrl } from "@/lib/utils";
 import { StatusBadge } from "./StatusBadge";
+import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import type { TestCase, DiffRow } from "@/lib/types";
 
 export function TestDocTopBar({
@@ -25,7 +26,7 @@ export function TestDocTopBar({
   const [, navigate] = useLocation();
   return (
     <div
-      className="gcp-card"
+      className="proof-card"
       style={{
         padding: 16,
         display: "flex",
@@ -59,7 +60,7 @@ export function TestDocTopBar({
         <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative" }}>
           <Search size={14} style={{ color: "var(--proof-text-secondary)" }} />
           <select
-            className="gcp-input"
+            className="proof-input"
             style={{ fontSize: 13, fontFamily: "var(--font-mono)", maxWidth: 300 }}
             value={testId}
             onChange={(e) => navigate(`/testdoc?testId=${e.target.value}`)}
@@ -88,12 +89,20 @@ export function TestDocTopBar({
           <span
             style={{
               padding: "4px 8px",
-              background: "var(--proof-grey-bg)",
               fontSize: 12,
-              fontWeight: 500,
+              fontWeight: 600,
               borderRadius: 4,
-              color: "var(--proof-text-secondary)",
-              border: "1px solid var(--proof-grey)",
+              background:
+                (CATEGORY_COLORS[CATEGORIES.indexOf(testCategory) % CATEGORY_COLORS.length] ??
+                  "#9aa0a6") + "20",
+              border:
+                "1px solid " +
+                (CATEGORY_COLORS[CATEGORIES.indexOf(testCategory) % CATEGORY_COLORS.length] ??
+                  "#9aa0a6") +
+                "40",
+              color:
+                CATEGORY_COLORS[CATEGORIES.indexOf(testCategory) % CATEGORY_COLORS.length] ??
+                "#9aa0a6",
             }}
           >
             {testCategory}
@@ -133,7 +142,7 @@ export function TestDocTopBar({
             href={getGitHubUrl(testCase)}
             target="_blank"
             rel="noreferrer"
-            className="gcp-button"
+            className="proof-button"
             style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}
           >
             <Github size={16} />
@@ -142,7 +151,7 @@ export function TestDocTopBar({
           </a>
         ) : (
           <span
-            className="gcp-button"
+            className="proof-button"
             style={{
               display: "flex",
               alignItems: "center",

@@ -10,6 +10,10 @@ export const CATEGORIES = [
   "routing",
   "tls",
   "ddos",
+  "screenshots",
+  "network",
+  "functional",
+  "general",
 ];
 
 export const PRIORITIES: string[] = ["P0", "P1", "P2", "P3"];
@@ -30,6 +34,13 @@ export const TAG_COLORS: Record<string, string> = {
   smoke: "#3b82f6",
   e2e: "#dc2626",
   automated: "#22c55e",
+  puppeteer: "#e91e63",
+  http: "#00bcd4",
+  browser: "#3b82f6",
+  functional: "#ff9800",
+  screenshots: "#9c27b0",
+  network: "#009688",
+  general: "#9aa0a6",
 };
 
 export const CATEGORY_COLORS = [
@@ -42,6 +53,10 @@ export const CATEGORY_COLORS = [
   "#3b82f6",
   "#dc2626",
   "#9aa0a6",
+  "#9c27b0",
+  "#009688",
+  "#ff9800",
+  "#78716c",
 ];
 
 export const TEST_TAGS = [
@@ -53,6 +68,12 @@ export const TEST_TAGS = [
   { id: "tag_regression", name: "regression", color: "#f59e0b" },
   { id: "tag_smoke", name: "smoke", color: "#3b82f6" },
   { id: "tag_e2e", name: "e2e", color: "#dc2626" },
+  { id: "tag_puppeteer", name: "puppeteer", color: "#e91e63" },
+  { id: "tag_http", name: "http", color: "#00bcd4" },
+  { id: "tag_browser", name: "browser", color: "#3b82f6" },
+  { id: "tag_functional", name: "functional", color: "#ff9800" },
+  { id: "tag_screenshots", name: "screenshots", color: "#9c27b0" },
+  { id: "tag_network", name: "network", color: "#009688" },
 ];
 
 export const TEST_NAMES = [

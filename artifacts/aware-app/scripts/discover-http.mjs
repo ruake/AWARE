@@ -23,10 +23,10 @@ const PROJECT_ROOT = path.resolve(__dirname, "..");
 function inferCategory(filePath, describeBlocks) {
   const lower = filePath.toLowerCase();
   const combined = [lower, ...describeBlocks.map(d => d.toLowerCase())].join(" ");
-  if (combined.includes("health")) return "URL Health";
-  if (combined.includes("security") || combined.includes("header")) return "Security";
-  if (combined.includes("perf") || combined.includes("performance") || combined.includes("cache")) return "Performance";
-  return "General";
+  if (combined.includes("health")) return "url-health";
+  if (combined.includes("security") || combined.includes("header")) return "security";
+  if (combined.includes("perf") || combined.includes("performance") || combined.includes("cache")) return "performance";
+  return "general";
 }
 
 function discoverHttpTests(directory) {

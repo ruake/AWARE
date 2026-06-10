@@ -2,8 +2,8 @@
 /**
  * Unified Test Discovery Orchestrator
  *
- * Runs both pytest and Playwright discovery scripts, merges results,
- * and writes a single auto-tests.json file.
+ * Runs pytest, Playwright, Puppeteer, and HTTP discovery scripts,
+ * merges results, and writes a single auto-tests.json file.
  *
  * Usage:
  *   node scripts/discover-all.mjs [--pytest-dirs dir ...] [--playwright-dirs dir ...]
@@ -19,37 +19,45 @@ const PROJECT_ROOT = path.resolve(__dirname, "..");
 
 const PYTEST_SCRIPT = path.join(__dirname, "discover-tests.py");
 const PLAYWRIGHT_SCRIPT = path.join(__dirname, "discover-playwright.mjs");
+const PUPPETEER_SCRIPT = path.join(__dirname, "discover-puppeteer.mjs");
+const HTTP_SCRIPT = path.join(__dirname, "discover-http.mjs");
 const OUTPUT_FILE = path.join(PROJECT_ROOT, "src/data/auto-tests.json");
 const PLAYWRIGHT_OUTPUT = path.join(PROJECT_ROOT, "src/data/auto-tests-playwright.json");
+const PUPPETEER_OUTPUT = path.join(PROJECT_ROOT, "src/data/auto-tests-puppeteer.json");
+const HTTP_OUTPUT = path.join(PROJECT_ROOT, "src/data/auto-tests-http.json");
 
-function runPytest(args = []) {
-  console.error("\n--- Running pytest discovery ---");
-  const cmd = ["python3", PYTEST_SCRIPT, ...args].join(" ");
+function runScript(label, cmd, outputPath) {
+  console.error(`\n--- Running ${label} discovery ---`);
   try {
     execSync(cmd, { cwd: PROJECT_ROOT, stdio: "inherit" });
   } catch (err) {
-    console.error("  [WARN] pytest discovery failed:", err.message);
+    console.error(`  [WARN] ${label} discovery failed:`, err.message);
     return [];
   }
-  if (!fs.existsSync(OUTPUT_FILE)) return [];
-  const data = JSON.parse(fs.readFileSync(OUTPUT_FILE, "utf-8"));
-  console.error(`  Pytest: ${data.length} tests`);
+  if (!fs.existsSync(outputPath)) return [];
+  const data = JSON.parse(fs.readFileSync(outputPath, "utf-8"));
+  console.error(`  ${label}: ${data.length} tests`);
   return data;
 }
 
+function runPytest(args = []) {
+  const cmd = ["python3", PYTEST_SCRIPT, ...args].join(" ");
+  return runScript("Pytest", cmd, OUTPUT_FILE);
+}
+
 function runPlaywright(args = []) {
-  console.error("\n--- Running Playwright discovery ---");
   const cmd = ["node", PLAYWRIGHT_SCRIPT, ...args].join(" ");
-  try {
-    execSync(cmd, { cwd: PROJECT_ROOT, stdio: "inherit" });
-  } catch (err) {
-    console.error("  [WARN] Playwright discovery failed:", err.message);
-    return [];
-  }
-  if (!fs.existsSync(PLAYWRIGHT_OUTPUT)) return [];
-  const data = JSON.parse(fs.readFileSync(PLAYWRIGHT_OUTPUT, "utf-8"));
-  console.error(`  Playwright: ${data.length} tests`);
-  return data;
+  return runScript("Playwright", cmd, PLAYWRIGHT_OUTPUT);
+}
+
+function runPuppeteer(args = []) {
+  const cmd = ["node", PUPPETEER_SCRIPT, ...args].join(" ");
+  return runScript("Puppeteer", cmd, PUPPETEER_OUTPUT);
+}
+
+function runHttp(args = []) {
+  const cmd = ["node", HTTP_SCRIPT, ...args].join(" ");
+  return runScript("HTTP", cmd, HTTP_OUTPUT);
 }
 
 function mergeWithExisting(tests) {
@@ -79,8 +87,8 @@ function mergeWithExisting(tests) {
   return tests;
 }
 
-function mergeAndWrite(pytestTests, playwrightTests) {
-  let all = [...pytestTests, ...playwrightTests];
+function mergeAndWrite(pytestTests, playwrightTests, puppeteerTests, httpTests) {
+  let all = [...pytestTests, ...playwrightTests, ...puppeteerTests, ...httpTests];
 
   // Collision check
   const ids = new Set();
@@ -100,7 +108,7 @@ function mergeAndWrite(pytestTests, playwrightTests) {
   const merged = mergeWithExisting(unique);
 
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(merged, null, 2), "utf-8");
-  console.error(`\n  Merged: ${unique.length} tests (${pytestTests.length} pytest + ${playwrightTests.length} playwright)`);
+  console.error(`\n  Merged: ${unique.length} tests (${pytestTests.length} pytest + ${playwrightTests.length} playwright + ${puppeteerTests.length} puppeteer + ${httpTests.length} http)`);
   console.error(`  Written to: ${OUTPUT_FILE}`);
 
   const cats = {};
@@ -123,12 +131,14 @@ function main() {
 
   const pytestTests = runPytest(pytestArgs);
   const playwrightTests = runPlaywright(playwrightArgs);
+  const puppeteerTests = runPuppeteer();
+  const httpTests = runHttp();
 
-  mergeAndWrite(pytestTests, playwrightTests);
+  mergeAndWrite(pytestTests, playwrightTests, puppeteerTests, httpTests);
 
-  // Clean up intermediate file
-  if (fs.existsSync(PLAYWRIGHT_OUTPUT)) {
-    fs.unlinkSync(PLAYWRIGHT_OUTPUT);
+  // Clean up intermediate files
+  for (const f of [PLAYWRIGHT_OUTPUT, PUPPETEER_OUTPUT, HTTP_OUTPUT]) {
+    if (fs.existsSync(f)) fs.unlinkSync(f);
   }
 }
 

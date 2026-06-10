@@ -85,7 +85,7 @@ for (const file of files) {
         if (content[i].id) {
           allIds.add(content[i].id);
           if (content[i].id.startsWith("run_")) runIds.add(content[i].id);
-          if (content[i].id.startsWith("ad_") || content[i].id.startsWith("pw_") || content[i].id.startsWith("tc_")) testIds.add(content[i].id);
+          if (content[i].id.startsWith("ad_") || content[i].id.startsWith("pw_") || content[i].id.startsWith("pu_") || content[i].id.startsWith("ht_") || content[i].id.startsWith("tc_")) testIds.add(content[i].id);
         }
       }
     } else if (rules.type === "object" && typeof content === "object" && content !== null) {
@@ -139,7 +139,7 @@ for (const file of files) {
 }
 
 // Cross-reference: suites reference existing test IDs
-// Test IDs come from auto-tests.json (ad_*, pw_*) and test-results.json
+// Test IDs come from auto-tests.json (ad_*, pw_*, pu_*, ht_*) and test-results.json
 try {
   const autoTests = JSON.parse(readFileSync(join(dataDir, "auto-tests.json"), "utf-8"));
   for (const t of autoTests) {

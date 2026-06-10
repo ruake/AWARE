@@ -5,6 +5,7 @@ import type { TestCase } from "@/lib/types";
 import { TagBadge, TestCaseStatusBadge, priorityColor } from "@/components/aware/TestCard";
 import { RepoStatusBadge } from "./RepoStatusBadge";
 import { TestFlowDiagram } from "./TestFlowDiagram";
+import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import { Beaker, Clock, BarChart3, FileText, Github, ExternalLink, Network } from "lucide-react";
 
 export function TestManagerSidePanel({
@@ -39,7 +40,7 @@ export function TestManagerSidePanel({
         borderLeft: "3px solid var(--proof-blue)",
         background: "var(--proof-surface)",
       }}
-      className="gcp-card"
+      className="proof-card"
     >
       <div
         style={{
@@ -111,10 +112,20 @@ export function TestManagerSidePanel({
           <span
             style={{
               fontSize: 11,
-              background: "var(--proof-grey-bg)",
               padding: "2px 8px",
               borderRadius: 4,
-              border: "1px solid var(--proof-grey)",
+              background:
+                (CATEGORY_COLORS[CATEGORIES.indexOf(tc.category) % CATEGORY_COLORS.length] ??
+                  "#9aa0a6") + "20",
+              border:
+                "1px solid " +
+                (CATEGORY_COLORS[CATEGORIES.indexOf(tc.category) % CATEGORY_COLORS.length] ??
+                  "#9aa0a6") +
+                "40",
+              color:
+                CATEGORY_COLORS[CATEGORIES.indexOf(tc.category) % CATEGORY_COLORS.length] ??
+                "#9aa0a6",
+              fontWeight: 600,
             }}
           >
             {tc.category}
@@ -129,7 +140,7 @@ export function TestManagerSidePanel({
             v{tc.version}
           </span>
           {tc.automated && (
-            <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>
+            <span className="proof-badge proof-badge-pass" style={{ fontSize: 10 }}>
               Automated
             </span>
           )}
@@ -189,22 +200,22 @@ export function TestManagerSidePanel({
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
           {Object.keys(tc.requestHeaders).length > 0 && (
-            <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>
+            <span className="proof-badge proof-badge-pass" style={{ fontSize: 10 }}>
               {Object.keys(tc.requestHeaders).length} headers
             </span>
           )}
           {Object.keys(tc.cookies).length > 0 && (
-            <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>
+            <span className="proof-badge proof-badge-pass" style={{ fontSize: 10 }}>
               {Object.keys(tc.cookies).length} cookies
             </span>
           )}
           {tc.captureResponseHeaders.length > 0 && (
-            <span className="gcp-badge gcp-badge-pass" style={{ fontSize: 10 }}>
+            <span className="proof-badge proof-badge-pass" style={{ fontSize: 10 }}>
               Capture {tc.captureResponseHeaders.length}
             </span>
           )}
           {tc.filmstrip.enabled && (
-            <span className="gcp-badge gcp-badge-flaky" style={{ fontSize: 10 }}>
+            <span className="proof-badge proof-badge-flaky" style={{ fontSize: 10 }}>
               Filmstrip {Math.round(tc.filmstrip.threshold * 100)}%
             </span>
           )}
@@ -245,7 +256,7 @@ export function TestManagerSidePanel({
           {editingDoc ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <textarea
-                className="gcp-input"
+                className="proof-input"
                 style={{
                   width: "100%",
                   minHeight: 120,
@@ -257,7 +268,7 @@ export function TestManagerSidePanel({
               />
               <button
                 onClick={handleSaveDoc}
-                className="gcp-button gcp-button-primary gcp-button-sm"
+                className="proof-button proof-button-primary proof-button-sm"
                 style={{ alignSelf: "flex-start" }}
               >
                 Save
@@ -404,7 +415,7 @@ export function TestManagerSidePanel({
         <div style={{ display: "flex", gap: 8 }}>
           <button
             onClick={() => navigate(`/analytics?testId=${tc.id}`)}
-            className="gcp-button gcp-button-sm"
+            className="proof-button proof-button-sm"
             style={{ flex: 1 }}
           >
             <BarChart3 size={13} /> Analytics
@@ -414,7 +425,7 @@ export function TestManagerSidePanel({
               navigator.clipboard.writeText(`${window.location.origin}/tests/${tc.id}`);
               toast("Link copied");
             }}
-            className="gcp-button gcp-button-sm"
+            className="proof-button proof-button-sm"
             style={{ flex: 1 }}
           >
             <FileText size={13} /> Copy Link

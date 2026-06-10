@@ -19,19 +19,22 @@ import {
   BarChart3,
   FolderTree,
   Cpu,
+  Radio,
 } from "lucide-react";
 import { CommandPalette } from "./CommandPalette";
+import { ProofLogo } from "./ProofLogo";
 
 import { useLiveStatus } from "@/lib/useLiveStatus";
 
 interface NavItem {
   href: string;
   label: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
 }
 
 const PRIMARY_NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/pulse", label: "Pulse", icon: Radio },
   { href: "/runs", label: "Runs", icon: List },
   { href: "/compare", label: "Compare", icon: GitCompare },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
@@ -70,10 +73,15 @@ export function AppLayout({
   const { updates, currentToast, dismissToast, pendingCount, clearCount } = useLiveStatus();
 
   const paletteRef = React.useRef(paletteOpen);
-  paletteRef.current = paletteOpen;
   const notifOpenRef = React.useRef(showNotifs);
-  notifOpenRef.current = showNotifs;
   const pendingG = React.useRef(false);
+
+  React.useEffect(() => {
+    paletteRef.current = paletteOpen;
+  }, [paletteOpen]);
+  React.useEffect(() => {
+    notifOpenRef.current = showNotifs;
+  }, [showNotifs]);
 
   React.useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -116,6 +124,7 @@ export function AppLayout({
           s: "/suites",
           c: "/copilot",
           a: "/about",
+          p: "/pulse",
         };
         if (navMap[e.key]) {
           e.preventDefault();
@@ -155,7 +164,9 @@ export function AppLayout({
     setIsDark(next);
     try {
       localStorage.setItem("proof-theme", next ? "dark" : "light");
-    } catch {}
+    } catch {
+      /* ignore localStorage write errors */
+    }
   };
 
   const isActive = (href: string) =>
@@ -190,25 +201,7 @@ export function AppLayout({
       >
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
-          <div
-            style={{
-              width: 30,
-              height: 30,
-              background: "linear-gradient(135deg, var(--proof-blue) 0%, #7aa2f7 100%)",
-              borderRadius: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              boxShadow: "0 2px 8px rgba(91,138,245,0.4)",
-            }}
-          >
-            <span
-              style={{ color: "white", fontWeight: 900, fontSize: 12, letterSpacing: "-0.5px" }}
-            >
-              PR
-            </span>
-          </div>
+          <ProofLogo />
           <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
             <span
               style={{

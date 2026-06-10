@@ -101,7 +101,7 @@ export function GoogleFilterableTable({
       {/* Filters row */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
         <input
-          className="gcp-input"
+          className="proof-input"
           style={{ width: 200, fontSize: 11, padding: "4px 8px" }}
           placeholder={searchPlaceholder}
           value={globalSearch}
@@ -112,7 +112,7 @@ export function GoogleFilterableTable({
           .map((col) => (
             <select
               key={col.field}
-              className="gcp-input"
+              className="proof-input"
               style={{ fontSize: 11, padding: "4px 8px", width: "auto" }}
               value={filters[col.field] || ""}
               onChange={(e) => setFilters((f) => ({ ...f, [col.field]: e.target.value }))}
@@ -208,24 +208,8 @@ export function GoogleAreaChart({
     return safeData.slice(-timeRange);
   }, [safeData, timeRange, showTimeFrame]);
 
-  if (filteredData.length === 0) {
-    return (
-      <div
-        style={{
-          height,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "var(--proof-text-secondary)",
-          fontSize: 12,
-        }}
-      >
-        No data
-      </div>
-    );
-  }
-
   const dataTable = React.useMemo(() => {
+    if (filteredData.length === 0) return [];
     const header = [columns[0], ...yKeys];
     const body = filteredData.map((row) => [
       String(row[xKey] ?? ""),
@@ -251,6 +235,23 @@ export function GoogleAreaChart({
     enableInteractivity: true,
     aggregationTarget: "auto",
   };
+
+  if (filteredData.length === 0) {
+    return (
+      <div
+        style={{
+          height,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--proof-text-secondary)",
+          fontSize: 12,
+        }}
+      >
+        No data
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -349,24 +350,8 @@ export function GoogleBarChart({
     return safeData.slice(-timeRange);
   }, [safeData, timeRange, showTimeFrame]);
 
-  if (filteredData.length === 0) {
-    return (
-      <div
-        style={{
-          height,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "var(--proof-text-secondary)",
-          fontSize: 12,
-        }}
-      >
-        No data
-      </div>
-    );
-  }
-
   const dataTable = React.useMemo(() => {
+    if (filteredData.length === 0) return [];
     const header = [columns[0], ...yKeys];
     const body = filteredData.map((row) => [
       String(row[xKey] ?? ""),
@@ -389,6 +374,23 @@ export function GoogleBarChart({
     backgroundColor: "transparent",
     chartArea: { width: "90%", height: "75%" },
   };
+
+  if (filteredData.length === 0) {
+    return (
+      <div
+        style={{
+          height,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--proof-text-secondary)",
+          fontSize: 12,
+        }}
+      >
+        No data
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

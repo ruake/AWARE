@@ -2,15 +2,99 @@ import React from "react";
 import Fuse from "fuse.js";
 import { useLocation } from "wouter";
 import { getTestCases, getTestSuites, RUNS, DIFF_ROWS } from "@/lib/data";
+import { repo } from "@/lib/nav";
 
 type SearchResult = {
   id: string;
   label: string;
   description: string;
-  type: "test" | "run" | "compare" | "suite";
+  type: "test" | "run" | "compare" | "suite" | "action";
   href: string;
   icon: string;
 };
+
+const ACTION_COMMANDS: SearchResult[] = [
+  {
+    id: "action_run_full_suite",
+    label: "> Run Full Suite",
+    description: "Trigger the full Pytest test suite",
+    type: "action",
+    href: "/pulse",
+    icon: "▶",
+  },
+  {
+    id: "action_compare_last_2",
+    label: "> Compare Last 2 Runs",
+    description: "Pre-fill compare page with the last two run IDs",
+    type: "action",
+    href: "/compare",
+    icon: "⇄",
+  },
+  {
+    id: "action_run_discovery",
+    label: "> Run Discovery",
+    description: "Scans test sources and merges into auto-tests.json",
+    type: "action",
+    href: "/pulse",
+    icon: "🔍",
+  },
+  {
+    id: "action_build_app",
+    label: "> Build App",
+    description: "pnpm build — validates data, typechecks, produces bundle",
+    type: "action",
+    href: "/pulse",
+    icon: "📦",
+  },
+  {
+    id: "action_run_puppeteer",
+    label: "> Run Puppeteer Tests",
+    description: "Run lightweight browser tests via Puppeteer",
+    type: "action",
+    href: "/pulse",
+    icon: "🎭",
+  },
+  {
+    id: "action_run_http",
+    label: "> Run HTTP Tests",
+    description: "Run HTTP-level tests (health checks, security headers)",
+    type: "action",
+    href: "/pulse",
+    icon: "🌐",
+  },
+  {
+    id: "action_share_page",
+    label: "> Share Current Page",
+    description: "Copy current page URL to clipboard",
+    type: "action",
+    href: "#",
+    icon: "🔗",
+  },
+  {
+    id: "action_go_pulse",
+    label: "> Go to Pulse",
+    description: "Navigate to the Pulse page",
+    type: "action",
+    href: "/pulse",
+    icon: "📡",
+  },
+  {
+    id: "action_go_dashboard",
+    label: "> Go to Dashboard",
+    description: "Navigate to the Dashboard",
+    type: "action",
+    href: "/",
+    icon: "📊",
+  },
+  {
+    id: "action_go_compare",
+    label: "> Go to Compare",
+    description: "Navigate to the Compare page",
+    type: "action",
+    href: "/compare",
+    icon: "⇄",
+  },
+];
 
 export function CommandPalette({ onClose }: { onClose: () => void }) {
   const [, navigate] = useLocation();
@@ -106,6 +190,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       href: "/about",
       icon: "ℹ",
     },
+    ...ACTION_COMMANDS,
   ];
 
   const [query, setQuery] = React.useState("");
@@ -134,6 +219,14 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 
   const q = query.trim();
   const filtered = React.useMemo(() => {
+    if (q.startsWith(">")) {
+      const search = q.slice(1).trim().toLowerCase();
+      if (!search) return ACTION_COMMANDS;
+      return ACTION_COMMANDS.filter(
+        (r) =>
+          r.label.toLowerCase().includes(search) || r.description.toLowerCase().includes(search),
+      );
+    }
     let items = ALL_RESULTS;
     if (typeFilter) {
       items = items.filter((r) => r.type === typeFilter);
@@ -145,9 +238,40 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       .filter((r) => !typeFilter || r.type === typeFilter);
   }, [q, typeFilter, fuse]);
 
-  React.useEffect(() => {
-    if (activeIdx >= filtered.length) setActiveIdx(0);
-  }, [activeIdx, filtered.length]);
+  const safeActiveIdx = Math.min(activeIdx, Math.max(0, filtered.length - 1));
+
+  const handleSelect = React.useCallback(
+    (r: SearchResult) => {
+      if (r.type === "action") {
+        switch (r.id) {
+          case "action_run_full_suite":
+          case "action_run_discovery":
+          case "action_build_app":
+          case "action_run_puppeteer":
+          case "action_run_http":
+            navigate("/start");
+            break;
+          case "action_compare_last_2": {
+            const lastTwo = RUNS.slice(0, 2);
+            const b = lastTwo[1]?.id ?? "";
+            const c = lastTwo[0]?.id ?? "";
+            navigate(`/compare?baseline=${b}&candidate=${c}`);
+            break;
+          }
+          case "action_share_page":
+            navigator.clipboard.writeText(window.location.href).catch(() => {});
+            break;
+          default:
+            navigate(r.href);
+            break;
+        }
+      } else {
+        navigate(r.href);
+      }
+      onClose();
+    },
+    [navigate, onClose],
+  );
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
@@ -159,12 +283,11 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       setActiveIdx((i) => Math.max(i - 1, 0));
     }
     if (e.key === "Enter" && filtered[activeIdx]) {
-      navigate(filtered[activeIdx].href);
-      onClose();
+      handleSelect(filtered[activeIdx]);
     }
   };
 
-  const typeCounts = { test: 0, run: 0, compare: 0, suite: 0 };
+  const typeCounts = { test: 0, run: 0, compare: 0, suite: 0, action: 0 };
   ALL_RESULTS.forEach((r) => {
     if (r.type in typeCounts) typeCounts[r.type as keyof typeof typeCounts]++;
   });
@@ -216,7 +339,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search tests, runs, comparisons..."
+            placeholder="Search tests, runs, suites, or type &gt; for actions..."
             style={{
               flex: 1,
               background: "transparent",
@@ -259,7 +382,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
             flexWrap: "wrap",
           }}
         >
-          {(["test", "suite", "run", "compare"] as const).map((type) => (
+          {(["test", "suite", "run", "compare", "action"] as const).map((type) => (
             <button
               key={type}
               onClick={() => setTypeFilter(typeFilter === type ? null : type)}
@@ -282,7 +405,9 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
                   ? "Runs"
                   : type === "compare"
                     ? "Compare"
-                    : "Suites"}{" "}
+                    : type === "action"
+                      ? "Actions"
+                      : "Suites"}{" "}
               ({typeCounts[type]})
             </button>
           ))}
@@ -314,7 +439,9 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
                 fontSize: 13,
               }}
             >
-              No results for "{query}"
+              {q.startsWith(">")
+                ? `No actions for "${q.slice(1).trim()}"`
+                : `No results for "${query}"`}
             </div>
           ) : (
             filtered.map((r, i) => {
@@ -328,13 +455,10 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
                     gap: 10,
                     padding: "10px 18px",
                     cursor: "pointer",
-                    background: i === activeIdx ? "var(--proof-blue-bg)" : "transparent",
+                    background: i === safeActiveIdx ? "var(--proof-blue-bg)" : "transparent",
                     transition: "background 0.1s",
                   }}
-                  onClick={() => {
-                    navigate(r.href);
-                    onClose();
-                  }}
+                  onClick={() => handleSelect(r)}
                   onMouseEnter={() => setActiveIdx(i)}
                 >
                   <div

@@ -188,7 +188,7 @@ export interface TestCase {
   id: string;
   name: string;
   description: string;
-  testType: "web" | "api" | "edgeworker" | "transaction";
+  testType: "web" | "api" | "http" | "edgeworker" | "transaction";
   category: string;
   priority: TestPriority;
   severity: TestSeverity;
@@ -291,6 +291,46 @@ export interface PromotionDecision {
   decidedBy?: string;
   decidedAt?: string;
   note?: string;
+}
+
+// ── Job Runner Types ──────────────────────────────────────────────
+
+export type JobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
+export type JobType = "test-run" | "discovery" | "sync" | "build" | "custom";
+
+export interface Job {
+  id: string;
+  type: JobType;
+  label: string;
+  description?: string;
+  status: JobStatus;
+  progress: number;
+  createdAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  duration?: number;
+  result?: string;
+  error?: string;
+  runnerId: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface JobRunnerDef {
+  id: string;
+  name: string;
+  type: JobType;
+  description: string;
+  icon: string;
+  defaultSuiteId?: string;
+}
+
+export interface JobSummary {
+  total: number;
+  byStatus: Record<JobStatus, number>;
+  byType: Record<JobType, number>;
+  lastRun: Job | null;
+  avgDuration: number;
+  passRate: number;
 }
 
 // ── Anomaly Detection Types ────────────────────────────────────────

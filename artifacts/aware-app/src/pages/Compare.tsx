@@ -54,7 +54,7 @@ function SidePanel({
 
   return (
     <div
-      className="gcp-card"
+      className="proof-card"
       style={{
         width: 340,
         flexShrink: 0,
@@ -155,7 +155,7 @@ function SidePanel({
             {diff.name}
           </div>
           <div style={{ display: "flex", gap: 4, marginTop: 8, flexWrap: "wrap" }}>
-            <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10 }}>
+            <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>
               {diff.category}
             </span>
             {stateBadge(diff.state)}
@@ -183,7 +183,7 @@ function SidePanel({
               Baseline
             </div>
             <span
-              className={`gcp-badge ${diff.baseStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}
+              className={`proof-badge ${diff.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
               style={{ fontSize: 10 }}
             >
               {diff.baseStatus}
@@ -221,7 +221,7 @@ function SidePanel({
               Candidate
             </div>
             <span
-              className={`gcp-badge ${diff.candStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}
+              className={`proof-badge ${diff.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
               style={{ fontSize: 10 }}
             >
               {diff.candStatus}
@@ -314,7 +314,7 @@ function SidePanel({
             </div>
           </div>
         </div>
-        <div className="gcp-card" style={{ padding: 10 }}>
+        <div className="proof-card" style={{ padding: 10 }}>
           <div
             style={{
               fontSize: 10,
@@ -351,7 +351,7 @@ function SidePanel({
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <button
             onClick={() => navigate(`/analytics?testId=${diff.id}`)}
-            className="gcp-button gcp-button-xs"
+            className="proof-button proof-button-xs"
             style={{ justifyContent: "center" }}
           >
             <BarChart3 size={12} /> View Analytics <ArrowUpRight size={10} />
@@ -361,7 +361,7 @@ function SidePanel({
               copy(`${window.location.origin}/tests/${diff.id}`);
               show("Test permalink copied");
             }}
-            className="gcp-button gcp-button-xs"
+            className="proof-button proof-button-xs"
             style={{ justifyContent: "center" }}
           >
             <Link2 size={12} /> Copy Test Permalink
@@ -373,7 +373,7 @@ function SidePanel({
               );
               show("GitHub issue template copied");
             }}
-            className="gcp-button gcp-button-xs"
+            className="proof-button proof-button-xs"
             style={{ justifyContent: "center" }}
           >
             <Github size={12} /> File GitHub Issue
@@ -389,6 +389,9 @@ export default function Compare() {
   const [, navigate] = useLocation();
   const { show, Toast } = useSimpleToast();
 
+  type ApprovalState = "none" | "approved" | "blocked" | "pending" | "error";
+  const [approvals, setApprovals] = React.useState<Record<string, ApprovalState>>({});
+
   const [baseline, setBaseline] = useSyncedUrlState("baseline", RUNS[RUNS.length - 1]?.id ?? "");
   const [candidate, setCandidate] = useSyncedUrlState("candidate", RUNS[0]?.id ?? "");
   const [selectedId, setSelectedId] = useSyncedUrlState<string | null>("sel", null);
@@ -396,30 +399,9 @@ export default function Compare() {
   const [regressionsOnly, setRegressionsOnly] = useSyncedUrlState("regressions", false);
   const [activeFilter, setActiveFilter] = React.useState<string | null>(null);
   const [swapped, setSwapped] = React.useState(false);
+  const [selectedIdx, setSelectedIdx] = React.useState(-1);
   const baselineRun = RUNS.find((r) => r.id === baseline);
   const candidateRun = RUNS.find((r) => r.id === candidate);
-
-  if (!baselineRun || !candidateRun) {
-    return (
-      <AppLayout activeHref="/compare">
-        <div style={{ textAlign: "center", padding: 64 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>
-            No runs to compare
-          </h2>
-          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
-            At least two runs are required for comparison.
-          </p>
-          <button
-            onClick={() => navigate("/runs")}
-            className="gcp-button"
-            style={{ fontSize: 13, marginTop: 16 }}
-          >
-            View Runs
-          </button>
-        </div>
-      </AppLayout>
-    );
-  }
 
   const diffs = React.useMemo(() => {
     if (!swapped) return DIFF_ROWS;
@@ -436,11 +418,6 @@ export default function Compare() {
       };
     });
   }, [swapped]);
-  const regressions = diffs.filter((d) => d.state === "regression");
-  const fixed = diffs.filter((d) => d.state === "fixed");
-  const duration = diffs.filter((d) => d.state === "duration");
-  const unchanged = diffs.filter((d) => d.state === "unchanged");
-  const categories = [...new Set(DIFF_ROWS.map((d) => d.category))];
 
   const [colFilters, setColFilters] = React.useState<Record<string, string>>({});
 
@@ -458,218 +435,309 @@ export default function Compare() {
     });
   }, [diffs, searchText, regressionsOnly, activeFilter, colFilters]);
 
+  const clampedIdx = selectedIdx >= filtered.length ? -1 : selectedIdx;
+
+  React.useEffect(() => {
+    if (clampedIdx >= 0 && clampedIdx < filtered.length) {
+      setSelectedId(filtered[clampedIdx].id);
+    }
+  }, [clampedIdx, filtered, setSelectedId]);
+
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.target instanceof HTMLSelectElement) return;
+
+      if (e.key === "j" || e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIdx((i) => Math.min(i + 1, filtered.length - 1));
+      } else if (e.key === "k" || e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIdx((i) => Math.max(i - 1, 0));
+      } else if (e.key === "Enter") {
+        const d = selectedIdx >= 0 && selectedIdx < filtered.length ? filtered[selectedIdx] : null;
+        if (d) navigate(`/runs/${d.id}`);
+      } else if (e.key === "r") {
+        setRegressionsOnly((p) => !p);
+        setActiveFilter(null);
+      } else if (e.key === "f") {
+        setActiveFilter((p) => (p === "fixed" ? null : "fixed"));
+        setRegressionsOnly(false);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [filtered, navigate, setRegressionsOnly, setActiveFilter]);
+
+  if (!baselineRun || !candidateRun) {
+    return (
+      <AppLayout activeHref="/compare">
+        <div style={{ textAlign: "center", padding: 64 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>
+            No runs to compare
+          </h2>
+          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
+            At least two runs are required for comparison.
+          </p>
+          <button
+            onClick={() => navigate("/runs")}
+            className="proof-button"
+            style={{ fontSize: 13, marginTop: 16 }}
+          >
+            View Runs
+          </button>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  const regressions = diffs.filter((d) => d.state === "regression");
+  const fixed = diffs.filter((d) => d.state === "fixed");
+  const duration = diffs.filter((d) => d.state === "duration");
+  const unchanged = diffs.filter((d) => d.state === "unchanged");
+  const categories = [...new Set(DIFF_ROWS.map((d) => d.category))];
+  const approvedCount = Object.values(approvals).filter((a) => a === "approved").length;
+  const blockedCount = Object.values(approvals).filter((a) => a === "blocked").length;
+
   const selectedDiff = selectedId ? (diffs.find((d) => d.id === selectedId) ?? null) : null;
   const hasActiveFilters = Object.values(colFilters).some((v) => v);
+
+  const handleApproval = async (diffId: string, action: "approved" | "blocked") => {
+    setApprovals((prev) => ({ ...prev, [diffId]: "pending" }));
+
+    await new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        if (Math.random() > 0.3) resolve();
+        else reject(new Error("API timeout"));
+      }, 1000);
+    }).then(
+      () => {
+        setApprovals((prev) => ({ ...prev, [diffId]: action }));
+        show(action === "approved" ? "✓ Approved" : "✗ Blocked");
+      },
+      () => {
+        setApprovals((prev) => ({ ...prev, [diffId]: "error" }));
+        show("Failed to sync — reverted");
+        setTimeout(() => {
+          setApprovals((prev) => ({ ...prev, [diffId]: "none" }));
+        }, 1500);
+      },
+    );
+  };
 
   return (
     <AppLayout activeHref="/compare">
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {/* Run selectors */}
-        <div
-          className="gcp-card"
-          style={{
-            padding: "12px 16px",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ flex: "1 1 240px", minWidth: 200 }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: 10,
-                fontWeight: 700,
-                color: "var(--proof-text-secondary)",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                marginBottom: 4,
-              }}
-            >
-              Baseline Run
-            </label>
-            <select
-              className="gcp-input"
-              style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: 11 }}
-              value={baseline}
-              onChange={(e) => {
-                setBaseline(e.target.value);
-                setSwapped(false);
-              }}
-            >
-              {RUNS.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.id} · {r.env} · Build {r.build} · Rev {r.rev}
-                </option>
-              ))}
-            </select>
-            {baselineRun && (
-              <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
-                <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>
-                  {baselineRun.target}
-                </span>
-                <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>
-                  {baselineRun.env}
-                </span>
-                <span
-                  className={`gcp-badge ${baselineRun.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`}
-                  style={{ fontSize: 9 }}
-                >
-                  {baselineRun.network}
-                </span>
-                <span
-                  style={{
-                    fontSize: 9,
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--proof-text-secondary)",
-                    background: "var(--proof-grey-bg)",
-                    padding: "1px 5px",
-                    borderRadius: 3,
-                    border: "1px solid var(--proof-grey)",
-                  }}
-                >
-                  Build {baselineRun.build}
-                </span>
-                <span
-                  style={{
-                    fontSize: 9,
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--proof-text-secondary)",
-                    background: "var(--proof-grey-bg)",
-                    padding: "1px 5px",
-                    borderRadius: 3,
-                    border: "1px solid var(--proof-grey)",
-                  }}
-                >
-                  Rev {baselineRun.rev}
-                </span>
-              </div>
-            )}
-          </div>
-          <button
-            onClick={() => {
-              const t = baseline;
-              setBaseline(candidate);
-              setCandidate(t);
-              setSwapped((p) => !p);
+        <PanelErrorBoundary label="Run selectors">
+          <div
+            className="proof-card"
+            style={{
+              padding: "12px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
+              flexWrap: "wrap",
             }}
-            className="gcp-button gcp-button-sm"
-            style={{ marginTop: 16 }}
           >
-            ⇄ Swap
-          </button>
-          <div style={{ flex: "1 1 240px", minWidth: 200 }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: 10,
-                fontWeight: 700,
-                color: "var(--proof-blue)",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                marginBottom: 4,
+            <div style={{ flex: "1 1 240px", minWidth: 200 }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: "var(--proof-text-secondary)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  marginBottom: 4,
+                }}
+              >
+                Baseline Run
+              </label>
+              <select
+                className="proof-input"
+                style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: 11 }}
+                value={baseline}
+                onChange={(e) => {
+                  setBaseline(e.target.value);
+                  setSwapped(false);
+                }}
+              >
+                {RUNS.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.id} · {r.env} · Build {r.build} · Rev {r.rev}
+                  </option>
+                ))}
+              </select>
+              {baselineRun && (
+                <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                  <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
+                    {baselineRun.target}
+                  </span>
+                  <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
+                    {baselineRun.env}
+                  </span>
+                  <span
+                    className={`proof-badge ${baselineRun.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}
+                    style={{ fontSize: 9 }}
+                  >
+                    {baselineRun.network}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--proof-text-secondary)",
+                      background: "var(--proof-grey-bg)",
+                      padding: "1px 5px",
+                      borderRadius: 3,
+                      border: "1px solid var(--proof-grey)",
+                    }}
+                  >
+                    Build {baselineRun.build}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--proof-text-secondary)",
+                      background: "var(--proof-grey-bg)",
+                      padding: "1px 5px",
+                      borderRadius: 3,
+                      border: "1px solid var(--proof-grey)",
+                    }}
+                  >
+                    Rev {baselineRun.rev}
+                  </span>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                const t = baseline;
+                setBaseline(candidate);
+                setCandidate(t);
+                setSwapped((p) => !p);
               }}
+              className="proof-button proof-button-sm"
+              style={{ marginTop: 16 }}
             >
-              Candidate Run
-            </label>
-            <select
-              className="gcp-input"
-              style={{
-                width: "100%",
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                borderColor: "var(--proof-blue)",
-              }}
-              value={candidate}
-              onChange={(e) => {
-                setCandidate(e.target.value);
-                setSwapped(false);
-              }}
+              ⇄ Swap
+            </button>
+            <div style={{ flex: "1 1 240px", minWidth: 200 }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: "var(--proof-blue)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  marginBottom: 4,
+                }}
+              >
+                Candidate Run
+              </label>
+              <select
+                className="proof-input"
+                style={{
+                  width: "100%",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  borderColor: "var(--proof-blue)",
+                }}
+                value={candidate}
+                onChange={(e) => {
+                  setCandidate(e.target.value);
+                  setSwapped(false);
+                }}
+              >
+                {RUNS.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.id} · {r.env} · Build {r.build} · Rev {r.rev}
+                  </option>
+                ))}
+              </select>
+              {candidateRun && (
+                <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                  <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
+                    {candidateRun.target}
+                  </span>
+                  <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
+                    {candidateRun.env}
+                  </span>
+                  <span
+                    className={`proof-badge ${candidateRun.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}
+                    style={{ fontSize: 9 }}
+                  >
+                    {candidateRun.network}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--proof-text-secondary)",
+                      background: "var(--proof-grey-bg)",
+                      padding: "1px 5px",
+                      borderRadius: 3,
+                      border: "1px solid var(--proof-grey)",
+                    }}
+                  >
+                    Build {candidateRun.build}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--proof-text-secondary)",
+                      background: "var(--proof-grey-bg)",
+                      padding: "1px 5px",
+                      borderRadius: 3,
+                      border: "1px solid var(--proof-grey)",
+                    }}
+                  >
+                    Rev {candidateRun.rev}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div
+              style={{ display: "flex", gap: 8, flexShrink: 0, marginTop: 16, flexWrap: "wrap" }}
             >
-              {RUNS.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.id} · {r.env} · Build {r.build} · Rev {r.rev}
-                </option>
-              ))}
-            </select>
-            {candidateRun && (
-              <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
-                <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>
-                  {candidateRun.target}
-                </span>
-                <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>
-                  {candidateRun.env}
-                </span>
-                <span
-                  className={`gcp-badge ${candidateRun.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`}
-                  style={{ fontSize: 9 }}
-                >
-                  {candidateRun.network}
-                </span>
-                <span
-                  style={{
-                    fontSize: 9,
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--proof-text-secondary)",
-                    background: "var(--proof-grey-bg)",
-                    padding: "1px 5px",
-                    borderRadius: 3,
-                    border: "1px solid var(--proof-grey)",
-                  }}
-                >
-                  Build {candidateRun.build}
-                </span>
-                <span
-                  style={{
-                    fontSize: 9,
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--proof-text-secondary)",
-                    background: "var(--proof-grey-bg)",
-                    padding: "1px 5px",
-                    borderRadius: 3,
-                    border: "1px solid var(--proof-grey)",
-                  }}
-                >
-                  Rev {candidateRun.rev}
-                </span>
-              </div>
-            )}
+              <button
+                onClick={() => {
+                  copy(window.location.href);
+                  show("Permalink copied — URL always reflects current comparison");
+                }}
+                className="proof-button proof-button-sm"
+              >
+                <Link2 size={13} /> Permalink
+              </button>
+              <button
+                onClick={() => {
+                  copy(
+                    `Comparison: ${baseline} vs ${candidate}\nNew failures: ${regressions.length}\nFixed: ${fixed.length}\nDuration regressions: ${duration.length}`,
+                  );
+                  show("Slack summary copied");
+                }}
+                className="proof-button proof-button-sm"
+              >
+                <Share2 size={13} /> Share
+              </button>
+              <button
+                onClick={() => {
+                  copy(
+                    `## Regression Report\n**Baseline:** ${baseline}\n**Candidate:** ${candidate}\n\n### Regressions (${regressions.length})\n${regressions.map((r) => `- ${r.name}`).join("\n")}\n\n### Fixed (${fixed.length})\n${fixed.map((r) => `- ${r.name}`).join("\n")}`,
+                  );
+                  show("Markdown report copied");
+                }}
+                className="proof-button proof-button-sm"
+              >
+                <Github size={13} /> Report
+              </button>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: 8, flexShrink: 0, marginTop: 16, flexWrap: "wrap" }}>
-            <button
-              onClick={() => {
-                copy(window.location.href);
-                show("Permalink copied — URL always reflects current comparison");
-              }}
-              className="gcp-button gcp-button-sm"
-            >
-              <Link2 size={13} /> Permalink
-            </button>
-            <button
-              onClick={() => {
-                copy(
-                  `Comparison: ${baseline} vs ${candidate}\nNew failures: ${regressions.length}\nFixed: ${fixed.length}\nDuration regressions: ${duration.length}`,
-                );
-                show("Slack summary copied");
-              }}
-              className="gcp-button gcp-button-sm"
-            >
-              <Share2 size={13} /> Share
-            </button>
-            <button
-              onClick={() => {
-                copy(
-                  `## Regression Report\n**Baseline:** ${baseline}\n**Candidate:** ${candidate}\n\n### Regressions (${regressions.length})\n${regressions.map((r) => `- ${r.name}`).join("\n")}\n\n### Fixed (${fixed.length})\n${fixed.map((r) => `- ${r.name}`).join("\n")}`,
-                );
-                show("Markdown report copied");
-              }}
-              className="gcp-button gcp-button-sm"
-            >
-              <Github size={13} /> Report
-            </button>
-          </div>
-        </div>
+        </PanelErrorBoundary>
 
         {/* Summary tiles — clickable filters */}
         <PanelErrorBoundary label="Stat cards">
@@ -744,11 +812,11 @@ export default function Compare() {
           >
             Comparison
           </span>
-          <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>
+          <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
             {baselineRun?.target} / {baselineRun?.env}
           </span>
           <span
-            className={`gcp-badge ${baselineRun?.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`}
+            className={`proof-badge ${baselineRun?.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}
             style={{ fontSize: 9 }}
           >
             {baselineRun?.network}
@@ -772,11 +840,11 @@ export default function Compare() {
             Rev {baselineRun?.rev}
           </span>
           <span style={{ color: "var(--proof-grey)", fontSize: 12 }}>|</span>
-          <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 9 }}>
+          <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
             {candidateRun?.target} / {candidateRun?.env}
           </span>
           <span
-            className={`gcp-badge ${candidateRun?.network === "production" ? "gcp-badge-pass" : "gcp-badge-flaky"}`}
+            className={`proof-badge ${candidateRun?.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}
             style={{ fontSize: 9 }}
           >
             {candidateRun?.network}
@@ -812,7 +880,10 @@ export default function Compare() {
                 fontSize: 10,
               }}
             >
-              <span className="gcp-badge gcp-badge-fail" style={{ fontSize: 8, padding: "0 4px" }}>
+              <span
+                className="proof-badge proof-badge-fail"
+                style={{ fontSize: 8, padding: "0 4px" }}
+              >
                 {regressions.length}
               </span>
               Blocked
@@ -836,11 +907,54 @@ export default function Compare() {
           </span>
         </div>
 
+        {/* Approval summary header */}
+        <div
+          className="proof-card"
+          style={{
+            padding: "8px 14px",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>
+            Approvals
+          </span>
+          <div
+            style={{
+              flex: 1,
+              height: 6,
+              background: "var(--proof-grey-bg)",
+              borderRadius: 3,
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                width: `${diffs.length > 0 ? ((approvedCount + blockedCount) / diffs.length) * 100 : 0}%`,
+                height: "100%",
+                background: "var(--proof-green)",
+                borderRadius: 3,
+                transition: "width 0.3s ease",
+              }}
+            />
+          </div>
+          <span
+            style={{
+              fontSize: 12,
+              color: "var(--proof-text-secondary)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {approvedCount + blockedCount}/{diffs.length} reviewed
+          </span>
+        </div>
+
         {/* Table + side panel */}
         <PanelErrorBoundary label="Diff area">
           <div style={{ display: "flex", gap: 14 }}>
             <div
-              className="gcp-card"
+              className="proof-card"
               style={{
                 flex: 1,
                 overflow: "hidden",
@@ -866,7 +980,7 @@ export default function Compare() {
                 >
                   <Search size={13} style={{ color: "var(--proof-text-secondary)" }} />
                   <input
-                    className="gcp-input"
+                    className="proof-input"
                     placeholder="Search tests…"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
@@ -914,7 +1028,7 @@ export default function Compare() {
                 </span>
               </div>
               <div style={{ flex: 1, overflowY: "auto" }}>
-                <table className="gcp-table">
+                <table className="proof-table">
                   <thead
                     style={{
                       position: "sticky",
@@ -926,7 +1040,7 @@ export default function Compare() {
                     <tr>
                       <th>
                         <input
-                          className="gcp-input"
+                          className="proof-input"
                           placeholder="Name"
                           value={colFilters.name ?? ""}
                           onChange={(e) => setColFilters((f) => ({ ...f, name: e.target.value }))}
@@ -935,7 +1049,7 @@ export default function Compare() {
                       </th>
                       <th>
                         <select
-                          className="gcp-input"
+                          className="proof-input"
                           style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
                           value={colFilters.baseStatus ?? ""}
                           onChange={(e) =>
@@ -949,7 +1063,7 @@ export default function Compare() {
                       </th>
                       <th>
                         <select
-                          className="gcp-input"
+                          className="proof-input"
                           style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
                           value={colFilters.candStatus ?? ""}
                           onChange={(e) =>
@@ -974,7 +1088,7 @@ export default function Compare() {
                       </th>
                       <th>
                         <select
-                          className="gcp-input"
+                          className="proof-input"
                           style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
                           value={colFilters.category ?? ""}
                           onChange={(e) =>
@@ -991,7 +1105,7 @@ export default function Compare() {
                       </th>
                       <th>
                         <select
-                          className="gcp-input"
+                          className="proof-input"
                           style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
                           value={colFilters.state ?? ""}
                           onChange={(e) => setColFilters((f) => ({ ...f, state: e.target.value }))}
@@ -1015,13 +1129,16 @@ export default function Compare() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((d) => {
+                    {filtered.map((d, i) => {
                       const isSelected = selectedId === d.id;
                       const deltams = d.durCand - d.durBase;
                       return (
                         <tr
                           key={d.id}
-                          onClick={() => setSelectedId(isSelected ? null : d.id)}
+                          onClick={() => {
+                            setSelectedId(isSelected ? null : d.id);
+                            setSelectedIdx(isSelected ? -1 : i);
+                          }}
                           style={{
                             cursor: "pointer",
                             background: isSelected
@@ -1051,14 +1168,14 @@ export default function Compare() {
                           </td>
                           <td>
                             <span
-                              className={`gcp-badge ${d.baseStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}
+                              className={`proof-badge ${d.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
                             >
                               {d.baseStatus}
                             </span>
                           </td>
                           <td>
                             <span
-                              className={`gcp-badge ${d.candStatus === "PASS" ? "gcp-badge-pass" : "gcp-badge-fail"}`}
+                              className={`proof-badge ${d.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
                             >
                               {d.candStatus}
                             </span>
@@ -1085,13 +1202,89 @@ export default function Compare() {
                             )}
                           </td>
                           <td>
-                            <span className="gcp-badge gcp-badge-skip" style={{ fontSize: 10 }}>
+                            <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>
                               {d.category}
                             </span>
                           </td>
                           <td>{stateBadge(d.state)}</td>
                           <td>
                             <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
+                              {approvals[d.id] === "approved" ? (
+                                <span
+                                  style={{
+                                    color: "var(--proof-green)",
+                                    fontSize: 12,
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  ✓
+                                </span>
+                              ) : approvals[d.id] === "blocked" ? (
+                                <span
+                                  style={{
+                                    color: "var(--proof-red)",
+                                    fontSize: 12,
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  ✗
+                                </span>
+                              ) : approvals[d.id] === "pending" ? (
+                                <span
+                                  style={{
+                                    color: "var(--proof-text-secondary)",
+                                    fontSize: 11,
+                                  }}
+                                >
+                                  Saving...
+                                </span>
+                              ) : approvals[d.id] === "error" ? (
+                                <span
+                                  style={{
+                                    color: "var(--proof-yellow)",
+                                    fontSize: 11,
+                                  }}
+                                >
+                                  Failed
+                                </span>
+                              ) : (
+                                <>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleApproval(d.id, "approved");
+                                    }}
+                                    style={{
+                                      padding: "2px 8px",
+                                      border: "1px solid var(--proof-green)",
+                                      borderRadius: 4,
+                                      background: "transparent",
+                                      color: "var(--proof-green)",
+                                      fontSize: 11,
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    ✓ Approve
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleApproval(d.id, "blocked");
+                                    }}
+                                    style={{
+                                      padding: "2px 8px",
+                                      border: "1px solid var(--proof-red)",
+                                      borderRadius: 4,
+                                      background: "transparent",
+                                      color: "var(--proof-red)",
+                                      fontSize: 11,
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    ✗ Block
+                                  </button>
+                                </>
+                              )}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();

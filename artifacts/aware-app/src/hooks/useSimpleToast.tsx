@@ -24,7 +24,7 @@ export function useSimpleToast(timeoutMs = 5000) {
     setState(null);
   };
   const Toast = state ? (
-    <div className="gcp-toast">
+    <div className="proof-toast">
       <svg
         width="13"
         height="13"
@@ -44,7 +44,7 @@ export function useSimpleToast(timeoutMs = 5000) {
             state.action!.onClick();
             dismiss();
           }}
-          className="gcp-button gcp-button-xs"
+          className="proof-button proof-button-xs"
           style={{ color: "var(--proof-blue)", borderColor: "var(--proof-blue)" }}
         >
           {state.action.label}

@@ -5,7 +5,7 @@ import testResultsSeed from "@/data/test-results.json";
 
 export const RUNS: Run[] = runsSeed as unknown as Run[];
 export const DIFF_ROWS: DiffRow[] = diffRowsSeed as unknown as DiffRow[];
-const TEST_RESULTS_BY_RUN: Record<string, TestResult[]> = testResultsSeed as Record<
+const TEST_RESULTS_BY_RUN: Record<string, TestResult[]> = testResultsSeed as unknown as Record<
   string,
   TestResult[]
 >;
@@ -20,13 +20,16 @@ export function getRunById(id: string): Run | undefined {
 
 function computeTestDetails(): TestDetail[] {
   return DIFF_ROWS.map((diff) => {
-    const diffName = diff.name.toLowerCase().replace(/_/g, " ");
     const history: TestRunPoint[] = [];
+    const diffSuffix = diff.id.replace("diff_", ""); // e.g. "pw_00" from "diff_pw_00"
     for (const run of RUNS) {
       const results = getTestResultsForRun(run.id);
       const match = results.find((r) => {
+        if (r.id === diffSuffix) return true; // direct ID match: "pw_00" vs "pw_0"
+        if (r.id === diffSuffix.replace(/^0+/, "")) return true; // "pw_00" vs "pw_0" after stripping leading zeros
         const rn = r.name.toLowerCase();
-        return rn === diffName || rn.includes(diffName) || diffName.includes(rn);
+        const dn = diff.name.toLowerCase().replace(/_/g, " ");
+        return rn === dn || rn.includes(dn) || dn.includes(rn);
       });
       if (match) {
         history.push({
@@ -59,13 +62,13 @@ function computeTestDetails(): TestDetail[] {
 }
 
 export function computeTestDetailForName(name: string): TestDetail {
-  const target = name.toLowerCase().replace(/_/g, " ");
   const history: TestRunPoint[] = [];
   for (const run of RUNS) {
     const results = getTestResultsForRun(run.id);
     const match = results.find((r) => {
       const rn = r.name.toLowerCase();
-      return rn === target || rn.includes(target) || target.includes(rn);
+      const dn = name.toLowerCase().replace(/_/g, " ");
+      return rn === dn || rn.includes(dn) || dn.includes(rn);
     });
     if (match) {
       history.push({
@@ -87,8 +90,7 @@ export function computeTestDetailForName(name: string): TestDetail {
   for (let i = 1; i < history.length; i++) {
     if (history[i].status !== history[i - 1].status) flips++;
   }
-  const flakinessScore =
-    history.length > 1 ? Math.round((flips / (history.length - 1)) * 100) : 0;
+  const flakinessScore = history.length > 1 ? Math.round((flips / (history.length - 1)) * 100) : 0;
   const avgDuration =
     history.length > 0
       ? Math.round(history.reduce((s, h) => s + h.duration, 0) / history.length)

@@ -194,7 +194,7 @@ export default function SearchDemo() {
           margin: "0 auto",
         }}
       >
-        <div className="gcp-card" style={{ flexShrink: 0, marginBottom: 16 }}>
+        <div className="proof-card" style={{ flexShrink: 0, marginBottom: 16 }}>
           <div
             style={{
               display: "flex",
@@ -207,7 +207,7 @@ export default function SearchDemo() {
             <Search size={18} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
             <input
               autoFocus
-              className="gcp-input"
+              className="proof-input"
               style={{
                 flex: 1,
                 border: "none",
@@ -337,7 +337,7 @@ export default function SearchDemo() {
 
         <div style={{ flex: 1, overflow: "auto" }}>
           {hasResults && (
-            <div className="gcp-card" style={{ overflow: "hidden" }}>
+            <div className="proof-card" style={{ overflow: "hidden" }}>
               <div
                 style={{
                   display: "flex",
@@ -446,7 +446,7 @@ export default function SearchDemo() {
           )}
 
           {!showResults && (
-            <div className="gcp-card" style={{ overflow: "hidden" }}>
+            <div className="proof-card" style={{ overflow: "hidden" }}>
               <div style={{ padding: 16 }}>
                 <div style={{ marginBottom: 20 }}>
                   <div

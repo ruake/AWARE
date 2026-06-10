@@ -25,10 +25,14 @@ import { computeRunFrequency } from "@/lib/data";
 interface Stage {
   id: string;
   title: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
   desc: string;
   detail: string;
-  cta?: { label: string; href: string; icon: React.ElementType };
+  cta?: {
+    label: string;
+    href: string;
+    icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+  };
 }
 
 const STAGES: Stage[] = [
@@ -192,7 +196,7 @@ export default function Status() {
         </div>
 
         {/* Pipeline visualization */}
-        <div className="gcp-card" style={{ padding: 24 }}>
+        <div className="proof-card" style={{ padding: 24 }}>
           <h2
             style={{
               fontSize: 13,
@@ -354,7 +358,7 @@ export default function Status() {
             </div>
             {STAGES[activeStage].cta && (
               <Link href={STAGES[activeStage].cta!.href}>
-                <a className="gcp-button-primary" style={{ flexShrink: 0 }}>
+                <a className="proof-button-primary" style={{ flexShrink: 0 }}>
                   {React.createElement(STAGES[activeStage].cta!.icon, { size: 13 })}
                   {STAGES[activeStage].cta!.label}
                 </a>
@@ -366,7 +370,7 @@ export default function Status() {
         {/* Live GHA runs + YAML side by side */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           {/* GitHub Actions runs */}
-          <div className="gcp-card" style={{ overflow: "hidden" }}>
+          <div className="proof-card" style={{ overflow: "hidden" }}>
             <div
               style={{
                 padding: "12px 16px",
@@ -382,12 +386,12 @@ export default function Status() {
                 href="https://github.com/ruake/PROOF/actions"
                 target="_blank"
                 rel="noopener"
-                className="gcp-button gcp-button-xs"
+                className="proof-button proof-button-xs"
               >
                 <Github size={11} /> View all
               </a>
             </div>
-            <table className="gcp-table">
+            <table className="proof-table">
               <thead>
                 <tr>
                   <th>Run</th>
@@ -416,14 +420,14 @@ export default function Status() {
                     </td>
                     <td>
                       <span
-                        className={`gcp-badge ${
+                        className={`proof-badge ${
                           run.status === "completed"
-                            ? "gcp-badge-pass"
+                            ? "proof-badge-pass"
                             : run.status === "failed"
-                              ? "gcp-badge-fail"
+                              ? "proof-badge-fail"
                               : run.status === "running"
-                                ? "gcp-badge-running"
-                                : "gcp-badge-skip"
+                                ? "proof-badge-running"
+                                : "proof-badge-skip"
                         }`}
                       >
                         {run.status}
@@ -446,7 +450,7 @@ export default function Status() {
 
           {/* YAML spec */}
           <div
-            className="gcp-card"
+            className="proof-card"
             style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}
           >
             <div
@@ -508,7 +512,7 @@ export default function Status() {
         </div>
 
         {/* Quick nav */}
-        <div className="gcp-card" style={{ padding: "14px 18px" }}>
+        <div className="proof-card" style={{ padding: "14px 18px" }}>
           <h3
             style={{
               fontSize: 12,
@@ -584,7 +588,7 @@ export default function Status() {
         </div>
 
         {/* Run Frequency Heatmap */}
-        <div className="gcp-card" style={{ padding: 16 }}>
+        <div className="proof-card" style={{ padding: 16 }}>
           <h3
             style={{
               fontSize: 13,

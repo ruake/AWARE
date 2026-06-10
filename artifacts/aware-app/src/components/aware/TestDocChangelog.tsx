@@ -40,7 +40,7 @@ export function TestDocChangelog({ testCase }: { testCase?: TestCase }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div className="gcp-card" style={{ display: "flex", flexDirection: "column" }}>
+      <div className="proof-card" style={{ display: "flex", flexDirection: "column" }}>
         <div
           style={{
             padding: "10px 12px",
@@ -204,7 +204,7 @@ export function TestDocChangelog({ testCase }: { testCase?: TestCase }) {
 
       {testCase && (
         <div
-          className="gcp-card"
+          className="proof-card"
           style={{
             padding: "10px 12px",
             background: "var(--proof-surface-hover)",
