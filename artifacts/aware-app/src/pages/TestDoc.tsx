@@ -2,7 +2,7 @@ import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { DIFF_ROWS, getTestCaseById, RUNS, getTestResultsForRun } from "@/lib/data";
-import type { TestResult } from "@/lib/types";
+
 import { TestDocTopBar } from "@/components/aware/TestDocTopBar";
 import { TestDocSidebar } from "@/components/aware/TestDocSidebar";
 import { TestDocChangelog } from "@/components/aware/TestDocChangelog";
@@ -349,6 +349,7 @@ export default function TestDoc() {
                             fontSize: 11,
                           }}
                         >
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                           {(row as any).spike ? (
                             <span
                               style={{

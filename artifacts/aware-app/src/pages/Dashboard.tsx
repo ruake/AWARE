@@ -9,7 +9,7 @@ import {
   PER_ENV_PASS_RATE,
   computeRunFrequency,
 } from "@/lib/data";
-import type { Run } from "@/lib/types";
+
 import { getLatestAnomalies } from "@/lib/anomaly";
 import { getLatestAnomalyBanner } from "@/lib/anomalyDetection";
 import {
@@ -32,23 +32,10 @@ import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 
-
 import { GoogleFilterableTable, GoogleAreaChart } from "@/components/aware/GoogleCharts";
 import { PassRateHeatmap } from "@/components/aware/PassRateHeatmap";
 import { Chart } from "react-google-charts";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
-
-function statusBadge(status: Run["status"]) {
-  const map: Record<string, { cls: string; label: string }> = {
-    PASS: { cls: "proof-badge-pass", label: "PASS" },
-    FAIL: { cls: "proof-badge-fail", label: "FAIL" },
-    PARTIAL: { cls: "proof-badge-partial", label: "PARTIAL" },
-    FLAKY: { cls: "proof-badge-flaky", label: "FLAKY" },
-    RUNNING: { cls: "proof-badge-running", label: "RUNNING" },
-  };
-  const s = map[status] ?? { cls: "proof-badge-skip", label: status };
-  return <span className={`proof-badge ${s.cls}`}>{s.label}</span>;
-}
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
@@ -228,7 +215,6 @@ export default function Dashboard() {
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {anomalies.map((a) => {
-                    const run = RUNS.find((r) => r.id === a.runId);
                     return (
                       <div
                         key={a.runId}
@@ -1021,8 +1007,7 @@ export default function Dashboard() {
         <div
           style={{ width: 160, flexShrink: 0, display: "flex", flexDirection: "column", gap: 12 }}
         >
-          <div className="proof-card" style={{ padding: 8 }}>
-          </div>
+          <div className="proof-card" style={{ padding: 8 }}></div>
         </div>
       </div>
       {Toast}

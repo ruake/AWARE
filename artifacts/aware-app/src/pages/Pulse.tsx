@@ -13,17 +13,11 @@ import {
   AlertTriangle,
   Loader2,
   Github,
-  RefreshCw,
-  ChevronRight,
-  TrendingUp,
-  TrendingDown,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { RUNS } from "@/lib/data";
 import type { Run } from "@/lib/types";
-import { repo } from "@/lib/nav";
-
-const GH_ACTIONS_URL = `${repo}/actions`;
+const GH_ACTIONS_URL = `${window.location.origin}/ruake/PROOF/actions`;
 
 const STATUS_CONFIG: Record<
   Run["status"],
@@ -230,7 +224,7 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
 }
 
 export default function Pulse() {
-  const { show, Toast } = useSimpleToast();
+  const { Toast } = useSimpleToast();
   const [activeTab, setActiveTab] = React.useState<"all" | Run["status"]>("all");
   const [, setRefresh] = React.useState(0);
 

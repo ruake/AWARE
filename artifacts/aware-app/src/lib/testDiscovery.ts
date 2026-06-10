@@ -5,10 +5,6 @@ const BASE_AUTO_TESTS = autoTestsSeed as unknown as TestCase[];
 
 let _autoSnapshot: TestCase[] = [];
 
-function _dropSnapshot() {
-  _autoSnapshot = [];
-}
-
 export function getAutoDiscoveredTests(): TestCase[] {
   if (_autoSnapshot.length === 0) _autoSnapshot = [...BASE_AUTO_TESTS];
   return _autoSnapshot;

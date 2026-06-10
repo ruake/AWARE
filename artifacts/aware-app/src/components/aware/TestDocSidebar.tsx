@@ -12,16 +12,6 @@ import { getTestCaseById } from "@/lib/data";
 import { DIFF_ROWS } from "@/lib/runs";
 import type { TestCase } from "@/lib/types";
 
-const collapseBtn: React.CSSProperties = {
-  background: "none",
-  border: "none",
-  cursor: "pointer",
-  color: "var(--proof-text-secondary)",
-  padding: 0,
-  display: "flex",
-  alignItems: "center",
-  transition: "transform 0.2s",
-};
 
 function CollapsibleSection({
   title,

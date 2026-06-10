@@ -4,7 +4,6 @@ import { AppLayout } from "@/components/aware/AppLayout";
 import {
   Github,
   Check,
-  Activity,
   LayoutDashboard,
   List,
   GitCompare,
@@ -13,7 +12,6 @@ import {
   Eye,
   Database,
   RefreshCw,
-  Zap,
   ChevronRight,
   Code2,
   Copy,
@@ -162,7 +160,7 @@ const WORKFLOW_RUNS = [
 ];
 
 export default function Status() {
-  const { show, Toast } = useSimpleToast();
+  const { Toast } = useSimpleToast();
   const [activeStage, setActiveStage] = React.useState(2);
   const [yamlCopied, setYamlCopied] = React.useState(false);
 

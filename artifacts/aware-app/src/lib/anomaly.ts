@@ -18,7 +18,7 @@ export function computeAnomalyScores(): AnomalyScore[] {
   const durMean = durations.reduce((s, v) => s + v, 0) / n;
   const durStd = Math.sqrt(durations.reduce((s, v) => s + (v - durMean) ** 2, 0) / n) || 1;
 
-  return RUNS.map((run, i) => {
+  return RUNS.map((run, _i) => {
     const passRateZ = (passMean - run.passPct) / passStd;
     const durationZ = (run.durationMs - durMean) / durStd;
 

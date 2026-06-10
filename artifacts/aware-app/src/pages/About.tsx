@@ -537,63 +537,13 @@ const DEFAULT_SLIDES: SlideData[] = [
   },
 ];
 
-const SLIDE_COLORS = [
-  "var(--proof-red)",
-  "var(--proof-orange)",
-  "var(--proof-blue)",
-  "var(--proof-green)",
-  "var(--proof-purple)",
-  "var(--proof-yellow)",
-  "var(--proof-cyan)",
-  "var(--proof-pink)",
-  "var(--proof-indigo)",
-  "#9aa0a6",
-];
-const SLIDE_ICONS: SlideIcon[] = [
-  "GitCompare",
-  "Shield",
-  "Globe",
-  "Bug",
-  "Activity",
-  "Zap",
-  "BarChart3",
-];
-
-function genId() {
-  return `s${Date.now()}`;
-}
-
-const TEMPLATE_KEY = "aware_carousel_templates";
-
-function loadTemplates(): SlideData[][] {
-  try {
-    return JSON.parse(localStorage.getItem(TEMPLATE_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveTemplates(t: SlideData[][]) {
-  localStorage.setItem(TEMPLATE_KEY, JSON.stringify(t));
-}
-
-const ASPECTS = [
-  { label: "1:1", w: 1, h: 1 },
-  { label: "4:5", w: 4, h: 5 },
-  { label: "9:16", w: 9, h: 16 },
-  { label: "16:9", w: 16, h: 9 },
-  { label: "3:2", w: 3, h: 2 },
-];
-
 function CarouselSlides() {
   const [slides] = React.useState<SlideData[]>(DEFAULT_SLIDES);
   const [idx, setIdx] = React.useState(0);
   const [fullscreen, setFullscreen] = React.useState(false);
-  const [aspect, setAspect] = React.useState(0);
   const total = slides.length;
   const slide = slides[idx] || slides[0];
   const Icon = slide ? ICON_MAP[slide.icon] : Zap;
-  const curAspect = ASPECTS[aspect];
 
   React.useEffect(() => {
     if (total < 2) return;
@@ -734,7 +684,7 @@ function CarouselSlides() {
                 fontWeight: 600,
               }}
             >
-              {ASPECTS[aspect].label}
+              {"16:9"}
             </span>
             <span>PROOF · {slide.title}</span>
           </div>

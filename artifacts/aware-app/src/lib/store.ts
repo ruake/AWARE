@@ -14,9 +14,16 @@ export function loadFromStorage<T>(key: string, fallback: T[]): T[] {
 export const _tcListeners = new Set<() => void>();
 export const _tsListeners = new Set<() => void>();
 
-export function _notifyTC() { _tcListeners.forEach(fn => fn()); }
-export function _notifyTS() { _tsListeners.forEach(fn => fn()); }
-export function _notify() { _notifyTC(); _notifyTS(); }
+export function _notifyTC() {
+  _tcListeners.forEach((fn) => fn());
+}
+export function _notifyTS() {
+  _tsListeners.forEach((fn) => fn());
+}
+export function _notify() {
+  _notifyTC();
+  _notifyTS();
+}
 
 export function subscribeToTestCases(onChange: () => void): () => void {
   _tcListeners.add(onChange);

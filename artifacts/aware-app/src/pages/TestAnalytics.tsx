@@ -9,7 +9,7 @@ import { ENVS, CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import { useTestData } from "@/hooks/useTestData";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { useSyncedUrlState } from "@/lib/urlState";
-import type { TestResult } from "@/lib/types";
+
 import {
   ArrowLeft,
   BarChart3,
@@ -42,7 +42,11 @@ interface EnrichedHistoryRow {
 type SortKey = "runId" | "status" | "duration" | "env";
 type SortDir = "asc" | "desc";
 
-function getTestNameForDetail(tcs: ReturnType<typeof useTestData>["tcs"], testId: string, isTc: boolean): string {
+function getTestNameForDetail(
+  tcs: ReturnType<typeof useTestData>["tcs"],
+  testId: string,
+  isTc: boolean,
+): string {
   if (isTc) {
     const tc = tcs.find((t) => t.id === testId);
     return tc?.name ?? testId;
@@ -119,6 +123,116 @@ export default function TestAnalytics() {
 
   const tcIdx = isTcMode ? tcs.findIndex((t) => t.id === rawTestId) : -1;
   const diffs = DIFF_ROWS;
+
+  // ── All hooks before any early return ──
+  const [selSearch, setSelSearch] = React.useState("");
+  const [selOpen, setSelOpen] = React.useState(false);
+  const [selActiveIdx, setSelActiveIdx] = React.useState(0);
+  const selRef = React.useRef<HTMLDivElement>(null);
+
+  const [hStatus, setHStatus] = useSyncedUrlState<string>("hStatus", "all");
+  const [hEnv, setHEnv] = useSyncedUrlState<string>("hEnv", "all");
+  const [hErrOnly, setHErrOnly] = useSyncedUrlState<boolean>("hErrOnly", false);
+  const [hSort, setHSort] = useSyncedUrlState<string>("hSort", "runId");
+
+  // ── Derived values (safe for empty diffs) ──
+  const idx =
+    diffs.length === 0
+      ? 0
+      : isTcMode
+        ? Math.abs(tcIdx % diffs.length)
+        : Math.max(
+            0,
+            diffs.findIndex((d) => d.id === selectedTestId),
+          );
+  const diff = diffs[Math.min(idx, diffs.length - 1)] ?? diffs[0];
+  const detail =
+    diffs.length === 0 || !Array.isArray(TEST_DETAILS) || TEST_DETAILS.length === 0
+      ? { history: [], passRate: 0, flakinessScore: 0, avgDuration: 0 }
+      : (TEST_DETAILS[idx % TEST_DETAILS.length] ?? {
+          history: [],
+          passRate: 0,
+          flakinessScore: 0,
+          avgDuration: 0,
+        });
+  const selectorItems =
+    diffs.length === 0
+      ? []
+      : isTcMode
+        ? tcs.map((t) => ({ id: t.id, name: t.name }))
+        : diffs.map((d) => ({ id: d.id, name: d.name }));
+
+  const filteredSelector = selSearch.trim()
+    ? selectorItems.filter(
+        (s) =>
+          s.id.toLowerCase().includes(selSearch.toLowerCase()) ||
+          s.name.toLowerCase().includes(selSearch.toLowerCase()),
+      )
+    : selectorItems;
+
+  const testName =
+    isTcMode && testCase ? testCase.name : getTestNameForDetail(tcs, selectedTestId, isTcMode);
+
+  const handleSelectNavigate = (id: string) => {
+    const key = isTcMode ? "testId" : "diffId";
+    navigate(`/analytics?${key}=${encodeURIComponent(id)}`, { replace: true });
+    setSelOpen(false);
+    setSelSearch("");
+  };
+
+  const enriched = React.useMemo(() => {
+    if (diffs.length === 0) return [];
+    return enrichHistory(detail.history, testName);
+  }, [detail.history, testName, diffs.length]);
+
+  const filteredHistory = React.useMemo(() => {
+    let rows = enriched;
+    if (hStatus !== "all") rows = rows.filter((r) => r.status === hStatus);
+    if (hEnv !== "all") rows = rows.filter((r) => r.env === hEnv);
+    if (hErrOnly) rows = rows.filter((r) => r.error);
+    const desc = hSort.startsWith("-");
+    const key = (desc ? hSort.slice(1) : hSort) as SortKey;
+    const dir: SortDir = desc ? "desc" : "asc";
+    return [...rows].sort((a, b) => {
+      let cmp = 0;
+      if (key === "runId") cmp = a.runId.localeCompare(b.runId);
+      else if (key === "status") cmp = a.status.localeCompare(b.status);
+      else if (key === "duration") cmp = a.duration - b.duration;
+      else if (key === "env") cmp = a.env.localeCompare(b.env);
+      return dir === "asc" ? cmp : -cmp;
+    });
+  }, [enriched, hStatus, hEnv, hErrOnly, hSort]);
+
+  const uniqueEnvs = React.useMemo(
+    () => [...new Set(enriched.map((r) => r.env))].sort(),
+    [enriched],
+  );
+
+  const toggleSort = (key: SortKey) => {
+    setHSort((prev) => {
+      const clean = prev.startsWith("-") ? prev.slice(1) : prev;
+      if (clean === key) return prev.startsWith("-") ? key : `-${key}`;
+      return key;
+    });
+  };
+
+  const sortIcon = (key: SortKey) => {
+    const clean = hSort.startsWith("-") ? hSort.slice(1) : hSort;
+    if (clean !== key) return <ArrowUpDown size={11} style={{ opacity: 0.3 }} />;
+    return hSort.startsWith("-") ? <ArrowDown size={11} /> : <ArrowUp size={11} />;
+  };
+
+  React.useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (selRef.current && !selRef.current.contains(e.target as Node)) {
+        setSelOpen(false);
+        setSelSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
   if (diffs.length === 0) {
     return (
       <AppLayout activeHref="/analytics">
@@ -140,92 +254,6 @@ export default function TestAnalytics() {
       </AppLayout>
     );
   }
-  const idx = isTcMode
-    ? Math.abs(tcIdx % diffs.length)
-    : Math.max(
-        0,
-        diffs.findIndex((d) => d.id === selectedTestId),
-      );
-  const diff = diffs[Math.min(idx, diffs.length - 1)] ?? diffs[0];
-  const detail =
-    Array.isArray(TEST_DETAILS) && TEST_DETAILS.length > 0
-      ? (TEST_DETAILS[idx % TEST_DETAILS.length] ?? {
-          history: [],
-          passRate: 0,
-          flakinessScore: 0,
-          avgDuration: 0,
-        })
-      : { history: [], passRate: 0, flakinessScore: 0, avgDuration: 0 };
-  const selectorItems = isTcMode
-    ? tcs.map((t) => ({ id: t.id, name: t.name }))
-    : diffs.map((d) => ({ id: d.id, name: d.name }));
-
-  // ── Searchable selector state ──
-  const [selSearch, setSelSearch] = React.useState("");
-  const [selOpen, setSelOpen] = React.useState(false);
-  const [selActiveIdx, setSelActiveIdx] = React.useState(0);
-  const selRef = React.useRef<HTMLDivElement>(null);
-
-  const filteredSelector = selSearch.trim()
-    ? selectorItems.filter(
-        (s) =>
-          s.id.toLowerCase().includes(selSearch.toLowerCase()) ||
-          s.name.toLowerCase().includes(selSearch.toLowerCase()),
-      )
-    : selectorItems;
-
-  const testName = isTcMode && testCase ? testCase.name : getTestNameForDetail(tcs, selectedTestId, isTcMode);
-
-  // ── History table filters (URL-synced) ──
-  const [hStatus, setHStatus] = useSyncedUrlState<string>("hStatus", "all");
-  const [hEnv, setHEnv] = useSyncedUrlState<string>("hEnv", "all");
-  const [hErrOnly, setHErrOnly] = useSyncedUrlState<boolean>("hErrOnly", false);
-  const [hSort, setHSort] = useSyncedUrlState<string>("hSort", "runId");
-
-  const handleSelectNavigate = (id: string) => {
-    const key = isTcMode ? "testId" : "diffId";
-    navigate(`/analytics?${key}=${encodeURIComponent(id)}`, { replace: true });
-    setSelOpen(false);
-    setSelSearch("");
-  };
-
-  // ── Enriched history ──
-  const enriched = React.useMemo(() => enrichHistory(detail.history, testName), [detail.history, testName]);
-
-  // ── Filtered + sorted history ──
-  const filteredHistory = React.useMemo(() => {
-    let rows = enriched;
-    if (hStatus !== "all") rows = rows.filter((r) => r.status === hStatus);
-    if (hEnv !== "all") rows = rows.filter((r) => r.env === hEnv);
-    if (hErrOnly) rows = rows.filter((r) => r.error);
-    const desc = hSort.startsWith("-");
-    const key = (desc ? hSort.slice(1) : hSort) as SortKey;
-    const dir: SortDir = desc ? "desc" : "asc";
-    return [...rows].sort((a, b) => {
-      let cmp = 0;
-      if (key === "runId") cmp = a.runId.localeCompare(b.runId);
-      else if (key === "status") cmp = a.status.localeCompare(b.status);
-      else if (key === "duration") cmp = a.duration - b.duration;
-      else if (key === "env") cmp = a.env.localeCompare(b.env);
-      return dir === "asc" ? cmp : -cmp;
-    });
-  }, [enriched, hStatus, hEnv, hErrOnly, hSort]);
-
-  const uniqueEnvs = React.useMemo(() => [...new Set(enriched.map((r) => r.env))].sort(), [enriched]);
-
-  const toggleSort = (key: SortKey) => {
-    setHSort((prev) => {
-      const clean = prev.startsWith("-") ? prev.slice(1) : prev;
-      if (clean === key) return prev.startsWith("-") ? key : `-${key}`;
-      return key;
-    });
-  };
-
-  const sortIcon = (key: SortKey) => {
-    const clean = hSort.startsWith("-") ? hSort.slice(1) : hSort;
-    if (clean !== key) return <ArrowUpDown size={11} style={{ opacity: 0.3 }} />;
-    return hSort.startsWith("-") ? <ArrowDown size={11} /> : <ArrowUp size={11} />;
-  };
 
   // ── Derived stats ──
   const envLabels = getEnvLabels();
@@ -266,18 +294,6 @@ export default function TestAnalytics() {
   const failCount = enriched.filter((r) => r.status === "FAIL").length;
   const errorCount = enriched.filter((r) => r.error).length;
 
-  // ── Click-outside to close selector ──
-  React.useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (selRef.current && !selRef.current.contains(e.target as Node)) {
-        setSelOpen(false);
-        setSelSearch("");
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
   return (
     <AppLayout activeHref="/analytics">
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -313,7 +329,9 @@ export default function TestAnalytics() {
                   padding: 0,
                   fontFamily: "var(--font-mono)",
                 }}
-                placeholder={isTcMode ? "Search tests by name or ID…" : "Search diffs by name or ID…"}
+                placeholder={
+                  isTcMode ? "Search tests by name or ID…" : "Search diffs by name or ID…"
+                }
                 value={selSearch}
                 onChange={(e) => {
                   setSelSearch(e.target.value);
@@ -338,10 +356,17 @@ export default function TestAnalytics() {
               />
               {selSearch && (
                 <button
-                  onClick={() => { setSelSearch(""); setSelActiveIdx(0); }}
+                  onClick={() => {
+                    setSelSearch("");
+                    setSelActiveIdx(0);
+                  }}
                   style={{
-                    border: "none", background: "transparent", cursor: "pointer",
-                    color: "var(--proof-text-secondary)", padding: 0, display: "flex",
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    color: "var(--proof-text-secondary)",
+                    padding: 0,
+                    display: "flex",
                   }}
                 >
                   <X size={13} />
@@ -351,9 +376,17 @@ export default function TestAnalytics() {
             {selOpen && filteredSelector.length > 0 && (
               <div
                 style={{
-                  position: "absolute", top: "100%", left: 0, right: 0, zIndex: 100,
-                  background: "var(--proof-surface)", border: "1px solid var(--proof-grey)",
-                  borderRadius: 4, marginTop: 2, maxHeight: 280, overflow: "auto",
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  right: 0,
+                  zIndex: 100,
+                  background: "var(--proof-surface)",
+                  border: "1px solid var(--proof-grey)",
+                  borderRadius: 4,
+                  marginTop: 2,
+                  maxHeight: 280,
+                  overflow: "auto",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                 }}
               >
@@ -363,16 +396,23 @@ export default function TestAnalytics() {
                     onClick={() => handleSelectNavigate(item.id)}
                     onMouseEnter={() => setSelActiveIdx(i)}
                     style={{
-                      display: "flex", alignItems: "center", gap: 8,
-                      padding: "7px 10px", cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "7px 10px",
+                      cursor: "pointer",
                       background: i === selActiveIdx ? "var(--proof-blue-bg)" : "transparent",
-                      borderBottom: i < filteredSelector.length - 1 ? "1px solid var(--proof-grey)" : undefined,
+                      borderBottom:
+                        i < filteredSelector.length - 1 ? "1px solid var(--proof-grey)" : undefined,
                     }}
                   >
                     <span
                       style={{
-                        fontSize: 10, fontWeight: 600, flexShrink: 0,
-                        color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        flexShrink: 0,
+                        color: "var(--proof-text-secondary)",
+                        fontFamily: "var(--font-mono)",
                         minWidth: 48,
                       }}
                     >
@@ -380,13 +420,18 @@ export default function TestAnalytics() {
                     </span>
                     <span
                       style={{
-                        fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        fontSize: 12,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {selectorLabel(item, selSearch)}
                     </span>
                     {item.id === selectedTestId && (
-                      <span style={{ fontSize: 10, color: "var(--proof-blue)", marginLeft: "auto" }}>
+                      <span
+                        style={{ fontSize: 10, color: "var(--proof-blue)", marginLeft: "auto" }}
+                      >
                         current
                       </span>
                     )}
@@ -397,10 +442,19 @@ export default function TestAnalytics() {
             {selOpen && filteredSelector.length === 0 && (
               <div
                 style={{
-                  position: "absolute", top: "100%", left: 0, right: 0, zIndex: 100,
-                  background: "var(--proof-surface)", border: "1px solid var(--proof-grey)",
-                  borderRadius: 4, marginTop: 2, padding: "12px 16px",
-                  fontSize: 12, color: "var(--proof-text-secondary)", textAlign: "center",
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  right: 0,
+                  zIndex: 100,
+                  background: "var(--proof-surface)",
+                  border: "1px solid var(--proof-grey)",
+                  borderRadius: 4,
+                  marginTop: 2,
+                  padding: "12px 16px",
+                  fontSize: 12,
+                  color: "var(--proof-text-secondary)",
+                  textAlign: "center",
                 }}
               >
                 No matches for <strong>"{selSearch}"</strong>
@@ -690,10 +744,23 @@ export default function TestAnalytics() {
               padding: "10px 14px",
               borderBottom: "1px solid var(--proof-grey)",
               background: "var(--proof-grey-bg)",
-              display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 8,
             }}
           >
-            <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)", display: "flex", alignItems: "center", gap: 6 }}>
+            <h3
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--proof-text)",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
               <Filter size={13} /> Run History
               <span style={{ fontSize: 11, fontWeight: 400, color: "var(--proof-text-secondary)" }}>
                 ({filteredHistory.length} of {enriched.length})
@@ -701,13 +768,26 @@ export default function TestAnalytics() {
             </h3>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               {/* Status filter */}
-              <div style={{ display: "flex", gap: 2, background: "var(--proof-surface)", borderRadius: 4, border: "1px solid var(--proof-grey)", overflow: "hidden" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 2,
+                  background: "var(--proof-surface)",
+                  borderRadius: 4,
+                  border: "1px solid var(--proof-grey)",
+                  overflow: "hidden",
+                }}
+              >
                 {(["all", "PASS", "FAIL"] as const).map((s) => (
                   <button
                     key={s}
                     onClick={() => setHStatus(s)}
                     style={{
-                      border: "none", cursor: "pointer", padding: "3px 10px", fontSize: 11, fontWeight: 500,
+                      border: "none",
+                      cursor: "pointer",
+                      padding: "3px 10px",
+                      fontSize: 11,
+                      fontWeight: 500,
                       background: hStatus === s ? "var(--proof-blue)" : "transparent",
                       color: hStatus === s ? "white" : "var(--proof-text-secondary)",
                     }}
@@ -725,16 +805,26 @@ export default function TestAnalytics() {
               >
                 <option value="all">All envs</option>
                 {uniqueEnvs.map((e) => (
-                  <option key={e} value={e}>{e}</option>
+                  <option key={e} value={e}>
+                    {e}
+                  </option>
                 ))}
               </select>
               {/* Errors only toggle */}
               <button
                 onClick={() => setHErrOnly((prev) => !prev)}
                 style={{
-                  display: "flex", alignItems: "center", gap: 4, cursor: "pointer",
-                  padding: "3px 8px", borderRadius: 4, fontSize: 11, fontWeight: 500,
-                  border: hErrOnly ? "1px solid var(--proof-yellow)" : "1px solid var(--proof-grey)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  cursor: "pointer",
+                  padding: "3px 8px",
+                  borderRadius: 4,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  border: hErrOnly
+                    ? "1px solid var(--proof-yellow)"
+                    : "1px solid var(--proof-grey)",
                   background: hErrOnly ? "var(--proof-yellow-bg)" : "var(--proof-surface)",
                   color: hErrOnly ? "var(--proof-yellow)" : "var(--proof-text-secondary)",
                 }}
@@ -747,22 +837,41 @@ export default function TestAnalytics() {
             <table className="proof-table">
               <thead>
                 <tr>
-                  <th onClick={() => toggleSort("runId")} style={{ cursor: "pointer", userSelect: "none" }}>
+                  <th
+                    onClick={() => toggleSort("runId")}
+                    style={{ cursor: "pointer", userSelect: "none" }}
+                  >
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
                       Run ID {sortIcon("runId")}
                     </span>
                   </th>
-                  <th onClick={() => toggleSort("status")} style={{ cursor: "pointer", userSelect: "none" }}>
+                  <th
+                    onClick={() => toggleSort("status")}
+                    style={{ cursor: "pointer", userSelect: "none" }}
+                  >
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
                       Status {sortIcon("status")}
                     </span>
                   </th>
-                  <th onClick={() => toggleSort("duration")} style={{ textAlign: "right", cursor: "pointer", userSelect: "none" }}>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 3, justifyContent: "flex-end" }}>
+                  <th
+                    onClick={() => toggleSort("duration")}
+                    style={{ textAlign: "right", cursor: "pointer", userSelect: "none" }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 3,
+                        justifyContent: "flex-end",
+                      }}
+                    >
                       Duration {sortIcon("duration")}
                     </span>
                   </th>
-                  <th onClick={() => toggleSort("env")} style={{ cursor: "pointer", userSelect: "none" }}>
+                  <th
+                    onClick={() => toggleSort("env")}
+                    style={{ cursor: "pointer", userSelect: "none" }}
+                  >
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
                       Environment {sortIcon("env")}
                     </span>
@@ -794,10 +903,12 @@ export default function TestAnalytics() {
                       >
                         {h.status}
                       </span>
-                      {(h.assertionsFailed > 0) && (
+                      {h.assertionsFailed > 0 && (
                         <span
                           style={{
-                            fontSize: 10, marginLeft: 4, color: "var(--proof-red)",
+                            fontSize: 10,
+                            marginLeft: 4,
+                            color: "var(--proof-red)",
                             fontFamily: "var(--font-mono)",
                           }}
                         >
@@ -816,16 +927,29 @@ export default function TestAnalytics() {
                       {h.duration}ms
                     </td>
                     <td style={{ fontSize: 12 }}>{h.env}</td>
-                    <td style={{ maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", fontSize: 11 }}>
+                    <td
+                      style={{
+                        maxWidth: 280,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        fontSize: 11,
+                      }}
+                    >
                       {h.error ? (
-                        <span style={{ color: "var(--proof-red)", fontFamily: "var(--font-mono)", fontSize: 10 }}>
+                        <span
+                          style={{
+                            color: "var(--proof-red)",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 10,
+                          }}
+                        >
                           {h.error.length > 80 ? h.error.slice(0, 80) + "…" : h.error}
                         </span>
-                      ) : (
-                        h.status === "FAIL" ? (
-                          <span style={{ color: "var(--proof-text-secondary)", fontSize: 10 }}>no error message</span>
-                        ) : null
-                      )}
+                      ) : h.status === "FAIL" ? (
+                        <span style={{ color: "var(--proof-text-secondary)", fontSize: 10 }}>
+                          no error message
+                        </span>
+                      ) : null}
                     </td>
                     <td>
                       <Link href={`/runs/${h.runId}`}>
@@ -838,7 +962,15 @@ export default function TestAnalytics() {
                 ))}
                 {filteredHistory.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", padding: 24, fontSize: 12, color: "var(--proof-text-secondary)" }}>
+                    <td
+                      colSpan={6}
+                      style={{
+                        textAlign: "center",
+                        padding: 24,
+                        fontSize: 12,
+                        color: "var(--proof-text-secondary)",
+                      }}
+                    >
                       No matching results for the selected filters
                     </td>
                   </tr>

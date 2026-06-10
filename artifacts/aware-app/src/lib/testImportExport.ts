@@ -3,7 +3,6 @@ import type {
   TestCase,
   TestAssertion,
   TestConfig,
-  TransactionStep,
   FilmstripConfig,
   Predicate,
 } from "./types";

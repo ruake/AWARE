@@ -1,5 +1,4 @@
-export type AIToolCategory =
-  | "analysis" | "query" | "alert" | "report" | "recommendation";
+export type AIToolCategory = "analysis" | "query" | "alert" | "report" | "recommendation";
 
 export interface AITool {
   id: string;

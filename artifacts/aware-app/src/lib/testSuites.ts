@@ -13,9 +13,6 @@ export function getTestSuitesStore(): TestSuite[] {
 }
 
 let _tsSnapshot: TestSuite[] = [];
-function _dropTSSnapshot() {
-  _tsSnapshot = [];
-}
 export function getTestSuites(): TestSuite[] {
   if (_tsSnapshot.length === 0) _tsSnapshot = [...testSuitesStore];
   return _tsSnapshot;

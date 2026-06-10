@@ -1,7 +1,6 @@
 import React from "react";
-import { repo } from "@/lib/nav";
 import { getTestChangelog } from "@/lib/data";
-import { GitCommit, ExternalLink, History } from "lucide-react";
+import { GitCommit, History } from "lucide-react";
 import type { TestCase } from "@/lib/types";
 import { getGitHubUrl, cleanScriptPath } from "@/lib/utils";
 

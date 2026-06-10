@@ -1,5 +1,10 @@
-import { RUNS, DIFF_ROWS, ENV_SUMMARY, computeRunFrequency, getTestResultsForRun } from "@/lib/runs";
-import { getTestCases, computeTestStats } from "@/lib/testCases";
+import {
+  RUNS,
+  ENV_SUMMARY,
+  computeRunFrequency,
+  getTestResultsForRun,
+} from "@/lib/runs";
+import { computeTestStats } from "@/lib/testCases";
 import { getTestSuites } from "@/lib/testSuites";
 import { getAllPromotionDecisions } from "@/lib/promotions";
 
@@ -25,18 +30,20 @@ export function buildAIContext(): AIContext {
   const testStats = computeTestStats();
   const runFrequency = computeRunFrequency();
   const sortedRuns = [...RUNS].sort(
-    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime()
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
   );
   const totalFailures = RUNS.reduce((s, r) => s + r.failures, 0);
-  const avgPassRate = RUNS.length > 0
-    ? Math.round(RUNS.reduce((s, r) => s + r.passPct, 0) / RUNS.length)
-    : 0;
+  const avgPassRate =
+    RUNS.length > 0 ? Math.round(RUNS.reduce((s, r) => s + r.passPct, 0) / RUNS.length) : 0;
   const promotions = getAllPromotionDecisions();
-  const promoted = promotions.filter(p => p.decision === "promote").length;
-  const blocked = promotions.filter(p => p.decision === "block").length;
+  const promoted = promotions.filter((p) => p.decision === "promote").length;
+  const blocked = promotions.filter((p) => p.decision === "block").length;
 
-  const envs = [...new Set(RUNS.map(r => r.env))];
-  const recentRunLabels = sortedRuns.slice(-3).map(r => `${r.build} (${r.passPct}% ${r.env})`).join(", ");
+  const envs = [...new Set(RUNS.map((r) => r.env))];
+  const recentRunLabels = sortedRuns
+    .slice(-3)
+    .map((r) => `${r.build} (${r.passPct}% ${r.env})`)
+    .join(", ");
 
   return {
     summary: `AWARE test observability dashboard: ${RUNS.length} runs across ${runFrequency.daysCovered} days. ${testStats.total} tests across ${testStats.byCategory ? Object.keys(testStats.byCategory).length : 0} categories. ${getTestSuites().length} suites. Avg pass rate ${avgPassRate}%.`,
@@ -55,20 +62,28 @@ export function buildAIContext(): AIContext {
     envSummary: ENV_SUMMARY,
     runFrequency,
     recentRuns: recentRunLabels,
-    testCoverage: `${testStats.automated} automated / ${testStats.manual} manual tests. Coverage: ${testStats.coverage}%. By priority: ${Object.entries(testStats.byPriority || {}).map(([k, v]) => `${k}:${v}`).join(", ")}`,
+    testCoverage: `${testStats.automated} automated / ${testStats.manual} manual tests. Coverage: ${testStats.coverage}%. By priority: ${Object.entries(
+      testStats.byPriority || {},
+    )
+      .map(([k, v]) => `${k}:${v}`)
+      .join(", ")}`,
     promotionStatus: `Promotions: ${promoted} promoted, ${blocked} blocked, ${promotions.length - promoted - blocked} pending.`,
   };
 }
 
 function computeTestLevelStats() {
   // Track per-test status AND duration across ALL runs
-  const testHistory: Record<string, { passes: number; failures: number; statuses: string[]; durations: number[] }> = {};
+  const testHistory: Record<
+    string,
+    { passes: number; failures: number; statuses: string[]; durations: number[] }
+  > = {};
   const testMeta: Record<string, { name: string; category: string }> = {};
 
   for (const run of RUNS) {
     const results = getTestResultsForRun(run.id);
     for (const r of results) {
-      if (!testHistory[r.id]) testHistory[r.id] = { passes: 0, failures: 0, statuses: [], durations: [] };
+      if (!testHistory[r.id])
+        testHistory[r.id] = { passes: 0, failures: 0, statuses: [], durations: [] };
       testHistory[r.id].statuses.push(r.status);
       testHistory[r.id].durations.push(r.duration);
       if (r.status === "PASS") testHistory[r.id].passes++;
@@ -86,7 +101,10 @@ function computeTestLevelStats() {
     const totalEntries = h.statuses.length;
     const flakinessScore = totalEntries > 1 ? Math.round((flips / (totalEntries - 1)) * 100) : 0;
     const passRate = totalEntries > 0 ? Math.round((h.passes / totalEntries) * 100) : 0;
-    const avgDuration = h.durations.length > 0 ? Math.round(h.durations.reduce((s, d) => s + d, 0) / h.durations.length) : 0;
+    const avgDuration =
+      h.durations.length > 0
+        ? Math.round(h.durations.reduce((s, d) => s + d, 0) / h.durations.length)
+        : 0;
     const maxDuration = h.durations.length > 0 ? Math.max(...h.durations) : 0;
     return {
       id,
@@ -105,20 +123,18 @@ function computeTestLevelStats() {
 
   // Top flaky (by flakiness score, descending, that have actually flipped)
   const topFlaky = testFlakiness
-    .filter(t => t.flips > 0)
+    .filter((t) => t.flips > 0)
     .sort((a, b) => b.flakinessScore - a.flakinessScore)
     .slice(0, 10);
 
   // Top failing (by failure count, descending)
   const topFailing = testFlakiness
-    .filter(t => t.failures > 0)
+    .filter((t) => t.failures > 0)
     .sort((a, b) => b.failures - a.failures)
     .slice(0, 10);
 
   // Top slowest (by avg duration, descending)
-  const topSlowest = [...testFlakiness]
-    .sort((a, b) => b.avgDuration - a.avgDuration)
-    .slice(0, 10);
+  const topSlowest = [...testFlakiness].sort((a, b) => b.avgDuration - a.avgDuration).slice(0, 10);
 
   // Category failure summary
   const catFailures: Record<string, { total: number; failed: number }> = {};
@@ -132,8 +148,8 @@ function computeTestLevelStats() {
     .map(([cat, s]) => `${cat}: ${s.failed}/${s.total} failed`);
 
   // Test execution summary
-  const neverFailed = testFlakiness.filter(t => t.failures === 0).length;
-  const everFailed = testFlakiness.filter(t => t.failures > 0).length;
+  const neverFailed = testFlakiness.filter((t) => t.failures === 0).length;
+  const everFailed = testFlakiness.filter((t) => t.failures > 0).length;
 
   return {
     totalUniqueTests: testFlakiness.length,
@@ -148,25 +164,34 @@ function computeTestLevelStats() {
 }
 
 export function buildSystemPrompt(context: AIContext): string {
-  const lastRuns = [...RUNS].sort(
-    (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()
-  ).slice(0, 5).map(r =>
-    `- ${r.id}: "${r.label}" | env=${r.env} | target=${r.target} | status=${r.status} | passRate=${r.passPct}% | failures=${r.failures} | duration=${r.duration} | build=${r.build} | started=${r.started.slice(0, 16)}`
-  ).join("\n");
+  const lastRuns = [...RUNS]
+    .sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())
+    .slice(0, 5)
+    .map(
+      (r) =>
+        `- ${r.id}: "${r.label}" | env=${r.env} | target=${r.target} | status=${r.status} | passRate=${r.passPct}% | failures=${r.failures} | duration=${r.duration} | build=${r.build} | started=${r.started.slice(0, 16)}`,
+    )
+    .join("\n");
 
   const testLevel = computeTestLevelStats();
 
-  const flakyRows = testLevel.topFlaky.map(t =>
-    `| ${t.id} | ${t.flakinessScore}% | ${t.flips} | ${t.passes}/${t.failures} | ${t.passRate}% | ${t.category} |`
-  ).join("\n");
+  const flakyRows = testLevel.topFlaky
+    .map(
+      (t) =>
+        `| ${t.id} | ${t.flakinessScore}% | ${t.flips} | ${t.passes}/${t.failures} | ${t.passRate}% | ${t.category} |`,
+    )
+    .join("\n");
 
-  const failRows = testLevel.topFailing.map(t =>
-    `| ${t.id} | ${t.failures} | ${t.passes} | ${t.passRate}% | ${t.category} |`
-  ).join("\n");
+  const failRows = testLevel.topFailing
+    .map((t) => `| ${t.id} | ${t.failures} | ${t.passes} | ${t.passRate}% | ${t.category} |`)
+    .join("\n");
 
-  const slowRows = testLevel.topSlowest.map(t =>
-    `| ${t.id} | ${t.avgDuration}ms | ${t.maxDuration}ms | ${t.passRate}% | ${t.category} |`
-  ).join("\n");
+  const slowRows = testLevel.topSlowest
+    .map(
+      (t) =>
+        `| ${t.id} | ${t.avgDuration}ms | ${t.maxDuration}ms | ${t.passRate}% | ${t.category} |`,
+    )
+    .join("\n");
 
   return `You are PROOF Copilot, an AI assistant for the AWARE CDN test observability dashboard.
 
@@ -207,7 +232,9 @@ ${slowRows || "| — | No duration data | — | — | — |"}
 FAILURES BY CATEGORY:
 ${testLevel.catSummary.join("\n") || "No failures recorded."}
 
-Run IDs: ${RUNS.slice(-5).map(r => r.id).join(", ")}.
+Run IDs: ${RUNS.slice(-5)
+    .map((r) => r.id)
+    .join(", ")}.
 
 Rules:
 - Answer ONLY from the data above — no generic advice or boilerplate

@@ -11,9 +11,15 @@ interface MarkdownProps {
 const LINK_PATTERNS = [
   { pattern: /\b(run_\w+)\b/g, href: (id: string) => `/runs/${encodeURIComponent(id)}` },
   { pattern: /\b(tr_\w+)\b/g, href: (id: string) => `/runs/${encodeURIComponent(id)}` },
-  { pattern: /\b(diff_\w+)\b/g, href: (id: string) => `/analytics?diffId=${encodeURIComponent(id)}` },
+  {
+    pattern: /\b(diff_\w+)\b/g,
+    href: (id: string) => `/analytics?diffId=${encodeURIComponent(id)}`,
+  },
   // Test IDs: any lowercase-prefix + underscore + digits (ad_14, pu_3, ht_20, pw_14, etc.)
-  { pattern: /\b([a-z]+_\d+)\b/g, href: (id: string) => `/analytics?testId=${encodeURIComponent(id)}` },
+  {
+    pattern: /\b([a-z]+_\d+)\b/g,
+    href: (id: string) => `/analytics?testId=${encodeURIComponent(id)}`,
+  },
 ];
 
 function linkifyContent(text: string): string {
@@ -47,15 +53,17 @@ function linkifyContent(text: string): string {
     return result;
   }
 
-  return segments.map((seg) => {
-    // If this is a backtick code span containing an ID, unwrap it to a markdown link
-    if (seg.type === "skip" && seg.codeContent) {
-      const linked = linkifyStr(seg.codeContent);
-      if (linked !== seg.codeContent) return linked;
-    }
-    if (seg.type === "skip") return seg.content;
-    return linkifyStr(seg.content);
-  }).join("");
+  return segments
+    .map((seg) => {
+      // If this is a backtick code span containing an ID, unwrap it to a markdown link
+      if (seg.type === "skip" && seg.codeContent) {
+        const linked = linkifyStr(seg.codeContent);
+        if (linked !== seg.codeContent) return linked;
+      }
+      if (seg.type === "skip") return seg.content;
+      return linkifyStr(seg.content);
+    })
+    .join("");
 }
 
 const components = {
@@ -164,16 +172,37 @@ const components = {
   ol: ({ children }: { children: React.ReactNode }) => (
     <ol style={{ margin: "4px 0", paddingLeft: 20, fontSize: 13, lineHeight: 1.7 }}>{children}</ol>
   ),
-  li: ({ children }: { children: React.ReactNode }) => <li style={{ marginBottom: 2 }}>{children}</li>,
-  p: ({ children }: { children: React.ReactNode }) => <p style={{ margin: "6px 0", lineHeight: 1.6, fontSize: 13 }}>{children}</p>,
-  strong: ({ children }: { children: React.ReactNode }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+  li: ({ children }: { children: React.ReactNode }) => (
+    <li style={{ marginBottom: 2 }}>{children}</li>
+  ),
+  p: ({ children }: { children: React.ReactNode }) => (
+    <p style={{ margin: "6px 0", lineHeight: 1.6, fontSize: 13 }}>{children}</p>
+  ),
+  strong: ({ children }: { children: React.ReactNode }) => (
+    <strong style={{ fontWeight: 700 }}>{children}</strong>
+  ),
   em: ({ children }: { children: React.ReactNode }) => <em>{children}</em>,
-  h1: ({ children }: { children: React.ReactNode }) => <h1 style={{ fontSize: 16, fontWeight: 700, margin: "12px 0 6px" }}>{children}</h1>,
-  h2: ({ children }: { children: React.ReactNode }) => <h2 style={{ fontSize: 14, fontWeight: 700, margin: "10px 0 4px" }}>{children}</h2>,
-  h3: ({ children }: { children: React.ReactNode }) => <h3 style={{ fontSize: 13, fontWeight: 600, margin: "8px 0 4px" }}>{children}</h3>,
-  hr: () => <hr style={{ border: "none", borderTop: "1px solid var(--proof-grey)", margin: "12px 0" }} />,
+  h1: ({ children }: { children: React.ReactNode }) => (
+    <h1 style={{ fontSize: 16, fontWeight: 700, margin: "12px 0 6px" }}>{children}</h1>
+  ),
+  h2: ({ children }: { children: React.ReactNode }) => (
+    <h2 style={{ fontSize: 14, fontWeight: 700, margin: "10px 0 4px" }}>{children}</h2>
+  ),
+  h3: ({ children }: { children: React.ReactNode }) => (
+    <h3 style={{ fontSize: 13, fontWeight: 600, margin: "8px 0 4px" }}>{children}</h3>
+  ),
+  hr: () => (
+    <hr style={{ border: "none", borderTop: "1px solid var(--proof-grey)", margin: "12px 0" }} />
+  ),
   blockquote: ({ children }: { children: React.ReactNode }) => (
-    <blockquote style={{ borderLeft: "3px solid var(--proof-blue)", paddingLeft: 12, margin: "8px 0", color: "var(--proof-text-secondary)" }}>
+    <blockquote
+      style={{
+        borderLeft: "3px solid var(--proof-blue)",
+        paddingLeft: 12,
+        margin: "8px 0",
+        color: "var(--proof-text-secondary)",
+      }}
+    >
       {children}
     </blockquote>
   ),
