@@ -256,16 +256,14 @@ function fallbackAnomalyDetection(): AIAnalysisResult {
     }
   }
   const passRateChart = JSON.stringify({
-    type: "LineChart",
+    type: "ColumnChart",
     title: "Pass Rate Trend",
     headers: ["Run", "Pass Rate"],
     rows: sortedRuns.map((r) => [r.id.slice(-8), r.passPct]),
-    pointSize: 4,
-    curveType: "function",
     colors: ["#5b8af5"],
     options: {
       vAxis: { minValue: 0, maxValue: 100, textStyle: { fontSize: 10 } },
-      hAxis: { textStyle: { fontSize: 8 } },
+      hAxis: { textStyle: { fontSize: 8 }, slantedText: true, slantedTextAngle: 45 },
       legend: { position: "none" },
     },
   });
