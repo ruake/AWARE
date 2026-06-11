@@ -41,7 +41,6 @@ export default function Runs() {
   const [statusFilter, setStatusFilter] = useSyncedUrlState("status", "all");
   const [suiteFilter, setSuiteFilter] = useSyncedUrlState("suite", "all");
   const [envFilter, setEnvFilter] = useSyncedUrlState("env", "all");
-  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [selectedIdx, setSelectedIdx] = React.useState(-1);
   const selectedRunIdRef = React.useRef<string | null>(null);
 
@@ -64,17 +63,6 @@ export default function Runs() {
     return true;
   });
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const s = new Set(prev);
-      if (s.has(id)) s.delete(id);
-      else s.add(id);
-      return s;
-    });
-  };
-
-  const comparePair = selectedIds.size === 2 ? [...selectedIds] : null;
-
   const hasActiveFilters =
     statusFilter !== "all" || suiteFilter !== "all" || envFilter !== "all" || search !== "";
 
@@ -84,7 +72,7 @@ export default function Runs() {
   const rowVirtualizer = useVirtualizer({
     count: filtered.length,
     getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 48,
+    estimateSize: () => 56,
     overscan: 5,
   });
 
@@ -123,9 +111,7 @@ export default function Runs() {
 
   return (
     <AppLayout activeHref="/runs">
-      <div
-        style={{ display: "flex", flexDirection: "column", gap: 16, minHeight: "100%", flex: 1 }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0, overflow: "hidden" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700 }}>Regression Runs</h1>
@@ -134,18 +120,7 @@ export default function Runs() {
             </p>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            {comparePair && (
               <button
-                onClick={() =>
-                  navigate(`/compare?baseline=${comparePair[0]}&candidate=${comparePair[1]}`)
-                }
-                className="proof-button-primary"
-                style={{ fontSize: 13 }}
-              >
-                <GitCompare size={14} /> Compare Selected ({selectedIds.size})
-              </button>
-            )}
-            <button
               onClick={() => navigate("/start")}
               className="proof-button-primary"
               style={{ fontSize: 13 }}
@@ -184,7 +159,7 @@ export default function Runs() {
               subtitle="successful runs"
               accentColor="var(--proof-green)"
               icon={<CheckCircle2 size={16} />}
-              onClick={() => navigate(`/runs?status=PASS`)}
+              onClick={() => setStatusFilter("PASS")}
               active={statusFilter === "PASS"}
             />
             <CTAStatCard
@@ -193,7 +168,7 @@ export default function Runs() {
               subtitle="need attention"
               accentColor="var(--proof-red)"
               icon={<XCircle size={16} />}
-              onClick={() => navigate(`/runs?status=FAIL`)}
+              onClick={() => setStatusFilter("FAIL")}
               active={statusFilter === "FAIL"}
             />
             <CTAStatCard
@@ -301,7 +276,6 @@ export default function Runs() {
               style={{ fontSize: 12, color: "var(--proof-text-secondary)", marginLeft: "auto" }}
             >
               {filtered.length} of {RUNS.length} runs
-              {selectedIds.size > 0 && ` · ${selectedIds.size} selected`}
             </span>
           </div>
         </PanelErrorBoundary>
@@ -360,16 +334,11 @@ export default function Runs() {
             >
               <table className="proof-table" style={{ position: "relative" }}>
                 <colgroup>
-                  <col style={{ width: 40 }} />
-                  <col style={{ width: 148 }} />
-                  <col style={{ width: 180 }} />
-                  <col style={{ width: 140 }} />
-                  <col style={{ width: 90 }} />
-                  <col style={{ width: 68 }} />
-                  <col style={{ width: 68 }} />
-                  <col style={{ width: 76 }} />
-                  <col style={{ width: 120 }} />
                   <col />
+                  <col style={{ width: 220 }} />
+                  <col style={{ width: 140 }} />
+                  <col style={{ width: 120 }} />
+                  <col style={{ width: 130 }} />
                 </colgroup>
                 <thead
                   style={{
@@ -380,33 +349,16 @@ export default function Runs() {
                   }}
                 >
                   <tr>
-                    <th style={{ width: 40 }}>
-                      <input
-                        type="checkbox"
-                        style={{ cursor: "pointer" }}
-                        checked={selectedIds.size === filtered.length && filtered.length > 0}
-                        onChange={(e) =>
-                          setSelectedIds(
-                            e.target.checked ? new Set(filtered.map((r) => r.id)) : new Set(),
-                          )
-                        }
-                      />
-                    </th>
-                    <th style={{ width: 148 }}>Run ID</th>
-                    <th style={{ width: 180 }}>Suite · Target</th>
-                    <th style={{ width: 140 }}>Env / Network</th>
-                    <th style={{ width: 90 }}>Status</th>
-                    <th style={{ textAlign: "right", width: 68 }}>Pass %</th>
-                    <th style={{ textAlign: "right", width: 68 }}>Failures</th>
-                    <th style={{ textAlign: "right", width: 76 }}>Duration</th>
-                    <th style={{ width: 120 }}>Started</th>
+                    <th>Run</th>
+                    <th>Suite / Env</th>
+                    <th>Result</th>
+                    <th>When</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody style={{ position: "relative", height: rowVirtualizer.getTotalSize() }}>
                   {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                     const run = filtered[virtualRow.index];
-                    const isSelected = selectedIds.has(run.id);
                     const isKbSelected = selectedIdx === virtualRow.index;
                     return (
                       <tr
@@ -418,23 +370,13 @@ export default function Runs() {
                           width: "100%",
                           height: virtualRow.size,
                           transform: `translateY(${virtualRow.start}px)`,
-                          outline: isSelected ? "2px solid var(--proof-blue)" : "none",
-                          outlineOffset: -2,
                           borderLeft: isKbSelected ? "3px solid var(--proof-blue)" : undefined,
-                          background:
-                            isKbSelected || isSelected ? "var(--proof-blue-bg)" : undefined,
+                          background: isKbSelected ? "var(--proof-blue-bg)" : undefined,
                         }}
                       >
+                        {/* Run: ID + build/rev */}
                         <td>
-                          <input
-                            type="checkbox"
-                            style={{ cursor: "pointer" }}
-                            checked={isSelected}
-                            onChange={() => toggleSelect(run.id)}
-                          />
-                        </td>
-                        <td>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                             <button
                               onClick={() => navigate(`/runs/${run.id}`)}
                               style={{
@@ -451,89 +393,66 @@ export default function Runs() {
                             >
                               {run.id}
                             </button>
-                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--proof-text-secondary)" }}>
+                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--proof-text-muted)" }}>
                               {run.build} · {run.rev}
                             </span>
                           </div>
                         </td>
+                        {/* Suite / Env: suite on top, target·env·network below */}
                         <td>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{run.suite}</span>
-                            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontWeight: 500 }}>{run.target}</span>
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <span style={{ fontSize: 12 }}>{run.env}</span>
-                            <span
-                              style={{
-                                fontSize: 9,
-                                fontWeight: 600,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.3px",
-                                background:
-                                  run.network === "production"
-                                    ? "var(--proof-green-bg)"
-                                    : "var(--proof-yellow-bg)",
-                                color:
-                                  run.network === "production" ? "var(--proof-green)" : "#d97706",
-                                padding: "1px 5px",
-                                borderRadius: 3,
-                                border: `1px solid ${run.network === "production" ? "var(--proof-green)" : "#f59e0b"}`,
-                              }}
-                            >
-                              {run.network}
+                          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 500 }}>{run.suite}</span>
+                            <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
+                              {run.target} · {run.env}
+                              {run.network && (
+                                <span style={{
+                                  marginLeft: 5,
+                                  fontSize: 9,
+                                  fontWeight: 600,
+                                  textTransform: "uppercase",
+                                  color: run.network === "production" ? "var(--proof-green)" : "#d97706",
+                                  background: run.network === "production" ? "var(--proof-green-bg)" : "var(--proof-yellow-bg)",
+                                  padding: "1px 4px",
+                                  borderRadius: 3,
+                                }}>
+                                  {run.network}
+                                </span>
+                              )}
                             </span>
                           </div>
                         </td>
-                        <td>{statusBadge(run.status)}</td>
-                        <td
-                          style={{
-                            textAlign: "right",
-                            fontFamily: "var(--font-mono)",
-                            fontWeight: 700,
-                            fontSize: 13,
-                            color:
-                              run.passPct === 100
-                                ? "var(--proof-green)"
-                                : run.passPct < 90
-                                  ? "var(--proof-red)"
-                                  : "var(--proof-text)",
-                          }}
-                        >
-                          {run.passPct}%
-                        </td>
-                        <td
-                          style={{
-                            textAlign: "right",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 12,
-                            color:
-                              run.failures > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)",
-                          }}
-                        >
-                          {run.failures || "—"}
-                        </td>
-                        <td
-                          style={{
-                            textAlign: "right",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 11,
-                            color: "var(--proof-text-secondary)",
-                          }}
-                        >
-                          {run.duration}
-                        </td>
-                        <td style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-                          {new Date(run.started).toLocaleString(undefined, {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </td>
+                        {/* Result: status badge on top, pass%·failures below */}
                         <td>
-                          <div style={{ display: "flex", gap: 6 }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                            {statusBadge(run.status)}
+                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--proof-text-secondary)" }}>
+                              <span style={{ color: run.passPct === 100 ? "var(--proof-green)" : run.passPct < 90 ? "var(--proof-red)" : "var(--proof-text)", fontWeight: 700 }}>
+                                {run.passPct}%
+                              </span>
+                              {" · "}
+                              <span style={{ color: run.failures > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)" }}>
+                                {run.failures > 0 ? `${run.failures} fail` : "0 fail"}
+                              </span>
+                            </span>
+                          </div>
+                        </td>
+                        {/* When: duration on top, started below */}
+                        <td>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)" }}>{run.duration}</span>
+                            <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
+                              {new Date(run.started).toLocaleString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </div>
+                        </td>
+                        {/* Actions */}
+                        <td>
+                          <div style={{ display: "flex", gap: 5 }}>
                             <button
                               onClick={() => navigate(`/runs/${run.id}`)}
                               className="proof-button"
@@ -542,11 +461,7 @@ export default function Runs() {
                               Detail
                             </button>
                             <button
-                              onClick={() =>
-                                navigate(
-                                  `/compare?baseline=${RUNS[RUNS.length - 1]?.id}&candidate=${run.id}`,
-                                )
-                              }
+                              onClick={() => navigate(`/compare?baseline=${RUNS[RUNS.length - 1]?.id}&candidate=${run.id}`)}
                               className="proof-button"
                               style={{ fontSize: 11, padding: "3px 8px" }}
                             >
@@ -578,44 +493,6 @@ export default function Runs() {
           </div>
         </PanelErrorBoundary>
 
-        {/* Bulk actions */}
-        {selectedIds.size >= 2 && (
-          <div
-            className="proof-card"
-            style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: 12 }}
-          >
-            <span style={{ fontSize: 13, fontWeight: 600 }}>{selectedIds.size} runs selected</span>
-            {comparePair && (
-              <button
-                onClick={() =>
-                  navigate(`/compare?baseline=${comparePair[0]}&candidate=${comparePair[1]}`)
-                }
-                className="proof-button-primary"
-                style={{ fontSize: 12 }}
-              >
-                <GitCompare size={13} /> Compare These Runs
-              </button>
-            )}
-            <button
-              onClick={() => {
-                navigator.clipboard
-                  .writeText([...selectedIds].join(", "))
-                  .then(() => show("Run IDs copied"));
-              }}
-              className="proof-button"
-              style={{ fontSize: 12 }}
-            >
-              <Share2 size={13} /> Copy Run IDs
-            </button>
-            <button
-              onClick={() => setSelectedIds(new Set())}
-              className="proof-button"
-              style={{ fontSize: 12, marginLeft: "auto" }}
-            >
-              Clear selection
-            </button>
-          </div>
-        )}
       </div>
       {Toast}
     </AppLayout>
