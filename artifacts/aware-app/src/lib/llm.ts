@@ -30,8 +30,7 @@ class OpenAILLMProvider implements ILLMProvider {
   async complete(req: LLMCompletionRequest): Promise<LLMCompletionResponse> {
     if (!this.config.apiKey) {
       return {
-        content:
-          "No API key configured. Click **⚙ Configure** above to enter your OpenAI API key.",
+        content: "No API key configured. Click **⚙ Configure** above to enter your OpenAI API key.",
         finishReason: "error",
       };
     }
@@ -83,7 +82,10 @@ class OpenAILLMProvider implements ILLMProvider {
   async testConnection(): Promise<boolean> {
     if (!this.config.apiKey) return false;
     try {
-      const result = await this.complete({ messages: [{ role: "user", content: "ping" }], maxTokens: 1 });
+      const result = await this.complete({
+        messages: [{ role: "user", content: "ping" }],
+        maxTokens: 1,
+      });
       return result.finishReason !== "error";
     } catch {
       return false;
@@ -159,16 +161,13 @@ class WebLLMProvider implements ILLMProvider {
 
   private async _init() {
     const mod = await import("@mlc-ai/web-llm");
-    this.engine = await mod.CreateMLCEngine(
-      this._webllmModel,
-      {
-        initProgressCallback: (report: { progress: number; text: string }) => {
-          if (_webLlmProgressCallback) {
-            _webLlmProgressCallback(report.progress, report.text);
-          }
-        },
+    this.engine = await mod.CreateMLCEngine(this._webllmModel, {
+      initProgressCallback: (report: { progress: number; text: string }) => {
+        if (_webLlmProgressCallback) {
+          _webLlmProgressCallback(report.progress, report.text);
+        }
       },
-    );
+    });
   }
 
   async testConnection(): Promise<boolean> {
@@ -286,7 +285,10 @@ function _saveConfig(config: LLMConfig): void {
 function _resolveInitialConfig(): LLMConfig {
   const stored = _loadStoredConfig();
   return {
-    provider: (import.meta.env.VITE_LLM_PROVIDER as LLMProviderType) || stored.provider || DEFAULT_LLM_CONFIG.provider,
+    provider:
+      (import.meta.env.VITE_LLM_PROVIDER as LLMProviderType) ||
+      stored.provider ||
+      DEFAULT_LLM_CONFIG.provider,
     apiKey: import.meta.env.VITE_LLM_API_KEY || stored.apiKey || "",
     apiUrl: import.meta.env.VITE_LLM_API_URL || stored.apiUrl || "",
     model: import.meta.env.VITE_LLM_MODEL || stored.model || DEFAULT_LLM_CONFIG.model,

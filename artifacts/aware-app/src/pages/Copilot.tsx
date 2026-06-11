@@ -89,7 +89,7 @@ async function probeProvider(type: LLMProviderType): Promise<boolean> {
 }
 
 export default function Copilot() {
-  const [activeUseCase, setActiveUseCase] = React.useState<string | null>(null);
+  const [_activeUseCase, setActiveUseCase] = React.useState<string | null>(null);
   const [messages, setMessages] = React.useState<
     { role: string; content: string; type?: string }[]
   >([]);
@@ -97,7 +97,7 @@ export default function Copilot() {
   const [busy, setBusy] = React.useState(false);
   const [aiReady, setAiReady] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
-  const [insights, setInsights] = React.useState<AIInsight[]>([]);
+  const [_insights, setInsights] = React.useState<AIInsight[]>([]);
   const [usingFallback, setUsingFallback] = React.useState(false);
   const [providerAvail, setProviderAvail] = React.useState<Record<string, boolean>>({});
   const [expandedMsgs, setExpandedMsgs] = React.useState<Set<number>>(new Set());
@@ -270,7 +270,9 @@ export default function Copilot() {
           { role: "system", content: systemPrompt },
           ...priorMessages
             .filter((m) => m.role === "user" || m.role === "assistant")
-            .filter((m) => m.type !== "intro" && m.type !== "capabilities" && m.content.trim() !== "")
+            .filter(
+              (m) => m.type !== "intro" && m.type !== "capabilities" && m.content.trim() !== "",
+            )
             .slice(-12) // keep last 6 turns (12 messages)
             .map((m) => ({
               role: m.role as "user" | "assistant",
@@ -410,7 +412,10 @@ export default function Copilot() {
               {aiReady ? "Connected" : "Unavailable"}
             </span>
             <button
-              onClick={() => { setShowProviderMenu(false); setShowSettings((p) => !p); }}
+              onClick={() => {
+                setShowProviderMenu(false);
+                setShowSettings((p) => !p);
+              }}
               style={{
                 marginLeft: "auto",
                 display: "flex",
@@ -421,7 +426,9 @@ export default function Copilot() {
                 fontSize: 11,
                 fontWeight: 600,
                 cursor: "pointer",
-                border: showSettings ? "1px solid var(--proof-blue)" : "1px solid var(--proof-grey)",
+                border: showSettings
+                  ? "1px solid var(--proof-blue)"
+                  : "1px solid var(--proof-grey)",
                 background: showSettings ? "var(--proof-blue-bg)" : "var(--proof-surface)",
                 color: showSettings ? "var(--proof-blue)" : "var(--proof-text-secondary)",
               }}
@@ -529,13 +536,31 @@ export default function Copilot() {
                 boxShadow: "0 2px 8px rgba(91,138,245,0.1)",
               }}
             >
-              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "var(--proof-text)",
+                  marginBottom: 12,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
                 <Globe size={13} style={{ color: "var(--proof-blue)" }} />
                 OpenAI / Compatible API Settings
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--proof-text-secondary)" }}>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      color: "var(--proof-text-secondary)",
+                    }}
+                  >
                     API Key <span style={{ color: "#ef4444" }}>*</span>
                   </span>
                   <input
@@ -557,7 +582,15 @@ export default function Copilot() {
                 </label>
                 <div style={{ display: "flex", gap: 10 }}>
                   <label style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--proof-text-secondary)" }}>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        color: "var(--proof-text-secondary)",
+                      }}
+                    >
                       Model
                     </span>
                     <input
@@ -577,7 +610,15 @@ export default function Copilot() {
                     />
                   </label>
                   <label style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--proof-text-secondary)" }}>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                        color: "var(--proof-text-secondary)",
+                      }}
+                    >
                       API URL (optional)
                     </span>
                     <input
@@ -703,14 +744,13 @@ export default function Copilot() {
                     borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "4px 16px 16px 16px",
                     fontSize: 13,
                     lineHeight: 1.7,
-                    background: msg.role === "user"
-                      ? "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)"
-                      : "var(--proof-surface-2)",
+                    background:
+                      msg.role === "user"
+                        ? "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)"
+                        : "var(--proof-surface-2)",
                     color: msg.role === "user" ? "white" : "var(--proof-text)",
                     border: msg.role === "user" ? "none" : "1px solid var(--proof-border)",
-                    boxShadow: msg.role === "user"
-                      ? "0 2px 10px rgba(91,138,245,0.25)"
-                      : "none",
+                    boxShadow: msg.role === "user" ? "0 2px 10px rgba(91,138,245,0.25)" : "none",
                     maxWidth: "100%",
                     overflow: "hidden",
                   }}
@@ -719,7 +759,14 @@ export default function Copilot() {
                     msg.content
                   ) : msg.type === "capabilities" ? (
                     <div style={{ minWidth: 320 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)", marginBottom: 12 }}>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: "var(--proof-text)",
+                          marginBottom: 12,
+                        }}
+                      >
                         Here's what I can do with your test data:
                       </div>
                       {(["analysis", "alert", "recommendation", "report"] as const).map((cat) => {
@@ -739,14 +786,16 @@ export default function Copilot() {
                         };
                         return (
                           <div key={cat} style={{ marginBottom: 10 }}>
-                            <div style={{
-                              fontSize: 9,
-                              fontWeight: 700,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.1em",
-                              color: catColor[cat],
-                              marginBottom: 6,
-                            }}>
+                            <div
+                              style={{
+                                fontSize: 9,
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.1em",
+                                color: catColor[cat],
+                                marginBottom: 6,
+                              }}
+                            >
                               {catLabel[cat]}
                             </div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -789,7 +838,9 @@ export default function Copilot() {
                           </div>
                         );
                       })}
-                      <div style={{ marginTop: 12, fontSize: 11, color: "var(--proof-text-muted)" }}>
+                      <div
+                        style={{ marginTop: 12, fontSize: 11, color: "var(--proof-text-muted)" }}
+                      >
                         Or just type a question about your runs, tests, or environments.
                       </div>
                     </div>
@@ -967,9 +1018,10 @@ export default function Copilot() {
                 alignSelf: "flex-end",
                 padding: "10px 18px",
                 borderRadius: 10,
-                background: busy || !input.trim()
-                  ? "var(--proof-surface-3)"
-                  : "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)",
+                background:
+                  busy || !input.trim()
+                    ? "var(--proof-surface-3)"
+                    : "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)",
                 color: busy || !input.trim() ? "var(--proof-text-muted)" : "white",
                 border: "none",
                 cursor: busy || !input.trim() ? "not-allowed" : "pointer",

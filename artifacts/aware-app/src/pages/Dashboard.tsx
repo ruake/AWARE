@@ -1002,7 +1002,6 @@ export default function Dashboard() {
             </a>
           </div>
         </div>
-
       </div>
       {Toast}
     </AppLayout>
