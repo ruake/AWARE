@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import {
   AI_USE_CASES,
+  runAnalysis,
   runFallbackAnalysis,
   generateInsights,
   buildAIContext,
@@ -189,7 +190,10 @@ export default function Copilot() {
     setMessages((prev) => [...prev, { role: "user", content: useCase.name, type: "use-case" }]);
     setBusy(true);
     try {
-      const result = runFallbackAnalysis({ useCaseId: useCase.id, parameters: {} });
+      // Use the real LLM when available; runAnalysis falls back internally if the provider fails
+      const result = aiReady
+        ? await runAnalysis({ useCaseId: useCase.id, parameters: {} })
+        : runFallbackAnalysis({ useCaseId: useCase.id, parameters: {} });
       const resultText = result.details || result.summary;
       setMessages((prev) => [
         ...prev,
@@ -209,6 +213,8 @@ export default function Copilot() {
   const handleSend = async () => {
     if (!input.trim() || busy) return;
     const userMsg = input.trim();
+    // Snapshot current messages synchronously before any state updates
+    const priorMessages = messages;
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userMsg, type: "text" }]);
     setBusy(true);
@@ -217,20 +223,33 @@ export default function Copilot() {
       let response: string;
       try {
         const ctx = buildAIContext();
+        const systemPrompt = buildSystemPrompt(ctx);
+        // Build full conversation history: system + prior exchanges + new user msg
+        const historyMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
+          { role: "system", content: systemPrompt },
+          ...priorMessages
+            .filter((m) => m.role === "user" || m.role === "assistant")
+            .filter((m) => m.type !== "intro")
+            .slice(-12) // keep last 6 turns (12 messages)
+            .map((m) => ({
+              role: m.role as "user" | "assistant",
+              content: m.content,
+            })),
+          { role: "user", content: userMsg },
+        ];
         const completion = await provider.complete({
-          messages: [
-            { role: "system", content: buildSystemPrompt(ctx) },
-            { role: "user", content: userMsg },
-          ],
+          messages: historyMessages,
           temperature: 0.3,
           maxTokens: 8192,
         });
         response = completion.content;
       } catch {
+        // Offline fallback: answer from data directly
+        const ctx = buildAIContext();
         const lastRun = [...RUNS].sort(
           (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
         )[0];
-        response = `I'm running in offline analysis mode. Here's the data I can share:\n\n**Last run:** ${lastRun?.id} — "${lastRun?.label}"\n   Status: ${lastRun?.status} | Pass rate: ${lastRun?.passPct}% | Failures: ${lastRun?.failures}\n   Environment: ${lastRun?.env} | Target: ${lastRun?.target}\n   Duration: ${lastRun?.duration} | Build: ${lastRun?.build}\n\n**Overall:** 15 runs across 3 days, avg 96% pass rate.\n\nTry a specific question or select an analysis type from the sidebar.`;
+        response = `**Offline mode** — no LLM provider available. Here's what the data says:\n\n- **${ctx.stats.totalRuns} runs** | avg pass rate **${ctx.stats.avgPassRate}%** | **${ctx.stats.totalFailures}** total failures\n- Environments: ${ctx.stats.envs.join(", ")}\n- ${ctx.testCoverage}\n- ${ctx.promotionStatus}\n\n**Latest run:** \`${lastRun?.id}\` — "${lastRun?.label}"\n  Status: **${lastRun?.status}** | Pass rate: ${lastRun?.passPct}% | Failures: ${lastRun?.failures} | Build: \`${lastRun?.build}\`\n\nSwitch to a working provider in the dropdown above for AI-generated answers.`;
       }
       setMessages((prev) => [...prev, { role: "assistant", content: response, type: "chat" }]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
