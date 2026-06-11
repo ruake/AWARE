@@ -242,7 +242,7 @@ export default function Copilot() {
   };
 
   const CAPABILITY_RE =
-    /\b(what can you do|capabilities|what do you do|how can you help|what are you|what can i ask|help me|show me what|get started)\b/i;
+    /\b(capabilities|what you can do|what can you do|what do you do|what are you|how can you help|what can i (ask|do)|help me|get started|show me what|what can i use you for|what do you know|what.{0,10}can.{0,10}do|your capabilities|your features|show (me )?(what|your))\b/i;
 
   const handleSend = async () => {
     if (!input.trim() || busy) return;
