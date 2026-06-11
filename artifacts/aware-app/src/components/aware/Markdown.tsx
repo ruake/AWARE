@@ -2,6 +2,7 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Chart } from "react-google-charts";
+import { Link } from "wouter";
 
 interface MarkdownProps {
   content: string;
@@ -65,7 +66,7 @@ function linkifyContent(text: string): string {
     .join("");
 }
 
-// ─── Smart table parsing + Google Charts rendering ────────────────────────────
+// ─── Table parsing ────────────────────────────────────────────────────────────
 
 type Segment = { type: "text"; raw: string } | { type: "table"; headers: string[]; rows: string[][] };
 
@@ -107,16 +108,25 @@ function parseMarkdownTable(raw: string): { headers: string[]; rows: string[][] 
     .split("\n")
     .filter((l) => l.trim().startsWith("|"));
   if (lines.length < 3) return null;
-  const parseRow = (line: string) =>
-    line
+
+  // Normalize: ensure trailing pipe so slice(1,-1) always captures last cell
+  const parseRow = (line: string) => {
+    const t = line.trim();
+    const normalized = t.endsWith("|") ? t : t + "|";
+    return normalized
       .split("|")
       .slice(1, -1)
       .map((c) => c.trim());
+  };
+
   const headers = parseRow(lines[0]);
-  const rows = lines.slice(2).map(parseRow);
+  // Skip separator row (index 1) — lines like |---|---|
+  const rows = lines.slice(2).map(parseRow).filter((r) => r.some((c) => c !== ""));
   if (headers.length === 0 || rows.length === 0) return null;
   return { headers, rows };
 }
+
+// ─── Color coding ─────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<string, string> = {
   pass: "#22c55e", passed: "#22c55e", success: "#22c55e", ok: "#22c55e",
@@ -144,13 +154,44 @@ function colorCellHtml(value: string): string {
   return value;
 }
 
-function parseCell(cell: string): { v: string | number; f: string } {
-  const f = colorCellHtml(cell);
-  const pctMatch = cell.match(/^([\d.]+)%$/);
-  if (pctMatch) return { v: parseFloat(pctMatch[1]), f };
-  const numMatch = cell.match(/^[\d,]+(\.\d+)?$/);
-  if (numMatch) return { v: parseFloat(cell.replace(/,/g, "")), f };
-  return { v: cell, f };
+// ─── SmartTable (Google Charts Table + filter) ────────────────────────────────
+
+/**
+ * Detect whether ALL parseable values in a column are numeric.
+ * Used to assign consistent Google Charts column types.
+ */
+function detectColTypes(headers: string[], rows: string[][]): ("string" | "number")[] {
+  return headers.map((_, ci) => {
+    const vals = rows.map((r) => (r[ci] ?? "").trim()).filter((v) => v && v !== "—" && v !== "-" && v.toLowerCase() !== "n/a");
+    if (vals.length === 0) return "string";
+    const allNum = vals.every((v) => /^[\d,]+(\.\d+)?$/.test(v) || /^[\d.]+%$/.test(v));
+    return allNum ? "number" : "string";
+  });
+}
+
+function buildGChartData(
+  headers: string[],
+  rows: string[][],
+  colTypes: ("string" | "number")[]
+): unknown[][] {
+  // Header row: typed column descriptors
+  const headerRow = headers.map((h, i) => ({ label: h, type: colTypes[i] }));
+
+  const dataRows = rows.map((row) =>
+    row.map((cell, ci) => {
+      const f = colorCellHtml(cell);
+      if (colTypes[ci] === "number") {
+        const pctMatch = cell.match(/^([\d.]+)%$/);
+        if (pctMatch) return { v: parseFloat(pctMatch[1]), f };
+        const numMatch = cell.match(/^[\d,]+(\.\d+)?$/);
+        if (numMatch) return { v: parseFloat(cell.replace(/,/g, "")), f };
+        return { v: null, f }; // null keeps the column type consistent
+      }
+      return { v: cell, f };
+    })
+  );
+
+  return [headerRow, ...dataRows];
 }
 
 function SmartTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
@@ -162,24 +203,17 @@ function SmartTable({ headers, rows }: { headers: string[]; rows: string[][] }) 
     return rows.filter((row) => row.some((cell) => cell.toLowerCase().includes(q)));
   }, [rows, filter]);
 
-  const chartData = React.useMemo(() => {
-    return [
-      headers,
-      ...filteredRows.map((row) => row.map((cell) => parseCell(cell))),
-    ];
-  }, [headers, filteredRows]);
+  const colTypes = React.useMemo(() => detectColTypes(headers, rows), [headers, rows]);
+
+  const chartData = React.useMemo(
+    () => buildGChartData(headers, filteredRows, colTypes),
+    [headers, filteredRows, colTypes]
+  );
 
   return (
     <div style={{ margin: "12px 0" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 6,
-          flexWrap: "wrap",
-        }}
-      >
+      {/* Toolbar */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
         <div style={{ position: "relative", flexShrink: 0 }}>
           <input
             type="text"
@@ -198,23 +232,10 @@ function SmartTable({ headers, rows }: { headers: string[]; rows: string[][] }) 
             }}
           />
           <svg
-            style={{
-              position: "absolute",
-              left: 8,
-              top: "50%",
-              transform: "translateY(-50%)",
-              opacity: 0.4,
-              pointerEvents: "none",
-            }}
-            width="11"
-            height="11"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
+            style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", opacity: 0.4, pointerEvents: "none" }}
+            width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
           >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
         </div>
         {filter && (
@@ -222,89 +243,49 @@ function SmartTable({ headers, rows }: { headers: string[]; rows: string[][] }) 
             {filteredRows.length} / {rows.length} rows
           </span>
         )}
-        <span
-          style={{
-            fontSize: 10,
-            color: "var(--proof-text-muted)",
-            marginLeft: "auto",
-            opacity: 0.6,
-          }}
-        >
-          ↕ click column header to sort
+        <span style={{ fontSize: 10, color: "var(--proof-text-muted)", marginLeft: "auto", opacity: 0.55 }}>
+          ↕ click header to sort
         </span>
       </div>
-      <div
-        style={{
-          borderRadius: 8,
-          overflow: "hidden",
-          border: "1px solid var(--proof-border)",
-        }}
-      >
-        <Chart
-          chartType="Table"
-          data={chartData}
-          options={{
-            allowHtml: true,
-            showRowNumber: false,
-            width: "100%",
-            alternatingRowStyle: true,
-            cssClassNames: {
-              headerRow: "proof-gchart-hdr",
-              tableRow: "proof-gchart-row",
-              oddTableRow: "proof-gchart-odd",
-              hoverTableRow: "proof-gchart-hover",
-              selectedTableRow: "proof-gchart-sel",
-            },
-          }}
-          width="100%"
-          chartPackages={["corechart", "table"]}
-        />
+
+      {/* Google Charts Table */}
+      <div style={{ borderRadius: 8, overflow: "hidden", border: "1px solid var(--proof-border)" }}>
+        {filteredRows.length > 0 ? (
+          <Chart
+            chartType="Table"
+            data={chartData}
+            options={{
+              allowHtml: true,
+              showRowNumber: false,
+              width: "100%",
+              alternatingRowStyle: true,
+            }}
+            width="100%"
+            chartPackages={["corechart", "table"]}
+          />
+        ) : (
+          <div style={{ textAlign: "center", padding: "20px", fontSize: 12, color: "var(--proof-text-muted)" }}>
+            {filter ? `No rows match "${filter}"` : "No data"}
+          </div>
+        )}
       </div>
-      {filteredRows.length === 0 && (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "18px",
-            fontSize: 12,
-            color: "var(--proof-text-muted)",
-          }}
-        >
-          No rows match "{filter}"
-        </div>
-      )}
     </div>
   );
 }
 
-// ─── Markdown components ──────────────────────────────────────────────────────
+// ─── Markdown component map ───────────────────────────────────────────────────
 
 const components = {
-  table: ({ children }: { children: React.ReactNode }) => (
-    <div style={{ overflowX: "auto", margin: "8px 0" }}>
-      <table className="proof-table" style={{ fontSize: 11 }}>
-        {children}
-      </table>
-    </div>
-  ),
-  th: ({ children }: { children: React.ReactNode }) => (
-    <th style={{ padding: "4px 10px", textAlign: "left", whiteSpace: "nowrap" }}>{children}</th>
-  ),
-  td: ({ children }: { children: React.ReactNode }) => (
-    <td style={{ padding: "4px 10px", fontSize: 11 }}>{children}</td>
-  ),
   code: ({ className, children, ...props }: { className?: string; children?: React.ReactNode }) => {
     const lang = className?.replace(/^language-/, "");
     if (lang === "chart") {
       try {
         const config = JSON.parse(String(children).trim());
         const rows = config.rows || [];
-        if (rows.length === 0) {
+        if (rows.length === 0)
           return (
-            <div style={{ padding: 12, fontSize: 11, color: "var(--proof-text-secondary)", textAlign: "center" }}>
-              No data
-            </div>
+            <div style={{ padding: 12, fontSize: 11, color: "var(--proof-text-secondary)", textAlign: "center" }}>No data</div>
           );
-        }
         const chartType = config.type || "ColumnChart";
         const data = [config.headers || ["X", "Y"], ...rows];
         return (
@@ -329,7 +310,7 @@ const components = {
             width="100%"
             height={config.height || "200px"}
             chartLanguage="en"
-            chartPackages={["corechart", "controls"]}
+            chartPackages={["corechart", "controls", "table"]}
           />
         );
       } catch {
@@ -372,15 +353,41 @@ const components = {
       </pre>
     );
   },
-  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{ color: "var(--proof-blue)", textDecoration: "underline", fontWeight: 500 }}
-    >
-      {children}
-    </a>
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => {
+    const isInternal = !!href && href.startsWith("/");
+    if (isInternal) {
+      return (
+        <Link
+          href={href!}
+          style={{ color: "var(--proof-blue)", textDecoration: "underline", fontWeight: 500 }}
+        >
+          {children}
+        </Link>
+      );
+    }
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: "var(--proof-blue)", textDecoration: "underline", fontWeight: 500 }}
+      >
+        {children}
+      </a>
+    );
+  },
+  table: ({ children }: { children: React.ReactNode }) => (
+    <div style={{ overflowX: "auto", margin: "8px 0" }}>
+      <table className="proof-table" style={{ fontSize: 11 }}>
+        {children}
+      </table>
+    </div>
+  ),
+  th: ({ children }: { children: React.ReactNode }) => (
+    <th style={{ padding: "4px 10px", textAlign: "left", whiteSpace: "nowrap" }}>{children}</th>
+  ),
+  td: ({ children }: { children: React.ReactNode }) => (
+    <td style={{ padding: "4px 10px", fontSize: 11 }}>{children}</td>
   ),
   ul: ({ children }: { children: React.ReactNode }) => (
     <ul style={{ margin: "6px 0 8px", paddingLeft: 18, fontSize: 13, lineHeight: 1.75 }}>{children}</ul>
@@ -424,7 +431,7 @@ const components = {
     <hr style={{ border: "none", borderTop: "1px solid var(--proof-border)", margin: "14px 0" }} />
   ),
   blockquote: ({ children }: { children: React.ReactNode }) => (
-    <blockquote style={{ borderLeft: "3px solid var(--proof-blue)", paddingLeft: 14, margin: "10px 0", color: "var(--proof-text-secondary)", background: "var(--proof-grey-bg)", borderRadius: "0 6px 6px 0", padding: "8px 14px" }}>
+    <blockquote style={{ borderLeft: "3px solid var(--proof-blue)", margin: "10px 0", color: "var(--proof-text-secondary)", background: "var(--proof-grey-bg)", borderRadius: "0 6px 6px 0", padding: "8px 14px" }}>
       {children}
     </blockquote>
   ),
