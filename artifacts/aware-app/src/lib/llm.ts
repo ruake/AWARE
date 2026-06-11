@@ -224,14 +224,35 @@ class ChromeBuiltinLLMProvider implements ILLMProvider {
 
 // ── Singleton Service ───────────────────────────────────────────────
 
+const LS_LLM_CONFIG_KEY = "aware_llm_config_v1";
+
+function _loadStoredConfig(): Partial<LLMConfig> {
+  try {
+    const raw = localStorage.getItem(LS_LLM_CONFIG_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as Partial<LLMConfig>;
+  } catch {
+    return {};
+  }
+}
+
+function _saveConfig(config: LLMConfig): void {
+  try {
+    localStorage.setItem(LS_LLM_CONFIG_KEY, JSON.stringify(config));
+  } catch {
+    /* storage full or unavailable */
+  }
+}
+
 function _resolveInitialConfig(): LLMConfig {
+  const stored = _loadStoredConfig();
   return {
-    provider: (import.meta.env.VITE_LLM_PROVIDER as LLMProviderType) || DEFAULT_LLM_CONFIG.provider,
-    apiKey: import.meta.env.VITE_LLM_API_KEY || "",
-    apiUrl: import.meta.env.VITE_LLM_API_URL || "",
-    model: import.meta.env.VITE_LLM_MODEL || DEFAULT_LLM_CONFIG.model,
-    temperature: DEFAULT_LLM_CONFIG.temperature,
-    maxTokens: DEFAULT_LLM_CONFIG.maxTokens,
+    provider: (import.meta.env.VITE_LLM_PROVIDER as LLMProviderType) || stored.provider || DEFAULT_LLM_CONFIG.provider,
+    apiKey: import.meta.env.VITE_LLM_API_KEY || stored.apiKey || "",
+    apiUrl: import.meta.env.VITE_LLM_API_URL || stored.apiUrl || "",
+    model: import.meta.env.VITE_LLM_MODEL || stored.model || DEFAULT_LLM_CONFIG.model,
+    temperature: stored.temperature ?? DEFAULT_LLM_CONFIG.temperature,
+    maxTokens: stored.maxTokens ?? DEFAULT_LLM_CONFIG.maxTokens,
   };
 }
 
@@ -255,6 +276,7 @@ export function getLLMConfig(): LLMConfig {
 export function setLLMConfig(config: Partial<LLMConfig>): LLMConfig {
   _config = { ..._config, ...config };
   _provider = _buildProvider(_config);
+  _saveConfig(_config);
   return getLLMConfig();
 }
 
