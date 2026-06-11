@@ -361,16 +361,14 @@ export default function Runs() {
               <table className="proof-table" style={{ position: "relative" }}>
                 <colgroup>
                   <col style={{ width: 40 }} />
-                  <col style={{ width: 112 }} />
-                  <col style={{ width: 130 }} />
-                  <col style={{ width: 78 }} />
-                  <col style={{ width: 138 }} />
+                  <col style={{ width: 148 }} />
+                  <col style={{ width: 180 }} />
+                  <col style={{ width: 140 }} />
                   <col style={{ width: 90 }} />
-                  <col style={{ width: 72 }} />
-                  <col style={{ width: 72 }} />
-                  <col style={{ width: 80 }} />
-                  <col style={{ width: 122 }} />
-                  <col style={{ width: 106 }} />
+                  <col style={{ width: 68 }} />
+                  <col style={{ width: 68 }} />
+                  <col style={{ width: 76 }} />
+                  <col style={{ width: 120 }} />
                   <col />
                 </colgroup>
                 <thead>
@@ -387,16 +385,14 @@ export default function Runs() {
                         }
                       />
                     </th>
-                    <th style={{ width: 112 }}>Run ID</th>
-                    <th style={{ width: 130 }}>Suite</th>
-                    <th style={{ width: 78 }}>Target</th>
-                    <th style={{ width: 138 }}>Env / Network</th>
+                    <th style={{ width: 148 }}>Run ID</th>
+                    <th style={{ width: 180 }}>Suite · Target</th>
+                    <th style={{ width: 140 }}>Env / Network</th>
                     <th style={{ width: 90 }}>Status</th>
-                    <th style={{ textAlign: "right", width: 72 }}>Pass %</th>
-                    <th style={{ textAlign: "right", width: 72 }}>Failures</th>
-                    <th style={{ textAlign: "right", width: 80 }}>Duration</th>
-                    <th style={{ width: 122 }}>Started</th>
-                    <th style={{ width: 106 }}>Build Config</th>
+                    <th style={{ textAlign: "right", width: 68 }}>Pass %</th>
+                    <th style={{ textAlign: "right", width: 68 }}>Failures</th>
+                    <th style={{ textAlign: "right", width: 76 }}>Duration</th>
+                    <th style={{ width: 120 }}>Started</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -431,29 +427,34 @@ export default function Runs() {
                           />
                         </td>
                         <td>
-                          <button
-                            onClick={() => navigate(`/runs/${run.id}`)}
-                            style={{
-                              fontFamily: "var(--font-mono)",
-                              fontSize: 11,
-                              color: "var(--proof-blue)",
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              fontWeight: 500,
-                              padding: 0,
-                              textAlign: "left",
-                            }}
-                          >
-                            {run.id}
-                          </button>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                            <button
+                              onClick={() => navigate(`/runs/${run.id}`)}
+                              style={{
+                                fontFamily: "var(--font-mono)",
+                                fontSize: 11,
+                                color: "var(--proof-blue)",
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                fontWeight: 500,
+                                padding: 0,
+                                textAlign: "left",
+                              }}
+                            >
+                              {run.id}
+                            </button>
+                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--proof-text-secondary)" }}>
+                              {run.build} · {run.rev}
+                            </span>
+                          </div>
                         </td>
                         <td>
-                          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>
-                            {run.suite}
-                          </span>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{run.suite}</span>
+                            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontWeight: 500 }}>{run.target}</span>
+                          </div>
                         </td>
-                        <td style={{ fontSize: 12, fontWeight: 500 }}>{run.target}</td>
                         <td>
                           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                             <span style={{ fontSize: 12 }}>{run.env}</span>
@@ -523,28 +524,6 @@ export default function Runs() {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
-                        </td>
-                        <td>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                            <span
-                              style={{
-                                fontFamily: "var(--font-mono)",
-                                fontSize: 11,
-                                color: "var(--proof-text)",
-                              }}
-                            >
-                              Build {run.build}
-                            </span>
-                            <span
-                              style={{
-                                fontFamily: "var(--font-mono)",
-                                fontSize: 10,
-                                color: "var(--proof-text-secondary)",
-                              }}
-                            >
-                              Rev {run.rev}
-                            </span>
-                          </div>
                         </td>
                         <td>
                           <div style={{ display: "flex", gap: 6 }}>
