@@ -106,10 +106,17 @@ function envLabel(run: Run): string {
 }
 
 const ENV_COLOR_MAP: Record<string, string> = {
+  "QA / Staging": "#a855f7",
+  "QA / Production": "#c084fc",
+  "UAT / Staging": "#f59e0b",
+  "UAT / Production": "#fbbf24",
+  "PROD / Staging": "#22c55e",
+  "PROD / Production": "#4ade80",
+  // Short forms (target only)
   QA: "#a855f7",
   UAT: "#f59e0b",
   PROD: "#22c55e",
-  // Legacy labels kept for backward compat
+  // Legacy
   "Prod/Production": "#5b8af5",
   "Prod/Staging": "#f59e0b",
   "UAT/Production": "#22c55e",
