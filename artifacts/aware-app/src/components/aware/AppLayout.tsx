@@ -208,7 +208,7 @@ export function AppLayout({
                 letterSpacing: "-0.4px",
               }}
             >
-              PROOF
+              A.W.A.R.E.
             </span>
             <span
               style={{
@@ -218,7 +218,7 @@ export function AppLayout({
                 letterSpacing: "0.5px",
               }}
             >
-              Bring Your Own Tests
+              Akamai CDN Observability
             </span>
           </div>
         </div>

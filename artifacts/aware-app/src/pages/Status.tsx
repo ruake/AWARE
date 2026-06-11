@@ -98,7 +98,7 @@ on:
       target:
         description: 'Target environment'
         required: true
-        default: 'Prod/Production'
+        default: 'QA'
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -355,11 +355,9 @@ export default function Status() {
               </pre>
             </div>
             {STAGES[activeStage].cta && (
-              <Link href={STAGES[activeStage].cta!.href}>
-                <a className="proof-button-primary" style={{ flexShrink: 0 }}>
+              <Link href={STAGES[activeStage].cta!.href} className="proof-button-primary" style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", gap: 5, textDecoration: "none" }}>
                   {React.createElement(STAGES[activeStage].cta!.icon, { size: 13 })}
                   {STAGES[activeStage].cta!.label}
-                </a>
               </Link>
             )}
           </div>

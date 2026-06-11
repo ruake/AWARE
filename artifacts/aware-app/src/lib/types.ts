@@ -109,6 +109,11 @@ export interface EnvironmentConfig {
   baseUrl: string;
   ips: string[];
   network: "staging" | "production";
+  property?: string;
+  propertyVersion?: number;
+  propertyStatus?: "active" | "inactive" | "pending";
+  cpcode?: string;
+  edgeHostname?: string;
 }
 
 export interface EnvSummary {
@@ -188,7 +193,7 @@ export interface TestCase {
   id: string;
   name: string;
   description: string;
-  testType: "web" | "api" | "http" | "edgeworker" | "transaction";
+  testType: "web" | "api" | "http" | "edgeworker" | "transaction" | "pytest";
   category: string;
   priority: TestPriority;
   severity: TestSeverity;

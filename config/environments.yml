@@ -1,0 +1,61 @@
+# =============================================================================
+# A.W.A.R.E. — Akamai Environment Configuration
+# Source of truth for QA / UAT / PROD environments.
+# Commit changes here and re-run CI to pick them up automatically.
+# =============================================================================
+
+environments:
+  - id: qa
+    label: QA
+    target: QA
+    stage: QA
+    baseUrl: https://qa.example.akamai.com
+    ips:
+      - 23.32.11.10
+      - 23.32.11.11
+    network: staging
+    property: www.example.com
+    propertyVersion: 52
+    propertyStatus: active
+    cpcode: "1234567"
+    edgeHostname: qa.example.com.edgekey.net
+    notes: >
+      QA environment — staging network, used for feature branch validation
+      before promotion to UAT.
+
+  - id: uat
+    label: UAT
+    target: UAT
+    stage: UAT
+    baseUrl: https://uat.example.akamai.com
+    ips:
+      - 23.32.22.10
+      - 23.32.22.11
+    network: staging
+    property: www.example.com
+    propertyVersion: 51
+    propertyStatus: active
+    cpcode: "1234567"
+    edgeHostname: uat.example.com.edgekey.net
+    notes: >
+      UAT environment — staging network, used for stakeholder sign-off before
+      promoting property to production.
+
+  - id: prod
+    label: PROD
+    target: PROD
+    stage: Production
+    baseUrl: https://www.example.com
+    ips:
+      - 23.32.33.10
+      - 23.32.33.11
+      - 23.32.33.12
+    network: production
+    property: www.example.com
+    propertyVersion: 50
+    propertyStatus: active
+    cpcode: "1234567"
+    edgeHostname: www.example.com.edgekey.net
+    notes: >
+      PROD environment — live production network. Run smoke suite only on each
+      deployment; full regression runs nightly.

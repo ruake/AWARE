@@ -3,6 +3,7 @@ import { getNotifications } from "./notifications";
 
 export interface LiveUpdate {
   id: string;
+  runId: string;
   message: string;
   type: "info" | "success" | "warning";
   timestamp: number;

@@ -102,10 +102,14 @@ export const TEST_DETAILS: TestDetail[] = computeTestDetails();
 
 // ── Env label helper ──────────────────────────────────────────────────
 function envLabel(run: Run): string {
-  return `${run.target}/${run.env.charAt(0).toUpperCase()}${run.env.slice(1)}`;
+  return run.env ?? run.target ?? "QA";
 }
 
 const ENV_COLOR_MAP: Record<string, string> = {
+  QA: "#a855f7",
+  UAT: "#f59e0b",
+  PROD: "#22c55e",
+  // Legacy labels kept for backward compat
   "Prod/Production": "#5b8af5",
   "Prod/Staging": "#f59e0b",
   "UAT/Production": "#22c55e",
