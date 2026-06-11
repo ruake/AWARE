@@ -91,49 +91,51 @@ function SummaryCard({
     <div
       style={{
         display: "flex",
-        alignItems: "center",
-        gap: 12,
-        padding: "14px 16px",
-        borderRadius: 8,
-        border: `1px solid ${color}20`,
-        background: `${color}08`,
-        minWidth: 140,
+        flexDirection: "column",
+        padding: "14px 16px 12px",
+        borderRadius: 10,
+        border: `1px solid ${color}22`,
+        background: `linear-gradient(160deg, ${color}0d 0%, rgba(19,23,40,0) 100%)`,
+        borderTop: `2px solid ${color}55`,
+        position: "relative",
+        overflow: "hidden",
+        minWidth: 120,
       }}
     >
       <div
         style={{
-          width: 36,
-          height: 36,
-          borderRadius: 8,
-          background: `${color}15`,
+          position: "absolute",
+          top: 10,
+          right: 12,
+          width: 28,
+          height: 28,
+          borderRadius: 7,
+          background: `${color}18`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          flexShrink: 0,
         }}
       >
-        <Icon size={18} style={{ color }} />
+        <Icon size={14} style={{ color }} />
       </div>
-      <div>
-        <div style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)", lineHeight: 1.2 }}>
-          {value}
-        </div>
-        <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", lineHeight: 1.3 }}>
-          {label}
-        </div>
-        {sub && (
-          <div
-            style={{
-              fontSize: 10,
-              color: "var(--proof-text-secondary)",
-              opacity: 0.7,
-              marginTop: 1,
-            }}
-          >
-            {sub}
-          </div>
-        )}
+      <div style={{ fontSize: 24, fontWeight: 800, color: "var(--proof-text)", lineHeight: 1, letterSpacing: "-0.5px" }}>
+        {value}
       </div>
+      <div style={{ fontSize: 11, fontWeight: 500, color: "var(--proof-text-secondary)", lineHeight: 1.3, marginTop: 5 }}>
+        {label}
+      </div>
+      {sub && (
+        <div
+          style={{
+            fontSize: 9.5,
+            color: "var(--proof-text-muted)",
+            marginTop: 2,
+            lineHeight: 1.3,
+          }}
+        >
+          {sub}
+        </div>
+      )}
     </div>
   );
 }
@@ -142,8 +144,8 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
   return (
     <tr
       onClick={() => onClick(run.id)}
-      style={{ cursor: "pointer" }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--proof-grey-bg)")}
+      style={{ cursor: "pointer", transition: "background 0.12s" }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--proof-surface-hover)")}
       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
       <td>
@@ -271,13 +273,55 @@ export default function Pulse() {
                 color: "var(--proof-text)",
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
+                gap: 10,
+                letterSpacing: "-0.3px",
               }}
             >
-              <Activity size={20} style={{ color: "var(--proof-blue)" }} />
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: "linear-gradient(135deg, rgba(91,138,245,0.2) 0%, rgba(59,130,246,0.15) 100%)",
+                  border: "1px solid rgba(91,138,245,0.25)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Activity size={16} style={{ color: "var(--proof-blue)" }} />
+              </div>
               Pulse
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: running.length > 0 ? "#3b82f6" : "#22c55e",
+                  background: running.length > 0 ? "rgba(59,130,246,0.1)" : "rgba(34,197,94,0.1)",
+                  border: `1px solid ${running.length > 0 ? "rgba(59,130,246,0.25)" : "rgba(34,197,94,0.25)"}`,
+                  borderRadius: 999,
+                  padding: "2px 8px 2px 6px",
+                }}
+              >
+                <span
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: "50%",
+                    background: running.length > 0 ? "#3b82f6" : "#22c55e",
+                    animation: running.length > 0 ? "pulseDot 1.5s ease-in-out infinite" : "none",
+                    display: "inline-block",
+                  }}
+                />
+                {running.length > 0 ? `${running.length} running` : "all idle"}
+              </span>
             </h1>
-            <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 3 }}>
+            <p style={{ fontSize: 12, color: "var(--proof-text-secondary)", marginTop: 4 }}>
               Live GitHub Actions workflow status — powered by CI runs
             </p>
           </div>
@@ -291,9 +335,9 @@ export default function Pulse() {
                 alignItems: "center",
                 gap: 5,
                 padding: "6px 12px",
-                borderRadius: 6,
+                borderRadius: 7,
                 border: "1px solid var(--proof-border-strong)",
-                background: "var(--proof-surface)",
+                background: "var(--proof-surface-2)",
                 color: "var(--proof-text)",
                 cursor: "pointer",
                 fontSize: 11,
@@ -303,7 +347,7 @@ export default function Pulse() {
             >
               <Github size={13} />
               GitHub Actions
-              <ExternalLink size={11} />
+              <ExternalLink size={10} style={{ opacity: 0.6 }} />
             </a>
             <Link href="/ci-pipeline">
               <button
@@ -312,9 +356,9 @@ export default function Pulse() {
                   alignItems: "center",
                   gap: 5,
                   padding: "6px 12px",
-                  borderRadius: 6,
+                  borderRadius: 7,
                   border: "1px solid var(--proof-border-strong)",
-                  background: "var(--proof-surface)",
+                  background: "var(--proof-surface-2)",
                   color: "var(--proof-text-secondary)",
                   cursor: "pointer",
                   fontSize: 11,
@@ -323,7 +367,7 @@ export default function Pulse() {
               >
                 <BarChart3 size={13} />
                 CI Pipeline
-                <ExternalLink size={11} />
+                <ExternalLink size={10} style={{ opacity: 0.6 }} />
               </button>
             </Link>
           </div>
@@ -360,38 +404,58 @@ export default function Pulse() {
         {running.length > 0 && (
           <div
             style={{
-              padding: "12px 16px",
-              borderRadius: 8,
-              background: "rgba(59,130,246,0.08)",
-              border: "1px solid rgba(59,130,246,0.2)",
+              padding: "12px 18px",
+              borderRadius: 10,
+              background: "linear-gradient(90deg, rgba(59,130,246,0.1) 0%, rgba(91,138,245,0.06) 100%)",
+              border: "1px solid rgba(59,130,246,0.25)",
+              borderLeft: "3px solid #3b82f6",
               display: "flex",
               alignItems: "center",
               gap: 12,
             }}
           >
-            <Loader2
-              size={16}
-              className="animate-spin"
-              style={{ color: "var(--proof-blue)", flexShrink: 0 }}
-            />
-            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--proof-text)" }}>
-              {running.length} workflow{running.length > 1 ? "s" : ""} running in GitHub Actions
-            </span>
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: "rgba(59,130,246,0.15)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Loader2 size={14} className="animate-spin" style={{ color: "#3b82f6" }} />
+            </div>
+            <div>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>
+                {running.length} workflow{running.length > 1 ? "s" : ""} currently running
+              </span>
+              <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginLeft: 8 }}>
+                GitHub Actions in progress
+              </span>
+            </div>
             <a
               href={GH_ACTIONS_URL}
               target="_blank"
               rel="noopener noreferrer"
               style={{
                 marginLeft: "auto",
-                fontSize: 12,
-                color: "var(--proof-blue)",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#3b82f6",
                 textDecoration: "none",
                 display: "flex",
                 alignItems: "center",
                 gap: 4,
+                padding: "5px 10px",
+                borderRadius: 6,
+                background: "rgba(59,130,246,0.12)",
+                border: "1px solid rgba(59,130,246,0.2)",
               }}
             >
-              View on GitHub <ExternalLink size={11} />
+              View on GitHub <ExternalLink size={10} />
             </a>
           </div>
         )}
@@ -400,34 +464,58 @@ export default function Pulse() {
         {running.length === 0 && (
           <div
             style={{
-              padding: "12px 16px",
-              borderRadius: 8,
-              background: "rgba(34,197,94,0.06)",
-              border: "1px solid rgba(34,197,94,0.15)",
+              padding: "12px 18px",
+              borderRadius: 10,
+              background: "linear-gradient(90deg, rgba(34,197,94,0.08) 0%, rgba(34,197,94,0.03) 100%)",
+              border: "1px solid rgba(34,197,94,0.18)",
+              borderLeft: "3px solid #22c55e",
               display: "flex",
               alignItems: "center",
-              gap: 10,
+              gap: 12,
             }}
           >
-            <Check size={16} style={{ color: "var(--proof-green)", flexShrink: 0 }} />
-            <span style={{ fontSize: 13, color: "var(--proof-text)" }}>
-              All workflows idle. No runs in progress.
-            </span>
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: "rgba(34,197,94,0.12)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Check size={14} style={{ color: "#22c55e" }} />
+            </div>
+            <div>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>
+                All workflows idle
+              </span>
+              <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginLeft: 8 }}>
+                No runs currently in progress
+              </span>
+            </div>
             <a
               href={GH_ACTIONS_URL}
               target="_blank"
               rel="noopener noreferrer"
               style={{
                 marginLeft: "auto",
-                fontSize: 12,
-                color: "var(--proof-blue)",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#22c55e",
                 textDecoration: "none",
                 display: "flex",
                 alignItems: "center",
                 gap: 4,
+                padding: "5px 10px",
+                borderRadius: 6,
+                background: "rgba(34,197,94,0.1)",
+                border: "1px solid rgba(34,197,94,0.18)",
               }}
             >
-              Open GitHub Actions <ExternalLink size={11} />
+              Open GitHub Actions <ExternalLink size={10} />
             </a>
           </div>
         )}
@@ -435,142 +523,126 @@ export default function Pulse() {
         {/* Quick actions */}
         <div
           style={{
-            padding: "13px 18px",
-            borderRadius: 8,
-            border: "1px solid var(--proof-grey)",
-            background: "var(--proof-grey-bg)",
+            padding: "10px 14px",
+            borderRadius: 10,
+            border: "1px solid var(--proof-border)",
+            background: "var(--proof-surface)",
             display: "flex",
             alignItems: "center",
-            gap: 10,
+            gap: 8,
             flexWrap: "wrap",
           }}
         >
           <span
             style={{
-              fontSize: 10.5,
+              fontSize: 10,
               fontWeight: 700,
-              color: "var(--proof-text-secondary)",
-              letterSpacing: "0.6px",
+              color: "var(--proof-text-muted)",
+              letterSpacing: "0.07em",
               textTransform: "uppercase",
-              marginRight: 2,
+              marginRight: 4,
             }}
           >
-            Quick Links
+            Navigate
           </span>
           <div
-            style={{ width: 1, height: 16, background: "var(--proof-border)", marginRight: 2 }}
+            style={{ width: 1, height: 14, background: "var(--proof-border-strong)", marginRight: 4 }}
           />
-          <Link href="/">
+          {[
+            { href: "/", icon: BarChart3, label: "Dashboard" },
+            { href: "/runs", icon: Activity, label: "All Runs" },
+            { href: "/compare", icon: GitCompare, label: "Compare" },
+          ].map(({ href, icon: Ic, label }) => (
+            <Link key={href} href={href}>
+              <button
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  padding: "5px 11px",
+                  borderRadius: 6,
+                  border: "1px solid var(--proof-border-strong)",
+                  background: "var(--proof-surface-2)",
+                  color: "var(--proof-text-secondary)",
+                  cursor: "pointer",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  transition: "all 0.12s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "var(--proof-text)";
+                  e.currentTarget.style.borderColor = "rgba(91,138,245,0.35)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "var(--proof-text-secondary)";
+                  e.currentTarget.style.borderColor = "var(--proof-border-strong)";
+                }}
+              >
+                <Ic size={12} /> {label}
+              </button>
+            </Link>
+          ))}
+          <Link href="/start" style={{ marginLeft: "auto" }}>
             <button
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 5,
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: "1px solid var(--proof-border-strong)",
-                background: "var(--proof-surface)",
-                color: "var(--proof-text)",
-                cursor: "pointer",
-                fontSize: 11,
-                fontWeight: 500,
-              }}
-            >
-              <BarChart3 size={13} /> Dashboard
-            </button>
-          </Link>
-          <Link href="/runs">
-            <button
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: "1px solid var(--proof-border-strong)",
-                background: "var(--proof-surface)",
-                color: "var(--proof-text)",
-                cursor: "pointer",
-                fontSize: 11,
-                fontWeight: 500,
-              }}
-            >
-              <Activity size={13} /> All Runs
-            </button>
-          </Link>
-          <Link href="/compare">
-            <button
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: "1px solid var(--proof-border-strong)",
-                background: "var(--proof-surface)",
-                color: "var(--proof-text)",
-                cursor: "pointer",
-                fontSize: 11,
-                fontWeight: 500,
-              }}
-            >
-              <GitCompare size={13} /> Compare Runs
-            </button>
-          </Link>
-          <Link href="/start">
-            <button
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                padding: "6px 14px",
+                padding: "5px 13px",
                 borderRadius: 6,
                 border: "none",
-                background: "var(--proof-blue)",
+                background: "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)",
                 color: "white",
                 cursor: "pointer",
                 fontSize: 11,
                 fontWeight: 600,
+                boxShadow: "0 1px 8px rgba(91,138,245,0.3)",
               }}
             >
-              <Play size={13} /> Trigger New Run
+              <Play size={12} /> Trigger New Run
             </button>
           </Link>
         </div>
 
         {/* Workflow history */}
-        <div style={{ borderRadius: 8, border: "1px solid var(--proof-grey)", overflow: "hidden" }}>
+        <div style={{ borderRadius: 10, border: "1px solid var(--proof-border)", overflow: "hidden" }}>
           <div
             style={{
-              padding: "12px 16px",
-              borderBottom: "1px solid var(--proof-grey)",
-              background: "var(--proof-grey-bg)",
+              padding: "11px 16px",
+              borderBottom: "1px solid var(--proof-border)",
+              background: "var(--proof-surface)",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
             }}
           >
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-              <h3 style={{ fontSize: 13, fontWeight: 600, marginRight: 8 }}>Workflow History</h3>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+              <h3 style={{ fontSize: 13, fontWeight: 700, marginRight: 6, color: "var(--proof-text)" }}>Workflow History</h3>
+              <div style={{ width: 1, height: 14, background: "var(--proof-border-strong)", marginRight: 2 }} />
               {statusTabs.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
                   style={{
                     padding: "3px 10px",
-                    borderRadius: 12,
-                    border: "none",
-                    background: activeTab === tab.key ? "var(--proof-blue)" : "transparent",
+                    borderRadius: 999,
+                    border: activeTab === tab.key ? "none" : "1px solid transparent",
+                    background: activeTab === tab.key
+                      ? "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)"
+                      : "transparent",
                     color: activeTab === tab.key ? "white" : "var(--proof-text-secondary)",
                     cursor: "pointer",
                     fontSize: 11,
-                    fontWeight: 500,
+                    fontWeight: activeTab === tab.key ? 600 : 500,
                     transition: "all 0.15s",
+                    boxShadow: activeTab === tab.key ? "0 1px 6px rgba(91,138,245,0.3)" : "none",
                   }}
                 >
                   {tab.label}
                   {tabCounts[tab.key] > 0 && (
-                    <span style={{ marginLeft: 4, opacity: 0.8 }}>({tabCounts[tab.key]})</span>
+                    <span style={{ marginLeft: 4, opacity: activeTab === tab.key ? 0.85 : 0.6 }}>
+                      {tabCounts[tab.key]}
+                    </span>
                   )}
                 </button>
               ))}

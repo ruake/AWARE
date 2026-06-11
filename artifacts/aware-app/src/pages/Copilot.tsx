@@ -303,85 +303,125 @@ export default function Copilot() {
       <div style={{ display: "flex", height: "calc(100vh - 96px)", gap: 16 }}>
         <div
           style={{
-            width: 220,
+            width: 228,
             flexShrink: 0,
             display: "flex",
             flexDirection: "column",
-            gap: 8,
+            gap: 2,
             overflowY: "auto",
-            paddingRight: 8,
-            borderRight: "1px solid var(--proof-grey)",
+            paddingRight: 4,
+            borderRight: "1px solid var(--proof-border)",
           }}
         >
           <div
             style={{
-              fontSize: 11,
-              fontWeight: 600,
+              fontSize: 10,
+              fontWeight: 700,
               textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              color: "var(--proof-text-secondary)",
-              padding: "8px 0",
+              letterSpacing: "0.08em",
+              color: "var(--proof-text-muted)",
+              padding: "10px 8px 6px",
             }}
           >
             Analysis Types
           </div>
-          {AI_USE_CASES.map((uc) => (
-            <button
-              key={uc.id}
-              onClick={() => handleUseCase(uc)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 10px",
-                borderRadius: 6,
-                fontSize: 12,
-                cursor: "pointer",
-                border:
-                  activeUseCase === uc.id ? "1px solid var(--proof-blue)" : "1px solid transparent",
-                background: activeUseCase === uc.id ? "var(--proof-blue-bg)" : "transparent",
-                color: activeUseCase === uc.id ? "var(--proof-blue)" : "var(--proof-text)",
-                textAlign: "left",
-                transition: "all 0.15s",
-              }}
-              title={uc.description}
-            >
-              {USE_CASE_ICONS[uc.id] || <Zap size={14} />}
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {uc.name}
-              </span>
-            </button>
-          ))}
+          {AI_USE_CASES.map((uc) => {
+            const isActive = activeUseCase === uc.id;
+            return (
+              <button
+                key={uc.id}
+                onClick={() => handleUseCase(uc)}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 9,
+                  padding: "8px 10px",
+                  borderRadius: 7,
+                  fontSize: 12,
+                  cursor: "pointer",
+                  border: isActive ? "1px solid rgba(91,138,245,0.35)" : "1px solid transparent",
+                  background: isActive
+                    ? "linear-gradient(135deg, rgba(91,138,245,0.12) 0%, rgba(124,106,245,0.08) 100%)"
+                    : "transparent",
+                  color: isActive ? "var(--proof-blue)" : "var(--proof-text)",
+                  textAlign: "left",
+                  transition: "all 0.15s",
+                  borderLeft: isActive ? "2px solid var(--proof-blue)" : "2px solid transparent",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = "var(--proof-surface-2)";
+                    e.currentTarget.style.borderLeft = "2px solid var(--proof-border-strong)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.borderLeft = "2px solid transparent";
+                  }
+                }}
+                title={uc.description}
+              >
+                <span style={{ flexShrink: 0, marginTop: 1, opacity: isActive ? 1 : 0.7 }}>
+                  {USE_CASE_ICONS[uc.id] || <Zap size={13} />}
+                </span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: "block", fontWeight: isActive ? 600 : 500, lineHeight: 1.3, fontSize: 12 }}>
+                    {uc.name}
+                  </span>
+                  <span style={{ display: "block", fontSize: 10, color: "var(--proof-text-muted)", lineHeight: 1.4, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {uc.description}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
           {insights.length > 0 && (
             <>
               <div
                 style={{
-                  fontSize: 11,
-                  fontWeight: 600,
+                  fontSize: 10,
+                  fontWeight: 700,
                   textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  color: "var(--proof-text-secondary)",
-                  padding: "16px 0 8px",
+                  letterSpacing: "0.08em",
+                  color: "var(--proof-text-muted)",
+                  padding: "14px 8px 6px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
                 }}
               >
-                Insights
-              </div>
-              {insights.map((ins) => (
-                <div
-                  key={ins.id}
+                <span
                   style={{
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    fontSize: 11,
-                    background:
-                      ins.type === "critical" ? "var(--proof-red-bg)" : "var(--proof-yellow-bg)",
-                    borderLeft: `3px solid ${ins.type === "critical" ? "#ef4444" : ins.type === "warning" ? "#f59e0b" : "#22c55e"}`,
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#ef4444",
+                    display: "inline-block",
+                    boxShadow: "0 0 6px rgba(239,68,68,0.6)",
                   }}
-                >
-                  <div style={{ fontWeight: 600, marginBottom: 2 }}>{ins.title}</div>
-                  <div style={{ color: "var(--proof-text-secondary)" }}>{ins.description}</div>
-                </div>
-              ))}
+                />
+                Live Insights
+              </div>
+              {insights.map((ins) => {
+                const accent = ins.type === "critical" ? "#ef4444" : ins.type === "warning" ? "#f59e0b" : "#22c55e";
+                return (
+                  <div
+                    key={ins.id}
+                    style={{
+                      padding: "9px 10px 9px 12px",
+                      borderRadius: 7,
+                      fontSize: 11,
+                      background: `${accent}0a`,
+                      border: `1px solid ${accent}20`,
+                      borderLeft: `3px solid ${accent}`,
+                    }}
+                  >
+                    <div style={{ fontWeight: 600, marginBottom: 2, fontSize: 11, color: "var(--proof-text)" }}>{ins.title}</div>
+                    <div style={{ color: "var(--proof-text-secondary)", fontSize: 10, lineHeight: 1.4 }}>{ins.description}</div>
+                  </div>
+                );
+              })}
             </>
           )}
         </div>
@@ -568,34 +608,40 @@ export default function Copilot() {
                   gap: 10,
                   alignItems: "flex-start",
                   alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-                  maxWidth: "85%",
+                  maxWidth: "88%",
                 }}
               >
                 {msg.role === "assistant" && (
                   <div
                     style={{
-                      width: 28,
-                      height: 28,
+                      width: 30,
+                      height: 30,
                       borderRadius: "50%",
-                      background: "var(--proof-blue-bg)",
+                      background: "linear-gradient(135deg, #3d6ff5 0%, #7c6af5 100%)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
+                      boxShadow: "0 0 0 2px rgba(91,138,245,0.25)",
                     }}
                   >
-                    <Bot size={14} style={{ color: "var(--proof-blue)" }} />
+                    <Bot size={14} style={{ color: "white" }} />
                   </div>
                 )}
                 <div
                   style={{
-                    padding: "10px 14px",
-                    borderRadius: 10,
+                    padding: "11px 15px",
+                    borderRadius: msg.role === "user" ? "14px 14px 4px 14px" : "4px 14px 14px 14px",
                     fontSize: 13,
-                    lineHeight: 1.6,
-                    background: msg.role === "user" ? "var(--proof-blue)" : "var(--proof-grey-bg)",
+                    lineHeight: 1.65,
+                    background: msg.role === "user"
+                      ? "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)"
+                      : "var(--proof-surface-2)",
                     color: msg.role === "user" ? "white" : "var(--proof-text)",
-                    border: msg.role === "user" ? "none" : "1px solid var(--proof-grey)",
+                    border: msg.role === "user" ? "none" : "1px solid var(--proof-border-strong)",
+                    boxShadow: msg.role === "user"
+                      ? "0 2px 12px rgba(91,138,245,0.3)"
+                      : "var(--proof-shadow-sm)",
                     maxWidth: "100%",
                     overflow: "hidden",
                   }}
@@ -648,17 +694,18 @@ export default function Copilot() {
                 {msg.role === "user" && (
                   <div
                     style={{
-                      width: 28,
-                      height: 28,
+                      width: 30,
+                      height: 30,
                       borderRadius: "50%",
-                      background: "var(--proof-blue)",
+                      background: "var(--proof-surface-3)",
+                      border: "1px solid var(--proof-border-strong)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
                     }}
                   >
-                    <User size={14} style={{ color: "white" }} />
+                    <User size={13} style={{ color: "var(--proof-text-secondary)" }} />
                   </div>
                 )}
               </div>
@@ -675,72 +722,53 @@ export default function Copilot() {
               >
                 <div
                   style={{
-                    width: 28,
-                    height: 28,
+                    width: 30,
+                    height: 30,
                     borderRadius: "50%",
-                    background: "var(--proof-blue-bg)",
+                    background: "linear-gradient(135deg, #3d6ff5 0%, #7c6af5 100%)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
+                    boxShadow: "0 0 0 2px rgba(91,138,245,0.25)",
                   }}
                 >
-                  <Bot size={14} style={{ color: "var(--proof-blue)" }} />
+                  <Bot size={14} style={{ color: "white" }} />
                 </div>
                 <div
                   style={{
-                    padding: "10px 14px",
-                    borderRadius: 10,
+                    padding: "12px 16px",
+                    borderRadius: "4px 14px 14px 14px",
                     fontSize: 13,
-                    background: "var(--proof-grey-bg)",
-                    border: "1px solid var(--proof-grey)",
+                    background: "var(--proof-surface-2)",
+                    border: "1px solid var(--proof-border-strong)",
+                    boxShadow: "var(--proof-shadow-sm)",
                     display: "flex",
                     alignItems: "center",
-                    gap: 10,
+                    gap: 12,
                   }}
                 >
-                  <span style={{ display: "flex", gap: 3 }}>
-                    <span
-                      className="thinking-dot"
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        background: "var(--proof-blue)",
-                        animation: "thinkingBounce 1.2s ease-in-out infinite",
-                        display: "inline-block",
-                      }}
-                    />
-                    <span
-                      className="thinking-dot"
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        background: "var(--proof-blue)",
-                        animation: "thinkingBounce 1.2s ease-in-out infinite",
-                        animationDelay: "0.2s",
-                        display: "inline-block",
-                      }}
-                    />
-                    <span
-                      className="thinking-dot"
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        background: "var(--proof-blue)",
-                        animation: "thinkingBounce 1.2s ease-in-out infinite",
-                        animationDelay: "0.4s",
-                        display: "inline-block",
-                      }}
-                    />
+                  <span style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                    {[0, 0.18, 0.36].map((delay, idx) => (
+                      <span
+                        key={idx}
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          background: "var(--proof-blue)",
+                          animation: "thinkingBounce 1.2s ease-in-out infinite",
+                          animationDelay: `${delay}s`,
+                          display: "inline-block",
+                          boxShadow: "0 0 4px rgba(91,138,245,0.5)",
+                        }}
+                      />
+                    ))}
                   </span>
                   <span
                     style={{
                       color: "var(--proof-text-secondary)",
                       fontSize: 12,
-                      fontStyle: "italic",
                     }}
                   >
                     {thinkingMsg}
@@ -754,27 +782,37 @@ export default function Copilot() {
             style={{
               display: "flex",
               gap: 8,
-              padding: "12px 0",
-              borderTop: "1px solid var(--proof-grey)",
+              padding: "12px 0 2px",
+              borderTop: "1px solid var(--proof-border)",
             }}
           >
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about test runs, CDN health, or select an analysis type from the sidebar..."
+              placeholder="Ask about test runs, CDN health, or select an analysis type from the sidebar…"
               rows={2}
               style={{
                 flex: 1,
                 padding: "10px 14px",
                 fontSize: 13,
-                borderRadius: 8,
-                border: "1px solid var(--proof-grey)",
+                borderRadius: 10,
+                border: "1px solid var(--proof-border-strong)",
                 resize: "none",
-                background: "var(--proof-surface)",
+                background: "var(--proof-surface-2)",
                 color: "var(--proof-text)",
                 fontFamily: "var(--font-sans)",
                 outline: "none",
+                lineHeight: 1.5,
+                transition: "border-color 0.15s, box-shadow 0.15s",
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = "rgba(91,138,245,0.5)";
+                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(91,138,245,0.1)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "var(--proof-border-strong)";
+                e.currentTarget.style.boxShadow = "none";
               }}
             />
             <button
@@ -782,17 +820,21 @@ export default function Copilot() {
               disabled={busy || !input.trim()}
               style={{
                 alignSelf: "flex-end",
-                padding: "10px 16px",
-                borderRadius: 8,
-                background: busy || !input.trim() ? "var(--proof-grey)" : "var(--proof-blue)",
-                color: "white",
+                padding: "10px 18px",
+                borderRadius: 10,
+                background: busy || !input.trim()
+                  ? "var(--proof-surface-3)"
+                  : "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)",
+                color: busy || !input.trim() ? "var(--proof-text-muted)" : "white",
                 border: "none",
                 cursor: busy || !input.trim() ? "not-allowed" : "pointer",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
                 fontSize: 13,
-                fontWeight: 500,
+                fontWeight: 600,
+                boxShadow: busy || !input.trim() ? "none" : "0 2px 10px rgba(91,138,245,0.35)",
+                transition: "all 0.15s",
               }}
             >
               {busy ? (
