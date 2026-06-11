@@ -753,86 +753,69 @@ export default function Dashboard() {
                 </div>
                 {!collapsedSections.recentRuns && (
                   <>
-                    <GoogleFilterableTable
-                      columns={[
-                        {
-                          label: "Run ID",
-                          field: "id",
-                          format: (v) =>
-                            `<span style="font-family:var(--font-mono);font-size:11px;color:var(--proof-blue);font-weight:500">${String(v).slice(-12)}</span>`,
-                        },
-                        { label: "Suite", field: "suite" },
-                        { label: "Env", field: "env" },
-                        {
-                          label: "Status",
-                          field: "status",
-                          format: (v) => {
-                            const s =
-                              v === "PASS"
-                                ? "proof-badge-pass"
-                                : v === "FAIL"
-                                  ? "proof-badge-fail"
-                                  : v === "PARTIAL"
-                                    ? "proof-badge-partial"
-                                    : v === "FLAKY"
-                                      ? "proof-badge-flaky"
-                                      : "proof-badge-skip";
-                            return `<span class="proof-badge ${s}">${v}</span>`;
-                          },
-                        },
-                        {
-                          label: "Pass %",
-                          field: "passPct",
-                          type: "number",
-                          format: (v) => {
-                            const n = Number(v);
-                            const c =
-                              n === 100
-                                ? "var(--proof-green)"
-                                : n < 90
-                                  ? "var(--proof-red)"
-                                  : "var(--proof-text)";
-                            return `<span style="font-family:var(--font-mono);font-weight:700;color:${c}">${n}%</span>`;
-                          },
-                        },
-                        {
-                          label: "Failures",
-                          field: "failures",
-                          type: "number",
-                          format: (v) => {
-                            const n = Number(v);
-                            return n > 0
-                              ? `<span style="font-family:var(--font-mono);color:var(--proof-red)">${n}</span>`
-                              : `<span style="font-family:var(--font-mono);color:var(--proof-text-secondary)">—</span>`;
-                          },
-                        },
-                        { label: "Duration", field: "duration" },
-                      ]}
-                      rows={visibleRuns.map((r) => ({ ...r, id: r.id }))}
-                      height={runsExpanded ? "360px" : "200px"}
-                      pageSize={10}
-                      onRowClick={(row) => navigate(`/runs/${row.id}`)}
-                      searchPlaceholder="Search runs…"
-                    />
+                    <table className="proof-table">
+                      <colgroup>
+                        <col style={{ width: 148 }} />
+                        <col style={{ width: 130 }} />
+                        <col style={{ width: 100 }} />
+                        <col style={{ width: 90 }} />
+                        <col style={{ width: 68 }} />
+                        <col style={{ width: 68 }} />
+                        <col />
+                      </colgroup>
+                      <thead>
+                        <tr>
+                          <th>Run ID</th>
+                          <th>Suite</th>
+                          <th>Env</th>
+                          <th>Status</th>
+                          <th style={{ textAlign: "right" }}>Pass %</th>
+                          <th style={{ textAlign: "right" }}>Failures</th>
+                          <th>Duration</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {visibleRuns.map((r) => (
+                          <tr
+                            key={r.id}
+                            onClick={() => navigate(`/runs/${r.id}`)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <td>
+                              <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)", fontWeight: 500 }}>
+                                  {r.id}
+                                </span>
+                                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--proof-text-secondary)" }}>
+                                  {r.build} · {r.rev}
+                                </span>
+                              </div>
+                            </td>
+                            <td style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{r.suite}</td>
+                            <td style={{ fontSize: 12 }}>{r.env}</td>
+                            <td>
+                              <span className={`proof-badge proof-badge-${r.status === "PASS" ? "pass" : r.status === "FAIL" ? "fail" : r.status === "PARTIAL" ? "partial" : r.status === "FLAKY" ? "flaky" : "skip"}`}>
+                                {r.status}
+                              </span>
+                            </td>
+                            <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 13, color: r.passPct === 100 ? "var(--proof-green)" : r.passPct < 90 ? "var(--proof-red)" : "var(--proof-text)" }}>
+                              {r.passPct}%
+                            </td>
+                            <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 12, color: r.failures > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)" }}>
+                              {r.failures || "—"}
+                            </td>
+                            <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)" }}>{r.duration}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                     {recentRuns.length > 3 && (
-                      <div
-                        style={{
-                          textAlign: "center",
-                          marginTop: 8,
-                        }}
-                      >
+                      <div style={{ textAlign: "center", marginTop: 8 }}>
                         <span
                           onClick={() => setRunsExpanded((p) => !p)}
-                          style={{
-                            fontSize: 11,
-                            color: "var(--proof-blue)",
-                            cursor: "pointer",
-                            fontWeight: 500,
-                          }}
+                          style={{ fontSize: 11, color: "var(--proof-blue)", cursor: "pointer", fontWeight: 500 }}
                         >
-                          {runsExpanded
-                            ? "Show less ▲"
-                            : `Show more (${recentRuns.length - 3} more) ▼`}
+                          {runsExpanded ? "Show less ▲" : `Show more (${recentRuns.length - 3} more) ▼`}
                         </span>
                       </div>
                     )}

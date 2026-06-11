@@ -158,12 +158,7 @@ function SummaryCard({
 
 function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
   return (
-    <tr
-      onClick={() => onClick(run.id)}
-      style={{ cursor: "pointer", transition: "background 0.12s" }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--proof-surface-hover)")}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-    >
+    <tr onClick={() => onClick(run.id)} style={{ cursor: "pointer" }}>
       <td>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div>
@@ -706,24 +701,25 @@ export default function Pulse() {
             </div>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
+              <table className="proof-table" style={{ minWidth: 700 }}>
+                <colgroup>
+                  <col />
+                  <col style={{ width: 100 }} />
+                  <col style={{ width: 68 }} />
+                  <col style={{ width: 160 }} />
+                  <col style={{ width: 90 }} />
+                  <col style={{ width: 80 }} />
+                  <col style={{ width: 80 }} />
+                </colgroup>
                 <thead>
-                  <tr
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: "var(--proof-text-secondary)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.3px",
-                    }}
-                  >
-                    <th style={{ textAlign: "left", padding: "10px 16px" }}>Workflow</th>
-                    <th style={{ textAlign: "left", padding: "10px 8px" }}>Status</th>
-                    <th style={{ textAlign: "left", padding: "10px 8px" }}>Pass %</th>
-                    <th style={{ textAlign: "left", padding: "10px 8px" }}>Suite · Env</th>
-                    <th style={{ textAlign: "left", padding: "10px 8px" }}>Duration</th>
-                    <th style={{ textAlign: "left", padding: "10px 8px" }}>When</th>
-                    <th style={{ textAlign: "left", padding: "10px 8px" }}>Build</th>
+                  <tr>
+                    <th>Workflow</th>
+                    <th>Status</th>
+                    <th>Pass %</th>
+                    <th>Suite · Env</th>
+                    <th>Duration</th>
+                    <th>When</th>
+                    <th>Build</th>
                   </tr>
                 </thead>
                 <tbody>
