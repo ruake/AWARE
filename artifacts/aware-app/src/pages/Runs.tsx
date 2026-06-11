@@ -359,9 +359,23 @@ export default function Runs() {
               style={{ flex: 1, overflow: "auto", position: "relative" }}
             >
               <table className="proof-table" style={{ position: "relative" }}>
+                <colgroup>
+                  <col style={{ width: 40 }} />
+                  <col style={{ width: 112 }} />
+                  <col style={{ width: 130 }} />
+                  <col style={{ width: 78 }} />
+                  <col style={{ width: 138 }} />
+                  <col style={{ width: 90 }} />
+                  <col style={{ width: 72 }} />
+                  <col style={{ width: 72 }} />
+                  <col style={{ width: 80 }} />
+                  <col style={{ width: 122 }} />
+                  <col style={{ width: 106 }} />
+                  <col />
+                </colgroup>
                 <thead>
                   <tr>
-                    <th style={{ width: 36 }}>
+                    <th style={{ width: 40 }}>
                       <input
                         type="checkbox"
                         style={{ cursor: "pointer" }}
@@ -373,16 +387,16 @@ export default function Runs() {
                         }
                       />
                     </th>
-                    <th>Run ID</th>
-                    <th>Suite</th>
-                    <th>Target</th>
-                    <th>Env / Network</th>
-                    <th>Status</th>
-                    <th style={{ textAlign: "right" }}>Pass %</th>
-                    <th style={{ textAlign: "right" }}>Failures</th>
-                    <th style={{ textAlign: "right" }}>Duration</th>
-                    <th>Started</th>
-                    <th>Build Config</th>
+                    <th style={{ width: 112 }}>Run ID</th>
+                    <th style={{ width: 130 }}>Suite</th>
+                    <th style={{ width: 78 }}>Target</th>
+                    <th style={{ width: 138 }}>Env / Network</th>
+                    <th style={{ width: 90 }}>Status</th>
+                    <th style={{ textAlign: "right", width: 72 }}>Pass %</th>
+                    <th style={{ textAlign: "right", width: 72 }}>Failures</th>
+                    <th style={{ textAlign: "right", width: 80 }}>Duration</th>
+                    <th style={{ width: 122 }}>Started</th>
+                    <th style={{ width: 106 }}>Build Config</th>
                     <th>Actions</th>
                   </tr>
                 </thead>

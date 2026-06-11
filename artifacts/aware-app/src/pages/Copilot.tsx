@@ -34,7 +34,7 @@ import type { AIInsight, AIUseCase } from "@/lib/ai";
 import { getProvider, getLLMConfig, setLLMConfig } from "@/lib/llm";
 import { RUNS } from "@/lib/runs";
 import type { LLMProviderType } from "@/lib/types";
-import { checkWebLLM, checkChromeAI } from "@/lib/llm";
+import { checkWebLLM, checkChromeAI, getChromeAIStatus } from "@/lib/llm";
 import { Markdown } from "@/components/aware/Markdown";
 
 const USE_CASE_ICONS: Record<string, React.ReactNode> = {
@@ -72,19 +72,24 @@ const PROVIDER_META: Record<
   chrome: { label: "Chrome AI", icon: <Zap size={12} />, color: "#4285f4" },
 };
 
-async function probeProvider(type: LLMProviderType): Promise<boolean> {
+type ProviderStatus = "available" | "downloading" | "unavailable";
+
+async function probeProvider(type: LLMProviderType): Promise<ProviderStatus> {
   try {
-    if (type === "webllm") return checkWebLLM();
-    if (type === "chrome") return checkChromeAI();
+    if (type === "webllm") {
+      const ok = await checkWebLLM();
+      return ok ? "available" : "unavailable";
+    }
+    if (type === "chrome") return getChromeAIStatus();
     if (type === "openai") {
       const cfg = getLLMConfig();
-      if (!cfg.apiKey) return false;
+      if (!cfg.apiKey) return "unavailable";
       const prov = getProvider();
-      return prov.testConnection();
+      return (await prov.testConnection()) ? "available" : "unavailable";
     }
-    return false;
+    return "unavailable";
   } catch {
-    return false;
+    return "unavailable";
   }
 }
 
@@ -99,7 +104,7 @@ export default function Copilot() {
   const [loading, setLoading] = React.useState(true);
   const [_insights, setInsights] = React.useState<AIInsight[]>([]);
   const [usingFallback, setUsingFallback] = React.useState(false);
-  const [providerAvail, setProviderAvail] = React.useState<Record<string, boolean>>({});
+  const [providerAvail, setProviderAvail] = React.useState<Record<string, ProviderStatus>>({});
   const [expandedMsgs, setExpandedMsgs] = React.useState<Set<number>>(new Set());
   const [showProviderMenu, setShowProviderMenu] = React.useState(false);
   const [showSettings, setShowSettings] = React.useState(false);
@@ -115,7 +120,7 @@ export default function Copilot() {
   const currentProvider = cfg.provider;
 
   const probeAllProviders = React.useCallback(async () => {
-    const results: Record<string, boolean> = {};
+    const results: Record<string, ProviderStatus> = {};
     for (const type of ["openai", "webllm", "chrome"] as LLMProviderType[]) {
       results[type] = await probeProvider(type);
     }
@@ -128,7 +133,7 @@ export default function Copilot() {
       const ctx = buildAIContext();
       const [insightsList, avail] = await Promise.all([generateInsights(), probeAllProviders()]);
       setInsights(insightsList);
-      const currentOk = avail[currentProvider] ?? false;
+      const currentOk = (avail[currentProvider] ?? "unavailable") === "available";
       setAiReady(currentOk);
       setUsingFallback(!currentOk);
       const lastRun = [...RUNS].sort(
@@ -402,14 +407,31 @@ export default function Copilot() {
             >
               {PROVIDER_META[currentProvider].icon}
               {PROVIDER_META[currentProvider].label}
-              {aiReady ? (
+              {providerAvail[currentProvider] === "available" ? (
                 <Wifi size={11} style={{ color: "#22c55e" }} />
+              ) : providerAvail[currentProvider] === "downloading" ? (
+                <Loader2 size={11} style={{ color: "#f59e0b", animation: "spin 1s linear infinite" }} />
               ) : (
                 <WifiOff size={11} style={{ color: "#ef4444" }} />
               )}
             </button>
-            <span style={{ fontSize: 10, color: aiReady ? "#22c55e" : "#ef4444", fontWeight: 500 }}>
-              {aiReady ? "Connected" : "Unavailable"}
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 500,
+                color:
+                  providerAvail[currentProvider] === "available"
+                    ? "#22c55e"
+                    : providerAvail[currentProvider] === "downloading"
+                      ? "#f59e0b"
+                      : "#ef4444",
+              }}
+            >
+              {providerAvail[currentProvider] === "available"
+                ? "Connected"
+                : providerAvail[currentProvider] === "downloading"
+                  ? "Downloading…"
+                  : "Unavailable"}
             </span>
             <button
               onClick={() => {
@@ -456,7 +478,7 @@ export default function Copilot() {
                 }}
               >
                 {(["openai", "webllm", "chrome"] as LLMProviderType[]).map((type) => {
-                  const avail = providerAvail[type];
+                  const status = providerAvail[type];
                   const meta = PROVIDER_META[type];
                   const isCurrent = type === currentProvider;
                   return (
@@ -480,11 +502,23 @@ export default function Copilot() {
                     >
                       <span style={{ color: meta.color }}>{meta.icon}</span>
                       <span style={{ flex: 1 }}>{meta.label}</span>
-                      {avail === true && (
-                        <span style={{ fontSize: 10, color: "#22c55e" }}>Available</span>
+                      {status === "available" && (
+                        <span style={{ fontSize: 10, color: "#22c55e", display: "flex", alignItems: "center", gap: 3 }}>
+                          <Wifi size={10} /> Ready
+                        </span>
                       )}
-                      {avail === false && (
-                        <span style={{ fontSize: 10, color: "#ef4444" }}>Unavailable</span>
+                      {status === "downloading" && (
+                        <span style={{ fontSize: 10, color: "#f59e0b", display: "flex", alignItems: "center", gap: 3 }}>
+                          <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} /> Downloading
+                        </span>
+                      )}
+                      {status === "unavailable" && (
+                        <span style={{ fontSize: 10, color: "#ef4444", display: "flex", alignItems: "center", gap: 3 }}>
+                          <WifiOff size={10} /> Unavailable
+                        </span>
+                      )}
+                      {!status && (
+                        <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>—</span>
                       )}
                       {isCurrent && (
                         <span
@@ -494,6 +528,7 @@ export default function Copilot() {
                             color: "white",
                             padding: "1px 5px",
                             borderRadius: 3,
+                            marginLeft: 4,
                           }}
                         >
                           Active

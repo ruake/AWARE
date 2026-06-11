@@ -199,6 +199,19 @@ export async function checkChromeAI(): Promise<boolean> {
   }
 }
 
+export async function getChromeAIStatus(): Promise<"available" | "downloading" | "unavailable"> {
+  try {
+    if (!("LanguageModel" in self)) return "unavailable";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const availability: string = await (self as any).LanguageModel.availability();
+    if (availability === "available") return "available";
+    if (availability === "downloading" || availability === "after-download") return "downloading";
+    return "unavailable";
+  } catch {
+    return "unavailable";
+  }
+}
+
 class ChromeBuiltinLLMProvider implements ILLMProvider {
   readonly type: LLMProviderType = "chrome";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

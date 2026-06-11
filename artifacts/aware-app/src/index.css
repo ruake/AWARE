@@ -318,7 +318,9 @@ select.proof-input {
 /* ── Tables ────────────────────────────────────────────────────────── */
 .proof-table {
   width: 100%;
+  min-width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 .proof-table th {
   text-align: left;
@@ -328,6 +330,8 @@ select.proof-input {
   font-weight: 600;
   font-size: 11px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   background: rgba(255, 255, 255, 0.02);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -336,6 +340,10 @@ select.proof-input {
   padding: 10px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 0;
 }
 .proof-table tr:last-child td {
   border-bottom: none;
