@@ -134,6 +134,7 @@ export default function TestAnalytics() {
   const [hEnv, setHEnv] = useSyncedUrlState<string>("hEnv", "all");
   const [hErrOnly, setHErrOnly] = useSyncedUrlState<boolean>("hErrOnly", false);
   const [hSort, setHSort] = useSyncedUrlState<string>("hSort", "runId");
+  const [selectedRow, setSelectedRow] = React.useState<EnrichedHistoryRow | null>(null);
 
   // ── Derived values (safe for empty diffs) ──
   const idx =
@@ -736,7 +737,8 @@ export default function TestAnalytics() {
         </div>
 
         {/* Run history table with filters */}
-        <div className="proof-card" style={{ overflow: "hidden" }}>
+        <div className="proof-card" style={{ overflow: "hidden", display: "flex", flexDirection: "row" }}>
+          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
           <div
             style={{
               padding: "10px 14px",
@@ -880,19 +882,30 @@ export default function TestAnalytics() {
               </thead>
               <tbody>
                 {filteredHistory.map((h) => (
-                  <tr key={h.runId} style={{ cursor: "pointer" }}>
+                  <tr
+                    key={h.runId}
+                    onClick={() => setSelectedRow(h)}
+                    style={{
+                      cursor: "pointer",
+                      background:
+                        selectedRow?.runId === h.runId ? "var(--proof-blue-bg)" : undefined,
+                    }}
+                  >
                     <td>
-                      <Link
-                        href={`/runs/${h.runId}`}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setSelectedRow(h); }}
                         style={{
                           fontFamily: "var(--font-mono)",
                           fontSize: 11,
                           color: "var(--proof-blue)",
-                          textDecoration: "none",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 0,
                         }}
                       >
                         {h.runId}
-                      </Link>
+                      </button>
                     </td>
                     <td>
                       <span
@@ -949,13 +962,13 @@ export default function TestAnalytics() {
                       ) : null}
                     </td>
                     <td>
-                      <Link
-                        href={`/runs/${h.runId}`}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setSelectedRow(h); }}
                         className="proof-button proof-button-xs"
                         style={{ padding: "2px 7px" }}
                       >
-                        View Run
-                      </Link>
+                        Detail
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -977,6 +990,167 @@ export default function TestAnalytics() {
               </tbody>
             </table>
           </div>
+          </div>{/* end left column */}
+
+          {/* Test detail side panel */}
+          {selectedRow && (
+            <div
+              style={{
+                width: 320,
+                flexShrink: 0,
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                borderLeft: "3px solid var(--proof-blue)",
+                background: "var(--proof-surface)",
+              }}
+            >
+              {/* Panel header */}
+              <div
+                style={{
+                  padding: "10px 14px",
+                  borderBottom: "1px solid var(--proof-grey)",
+                  background: "var(--proof-blue-bg)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexShrink: 0,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "var(--proof-blue)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <FileText size={13} /> Test Detail
+                </span>
+                <button
+                  onClick={() => setSelectedRow(null)}
+                  style={{
+                    border: "none",
+                    background: "none",
+                    cursor: "pointer",
+                    color: "var(--proof-text-secondary)",
+                    fontSize: 18,
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Panel body */}
+              <div style={{ flex: 1, overflow: "auto", padding: "14px 16px" }}>
+                {/* Test name */}
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "var(--proof-text)",
+                    marginBottom: 14,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {testName}
+                </div>
+
+                {/* Run ID */}
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-secondary)", marginBottom: 4 }}>
+                    Run ID
+                  </div>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)", fontWeight: 500 }}>
+                    {selectedRow.runId}
+                  </span>
+                </div>
+
+                {/* Status */}
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-secondary)", marginBottom: 4 }}>
+                    Status
+                  </div>
+                  <span className={`proof-badge ${selectedRow.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}>
+                    {selectedRow.status}
+                  </span>
+                  {(selectedRow.assertionsPassed + selectedRow.assertionsFailed) > 0 && (
+                    <span style={{ fontSize: 10, marginLeft: 6, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)" }}>
+                      <span style={{ color: "var(--proof-green)" }}>{selectedRow.assertionsPassed}✓</span>
+                      {" · "}
+                      <span style={{ color: selectedRow.assertionsFailed > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)" }}>
+                        {selectedRow.assertionsFailed}✗
+                      </span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Environment */}
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-secondary)", marginBottom: 4 }}>
+                    Environment
+                  </div>
+                  <span style={{ fontSize: 12, color: "var(--proof-text)" }}>{selectedRow.env}</span>
+                </div>
+
+                {/* Duration */}
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-secondary)", marginBottom: 4 }}>
+                    Duration
+                  </div>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--proof-text)" }}>
+                    {selectedRow.duration}ms
+                  </span>
+                </div>
+
+                {/* Error */}
+                {selectedRow.error && (
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-red)", marginBottom: 4 }}>
+                      Error
+                    </div>
+                    <pre
+                      style={{
+                        fontSize: 10,
+                        color: "var(--proof-red)",
+                        fontFamily: "var(--font-mono)",
+                        background: "rgba(239,68,68,0.06)",
+                        border: "1px solid rgba(239,68,68,0.15)",
+                        borderRadius: 6,
+                        padding: "8px 10px",
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-all",
+                        margin: 0,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {selectedRow.error}
+                    </pre>
+                  </div>
+                )}
+              </div>
+
+              {/* Panel footer */}
+              <div
+                style={{
+                  padding: "10px 14px",
+                  borderTop: "1px solid var(--proof-grey)",
+                  flexShrink: 0,
+                }}
+              >
+                <button
+                  onClick={() => navigate(`/runs/${selectedRow.runId}`)}
+                  className="proof-button-primary"
+                  style={{ width: "100%", fontSize: 12, justifyContent: "center" }}
+                >
+                  View Full Run →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       {Toast}

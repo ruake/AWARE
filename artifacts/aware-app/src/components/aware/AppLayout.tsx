@@ -396,31 +396,78 @@ export function AppLayout({
                   <div
                     key={u.id}
                     style={{
-                      display: "flex",
-                      gap: 8,
-                      padding: "8px 12px",
+                      padding: "10px 12px",
                       borderBottom: "1px solid var(--proof-grey)",
-                      fontSize: 12,
-                      alignItems: "flex-start",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
                     }}
                   >
-                    {u.type === "success" ? (
-                      <Check
-                        size={14}
-                        style={{ color: "var(--proof-green)", flexShrink: 0, marginTop: 1 }}
-                      />
-                    ) : u.type === "warning" ? (
-                      <AlertTriangle
-                        size={14}
-                        style={{ color: "var(--proof-yellow)", flexShrink: 0, marginTop: 1 }}
-                      />
-                    ) : (
-                      <Activity
-                        size={14}
-                        style={{ color: "var(--proof-blue)", flexShrink: 0, marginTop: 1 }}
-                      />
-                    )}
-                    <span style={{ flex: 1 }}>{u.message}</span>
+                    <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                      {u.type === "success" ? (
+                        <Check
+                          size={14}
+                          style={{ color: "var(--proof-green)", flexShrink: 0, marginTop: 1 }}
+                        />
+                      ) : u.type === "warning" ? (
+                        <AlertTriangle
+                          size={14}
+                          style={{ color: "var(--proof-yellow)", flexShrink: 0, marginTop: 1 }}
+                        />
+                      ) : (
+                        <Activity
+                          size={14}
+                          style={{ color: "var(--proof-blue)", flexShrink: 0, marginTop: 1 }}
+                        />
+                      )}
+                      <span style={{ flex: 1, fontSize: 12, lineHeight: 1.4 }}>{u.message}</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, paddingLeft: 22 }}>
+                      <button
+                        onClick={() => {
+                          navigate(`/runs/${u.runId}`);
+                          setShowNotifs(false);
+                        }}
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color:
+                            u.type === "success"
+                              ? "var(--proof-green)"
+                              : u.type === "warning"
+                                ? "var(--proof-yellow)"
+                                : "var(--proof-blue)",
+                          background: "none",
+                          border: `1px solid ${u.type === "success" ? "rgba(34,197,94,0.25)" : u.type === "warning" ? "rgba(245,158,11,0.25)" : "rgba(91,138,245,0.25)"}`,
+                          borderRadius: 5,
+                          padding: "2px 8px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 3,
+                        }}
+                      >
+                        View Run →
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate(`/compare?candidate=${u.runId}`);
+                          setShowNotifs(false);
+                        }}
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          color: "var(--proof-text-secondary)",
+                          background: "none",
+                          border: "1px solid var(--proof-border)",
+                          borderRadius: 5,
+                          padding: "2px 8px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Compare
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -637,7 +684,7 @@ export function AppLayout({
         </aside>
 
         {/* Main content */}
-        <main style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>{children}</main>
+        <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", padding: "20px 24px" }}>{children}</main>
       </div>
 
       {/* Command Palette */}
