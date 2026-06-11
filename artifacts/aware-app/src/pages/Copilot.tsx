@@ -348,130 +348,6 @@ export default function Copilot() {
   return (
     <AppLayout activeHref="/copilot">
       <div style={{ display: "flex", height: "calc(100vh - 96px)", gap: 16 }}>
-        <div
-          style={{
-            width: 228,
-            flexShrink: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            overflowY: "auto",
-            paddingRight: 4,
-            borderRight: "1px solid var(--proof-border)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 10,
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              color: "var(--proof-text-muted)",
-              padding: "10px 8px 6px",
-            }}
-          >
-            Analysis Types
-          </div>
-          {AI_USE_CASES.map((uc) => {
-            const isActive = activeUseCase === uc.id;
-            return (
-              <button
-                key={uc.id}
-                onClick={() => handleUseCase(uc)}
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 9,
-                  padding: "8px 10px",
-                  borderRadius: 7,
-                  fontSize: 12,
-                  cursor: "pointer",
-                  border: isActive ? "1px solid rgba(91,138,245,0.35)" : "1px solid transparent",
-                  background: isActive
-                    ? "linear-gradient(135deg, rgba(91,138,245,0.12) 0%, rgba(124,106,245,0.08) 100%)"
-                    : "transparent",
-                  color: isActive ? "var(--proof-blue)" : "var(--proof-text)",
-                  textAlign: "left",
-                  transition: "all 0.15s",
-                  borderLeft: isActive ? "2px solid var(--proof-blue)" : "2px solid transparent",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = "var(--proof-surface-2)";
-                    e.currentTarget.style.borderLeft = "2px solid var(--proof-border-strong)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.borderLeft = "2px solid transparent";
-                  }
-                }}
-                title={uc.description}
-              >
-                <span style={{ flexShrink: 0, marginTop: 1, opacity: isActive ? 1 : 0.7 }}>
-                  {USE_CASE_ICONS[uc.id] || <Zap size={13} />}
-                </span>
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: "block", fontWeight: isActive ? 600 : 500, lineHeight: 1.3, fontSize: 12 }}>
-                    {uc.name}
-                  </span>
-                  <span style={{ display: "block", fontSize: 10, color: "var(--proof-text-muted)", lineHeight: 1.4, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {uc.description}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-          {insights.length > 0 && (
-            <>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  color: "var(--proof-text-muted)",
-                  padding: "14px 8px 6px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: "#ef4444",
-                    display: "inline-block",
-                    boxShadow: "0 0 6px rgba(239,68,68,0.6)",
-                  }}
-                />
-                Live Insights
-              </div>
-              {insights.map((ins) => {
-                const accent = ins.type === "critical" ? "#ef4444" : ins.type === "warning" ? "#f59e0b" : "#22c55e";
-                return (
-                  <div
-                    key={ins.id}
-                    style={{
-                      padding: "9px 10px 9px 12px",
-                      borderRadius: 7,
-                      fontSize: 11,
-                      background: `${accent}0a`,
-                      border: `1px solid ${accent}20`,
-                      borderLeft: `3px solid ${accent}`,
-                    }}
-                  >
-                    <div style={{ fontWeight: 600, marginBottom: 2, fontSize: 11, color: "var(--proof-text)" }}>{ins.title}</div>
-                    <div style={{ color: "var(--proof-text-secondary)", fontSize: 10, lineHeight: 1.4 }}>{ins.description}</div>
-                  </div>
-                );
-              })}
-            </>
-          )}
-        </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
           {/* Provider selector bar */}
           <div
@@ -800,40 +676,41 @@ export default function Copilot() {
                   gap: 10,
                   alignItems: "flex-start",
                   alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-                  maxWidth: "88%",
+                  maxWidth: msg.role === "user" ? "75%" : "92%",
                 }}
               >
                 {msg.role === "assistant" && (
                   <div
                     style={{
-                      width: 30,
-                      height: 30,
+                      width: 28,
+                      height: 28,
                       borderRadius: "50%",
                       background: "linear-gradient(135deg, #3d6ff5 0%, #7c6af5 100%)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
-                      boxShadow: "0 0 0 2px rgba(91,138,245,0.25)",
+                      marginTop: 2,
+                      boxShadow: "0 0 0 2px rgba(91,138,245,0.2)",
                     }}
                   >
-                    <Bot size={14} style={{ color: "white" }} />
+                    <Bot size={13} style={{ color: "white" }} />
                   </div>
                 )}
                 <div
                   style={{
-                    padding: "11px 15px",
-                    borderRadius: msg.role === "user" ? "14px 14px 4px 14px" : "4px 14px 14px 14px",
+                    padding: msg.role === "user" ? "10px 15px" : "14px 18px",
+                    borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "4px 16px 16px 16px",
                     fontSize: 13,
-                    lineHeight: 1.65,
+                    lineHeight: 1.7,
                     background: msg.role === "user"
                       ? "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)"
                       : "var(--proof-surface-2)",
                     color: msg.role === "user" ? "white" : "var(--proof-text)",
-                    border: msg.role === "user" ? "none" : "1px solid var(--proof-border-strong)",
+                    border: msg.role === "user" ? "none" : "1px solid var(--proof-border)",
                     boxShadow: msg.role === "user"
-                      ? "0 2px 12px rgba(91,138,245,0.3)"
-                      : "var(--proof-shadow-sm)",
+                      ? "0 2px 10px rgba(91,138,245,0.25)"
+                      : "none",
                     maxWidth: "100%",
                     overflow: "hidden",
                   }}
