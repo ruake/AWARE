@@ -364,8 +364,8 @@ export interface LLMConfig {
 }
 
 export const DEFAULT_LLM_CONFIG: LLMConfig = {
-  provider: "chrome",
-  model: "gemini-2.0-flash-lite",
+  provider: "openai",
+  model: "gpt-4o-mini",
   temperature: 0.7,
   maxTokens: 2048,
 };

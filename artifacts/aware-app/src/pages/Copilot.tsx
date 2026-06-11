@@ -273,14 +273,20 @@ export default function Copilot() {
           temperature: 0.3,
           maxTokens: 8192,
         });
+        // If the provider returned an error response, surface it directly
+        if (completion.finishReason === "error") {
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: completion.content, type: "error" },
+          ]);
+          setBusy(false);
+          return;
+        }
         response = completion.content;
-      } catch {
-        // Offline fallback: answer from data directly
-        const ctx = buildAIContext();
-        const lastRun = [...RUNS].sort(
-          (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
-        )[0];
-        response = `**Offline mode** — no LLM provider available. Here's what the data says:\n\n- **${ctx.stats.totalRuns} runs** | avg pass rate **${ctx.stats.avgPassRate}%** | **${ctx.stats.totalFailures}** total failures\n- Environments: ${ctx.stats.envs.join(", ")}\n- ${ctx.testCoverage}\n- ${ctx.promotionStatus}\n\n**Latest run:** \`${lastRun?.id}\` — "${lastRun?.label}"\n  Status: **${lastRun?.status}** | Pass rate: ${lastRun?.passPct}% | Failures: ${lastRun?.failures} | Build: \`${lastRun?.build}\`\n\nSwitch to a working provider in the dropdown above for AI-generated answers.`;
+      } catch (err) {
+        // Only reach here if the provider threw (shouldn't happen after our fixes, but keep as safety net)
+        const msg = err instanceof Error ? err.message : String(err);
+        response = `**Provider error:** ${msg}\n\nClick **⚙ Configure** to set up a working API key.`;
       }
       setMessages((prev) => [...prev, { role: "assistant", content: response, type: "chat" }]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
