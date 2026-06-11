@@ -1,11 +1,12 @@
 # =============================================================================
 # A.W.A.R.E. — Akamai CDN Regression Test Workflow
-# Runs Playwright and pytest suites against QA / UAT / PROD Akamai edges.
+# Target: https://www.akamai.com/
+# Environments: QA / UAT / PROD × Staging / Production (6 combinations)
 #
 # Trigger manually:
 #   gh workflow run run-tests.yml \
 #     --field suite=suite_smoke \
-#     --field environment=QA \
+#     --field environment="QA / Staging" \
 #     --field parallelism=4
 # =============================================================================
 
@@ -32,14 +33,17 @@ on:
           - suite_edgeworker
           - suite_performance
       environment:
-        description: "Target Akamai environment"
+        description: "Target Akamai environment + network"
         required: true
-        default: QA
+        default: "QA / Staging"
         type: choice
         options:
-          - QA
-          - UAT
-          - PROD
+          - "QA / Staging"
+          - "QA / Production"
+          - "UAT / Staging"
+          - "UAT / Production"
+          - "PROD / Staging"
+          - "PROD / Production"
       parallelism:
         description: "Number of parallel test workers"
         required: false
@@ -51,7 +55,7 @@ on:
         type: boolean
 
   schedule:
-    # Nightly PROD regression — 02:00 UTC
+    # Nightly PROD / Production — 02:00 UTC
     - cron: "0 2 * * *"
     # Nightly UAT regression — 06:00 UTC
     - cron: "0 6 * * *"
@@ -66,9 +70,10 @@ on:
       - ".github/workflows/run-tests.yml"
 
 env:
-  AWARE_ENV: ${{ github.event.inputs.environment || 'QA' }}
-  AWARE_SUITE: ${{ github.event.inputs.suite || 'suite_smoke' }}
-  AWARE_PARALLELISM: ${{ github.event.inputs.parallelism || '4' }}
+  AWARE_ENV:         ${{ github.event.inputs.environment || 'QA / Staging' }}
+  AWARE_SUITE:       ${{ github.event.inputs.suite       || 'suite_smoke'  }}
+  AWARE_PARALLELISM: ${{ github.event.inputs.parallelism || '4'            }}
+  BASE_URL:          https://www.akamai.com
 
 jobs:
   # ── Config validation ──────────────────────────────────────────────────────
@@ -76,9 +81,11 @@ jobs:
     name: Validate AWARE config
     runs-on: ubuntu-latest
     outputs:
-      suite_name: ${{ steps.parse.outputs.suite_name }}
-      base_url: ${{ steps.parse.outputs.base_url }}
-      runners: ${{ steps.parse.outputs.runners }}
+      suite_name:  ${{ steps.parse.outputs.suite_name }}
+      base_url:    ${{ steps.parse.outputs.base_url }}
+      runners:     ${{ steps.parse.outputs.runners }}
+      network:     ${{ steps.parse.outputs.network }}
+      tier:        ${{ steps.parse.outputs.tier }}
     steps:
       - uses: actions/checkout@v4
 
@@ -94,22 +101,32 @@ jobs:
           SUITE_NAME=$(yq ".suites[] | select(.id == \"$AWARE_SUITE\") | .name" config/test-suites.yml)
           BASE_URL=$(yq ".environments[] | select(.label == \"$AWARE_ENV\") | .baseUrl" config/environments.yml)
           RUNNERS=$(yq ".suites[] | select(.id == \"$AWARE_SUITE\") | .runners | join(\",\")" config/test-suites.yml)
+          NETWORK=$(yq ".environments[] | select(.label == \"$AWARE_ENV\") | .network" config/environments.yml)
+          TIER=$(yq ".environments[] | select(.label == \"$AWARE_ENV\") | .target" config/environments.yml)
+
+          # Fall back to global baseUrl if env-specific is missing
+          [ -z "$BASE_URL" ] && BASE_URL=$(yq ".baseUrl" config/environments.yml)
+
           echo "suite_name=$SUITE_NAME" >> $GITHUB_OUTPUT
-          echo "base_url=$BASE_URL" >> $GITHUB_OUTPUT
-          echo "runners=$RUNNERS" >> $GITHUB_OUTPUT
+          echo "base_url=$BASE_URL"     >> $GITHUB_OUTPUT
+          echo "runners=$RUNNERS"       >> $GITHUB_OUTPUT
+          echo "network=$NETWORK"       >> $GITHUB_OUTPUT
+          echo "tier=$TIER"             >> $GITHUB_OUTPUT
+
           echo "✅ Suite: $SUITE_NAME"
-          echo "✅ Environment: $AWARE_ENV → $BASE_URL"
+          echo "✅ Environment: $AWARE_ENV  →  $BASE_URL  ($NETWORK network)"
           echo "✅ Runners: $RUNNERS"
 
       - name: Property version check
         run: |
-          ENV_KEY=$(echo $AWARE_ENV | tr '[:upper:]' '[:lower:]')
-          PROP_VER=$(yq ".properties[0].activeVersions.$ENV_KEY" config/akamai-config.yml)
+          TIER=$(yq ".environments[] | select(.label == \"$AWARE_ENV\") | .target" config/environments.yml | tr '[:upper:]' '[:lower:]')
+          PROP_VER=$(yq ".properties[0].activeVersions.$TIER" config/akamai-config.yml)
           echo "🏷️  Active property version on $AWARE_ENV: v$PROP_VER"
+          echo "🌐 Base URL: https://www.akamai.com"
 
   # ── Playwright tests ───────────────────────────────────────────────────────
   playwright:
-    name: "Playwright — ${{ github.event.inputs.environment || 'QA' }}"
+    name: "Playwright — ${{ github.event.inputs.environment || 'QA / Staging' }}"
     runs-on: ubuntu-latest
     needs: validate-config
     if: contains(needs.validate-config.outputs.runners, 'playwright') && github.event.inputs.dry_run != 'true'
@@ -141,8 +158,10 @@ jobs:
             --grep "@${{ env.AWARE_SUITE }}" \
           || true
         env:
-          BASE_URL: ${{ needs.validate-config.outputs.base_url }}
-          AWARE_ENV: ${{ env.AWARE_ENV }}
+          BASE_URL:   https://www.akamai.com
+          AWARE_ENV:  ${{ env.AWARE_ENV }}
+          AWARE_SUITE: ${{ env.AWARE_SUITE }}
+          AKAMAI_NETWORK: ${{ needs.validate-config.outputs.network }}
           CI: true
 
       - name: Upload Playwright report
@@ -157,7 +176,7 @@ jobs:
 
   # ── pytest tests ───────────────────────────────────────────────────────────
   pytest:
-    name: "pytest — ${{ github.event.inputs.environment || 'QA' }}"
+    name: "pytest — ${{ github.event.inputs.environment || 'QA / Staging' }}"
     runs-on: ubuntu-latest
     needs: validate-config
     if: contains(needs.validate-config.outputs.runners, 'pytest') && github.event.inputs.dry_run != 'true'
@@ -187,8 +206,9 @@ jobs:
             -v \
           || true
         env:
-          BASE_URL: ${{ needs.validate-config.outputs.base_url }}
-          AWARE_ENV: ${{ env.AWARE_ENV }}
+          BASE_URL:       https://www.akamai.com
+          AWARE_ENV:      ${{ env.AWARE_ENV }}
+          AKAMAI_NETWORK: ${{ needs.validate-config.outputs.network }}
           CI: true
 
       - name: Upload pytest report
@@ -217,18 +237,20 @@ jobs:
         run: |
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           RUN_ID="run_$(date -u +%Y%m%d)_gh${GITHUB_RUN_ID}"
+          NETWORK="${{ needs.validate-config.outputs.network }}"
           mkdir -p all-results
           cat > all-results/aware-run.json <<EOF
           {
             "id": "$RUN_ID",
             "label": "CI — $(date -u +'%b %d, %Y')",
             "suite": "$AWARE_SUITE",
-            "target": "$AWARE_ENV",
+            "target": "${{ needs.validate-config.outputs.tier }}",
             "started": "$TIMESTAMP",
             "build": "${GITHUB_SHA::7}",
             "rev": "$GITHUB_SHA",
             "env": "$AWARE_ENV",
-            "network": "$([ '$AWARE_ENV' = 'PROD' ] && echo 'production' || echo 'staging')",
+            "network": "$NETWORK",
+            "baseUrl": "https://www.akamai.com",
             "workflowRunId": "$GITHUB_RUN_ID",
             "workflowUrl": "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           }
@@ -251,18 +273,19 @@ jobs:
           echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| **Suite** | ${{ needs.validate-config.outputs.suite_name }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Environment** | $AWARE_ENV |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Base URL** | ${{ needs.validate-config.outputs.base_url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Network** | ${{ needs.validate-config.outputs.network }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Base URL** | https://www.akamai.com |" >> $GITHUB_STEP_SUMMARY
           echo "| **Commit** | \`${GITHUB_SHA::7}\` |" >> $GITHUB_STEP_SUMMARY
 
   # ── Promotion gate (UAT → PROD) ────────────────────────────────────────────
   promotion-gate:
-    name: Promotion gate (UAT → PROD)
+    name: "Promotion gate — UAT → PROD"
     runs-on: ubuntu-latest
     needs: [report]
-    if: env.AWARE_ENV == 'UAT' && env.AWARE_SUITE == 'suite_regression_uat'
+    if: contains(env.AWARE_ENV, 'UAT') && env.AWARE_SUITE == 'suite_regression_uat'
     environment:
       name: production
-      url: https://www.example.com
+      url: https://www.akamai.com
     steps:
       - uses: actions/checkout@v4
       - name: Install yq
@@ -273,5 +296,5 @@ jobs:
       - name: Check promotion gate
         run: |
           MIN_PASS=$(yq ".properties[0].promotionGate.minPassRate" config/akamai-config.yml)
-          echo "✅ Promotion gate: requires ≥ ${MIN_PASS}% pass rate"
-          echo "🚀 If approved, proceed with Akamai property activation on PROD"
+          echo "✅ Promotion gate: requires ≥ ${MIN_PASS}% pass rate on UAT / Staging + UAT / Production"
+          echo "🚀 If approved, proceed with Akamai property activation on PROD / Staging, then PROD / Production"

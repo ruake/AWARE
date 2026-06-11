@@ -1,47 +1,99 @@
 import type { EnvironmentConfig } from "./types";
 
+// Akamai uses two networks per environment tier:
+//   - staging   → Akamai staging network (validate before activating)
+//   - production → Akamai production (live) edge network
+//
+// All three tiers (QA / UAT / PROD) exist on both networks,
+// giving 6 environment+network combinations.
+
 const DEFAULT_ENVIRONMENTS: EnvironmentConfig[] = [
+  // ── QA ──────────────────────────────────────────────────────────────
   {
-    id: "qa",
-    label: "QA",
+    id: "qa_staging",
+    label: "QA / Staging",
     target: "QA",
-    stage: "QA",
-    baseUrl: "https://qa.example.akamai.com",
-    ips: ["23.32.11.10", "23.32.11.11"],
+    stage: "Staging",
+    baseUrl: "https://www.akamai.com",
+    ips: ["23.32.1.10", "23.32.1.11"],
     network: "staging",
-    property: "www.example.com",
+    property: "www.akamai.com",
     propertyVersion: 52,
     propertyStatus: "active",
     cpcode: "1234567",
-    edgeHostname: "qa.example.com.edgekey.net",
+    edgeHostname: "www.akamai.com.edgekey.net",
   },
   {
-    id: "uat",
-    label: "UAT",
+    id: "qa_prod",
+    label: "QA / Production",
+    target: "QA",
+    stage: "Production",
+    baseUrl: "https://www.akamai.com",
+    ips: ["23.32.2.10", "23.32.2.11"],
+    network: "production",
+    property: "www.akamai.com",
+    propertyVersion: 52,
+    propertyStatus: "active",
+    cpcode: "1234567",
+    edgeHostname: "www.akamai.com.edgekey.net",
+  },
+  // ── UAT ─────────────────────────────────────────────────────────────
+  {
+    id: "uat_staging",
+    label: "UAT / Staging",
     target: "UAT",
-    stage: "UAT",
-    baseUrl: "https://uat.example.akamai.com",
-    ips: ["23.32.22.10", "23.32.22.11"],
+    stage: "Staging",
+    baseUrl: "https://www.akamai.com",
+    ips: ["23.32.3.10", "23.32.3.11"],
     network: "staging",
-    property: "www.example.com",
+    property: "www.akamai.com",
     propertyVersion: 51,
     propertyStatus: "active",
     cpcode: "1234567",
-    edgeHostname: "uat.example.com.edgekey.net",
+    edgeHostname: "www.akamai.com.edgekey.net",
   },
   {
-    id: "prod",
-    label: "PROD",
-    target: "PROD",
+    id: "uat_prod",
+    label: "UAT / Production",
+    target: "UAT",
     stage: "Production",
-    baseUrl: "https://www.example.com",
-    ips: ["23.32.33.10", "23.32.33.11", "23.32.33.12"],
+    baseUrl: "https://www.akamai.com",
+    ips: ["23.32.4.10", "23.32.4.11"],
     network: "production",
-    property: "www.example.com",
+    property: "www.akamai.com",
+    propertyVersion: 51,
+    propertyStatus: "active",
+    cpcode: "1234567",
+    edgeHostname: "www.akamai.com.edgekey.net",
+  },
+  // ── PROD ─────────────────────────────────────────────────────────────
+  {
+    id: "prod_staging",
+    label: "PROD / Staging",
+    target: "PROD",
+    stage: "Staging",
+    baseUrl: "https://www.akamai.com",
+    ips: ["23.32.5.10", "23.32.5.11", "23.32.5.12"],
+    network: "staging",
+    property: "www.akamai.com",
     propertyVersion: 50,
     propertyStatus: "active",
     cpcode: "1234567",
-    edgeHostname: "www.example.com.edgekey.net",
+    edgeHostname: "www.akamai.com.edgekey.net",
+  },
+  {
+    id: "prod_prod",
+    label: "PROD / Production",
+    target: "PROD",
+    stage: "Production",
+    baseUrl: "https://www.akamai.com",
+    ips: ["23.32.6.10", "23.32.6.11", "23.32.6.12"],
+    network: "production",
+    property: "www.akamai.com",
+    propertyVersion: 50,
+    propertyStatus: "active",
+    cpcode: "1234567",
+    edgeHostname: "www.akamai.com.edgekey.net",
   },
 ];
 
@@ -51,7 +103,7 @@ const _listeners: Set<() => void> = new Set();
 function _load(): EnvironmentConfig[] {
   if (_overrides) return _overrides;
   try {
-    const raw = localStorage.getItem("aware-env-configs-v2");
+    const raw = localStorage.getItem("aware-env-configs-v3");
     if (raw) {
       const parsed = JSON.parse(raw) as EnvironmentConfig[];
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -69,7 +121,7 @@ export function getEnvConfigs(): EnvironmentConfig[] {
 export function saveEnvConfigs(configs: EnvironmentConfig[]): void {
   _overrides = configs;
   try {
-    localStorage.setItem("aware-env-configs-v2", JSON.stringify(configs));
+    localStorage.setItem("aware-env-configs-v3", JSON.stringify(configs));
   } catch {
     /* ignore */
   }
@@ -79,7 +131,7 @@ export function saveEnvConfigs(configs: EnvironmentConfig[]): void {
 export function resetEnvConfigs(): void {
   _overrides = null;
   try {
-    localStorage.removeItem("aware-env-configs-v2");
+    localStorage.removeItem("aware-env-configs-v3");
   } catch {
     /* ignore */
   }

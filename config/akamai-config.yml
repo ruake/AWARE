@@ -1,36 +1,35 @@
 # =============================================================================
 # A.W.A.R.E. — Akamai Property & CDN Configuration
+# All tests target https://www.akamai.com/
 # Central config consumed by both CI and the observability dashboard.
-# Update property versions here after each Akamai activation.
 # =============================================================================
 
 project:
   name: A.W.A.R.E.
   fullName: Akamai Web Analytics Regression Engine
   description: >
-    CDN test observability dashboard for Playwright + pytest suites
-    running via GitHub Actions across QA, UAT, and PROD Akamai edges.
+    CDN test observability dashboard for Playwright + pytest suites running via
+    GitHub Actions across QA, UAT, and PROD Akamai edges — staging and
+    production networks.
   team: platform-engineering
   repoUrl: https://github.com/your-org/aware
   slackChannel: "#cdn-alerts"
 
 # Akamai properties tracked by A.W.A.R.E.
-# Add one block per property you want to track.
 properties:
-  - name: www.example.com
+  - name: www.akamai.com
     contractId: ctr_XXXXXXXX
     groupId: grp_XXXXXXXX
     cpcode: "1234567"
-    edgeHostnames:
-      qa: qa.example.com.edgekey.net
-      uat: uat.example.com.edgekey.net
-      prod: www.example.com.edgekey.net
+    edgeHostname: www.akamai.com.edgekey.net
+    # Active property version per environment tier
+    # Each tier also has staging + production network variants
     activeVersions:
       qa: 52
       uat: 51
       prod: 50
     promotionGate:
-      minPassRate: 95         # % pass rate required to promote
+      minPassRate: 95           # % pass rate required to promote (UAT → PROD)
       requiredSuites:
         - suite_smoke
         - suite_regression_uat
@@ -55,6 +54,7 @@ runners:
     baseTimeout: 30000
     retries: 2
     workers: 4
+    baseUrl: https://www.akamai.com
     reportDir: reports/playwright/
 
   pytest:
@@ -66,6 +66,7 @@ runners:
       - performance
     timeout: 60
     workers: 4
+    baseUrl: https://www.akamai.com
     reportDir: reports/pytest/
 
 # Notification settings
@@ -79,4 +80,4 @@ notifications:
     requiredForMerge: true
   pagerduty:
     enabled: true
-    triggerOn: [prod_fail, pass_rate_below_80]
+    triggerOn: [prod_prod_fail, pass_rate_below_80]

@@ -1,4 +1,11 @@
-export const ENVS = ["QA", "UAT", "PROD"];
+export const ENVS = [
+  "QA / Staging",
+  "QA / Production",
+  "UAT / Staging",
+  "UAT / Production",
+  "PROD / Staging",
+  "PROD / Production",
+];
 
 export const CATEGORIES = [
   "geo-match",
