@@ -102,6 +102,11 @@ export default function Copilot() {
   const [providerAvail, setProviderAvail] = React.useState<Record<string, boolean>>({});
   const [expandedMsgs, setExpandedMsgs] = React.useState<Set<number>>(new Set());
   const [showProviderMenu, setShowProviderMenu] = React.useState(false);
+  const [showSettings, setShowSettings] = React.useState(false);
+  const [settingsApiKey, setSettingsApiKey] = React.useState("");
+  const [settingsApiUrl, setSettingsApiUrl] = React.useState("");
+  const [settingsModel, setSettingsModel] = React.useState("");
+  const [settingsSaved, setSettingsSaved] = React.useState(false);
   const [thinkingMsg, setThinkingMsg] = React.useState(PROCESSING_MESSAGES[0]);
   const providerRef = React.useRef<HTMLDivElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
@@ -174,6 +179,32 @@ export default function Copilot() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  // Sync settings form from current config when panel opens
+  React.useEffect(() => {
+    if (showSettings) {
+      const c = getLLMConfig();
+      setSettingsApiKey(c.apiKey ?? "");
+      setSettingsApiUrl(c.apiUrl ?? "");
+      setSettingsModel(c.model ?? "");
+    }
+  }, [showSettings]);
+
+  const handleSaveSettings = async () => {
+    setLLMConfig({
+      provider: "openai",
+      apiKey: settingsApiKey.trim(),
+      apiUrl: settingsApiUrl.trim() || undefined,
+      model: settingsModel.trim() || "gpt-4o-mini",
+    });
+    setSettingsSaved(true);
+    setTimeout(() => setSettingsSaved(false), 2500);
+    setShowSettings(false);
+    setLoading(true);
+    setMessages([]);
+    setActiveUseCase(null);
+    setTimeout(() => init(), 0);
+  };
 
   const switchProvider = async (type: LLMProviderType) => {
     setShowProviderMenu(false);
@@ -486,6 +517,29 @@ export default function Copilot() {
             <span style={{ fontSize: 10, color: aiReady ? "#22c55e" : "#ef4444", fontWeight: 500 }}>
               {aiReady ? "Connected" : "Unavailable"}
             </span>
+            <button
+              onClick={() => { setShowProviderMenu(false); setShowSettings((p) => !p); }}
+              style={{
+                marginLeft: "auto",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "3px 10px",
+                borderRadius: 4,
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                border: showSettings ? "1px solid var(--proof-blue)" : "1px solid var(--proof-grey)",
+                background: showSettings ? "var(--proof-blue-bg)" : "var(--proof-surface)",
+                color: showSettings ? "var(--proof-blue)" : "var(--proof-text-secondary)",
+              }}
+            >
+              <Settings size={11} />
+              Configure
+            </button>
+            {settingsSaved && (
+              <span style={{ fontSize: 10, color: "#22c55e", fontWeight: 600 }}>Saved!</span>
+            )}
             {showProviderMenu && (
               <div
                 style={{
@@ -560,7 +614,7 @@ export default function Copilot() {
                 >
                   {currentProvider === "openai" &&
                     !providerAvail.openai &&
-                    "Set VITE_LLM_API_KEY env var or configure in Settings"}
+                    "Click ⚙ Configure above to enter your API key"}
                   {currentProvider === "webllm" &&
                     !providerAvail.webllm &&
                     "Requires Chrome 113+ with WebGPU"}
@@ -571,6 +625,128 @@ export default function Copilot() {
               </div>
             )}
           </div>
+          {/* Settings panel */}
+          {showSettings && (
+            <div
+              style={{
+                padding: "14px 16px",
+                borderRadius: 8,
+                marginBottom: 8,
+                background: "var(--proof-surface)",
+                border: "1px solid var(--proof-blue)",
+                boxShadow: "0 2px 8px rgba(91,138,245,0.1)",
+              }}
+            >
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                <Globe size={13} style={{ color: "var(--proof-blue)" }} />
+                OpenAI / Compatible API Settings
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--proof-text-secondary)" }}>
+                    API Key <span style={{ color: "#ef4444" }}>*</span>
+                  </span>
+                  <input
+                    type="password"
+                    value={settingsApiKey}
+                    onChange={(e) => setSettingsApiKey(e.target.value)}
+                    placeholder="sk-..."
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 5,
+                      border: "1px solid var(--proof-grey)",
+                      background: "var(--proof-grey-bg)",
+                      color: "var(--proof-text)",
+                      fontSize: 12,
+                      fontFamily: "monospace",
+                      outline: "none",
+                    }}
+                  />
+                </label>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <label style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--proof-text-secondary)" }}>
+                      Model
+                    </span>
+                    <input
+                      type="text"
+                      value={settingsModel}
+                      onChange={(e) => setSettingsModel(e.target.value)}
+                      placeholder="gpt-4o-mini"
+                      style={{
+                        padding: "6px 10px",
+                        borderRadius: 5,
+                        border: "1px solid var(--proof-grey)",
+                        background: "var(--proof-grey-bg)",
+                        color: "var(--proof-text)",
+                        fontSize: 12,
+                        outline: "none",
+                      }}
+                    />
+                  </label>
+                  <label style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--proof-text-secondary)" }}>
+                      API URL (optional)
+                    </span>
+                    <input
+                      type="text"
+                      value={settingsApiUrl}
+                      onChange={(e) => setSettingsApiUrl(e.target.value)}
+                      placeholder="https://api.openai.com/v1/chat/completions"
+                      style={{
+                        padding: "6px 10px",
+                        borderRadius: 5,
+                        border: "1px solid var(--proof-grey)",
+                        background: "var(--proof-grey-bg)",
+                        color: "var(--proof-text)",
+                        fontSize: 12,
+                        outline: "none",
+                      }}
+                    />
+                  </label>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+                  <button
+                    onClick={handleSaveSettings}
+                    disabled={!settingsApiKey.trim()}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: 5,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: settingsApiKey.trim() ? "pointer" : "not-allowed",
+                      border: "none",
+                      background: settingsApiKey.trim() ? "var(--proof-blue)" : "var(--proof-grey)",
+                      color: "white",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 5,
+                    }}
+                  >
+                    Save & Connect
+                  </button>
+                  <button
+                    onClick={() => setShowSettings(false)}
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: 5,
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      border: "1px solid var(--proof-grey)",
+                      background: "transparent",
+                      color: "var(--proof-text-secondary)",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <span style={{ fontSize: 10, color: "var(--proof-text-muted)", marginLeft: 4 }}>
+                    Key is stored in your browser only — never sent anywhere except the LLM API.
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
           {!aiReady && usingFallback && (
             <div
               style={{
