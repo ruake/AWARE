@@ -1570,73 +1570,101 @@ export default function About() {
         <div
           className="proof-card"
           style={{
-            padding: "32px 36px",
+            padding: "36px 40px",
             marginBottom: 24,
-            borderLeft: "4px solid var(--proof-blue)",
             position: "relative",
             overflow: "hidden",
+            background: "linear-gradient(135deg, rgba(91,138,245,0.1) 0%, rgba(124,106,245,0.06) 50%, var(--proof-surface) 100%)",
+            borderTop: "2px solid rgba(91,138,245,0.5)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
+          {/* Decorative glow blob */}
+          <div
+            style={{
+              position: "absolute",
+              top: -60,
+              right: -60,
+              width: 220,
+              height: 220,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(91,138,245,0.12) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }}
+          />
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 22, position: "relative" }}>
             <div
               style={{
-                width: 56,
-                height: 56,
-                background: "var(--proof-blue)",
-                borderRadius: 12,
+                width: 60,
+                height: 60,
+                background: "linear-gradient(135deg, #4a7af5 0%, #7c6af5 100%)",
+                borderRadius: 14,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
+                boxShadow: "0 4px 20px rgba(91,138,245,0.35)",
               }}
             >
               <Zap size={28} color="white" />
             </div>
             <div>
-              <h1
-                style={{
-                  fontSize: 26,
-                  fontWeight: 800,
-                  color: "var(--proof-text)",
-                  marginBottom: 6,
-                  letterSpacing: "-0.5px",
-                }}
-              >
-                PROOF
-              </h1>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
+                <h1
+                  style={{
+                    fontSize: 30,
+                    fontWeight: 900,
+                    color: "var(--proof-text)",
+                    letterSpacing: "-1px",
+                    lineHeight: 1,
+                  }}
+                >
+                  PROOF
+                </h1>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "var(--proof-text-secondary)",
+                    letterSpacing: "0.05em",
+                    fontFamily: "var(--font-mono)",
+                  }}
+                >
+                  v2.0.0
+                </span>
+              </div>
               <p
                 style={{
                   fontSize: 14,
                   color: "var(--proof-text-secondary)",
-                  lineHeight: 1.6,
-                  maxWidth: 600,
+                  lineHeight: 1.7,
+                  maxWidth: 580,
+                  marginBottom: 16,
                 }}
               >
-                <strong>Pipeline for Regression Observation and Output Framework</strong> — a web
-                application regression testing platform for GitHub Actions. Observe pass rates,
-                compare baseline vs candidate, manage test cases, and gate promotions with
-                confidence.
+                <strong style={{ color: "var(--proof-text)" }}>Pipeline for Regression Observation and Output Framework</strong>
+                {" "}— a web application regression testing platform for GitHub Actions. Observe pass rates,
+                compare baseline vs candidate, manage test cases, and gate promotions with confidence.
               </p>
-              <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[
-                  "GHA Observability",
-                  "Regression Testing",
-                  "Promotion Gating",
-                  "Cross-Environment",
-                ].map((tag) => (
+                  { label: "GHA Observability", color: "#5b8af5" },
+                  { label: "Regression Testing", color: "#22c55e" },
+                  { label: "Promotion Gating", color: "#f59e0b" },
+                  { label: "Cross-Environment", color: "#a855f7" },
+                ].map(({ label, color }) => (
                   <span
-                    key={tag}
+                    key={label}
                     style={{
                       fontSize: 11,
-                      padding: "3px 10px",
-                      background: "var(--proof-blue-bg)",
-                      color: "var(--proof-blue)",
-                      borderRadius: 12,
+                      padding: "3px 11px",
+                      background: `${color}14`,
+                      color,
+                      borderRadius: 999,
                       fontWeight: 600,
-                      border: "1px solid var(--proof-blue)",
+                      border: `1px solid ${color}30`,
                     }}
                   >
-                    {tag}
+                    {label}
                   </span>
                 ))}
               </div>
@@ -1916,9 +1944,12 @@ export default function About() {
         </div>
 
         {/* Use Case Carousel */}
-        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--proof-text)" }}>
-          Use Cases
-        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 3, height: 18, borderRadius: 2, background: "linear-gradient(180deg, #f59e0b 0%, #f97316 100%)" }} />
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--proof-text)", margin: 0 }}>
+            Use Cases
+          </h2>
+        </div>
         <div
           className="proof-card"
           style={{ padding: 24, marginBottom: 24, position: "relative", overflow: "hidden" }}
@@ -1927,38 +1958,59 @@ export default function About() {
         </div>
 
         {/* Features grid */}
-        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--proof-text)" }}>
-          Platform Features
-        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 3, height: 18, borderRadius: 2, background: "linear-gradient(180deg, #5b8af5 0%, #7c6af5 100%)" }} />
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--proof-text)", margin: 0 }}>
+            Platform Features
+          </h2>
+        </div>
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-            gap: 16,
-            marginBottom: 28,
+            gap: 14,
+            marginBottom: 32,
           }}
         >
-          {features.map((f) => {
+          {features.map((f, idx) => {
             const Icon = f.icon;
+            const iconColors = ["#5b8af5", "#22c55e", "#f59e0b", "#a855f7", "#ef4444", "#f97316"];
+            const color = iconColors[idx % iconColors.length];
             return (
               <div
                 key={f.title}
                 className="proof-card"
-                style={{ padding: 20, display: "flex", gap: 14 }}
+                style={{
+                  padding: 18,
+                  display: "flex",
+                  gap: 14,
+                  borderTop: `2px solid ${color}40`,
+                  background: `linear-gradient(160deg, ${color}07 0%, var(--proof-surface) 100%)`,
+                  transition: "border-color 0.15s, box-shadow 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.borderTopColor = `${color}80`;
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = `0 4px 20px ${color}18`;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.borderTopColor = `${color}40`;
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = "";
+                }}
               >
                 <div
                   style={{
                     width: 36,
                     height: 36,
-                    background: "var(--proof-blue-bg)",
-                    borderRadius: 8,
+                    background: `${color}18`,
+                    borderRadius: 9,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
+                    border: `1px solid ${color}25`,
                   }}
                 >
-                  <Icon size={18} color="var(--proof-blue)" />
+                  <Icon size={17} style={{ color }} />
                 </div>
                 <div>
                   <div
@@ -1972,7 +2024,7 @@ export default function About() {
                     {f.title}
                   </div>
                   <div
-                    style={{ fontSize: 12, color: "var(--proof-text-secondary)", lineHeight: 1.5 }}
+                    style={{ fontSize: 12, color: "var(--proof-text-secondary)", lineHeight: 1.55 }}
                   >
                     {f.desc}
                   </div>
@@ -1983,9 +2035,12 @@ export default function About() {
         </div>
 
         {/* Tech stack */}
-        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: "var(--proof-text)" }}>
-          Tech Stack
-        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 3, height: 18, borderRadius: 2, background: "linear-gradient(180deg, #a855f7 0%, #5b8af5 100%)" }} />
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--proof-text)", margin: 0 }}>
+            Tech Stack
+          </h2>
+        </div>
         <div className="proof-card" style={{ overflow: "hidden", marginBottom: 28 }}>
           <table className="proof-table" style={{ margin: 0 }}>
             <thead>
@@ -2046,9 +2101,13 @@ export default function About() {
 
         {/* CTA */}
         <div
-          className="proof-card"
           style={{
-            padding: 24,
+            padding: "28px 32px",
+            borderRadius: 12,
+            position: "relative",
+            overflow: "hidden",
+            background: "linear-gradient(135deg, rgba(91,138,245,0.14) 0%, rgba(124,106,245,0.10) 50%, rgba(19,23,40,0.8) 100%)",
+            border: "1px solid rgba(91,138,245,0.25)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -2056,27 +2115,40 @@ export default function About() {
             flexWrap: "wrap",
           }}
         >
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Ready to explore?</div>
-            <div style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>
+          <div
+            style={{
+              position: "absolute",
+              bottom: -40,
+              left: -40,
+              width: 160,
+              height: 160,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(124,106,245,0.1) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }}
+          />
+          <div style={{ position: "relative" }}>
+            <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 5, letterSpacing: "-0.3px" }}>Ready to explore?</div>
+            <div style={{ fontSize: 13, color: "var(--proof-text-secondary)", lineHeight: 1.5 }}>
               Start with the Dashboard for a pass-rate summary, or dive into the Test Manager to
               manage your suite.
             </div>
           </div>
-          <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: 10, flexShrink: 0, position: "relative" }}>
             <Link
               href="/"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "8px 18px",
-                background: "var(--proof-blue)",
+                padding: "9px 20px",
+                background: "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)",
                 color: "white",
-                borderRadius: 4,
+                borderRadius: 8,
                 fontWeight: 600,
                 fontSize: 13,
                 textDecoration: "none",
+                boxShadow: "0 2px 12px rgba(91,138,245,0.35)",
               }}
             >
               <BarChart3 size={14} /> Dashboard
@@ -2087,14 +2159,14 @@ export default function About() {
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "8px 18px",
-                border: "1px solid var(--proof-blue)",
+                padding: "9px 20px",
+                border: "1px solid rgba(91,138,245,0.4)",
                 color: "var(--proof-blue)",
-                borderRadius: 4,
+                borderRadius: 8,
                 fontWeight: 600,
                 fontSize: 13,
                 textDecoration: "none",
-                background: "var(--proof-blue-bg)",
+                background: "rgba(91,138,245,0.1)",
               }}
             >
               <Bug size={14} /> Test Manager

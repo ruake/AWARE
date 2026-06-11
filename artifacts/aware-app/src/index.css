@@ -433,6 +433,16 @@ select.proof-input {
     box-shadow: 0 0 0 0 transparent;
   }
 }
+@keyframes pulseDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.7);
+  }
+}
 .animate-slide-up {
   animation: slide-up 0.25s ease-out both;
 }
