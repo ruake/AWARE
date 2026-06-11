@@ -270,7 +270,7 @@ export default function Copilot() {
           { role: "system", content: systemPrompt },
           ...priorMessages
             .filter((m) => m.role === "user" || m.role === "assistant")
-            .filter((m) => m.type !== "intro")
+            .filter((m) => m.type !== "intro" && m.type !== "capabilities" && m.content.trim() !== "")
             .slice(-12) // keep last 6 turns (12 messages)
             .map((m) => ({
               role: m.role as "user" | "assistant",
