@@ -1574,7 +1574,8 @@ export default function About() {
             marginBottom: 24,
             position: "relative",
             overflow: "hidden",
-            background: "linear-gradient(135deg, rgba(91,138,245,0.1) 0%, rgba(124,106,245,0.06) 50%, var(--proof-surface) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(91,138,245,0.1) 0%, rgba(124,106,245,0.06) 50%, var(--proof-surface) 100%)",
             borderTop: "2px solid rgba(91,138,245,0.5)",
           }}
         >
@@ -1641,9 +1642,12 @@ export default function About() {
                   marginBottom: 16,
                 }}
               >
-                <strong style={{ color: "var(--proof-text)" }}>Pipeline for Regression Observation and Output Framework</strong>
-                {" "}— a web application regression testing platform for GitHub Actions. Observe pass rates,
-                compare baseline vs candidate, manage test cases, and gate promotions with confidence.
+                <strong style={{ color: "var(--proof-text)" }}>
+                  Pipeline for Regression Observation and Output Framework
+                </strong>{" "}
+                — a web application regression testing platform for GitHub Actions. Observe pass
+                rates, compare baseline vs candidate, manage test cases, and gate promotions with
+                confidence.
               </p>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[
@@ -1945,7 +1949,14 @@ export default function About() {
 
         {/* Use Case Carousel */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-          <div style={{ width: 3, height: 18, borderRadius: 2, background: "linear-gradient(180deg, #f59e0b 0%, #f97316 100%)" }} />
+          <div
+            style={{
+              width: 3,
+              height: 18,
+              borderRadius: 2,
+              background: "linear-gradient(180deg, #f59e0b 0%, #f97316 100%)",
+            }}
+          />
           <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--proof-text)", margin: 0 }}>
             Use Cases
           </h2>
@@ -1959,7 +1970,14 @@ export default function About() {
 
         {/* Features grid */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-          <div style={{ width: 3, height: 18, borderRadius: 2, background: "linear-gradient(180deg, #5b8af5 0%, #7c6af5 100%)" }} />
+          <div
+            style={{
+              width: 3,
+              height: 18,
+              borderRadius: 2,
+              background: "linear-gradient(180deg, #5b8af5 0%, #7c6af5 100%)",
+            }}
+          />
           <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--proof-text)", margin: 0 }}>
             Platform Features
           </h2>
@@ -2036,7 +2054,14 @@ export default function About() {
 
         {/* Tech stack */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-          <div style={{ width: 3, height: 18, borderRadius: 2, background: "linear-gradient(180deg, #a855f7 0%, #5b8af5 100%)" }} />
+          <div
+            style={{
+              width: 3,
+              height: 18,
+              borderRadius: 2,
+              background: "linear-gradient(180deg, #a855f7 0%, #5b8af5 100%)",
+            }}
+          />
           <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--proof-text)", margin: 0 }}>
             Tech Stack
           </h2>
@@ -2106,7 +2131,8 @@ export default function About() {
             borderRadius: 12,
             position: "relative",
             overflow: "hidden",
-            background: "linear-gradient(135deg, rgba(91,138,245,0.14) 0%, rgba(124,106,245,0.10) 50%, rgba(19,23,40,0.8) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(91,138,245,0.14) 0%, rgba(124,106,245,0.10) 50%, rgba(19,23,40,0.8) 100%)",
             border: "1px solid rgba(91,138,245,0.25)",
             display: "flex",
             alignItems: "center",
@@ -2128,7 +2154,11 @@ export default function About() {
             }}
           />
           <div style={{ position: "relative" }}>
-            <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 5, letterSpacing: "-0.3px" }}>Ready to explore?</div>
+            <div
+              style={{ fontWeight: 800, fontSize: 16, marginBottom: 5, letterSpacing: "-0.3px" }}
+            >
+              Ready to explore?
+            </div>
             <div style={{ fontSize: 13, color: "var(--proof-text-secondary)", lineHeight: 1.5 }}>
               Start with the Dashboard for a pass-rate summary, or dive into the Test Manager to
               manage your suite.

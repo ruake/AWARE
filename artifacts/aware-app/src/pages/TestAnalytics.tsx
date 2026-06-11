@@ -949,7 +949,11 @@ export default function TestAnalytics() {
                       ) : null}
                     </td>
                     <td>
-                      <Link href={`/runs/${h.runId}`} className="proof-button proof-button-xs" style={{ padding: "2px 7px" }}>
+                      <Link
+                        href={`/runs/${h.runId}`}
+                        className="proof-button proof-button-xs"
+                        style={{ padding: "2px 7px" }}
+                      >
                         View Run
                       </Link>
                     </td>

@@ -118,10 +118,26 @@ function SummaryCard({
       >
         <Icon size={14} style={{ color }} />
       </div>
-      <div style={{ fontSize: 24, fontWeight: 800, color: "var(--proof-text)", lineHeight: 1, letterSpacing: "-0.5px" }}>
+      <div
+        style={{
+          fontSize: 24,
+          fontWeight: 800,
+          color: "var(--proof-text)",
+          lineHeight: 1,
+          letterSpacing: "-0.5px",
+        }}
+      >
         {value}
       </div>
-      <div style={{ fontSize: 11, fontWeight: 500, color: "var(--proof-text-secondary)", lineHeight: 1.3, marginTop: 5 }}>
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 500,
+          color: "var(--proof-text-secondary)",
+          lineHeight: 1.3,
+          marginTop: 5,
+        }}
+      >
         {label}
       </div>
       {sub && (
@@ -282,7 +298,8 @@ export default function Pulse() {
                   width: 32,
                   height: 32,
                   borderRadius: 8,
-                  background: "linear-gradient(135deg, rgba(91,138,245,0.2) 0%, rgba(59,130,246,0.15) 100%)",
+                  background:
+                    "linear-gradient(135deg, rgba(91,138,245,0.2) 0%, rgba(59,130,246,0.15) 100%)",
                   border: "1px solid rgba(91,138,245,0.25)",
                   display: "flex",
                   alignItems: "center",
@@ -406,7 +423,8 @@ export default function Pulse() {
             style={{
               padding: "12px 18px",
               borderRadius: 10,
-              background: "linear-gradient(90deg, rgba(59,130,246,0.1) 0%, rgba(91,138,245,0.06) 100%)",
+              background:
+                "linear-gradient(90deg, rgba(59,130,246,0.1) 0%, rgba(91,138,245,0.06) 100%)",
               border: "1px solid rgba(59,130,246,0.25)",
               borderLeft: "3px solid #3b82f6",
               display: "flex",
@@ -466,7 +484,8 @@ export default function Pulse() {
             style={{
               padding: "12px 18px",
               borderRadius: 10,
-              background: "linear-gradient(90deg, rgba(34,197,94,0.08) 0%, rgba(34,197,94,0.03) 100%)",
+              background:
+                "linear-gradient(90deg, rgba(34,197,94,0.08) 0%, rgba(34,197,94,0.03) 100%)",
               border: "1px solid rgba(34,197,94,0.18)",
               borderLeft: "3px solid #22c55e",
               display: "flex",
@@ -546,7 +565,12 @@ export default function Pulse() {
             Navigate
           </span>
           <div
-            style={{ width: 1, height: 14, background: "var(--proof-border-strong)", marginRight: 4 }}
+            style={{
+              width: 1,
+              height: 14,
+              background: "var(--proof-border-strong)",
+              marginRight: 4,
+            }}
           />
           {[
             { href: "/", icon: BarChart3, label: "Dashboard" },
@@ -605,7 +629,9 @@ export default function Pulse() {
         </div>
 
         {/* Workflow history */}
-        <div style={{ borderRadius: 10, border: "1px solid var(--proof-border)", overflow: "hidden" }}>
+        <div
+          style={{ borderRadius: 10, border: "1px solid var(--proof-border)", overflow: "hidden" }}
+        >
           <div
             style={{
               padding: "11px 16px",
@@ -617,8 +643,24 @@ export default function Pulse() {
             }}
           >
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-              <h3 style={{ fontSize: 13, fontWeight: 700, marginRight: 6, color: "var(--proof-text)" }}>Workflow History</h3>
-              <div style={{ width: 1, height: 14, background: "var(--proof-border-strong)", marginRight: 2 }} />
+              <h3
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  marginRight: 6,
+                  color: "var(--proof-text)",
+                }}
+              >
+                Workflow History
+              </h3>
+              <div
+                style={{
+                  width: 1,
+                  height: 14,
+                  background: "var(--proof-border-strong)",
+                  marginRight: 2,
+                }}
+              />
               {statusTabs.map((tab) => (
                 <button
                   key={tab.key}
@@ -627,9 +669,10 @@ export default function Pulse() {
                     padding: "3px 10px",
                     borderRadius: 999,
                     border: activeTab === tab.key ? "none" : "1px solid transparent",
-                    background: activeTab === tab.key
-                      ? "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)"
-                      : "transparent",
+                    background:
+                      activeTab === tab.key
+                        ? "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)"
+                        : "transparent",
                     color: activeTab === tab.key ? "white" : "var(--proof-text-secondary)",
                     cursor: "pointer",
                     fontSize: 11,
