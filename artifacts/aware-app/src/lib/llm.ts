@@ -28,44 +28,63 @@ class OpenAILLMProvider implements ILLMProvider {
   constructor(private config: LLMConfig) {}
 
   async complete(req: LLMCompletionRequest): Promise<LLMCompletionResponse> {
-    const url = this.config.apiUrl ?? "https://api.openai.com/v1/chat/completions";
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.config.apiKey ?? ""}`,
-      },
-      body: JSON.stringify({
-        model: this.config.model,
-        messages: req.messages,
-        temperature: req.temperature ?? this.config.temperature,
-        max_tokens: req.maxTokens ?? this.config.maxTokens,
-        stream: false,
-      }),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "Unknown error");
-      throw new Error(`LLM API error ${res.status}: ${text}`);
+    if (!this.config.apiKey) {
+      return {
+        content:
+          "No API key configured. Click **⚙ Configure** above to enter your OpenAI API key.",
+        finishReason: "error",
+      };
     }
-    const data = await res.json();
-    const choice = data.choices?.[0];
-    return {
-      content: choice?.message?.content ?? "",
-      finishReason: choice?.finish_reason === "stop" ? "stop" : "length",
-      usage: data.usage
-        ? {
-            promptTokens: data.usage.prompt_tokens,
-            completionTokens: data.usage.completion_tokens,
-            totalTokens: data.usage.total_tokens,
-          }
-        : undefined,
-    };
+    try {
+      const url = this.config.apiUrl ?? "https://api.openai.com/v1/chat/completions";
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.config.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: this.config.model,
+          messages: req.messages,
+          temperature: req.temperature ?? this.config.temperature,
+          max_tokens: req.maxTokens ?? this.config.maxTokens,
+          stream: false,
+        }),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "Unknown error");
+        return {
+          content: `API error ${res.status}: ${text}\n\nCheck your API key and model name in **⚙ Configure**.`,
+          finishReason: "error",
+        };
+      }
+      const data = await res.json();
+      const choice = data.choices?.[0];
+      return {
+        content: choice?.message?.content ?? "",
+        finishReason: choice?.finish_reason === "stop" ? "stop" : "length",
+        usage: data.usage
+          ? {
+              promptTokens: data.usage.prompt_tokens,
+              completionTokens: data.usage.completion_tokens,
+              totalTokens: data.usage.total_tokens,
+            }
+          : undefined,
+      };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return {
+        content: `Network error: ${msg}\n\nCheck your API URL in **⚙ Configure**.`,
+        finishReason: "error",
+      };
+    }
   }
 
   async testConnection(): Promise<boolean> {
+    if (!this.config.apiKey) return false;
     try {
-      await this.complete({ messages: [{ role: "user", content: "ping" }], maxTokens: 1 });
-      return true;
+      const result = await this.complete({ messages: [{ role: "user", content: "ping" }], maxTokens: 1 });
+      return result.finishReason !== "error";
     } catch {
       return false;
     }
@@ -95,35 +114,53 @@ class WebLLMProvider implements ILLMProvider {
 
   constructor(private config: LLMConfig) {}
 
+  // WebLLM uses its own model catalog — the shared config.model is for OpenAI/Chrome
+  private get _webllmModel(): string {
+    const m = this.config.model || "";
+    // Only use config.model if it looks like a WebLLM model ID (contains "-MLC" or "MLC-")
+    if (m.includes("-MLC") || m.includes("MLC-")) return m;
+    return "Llama-3.2-1B-Instruct-q4f32_1-MLC";
+  }
+
   async complete(req: LLMCompletionRequest): Promise<LLMCompletionResponse> {
     const avail = await checkWebLLM();
     if (!avail) {
       return {
         content:
-          "WebLLM is not available. This browser lacks WebGPU support or the `@mlc-ai/web-llm` package is not installed.\n\nTo use WebLLM:\n1. Use Chrome (≥113) with WebGPU enabled\n2. Run `pnpm add @mlc-ai/web-llm`\n\nFor now, switch to **Mock (offline)** or configure an **OpenAI-compatible API** in Settings.",
+          "WebLLM requires WebGPU support (Chrome 113+). Your browser doesn't support it.\n\nClick **⚙ Configure** above to use OpenAI or another API instead.",
         finishReason: "error",
       };
     }
-    if (!this.engine) {
-      if (!this._initPromise) this._initPromise = this._init();
-      await this._initPromise;
+    try {
+      if (!this.engine) {
+        if (!this._initPromise) this._initPromise = this._init();
+        await this._initPromise;
+      }
+      const res = await this.engine.chat.completions.create({
+        messages: req.messages.map((m) => ({ role: m.role, content: m.content })),
+        temperature: req.temperature ?? this.config.temperature,
+        max_tokens: req.maxTokens ?? this.config.maxTokens,
+      });
+      const choice = res.choices?.[0];
+      return {
+        content: choice?.message?.content ?? "",
+        finishReason: choice?.finish_reason === "stop" ? "stop" : "length",
+      };
+    } catch (err) {
+      this.engine = null;
+      this._initPromise = null;
+      const msg = err instanceof Error ? err.message : String(err);
+      return {
+        content: `WebLLM failed to load model "${this._webllmModel}": ${msg}\n\nClick **⚙ Configure** above to use OpenAI or another API instead.`,
+        finishReason: "error",
+      };
     }
-    const res = await this.engine.chat.completions.create({
-      messages: req.messages.map((m) => ({ role: m.role, content: m.content })),
-      temperature: req.temperature ?? this.config.temperature,
-      max_tokens: req.maxTokens ?? this.config.maxTokens,
-    });
-    const choice = res.choices?.[0];
-    return {
-      content: choice?.message?.content ?? "",
-      finishReason: choice?.finish_reason === "stop" ? "stop" : "length",
-    };
   }
 
   private async _init() {
     const mod = await import("@mlc-ai/web-llm");
     this.engine = await mod.CreateMLCEngine(
-      this.config.model || "Llama-3.2-1B-Instruct-q4f32_1-MLC",
+      this._webllmModel,
       {
         initProgressCallback: (report: { progress: number; text: string }) => {
           if (_webLlmProgressCallback) {
@@ -141,6 +178,8 @@ class WebLLMProvider implements ILLMProvider {
       if (!this.engine) await this._init();
       return this.engine !== null;
     } catch {
+      this.engine = null;
+      this._initPromise = null;
       return false;
     }
   }
