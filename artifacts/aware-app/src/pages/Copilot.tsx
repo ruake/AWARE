@@ -241,13 +241,23 @@ export default function Copilot() {
     }
   };
 
+  const CAPABILITY_RE =
+    /\b(what can you do|capabilities|what do you do|how can you help|what are you|what can i ask|help me|show me what|get started)\b/i;
+
   const handleSend = async () => {
     if (!input.trim() || busy) return;
     const userMsg = input.trim();
-    // Snapshot current messages synchronously before any state updates
-    const priorMessages = messages;
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userMsg, type: "text" }]);
+
+    // Intercept capability questions — show quick-action bubbles instantly
+    if (CAPABILITY_RE.test(userMsg)) {
+      setMessages((prev) => [...prev, { role: "assistant", content: "", type: "capabilities" }]);
+      return;
+    }
+
+    // Snapshot current messages synchronously before any state updates
+    const priorMessages = messages;
     setBusy(true);
     try {
       const provider = getProvider();
@@ -830,6 +840,82 @@ export default function Copilot() {
                 >
                   {msg.role === "user" ? (
                     msg.content
+                  ) : msg.type === "capabilities" ? (
+                    <div style={{ minWidth: 320 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)", marginBottom: 12 }}>
+                        Here's what I can do with your test data:
+                      </div>
+                      {(["analysis", "alert", "recommendation", "report"] as const).map((cat) => {
+                        const catUcs = AI_USE_CASES.filter((uc) => uc.category === cat);
+                        if (!catUcs.length) return null;
+                        const catLabel: Record<string, string> = {
+                          analysis: "Analysis",
+                          alert: "Alerts & Detection",
+                          recommendation: "Recommendations",
+                          report: "Reports",
+                        };
+                        const catColor: Record<string, string> = {
+                          analysis: "#5b8af5",
+                          alert: "#ef4444",
+                          recommendation: "#22c55e",
+                          report: "#a855f7",
+                        };
+                        return (
+                          <div key={cat} style={{ marginBottom: 10 }}>
+                            <div style={{
+                              fontSize: 9,
+                              fontWeight: 700,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.1em",
+                              color: catColor[cat],
+                              marginBottom: 6,
+                            }}>
+                              {catLabel[cat]}
+                            </div>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                              {catUcs.map((uc) => (
+                                <button
+                                  key={uc.id}
+                                  onClick={() => handleUseCase(uc)}
+                                  title={uc.description}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 5,
+                                    padding: "5px 11px",
+                                    borderRadius: 20,
+                                    fontSize: 11,
+                                    fontWeight: 500,
+                                    cursor: "pointer",
+                                    border: `1px solid ${catColor[cat]}30`,
+                                    background: `${catColor[cat]}0f`,
+                                    color: "var(--proof-text)",
+                                    transition: "all 0.12s",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = `${catColor[cat]}22`;
+                                    e.currentTarget.style.borderColor = `${catColor[cat]}60`;
+                                    e.currentTarget.style.color = catColor[cat];
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = `${catColor[cat]}0f`;
+                                    e.currentTarget.style.borderColor = `${catColor[cat]}30`;
+                                    e.currentTarget.style.color = "var(--proof-text)";
+                                  }}
+                                >
+                                  {USE_CASE_ICONS[uc.id] || <Zap size={11} />}
+                                  {uc.name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div style={{ marginTop: 12, fontSize: 11, color: "var(--proof-text-muted)" }}>
+                        Or just type a question about your runs, tests, or environments.
+                      </div>
+                    </div>
                   ) : (
                     <>
                       <Markdown
