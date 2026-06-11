@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import {
   Activity,
@@ -15,6 +15,7 @@ import {
   Github,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
+import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { RUNS } from "@/lib/data";
 import type { Run } from "@/lib/types";
 const GH_ACTIONS_URL = `${window.location.origin}/ruake/PROOF/actions`;
@@ -71,88 +72,6 @@ function StatusBadge({ status }: { status: Run["status"] }) {
       <Icon size={11} className={status === "RUNNING" ? "animate-spin" : ""} />
       {cfg.label}
     </span>
-  );
-}
-
-function SummaryCard({
-  label,
-  value,
-  sub,
-  color,
-  icon: Icon,
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-  color: string;
-  icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        padding: "14px 16px 12px",
-        borderRadius: 10,
-        border: `1px solid ${color}22`,
-        background: `linear-gradient(160deg, ${color}0d 0%, rgba(19,23,40,0) 100%)`,
-        borderTop: `2px solid ${color}55`,
-        position: "relative",
-        overflow: "hidden",
-        minWidth: 120,
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: 10,
-          right: 12,
-          width: 28,
-          height: 28,
-          borderRadius: 7,
-          background: `${color}18`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Icon size={14} style={{ color }} />
-      </div>
-      <div
-        style={{
-          fontSize: 24,
-          fontWeight: 800,
-          color: "var(--proof-text)",
-          lineHeight: 1,
-          letterSpacing: "-0.5px",
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          fontSize: 11,
-          fontWeight: 500,
-          color: "var(--proof-text-secondary)",
-          lineHeight: 1.3,
-          marginTop: 5,
-        }}
-      >
-        {label}
-      </div>
-      {sub && (
-        <div
-          style={{
-            fontSize: 9.5,
-            color: "var(--proof-text-muted)",
-            marginTop: 2,
-            lineHeight: 1.3,
-          }}
-        >
-          {sub}
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -237,6 +156,7 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
 }
 
 export default function Pulse() {
+  const [, navigate] = useLocation();
   const { Toast } = useSimpleToast();
   const [activeTab, setActiveTab] = React.useState<"all" | Run["status"]>("all");
   const [, setRefresh] = React.useState(0);
@@ -385,30 +305,63 @@ export default function Pulse() {
           </div>
         </div>
 
-        {/* Summary cards */}
+        {/* Summary cards — clickable to filter the workflow table */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+            gridTemplateColumns: "repeat(6, 1fr)",
             gap: 10,
           }}
         >
-          <SummaryCard label="Total Workflows" value={total} color="#5b8af5" icon={Activity} />
-          <SummaryCard label="Running Now" value={running.length} color="#3b82f6" icon={Loader2} />
-          <SummaryCard label="Passed" value={passed} color="#22c55e" icon={Check} />
-          <SummaryCard label="Failed / Flaky" value={failed} color="#ef4444" icon={X} />
-          <SummaryCard
+          <CTAStatCard
+            label="Total"
+            value={total}
+            subtitle="all environments"
+            accentColor="var(--proof-blue)"
+            icon={<Activity size={16} />}
+            onClick={() => setActiveTab("all")}
+            active={activeTab === "all"}
+          />
+          <CTAStatCard
+            label="Running"
+            value={running.length}
+            subtitle="in progress"
+            accentColor="#3b82f6"
+            icon={<Loader2 size={16} />}
+            onClick={() => setActiveTab("RUNNING")}
+            active={activeTab === "RUNNING"}
+          />
+          <CTAStatCard
+            label="Passed"
+            value={passed}
+            subtitle="successful"
+            accentColor="var(--proof-green)"
+            icon={<Check size={16} />}
+            onClick={() => setActiveTab("PASS")}
+            active={activeTab === "PASS"}
+          />
+          <CTAStatCard
+            label="Failed / Flaky"
+            value={failed}
+            subtitle="need attention"
+            accentColor="var(--proof-red)"
+            icon={<X size={16} />}
+            onClick={() => setActiveTab("FAIL")}
+            active={activeTab === "FAIL"}
+          />
+          <CTAStatCard
             label="Avg Pass Rate"
             value={`${avgPassRate}%`}
-            sub={`across ${total} workflows`}
-            color={avgPassRate >= 80 ? "#22c55e" : avgPassRate >= 50 ? "#f59e0b" : "#ef4444"}
-            icon={BarChart3}
+            subtitle={`${total} workflows`}
+            accentColor={avgPassRate >= 80 ? "var(--proof-green)" : avgPassRate >= 50 ? "var(--proof-yellow)" : "var(--proof-red)"}
+            icon={<BarChart3 size={16} />}
           />
-          <SummaryCard
+          <CTAStatCard
             label="Avg Duration"
             value={avgDuration > 0 ? formatDuration(avgDuration) : "—"}
-            color="#a855f7"
-            icon={Clock}
+            subtitle="per workflow"
+            accentColor="var(--proof-purple)"
+            icon={<Clock size={16} />}
           />
         </div>
 
@@ -727,7 +680,7 @@ export default function Pulse() {
                     <RunRow
                       key={run.id}
                       run={run}
-                      onClick={(id) => (window.location.href = `/runs/${id}`)}
+                      onClick={(id) => navigate(`/runs/${id}`)}
                     />
                   ))}
                 </tbody>
