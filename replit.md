@@ -1,45 +1,66 @@
-# [Project name]
+# A.W.A.R.E. — Akamai Web Analytics Regression Engine
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A.W.A.R.E. is a CDN test observability dashboard for Playwright + pytest suites running via GitHub Actions across **QA**, **UAT**, and **PROD** Akamai edge environments. It surfaces pass-rate trends, regression comparisons, and Akamai property activation status in a single always-visible view.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/aware-app run dev` — run the app (dev server)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- pnpm workspaces, Node.js 20, TypeScript 5.9
+- Frontend: React 19 + Vite 7 + Tailwind CSS 4
+- Routing: wouter
+- Charts: react-google-charts + recharts
+- AI Copilot: WebLLM / OpenAI-compatible
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/aware-app/src/` — main React app source
+- `artifacts/aware-app/src/pages/` — Dashboard, Runs, Compare, Analytics, Suites, Copilot, CI Pipeline, About
+- `artifacts/aware-app/src/lib/` — data layer (runs, testCases, envConfig, ciConfig, types, constants)
+- `artifacts/aware-app/src/data/` — seed JSON (runs, test-results, test-suites, auto-tests)
+- `artifacts/aware-app/src/components/aware/` — domain components (AppLayout, PropertyStatusBar, …)
+- `config/` — repo-committed YAML config (akamai-config.yml, environments.yml, test-suites.yml)
+- `.github/workflows/run-tests.yml` — GitHub Actions CDN test workflow
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- **Three environments: QA → UAT → PROD** — replacing the old four-env Prod/Staging matrix. Promotion gate enforces ≥ 95% pass rate before UAT → PROD.
+- **PropertyStatusBar always visible on Dashboard** — shows active Akamai property name, version, and status for all three envs at a glance.
+- **Config-as-code** — `config/environments.yml`, `config/test-suites.yml`, and `config/akamai-config.yml` are the single source of truth; CI reads them directly.
+- **Playwright + pytest both supported** — TestCase.testType includes `"pytest"` and `"web"` (Playwright); the CI workflow runs both in parallel jobs.
+- **All data in repo** — seed JSON in `src/data/` and YAML in `config/` live alongside code; no external database required.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- **Dashboard** — pass-rate KPIs, always-visible Akamai property status (QA/UAT/PROD), anomaly banners, env health cards, heatmap
+- **Runs** — full history of Playwright + pytest CI runs with env/suite filtering
+- **Compare** — side-by-side diff of two runs; surfaces regressions and fixes
+- **Analytics** — pass-rate trends, category heatmaps, flakiness scores
+- **Suites** — hierarchical test suite manager; maps to `config/test-suites.yml`
+- **CI Pipeline** — GitHub Actions status and downloadable AWARE config YAML
+- **Copilot** — AI-assisted test analysis and generation
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Always show QA, UAT, and PROD environments — never fewer than three
+- Use Akamai-specific terminology: property, property version, PoP, EdgeWorker, cpcode
+- Test runner language: Playwright (browser) and pytest (API / EdgeWorker)
+- GitHub Actions is the CI platform; workflow file lives at `.github/workflows/run-tests.yml`
+- Config is in the repo (`config/`) — highly configurable and scalable
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- `envConfig.ts` is the source of truth for environment definitions in the app; `config/environments.yml` is the repo-committed version for CI.
+- runs.json `env` field now uses `"QA"`, `"UAT"`, or `"PROD"` (not old "production"/"staging" strings).
+- `ENV_COLOR_MAP` in `runs.ts` has both new and legacy labels for backward compat.
+- The PropertyStatusBar reads from `getEnvConfigs()` which supports localStorage override (for user customization).
 
 ## Pointers
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- See `config/akamai-config.yml` for property + EdgeWorker definitions
+- See `config/test-suites.yml` for suite-to-environment mapping and schedules
+- See `.github/workflows/run-tests.yml` for the full CI workflow

@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
+import { PropertyStatusBar } from "@/components/aware/PropertyStatusBar";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 
 import { GoogleFilterableTable, GoogleAreaChart } from "@/components/aware/GoogleCharts";
@@ -131,7 +132,7 @@ export default function Dashboard() {
                   letterSpacing: "-0.1px",
                 }}
               >
-                Test analytics &amp; promotion readiness · Powered by GitHub Actions
+                Akamai CDN · Playwright + pytest · GitHub Actions
               </p>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
@@ -145,6 +146,11 @@ export default function Dashboard() {
                 <Play size={14} /> New Regression Run
               </button>
             </div>
+          </div>
+
+          {/* Akamai Property Status — always visible */}
+          <div className="proof-card" style={{ padding: "0 16px 12px" }}>
+            <PropertyStatusBar />
           </div>
 
           {/* Anomaly Detection Banner */}

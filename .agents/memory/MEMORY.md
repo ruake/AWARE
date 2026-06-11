@@ -1,3 +1,4 @@
 - [AWARE app routing pattern](aware-routing.md) — use `useLocation` + `navigate()` or pass props to `Link` directly; never nest `<a>` inside `<Link>` (wouter renders Link as `<a>` already).
 - [AWARE app architecture](aware-app-arch.md) — inline styles + GCP CSS vars (no Tailwind in main app), wouter routing, recharts (not react-google-charts), localStorage v2 keys.
 - [AWARE port decisions](aware-port-decisions.md) — mockup → main app porting rules; key conversions needed each time.
+- [AWARE Akamai environment model](aware-akamai-envs.md) — three envs: QA / UAT / PROD (replaced old four-env Prod/Staging matrix); runs.json uses `env: "QA"|"UAT"|"PROD"`; PropertyStatusBar always visible on Dashboard.

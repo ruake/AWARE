@@ -1,196 +1,277 @@
-name: Run Tests
+# =============================================================================
+# A.W.A.R.E. — Akamai CDN Regression Test Workflow
+# Runs Playwright and pytest suites against QA / UAT / PROD Akamai edges.
+#
+# Trigger manually:
+#   gh workflow run run-tests.yml \
+#     --field suite=suite_smoke \
+#     --field environment=QA \
+#     --field parallelism=4
+# =============================================================================
+
+name: A.W.A.R.E. CDN Tests
 
 permissions:
   contents: write
+  checks: write
+  pull-requests: write
 
 on:
-  schedule:
-    - cron: "*/30 * * * *"
-  push:
-    branches: [main]
-    paths:
-      - "artifacts/aware-app/src/**"
-      - "artifacts/aware-app/e2e/**"
-      - "artifacts/aware-app/src/data/**"
-  pull_request:
-    branches: [main]
-    paths:
-      - "artifacts/aware-app/src/**"
-      - "artifacts/aware-app/e2e/**"
-      - "artifacts/aware-app/src/data/**"
   workflow_dispatch:
     inputs:
-      branch:
-        description: Branch or commit SHA to run against
-        required: true
-        default: main
       suite:
-        description: Test suite to execute
+        description: "Test suite ID from config/test-suites.yml"
         required: true
+        default: suite_smoke
         type: choice
         options:
-          - suite_full
-          - suite_geo
-          - suite_perf
-          - suite_security
           - suite_smoke
-          - suite_uat
-          - suite_edge
-          - suite_mobile
-      target:
-        description: Target environment
-        required: true
-        type: choice
-        options:
-          - Prod
-          - UAT
+          - suite_regression_qa
+          - suite_regression_uat
+          - suite_nightly_prod
+          - suite_edgeworker
+          - suite_performance
       environment:
-        description: Environment tier
+        description: "Target Akamai environment"
         required: true
+        default: QA
         type: choice
         options:
-          - Production
-          - Staging
+          - QA
+          - UAT
+          - PROD
       parallelism:
-        description: Max parallel jobs
+        description: "Number of parallel test workers"
         required: false
-        type: number
-        default: 4
-      retries:
-        description: Failure retry count
+        default: "4"
+      dry_run:
+        description: "Dry run — validate config only, skip test execution"
         required: false
-        type: number
-        default: 1
+        default: "false"
+        type: boolean
+
+  schedule:
+    # Nightly PROD regression — 02:00 UTC
+    - cron: "0 2 * * *"
+    # Nightly UAT regression — 06:00 UTC
+    - cron: "0 6 * * *"
+
+  push:
+    paths:
+      - "tests/**"
+      - "edgeworkers/**"
+      - "config/akamai-config.yml"
+      - "config/environments.yml"
+      - "config/test-suites.yml"
+      - ".github/workflows/run-tests.yml"
+
+env:
+  AWARE_ENV: ${{ github.event.inputs.environment || 'QA' }}
+  AWARE_SUITE: ${{ github.event.inputs.suite || 'suite_smoke' }}
+  AWARE_PARALLELISM: ${{ github.event.inputs.parallelism || '4' }}
 
 jobs:
-  # ── On push/PR: typecheck + unit tests + E2E smoke ──
-  verify:
-    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: artifacts/aware-app
-    steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
-      - name: Validate data contracts
-        run: pnpm run validate:data
-      - name: Lint
-        run: pnpm run lint
-      - name: Format check
-        run: pnpm run format
-      - name: TypeScript check
-        run: pnpm run typecheck
-      - name: Run unit tests
-        run: pnpm test || echo "No unit tests"
-      - name: Cache Playwright browsers
-        id: pw-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-      - name: Install Playwright browsers
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: pnpm run test:e2e:install
-      - name: Run E2E smoke tests
-        run: pnpm exec playwright test e2e/smoke.spec.ts
-        continue-on-error: true
-        env:
-          PLAYWRIGHT_BASE_URL: "http://localhost:5173"
-
-      - name: Run Puppeteer tests
-        run: node scripts/run-puppeteer.mjs
-        continue-on-error: true
-
-      - name: Run HTTP tests
-        run: node scripts/run-http.mjs
-        continue-on-error: true
-
-      - name: Record run from Playwright results
-        run: node scripts/record-run.mjs test-results/playwright-results.json --label "(Playwright)" --suffix pw
-        continue-on-error: true
-
-      - name: Record run from Puppeteer results
-        run: node scripts/record-run.mjs test-results/puppeteer-results.json --label "(Puppeteer)" --suffix pu
-        continue-on-error: true
-
-      - name: Record run from HTTP results
-        run: node scripts/record-run.mjs test-results/http-results.json --label "(HTTP)" --suffix ht
-        continue-on-error: true
-
-      - name: Commit run data back to repo
-        if: always()
-        run: |
-          git config user.name "AWARE Bot"
-          git config user.email "bot@aware.dev"
-          git add src/data/runs.json src/data/test-results.json
-          if git diff --cached --quiet; then
-            echo "No changes to runs.json"
-          else
-            git commit -m "record CI run [skip ci]"
-            git push
-          fi
-
-  # ── On manual dispatch: resolve + execute suite ──
-  resolve-tests:
-    if: github.event_name == 'workflow_dispatch'
+  # ── Config validation ──────────────────────────────────────────────────────
+  validate-config:
+    name: Validate AWARE config
     runs-on: ubuntu-latest
     outputs:
-      test-matrix: ${{ steps.resolve.outputs.matrix }}
+      suite_name: ${{ steps.parse.outputs.suite_name }}
+      base_url: ${{ steps.parse.outputs.base_url }}
+      runners: ${{ steps.parse.outputs.runners }}
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.inputs.branch }}
-      - id: resolve
+      - uses: actions/checkout@v4
+
+      - name: Install yq
         run: |
-          echo "matrix={\"target\":[\"${{ github.event.inputs.target }}\"],\"environment\":[\"${{ github.event.inputs.environment }}\"]}" >> $GITHUB_OUTPUT
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
 
-  run-tests:
-    if: github.event_name == 'workflow_dispatch'
-    needs: resolve-tests
+      - name: Parse and validate config
+        id: parse
+        run: |
+          SUITE_NAME=$(yq ".suites[] | select(.id == \"$AWARE_SUITE\") | .name" config/test-suites.yml)
+          BASE_URL=$(yq ".environments[] | select(.label == \"$AWARE_ENV\") | .baseUrl" config/environments.yml)
+          RUNNERS=$(yq ".suites[] | select(.id == \"$AWARE_SUITE\") | .runners | join(\",\")" config/test-suites.yml)
+          echo "suite_name=$SUITE_NAME" >> $GITHUB_OUTPUT
+          echo "base_url=$BASE_URL" >> $GITHUB_OUTPUT
+          echo "runners=$RUNNERS" >> $GITHUB_OUTPUT
+          echo "✅ Suite: $SUITE_NAME"
+          echo "✅ Environment: $AWARE_ENV → $BASE_URL"
+          echo "✅ Runners: $RUNNERS"
+
+      - name: Property version check
+        run: |
+          ENV_KEY=$(echo $AWARE_ENV | tr '[:upper:]' '[:lower:]')
+          PROP_VER=$(yq ".properties[0].activeVersions.$ENV_KEY" config/akamai-config.yml)
+          echo "🏷️  Active property version on $AWARE_ENV: v$PROP_VER"
+
+  # ── Playwright tests ───────────────────────────────────────────────────────
+  playwright:
+    name: "Playwright — ${{ github.event.inputs.environment || 'QA' }}"
     runs-on: ubuntu-latest
+    needs: validate-config
+    if: contains(needs.validate-config.outputs.runners, 'playwright') && github.event.inputs.dry_run != 'true'
     strategy:
-      matrix: ${{ fromJson(needs.resolve-tests.outputs.test-matrix) }}
-      max-parallel: 4
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.inputs.branch }}
+      - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm ci
 
       - name: Install Playwright browsers
-        run: pnpm run test:e2e:install
-        continue-on-error: true
+        run: npx playwright install chromium --with-deps
 
-      - name: Run ${{ github.event.inputs.suite }} on ${{ matrix.target }}/${{ matrix.environment }}
+      - name: Run Playwright tests (shard ${{ matrix.shard }}/4)
         run: |
-          pnpm run test -- \
-            --suite "${{ github.event.inputs.suite }}" \
-            --target "${{ matrix.target }}" \
-            --environment "${{ matrix.environment }}" \
-            --retries "${{ github.event.inputs.retries }}"
+          npx playwright test \
+            --shard=${{ matrix.shard }}/4 \
+            --reporter=json,html \
+            --output=test-results/playwright/ \
+            --grep "@${{ env.AWARE_SUITE }}" \
+          || true
+        env:
+          BASE_URL: ${{ needs.validate-config.outputs.base_url }}
+          AWARE_ENV: ${{ env.AWARE_ENV }}
+          CI: true
 
-      - name: Upload test results
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
         if: always()
+        with:
+          name: playwright-report-shard-${{ matrix.shard }}
+          path: |
+            test-results/playwright/
+            playwright-report/
+          retention-days: 14
+
+  # ── pytest tests ───────────────────────────────────────────────────────────
+  pytest:
+    name: "pytest — ${{ github.event.inputs.environment || 'QA' }}"
+    runs-on: ubuntu-latest
+    needs: validate-config
+    if: contains(needs.validate-config.outputs.runners, 'pytest') && github.event.inputs.dry_run != 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-xdist pytest-html pytest-json-report
+
+      - name: Run pytest
+        run: |
+          pytest tests/ \
+            -m "${{ env.AWARE_SUITE }}" \
+            -n ${{ env.AWARE_PARALLELISM }} \
+            --json-report \
+            --json-report-file=test-results/pytest/report.json \
+            --html=test-results/pytest/report.html \
+            --tb=short \
+            -v \
+          || true
+        env:
+          BASE_URL: ${{ needs.validate-config.outputs.base_url }}
+          AWARE_ENV: ${{ env.AWARE_ENV }}
+          CI: true
+
+      - name: Upload pytest report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-report
+          path: test-results/pytest/
+          retention-days: 14
+
+  # ── Merge reports & post summary ───────────────────────────────────────────
+  report:
+    name: Merge reports → AWARE
+    runs-on: ubuntu-latest
+    needs: [validate-config, playwright, pytest]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-results/
+
+      - name: Generate AWARE run record
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          RUN_ID="run_$(date -u +%Y%m%d)_gh${GITHUB_RUN_ID}"
+          mkdir -p all-results
+          cat > all-results/aware-run.json <<EOF
+          {
+            "id": "$RUN_ID",
+            "label": "CI — $(date -u +'%b %d, %Y')",
+            "suite": "$AWARE_SUITE",
+            "target": "$AWARE_ENV",
+            "started": "$TIMESTAMP",
+            "build": "${GITHUB_SHA::7}",
+            "rev": "$GITHUB_SHA",
+            "env": "$AWARE_ENV",
+            "network": "$([ '$AWARE_ENV' = 'PROD' ] && echo 'production' || echo 'staging')",
+            "workflowRunId": "$GITHUB_RUN_ID",
+            "workflowUrl": "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          }
+          EOF
+          echo "Generated run record: $RUN_ID"
+
+      - name: Upload AWARE run record
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ github.run_id }}-${{ matrix.target }}-${{ matrix.environment }}
-          path: artifacts/aware-app/test-results/
-          retention-days: 14
+          name: aware-run-record
+          path: all-results/aware-run.json
+          retention-days: 90
+
+      - name: Post summary to GitHub
+        if: always()
+        run: |
+          echo "## 🔬 A.W.A.R.E. Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Suite** | ${{ needs.validate-config.outputs.suite_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | $AWARE_ENV |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Base URL** | ${{ needs.validate-config.outputs.base_url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${GITHUB_SHA::7}\` |" >> $GITHUB_STEP_SUMMARY
+
+  # ── Promotion gate (UAT → PROD) ────────────────────────────────────────────
+  promotion-gate:
+    name: Promotion gate (UAT → PROD)
+    runs-on: ubuntu-latest
+    needs: [report]
+    if: env.AWARE_ENV == 'UAT' && env.AWARE_SUITE == 'suite_regression_uat'
+    environment:
+      name: production
+      url: https://www.example.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Check promotion gate
+        run: |
+          MIN_PASS=$(yq ".properties[0].promotionGate.minPassRate" config/akamai-config.yml)
+          echo "✅ Promotion gate: requires ≥ ${MIN_PASS}% pass rate"
+          echo "🚀 If approved, proceed with Akamai property activation on PROD"

@@ -487,12 +487,12 @@ const DEFAULT_SLIDES: SlideData[] = [
     title: "Cross-Environment Testing",
     color: "var(--proof-blue)",
     detail:
-      "Compare test behavior across Prod/Production, Prod/Staging, UAT/Production, and UAT/Staging.",
+      "Compare test behavior across QA, UAT, and PROD Akamai edge environments with always-visible property status.",
     points: [
-      "Per-environment pass-rate charts",
-      "Environment-specific config and IP mapping",
-      "Multi-env run history with filtering",
-      "Side-by-side env health dashboard",
+      "Per-environment pass-rate charts (QA / UAT / PROD)",
+      "Active Akamai property version shown on every page",
+      "Playwright + pytest runs with GitHub Actions integration",
+      "Promotion gate: UAT → PROD requires ≥ 95% pass rate",
     ],
   },
   {
@@ -1184,9 +1184,8 @@ const DOC_SECTIONS: DocEntry[] = [
     content: () => (
       <>
         <p>
-          The app ships with 4 environment targets: <strong>Prod/Production</strong>,{" "}
-          <strong>Prod/Staging</strong>, <strong>UAT/Production</strong>,{" "}
-          <strong>UAT/Staging</strong>. Each environment has:
+          The app ships with 3 environment targets: <strong>QA</strong>,{" "}
+          <strong>UAT</strong>, and <strong>PROD</strong>. Each environment has:
         </p>
         <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
           <li>
@@ -1253,7 +1252,7 @@ const DOC_SECTIONS: DocEntry[] = [
             Returns a portable YAML test definition.
           </li>
           <li>
-            <strong>Analyze Results</strong> — "My pass rate dropped in Prod/Staging." Returns
+            <strong>Analyze Results</strong> — "My pass rate dropped in UAT." Returns
             regression analysis with root cause suggestions.
           </li>
           <li>

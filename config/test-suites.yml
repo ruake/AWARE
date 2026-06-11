@@ -1,0 +1,101 @@
+# =============================================================================
+# A.W.A.R.E. — Test Suite Configuration
+# Defines which test suites run on which environments and when.
+# Commit changes here; GitHub Actions reads this file via the workflow.
+# =============================================================================
+
+suites:
+  - id: suite_smoke
+    name: Smoke — QA/UAT/PROD
+    description: >
+      Lightweight smoke tests run on every deployment across all three
+      environments. Tests must complete in < 2 minutes.
+    environments: [QA, UAT, PROD]
+    parallelism: 4
+    retries: 1
+    failFast: true
+    timeoutMinutes: 5
+    runners:
+      - playwright
+      - pytest
+    tags: [smoke, geo-match, routing, tls]
+    schedule: null  # triggered on deployment
+
+  - id: suite_regression_qa
+    name: Full Regression — QA
+    description: >
+      Complete Playwright + pytest regression suite for QA. Runs on every
+      push to a feature branch that touches Akamai property config or
+      EdgeWorker code.
+    environments: [QA]
+    parallelism: 8
+    retries: 2
+    failFast: false
+    timeoutMinutes: 30
+    runners:
+      - playwright
+      - pytest
+    tags: [regression, geo-match, caching, edgeworker, waf, bot-manager]
+    schedule: "0 */2 * * *"  # every 2 hours on QA
+
+  - id: suite_regression_uat
+    name: Full Regression — UAT
+    description: >
+      Complete regression suite run in UAT before property promotion to PROD.
+      Gate: requires ≥ 95% pass rate to approve promotion.
+    environments: [UAT]
+    parallelism: 6
+    retries: 2
+    failFast: false
+    timeoutMinutes: 30
+    runners:
+      - playwright
+      - pytest
+    tags: [regression, performance, security, caching]
+    schedule: "0 6 * * *"  # 06:00 UTC nightly
+
+  - id: suite_nightly_prod
+    name: Nightly Regression — PROD
+    description: >
+      Full regression run against PROD edge servers overnight.
+      Any failure raises a PagerDuty alert.
+    environments: [PROD]
+    parallelism: 4
+    retries: 1
+    failFast: false
+    timeoutMinutes: 45
+    runners:
+      - playwright
+      - pytest
+    tags: [regression, smoke, performance, security]
+    schedule: "0 2 * * *"  # 02:00 UTC nightly
+
+  - id: suite_edgeworker
+    name: EdgeWorker Unit Tests
+    description: >
+      Pytest-based unit tests for EdgeWorker bundles. Run on every EW code
+      change before deployment.
+    environments: [QA, UAT]
+    parallelism: 4
+    retries: 0
+    failFast: true
+    timeoutMinutes: 10
+    runners:
+      - pytest
+    tags: [edgeworker, functional]
+    schedule: null  # triggered on EW deploy
+
+  - id: suite_performance
+    name: Performance Benchmarks
+    description: >
+      Playwright tests that measure TTFB, cache hit ratio, and Ion
+      compression savings across all environments.
+    environments: [QA, UAT, PROD]
+    parallelism: 2
+    retries: 1
+    failFast: false
+    timeoutMinutes: 20
+    runners:
+      - playwright
+    tags: [performance, caching, ion]
+    schedule: "0 4 * * 1"  # Monday 04:00 UTC
