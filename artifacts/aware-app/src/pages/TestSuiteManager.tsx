@@ -146,7 +146,7 @@ export default function TestSuiteManager() {
           <div
             className="proof-card"
             style={{
-              width: 320,
+              width: 260,
               flexShrink: 0,
               overflow: "hidden",
               display: "flex",
@@ -570,22 +570,52 @@ export default function TestSuiteManager() {
                       </div>
                     </div>
                   </div>
-                  <div className="proof-card" style={{ padding: 12, marginBottom: 12 }}>
-                    <h4
-                      style={{
-                        fontSize: 11,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        color: "var(--proof-text-secondary)",
-                        fontWeight: 600,
-                        marginBottom: 6,
-                      }}
-                    >
-                      Description
-                    </h4>
-                    <p style={{ fontSize: 13, color: "var(--proof-text)", lineHeight: 1.6 }}>
-                      {selectedTest.description || "No description"}
-                    </p>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                    <div className="proof-card" style={{ padding: 12 }}>
+                      <h4
+                        style={{
+                          fontSize: 11,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.5px",
+                          color: "var(--proof-text-secondary)",
+                          fontWeight: 600,
+                          marginBottom: 6,
+                        }}
+                      >
+                        Description
+                      </h4>
+                      <p style={{ fontSize: 13, color: "var(--proof-text)", lineHeight: 1.6 }}>
+                        {selectedTest.description || "No description"}
+                      </p>
+                    </div>
+                    <div className="proof-card" style={{ padding: 12 }}>
+                      <h4
+                        style={{
+                          fontSize: 11,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.5px",
+                          color: "var(--proof-text-secondary)",
+                          fontWeight: 600,
+                          marginBottom: 6,
+                        }}
+                      >
+                        Script
+                      </h4>
+                      <a
+                        href={getGitHubUrl(selectedTest)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: 12,
+                          fontFamily: "var(--font-mono)",
+                          color: "var(--proof-blue)",
+                          textDecoration: "underline",
+                          textUnderlineOffset: 2,
+                        }}
+                      >
+                        {cleanScriptPath(selectedTest)}
+                      </a>
+                    </div>
                   </div>
                   {selectedTest.predicates.length > 0 && (
                     <div className="proof-card" style={{ padding: 12, marginBottom: 12 }}>
@@ -620,34 +650,6 @@ export default function TestSuiteManager() {
                       </div>
                     </div>
                   )}
-                  <div className="proof-card" style={{ padding: 12, marginBottom: 12 }}>
-                    <h4
-                      style={{
-                        fontSize: 11,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        color: "var(--proof-text-secondary)",
-                        fontWeight: 600,
-                        marginBottom: 6,
-                      }}
-                    >
-                      Script
-                    </h4>
-                    <a
-                      href={getGitHubUrl(selectedTest)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        fontSize: 12,
-                        fontFamily: "var(--font-mono)",
-                        color: "var(--proof-blue)",
-                        textDecoration: "underline",
-                        textUnderlineOffset: 2,
-                      }}
-                    >
-                      {cleanScriptPath(selectedTest)}
-                    </a>
-                  </div>
                 </div>
               </>
             ) : selected ? (
@@ -964,7 +966,7 @@ export default function TestSuiteManager() {
                   >
                     <Beaker size={12} /> Tests ({selectedTests.length})
                   </h4>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 4 }}>
                     {selectedTests.map((tc) => (
                       <div
                         key={tc.id}

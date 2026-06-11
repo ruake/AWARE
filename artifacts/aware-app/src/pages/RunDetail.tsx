@@ -163,7 +163,7 @@ export default function RunDetail() {
 
   return (
     <AppLayout activeHref="/runs">
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}>
         {/* Top bar: breadcrumb + promotion + actions + KPI inline */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <button onClick={() => navigate("/runs")} className="proof-button proof-button-xs">
@@ -278,7 +278,7 @@ export default function RunDetail() {
         </div>
 
         {/* Chart + results table */}
-        <div style={{ display: "flex", gap: 14 }}>
+        <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
           <PanelErrorBoundary label="By category chart">
             <div className="proof-card" style={{ padding: 16, width: 260, flexShrink: 0 }}>
               <h3
@@ -367,7 +367,7 @@ export default function RunDetail() {
                   {filtered.length} / {results.length}
                 </span>
               </div>
-              <div style={{ flex: 1, overflowY: "auto", maxHeight: 380 }}>
+              <div style={{ flex: 1, overflowY: "auto" }}>
                 <table className="proof-table">
                   <thead>
                     <tr>
