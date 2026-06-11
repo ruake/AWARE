@@ -76,78 +76,70 @@ function StatusBadge({ status }: { status: Run["status"] }) {
 }
 
 function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
+  const [hovered, setHovered] = React.useState(false);
   return (
-    <tr onClick={() => onClick(run.id)} style={{ cursor: "pointer" }}>
-      <td>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 500, color: "var(--proof-text)" }}>
-              {run.label}
-            </div>
-            <div
-              style={{
-                fontSize: 10,
-                color: "var(--proof-text-secondary)",
-                fontFamily: "var(--font-mono)",
-              }}
-            >
-              {run.id.slice(-12)}
-            </div>
-          </div>
+    <tr
+      onClick={() => onClick(run.id)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        cursor: "pointer",
+        background: hovered ? "rgba(255,255,255,0.025)" : undefined,
+        transition: "background 0.1s ease",
+      }}
+    >
+      {/* Workflow: label + short ID */}
+      <td style={{ verticalAlign: "middle" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <span style={{ fontSize: 12, fontWeight: 500, color: "var(--proof-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {run.label}
+          </span>
+          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)" }}>
+            {run.id.slice(-12)}
+          </span>
         </div>
       </td>
-      <td>
+      {/* Status */}
+      <td style={{ verticalAlign: "middle" }}>
         <StatusBadge status={run.status} />
       </td>
-      <td>
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            fontWeight: 600,
-            color:
-              run.passPct === 100
-                ? "var(--proof-green)"
-                : run.passPct < 90
-                  ? "var(--proof-red)"
-                  : "var(--proof-text)",
-          }}
-        >
+      {/* Pass % */}
+      <td style={{ verticalAlign: "middle" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: run.passPct === 100 ? "var(--proof-green)" : run.passPct < 90 ? "var(--proof-red)" : "var(--proof-text)" }}>
           {run.passPct}%
         </span>
       </td>
-      <td>
-        <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-          {run.suite} · {run.env}
-        </span>
+      {/* Suite · Env */}
+      <td style={{ verticalAlign: "middle" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {run.suite}
+          </span>
+          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}>
+            {run.env}
+            {run.network && (
+              <span style={{ marginLeft: 5, fontSize: 9, fontWeight: 700, textTransform: "uppercase", color: run.network === "production" ? "var(--proof-green)" : "#d97706", background: run.network === "production" ? "var(--proof-green-bg)" : "var(--proof-yellow-bg)", padding: "1px 4px", borderRadius: 3 }}>
+                {run.network}
+              </span>
+            )}
+          </span>
+        </div>
       </td>
-      <td>
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            color: "var(--proof-text-secondary)",
-          }}
-        >
+      {/* Duration */}
+      <td style={{ verticalAlign: "middle" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}>
           {formatDuration(run.durationMs)}
         </span>
       </td>
-      <td>
-        <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+      {/* When */}
+      <td style={{ verticalAlign: "middle" }}>
+        <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}>
           {timeAgo(run.started)}
         </span>
       </td>
-      <td>
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 10,
-            color: "var(--proof-text-secondary)",
-            background: "var(--proof-grey-bg)",
-            padding: "1px 5px",
-            borderRadius: 3,
-          }}
-        >
+      {/* Build */}
+      <td style={{ verticalAlign: "middle" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--proof-text-secondary)", background: "var(--proof-grey-bg)", border: "1px solid var(--proof-border)", padding: "2px 6px", borderRadius: 3, whiteSpace: "nowrap" }}>
           {run.build?.slice(0, 7) || "—"}
         </span>
       </td>
@@ -654,15 +646,15 @@ export default function Pulse() {
             </div>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table className="proof-table" style={{ minWidth: 700 }}>
+              <table className="proof-table" style={{ minWidth: 820, tableLayout: "fixed", width: "100%" }}>
                 <colgroup>
                   <col />
-                  <col style={{ width: 100 }} />
-                  <col style={{ width: 68 }} />
-                  <col style={{ width: 160 }} />
+                  <col style={{ width: 110 }} />
+                  <col style={{ width: 72 }} />
+                  <col style={{ width: 200 }} />
                   <col style={{ width: 90 }} />
                   <col style={{ width: 80 }} />
-                  <col style={{ width: 80 }} />
+                  <col style={{ width: 75 }} />
                 </colgroup>
                 <thead>
                   <tr>

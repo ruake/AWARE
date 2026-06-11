@@ -62,8 +62,7 @@ export default function Dashboard() {
     }
     requestAnimationFrame(step);
   }, [overallPassRate]);
-  const [runsExpanded, setRunsExpanded] = React.useState(false);
-  const visibleRuns = runsExpanded ? recentRuns : recentRuns.slice(0, 3);
+  const visibleRuns = recentRuns;
   const [collapsedSections, setCollapsedSections] = React.useState<Record<string, boolean>>({});
   const toggleSection = (key: string) => setCollapsedSections((p) => ({ ...p, [key]: !p[key] }));
   const anomalies = React.useMemo(() => getLatestAnomalies(), []);
@@ -815,16 +814,6 @@ export default function Dashboard() {
                         ))}
                       </tbody>
                     </table>
-                    {recentRuns.length > 3 && (
-                      <div style={{ textAlign: "center", marginTop: 8 }}>
-                        <span
-                          onClick={() => setRunsExpanded((p) => !p)}
-                          style={{ fontSize: 11, color: "var(--proof-blue)", cursor: "pointer", fontWeight: 500 }}
-                        >
-                          {runsExpanded ? "Show less ▲" : `Show more (${recentRuns.length - 3} more) ▼`}
-                        </span>
-                      </div>
-                    )}
                   </>
                 )}
               </div>
