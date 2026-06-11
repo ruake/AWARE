@@ -37,7 +37,6 @@ jobs:
           path: artifacts/aware-app/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install dependencies
-        if: steps.nm-cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Lint
         run: pnpm run lint
