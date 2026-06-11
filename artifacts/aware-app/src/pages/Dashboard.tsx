@@ -1003,12 +1003,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Right sidebar — PoP Globe */}
-        <div
-          style={{ width: 160, flexShrink: 0, display: "flex", flexDirection: "column", gap: 12 }}
-        >
-          <div className="proof-card" style={{ padding: 8 }}></div>
-        </div>
       </div>
       {Toast}
     </AppLayout>
