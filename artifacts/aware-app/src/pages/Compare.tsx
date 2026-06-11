@@ -19,6 +19,10 @@ import {
   ArrowUpRight,
   Search,
   X,
+  XCircle,
+  CheckCircle2,
+  Clock,
+  Minus,
 } from "lucide-react";
 import type { Run } from "@/lib/types";
 
@@ -1154,23 +1158,32 @@ export default function Compare() {
                 color: "var(--proof-text-secondary)",
                 key: "unchanged",
               },
-            ].map((tile) => (
-              <CTAStatCard
-                key={tile.label}
-                label={tile.label}
-                value={tile.value}
-                accentColor={tile.color}
-                active={activeFilter === tile.key}
-                onClick={() => {
-                  if (activeFilter === tile.key) {
-                    setActiveFilter(null);
-                  } else {
-                    setActiveFilter(tile.key);
-                    setRegressionsOnly(false);
-                  }
-                }}
-              />
-            ))}
+            ].map((tile) => {
+              const iconMap: Record<string, React.ReactNode> = {
+                regression: <XCircle size={16} />,
+                fixed:      <CheckCircle2 size={16} />,
+                duration:   <Clock size={16} />,
+                unchanged:  <Minus size={16} />,
+              };
+              return (
+                <CTAStatCard
+                  key={tile.label}
+                  label={tile.label}
+                  value={tile.value}
+                  accentColor={tile.color}
+                  icon={iconMap[tile.key]}
+                  active={activeFilter === tile.key}
+                  onClick={() => {
+                    if (activeFilter === tile.key) {
+                      setActiveFilter(null);
+                    } else {
+                      setActiveFilter(tile.key);
+                      setRegressionsOnly(false);
+                    }
+                  }}
+                />
+              );
+            })}
           </div>
         </PanelErrorBoundary>
 
@@ -1347,7 +1360,7 @@ export default function Compare() {
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
-                maxHeight: "60vh",
+                minHeight: 420,
               }}
             >
               <div
@@ -1423,7 +1436,7 @@ export default function Compare() {
                     <col style={{ width: 90 }} />
                     <col style={{ width: 110 }} />
                     <col style={{ width: 110 }} />
-                    <col style={{ width: 88 }} />
+                    <col style={{ width: 170 }} />
                   </colgroup>
                   <thead
                     style={{
