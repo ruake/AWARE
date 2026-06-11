@@ -653,6 +653,17 @@ export default function TestManager() {
                 style={{ flex: 1, overflow: "auto", position: "relative" }}
               >
                 <table className="proof-table" style={{ margin: 0, position: "relative" }}>
+                  <colgroup>
+                    <col style={{ width: 40 }} />
+                    <col />
+                    <col style={{ width: 90 }} />
+                    <col style={{ width: 72 }} />
+                    <col style={{ width: 112 }} />
+                    <col style={{ width: 120 }} />
+                    <col style={{ width: 90 }} />
+                    <col style={{ width: 100 }} />
+                    <col style={{ width: 80 }} />
+                  </colgroup>
                   <thead
                     style={{
                       position: "sticky",
@@ -662,7 +673,7 @@ export default function TestManager() {
                     }}
                   >
                     <tr>
-                      <th style={{ width: 36 }}>
+                      <th style={{ width: 40 }}>
                         <input
                           type="checkbox"
                           checked={selectedIds.size === filtered.length && filtered.length > 0}
@@ -677,7 +688,7 @@ export default function TestManager() {
                           onFilterChange={updateColFilter("name")}
                         />
                       </th>
-                      <th>
+                      <th style={{ width: 90 }}>
                         <ColumnFilter
                           label="Status"
                           allValues={allValues.status}
@@ -685,7 +696,7 @@ export default function TestManager() {
                           onFilterChange={updateColFilter("status")}
                         />
                       </th>
-                      <th>
+                      <th style={{ width: 72 }}>
                         <ColumnFilter
                           label="Priority"
                           allValues={allValues.priority}
@@ -693,7 +704,7 @@ export default function TestManager() {
                           onFilterChange={updateColFilter("priority")}
                         />
                       </th>
-                      <th>
+                      <th style={{ width: 112 }}>
                         <ColumnFilter
                           label="Category"
                           allValues={allValues.category}
@@ -701,8 +712,8 @@ export default function TestManager() {
                           onFilterChange={updateColFilter("category")}
                         />
                       </th>
-                      <th>Tags</th>
-                      <th>Owner</th>
+                      <th style={{ width: 120 }}>Tags</th>
+                      <th style={{ width: 90 }}>Owner</th>
                       <th style={{ width: 100 }}>Repo</th>
                       <th style={{ width: 80, textAlign: "center" }}>Actions</th>
                     </tr>
