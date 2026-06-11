@@ -1416,6 +1416,15 @@ export default function Compare() {
               </div>
               <div style={{ flex: 1, overflowY: "auto" }}>
                 <table className="proof-table">
+                  <colgroup>
+                    <col />
+                    <col style={{ width: 80 }} />
+                    <col style={{ width: 80 }} />
+                    <col style={{ width: 90 }} />
+                    <col style={{ width: 110 }} />
+                    <col style={{ width: 110 }} />
+                    <col style={{ width: 88 }} />
+                  </colgroup>
                   <thead
                     style={{
                       position: "sticky",

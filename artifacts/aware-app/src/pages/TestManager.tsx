@@ -840,14 +840,7 @@ export default function TestManager() {
                           <td style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
                             {tc.owner.split("@")[0]}
                           </td>
-                          <td
-                            style={{
-                              padding: "6px 8px",
-                              fontSize: 11,
-                              whiteSpace: "nowrap",
-                              verticalAlign: "middle",
-                            }}
-                          >
+                          <td style={{ fontSize: 11, verticalAlign: "middle" }}>
                             <RepoStatusBadge status={tc.repoStatus} />
                           </td>
                           <td onClick={(e) => e.stopPropagation()}>
