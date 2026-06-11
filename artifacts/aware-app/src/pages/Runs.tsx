@@ -371,7 +371,14 @@ export default function Runs() {
                   <col style={{ width: 120 }} />
                   <col />
                 </colgroup>
-                <thead>
+                <thead
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    background: "var(--proof-surface)",
+                    zIndex: 10,
+                  }}
+                >
                   <tr>
                     <th style={{ width: 40 }}>
                       <input
