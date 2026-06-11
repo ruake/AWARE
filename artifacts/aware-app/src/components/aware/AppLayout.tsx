@@ -218,7 +218,7 @@ export function AppLayout({
                 letterSpacing: "0.5px",
               }}
             >
-              CDN Observability
+              Bring Your Own Tests
             </span>
           </div>
         </div>

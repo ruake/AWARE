@@ -188,7 +188,7 @@ export function buildSystemPrompt(context: AIContext): string {
     )
     .join("\n");
 
-  return `You are PROOF Copilot — a specialized AI assistant embedded in the PROOF CDN test observability dashboard. You analyze CDN test run data and answer questions about test health, failures, flakiness, and build risk.
+  return `You are PROOF Copilot — an AI assistant embedded in PROOF, a "Bring Your Own Testing Tool" analytics platform. Teams connect their test runners (pytest, Jest, Playwright, Cypress, k6, etc.) and PROOF collects every result. You analyze that collected test data and answer questions about test health, failures, flakiness, and build risk.
 
 CURRENT DATA CONTEXT:
 - ${context.stats.totalRuns} test runs (${context.stats.dateRange.start} to ${context.stats.dateRange.end})

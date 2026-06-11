@@ -299,10 +299,8 @@ export default function TestAnalytics() {
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Header with searchable selector */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Link href={isTcMode ? "/tests" : "/compare"}>
-            <a className="proof-button proof-button-sm">
-              <ArrowLeft size={13} /> {isTcMode ? "Tests" : "Compare"}
-            </a>
+          <Link href={isTcMode ? "/tests" : "/compare"} className="proof-button proof-button-sm">
+            <ArrowLeft size={13} /> {isTcMode ? "Tests" : "Compare"}
           </Link>
           <ChevronRight size={14} style={{ color: "var(--proof-text-secondary)" }} />
           <div ref={selRef} style={{ position: "relative", flex: 1, maxWidth: 420 }}>
@@ -884,17 +882,16 @@ export default function TestAnalytics() {
                 {filteredHistory.map((h) => (
                   <tr key={h.runId} style={{ cursor: "pointer" }}>
                     <td>
-                      <Link href={`/runs/${h.runId}`}>
-                        <a
-                          style={{
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 11,
-                            color: "var(--proof-blue)",
-                            textDecoration: "none",
-                          }}
-                        >
-                          {h.runId}
-                        </a>
+                      <Link
+                        href={`/runs/${h.runId}`}
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 11,
+                          color: "var(--proof-blue)",
+                          textDecoration: "none",
+                        }}
+                      >
+                        {h.runId}
                       </Link>
                     </td>
                     <td>
@@ -952,10 +949,8 @@ export default function TestAnalytics() {
                       ) : null}
                     </td>
                     <td>
-                      <Link href={`/runs/${h.runId}`}>
-                        <a className="proof-button proof-button-xs" style={{ padding: "2px 7px" }}>
-                          View Run
-                        </a>
+                      <Link href={`/runs/${h.runId}`} className="proof-button proof-button-xs" style={{ padding: "2px 7px" }}>
+                        View Run
                       </Link>
                     </td>
                   </tr>

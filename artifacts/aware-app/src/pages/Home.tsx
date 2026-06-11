@@ -53,12 +53,24 @@ export default function Home() {
           }}
         >
           <div style={{ flex: 1 }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "2px",
+                color: "var(--proof-blue)",
+                marginBottom: 14,
+              }}
+            >
+              Bring Your Own Testing Tool
+            </div>
             <h1
               style={{
-                fontSize: 48,
+                fontSize: 52,
                 fontWeight: 800,
-                letterSpacing: "-1.5px",
-                lineHeight: 1.1,
+                letterSpacing: "-2px",
+                lineHeight: 1.08,
                 margin: 0,
                 background: "linear-gradient(135deg, var(--proof-text) 0%, var(--proof-blue) 100%)",
                 WebkitBackgroundClip: "text",
@@ -69,29 +81,56 @@ export default function Home() {
             </h1>
             <p
               style={{
-                fontSize: 16,
+                fontSize: 17,
                 color: "var(--proof-text-secondary)",
-                marginTop: 12,
+                marginTop: 16,
                 marginBottom: 0,
-                lineHeight: 1.5,
-                maxWidth: 420,
+                lineHeight: 1.6,
+                maxWidth: 460,
               }}
             >
-              CDN Observability Platform — Monitor, compare, and validate CDN behavior across
-              environments with automated regression testing.
+              Plug in any test framework. We handle the runs, collect every result, and surface
+              analytics and AI-powered insights so your team ships with confidence.
             </p>
-            <div style={{ display: "flex", gap: 10, marginTop: 28 }}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                marginTop: 20,
+                marginBottom: 4,
+              }}
+            >
+              {["pytest", "Jest", "Playwright", "Cypress", "k6", "custom"].map((fw) => (
+                <span
+                  key={fw}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    padding: "3px 10px",
+                    borderRadius: 20,
+                    background: "rgba(91,138,245,0.1)",
+                    border: "1px solid rgba(91,138,245,0.25)",
+                    color: "var(--proof-blue)",
+                    fontFamily: "var(--font-mono)",
+                  }}
+                >
+                  {fw}
+                </span>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
               <button
                 onClick={() => navigate("/start")}
                 className="proof-button-primary"
-                style={{ padding: "10px 24px", fontSize: 14 }}
+                style={{ padding: "11px 26px", fontSize: 14 }}
               >
-                Get Started
+                Connect a Runner
               </button>
               <button
                 onClick={() => navigate("/")}
                 className="proof-button"
-                style={{ padding: "10px 24px", fontSize: 14 }}
+                style={{ padding: "11px 26px", fontSize: 14 }}
               >
                 View Dashboard
               </button>
@@ -209,16 +248,16 @@ export default function Home() {
           >
             {[
               {
-                title: "Real-time Monitoring",
-                body: "Track CDN behavior across environments with live dashboards and automated regression detection.",
+                title: "Any Test Framework",
+                body: "Bring pytest, Jest, Playwright, Cypress, k6, or any custom runner. Connect via our lightweight SDK or CLI — no rewrites required.",
               },
               {
-                title: "Smart Alerts",
-                body: "Anomaly detection and regression alerts powered by statistical analysis and configurable thresholds.",
+                title: "We Run & Collect",
+                body: "Schedule runs across environments and targets. Every result, log, and duration is captured and stored in full history automatically.",
               },
               {
-                title: "Team Collaboration",
-                body: "Share reports, compare results, and approve promotions with your team.",
+                title: "Analytics & AI Copilot",
+                body: "Pass/fail trends, flaky test detection, regression risk scoring, and an AI copilot that answers questions about your data in plain English.",
               },
             ].map((f) => (
               <div
@@ -275,7 +314,7 @@ export default function Home() {
           borderTop: "1px solid var(--proof-border)",
         }}
       >
-        PROOF CDN Observability Platform &middot; Open source &middot; MIT License
+        PROOF &middot; Bring Your Own Testing Tool &middot; Open source &middot; MIT License
       </footer>
     </div>
   );
