@@ -3,7 +3,11 @@ import schedulerStatusSeed from "@/data/scheduler-status.json";
 
 const _initial = schedulerStatusSeed as unknown as SchedulerStatus;
 
-let _cached: SchedulerStatus = { ..._initial, suites: [..._initial.suites], recentDispatches: [..._initial.recentDispatches] };
+let _cached: SchedulerStatus = {
+  ..._initial,
+  suites: [..._initial.suites],
+  recentDispatches: [..._initial.recentDispatches],
+};
 const _listeners = new Set<() => void>();
 
 export function getSchedulerStatus(): SchedulerStatus {

@@ -1,3 +1,8 @@
+---
+name: aware-cicd-expert
+description: Expert in GitHub Actions workflows, suite scheduling, config-driven CI, the promotion gate, and CiConfig generation. Use when modifying workflows, adding/changing suite schedules, implementing promotion gate logic, working on the CI Pipeline page, or debugging CI failures.
+---
+
 # AWARE CI/CD Expert
 
 ## Role

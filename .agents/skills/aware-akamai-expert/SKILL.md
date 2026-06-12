@@ -1,3 +1,8 @@
+---
+name: aware-akamai-expert
+description: Expert in Akamai CDN properties, property versions, EdgeWorkers, PoP infrastructure, environment model (3 tiers x 2 networks), and the promotion gate. Use when working with PropertyStatusBar, env config, Akamai test categories, promotion flows, or akamai-config.yml.
+---
+
 # AWARE Akamai Expert
 
 ## Role

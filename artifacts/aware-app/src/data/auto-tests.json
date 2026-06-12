@@ -8,9 +8,13 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_us_east_users_resolve_to_ashburn",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -32,8 +36,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.718944Z",
-    "updatedAt": "2026-06-12T05:58:49.718944Z",
+    "createdAt": "2026-06-12T06:10:47.716317Z",
+    "updatedAt": "2026-06-12T06:10:47.716317Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -46,9 +50,13 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_us_west_users_resolve_to_portland",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -70,8 +78,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.718996Z",
-    "updatedAt": "2026-06-12T05:58:49.718996Z",
+    "createdAt": "2026-06-12T06:10:47.716373Z",
+    "updatedAt": "2026-06-12T06:10:47.716373Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -84,9 +92,13 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_eu_west_users_resolve_to_dublin",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -108,8 +120,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719014Z",
-    "updatedAt": "2026-06-12T05:58:49.719014Z",
+    "createdAt": "2026-06-12T06:10:47.716390Z",
+    "updatedAt": "2026-06-12T06:10:47.716390Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -122,9 +134,13 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_ap_southeast_users_resolve_to_singapore",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -146,8 +162,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719035Z",
-    "updatedAt": "2026-06-12T05:58:49.719035Z",
+    "createdAt": "2026-06-12T06:10:47.716403Z",
+    "updatedAt": "2026-06-12T06:10:47.716403Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -160,9 +176,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_endpoints_return_200",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -184,8 +204,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719177Z",
-    "updatedAt": "2026-06-12T05:58:49.719177Z",
+    "createdAt": "2026-06-12T06:10:47.716541Z",
+    "updatedAt": "2026-06-12T06:10:47.716541Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -198,9 +218,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_endpoints_return_200",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -222,8 +246,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719189Z",
-    "updatedAt": "2026-06-12T05:58:49.719189Z",
+    "createdAt": "2026-06-12T06:10:47.716553Z",
+    "updatedAt": "2026-06-12T06:10:47.716553Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -236,9 +260,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_endpoints_return_200",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -260,8 +288,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719197Z",
-    "updatedAt": "2026-06-12T05:58:49.719197Z",
+    "createdAt": "2026-06-12T06:10:47.716560Z",
+    "updatedAt": "2026-06-12T06:10:47.716560Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -274,9 +302,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -298,8 +330,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719228Z",
-    "updatedAt": "2026-06-12T05:58:49.719228Z",
+    "createdAt": "2026-06-12T06:10:47.716588Z",
+    "updatedAt": "2026-06-12T06:10:47.716588Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -312,9 +344,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -336,8 +372,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719240Z",
-    "updatedAt": "2026-06-12T05:58:49.719240Z",
+    "createdAt": "2026-06-12T06:10:47.716596Z",
+    "updatedAt": "2026-06-12T06:10:47.716596Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -350,9 +386,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -374,8 +414,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719246Z",
-    "updatedAt": "2026-06-12T05:58:49.719246Z",
+    "createdAt": "2026-06-12T06:10:47.716605Z",
+    "updatedAt": "2026-06-12T06:10:47.716605Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -388,9 +428,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["geo-match"],
+    "tags": [
+      "geo-match"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_geo_routing_table",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -412,8 +456,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719252Z",
-    "updatedAt": "2026-06-12T05:58:49.719252Z",
+    "createdAt": "2026-06-12T06:10:47.716611Z",
+    "updatedAt": "2026-06-12T06:10:47.716611Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -426,9 +470,14 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": ["geo-match", "geofailover"],
+    "tags": [
+      "geo-match",
+      "geofailover"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::TestGeoFailover::test_failover_to_secondary_pop",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -450,8 +499,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719284Z",
-    "updatedAt": "2026-06-12T05:58:49.719284Z",
+    "createdAt": "2026-06-12T06:10:47.716640Z",
+    "updatedAt": "2026-06-12T06:10:47.716640Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -464,9 +513,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["geo-match", "geofailover"],
+    "tags": [
+      "geo-match",
+      "geofailover"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::TestGeoFailover::test_failover_logs_alert",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -488,8 +542,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719297Z",
-    "updatedAt": "2026-06-12T05:58:49.719297Z",
+    "createdAt": "2026-06-12T06:10:47.716650Z",
+    "updatedAt": "2026-06-12T06:10:47.716650Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -502,9 +556,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["geo-match", "geofailover"],
+    "tags": [
+      "geo-match",
+      "geofailover"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::TestGeoFailover::test_failover_health_check_resumes",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -526,8 +585,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719313Z",
-    "updatedAt": "2026-06-12T05:58:49.719313Z",
+    "createdAt": "2026-06-12T06:10:47.716660Z",
+    "updatedAt": "2026-06-12T06:10:47.716660Z",
     "githubPath": "tests/test_geo_matching.py",
     "repoStatus": "synced"
   },
@@ -540,9 +599,14 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": ["caching", "cachebehavior"],
+    "tags": [
+      "caching",
+      "cachebehavior"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_hit_ratio_exceeds_80_percent",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -564,8 +628,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719950Z",
-    "updatedAt": "2026-06-12T05:58:49.719950Z",
+    "createdAt": "2026-06-12T06:10:47.717883Z",
+    "updatedAt": "2026-06-12T06:10:47.717883Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -578,9 +642,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["caching", "cachebehavior"],
+    "tags": [
+      "caching",
+      "cachebehavior"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_ttl_respects_origin_max_age",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -602,8 +671,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719965Z",
-    "updatedAt": "2026-06-12T05:58:49.719965Z",
+    "createdAt": "2026-06-12T06:10:47.717896Z",
+    "updatedAt": "2026-06-12T06:10:47.717896Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -616,9 +685,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["caching", "cachebehavior"],
+    "tags": [
+      "caching",
+      "cachebehavior"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_purge_invalidates_content",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -640,8 +714,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719973Z",
-    "updatedAt": "2026-06-12T05:58:49.719973Z",
+    "createdAt": "2026-06-12T06:10:47.717903Z",
+    "updatedAt": "2026-06-12T06:10:47.717903Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -654,9 +728,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["caching", "cachebehavior"],
+    "tags": [
+      "caching",
+      "cachebehavior"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_vary_header_respected",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -678,8 +757,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719981Z",
-    "updatedAt": "2026-06-12T05:58:49.719981Z",
+    "createdAt": "2026-06-12T06:10:47.717910Z",
+    "updatedAt": "2026-06-12T06:10:47.717910Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -692,9 +771,14 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": ["performance", "latency"],
+    "tags": [
+      "performance",
+      "latency"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_p95_latency_under_200ms",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -716,8 +800,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.719995Z",
-    "updatedAt": "2026-06-12T05:58:49.719995Z",
+    "createdAt": "2026-06-12T06:10:47.717924Z",
+    "updatedAt": "2026-06-12T06:10:47.717924Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -730,9 +814,14 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": ["performance", "latency"],
+    "tags": [
+      "performance",
+      "latency"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_static_assets_under_50ms",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -754,8 +843,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720002Z",
-    "updatedAt": "2026-06-12T05:58:49.720002Z",
+    "createdAt": "2026-06-12T06:10:47.717932Z",
+    "updatedAt": "2026-06-12T06:10:47.717932Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -768,9 +857,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["performance", "latency"],
+    "tags": [
+      "performance",
+      "latency"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_dynamic_content_under_500ms",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -792,8 +886,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720010Z",
-    "updatedAt": "2026-06-12T05:58:49.720010Z",
+    "createdAt": "2026-06-12T06:10:47.717939Z",
+    "updatedAt": "2026-06-12T06:10:47.717939Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -806,9 +900,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["performance", "latency"],
+    "tags": [
+      "performance",
+      "latency"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -830,8 +929,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720037Z",
-    "updatedAt": "2026-06-12T05:58:49.720037Z",
+    "createdAt": "2026-06-12T06:10:47.717964Z",
+    "updatedAt": "2026-06-12T06:10:47.717964Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -844,9 +943,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["performance", "latency"],
+    "tags": [
+      "performance",
+      "latency"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -868,8 +972,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720043Z",
-    "updatedAt": "2026-06-12T05:58:49.720043Z",
+    "createdAt": "2026-06-12T06:10:47.717971Z",
+    "updatedAt": "2026-06-12T06:10:47.717971Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -882,9 +986,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["performance", "latency"],
+    "tags": [
+      "performance",
+      "latency"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -906,8 +1015,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720093Z",
-    "updatedAt": "2026-06-12T05:58:49.720093Z",
+    "createdAt": "2026-06-12T06:10:47.717976Z",
+    "updatedAt": "2026-06-12T06:10:47.717976Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -920,9 +1029,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["performance", "latency"],
+    "tags": [
+      "performance",
+      "latency"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestLatency::test_regional_latency_within_bounds",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -944,8 +1058,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720103Z",
-    "updatedAt": "2026-06-12T05:58:49.720103Z",
+    "createdAt": "2026-06-12T06:10:47.717981Z",
+    "updatedAt": "2026-06-12T06:10:47.717981Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -958,9 +1072,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["performance", "compression"],
+    "tags": [
+      "performance",
+      "compression"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCompression::test_gzip_compression_for_text_assets",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -982,8 +1101,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720125Z",
-    "updatedAt": "2026-06-12T05:58:49.720125Z",
+    "createdAt": "2026-06-12T06:10:47.717995Z",
+    "updatedAt": "2026-06-12T06:10:47.717995Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -996,9 +1115,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["performance", "compression"],
+    "tags": [
+      "performance",
+      "compression"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCompression::test_brotli_compression_preferred",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1020,8 +1144,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720138Z",
-    "updatedAt": "2026-06-12T05:58:49.720138Z",
+    "createdAt": "2026-06-12T06:10:47.718004Z",
+    "updatedAt": "2026-06-12T06:10:47.718004Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -1034,9 +1158,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["performance", "compression"],
+    "tags": [
+      "performance",
+      "compression"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCompression::test_compression_ratio_exceeds_5x",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1058,8 +1187,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720145Z",
-    "updatedAt": "2026-06-12T05:58:49.720145Z",
+    "createdAt": "2026-06-12T06:10:47.718011Z",
+    "updatedAt": "2026-06-12T06:10:47.718011Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
   },
@@ -1072,9 +1201,14 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": ["security", "securityheaders"],
+    "tags": [
+      "security",
+      "securityheaders"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_strict_transport_security_header",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1096,8 +1230,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720601Z",
-    "updatedAt": "2026-06-12T05:58:49.720601Z",
+    "createdAt": "2026-06-12T06:10:47.718965Z",
+    "updatedAt": "2026-06-12T06:10:47.718965Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1110,9 +1244,14 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": ["security", "securityheaders"],
+    "tags": [
+      "security",
+      "securityheaders"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_content_security_policy_header",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1134,8 +1273,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720611Z",
-    "updatedAt": "2026-06-12T05:58:49.720611Z",
+    "createdAt": "2026-06-12T06:10:47.718978Z",
+    "updatedAt": "2026-06-12T06:10:47.718978Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1148,9 +1287,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["security", "securityheaders"],
+    "tags": [
+      "security",
+      "securityheaders"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_x_frame_options_deny",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1172,8 +1316,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720619Z",
-    "updatedAt": "2026-06-12T05:58:49.720619Z",
+    "createdAt": "2026-06-12T06:10:47.718986Z",
+    "updatedAt": "2026-06-12T06:10:47.718986Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1186,9 +1330,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["security", "securityheaders"],
+    "tags": [
+      "security",
+      "securityheaders"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_x_content_type_options_nosniff",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1210,8 +1359,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720626Z",
-    "updatedAt": "2026-06-12T05:58:49.720626Z",
+    "createdAt": "2026-06-12T06:10:47.718993Z",
+    "updatedAt": "2026-06-12T06:10:47.718993Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1224,9 +1373,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["security", "securityheaders"],
+    "tags": [
+      "security",
+      "securityheaders"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_referrer_policy_strict_origin",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1248,8 +1402,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720632Z",
-    "updatedAt": "2026-06-12T05:58:49.720632Z",
+    "createdAt": "2026-06-12T06:10:47.719000Z",
+    "updatedAt": "2026-06-12T06:10:47.719000Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1262,9 +1416,14 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": ["security", "wafrules"],
+    "tags": [
+      "security",
+      "wafrules"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_sql_injection",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1286,8 +1445,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720645Z",
-    "updatedAt": "2026-06-12T05:58:49.720645Z",
+    "createdAt": "2026-06-12T06:10:47.719013Z",
+    "updatedAt": "2026-06-12T06:10:47.719013Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1300,9 +1459,14 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": ["security", "wafrules"],
+    "tags": [
+      "security",
+      "wafrules"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_xss_attempts",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1324,8 +1488,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720652Z",
-    "updatedAt": "2026-06-12T05:58:49.720652Z",
+    "createdAt": "2026-06-12T06:10:47.719020Z",
+    "updatedAt": "2026-06-12T06:10:47.719020Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1338,9 +1502,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["security", "wafrules"],
+    "tags": [
+      "security",
+      "wafrules"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_path_traversal",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1362,8 +1531,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720658Z",
-    "updatedAt": "2026-06-12T05:58:49.720658Z",
+    "createdAt": "2026-06-12T06:10:47.719026Z",
+    "updatedAt": "2026-06-12T06:10:47.719026Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1376,9 +1545,14 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": ["security", "wafrules"],
+    "tags": [
+      "security",
+      "wafrules"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWafRules::test_waf_blocks_large_payloads",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1400,8 +1574,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720665Z",
-    "updatedAt": "2026-06-12T05:58:49.720665Z",
+    "createdAt": "2026-06-12T06:10:47.719032Z",
+    "updatedAt": "2026-06-12T06:10:47.719032Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1414,9 +1588,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::test_rate_limiting_100_req_per_min",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1438,8 +1616,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720672Z",
-    "updatedAt": "2026-06-12T05:58:49.720672Z",
+    "createdAt": "2026-06-12T06:10:47.719040Z",
+    "updatedAt": "2026-06-12T06:10:47.719040Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1452,9 +1630,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::test_jwt_expiry_returns_401",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1476,8 +1658,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720679Z",
-    "updatedAt": "2026-06-12T05:58:49.720679Z",
+    "createdAt": "2026-06-12T06:10:47.719049Z",
+    "updatedAt": "2026-06-12T06:10:47.719049Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1490,9 +1672,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@discovery",
-    "suiteIds": ["suite_auto"],
+    "suiteIds": [
+      "suite_auto"
+    ],
     "automated": true,
     "scriptPath": "tests/test_security.py::test_cors_validates_origin",
     "preconditions": "Auto-discovered via pytest AST traversal",
@@ -1514,8 +1700,8 @@
     "assertions": [],
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.720687Z",
-    "updatedAt": "2026-06-12T05:58:49.720687Z",
+    "createdAt": "2026-06-12T06:10:47.719056Z",
+    "updatedAt": "2026-06-12T06:10:47.719056Z",
     "githubPath": "tests/test_security.py",
     "repoStatus": "synced"
   },
@@ -1528,9 +1714,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["functional"],
+    "tags": [
+      "functional"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/checkboxes-dropdown.spec.ts::Checkboxes and Dropdown > check and uncheck checkboxes",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1538,8 +1728,8 @@
     "documentation": "check and uncheck checkboxes",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.784Z",
-    "updatedAt": "2026-06-12T05:58:49.784Z",
+    "createdAt": "2026-06-12T06:10:47.777Z",
+    "updatedAt": "2026-06-12T06:10:47.777Z",
     "githubPath": "e2e/checkboxes-dropdown.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1566,9 +1756,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["functional"],
+    "tags": [
+      "functional"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/checkboxes-dropdown.spec.ts::select dropdown option by label",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1576,8 +1770,8 @@
     "documentation": "select dropdown option by label",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.785Z",
-    "updatedAt": "2026-06-12T05:58:49.785Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/checkboxes-dropdown.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1604,9 +1798,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["functional"],
+    "tags": [
+      "functional"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/checkboxes-dropdown.spec.ts::dropdown defaults to first option",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1614,8 +1812,8 @@
     "documentation": "dropdown defaults to first option",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.785Z",
-    "updatedAt": "2026-06-12T05:58:49.785Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/checkboxes-dropdown.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1642,9 +1840,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["performance"],
+    "tags": [
+      "performance"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/dynamic-content.spec.ts::Dynamic Content and Loading > dynamic loading hidden element appears",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1652,8 +1854,8 @@
     "documentation": "dynamic loading hidden element appears",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.786Z",
-    "updatedAt": "2026-06-12T05:58:49.786Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/dynamic-content.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1680,9 +1882,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["performance"],
+    "tags": [
+      "performance"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/dynamic-content.spec.ts::dynamic loading rendered after fetch",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1690,8 +1896,8 @@
     "documentation": "dynamic loading rendered after fetch",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.786Z",
-    "updatedAt": "2026-06-12T05:58:49.786Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/dynamic-content.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1718,9 +1924,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["performance"],
+    "tags": [
+      "performance"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/dynamic-content.spec.ts::dynamic content has at least one element",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1728,8 +1938,8 @@
     "documentation": "dynamic content has at least one element",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.786Z",
-    "updatedAt": "2026-06-12T05:58:49.786Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/dynamic-content.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1756,9 +1966,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["performance"],
+    "tags": [
+      "performance"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/dynamic-content.spec.ts::floating menu disappears on scroll",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1766,8 +1980,8 @@
     "documentation": "floating menu disappears on scroll",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.786Z",
-    "updatedAt": "2026-06-12T05:58:49.786Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/dynamic-content.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1794,9 +2008,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["functional"],
+    "tags": [
+      "functional"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/frames-windows.spec.ts::Frames and Windows > iframe editor loads with content",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1804,8 +2022,8 @@
     "documentation": "iframe editor loads with content",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.786Z",
-    "updatedAt": "2026-06-12T05:58:49.786Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/frames-windows.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1832,9 +2050,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["functional"],
+    "tags": [
+      "functional"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/frames-windows.spec.ts::nested frames contain text",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1842,8 +2064,8 @@
     "documentation": "nested frames contain text",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.787Z",
-    "updatedAt": "2026-06-12T05:58:49.787Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/frames-windows.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1870,9 +2092,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["functional"],
+    "tags": [
+      "functional"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/frames-windows.spec.ts::open new window tab",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1880,8 +2106,8 @@
     "documentation": "open new window tab",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.787Z",
-    "updatedAt": "2026-06-12T05:58:49.787Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/frames-windows.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1908,9 +2134,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/javascript-alerts.spec.ts::JavaScript Alerts > accept JS alert",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1918,8 +2148,8 @@
     "documentation": "accept JS alert",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.787Z",
-    "updatedAt": "2026-06-12T05:58:49.787Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/javascript-alerts.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1946,9 +2176,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/javascript-alerts.spec.ts::accept JS confirm",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1956,8 +2190,8 @@
     "documentation": "accept JS confirm",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.787Z",
-    "updatedAt": "2026-06-12T05:58:49.787Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/javascript-alerts.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -1984,9 +2218,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/javascript-alerts.spec.ts::dismiss JS confirm",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -1994,8 +2232,8 @@
     "documentation": "dismiss JS confirm",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.787Z",
-    "updatedAt": "2026-06-12T05:58:49.787Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/javascript-alerts.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2022,9 +2260,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/javascript-alerts.spec.ts::type in JS prompt",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2032,8 +2274,8 @@
     "documentation": "type in JS prompt",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.787Z",
-    "updatedAt": "2026-06-12T05:58:49.787Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/javascript-alerts.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2060,9 +2302,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/javascript-alerts.spec.ts::dismiss JS prompt returns null",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2070,8 +2316,8 @@
     "documentation": "dismiss JS prompt returns null",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.787Z",
-    "updatedAt": "2026-06-12T05:58:49.787Z",
+    "createdAt": "2026-06-12T06:10:47.778Z",
+    "updatedAt": "2026-06-12T06:10:47.778Z",
     "githubPath": "e2e/javascript-alerts.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2098,9 +2344,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/login-auth.spec.ts::Login Page Authentication > successful login with valid credentials",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2108,8 +2358,8 @@
     "documentation": "successful login with valid credentials",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/login-auth.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2136,9 +2386,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/login-auth.spec.ts::failed login with invalid password",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2146,8 +2400,8 @@
     "documentation": "failed login with invalid password",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/login-auth.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2174,9 +2428,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/login-auth.spec.ts::failed login with empty username",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2184,8 +2442,8 @@
     "documentation": "failed login with empty username",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/login-auth.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2212,9 +2470,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/login-auth.spec.ts::logout from secure area",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2222,8 +2484,8 @@
     "documentation": "logout from secure area",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/login-auth.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2250,9 +2512,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["security"],
+    "tags": [
+      "security"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/login-auth.spec.ts::login page displays correct title",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2260,8 +2526,8 @@
     "documentation": "login page displays correct title",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/login-auth.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2288,9 +2554,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["general"],
+    "tags": [
+      "general"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::PROOF App Smoke Tests > Dashboard loads and shows data",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2298,8 +2568,8 @@
     "documentation": "Dashboard loads and shows data",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/smoke.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2326,9 +2596,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["general"],
+    "tags": [
+      "general"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::Runs page loads",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2336,8 +2610,8 @@
     "documentation": "Runs page loads",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/smoke.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2364,9 +2638,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["general"],
+    "tags": [
+      "general"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::Test Manager loads test list",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2374,8 +2652,8 @@
     "documentation": "Test Manager loads test list",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/smoke.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2402,9 +2680,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["general"],
+    "tags": [
+      "general"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::Copilot page loads and shows fallback when AI unavailable",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2412,8 +2694,8 @@
     "documentation": "Copilot page loads and shows fallback when AI unavailable",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/smoke.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2440,9 +2722,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["general"],
+    "tags": [
+      "general"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::About page loads",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2450,8 +2736,8 @@
     "documentation": "About page loads",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/smoke.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2478,9 +2764,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["general"],
+    "tags": [
+      "general"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::Compare page loads",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2488,8 +2778,8 @@
     "documentation": "Compare page loads",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/smoke.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2516,9 +2806,13 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["general"],
+    "tags": [
+      "general"
+    ],
     "owner": "auto@playwright",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/smoke.spec.ts::Test Analytics loads with search params",
     "preconditions": "Auto-discovered via Playwright file traversal",
@@ -2526,8 +2820,8 @@
     "documentation": "Test Analytics loads with search params",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.788Z",
-    "updatedAt": "2026-06-12T05:58:49.788Z",
+    "createdAt": "2026-06-12T06:10:47.779Z",
+    "updatedAt": "2026-06-12T06:10:47.779Z",
     "githubPath": "e2e/smoke.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2554,9 +2848,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["puppeteer", "network"],
+    "tags": [
+      "puppeteer",
+      "network"
+    ],
     "owner": "auto@puppeteer",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/puppeteer/network.spec.ts::Puppeteer Network Tests > intercept and verify login POST request",
     "preconditions": "Auto-discovered via Puppeteer file traversal",
@@ -2564,8 +2863,8 @@
     "documentation": "intercept and verify login POST request",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.838Z",
-    "updatedAt": "2026-06-12T05:58:49.838Z",
+    "createdAt": "2026-06-12T06:10:47.824Z",
+    "updatedAt": "2026-06-12T06:10:47.824Z",
     "githubPath": "e2e/puppeteer/network.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2592,9 +2891,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["puppeteer", "network"],
+    "tags": [
+      "puppeteer",
+      "network"
+    ],
     "owner": "auto@puppeteer",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/puppeteer/network.spec.ts::monitor all network requests on frames page",
     "preconditions": "Auto-discovered via Puppeteer file traversal",
@@ -2602,8 +2906,8 @@
     "documentation": "monitor all network requests on frames page",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.838Z",
-    "updatedAt": "2026-06-12T05:58:49.838Z",
+    "createdAt": "2026-06-12T06:10:47.825Z",
+    "updatedAt": "2026-06-12T06:10:47.825Z",
     "githubPath": "e2e/puppeteer/network.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2630,9 +2934,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["puppeteer", "network"],
+    "tags": [
+      "puppeteer",
+      "network"
+    ],
     "owner": "auto@puppeteer",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/puppeteer/network.spec.ts::verify response headers for all herokuapp pages",
     "preconditions": "Auto-discovered via Puppeteer file traversal",
@@ -2640,8 +2949,8 @@
     "documentation": "verify response headers for all herokuapp pages",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.838Z",
-    "updatedAt": "2026-06-12T05:58:49.838Z",
+    "createdAt": "2026-06-12T06:10:47.825Z",
+    "updatedAt": "2026-06-12T06:10:47.825Z",
     "githubPath": "e2e/puppeteer/network.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2668,9 +2977,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["puppeteer", "network"],
+    "tags": [
+      "puppeteer",
+      "network"
+    ],
     "owner": "auto@puppeteer",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/puppeteer/network.spec.ts::measure page load performance metrics",
     "preconditions": "Auto-discovered via Puppeteer file traversal",
@@ -2678,8 +2992,8 @@
     "documentation": "measure page load performance metrics",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.838Z",
-    "updatedAt": "2026-06-12T05:58:49.838Z",
+    "createdAt": "2026-06-12T06:10:47.825Z",
+    "updatedAt": "2026-06-12T06:10:47.825Z",
     "githubPath": "e2e/puppeteer/network.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2706,9 +3020,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["puppeteer", "network"],
+    "tags": [
+      "puppeteer",
+      "network"
+    ],
     "owner": "auto@puppeteer",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/puppeteer/network.spec.ts::detect mixed content warnings",
     "preconditions": "Auto-discovered via Puppeteer file traversal",
@@ -2716,8 +3035,8 @@
     "documentation": "detect mixed content warnings",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.838Z",
-    "updatedAt": "2026-06-12T05:58:49.838Z",
+    "createdAt": "2026-06-12T06:10:47.825Z",
+    "updatedAt": "2026-06-12T06:10:47.825Z",
     "githubPath": "e2e/puppeteer/network.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2744,9 +3063,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["puppeteer", "screenshots"],
+    "tags": [
+      "puppeteer",
+      "screenshots"
+    ],
     "owner": "auto@puppeteer",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/puppeteer/screenshots.spec.ts::Puppeteer Screenshot Tests > capture login page screenshot",
     "preconditions": "Auto-discovered via Puppeteer file traversal",
@@ -2754,8 +3078,8 @@
     "documentation": "capture login page screenshot",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.838Z",
-    "updatedAt": "2026-06-12T05:58:49.838Z",
+    "createdAt": "2026-06-12T06:10:47.825Z",
+    "updatedAt": "2026-06-12T06:10:47.825Z",
     "githubPath": "e2e/puppeteer/screenshots.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2782,9 +3106,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["puppeteer", "screenshots"],
+    "tags": [
+      "puppeteer",
+      "screenshots"
+    ],
     "owner": "auto@puppeteer",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/puppeteer/screenshots.spec.ts::capture dynamic loading element screenshot",
     "preconditions": "Auto-discovered via Puppeteer file traversal",
@@ -2792,8 +3121,8 @@
     "documentation": "capture dynamic loading element screenshot",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.838Z",
-    "updatedAt": "2026-06-12T05:58:49.838Z",
+    "createdAt": "2026-06-12T06:10:47.825Z",
+    "updatedAt": "2026-06-12T06:10:47.825Z",
     "githubPath": "e2e/puppeteer/screenshots.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2820,9 +3149,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["puppeteer", "screenshots"],
+    "tags": [
+      "puppeteer",
+      "screenshots"
+    ],
     "owner": "auto@puppeteer",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/puppeteer/screenshots.spec.ts::capture dropdown options screenshot",
     "preconditions": "Auto-discovered via Puppeteer file traversal",
@@ -2830,8 +3164,8 @@
     "documentation": "capture dropdown options screenshot",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.838Z",
-    "updatedAt": "2026-06-12T05:58:49.838Z",
+    "createdAt": "2026-06-12T06:10:47.825Z",
+    "updatedAt": "2026-06-12T06:10:47.825Z",
     "githubPath": "e2e/puppeteer/screenshots.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2858,9 +3192,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["puppeteer", "screenshots"],
+    "tags": [
+      "puppeteer",
+      "screenshots"
+    ],
     "owner": "auto@puppeteer",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/puppeteer/screenshots.spec.ts::capture frames page screenshot",
     "preconditions": "Auto-discovered via Puppeteer file traversal",
@@ -2868,8 +3207,8 @@
     "documentation": "capture frames page screenshot",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.838Z",
-    "updatedAt": "2026-06-12T05:58:49.838Z",
+    "createdAt": "2026-06-12T06:10:47.825Z",
+    "updatedAt": "2026-06-12T06:10:47.825Z",
     "githubPath": "e2e/puppeteer/screenshots.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2896,9 +3235,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["puppeteer", "screenshots"],
+    "tags": [
+      "puppeteer",
+      "screenshots"
+    ],
     "owner": "auto@puppeteer",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/puppeteer/screenshots.spec.ts::capture file upload page screenshot",
     "preconditions": "Auto-discovered via Puppeteer file traversal",
@@ -2906,8 +3250,8 @@
     "documentation": "capture file upload page screenshot",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.838Z",
-    "updatedAt": "2026-06-12T05:58:49.838Z",
+    "createdAt": "2026-06-12T06:10:47.825Z",
+    "updatedAt": "2026-06-12T06:10:47.825Z",
     "githubPath": "e2e/puppeteer/screenshots.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2934,9 +3278,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "security"],
+    "tags": [
+      "http",
+      "security"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/headers.spec.ts::HTTP Security Headers > login page has X-Content-Type-Options: nosniff",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -2944,8 +3293,8 @@
     "documentation": "login page has X-Content-Type-Options: nosniff",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.866Z",
+    "updatedAt": "2026-06-12T06:10:47.866Z",
     "githubPath": "e2e/http/headers.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -2972,9 +3321,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "security"],
+    "tags": [
+      "http",
+      "security"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/headers.spec.ts::login page has X-Frame-Options: SAMEORIGIN",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -2982,8 +3336,8 @@
     "documentation": "login page has X-Frame-Options: SAMEORIGIN",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/headers.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3010,9 +3364,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "security"],
+    "tags": [
+      "http",
+      "security"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/headers.spec.ts::login page has X-XSS-Protection header",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3020,8 +3379,8 @@
     "documentation": "login page has X-XSS-Protection header",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/headers.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3048,9 +3407,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "security"],
+    "tags": [
+      "http",
+      "security"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/headers.spec.ts::login page has Content-Type: text/html",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3058,8 +3422,8 @@
     "documentation": "login page has Content-Type: text/html",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/headers.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3086,9 +3450,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "security"],
+    "tags": [
+      "http",
+      "security"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/headers.spec.ts::all pages have Server header",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3096,8 +3465,8 @@
     "documentation": "all pages have Server header",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/headers.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3124,9 +3493,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "security"],
+    "tags": [
+      "http",
+      "security"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/headers.spec.ts::login page sets cookies on authentication",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3134,8 +3508,8 @@
     "documentation": "login page sets cookies on authentication",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/headers.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3162,9 +3536,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "security"],
+    "tags": [
+      "http",
+      "security"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/headers.spec.ts::checkboxes page returns Content-Type: text/html",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3172,8 +3551,8 @@
     "documentation": "checkboxes page returns Content-Type: text/html",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/headers.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3200,9 +3579,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "security"],
+    "tags": [
+      "http",
+      "security"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/headers.spec.ts::dropdown page response has Content-Length header",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3210,8 +3594,8 @@
     "documentation": "dropdown page response has Content-Length header",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/headers.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3238,9 +3622,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "security"],
+    "tags": [
+      "http",
+      "security"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/headers.spec.ts::all herokuapp pages use UTF-8 charset",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3248,8 +3637,8 @@
     "documentation": "all herokuapp pages use UTF-8 charset",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/headers.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3276,9 +3665,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "security"],
+    "tags": [
+      "http",
+      "security"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/headers.spec.ts::no page exposes internal server version",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3286,8 +3680,8 @@
     "documentation": "no page exposes internal server version",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/headers.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3314,9 +3708,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::HTTP Health Checks > login page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3324,8 +3723,8 @@
     "documentation": "login page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.888Z",
-    "updatedAt": "2026-06-12T05:58:49.888Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3352,9 +3751,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::checkboxes page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3362,8 +3766,8 @@
     "documentation": "checkboxes page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3390,9 +3794,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::dropdown page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3400,8 +3809,8 @@
     "documentation": "dropdown page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3428,9 +3837,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::dynamic loading page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3438,8 +3852,8 @@
     "documentation": "dynamic loading page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3466,9 +3880,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::javascript alerts page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3476,8 +3895,8 @@
     "documentation": "javascript alerts page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3504,9 +3923,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::frames page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3514,8 +3938,8 @@
     "documentation": "frames page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3542,9 +3966,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::windows page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3552,8 +3981,8 @@
     "documentation": "windows page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3580,9 +4009,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::key presses page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3590,8 +4024,8 @@
     "documentation": "key presses page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3618,9 +4052,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::file upload page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3628,8 +4067,8 @@
     "documentation": "file upload page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3656,9 +4095,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::drag and drop page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3666,8 +4110,8 @@
     "documentation": "drag and drop page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3694,9 +4138,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::secure page redirects to login",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3704,8 +4153,8 @@
     "documentation": "secure page redirects to login",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3732,9 +4181,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::non-existent page returns 404",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3742,8 +4196,8 @@
     "documentation": "non-existent page returns 404",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3770,9 +4224,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::basic auth page prompts for credentials",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3780,8 +4239,8 @@
     "documentation": "basic auth page prompts for credentials",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3808,9 +4267,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::digest auth page prompts for credentials",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3818,8 +4282,8 @@
     "documentation": "digest auth page prompts for credentials",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3846,9 +4310,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "url-health"],
+    "tags": [
+      "http",
+      "url-health"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/health.spec.ts::status codes page returns 200",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3856,8 +4325,8 @@
     "documentation": "status codes page returns 200",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/health.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3884,9 +4353,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "performance"],
+    "tags": [
+      "http",
+      "performance"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/performance.spec.ts::HTTP Performance > login page responds within 2 seconds",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3894,8 +4368,8 @@
     "documentation": "login page responds within 2 seconds",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/performance.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3922,9 +4396,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "performance"],
+    "tags": [
+      "http",
+      "performance"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/performance.spec.ts::checkboxes page responds within 2 seconds",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3932,8 +4411,8 @@
     "documentation": "checkboxes page responds within 2 seconds",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/performance.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3960,9 +4439,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "performance"],
+    "tags": [
+      "http",
+      "performance"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/performance.spec.ts::dropdown page responds within 2 seconds",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -3970,8 +4454,8 @@
     "documentation": "dropdown page responds within 2 seconds",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/performance.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -3998,9 +4482,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "performance"],
+    "tags": [
+      "http",
+      "performance"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/performance.spec.ts::dynamic loading page responds within 3 seconds",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -4008,8 +4497,8 @@
     "documentation": "dynamic loading page responds within 3 seconds",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/performance.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -4036,9 +4525,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "performance"],
+    "tags": [
+      "http",
+      "performance"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/performance.spec.ts::frames page responds within 2 seconds",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -4046,8 +4540,8 @@
     "documentation": "frames page responds within 2 seconds",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/performance.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -4074,9 +4568,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "performance"],
+    "tags": [
+      "http",
+      "performance"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/performance.spec.ts::all herokuapp pages respond under 5 seconds",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -4084,8 +4583,8 @@
     "documentation": "all herokuapp pages respond under 5 seconds",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/performance.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -4112,9 +4611,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "performance"],
+    "tags": [
+      "http",
+      "performance"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/performance.spec.ts::login page supports HTTP/1.1",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -4122,8 +4626,8 @@
     "documentation": "login page supports HTTP/1.1",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/performance.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -4150,9 +4654,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "performance"],
+    "tags": [
+      "http",
+      "performance"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/performance.spec.ts::login page supports gzip compression",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -4160,8 +4669,8 @@
     "documentation": "login page supports gzip compression",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/performance.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -4188,9 +4697,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "performance"],
+    "tags": [
+      "http",
+      "performance"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/performance.spec.ts::page responses include Date header",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -4198,8 +4712,8 @@
     "documentation": "page responses include Date header",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/performance.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {
@@ -4226,9 +4740,14 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": ["http", "performance"],
+    "tags": [
+      "http",
+      "performance"
+    ],
     "owner": "auto@http",
-    "suiteIds": ["suite_e2e"],
+    "suiteIds": [
+      "suite_e2e"
+    ],
     "automated": true,
     "scriptPath": "e2e/http/performance.spec.ts::page responses include Connection header",
     "preconditions": "Auto-discovered via HTTP file traversal",
@@ -4236,8 +4755,8 @@
     "documentation": "page responses include Connection header",
     "version": 1,
     "changelog": [],
-    "createdAt": "2026-06-12T05:58:49.889Z",
-    "updatedAt": "2026-06-12T05:58:49.889Z",
+    "createdAt": "2026-06-12T06:10:47.867Z",
+    "updatedAt": "2026-06-12T06:10:47.867Z",
     "githubPath": "e2e/http/performance.spec.ts",
     "repoStatus": "synced",
     "filmstrip": {

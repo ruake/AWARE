@@ -1,3 +1,8 @@
+---
+name: aware-ui-components-expert
+description: Expert in shadcn/radix UI primitives (Tailwind), AWARE domain components (inline style + --proof-* CSS vars), CSS design token system, Three.js PoPGlobe, and lucide-react icons. Use when creating domain components, modifying UI primitives, fixing styling inconsistencies, or working with the design token system.
+---
+
 # AWARE UI Components Expert
 
 ## Role

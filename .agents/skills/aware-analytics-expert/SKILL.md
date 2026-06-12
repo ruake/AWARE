@@ -1,3 +1,8 @@
+---
+name: aware-analytics-expert
+description: Expert in pass-rate trends, category heatmaps, flakiness scoring, run-level and test-level anomaly detection (Z-score), run frequency analysis, and recharts chart data pipelines. Use when building or modifying analytics charts, adding new metrics, implementing anomaly detection, or fixing chart data shape mismatches.
+---
+
 # AWARE Analytics Expert
 
 ## Role

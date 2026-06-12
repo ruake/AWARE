@@ -1,3 +1,8 @@
+---
+name: aware-testing-expert
+description: Expert in Playwright E2E, Puppeteer, HTTP runner tests, pytest integration, Vitest unit tests, test discovery, and TestCase/TestSuite management. Use when writing or modifying test specs, implementing test discovery, configuring runners, or debugging flaky test detection.
+---
+
 # AWARE Testing Expert
 
 ## Role

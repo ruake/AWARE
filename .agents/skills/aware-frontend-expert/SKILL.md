@@ -1,3 +1,8 @@
+---
+name: aware-frontend-expert
+description: Expert in React 19, Vite 7, wouter routing, inline styling with --proof-* CSS vars, recharts, and shadcn/radix UI. Use when building pages, creating domain components, fixing layout/styling/routing, integrating charts, or debugging Vite/React builds.
+---
+
 # AWARE Frontend Expert
 
 ## Role

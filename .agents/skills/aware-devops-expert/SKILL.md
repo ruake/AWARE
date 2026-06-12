@@ -1,3 +1,8 @@
+---
+name: aware-devops-expert
+description: Expert in Vite build config, pnpm workspace, data generation/validation scripts, test discovery automation, and GitHub Pages deployment. Use when configuring the build, adding npm scripts, working with data generation scripts, debugging pnpm workspace issues, or setting up deployment.
+---
+
 # AWARE DevOps Expert
 
 ## Role

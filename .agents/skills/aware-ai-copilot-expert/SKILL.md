@@ -1,3 +1,8 @@
+---
+name: aware-ai-copilot-expert
+description: Expert in LLM provider abstraction (OpenAI/WebLLM/Chrome AI), Copilot chat UI, skill/use-case system, context building, and chat storage. Use when modifying the Copilot interface, adding AI use cases, changing LLM providers, improving context building, or debugging WebLLM/OpenAI issues.
+---
+
 # AWARE AI Copilot Expert
 
 ## Role
