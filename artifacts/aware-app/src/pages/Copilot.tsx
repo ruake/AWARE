@@ -95,16 +95,21 @@ const FOLLOW_UP_MAP: Record<string, string[]> = {
   "suite-health": ["category-health", "coverage-gap"],
   "test-doc-gen": ["coverage-gap", "category-health"],
   "test-redundancy": ["coverage-gap", "test-doc-gen"],
-  "release-readiness": ["build-risk-assessment", "promotion-decision-support", "env-health-summary"],
+  "release-readiness": [
+    "build-risk-assessment",
+    "promotion-decision-support",
+    "env-health-summary",
+  ],
   "env-health-summary": ["env-comparison", "env-drift", "smart-alerting"],
   "regression-report": ["failure-analysis", "build-risk-assessment", "cross-category-correlation"],
 };
 
 function getFollowUpSuggestions(useCaseId: string): { id: string; name: string }[] {
   const ids = FOLLOW_UP_MAP[useCaseId] || [];
-  return ids
-    .map((id) => AI_USE_CASES.find((uc) => uc.id === id))
-    .filter(Boolean) as { id: string; name: string }[];
+  return ids.map((id) => AI_USE_CASES.find((uc) => uc.id === id)).filter(Boolean) as {
+    id: string;
+    name: string;
+  }[];
 }
 
 const PROCESSING_MESSAGES = [
@@ -303,7 +308,12 @@ export default function Copilot() {
       const resultText = result.details || result.summary;
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: resultText, type: "analysis", followUps: getFollowUpSuggestions(useCase.id) },
+        {
+          role: "assistant",
+          content: resultText,
+          type: "analysis",
+          followUps: getFollowUpSuggestions(useCase.id),
+        },
       ]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -321,10 +331,16 @@ export default function Copilot() {
 
   // Intent → use case mapping for smart question routing
   const INTENT_MAP: [RegExp, string][] = [
-    [/\b(release|deploy|rollout|go.?live|ready|ship)\b.*\b(safe|ready|check|status)\b/i, "release-readiness"],
+    [
+      /\b(release|deploy|rollout|go.?live|ready|ship)\b.*\b(safe|ready|check|status)\b/i,
+      "release-readiness",
+    ],
     [/\b(env|environment)\b.*\b(health|status|snapshot|check|how)\b/i, "env-health-summary"],
     [/\bhow are\b.*\b(env|environment|stage|prod|qa|uat)\b/i, "env-health-summary"],
-    [/\b(regress|regression|what changed|diff|compare)\b.*\b(build|last|latest|run)\b/i, "regression-report"],
+    [
+      /\b(regress|regression|what changed|diff|compare)\b.*\b(build|last|latest|run)\b/i,
+      "regression-report",
+    ],
     [/\bcompare\b.*\b(build|run|two|last)\b/i, "regression-report"],
     [/\b(flaky|flip|flakiness|inconsistent)\b/i, "flaky-detection"],
     [/\b(fail|error|broken|crash|what.*wrong)\b/i, "failure-analysis"],
@@ -373,7 +389,12 @@ export default function Copilot() {
           const resultText = result.details || result.summary;
           setMessages((prev) => [
             ...prev,
-            { role: "assistant", content: resultText, type: "analysis", followUps: getFollowUpSuggestions(useCaseId) },
+            {
+              role: "assistant",
+              content: resultText,
+              type: "analysis",
+              followUps: getFollowUpSuggestions(useCaseId),
+            },
           ]);
         } catch {
           // fall through to LLM below
@@ -461,7 +482,9 @@ export default function Copilot() {
   const persistMessages = (msgs: typeof messages) => {
     try {
       localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(msgs));
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   };
 
   const loadPersistedMessages = (): typeof messages => {
@@ -476,7 +499,9 @@ export default function Copilot() {
   const clearPersistedMessages = () => {
     try {
       localStorage.removeItem(CHAT_STORAGE_KEY);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   };
 
   const copyMessage = async (i: number, content: string) => {
@@ -484,7 +509,9 @@ export default function Copilot() {
       await navigator.clipboard.writeText(content);
       setCopiedIndex(i);
       setTimeout(() => setCopiedIndex(null), 2000);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   };
 
   const newChat = () => {
@@ -1172,9 +1199,13 @@ export default function Copilot() {
                           }}
                         >
                           {copiedIndex === i ? (
-                            <><Check size={10} /> Copied</>
+                            <>
+                              <Check size={10} /> Copied
+                            </>
                           ) : (
-                            <><Copy size={10} /> Copy</>
+                            <>
+                              <Copy size={10} /> Copy
+                            </>
                           )}
                         </button>
                       )}
@@ -1354,7 +1385,7 @@ export default function Copilot() {
                 e.target.style.height = Math.min(e.target.scrollHeight, 250) + "px";
               }}
               onKeyDown={handleKeyDown}
-              placeholder='Ask about test runs, CDN health…  (Enter to send, Ctrl+Enter for new line)'
+              placeholder="Ask about test runs, CDN health…  (Enter to send, Ctrl+Enter for new line)"
               rows={1}
               style={{
                 flex: 1,
@@ -1486,18 +1517,14 @@ export default function Copilot() {
                           _activeUseCase === uc.id ? catColor[cat] : `${catColor[cat]}28`
                         }`,
                         background:
-                          _activeUseCase === uc.id
-                            ? `${catColor[cat]}22`
-                            : `${catColor[cat]}0c`,
+                          _activeUseCase === uc.id ? `${catColor[cat]}22` : `${catColor[cat]}0c`,
                         color: _activeUseCase === uc.id ? catColor[cat] : "var(--proof-text)",
                         textAlign: "left",
                         width: "100%",
                         transition: "all 0.12s",
                         lineHeight: 1.3,
                         boxShadow:
-                          _activeUseCase === uc.id
-                            ? `0 0 0 1px ${catColor[cat]}40`
-                            : "none",
+                          _activeUseCase === uc.id ? `0 0 0 1px ${catColor[cat]}40` : "none",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = `${catColor[cat]}1e`;
@@ -1506,13 +1533,9 @@ export default function Copilot() {
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.background =
-                          _activeUseCase === uc.id
-                            ? `${catColor[cat]}22`
-                            : `${catColor[cat]}0c`;
+                          _activeUseCase === uc.id ? `${catColor[cat]}22` : `${catColor[cat]}0c`;
                         e.currentTarget.style.borderColor =
-                          _activeUseCase === uc.id
-                            ? catColor[cat]
-                            : `${catColor[cat]}28`;
+                          _activeUseCase === uc.id ? catColor[cat] : `${catColor[cat]}28`;
                         e.currentTarget.style.color =
                           _activeUseCase === uc.id ? catColor[cat] : "var(--proof-text)";
                       }}

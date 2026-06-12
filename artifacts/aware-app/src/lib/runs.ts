@@ -117,7 +117,14 @@ export function computeEnvSummary(): void {
       latest.failures > 0
         ? `${latest.failures} failure${latest.failures !== 1 ? "s" : ""} in last run`
         : null;
-    ENV_SUMMARY.push({ label, passRate: avgPassRate, trend, failures: latest.failures, color, alert });
+    ENV_SUMMARY.push({
+      label,
+      passRate: avgPassRate,
+      trend,
+      failures: latest.failures,
+      color,
+      alert,
+    });
   }
   ENV_SUMMARY.sort((a, b) => a.label.localeCompare(b.label));
 }
