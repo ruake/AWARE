@@ -96,6 +96,28 @@ export function runFallbackAnalysis(request: AIAnalysisRequest): AIAnalysisResul
       return fallbackDurationBudget();
     case "test-redundancy":
       return fallbackRedundancyDetection();
+    case "regression-prediction":
+      return fallbackRegressionPrediction();
+    case "performance-trends":
+      return fallbackPerformanceTrends();
+    case "root-cause-analysis":
+      return fallbackRootCauseAnalysis();
+    case "failure-clustering":
+      return fallbackFailureClustering();
+    case "cross-category-correlation":
+      return fallbackCrossCategoryCorrelation();
+    case "trend-forecasting":
+      return fallbackTrendForecasting();
+    case "failure-impact":
+      return fallbackFailureImpact();
+    case "env-drift":
+      return fallbackEnvDrift();
+    case "build-risk-assessment":
+      return fallbackBuildRiskAssessment();
+    case "promotion-decision-support":
+      return fallbackPromotionDecisionSupport();
+    case "test-doc-gen":
+      return fallbackTestDocGen();
     default:
       return genericFallback(request);
   }
@@ -676,6 +698,662 @@ function fallbackRedundancyDetection(): AIAnalysisResult {
         (r) =>
           `Review ${r.tests.length} tests in ${r.category} for consolidation: ${r.tests.map((t) => t.id).join(", ")}`,
       ),
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackRegressionPrediction(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
+  );
+  const recent = sortedRuns.slice(-10);
+  const categoryTrends: Record<string, { rates: number[]; decline: boolean; declinePct: number }> =
+    {};
+  for (const run of recent) {
+    const results = getTestResultsForRun(run.id);
+    const byCat: Record<string, { total: number; passed: number }> = {};
+    for (const r of results) {
+      const cat = r.category || "Unknown";
+      if (!byCat[cat]) byCat[cat] = { total: 0, passed: 0 };
+      byCat[cat].total++;
+      if (r.status === "PASS") byCat[cat].passed++;
+    }
+    for (const [cat, s] of Object.entries(byCat)) {
+      if (!categoryTrends[cat]) categoryTrends[cat] = { rates: [], decline: false, declinePct: 0 };
+      categoryTrends[cat].rates.push(Math.round((s.passed / s.total) * 100));
+    }
+  }
+  for (const [, t] of Object.entries(categoryTrends)) {
+    if (t.rates.length >= 2) {
+      const first = t.rates[0];
+      const last = t.rates[t.rates.length - 1];
+      t.decline = last < first;
+      t.declinePct = first > 0 ? Math.round(((first - last) / first) * 100) : 0;
+    }
+  }
+  const atRisk = Object.entries(categoryTrends)
+    .filter(([, t]) => t.decline && t.declinePct > 5)
+    .sort(([, a], [, b]) => b.declinePct - a.declinePct);
+  const stable = Object.entries(categoryTrends).filter(([, t]) => !t.decline || t.declinePct <= 5);
+  const summary =
+    atRisk.length === 0
+      ? "No categories showing regression risk. All monitored categories are stable or improving."
+      : `${atRisk.length} category(s) at risk of regression: ${atRisk.map(([c, t]) => `${c} (${t.declinePct}% decline)`).join(", ")}. ${stable.length} categories stable.`;
+  return {
+    useCaseId: "regression-prediction",
+    summary,
+    details: `## Regression Prediction\n\n**At-Risk Categories:** ${atRisk.length}\n\n### Declining Categories\n| Category | Trend (old → new) | Decline |\n|----------|-------------------|---------|\n${atRisk.map(([c, t]) => `| ${c} | ${t.rates[0]}% → ${t.rates[t.rates.length - 1]}% | ${t.declinePct}% |`).join("\n") || "| — | No at-risk categories | — |"}\n\n### Stable Categories\n${stable.map(([c, t]) => `- ${c}: ${t.rates[0]}% → ${t.rates[t.rates.length - 1]}%`).join("\n") || "- None"}\n\n**Based on last ${recent.length} runs.**`,
+    data: {
+      atRisk: atRisk.map(([c, t]) => ({ category: c, declinePct: t.declinePct })),
+      totalCategories: Object.keys(categoryTrends).length,
+    },
+    confidence: 1,
+    recommendations:
+      atRisk.length > 0
+        ? atRisk.map(([c]) => `Investigate declining pass rate in ${c}`)
+        : ["No regression risk detected — continue monitoring"],
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackPerformanceTrends(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
+  );
+  const testDurations: Record<string, { durations: number[]; runs: string[] }> = {};
+  for (const run of sortedRuns) {
+    const results = getTestResultsForRun(run.id);
+    for (const r of results) {
+      if (!testDurations[r.id]) testDurations[r.id] = { durations: [], runs: [] };
+      testDurations[r.id].durations.push(r.duration);
+      testDurations[r.id].runs.push(run.build || run.id.slice(-8));
+    }
+  }
+  const trending = Object.entries(testDurations)
+    .map(([id, d]) => {
+      const avg =
+        d.durations.length > 0
+          ? Math.round(d.durations.reduce((s, v) => s + v, 0) / d.durations.length)
+          : 0;
+      const first = d.durations[0] || 0;
+      const last = d.durations[d.durations.length - 1] || 0;
+      const change = first > 0 ? Math.round(((last - first) / first) * 100) : 0;
+      return { id, avg, first, last, change, count: d.durations.length };
+    })
+    .filter((t) => t.count >= 2)
+    .sort((a, b) => b.change - a.change);
+  const slowing = trending.filter((t) => t.change > 20);
+  const durationChart = JSON.stringify({
+    type: "BarChart",
+    title: "Duration Change % (slowing tests)",
+    headers: ["Test", "Change %"],
+    rows: slowing.slice(0, 8).map((t) => [t.id, t.change]),
+    colors: ["#ef4444"],
+    isHorizontal: true,
+    options: {
+      legend: { position: "none" },
+      hAxis: { textStyle: { fontSize: 10 } },
+      vAxis: { textStyle: { fontSize: 9 } },
+    },
+  });
+  const summary =
+    slowing.length === 0
+      ? "No performance regressions detected. All tests show stable or improving durations."
+      : `${slowing.length} test(s) slowing down. Worst: ${slowing[0]?.id} (${slowing[0]?.change}% increase, avg ${slowing[0]?.avg}ms).`;
+  return {
+    useCaseId: "performance-trends",
+    summary,
+    details: `## Performance Trend Analysis\n\n\`\`\`chart\n${durationChart}\n\`\`\`\n\n### Slowing Tests (>20% increase)\n| Test ID | Avg (ms) | First | Last | Change |\n|---------|----------|-------|------|--------|\n${slowing.map((t) => `| \`${t.id}\` | ${t.avg} | ${t.first}ms | ${t.last}ms | **+${t.change}%** |`).join("\n") || "| — | — | — | — | — |"}\n\n**Total tests tracked: ${trending.length}**`,
+    data: { slowingTests: slowing, totalTracked: trending.length },
+    confidence: 1,
+    recommendations: slowing
+      .slice(0, 3)
+      .map((t) => `Investigate duration increase in ${t.id} (+${t.change}%)`),
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackRootCauseAnalysis(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
+  );
+  const latestRun = sortedRuns[sortedRuns.length - 1];
+  if (!latestRun) return genericFallback({ useCaseId: "root-cause-analysis", parameters: {} });
+  const latestResults = getTestResultsForRun(latestRun.id);
+  const failures = latestResults.filter((r) => r.status === "FAIL");
+  const byFirstSeen: Record<
+    string,
+    { test: string; category: string; firstRun: string; firstBuild: string; reappearances: number }
+  > = {};
+  for (const f of failures) {
+    for (const run of sortedRuns) {
+      const results = getTestResultsForRun(run.id);
+      const match = results.find((r) => r.id === f.id);
+      if (match && match.status === "FAIL") {
+        if (!byFirstSeen[f.id]) {
+          byFirstSeen[f.id] = {
+            test: f.id,
+            category: f.category || "Unknown",
+            firstRun: run.id,
+            firstBuild: run.build || "",
+            reappearances: 0,
+          };
+        } else {
+          byFirstSeen[f.id].reappearances++;
+        }
+      }
+    }
+  }
+  const systemic = Object.values(byFirstSeen)
+    .filter((b) => b.reappearances > 1)
+    .sort((a, b) => b.reappearances - a.reappearances);
+  const recentFailures = Object.values(byFirstSeen).filter((b) => b.reappearances <= 1);
+  const summary =
+    failures.length === 0
+      ? `No failures in latest run (${latestRun.id}). No root cause analysis needed.`
+      : `${failures.length} failures in latest run. ${systemic.length} systemic issues (recurring across runs), ${recentFailures.length} new failures.${systemic.length > 0 ? ` Top: ${systemic[0]?.test} first appeared in ${systemic[0]?.firstBuild}.` : ""}`;
+  return {
+    useCaseId: "root-cause-analysis",
+    summary,
+    details: `## Root Cause Analysis — ${latestRun.id} (\`${latestRun.build}\`)\n\n**Failures: ${failures.length}**\n\n### Systemic Issues (recurring across runs)\n| Test | Category | First Seen In | Build | Reappearances |\n|------|----------|---------------|-------|---------------|\n${systemic.map((s) => `| \`${s.test}\` | ${s.category} | ${s.firstRun} | \`${s.firstBuild}\` | ${s.reappearances} |`).join("\n") || "| — | — | — | — | — |"}\n\n### New/Recent Failures\n| Test | Category |\n|------|----------|\n${recentFailures.map((r) => `| \`${r.test}\` | ${r.category} |`).join("\n") || "| — | None |"}`,
+    data: {
+      systemic,
+      newFailures: recentFailures,
+      totalFailures: failures.length,
+      latestBuild: latestRun.build,
+    },
+    confidence: 1,
+    recommendations: [
+      ...systemic
+        .slice(0, 3)
+        .map(
+          (s) =>
+            `Root-cause recurring failure in ${s.test} (seen ${s.reappearances + 1} times since ${s.firstBuild})`,
+        ),
+      ...(systemic.length > 3 ? ["Schedule dedicated investigation for systemic failures"] : []),
+      ...(failures.length === 0 ? ["No action needed"] : []),
+    ],
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackFailureClustering(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
+  );
+  const latestRun = sortedRuns[0];
+  if (!latestRun) return genericFallback({ useCaseId: "failure-clustering", parameters: {} });
+  const results = getTestResultsForRun(latestRun.id);
+  const failures = results.filter((r) => r.status === "FAIL");
+  const clusters: Record<
+    string,
+    { category: string; tests: string[]; count: number; pct: number }
+  > = {};
+  for (const f of failures) {
+    const key = `${f.category || "Unknown"}::${f.suite || "none"}`;
+    if (!clusters[key])
+      clusters[key] = { category: f.category || "Unknown", tests: [], count: 0, pct: 0 };
+    clusters[key].tests.push(f.name);
+    clusters[key].count++;
+  }
+  const total = failures.length;
+  for (const c of Object.values(clusters)) {
+    c.pct = total > 0 ? Math.round((c.count / total) * 100) : 0;
+  }
+  const sortedClusters = Object.values(clusters).sort((a, b) => b.count - a.count);
+  const clusterChart = JSON.stringify({
+    type: "PieChart",
+    title: "Failure Clusters by Category",
+    headers: ["Cluster", "Failures"],
+    rows: sortedClusters.map((c) => [`${c.category}`, c.count]),
+    colors: ["#ef4444", "#f59e0b", "#8b5cf6", "#3b82f6", "#10b981"],
+    options: { pieHole: 0.4, legend: { position: "right", textStyle: { fontSize: 10 } } },
+  });
+  const summary =
+    failures.length === 0
+      ? "No failures to cluster in latest run."
+      : `${sortedClusters.length} failure cluster(s) across ${failures.length} failures. Largest: ${sortedClusters[0]?.category} (${sortedClusters[0]?.count} failures, ${sortedClusters[0]?.pct}%).`;
+  return {
+    useCaseId: "failure-clustering",
+    summary,
+    details: `## Failure Clustering — ${latestRun.id}\n\n\`\`\`chart\n${clusterChart}\n\`\`\`\n\n### Clusters\n| Category/Suite | Count | % of Failures | Tests |\n|----------------|-------|---------------|-------|\n${sortedClusters.map((c) => `| ${c.category} | **${c.count}** | ${c.pct}% | ${c.tests.join(", ")} |`).join("\n") || "| — | 0 | — | — |"}`,
+    data: { clusters: sortedClusters, totalFailures: failures.length, latestRun: latestRun.id },
+    confidence: 1,
+    recommendations: sortedClusters
+      .slice(0, 3)
+      .map((c) => `Investigate ${c.category} cluster (${c.count} failures, ${c.pct}% of total)`),
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackCrossCategoryCorrelation(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
+  );
+  const catRates: Record<string, number[]> = {};
+  for (const run of sortedRuns) {
+    const results = getTestResultsForRun(run.id);
+    const byCat: Record<string, { total: number; passed: number }> = {};
+    for (const r of results) {
+      const cat = r.category || "Unknown";
+      if (!byCat[cat]) byCat[cat] = { total: 0, passed: 0 };
+      byCat[cat].total++;
+      if (r.status === "PASS") byCat[cat].passed++;
+    }
+    for (const [cat, s] of Object.entries(byCat)) {
+      if (!catRates[cat]) catRates[cat] = [];
+      catRates[cat].push(Math.round((s.passed / s.total) * 100));
+    }
+  }
+  const cats = Object.keys(catRates).filter((c) => catRates[c].length >= 3);
+  const correlations: { a: string; b: string; moveTogether: boolean; strength: number }[] = [];
+  for (let i = 0; i < cats.length; i++) {
+    for (let j = i + 1; j < cats.length; j++) {
+      const a = catRates[cats[i]];
+      const b = catRates[cats[j]];
+      const minLen = Math.min(a.length, b.length);
+      const aTrim = a.slice(-minLen);
+      const bTrim = b.slice(-minLen);
+      const diffs = aTrim.map(
+        (v, idx) =>
+          Math.sign(v - (aTrim[idx - 1] || v)) ===
+          Math.sign(bTrim[idx] - (bTrim[idx - 1] || bTrim[0])),
+      );
+      const sameDirection = diffs.filter(Boolean).length;
+      const strength = Math.round((sameDirection / diffs.length) * 100);
+      if (strength > 60)
+        correlations.push({ a: cats[i], b: cats[j], moveTogether: strength > 75, strength });
+    }
+  }
+  correlations.sort((a, b) => b.strength - a.strength);
+  const summary =
+    correlations.length === 0
+      ? "No significant correlations found between categories."
+      : `Found ${correlations.length} correlated category pair(s). Strongest: ${correlations[0]?.a} ↔ ${correlations[0]?.b} (${correlations[0]?.strength}% directional agreement).`;
+  return {
+    useCaseId: "cross-category-correlation",
+    summary,
+    details: `## Cross-Category Correlation\n\n| Category A | Category B | Direction Match | Strength |\n|------------|------------|-----------------|----------|\n${correlations.map((c) => `| ${c.a} | ${c.b} | ${c.moveTogether ? "✅ Same direction" : "⚠️ Partial"} | ${c.strength}% |`).join("\n") || "| — | — | — | — |"}\n\n**Note:** Strength = % of runs where both categories moved in the same direction. >75% suggests correlated behaviour.`,
+    data: { correlations, categoriesAnalyzed: cats.length },
+    confidence: 1,
+    recommendations:
+      correlations.length > 0
+        ? [`Monitor ${correlations[0]?.a} as leading indicator for ${correlations[0]?.b}`]
+        : ["Add more runs to detect correlation patterns"],
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackTrendForecasting(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
+  );
+  if (sortedRuns.length < 3) {
+    return {
+      useCaseId: "trend-forecasting",
+      summary: "Need at least 3 runs for forecasting.",
+      details: "Insufficient data — add more runs to enable trend forecasting.",
+      data: { runCount: sortedRuns.length, minRequired: 3 },
+      confidence: 0.5,
+      recommendations: ["Add more test runs for trend analysis"],
+      generatedAt: new Date().toISOString(),
+    };
+  }
+  const rates = sortedRuns.map((r) => r.passPct);
+  const n = rates.length;
+  const xMean = (n - 1) / 2;
+  const yMean = rates.reduce((s, v) => s + v, 0) / n;
+  let num = 0,
+    den = 0;
+  for (let i = 0; i < n; i++) {
+    num += (i - xMean) * (rates[i] - yMean);
+    den += (i - xMean) ** 2;
+  }
+  const slope = den > 0 ? num / den : 0;
+  const intercept = yMean - slope * xMean;
+  const forecast = (x: number) => Math.round(Math.max(0, Math.min(100, intercept + slope * x)));
+  const next5 = Array.from({ length: 5 }, (_, i) => forecast(n + i));
+  const forecastChart = JSON.stringify({
+    type: "LineChart",
+    title: "Pass Rate Forecast (next 5 runs)",
+    headers: ["Run", "Actual/Forecast"],
+    rows: [
+      ...rates.map((r, i) => [`#${i + 1}`, r]),
+      ...next5.map((r, i) => [`#${n + i + 1} (f)`, r]),
+    ],
+    colors: ["#5b8af5"],
+    options: {
+      legend: { position: "none" },
+      vAxis: { minValue: 0, maxValue: 100, textStyle: { fontSize: 10 } },
+      trendline: { type: "linear", color: "#ef4444", lineWidth: 2 },
+    },
+  });
+  const trend = slope > 0 ? "improving" : slope < 0 ? "declining" : "stable";
+  const summary = `Forecast: rates are ${trend} (slope: ${slope.toFixed(2)}). Predicted pass rate in 5 runs: ${next5[4]}%. ${next5[4] < 80 ? "⚠️ Forecast below 80% threshold." : ""}`;
+  return {
+    useCaseId: "trend-forecasting",
+    summary,
+    details: `## Trend Forecasting\n\n\`\`\`chart\n${forecastChart}\n\`\`\`\n\n| Metric | Value |\n|--------|-------|\n| Trend | ${trend} (slope: ${slope.toFixed(2)}) |\n| Runs analyzed | ${n} |\n| Current pass rate | ${rates[n - 1]}% |\n| Forecast (next run) | ${next5[0]}% |\n| Forecast (5 runs) | ${next5[4]}% |\n\n**Interpretation:** ${trend === "improving" ? "Pass rates trending upward. Positive trajectory." : trend === "declining" ? "Pass rates declining. Investigate root causes." : "Pass rates stable. No significant change expected."}`,
+    data: {
+      trend,
+      slope: Math.round(slope * 100) / 100,
+      currentRate: rates[n - 1],
+      forecast: next5,
+    },
+    confidence: 1,
+    recommendations:
+      trend === "declining"
+        ? [
+            "Investigate declining pass rate trend",
+            "Review recent build changes",
+            "Increase test frequency for faster detection",
+          ]
+        : trend === "improving"
+          ? ["Continue current practices", "Monitor for trend reversal"]
+          : ["No action needed — rates stable"],
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackFailureImpact(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(b.started).getTime() - new Date(b.started).getTime(),
+  );
+  const latestRun = sortedRuns[0];
+  if (!latestRun) return genericFallback({ useCaseId: "failure-impact", parameters: {} });
+  const results = getTestResultsForRun(latestRun.id);
+  const failures = results.filter((r) => r.status === "FAIL");
+  const suites = getTestSuites();
+  const impactedSuites: { id: string; name: string; failedTests: string[] }[] = [];
+  for (const suite of suites) {
+    const failed = failures.filter((f) => suite.testIds.includes(f.id));
+    if (failed.length > 0)
+      impactedSuites.push({
+        id: suite.id,
+        name: suite.name,
+        failedTests: failed.map((f) => f.name),
+      });
+  }
+  const byCategory: Record<string, number> = {};
+  for (const f of failures) {
+    const cat = f.category || "Unknown";
+    byCategory[cat] = (byCategory[cat] || 0) + 1;
+  }
+  const summary =
+    failures.length === 0
+      ? "No failures in latest run. Zero impact."
+      : `${failures.length} failure(s) impacting ${impactedSuites.length} suite(s) and ${Object.keys(byCategory).length} categorie(s). Largest impact: ${Object.entries(byCategory).sort((a, b) => b[1] - a[1])[0]?.[0]} (${Object.entries(byCategory).sort((a, b) => b[1] - a[1])[0]?.[1]} failures).`;
+  return {
+    useCaseId: "failure-impact",
+    summary,
+    details: `## Failure Impact Analysis — ${latestRun.id}\n\n| Impact Dimension | Value |\n|-----------------|-------|\n| Total failures | **${failures.length}** |\n| Impacted suites | ${impactedSuites.length}/${suites.length} |\n| Impacted categories | ${Object.keys(byCategory).length} |\n\n### By Category\n| Category | Failures |\n|----------|-----------|\n${
+      Object.entries(byCategory)
+        .sort((a, b) => b[1] - a[1])
+        .map(([c, n]) => `| ${c} | **${n}** |`)
+        .join("\n") || "| — | 0 |"
+    }\n\n### Impacted Suites\n| Suite | Failed Tests |\n|-------|-------------|\n${impactedSuites.map((s) => `| ${s.name} | ${s.failedTests.join(", ")} |`).join("\n") || "| — | None |"}`,
+    data: { totalFailures: failures.length, impactedSuites: impactedSuites.length, byCategory },
+    confidence: 1,
+    recommendations:
+      failures.length > 0
+        ? [
+            ...impactedSuites.slice(0, 2).map((s) => `Review failures blocking suite: ${s.name}`),
+            ...(failures.length > 5 ? ["Blast radius is significant — consider rollback"] : []),
+          ]
+        : ["No impact detected"],
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackEnvDrift(): AIAnalysisResult {
+  const envGroups: Record<
+    string,
+    {
+      runs: number;
+      avgPass: number;
+      failures: number;
+      categories: Record<string, { total: number; passed: number }>;
+    }
+  > = {};
+  for (const run of RUNS) {
+    const key = `${run.target}/${run.env}`;
+    if (!envGroups[key]) envGroups[key] = { runs: 0, avgPass: 0, failures: 0, categories: {} };
+    envGroups[key].runs++;
+    envGroups[key].avgPass += run.passPct;
+    envGroups[key].failures += run.failures;
+    const results = getTestResultsForRun(run.id);
+    for (const r of results) {
+      const cat = r.category || "Unknown";
+      if (!envGroups[key].categories[cat]) envGroups[key].categories[cat] = { total: 0, passed: 0 };
+      envGroups[key].categories[cat].total++;
+      if (r.status === "PASS") envGroups[key].categories[cat].passed++;
+    }
+  }
+  for (const key of Object.keys(envGroups)) {
+    envGroups[key].avgPass = Math.round(envGroups[key].avgPass / envGroups[key].runs);
+    for (const cat of Object.keys(envGroups[key].categories)) {
+      const c = envGroups[key].categories[cat];
+      c.passed = Math.round((c.passed / c.total) * 100);
+    }
+  }
+  const envKeys = Object.keys(envGroups).sort();
+  const driftPairs: {
+    a: string;
+    b: string;
+    passDiff: number;
+    categories: { cat: string; aRate: number; bRate: number; diff: number }[];
+  }[] = [];
+  for (let i = 0; i < envKeys.length; i++) {
+    for (let j = i + 1; j < envKeys.length; j++) {
+      const a = envGroups[envKeys[i]];
+      const b = envGroups[envKeys[j]];
+      const catDiffs = Object.keys({ ...a.categories, ...b.categories })
+        .map((cat) => {
+          const aRate = a.categories[cat]?.passed ?? 0;
+          const bRate = b.categories[cat]?.passed ?? 0;
+          return { cat, aRate, bRate, diff: Math.abs(aRate - bRate) };
+        })
+        .filter((c) => c.diff > 10)
+        .sort((x, y) => y.diff - x.diff);
+      driftPairs.push({
+        a: envKeys[i],
+        b: envKeys[j],
+        passDiff: Math.abs(a.avgPass - b.avgPass),
+        categories: catDiffs,
+      });
+    }
+  }
+  const significantDrift = driftPairs.filter((d) => d.passDiff > 5 || d.categories.length > 0);
+  const summary =
+    significantDrift.length === 0
+      ? "No significant environment drift detected. All environments consistent."
+      : `${significantDrift.length} drift pair(s) detected. ${significantDrift.map((d) => `${d.a} vs ${d.b}: ${d.passDiff}% pass rate difference, ${d.categories.length} drifted categories`).join("; ")}`;
+  return {
+    useCaseId: "env-drift",
+    summary,
+    details: `## Environment Drift Detection\n\n${significantDrift.map((d) => `### ${d.a} vs ${d.b}\n| Metric | Value |\n|--------|-------|\n| Pass rate diff | **${d.passDiff}%** |\n| Drifted categories | ${d.categories.length} |\n\n${d.categories.length > 0 ? `| Category | ${d.a} | ${d.b} | Diff |\n|----------|${d.a}|${d.b}|------|\n${d.categories.map((c) => `| ${c.cat} | ${c.aRate}% | ${c.bRate}% | **${c.diff}%** |`).join("\n")}` : "No category-level drift."}`).join("\n\n") || "No environment drift detected.\n\nAll environments show consistent pass rates."}`,
+    data: { driftPairs: significantDrift, environments: envKeys },
+    confidence: 1,
+    recommendations: significantDrift
+      .flatMap((d) => [
+        ...d.categories
+          .slice(0, 2)
+          .map(
+            (c) => `Check config parity for ${c.cat} between ${d.a} and ${d.b} (${c.diff}% diff)`,
+          ),
+        d.passDiff > 10
+          ? `⚠️ Large drift (${d.passDiff}%) between ${d.a} and ${d.b} — investigate deployment differences`
+          : "",
+      ])
+      .filter(Boolean),
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackBuildRiskAssessment(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(b.started).getTime() - new Date(b.started).getTime(),
+  );
+  const latest = sortedRuns[0];
+  if (!latest) return genericFallback({ useCaseId: "build-risk-assessment", parameters: {} });
+  const prevRun = sortedRuns[1];
+  const passRateScore = Math.max(0, 100 - latest.passPct) * 0.35;
+  const failureScore = Math.min(100, latest.failures * 5) * 0.25;
+  const trendScore = prevRun ? (latest.passPct < prevRun.passPct ? 25 : 0) : 12;
+  const envScore = latest.failures > 10 && latest.env === "PROD" ? 15 : latest.failures > 0 ? 5 : 0;
+  const totalScore = Math.round(passRateScore + failureScore + trendScore + envScore);
+  const level =
+    totalScore <= 20 ? "LOW" : totalScore <= 50 ? "MEDIUM" : totalScore <= 80 ? "HIGH" : "CRITICAL";
+  const verdict =
+    level === "LOW"
+      ? "✅ Safe to deploy"
+      : level === "MEDIUM"
+        ? "⚠️ Proceed with caution"
+        : "❌ Do not deploy";
+  const summary = `Build assessment for \`${latest.build}\`: Risk score ${totalScore}/100 (${level}). ${verdict}.`;
+  return {
+    useCaseId: "build-risk-assessment",
+    summary,
+    details: `## Build Risk Assessment — \`${latest.build}\`\n\n**Overall Risk: ${totalScore}/100 — ${level}**\n**Verdict: ${verdict}**\n\n| Factor | Weight | Score | Detail |\n|--------|--------|-------|--------|\n| Pass rate | 35% | ${Math.round(passRateScore)} pts | ${latest.passPct}% pass rate |\n| Failures | 25% | ${Math.round(failureScore)} pts | ${latest.failures} failures |\n| Trend vs prev | 25% | ${trendScore} pts | ${prevRun ? `${prevRun.passPct}% → ${latest.passPct}%` : "No previous run"} |\n| Environment | 15% | ${envScore} pts | ${latest.env} environment |\n\n**Supports:** Promotion gate requires ≥95% pass rate for UAT → PROD.`,
+    data: {
+      build: latest.build,
+      riskScore: totalScore,
+      riskLevel: level,
+      verdict,
+      passPct: latest.passPct,
+      failures: latest.failures,
+    },
+    confidence: 1,
+    recommendations:
+      level === "LOW"
+        ? [`Build ${latest.build} approved for deployment`]
+        : level === "MEDIUM"
+          ? [
+              `Review ${latest.failures} failures before deploying ${latest.build}`,
+              "Run additional smoke tests",
+            ]
+          : [
+              `BLOCK: Do not deploy ${latest.build}`,
+              `Critical: ${latest.failures} failures at ${latest.passPct}% pass rate`,
+              "Roll back to previous stable build",
+            ],
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackPromotionDecisionSupport(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(b.started).getTime() - new Date(b.started).getTime(),
+  );
+  const uatRuns = sortedRuns.filter((r) => r.env === "UAT");
+  const prodRuns = sortedRuns.filter((r) => r.env === "PROD");
+  const latestUat = uatRuns[0];
+  const latestProd = prodRuns[0];
+  if (!latestUat) {
+    return {
+      useCaseId: "promotion-decision-support",
+      summary: "No UAT runs found. Cannot evaluate promotion readiness.",
+      details: "Promotion gate requires UAT test results. Run the UAT regression suite first.",
+      data: { uatRunCount: uatRuns.length, prodRunCount: prodRuns.length },
+      confidence: 0.5,
+      recommendations: ["Run UAT regression suite", "Ensure UAT pass rate ≥ 95%"],
+      generatedAt: new Date().toISOString(),
+    };
+  }
+  const gateMet = latestUat.passPct >= 95;
+  const prodParity = latestProd ? Math.abs(latestUat.passPct - latestProd.passPct) < 5 : true;
+  const checks = [
+    { name: "UAT pass rate ≥ 95%", passed: gateMet, actual: `${latestUat.passPct}%` },
+    {
+      name: "UAT failures < 5",
+      passed: latestUat.failures < 5,
+      actual: `${latestUat.failures} failures`,
+    },
+    {
+      name: "UAT/PROD parity (≤5% diff)",
+      passed: prodParity,
+      actual: latestProd
+        ? `${Math.abs(latestUat.passPct - latestProd.passPct)}% diff`
+        : "No PROD data",
+    },
+  ];
+  const allPassed = checks.every((c) => c.passed);
+  const decision = allPassed ? "PROMOTE" : gateMet ? "PENDING" : "BLOCK";
+  const summary = `Promotion decision: **${decision}**. ${allPassed ? "All promotion criteria met." : gateMet ? "UAT pass rate OK but other checks need review." : "UAT pass rate below 95% threshold — cannot promote to PROD."}`;
+  return {
+    useCaseId: "promotion-decision-support",
+    summary,
+    details: `## Promotion Decision Support — UAT → PROD\n\n**Decision: ${decision === "PROMOTE" ? "✅ PROMOTE" : decision === "PENDING" ? "⚠️ PENDING" : "❌ BLOCK"}**\n\n### Latest UAT Run\n| Metric | Value |\n|--------|-------|\n| Run | ${latestUat.id} |\n| Build | \`${latestUat.build}\` |\n| Pass rate | ${latestUat.passPct}% |\n| Failures | ${latestUat.failures} |\n\n### Promotion Checks\n| Check | Result | Actual |\n|-------|--------|--------|\n${checks.map((c) => `| ${c.name} | ${c.passed ? "✅ Pass" : "❌ Fail"} | ${c.actual} |`).join("\n")}\n\n### Previous PROD Baseline\n${latestProd ? `Latest PROD run: ${latestProd.passPct}% pass rate (${latestProd.build})` : "No PROD runs recorded."}\n\n**Gate:** UAT regression suite must pass ≥95% before PROD property activation.`,
+    data: {
+      decision,
+      checks,
+      latestUat: latestUat.id,
+      uatPassPct: latestUat.passPct,
+      uatBuild: latestUat.build,
+    },
+    confidence: 1,
+    recommendations:
+      decision === "PROMOTE"
+        ? ["Promote to PROD — all checks pass", "Monitor first PROD run after promotion"]
+        : decision === "PENDING"
+          ? ["Review failing checks and retry", "Check env-specific configuration differences"]
+          : [
+              "BLOCKED: UAT pass rate below 95% threshold",
+              "Fix UAT failures before promotion attempt",
+              "Run UAT regression suite again after fixes",
+            ],
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackTestDocGen(): AIAnalysisResult {
+  const testCases = getTestCases();
+  const suites = getTestSuites();
+  const byCategory: Record<
+    string,
+    { count: number; automated: number; manual: number; priorities: string[] }
+  > = {};
+  for (const tc of testCases) {
+    const cat = tc.category || "Unknown";
+    if (!byCategory[cat]) byCategory[cat] = { count: 0, automated: 0, manual: 0, priorities: [] };
+    byCategory[cat].count++;
+    if (tc.automated) byCategory[cat].automated++;
+    else byCategory[cat].manual++;
+    if (tc.priority && !byCategory[cat].priorities.includes(tc.priority))
+      byCategory[cat].priorities.push(tc.priority);
+  }
+  const testInventory = Object.entries(byCategory)
+    .map(([cat, s]) => ({
+      category: cat,
+      total: s.count,
+      automated: s.automated,
+      manual: s.manual,
+      coverage: s.count > 0 ? Math.round((s.automated / s.count) * 100) : 0,
+      priorities: s.priorities.sort().join(", "),
+    }))
+    .sort((a, b) => b.total - a.total);
+  const suiteList = suites
+    .map(
+      (s) =>
+        `${s.name} (\`${s.id}\`): ${s.testIds.length} tests, target ${s.config.target}, parallelism ${s.config.parallelism}`,
+    )
+    .join("\n");
+  const summary = `Documentation generated: ${testCases.length} tests across ${testInventory.length} categories in ${suites.length} suites.`;
+  return {
+    useCaseId: "test-doc-gen",
+    summary,
+    details: `## Test Documentation\n\n### Overview\n| Metric | Count |\n|--------|-------|\n| Total tests | ${testCases.length} |\n| Categories | ${testInventory.length} |\n| Suites | ${suites.length} |\n| Automated | ${testCases.filter((t) => t.automated).length} |\n| Manual | ${testCases.filter((t) => !t.automated).length} |\n\n### Category Breakdown\n| Category | Total | Automated | Manual | Coverage | Priorities |\n|----------|-------|-----------|--------|----------|------------|\n${testInventory.map((c) => `| ${c.category} | ${c.total} | ${c.automated} | ${c.manual} | ${c.coverage}% | ${c.priorities} |`).join("\n")}\n\n### Test Suites\n${suiteList}\n\n### Sample Test Cases\n| ID | Name | Category | Priority | Status |\n|----|------|----------|----------|--------|\n${testCases
+      .slice(0, 10)
+      .map(
+        (t) =>
+          `| \`${t.id}\` | ${t.name} | ${t.category || "-"} | ${t.priority || "-"} | ${t.status || "active"} |`,
+      )
+      .join("\n")}\n\n*Generated from ${testCases.length} test cases and ${suites.length} suites.*`,
+    data: { totalTests: testCases.length, totalSuites: suites.length, categories: testInventory },
+    confidence: 1,
+    recommendations: testInventory
+      .filter((c) => c.coverage < 50)
+      .map((c) => `Increase automation in ${c.category} (${c.coverage}% coverage)`),
     generatedAt: new Date().toISOString(),
   };
 }
