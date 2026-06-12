@@ -75,7 +75,14 @@
       "activeRuns": 0,
       "status": "idle",
       "nextDue": null,
-      "environments": ["qa_staging", "qa_prod", "uat_staging", "uat_prod", "prod_staging", "prod_prod"],
+      "environments": [
+        "qa_staging",
+        "qa_prod",
+        "uat_staging",
+        "uat_prod",
+        "prod_staging",
+        "prod_prod"
+      ],
       "runners": ["playwright", "pytest"]
     },
     {

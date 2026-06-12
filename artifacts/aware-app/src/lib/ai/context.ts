@@ -158,6 +158,74 @@ function computeTestLevelStats() {
   };
 }
 
+const SETUP_KNOWLEDGE = `
+SETUP & CONFIGURATION KNOWLEDGE BASE:
+
+## Repo layout (config-as-code)
+- \`config/akamai-config.yml\` — Akamai property definitions (propertyName, contractId, groupId, propertyVersion, edgeWorkerName, edgeWorkerId, cpcodes). contractId must start with "ctr_", groupId with "grp_".
+- \`config/environments.yml\` — three environment tiers (QA / UAT / PROD), each with baseUrl and enabled flag. Must define exactly QA, UAT, PROD — no more, no fewer.
+- \`config/test-suites.yml\` — test suites with schedule (cron), runner (playwright | pytest), tags, and envs list. Tags must match what tests use for filtering.
+- \`data/\` — seed JSON files (runs.json, test-results/*.json, test-suites.json, auto-tests.json). Served at runtime by the Vite dev server. Editing the wrong \`src/data/\` directory has no effect — always edit \`data/\`.
+
+## Validation & CI
+- \`node scripts/validate-config.mjs\` — run locally to check all three YAML files before pushing.
+- Flags: \`--warn-only\` exits 0 even with errors (used by scheduler), \`--json\` outputs machine-readable JSON.
+- \`.github/workflows/validate-config.yml\` — runs on every push/PR touching \`config/\`. Blocks merge if config is invalid.
+- Common validation errors:
+  - "contractId must start with ctr_" → open \`akamai-config.yml\`, fix the contractId field.
+  - "groupId must start with grp_" → same file, fix groupId.
+  - "baseUrl must start with https://" → open \`environments.yml\`, ensure all baseUrl values use https.
+  - "Unknown environment X in suite Y" → the envs list in a test-suites.yml suite references an env not defined in environments.yml.
+  - "Duplicate suite id" → two suites share the same id field in test-suites.yml.
+  - "Invalid cron expression" → schedule field in test-suites.yml has a bad cron string; use 5-field POSIX cron.
+
+## Required GitHub secrets (Settings → Secrets → Actions)
+- \`AKAMAI_CLIENT_TOKEN\` — Akamai EdgeGrid client token
+- \`AKAMAI_ACCESS_TOKEN\` — Akamai EdgeGrid access token
+- \`AKAMAI_CLIENT_SECRET\` — Akamai EdgeGrid client secret
+- \`AKAMAI_HOST\` — EdgeGrid host (e.g. akab-xxxx.luna.akamaiapis.net)
+- \`GH_PAGES_TOKEN\` — GitHub PAT with repo + pages write scopes (only needed if not using Actions built-in token)
+
+## Deployment (GitHub Pages)
+- Enable: repo Settings → Pages → Source: GitHub Actions
+- Workflow: \`.github/workflows/deploy.yml\` — builds React app, deploys to gh-pages branch.
+- First deploy runs \`init-data-branch.mjs\` to create the orphan \`data\` branch.
+- Custom domain: set \`CNAME\` record pointing to \`<org>.github.io\`, add domain in repo Settings → Pages.
+- Build failures: check the "Pages" job in the Actions tab. Common cause: \`validate-config\` step fails first — fix config YAML.
+- 404 after deploy: check that base URL in \`vite.config.ts\` matches the repo path (\`base: "/repo-name/"\`).
+
+## Data branch
+- An orphan \`data\` branch stores live test results separate from the main codebase.
+- Created automatically by \`init-data-branch.mjs\` on first deploy.
+- \`run-tests.yml\` writes new run JSON to this branch after each CI run.
+- If missing: re-run the deploy workflow, or run \`node scripts/init-data-branch.mjs\` locally.
+
+## Common setup questions
+Q: How do I fork and set up AWARE?
+A: Fork the repo → edit the three config/ YAML files → add GitHub secrets → enable GitHub Pages → push. Full guide in SETUP.md.
+
+Q: Why is my CI failing on "validate-config"?
+A: Run \`node scripts/validate-config.mjs\` locally. Fix the reported errors in config/. Placeholder contractId/groupId values from the demo will always warn — replace with your real Akamai IDs.
+
+Q: Why is the dashboard empty after deploy?
+A: The data branch may not exist yet. Check if a \`data\` branch exists. If not, re-run the deploy workflow or run \`node scripts/init-data-branch.mjs --dry-run\` to verify, then without \`--dry-run\`.
+
+Q: How do I add a new environment?
+A: Add an entry to \`config/environments.yml\` with a unique key (only QA/UAT/PROD are supported by the promotion gate), update \`config/akamai-config.yml\` if the property is different, and update any suites in \`test-suites.yml\` that should run in the new env.
+
+Q: How do I change the promotion gate threshold?
+A: The threshold is set in \`.github/workflows/run-tests.yml\` under the \`gate-check\` job. Look for \`PASS_RATE_THRESHOLD\` (default: 95). Change the value and commit.
+
+Q: Tests are not being discovered — why?
+A: Check that test files are tagged with the correct tag matching the suite's \`tags\` field in \`test-suites.yml\`. For Playwright, use \`@tag\` in the test name. For pytest, use \`-m tag\` markers.
+
+Q: How do I point the dashboard at a custom API endpoint?
+A: In the Copilot settings panel (gear icon top-right of the Copilot page), set the API URL field to your endpoint. Supports any OpenAI-compatible API (Ollama, LM Studio, etc.).
+
+Q: Can I use a self-hosted LLM?
+A: Yes. Three providers are supported: OpenAI (any compatible endpoint), WebLLM (runs in the browser via WebGPU, no API key), Chrome Built-in AI (experimental). Configure in Copilot → Settings.
+`.trim();
+
 export function buildSystemPrompt(context: AIContext): string {
   const lastRuns = [...RUNS]
     .sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())
@@ -234,7 +302,7 @@ Run IDs: ${RUNS.slice(-5)
 STRICT RULES — YOU MUST FOLLOW THESE:
 - You are A.W.A.R.E. Copilot. NEVER identify yourself as ChatGPT, GPT, Claude, Gemini, or any other AI system.
 - NEVER list generic AI capabilities (NLP, machine learning, translation, creative writing, etc.). Those are not your capabilities.
-- Answer ONLY about this dashboard's test data. If asked something unrelated, say: "I can only help with test data from this dashboard. Try asking about run failures, flaky tests, pass rate trends, or build risk."
+- Answer questions about this dashboard's test data AND setup/configuration questions (forking the repo, config YAML files, GitHub secrets, CI workflows, deployment, data branch). For anything else say: "I can only help with test data or AWARE setup questions. Try asking about run failures, flaky tests, pass rates, config errors, or deployment."
 - Do NOT add intro paragraphs like "Here's an analysis" or "Based on the data"
 - Just present the facts as a short sentence or table — be extremely concise
 - When referencing a run ID like jasper, format it as [id](/runs/id)
@@ -245,5 +313,7 @@ STRICT RULES — YOU MUST FOLLOW THESE:
   {"type":"BarChart","title":"Chart Title","headers":["X","Y"],"rows":[["A",10],["B",20]],"colors":["#5b8af5"]}
   \`\`\`
   Supported types: "ColumnChart", "BarChart", "LineChart", "PieChart". Add "pieHole":0.4 for donut, "curveType":"function" for smooth lines, "pointSize":4 for data points.
-- If the data doesn't contain the answer, say "I don't have that data available"`;
+- If the data doesn't contain the answer, say "I don't have that data available"
+
+${SETUP_KNOWLEDGE}`;
 }

@@ -903,8 +903,8 @@ const DOC_SECTIONS: DocEntry[] = [
     content: () => (
       <>
         <p>
-          <strong>A.W.A.R.E.</strong> is a web-based observability dashboard for your GitHub Actions test
-          pipeline. It runs entirely in your browser — no backend or API setup needed.
+          <strong>A.W.A.R.E.</strong> is a web-based observability dashboard for your GitHub Actions
+          test pipeline. It runs entirely in your browser — no backend or API setup needed.
         </p>
         <ol style={{ paddingLeft: 18, margin: "8px 0" }}>
           <li>
@@ -1699,10 +1699,10 @@ export default function About() {
               maxWidth: 720,
             }}
           >
-            <strong>A.W.A.R.E.</strong> is a web dashboard that tracks your Akamai CDN test health after
-            every code change. When your automated tests run (via GitHub Actions), A.W.A.R.E. shows you
-            which tests passed, which failed, and whether it's safe to promote — across QA, UAT, and PROD
-            Akamai environments.
+            <strong>A.W.A.R.E.</strong> is a web dashboard that tracks your Akamai CDN test health
+            after every code change. When your automated tests run (via GitHub Actions), A.W.A.R.E.
+            shows you which tests passed, which failed, and whether it's safe to promote — across
+            QA, UAT, and PROD Akamai environments.
           </p>
 
           {/* Architecture flow as SVG */}

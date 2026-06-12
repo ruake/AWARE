@@ -31,10 +31,30 @@ const STATUS_CONFIG: Record<
 > = {
   PASS: { label: "Passed", color: "var(--proof-green)", bg: "var(--proof-green-bg)", icon: Check },
   FAIL: { label: "Failed", color: "var(--proof-red)", bg: "var(--proof-red-bg)", icon: X },
-  PARTIAL: { label: "Partial", color: "var(--proof-yellow)", bg: "var(--proof-yellow-bg)", icon: AlertTriangle },
-  FLAKY: { label: "Flaky", color: "var(--proof-orange)", bg: "var(--proof-orange-bg)", icon: AlertTriangle },
-  RUNNING: { label: "Running", color: "var(--proof-blue)", bg: "var(--proof-blue-bg)", icon: Loader2 },
-  PENDING: { label: "Pending", color: "var(--proof-text-secondary)", bg: "rgba(126,138,158,0.10)", icon: Clock },
+  PARTIAL: {
+    label: "Partial",
+    color: "var(--proof-yellow)",
+    bg: "var(--proof-yellow-bg)",
+    icon: AlertTriangle,
+  },
+  FLAKY: {
+    label: "Flaky",
+    color: "var(--proof-orange)",
+    bg: "var(--proof-orange-bg)",
+    icon: AlertTriangle,
+  },
+  RUNNING: {
+    label: "Running",
+    color: "var(--proof-blue)",
+    bg: "var(--proof-blue-bg)",
+    icon: Loader2,
+  },
+  PENDING: {
+    label: "Pending",
+    color: "var(--proof-text-secondary)",
+    bg: "rgba(126,138,158,0.10)",
+    icon: Clock,
+  },
   ERROR: { label: "Error", color: "var(--proof-red)", bg: "var(--proof-red-bg)", icon: X },
 };
 
