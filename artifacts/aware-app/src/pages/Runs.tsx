@@ -213,10 +213,6 @@ export default function Runs() {
 
   // Keyboard nav (j/k/Enter)
   React.useEffect(() => {
-    setSelectedIdx(-1);
-  }, [filtered.length]);
-
-  React.useEffect(() => {
     if (selectedIdx >= 0 && selectedIdx < filtered.length) {
       selectedRunIdRef.current = filtered[selectedIdx].id;
     } else {
