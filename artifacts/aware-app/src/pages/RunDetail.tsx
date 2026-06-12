@@ -6,7 +6,6 @@ import {
   getRunById,
   getTestResultsForRun,
   RUNS,
-  getPromotionDecision,
   loadResultsForRun,
 } from "@/lib/data";
 import type { TestResult, TestAssertionResult, FilmstripFrame } from "@/lib/types";
@@ -16,8 +15,6 @@ import {
   XCircle,
   Github,
   Share2,
-  Zap,
-  RefreshCw,
   Search,
   ChevronRight,
   ChevronLeft,
@@ -89,7 +86,6 @@ export default function RunDetail() {
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [catFilter, setCatFilter] = React.useState<string>("all");
-  const [decision, setDecision] = React.useState(run ? getPromotionDecision(run.id) : null);
   const [expandScreenshot, setExpandScreenshot] = React.useState<FilmstripFrame | null>(null);
   const urlTestId = React.useMemo(() => new URLSearchParams(urlSearch).get("testId"), [urlSearch]);
   const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(() => {
@@ -119,20 +115,6 @@ export default function RunDetail() {
     );
   }
 
-  const decide = (action: "promote" | "block") => {
-    const d = {
-      runId: run.id,
-      decision: action,
-      decidedBy: "you",
-      decidedAt: new Date().toISOString(),
-      note: action === "promote" ? "Approved via run detail" : "Blocked via run detail",
-    };
-    setDecision(d);
-    show(
-      action === "promote" ? "Promotion approved for this run" : "Promotion blocked for this run",
-    );
-  };
-
   const categories = [...new Set(results.map((r) => r.category))];
   const filtered = results.filter((r) => {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
@@ -144,7 +126,6 @@ export default function RunDetail() {
   const passCount = results.filter((r) => r.status === "PASS").length;
   const failCount = results.filter((r) => r.status === "FAIL").length;
   const passRate = results.length > 0 ? Math.round((passCount / results.length) * 100) : 0;
-  const canPromote = run.status === "PASS";
 
   const catData = categories.map((cat) => {
     const catResults = results.filter((r) => r.category === cat);
@@ -169,9 +150,6 @@ export default function RunDetail() {
     if (next >= 0 && next < filtered.length) setSelectedResultSyncUrl(filtered[next]);
   };
 
-  const hasDecision = decision && decision.decision !== "pending";
-  const decisionIsPromote = decision?.decision === "promote";
-
   return (
     <AppLayout activeHref="/runs">
       <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}>
@@ -195,18 +173,6 @@ export default function RunDetail() {
             style={{ fontSize: 10 }}
           >
             {run.status}
-          </span>
-          <span
-            className={`proof-badge ${canPromote ? "proof-badge-pass" : "proof-badge-fail"}`}
-            style={{ fontSize: 10 }}
-          >
-            {hasDecision
-              ? decisionIsPromote
-                ? "Approved"
-                : "Blocked"
-              : canPromote
-                ? "Ready to Promote"
-                : `${failCount} failed`}
           </span>
           <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
             Pass{" "}
@@ -256,35 +222,6 @@ export default function RunDetail() {
             >
               <Github size={11} />
             </a>
-            {!hasDecision ? (
-              canPromote ? (
-                <button
-                  onClick={() => decide("promote")}
-                  className="proof-button-success"
-                  style={{ fontSize: 10, padding: "3px 8px" }}
-                >
-                  <Zap size={11} /> Approve
-                </button>
-              ) : (
-                <button
-                  onClick={() => decide("block")}
-                  className="proof-button-danger"
-                  style={{ fontSize: 10, padding: "3px 8px" }}
-                >
-                  <XCircle size={11} /> Block
-                </button>
-              )
-            ) : (
-              <button
-                onClick={() => {
-                  setDecision(undefined);
-                }}
-                className="proof-button proof-button-xs"
-                style={{ fontSize: 10 }}
-              >
-                <RefreshCw size={10} /> Reset
-              </button>
-            )}
           </div>
         </div>
 

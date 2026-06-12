@@ -1,107 +1,152 @@
-# PROOF — Test Observability Dashboard
+# A.W.A.R.E. — Akamai Web Analytics Regression Engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Pages](https://img.shields.io/badge/GitHub%20Pages-deployed-blue)](https://ruake.github.io/AWARE)
+[![Config Validation](https://github.com/your-org/aware/actions/workflows/validate-config.yml/badge.svg)](https://github.com/your-org/aware/actions/workflows/validate-config.yml)
+[![Deploy](https://github.com/your-org/aware/actions/workflows/deploy.yml/badge.svg)](https://github.com/your-org/aware/actions/workflows/deploy.yml)
 
-**PROOF** is a configurable web application testing observability dashboard. It visualizes pass-rate trends across multiple environments, surfaces regressions via side-by-side run comparison, and provides per-test analytics — all as a static SPA served via GitHub Pages.
+**A.W.A.R.E.** is a CDN test observability dashboard for Playwright + pytest suites running via GitHub Actions across **QA**, **UAT**, and **PROD** Akamai edge environments. Fork it, edit three config files, push — and your static dashboard is live with automated test runs, data recording, and a promotion gate.
 
 **Live demo:** https://ruake.github.io/AWARE
 
-## Pages
+---
+
+## Fork & Configure in 5 minutes
+
+> **See [SETUP.md](SETUP.md) for the complete guide.**
+
+1. **Fork** this repo
+2. Edit `config/akamai-config.yml` — your property name, contract/group IDs, CP code
+3. Edit `config/environments.yml` — your 6 environments (QA/UAT/PROD × staging/production)
+4. Edit `config/test-suites.yml` — your suites, schedules, and runners
+5. Enable GitHub Pages (Settings → Pages → Source: GitHub Actions)
+6. Push — everything else is automated
+
+---
+
+## What you get automatically
+
+| Capability | How |
+|------------|-----|
+| Static dashboard on GitHub Pages | `deploy.yml` — builds + deploys on every push to `main` |
+| Config validation on every push | `validate-config.yml` — blocks merges on invalid config |
+| Scheduled test runs | `scheduler.yml` — every 15 min, dispatches suites per cron schedule |
+| Run data recording | `record-run.mjs` — writes JSON to the `data` branch after each run |
+| Promotion gate | `run-tests.yml` — blocks UAT → PROD if pass rate < 95% |
+| Code quality checks | `code-quality.yml` — lint, typecheck, audit, CodeQL |
+
+---
+
+## Dashboard pages
 
 | Page | Route | Description |
 |------|-------|-------------|
-| Dashboard | `/` | Multi-environment pass-rate charts, per-env health cards, regression alerts, promotion banner |
-| Runs | `/runs` | Filterable run table with column filters, status/target quick filters, side panel with CTAs |
-| Run Detail | `/runs/:runId` | Test results table + HTTP evidence viewer with syntax-highlighted request/response |
-| Compare | `/compare` | Baseline vs. candidate diff with column filters, regression/fixed/duration CTAs, side panel |
-| Tests | `/tests` | Test case CRUD, multi-select bulk actions, batch status/priority/suite, multi-format import (JSON/YAML/JUnit), stats dashboard, template/AI generation |
-| Suites | `/suites` | Suite tree hierarchy, editor modal, YAML export, Recharts pie/bar charts |
-| Analytics | `/analytics` | Per-test analytics (supports both `testId=tc_N` and `diffId=diff_N`), pass-rate trend, duration history, flakiness score |
-| AI Copilot | `/copilot` | AI chat with skill selector, 3 providers (Mock/OpenAI/WebLLM), WebLLM availability check + user-friendly unavailable message |
-| Test Doc | `/testdoc` | Per-test deep-dive with docstring, predicates, changelog timeline |
-| Start Run | `/start` | Full-page workflow dispatcher: suite, target, env, parallelism, command preview |
-| Search | `/search` | Full-page keyboard-navigable search wired to real testCasesStore, RUNS, and DIFF_ROWS |
-| Sharing | `/share` | Permalink/share with entity tabs, export formats, badge embed |
-| Status | `/status` | System status dashboard |
-| About | `/about` | Project info, feature cards, tech stack |
+| Dashboard | `/` | Pass-rate KPIs, Akamai property status (all 6 envs), anomaly banners, heatmap |
+| Runs | `/runs` | Full run history with env/suite filtering and side panel |
+| Run Detail | `/runs/:runId` | Test results + HTTP evidence viewer |
+| Compare | `/compare` | Side-by-side diff; surfaces regressions and fixes |
+| Analytics | `/analytics` | Pass-rate trends, category heatmaps, flakiness scores |
+| Suites | `/suites` | Suite hierarchy manager; maps to `config/test-suites.yml` |
+| AI Copilot | `/copilot` | AI-assisted test analysis and generation (OpenAI / WebLLM / mock) |
+| CI Pipeline | `/ci` | GitHub Actions status and AWARE config YAML download |
+| Tests | `/tests` | Test case CRUD, bulk actions, import/export |
 
-## Tech Stack
+---
+
+## Tech stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Language** | TypeScript 5.9 (strict) |
-| **Frontend** | React 19, Vite 7, Tailwind CSS 4 |
-| **Charts** | Google Charts |
-| **LLM** | Mock (offline), OpenAI-compatible, WebLLM (WebGPU) |
-| **Icons** | lucide-react |
-| **Package Manager** | pnpm |
-| **CI/CD** | GitHub Actions (build + deploy to GitHub Pages) |
+| Language | TypeScript 5.9 (strict) |
+| Frontend | React 19, Vite 7, Tailwind CSS 4 |
+| Charts | Google Charts + Recharts |
+| Routing | wouter |
+| LLM | Mock · OpenAI-compatible · WebLLM (WebGPU) |
+| Package manager | pnpm workspaces |
+| CI/CD | GitHub Actions → GitHub Pages |
 
-## Getting Started
+---
+
+## Local development
 
 ```bash
-cd artifacts/aware-app
 pnpm install
-pnpm dev
+pnpm --filter @workspace/aware-app run dev
 ```
 
-Open http://localhost:5173
+Open http://localhost:5000
 
-### Build for GitHub Pages
+### Validate your config locally
 
 ```bash
-cd artifacts/aware-app
-pnpm build
+node scripts/validate-config.mjs
 ```
 
-### Environment Variables
+### Build for production
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `5173` | Dev server port |
-| `BASE_PATH` | `/` | Path prefix (use `/PROOF` for GitHub Pages) |
-
-## Project Structure
-
-```
-artifacts/aware-app/src/
-├── lib/               # Data layer (store, runs, testCases, testSuites, promotions, llm, skills, types)
-├── components/
-│   ├── aware/         # AppLayout, ColumnFilter, CTAStatCard, FilterBar, GenerateWizard, etc.
-│   └── ui/            # shadcn/ui components
-├── pages/             # 15 page components (Dashboard, Runs, Compare, TestManager, Copilot, etc.)
-├── hooks/             # useSimpleToast, useTestData, useSyncedUrlState
-├── App.tsx            # wouter Router with all routes
-├── main.tsx           # Entry point
-├── _group.css         # GCP theme CSS variables
-└── index.css          # Tailwind imports
+```bash
+BASE_PATH=/aware pnpm --filter @workspace/aware-app run build
 ```
 
-## Features
+---
 
-- **Multi-environment pass-rate charts** — Composite line chart with all environments overlaid
-- **Column-header filtering** — Every table column supports text search + multi-select checkboxes
-- **Regression alerts** — Dashboard highlights pass-rate drops; Compare shows regression/fixed/duration delta
-- **AI Copilot** — Chat interface with 5 skills for test generation, script creation (YAML), result analysis, diff explanation, suite config generation
-- **LLM providers** — Mock (offline), OpenAI-compatible, WebLLM (WebGPU) — configurable per session
-- **Stat-to-filter CTAs** — Clickable summary cards toggle column filters across Compare, Analytics, Runs, Dashboard
-- **Bulk generation** — Template-based or AI-powered test case generation with suite assignment
-- **Import/Export** — JSON, CSV, JUnit XML
-- **Dark mode** — GCP-inspired light/dark theme toggle
-- **SPA routing** — wouter with 404 fallback for GitHub Pages
+## Config files
 
-## GitHub Actions
+| File | Purpose |
+|------|---------|
+| `config/akamai-config.yml` | Property metadata, EdgeWorker versions, promotion gate thresholds |
+| `config/environments.yml` | 6 Akamai environments (QA/UAT/PROD × staging/production networks) |
+| `config/test-suites.yml` | Suite definitions, cron schedules, runners, parallelism |
 
-Push to `main` triggers the [deploy workflow](.github/workflows/deploy.yml) which:
-1. Installs dependencies with pnpm
-2. Builds with `BASE_PATH=/AWARE`
-3. Copies `index.html` as `404.html` for SPA routing
-4. Uploads and deploys to GitHub Pages
+These files are the **single source of truth** — both GitHub Actions and the dashboard read them directly.
 
-> **Note:** The deploy workflow still uses `AWARE` for backwards compatibility until the domain is migrated.
+---
 
-The [run-tests workflow](.github/workflows/run-tests.yml) accepts `workflow_dispatch` inputs (branch, suite, target, environment) for triggerable test runs.
+## Environment variables
+
+Copy `.env.example` for local development. For GitHub Actions, add secrets at Settings → Secrets → Actions.
+
+| Variable | Default | Required |
+|----------|---------|----------|
+| `BASE_PATH` | `/` | No — set to `/aware` for GitHub Pages |
+| `PORT` | `5000` | No |
+| `VITE_LLM_PROVIDER` | `mock` | No — set to `openai` for AI Copilot |
+| `VITE_LLM_API_KEY` | — | No — OpenAI key for Copilot |
+| `SLACK_WEBHOOK_URL` | — | No — failure notifications |
+| `PAGERDUTY_ROUTING_KEY` | — | No — PROD alerts |
+
+---
+
+## Project structure
+
+```
+config/                          ← edit these three files to configure AWARE
+├── akamai-config.yml            property + EdgeWorker + promotion gate
+├── environments.yml             6 target environments
+└── test-suites.yml              suites, schedules, runners
+
+scripts/
+├── validate-config.mjs          config validator (CI + local)
+├── init-data-branch.mjs         one-time data branch bootstrap
+├── scheduler.mjs                cron-based suite dispatcher
+└── record-run.mjs               writes run results to data branch
+
+.github/workflows/
+├── validate-config.yml          blocks on invalid config (push/PR)
+├── deploy.yml                   build + deploy to GitHub Pages
+├── run-tests.yml                Playwright + pytest execution engine
+├── scheduler.yml                every-15-min orchestrator
+└── code-quality.yml             lint, typecheck, audit, CodeQL
+
+artifacts/aware-app/
+├── src/                         React 19 + Vite 7 SPA
+│   ├── pages/                   Dashboard, Runs, Compare, Analytics, …
+│   ├── components/              aware/ domain + ui/ shadcn components
+│   └── lib/                     data layer, types, LLM, CI config
+├── data/                        seed JSON (runs, test-results, suites)
+└── scripts/                     validate-data.mjs, record-run.mjs, …
+```
+
+---
 
 ## License
 
