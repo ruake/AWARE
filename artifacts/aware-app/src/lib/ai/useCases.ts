@@ -361,6 +361,51 @@ export const AI_USE_CASES: AIUseCase[] = [
       "Test consolidation candidates",
     ],
   },
+  {
+    id: "release-readiness",
+    name: "Release Readiness Check",
+    description: "Overall deployment readiness score across all environments",
+    icon: "Rocket",
+    category: "recommendation",
+    systemPrompt:
+      "You are a release readiness assessor. Evaluate all environments, pass rates, failure clusters, and promotion gate status to produce a deployment readiness score.",
+    tools: ["query_data", "risk_scoring", "compare_envs"],
+    exampleQueries: [
+      "Is it safe to release?",
+      "Release readiness report",
+      "Can we deploy to production?",
+    ],
+  },
+  {
+    id: "env-health-summary",
+    name: "Environment Health Snapshot",
+    description: "Quick health snapshot across all 6 CDN environments",
+    icon: "Activity",
+    category: "report",
+    systemPrompt:
+      "You are an environment health monitor. Produce a concise health summary for each environment tier (QA, UAT, PROD) with pass rates, failure counts, and status.",
+    tools: ["query_data", "compare_envs"],
+    exampleQueries: [
+      "How are all environments doing?",
+      "Environment health check",
+      "Status of all envs",
+    ],
+  },
+  {
+    id: "regression-report",
+    name: "Quick Regression Report",
+    description: "Compare last two builds for regressions and improvements",
+    icon: "GitCompare",
+    category: "report",
+    systemPrompt:
+      "You are a regression analyst. Compare the latest build against the previous build. Highlight regressed tests, improved tests, and category-level changes.",
+    tools: ["query_data", "analyze_trend"],
+    exampleQueries: [
+      "What regressed in the latest build?",
+      "Compare last two builds",
+      "Regression summary",
+    ],
+  },
 ];
 
 export function getUseCaseById(id: string): AIUseCase | undefined {
