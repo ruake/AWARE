@@ -1,152 +1,202 @@
 [
   {
-    "id": "diff_ad_0",
-    "name": "Test Us East Users Resolve To Ashburn",
+    "id": "diff_geo_01",
+    "name": "US East users resolve to IAD PoP",
     "baseStatus": "PASS",
     "candStatus": "PASS",
-    "durBase": 1100,
-    "durCand": 270,
+    "durBase": 680,
+    "durCand": 986,
     "category": "geo-match",
     "state": "duration"
   },
   {
-    "id": "diff_ad_1",
-    "name": "Test Us West Users Resolve To Portland",
+    "id": "diff_geo_02",
+    "name": "EU West users resolve to DUB PoP",
     "baseStatus": "PASS",
     "candStatus": "PASS",
-    "durBase": 350,
-    "durCand": 815,
-    "category": "geo-match",
-    "state": "duration"
-  },
-  {
-    "id": "diff_ad_2",
-    "name": "Test Eu West Users Resolve To Dublin",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 542,
-    "durCand": 792,
-    "category": "geo-match",
-    "state": "duration"
-  },
-  {
-    "id": "diff_ad_3",
-    "name": "Test Ap Southeast Users Resolve To Singapore",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 1083,
-    "durCand": 1101,
+    "durBase": 892,
+    "durCand": 1003,
     "category": "geo-match",
     "state": "unchanged"
   },
   {
-    "id": "diff_ad_4",
-    "name": "Test Geo Endpoints Return 200[_api_v1_data_200]",
-    "baseStatus": "PASS",
+    "id": "diff_geo_03",
+    "name": "AP Southeast users resolve to SIN PoP",
+    "baseStatus": "FAIL",
     "candStatus": "PASS",
-    "durBase": 1195,
-    "durCand": 1232,
+    "durBase": 783,
+    "durCand": 887,
     "category": "geo-match",
-    "state": "unchanged"
+    "state": "fixed"
   },
   {
-    "id": "diff_ad_5",
-    "name": "Test Geo Endpoints Return 200[_api_v1_config_200]",
-    "baseStatus": "PASS",
+    "id": "diff_geo_04",
+    "name": "Primary PoP failover within 5 seconds",
+    "baseStatus": "FAIL",
     "candStatus": "PASS",
-    "durBase": 1122,
-    "durCand": 383,
+    "durBase": 3486,
+    "durCand": 4998,
     "category": "geo-match",
-    "state": "duration"
+    "state": "fixed"
   },
   {
-    "id": "diff_ad_6",
-    "name": "Test Geo Endpoints Return 200[_api_v1_status_200]",
+    "id": "diff_cache_01",
+    "name": "Cache hit ratio exceeds 80% for static assets",
     "baseStatus": "PASS",
     "candStatus": "PASS",
-    "durBase": 889,
-    "durCand": 147,
-    "category": "geo-match",
-    "state": "duration"
-  },
-  {
-    "id": "diff_ad_7",
-    "name": "Test Geo Routing Table[us-east_iad]",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 1466,
-    "durCand": 222,
-    "category": "geo-match",
-    "state": "duration"
-  },
-  {
-    "id": "diff_ad_8",
-    "name": "Test Geo Routing Table[us-west_pdx]",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 1445,
-    "durCand": 743,
-    "category": "geo-match",
-    "state": "duration"
-  },
-  {
-    "id": "diff_ad_9",
-    "name": "Test Geo Routing Table[eu-west_dub]",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 1455,
-    "durCand": 941,
-    "category": "geo-match",
-    "state": "duration"
-  },
-  {
-    "id": "diff_ad_10",
-    "name": "Test Geo Routing Table[ap-southeast_sin]",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 1064,
-    "durCand": 1305,
-    "category": "geo-match",
-    "state": "unchanged"
-  },
-  {
-    "id": "diff_ad_11",
-    "name": "Test Failover To Secondary Pop",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 644,
-    "durCand": 131,
-    "category": "geo-match",
-    "state": "duration"
-  },
-  {
-    "id": "diff_ad_12",
-    "name": "Test Failover Logs Alert",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 722,
-    "durCand": 977,
-    "category": "geo-match",
-    "state": "duration"
-  },
-  {
-    "id": "diff_ad_13",
-    "name": "Test Failover Health Check Resumes",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 927,
-    "durCand": 489,
-    "category": "geo-match",
-    "state": "duration"
-  },
-  {
-    "id": "diff_ad_14",
-    "name": "Test Cache Hit Ratio Exceeds 80 Percent",
-    "baseStatus": "PASS",
-    "candStatus": "PASS",
-    "durBase": 524,
-    "durCand": 443,
+    "durBase": 323,
+    "durCand": 364,
     "category": "caching",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_cache_02",
+    "name": "Cache TTL respects origin Cache-Control max-age",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 246,
+    "durCand": 235,
+    "category": "caching",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_cache_03",
+    "name": "CDN purge invalidates cached objects within 5s",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1890,
+    "durCand": 2106,
+    "category": "caching",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_cache_04",
+    "name": "Stale cache serves during origin 5xx timeout",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 2058,
+    "durCand": 2310,
+    "category": "caching",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_sec_01",
+    "name": "WAF blocks SQL injection attempts",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 546,
+    "durCand": 620,
+    "category": "security",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_sec_02",
+    "name": "Rate limiter triggers at 100 RPS threshold",
+    "baseStatus": "PASS",
+    "candStatus": "FAIL",
+    "durBase": 2754,
+    "durCand": 3162,
+    "category": "security",
+    "state": "regression"
+  },
+  {
+    "id": "diff_sec_03",
+    "name": "TLS 1.3 negotiated on all edge endpoints",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1015,
+    "durCand": 979,
+    "category": "security",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_sec_04",
+    "name": "HSTS header present with max-age ≥ 31536000",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 391,
+    "durCand": 443,
+    "category": "security",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_edge_01",
+    "name": "HTTP to HTTPS redirect returns 301",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1276,
+    "durCand": 1232,
+    "category": "edge-routing",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_edge_02",
+    "name": "Custom 404 error page served by edge",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1256,
+    "durCand": 1418,
+    "category": "edge-routing",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_edge_03",
+    "name": "Signed URL access control enforced",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 817,
+    "durCand": 931,
+    "category": "edge-routing",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_edge_04",
+    "name": "EdgeWorker rewrites X-Forwarded-Host header",
+    "baseStatus": "FAIL",
+    "candStatus": "PASS",
+    "durBase": 1904,
+    "durCand": 1840,
+    "category": "edge-routing",
+    "state": "fixed"
+  },
+  {
+    "id": "diff_http_01",
+    "name": "Homepage returns HTTP 200 in all regions",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 204,
+    "durCand": 229,
+    "category": "http-protocol",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_http_02",
+    "name": "API health endpoint returns 200 OK",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 162,
+    "durCand": 184,
+    "category": "http-protocol",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_http_03",
+    "name": "Gzip compression enabled on text assets",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 216,
+    "durCand": 309,
+    "category": "http-protocol",
+    "state": "duration"
+  },
+  {
+    "id": "diff_http_04",
+    "name": "CORS headers present on API routes",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 195,
+    "durCand": 218,
+    "category": "http-protocol",
     "state": "unchanged"
   }
 ]
