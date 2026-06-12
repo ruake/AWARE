@@ -72,8 +72,8 @@ plugins: [
 
 ## Prebuild Data Validation
 `validate-data.mjs` runs automatically before every build:
-1. Loads `src/data/test-results.json`
-2. Validates against `src/data/schemas/test-results.schema.json`
+1. Loads `data/test-results.json`
+2. Validates against `data/schemas/test-results.schema.json`
 3. Exits non-zero on failure → blocks the build
 
 **Fix approach**: If build fails due to data validation, check that all TestResult entries have required fields (`id`, `name`, `status`, `duration`, `category`, `suite`, `evidence`).

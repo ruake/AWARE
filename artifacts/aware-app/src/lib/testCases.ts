@@ -5,27 +5,31 @@ import { getAutoDiscoveredTests } from "./testDiscovery";
 
 export { subscribeToTestCases };
 
-const testCasesStore: TestCase[] = [...getAutoDiscoveredTests()];
-
 let _tcSnapshot: TestCase[] = [];
+
 export function getTestCasesStore(): TestCase[] {
-  return testCasesStore;
+  return getAutoDiscoveredTests();
 }
+
 export function getTestCases(): TestCase[] {
-  if (_tcSnapshot.length === 0) _tcSnapshot = [...testCasesStore];
+  const current = getAutoDiscoveredTests();
+  if (_tcSnapshot.length !== current.length) {
+    _tcSnapshot = [...current];
+  }
   return _tcSnapshot;
 }
+
 export function getTestCaseById(id: string): TestCase | undefined {
-  return testCasesStore.find((tc) => tc.id === id);
+  return getAutoDiscoveredTests().find((tc) => tc.id === id);
 }
 
 export function getTestChangelog(id: string): TestChangeLogEntry[] {
-  const tc = testCasesStore.find((t) => t.id === id);
+  const tc = getAutoDiscoveredTests().find((t) => t.id === id);
   return tc ? [...tc.changelog].reverse() : [];
 }
 
 export function computeTestStats(): TestStats {
-  const tcs = testCasesStore;
+  const tcs = getAutoDiscoveredTests();
   const byStatus: Record<string, number> = {};
   const byPriority: Record<string, number> = {};
   const byCategory: Record<string, number> = {};
@@ -66,7 +70,7 @@ export function computeTestStats(): TestStats {
 }
 
 export function getTestCasesByFilter(filter: TestCaseFilter): TestCase[] {
-  return testCasesStore.filter((tc) => {
+  return getAutoDiscoveredTests().filter((tc) => {
     if (
       filter.search &&
       !tc.name.toLowerCase().includes(filter.search.toLowerCase()) &&

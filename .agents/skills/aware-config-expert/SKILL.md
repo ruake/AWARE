@@ -94,7 +94,7 @@ runners:
 `downloadCiConfig()` triggers a browser download of `aware-test-config-<date>.yml`.
 
 ## Critical Consistency Rules
-1. **Suite IDs must match** between `config/test-suites.yml` (for CI) and `src/data/test-suites.json` (for the app)
+1. **Suite IDs must match** between `config/test-suites.yml` (for CI) and `data/test-suites.json` (for the app)
 2. **Environment labels must match exactly** — `"QA / Staging"` not `"qa-staging"` or `"QA/Staging"`
 3. **Updating `config/environments.yml` does NOT auto-update `envConfig.ts`** — they are separate and must be kept in sync manually
 4. **`config/aware-test-config.yml` is auto-generated** — never hand-edit it

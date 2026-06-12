@@ -18,7 +18,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const dataDir = join(__dirname, "..", "src", "data");
+const dataDir = join(__dirname, "..", "data");
 
 // ── Load auto-tests for canonical test IDs, names, categories ────────────
 const autoTestsPath = join(dataDir, "auto-tests.json");

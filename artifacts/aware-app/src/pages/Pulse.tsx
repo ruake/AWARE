@@ -34,6 +34,8 @@ const STATUS_CONFIG: Record<
   PARTIAL: { label: "Partial", color: "#f59e0b", bg: "rgba(245,158,11,0.10)", icon: AlertTriangle },
   FLAKY: { label: "Flaky", color: "#f97316", bg: "rgba(247,147,26,0.10)", icon: AlertTriangle },
   RUNNING: { label: "Running", color: "#3b82f6", bg: "rgba(59,130,246,0.10)", icon: Loader2 },
+  PENDING: { label: "Pending", color: "#9aa0a6", bg: "rgba(154,160,166,0.10)", icon: Clock },
+  ERROR: { label: "Error", color: "#dc2626", bg: "rgba(220,38,38,0.10)", icon: X },
 };
 
 function formatDuration(ms: number): string {

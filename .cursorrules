@@ -79,10 +79,10 @@ artifacts/aware-app/src/
 ```
 
 ## Data
-- `src/data/auto-tests.json` — auto-discovered tests (`ad_*` pytest + `pw_*` Playwright); no separate test-cases.json
-- `src/data/runs.json` — seed CI runs
-- `src/data/test-results.json` — `Record<runId, TestResult[]>`
-- `src/data/diff-rows.json` — pre-computed compare diffs
+- `data/auto-tests.json` — auto-discovered tests (`ad_*` pytest + `pw_*` Playwright); no separate test-cases.json
+- `data/runs.json` — seed CI runs
+- `data/test-results.json` — `Record<runId, TestResult[]>`
+- `data/diff-rows.json` — pre-computed compare diffs
 - Test cases: in-memory store seeded from `auto-tests.json` + localStorage (`aware_test_cases_v2`)
 - `_snapshot` caching in stores for stable `useSyncExternalStore` references
 

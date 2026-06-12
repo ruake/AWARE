@@ -11,7 +11,7 @@
  *
  * Defaults:
  *   --dirs    e2e/
- *   --output  src/data/auto-tests-playwright.json
+ *   --output  data/auto-tests-playwright.json
  */
 
 import fs from "fs";
@@ -182,7 +182,7 @@ function main() {
   const outputIdx = args.indexOf("--output");
 
   const directories = dirsIdx >= 0 ? args[dirsIdx + 1].split(",") : ["e2e"];
-  const outputPath = outputIdx >= 0 ? args[outputIdx + 1] : "src/data/auto-tests-playwright.json";
+  const outputPath = outputIdx >= 0 ? args[outputIdx + 1] : "data/auto-tests-playwright.json";
 
   const absOutput = path.resolve(PROJECT_ROOT, outputPath);
   const tests = discoverPlaywrightTests(directories);

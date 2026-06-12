@@ -18,7 +18,7 @@ const RUN_NAMES = [
   "topaz", "vega", "violet", "wisp", "zenith",
 ];
 
-const runsPath = resolve(root, "src/data/runs.json");
+const runsPath = resolve(root, "data/runs.json");
 const runs = JSON.parse(readFileSync(runsPath, "utf-8"));
 const currentIds = runs.map((r) => r.id).sort();
 
@@ -45,7 +45,7 @@ writeFileSync(runsPath, JSON.stringify(runs, null, 2) + "\n");
 console.log(`\n✓ Updated runs.json`);
 
 // Update test-results.json (keys)
-const trPath = resolve(root, "src/data/test-results.json");
+const trPath = resolve(root, "data/test-results.json");
 const tr = JSON.parse(readFileSync(trPath, "utf-8"));
 const newTr = {};
 for (const [key, value] of Object.entries(tr)) {
@@ -55,7 +55,7 @@ writeFileSync(trPath, JSON.stringify(newTr, null, 2) + "\n");
 console.log(`✓ Updated test-results.json`);
 
 // Update promotions.json (runId fields)
-const promosPath = resolve(root, "src/data/promotions.json");
+const promosPath = resolve(root, "data/promotions.json");
 const promos = JSON.parse(readFileSync(promosPath, "utf-8"));
 for (const p of promos) {
   if (idMap[p.runId]) p.runId = idMap[p.runId];

@@ -1,12 +1,19 @@
 import type { PromotionDecision } from "./types";
-import promotionsSeed from "@/data/promotions.json";
+import { fetchJson } from "./dataFetcher";
 
-const promotionDecisions: PromotionDecision[] = promotionsSeed as PromotionDecision[];
+let _promotionDecisions: PromotionDecision[] = [];
+let _promotionsLoaded = false;
+
+export async function loadPromotions(): Promise<void> {
+  if (_promotionsLoaded) return;
+  _promotionsLoaded = true;
+  _promotionDecisions = await fetchJson<PromotionDecision[]>("promotions.json");
+}
 
 export function getPromotionDecision(runId: string): PromotionDecision | undefined {
-  return promotionDecisions.find((d) => d.runId === runId);
+  return _promotionDecisions.find((d) => d.runId === runId);
 }
 
 export function getAllPromotionDecisions(): PromotionDecision[] {
-  return [...promotionDecisions];
+  return [..._promotionDecisions];
 }

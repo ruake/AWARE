@@ -1,9 +1,3 @@
-// ── Data-layer barrel for @/lib/data ─────────────────────────────────
-// Re-exports the core data-domain API (runs, test cases, suites,
-// promotions, types, and the most-commonly-used convenience modules.
-// For AI/LLM, nav, CI config, etc., import directly from their modules
-// or use @/lib (the complete fan-out barrel).
-
 export type {
   Run,
   TestResult,
@@ -45,6 +39,8 @@ export {
   PER_ENV_PASS_RATE,
   getTestResultsForRun,
   computeRunFrequency,
+  recomputeAll,
+  loadRuns,
 } from "./runs";
 
 export {
@@ -68,9 +64,10 @@ export {
   getTestSuiteById,
   buildSuiteTree,
   subscribeToTestSuites,
+  loadTestSuites,
 } from "./testSuites";
 
-export { getPromotionDecision, getAllPromotionDecisions } from "./promotions";
+export { getPromotionDecision, getAllPromotionDecisions, loadPromotions } from "./promotions";
 
 export { getTestCasesBySuiteId } from "./operations";
 
@@ -99,10 +96,13 @@ export {
   subscribeToEnvConfigs,
 } from "./envConfig";
 
-export { getAutoDiscoveredTests, getAutoDiscoverySummary } from "./testDiscovery";
+export { getAutoDiscoveredTests, getAutoDiscoverySummary, loadAutoDiscoveredTests } from "./testDiscovery";
 
 export {
   getSchedulerStatus,
   refreshSchedulerStatus,
   subscribeToSchedulerStatus,
+  loadSchedulerStatus,
 } from "./schedulerStatus";
+
+export { loadAllData, getDataInitState, subscribeToDataInit } from "./initData";

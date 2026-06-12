@@ -40,10 +40,14 @@ pnpm verify                 # typecheck + lint + format + test (full pre-commit 
 - **Primary**: `recharts` — `LineChart`, `AreaChart`, `BarChart`, `ResponsiveContainer` etc.
 - **Legacy**: `react-google-charts` — only in `GoogleCharts.tsx` wrapper; do not use for new work
 
-### Data Layer (static-first)
-- All seed data in `src/data/*.json` — loaded at module import time, kept in memory
-- Mutable stores: `getTestCases()` / `saveTestCases()`, `getTestSuites()` / `saveTestSuites()`
-- Subscription: `subscribeToTestCases(cb)` — returns unsubscribe fn; use in `useEffect` cleanup
+### Data Layer (runtime-fetch)
+- All seed data in `data/*.json` — **fetched at runtime** from `raw.githubusercontent.com/ruake/AWARE/data/`
+- `src/lib/dataFetcher.ts` — `fetchJson<T>(path)` resolves URLs for dev (`/data/`) vs production (`raw.githubusercontent.com/.../data/`)
+- Data init: `src/lib/initData.ts` — `loadAllData()` is called in `App.tsx` before rendering; shows loading state until complete
+- Each data module (`runs.ts`, `testSuites.ts`, `promotions.ts`, `schedulerStatus.ts`, `testDiscovery.ts`) exposes both:
+  - A synchronous getter (`getXxx()`) that returns the current (possibly empty) state
+  - An async `loadXxx()` that fetches from the `data` GitHub branch and populates the store
+- `RUNS` and `DIFF_ROWS` in `runs.ts` are `let` bindings reassigned after fetch
 - Env config: `getEnvConfigs()` / `saveEnvConfigs()` with localStorage key `aware-env-configs-v3`
 - `_snapshot` caching in stores for stable `useSyncExternalStore` references
 
@@ -81,6 +85,8 @@ artifacts/aware-app/src/
 │   ├── types.ts           # ALL type interfaces (Run, TestResult, TestCase, TestSuite, DiffRow, PromotionDecision, LLM types, error classes)
 │   ├── runs.ts            # RUNS[], ENV_SUMMARY, chart data exports, flakiness computation
 │   ├── data.ts            # barrel + mutable stores (testCases, testSuites) + subscriptions
+│   ├── dataFetcher.ts     # Runtime fetch: raw.githubusercontent.com (prod) or /data/ (dev)
+│   ├── initData.ts        # loadAllData() — orchestrates all async data loading before render
 │   ├── envConfig.ts       # EnvironmentConfig store with localStorage override
 │   ├── ciConfig.ts        # CI config generation (generateCiConfigYaml, downloadCiConfig)
 │   ├── anomalyDetection.ts # test-level Z-score (7-day window, detectAnomalies)
@@ -128,13 +134,14 @@ artifacts/aware-app/src/
 ```
 
 ## Data Files & Counts
-- `src/data/auto-tests.json` — auto-discovered tests (`ad_*` pytest + `pw_*` Playwright)
-- `src/data/test-suites.json` — suites referencing `ad_*` and `pw_*` IDs
-- `src/data/runs.json` — seed CI runs (`env: "QA"|"UAT"|"PROD"`)
-- `src/data/diff-rows.json` — seed diff rows
-- `src/data/test-results.json` — `Record<runId, TestResult[]>`
-- `src/data/promotions.json` — promotion history
+- `data/auto-tests.json` — auto-discovered tests (`ad_*` pytest + `pw_*` Playwright); no separate test-cases.json
+- `data/test-suites.json` — suites referencing `ad_*` and `pw_*` IDs
+- `data/runs.json` — seed CI runs (`env: "QA"|"UAT"|"PROD"`)
+- `data/diff-rows.json` — seed diff rows
+- `data/test-results.json` — `Record<runId, TestResult[]>`
+- `data/promotions.json` — promotion history
 - **No separate test-cases.json** — all test cases come from auto-discovery
+- All fetched at runtime from `raw.githubusercontent.com/ruake/AWARE/data/<file>.json` (branch = `data`)
 
 ## Data Contract
 - `TestResult.evidence` is **REQUIRED** — never omit in seed data or `record-run.mjs` output
@@ -150,9 +157,10 @@ artifacts/aware-app/src/
 - **App integration**: `src/lib/testDiscovery.ts` — `getAutoDiscoveredTests()` + `getAutoDiscoverySummary()`
 
 ## GitHub Actions Workflows (`.github/workflows/`)
-- `deploy.yml` — validate data → typecheck → unit tests → E2E → discover:tests → build → GitHub Pages
-- `run-tests.yml` — Akamai CDN regression: Playwright + pytest parallel jobs across all 6 envs; reads `config/*.yml`
-- `sync-data-branches.yml` — pushes extracted data to dedicated branches
+- `deploy.yml` — validate data → typecheck → unit tests → E2E → discover:tests → build → GitHub Pages; commits run data to `data` branch
+- `run-tests.yml` — Akamai CDN regression: Playwright + pytest parallel jobs across all 6 envs; reads `config/*.yml`; commits results to `data` branch
+- `scheduler.yml` — every 15 min cron evaluates suites and dispatches `run-tests.yml`; commits runs + status to `data` branch
+- `sync-data-branches.yml` — pushes seed data to `data` branch + extracted data to dedicated branches
 
 ## Config-as-Code (`config/`)
 - `config/akamai-config.yml` — property metadata, EdgeWorker IDs, runner settings, notifications
@@ -170,6 +178,26 @@ artifacts/aware-app/src/
 - localStorage key for env config is `aware-env-configs-v3` (v2 is silently ignored)
 - `ENV_COLOR_MAP` in `runs.ts` has both new short forms (`QA`) and legacy long forms for backward compat
 - `validate-data.mjs` must pass before any build — fix data schema before fixing code if both fail
+- Data is fetched at runtime from `raw.githubusercontent.com/ruake/AWARE/data/<file>` (`data` branch) — never imported statically
+- `src/lib/dataFetcher.ts` auto-detects dev vs prod: dev uses `/data/` (Vite static serve), prod uses raw GitHub URL
+- `RUNS` and `DIFF_ROWS` are `let` bindings — mutated by `loadRuns()` before the app renders via `DataGate` in `App.tsx`
+- The `data` branch is an orphan branch containing only data files at root (`runs.json`, `scheduler-status.json`, etc.)
+- Scheduler and test workflows push run data to the `data` branch, not `main`
+- Commits to `data` branch include `[skip ci]` to prevent recursive workflow triggers
+
+## Controller / Reconciler Pattern (Kubernetes-inspired)
+
+Run status management follows a K8s-style controller pattern:
+
+- **`scripts/lib/reconciler.mjs`** — base `Reconciler` class with `start()`/`stop()`/`reconcile()` loop; `ResourceReconciler` for list-reconcile workloads.
+- **`scripts/lib/runStatus.mjs`** — Run conditions (`Dispatched`, `WorkflowRunning`, `Completed`, `Passed`, `Reconciled`) with `True`/`False`/`Unknown` status. `deriveRunStatus()` computes the overall status from conditions. GC pass marks stale RUNNING entries as `ERROR`.
+- **`scripts/lib/ghApi.mjs`** — Facade over `gh` CLI for `listWorkflowRuns()`, `getWorkflowRun()`, `dispatchWorkflow()`, `findLatestDispatch()`.
+- **`scripts/scheduler.mjs`** — Main controller with phases: Reconcile (poll GH) → Dispatch (cron eval + dispatch) → GC (stale cleanup) → Persist → Commit.
+- **`scripts/record-run.mjs`** — Updates or creates runs with full conditions. Called by CI via env vars (`AWARE_SUITE`, `AWARE_ENV`, `PASS_PCT`, etc.)
+- **Run types** in `src/lib/types.ts` have `conditions?: RunCondition[]` and `workflowRunId?: number`.
+- All runs use conditions (even non-scheduler runs) for consistent status tracking across CI and scheduler.
+
+Flow: `scheduler.mjs` (reconciler) dispatches GH workflow → `run-tests.yml` runs tests → `record-run.mjs` records result with conditions → scheduler poll phase picks up completed status → GC cleans stale entries >24h.
 
 ## Skills (Specialist Agents)
 Load a skill by reading its `SKILL.md` before starting work in that domain:

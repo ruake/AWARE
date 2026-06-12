@@ -1,6 +1,6 @@
 ---
 name: AWARE Config System
-description: Config-as-code YAML files, envConfig.ts runtime source of truth, localStorage override key, and the relationship between config/ and src/data/.
+description: Config-as-code YAML files, envConfig.ts runtime source of truth, localStorage override key, and the relationship between config/ and data/.
 ---
 
 # AWARE Config System
@@ -54,7 +54,7 @@ Pattern: `{tier}_{network}` e.g. `qa_staging`, `qa_prod`, `uat_staging`, `uat_pr
 ```
 config/environments.yml  →  consumed by GitHub Actions CI
 src/lib/envConfig.ts     →  runtime app state (override of hardcoded defaults)
-src/data/runs.json       →  historical run records (env field = QA/UAT/PROD only)
+data/runs.json       →  historical run records (env field = QA/UAT/PROD only)
 ```
 These are SEPARATE. Changes to config/environments.yml do NOT automatically update the app's envConfig.ts defaults — that must be done manually.
 

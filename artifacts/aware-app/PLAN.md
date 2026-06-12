@@ -12,8 +12,8 @@ AWARE is a **local-first, AI-augmented, read-only** test observability dashboard
 
 ```
 GITHUB REPO (source of truth)
-  artifacts/aware-app/src/data/*.json    ← seed data, CI-updated
-  artifacts/aware-app/src/data/auto-tests.json  ← testCase.sourceFile links
+  artifacts/aware-app/data/*.json    ← seed data, CI-updated
+  artifacts/aware-app/data/auto-tests.json  ← testCase.sourceFile links
   artifacts/aware-app/public/evidence/   ← screenshots as .png
         │
         │ raw.githubusercontent.com (unauthenticated, read-only)

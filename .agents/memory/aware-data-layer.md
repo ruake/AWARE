@@ -6,18 +6,18 @@ description: Static-first data strategy, seed JSON files, in-memory stores, loca
 # AWARE Data Layer
 
 ## Strategy: Static-First
-The app ships with all data as JSON seed files in `src/data/`. There is no backend database in production. Data is loaded at module import time and kept in memory.
+The app ships with all data as JSON seed files in `data/`. There is no backend database in production. Data is loaded at module import time and kept in memory.
 
 ## Seed Data Files
 | File | Contents |
 |------|----------|
-| `src/data/runs.json` | All CI run records (Run[]) |
-| `src/data/test-results.json` | TestResult[] keyed by runId: `Record<string, TestResult[]>` |
-| `src/data/test-suites.json` | TestSuite[] definitions |
-| `src/data/auto-tests.json` | TestCase[] — auto-discovered test cases |
-| `src/data/diff-rows.json` | DiffRow[] — pre-computed compare data |
-| `src/data/promotions.json` | PromotionDecision[] |
-| `src/data/schemas/test-results.schema.json` | JSON Schema for validation |
+| `data/runs.json` | All CI run records (Run[]) |
+| `data/test-results.json` | TestResult[] keyed by runId: `Record<string, TestResult[]>` |
+| `data/test-suites.json` | TestSuite[] definitions |
+| `data/auto-tests.json` | TestCase[] — auto-discovered test cases |
+| `data/diff-rows.json` | DiffRow[] — pre-computed compare data |
+| `data/promotions.json` | PromotionDecision[] |
+| `data/schemas/test-results.schema.json` | JSON Schema for validation |
 
 ## Core Data Modules
 

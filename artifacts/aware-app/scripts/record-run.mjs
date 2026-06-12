@@ -1,4 +1,22 @@
 #!/usr/bin/env node
+/**
+ * Record a completed CI test run into data/runs.json and data/test-results.json.
+ *
+ * Usage:
+ *   node scripts/record-run.mjs <results.json> [runId]
+ *
+ * Environment overrides (set by run-tests.yml):
+ *   AWARE_SUITE   — suite ID (e.g. suite_smoke)
+ *   AWARE_ENV     — environment label (e.g. "QA / Staging")
+ *   AWARE_TARGET  — target tier (QA | UAT | PROD)
+ *   AWARE_NETWORK — network (staging | production)
+ *   GITHUB_RUN_ID — GitHub Actions run ID (for workflowRunId)
+ *   GITHUB_SHA    — commit SHA
+ *
+ * If a runId is given, the script looks for an existing "RUNNING" entry
+ * in runs.json with that id and updates it in place. Otherwise it
+ * prepends a new entry.
+ */
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
@@ -6,11 +24,11 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const RUNS_FILE = path.resolve(ROOT, "src", "data", "runs.json");
-const DIFFS_FILE = path.resolve(ROOT, "src", "data", "diff-rows.json");
-const TEST_RESULTS_FILE = path.resolve(ROOT, "src", "data", "test-results.json");
+const RUNS_FILE = path.resolve(ROOT, "data", "runs.json");
+const TEST_RESULTS_FILE = path.resolve(ROOT, "data", "test-results.json");
 
 const resultsPath = process.argv[2] || "test-results/playwright-results.json";
+const existingRunId = process.argv[3] || null;
 
 function getBuildInfo() {
   try {
@@ -262,9 +280,16 @@ function writeJSON(file, data) {
   fs.writeFileSync(file, JSON.stringify(data, null, 2) + "\n");
 }
 
+// ── Read env overrides ───────────────────────────────────────────────────────
+const suite    = process.env.AWARE_SUITE   || "suite_smoke";
+const envLabel = process.env.AWARE_ENV     || "QA / Staging";
+const target   = process.env.AWARE_TARGET  || "QA";
+const network  = process.env.AWARE_NETWORK || "staging";
+const ghRunId  = process.env.GITHUB_RUN_ID || null;
+
 const { rev, build } = getBuildInfo();
 const now = new Date();
-const runId = `run_${now.toISOString().slice(0, 10).replace(/-/g, "")}_${Date.now().toString(36)}`;
+const runId = existingRunId || `run_${now.toISOString().slice(0, 10).replace(/-/g, "")}_${Date.now().toString(36)}`;
 const raw = JSON.parse(fs.readFileSync(resultsPath, "utf8"));
 const results = parseResults(raw);
 const resultsDir = path.dirname(path.resolve(resultsPath));
@@ -272,9 +297,9 @@ const testResults = extractTestResults(raw, runId, resultsDir);
 
 const run = {
   id: runId,
-  label: `CI — ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
-  suite: "suite_full",
-  target: "Prod",
+  label: `${suite} — ${envLabel}`,
+  suite,
+  target,
   status: results.status,
   passPct: results.passPct,
   failures: results.failed,
@@ -283,14 +308,37 @@ const run = {
   started: now.toISOString(),
   build,
   rev,
-  env: "production",
-  network: "production",
+  env: target,
+  network,
+  ...(ghRunId ? { workflowRunId: Number(ghRunId) } : {}),
 };
 
-const runs = readJSON(RUNS_FILE);
-runs.unshift(run);
+let runs = readJSON(RUNS_FILE);
+let updated = false;
+
+// If the scheduler pre-created a RUNNING entry, update it in place
+for (let i = 0; i < runs.length; i++) {
+  const match =
+    runs[i].status === "RUNNING" &&
+    runs[i].suite === suite &&
+    runs[i].target === target &&
+    runs[i].network === network;
+  if (match) {
+    run.id = runs[i].id;
+    run.started = runs[i].started; // preserve original dispatch time
+    runs[i] = run;
+    updated = true;
+    console.log(`✓ Updated existing run ${run.id} from RUNNING → ${run.status}`);
+    break;
+  }
+}
+
+if (!updated) {
+  runs.unshift(run);
+  console.log(`✓ Prepended new run ${run.id}: ${results.passed}/${results.total} passed (${results.passPct}%) ${results.status}`);
+}
+
 writeJSON(RUNS_FILE, runs);
-console.log(`✓ Recorded run ${run.id}: ${results.passed}/${results.total} passed (${results.passPct}%) ${results.status}`);
 
 const testResultsByRun = readJSONObj(TEST_RESULTS_FILE);
 testResultsByRun[run.id] = testResults;

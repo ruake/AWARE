@@ -43,7 +43,7 @@ node scripts/discover-puppeteer.mjs  # Puppeteer only
 node scripts/discover-http.mjs       # HTTP only
 python scripts/discover-tests.py     # pytest discovery
 ```
-Discovery output populates `src/data/auto-tests.json` which seeds the TestManager.
+Discovery output populates `data/auto-tests.json` which seeds the TestManager.
 
 ## TestCase Management (App-Side)
 

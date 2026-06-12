@@ -84,7 +84,7 @@ TestDetail { history: TestRunPoint[], passRate, flakinessScore, avgDuration }
 | `unchanged` | Same status, similar duration |
 | `fishy` | PASS→PASS but suspicious duration spike |
 
-`DIFF_ROWS` in `src/data/diff-rows.json` — seeded between two most recent runs.
+`DIFF_ROWS` in `data/diff-rows.json` — seeded between two most recent runs.
 
 ## Run Frequency Analytics
 ```ts

@@ -1,9 +1,17 @@
+export interface RunCondition {
+  type: string;
+  status: "True" | "False" | "Unknown";
+  reason: string;
+  message: string;
+  lastTransitionTime: string;
+}
+
 export interface Run {
   id: string;
   label: string;
   suite: string;
   target: string;
-  status: "PASS" | "FAIL" | "PARTIAL" | "FLAKY" | "RUNNING";
+  status: "PASS" | "FAIL" | "PARTIAL" | "FLAKY" | "RUNNING" | "PENDING" | "ERROR";
   passPct: number;
   failures: number;
   duration: string;
@@ -13,6 +21,12 @@ export interface Run {
   rev: string;
   env: string;
   network: "staging" | "production";
+  /** Optional K8s-style conditions for granular status tracking */
+  conditions?: RunCondition[];
+  /** GitHub Actions workflow run ID for status polling */
+  workflowRunId?: number;
+  /** Last status update timestamp */
+  updatedAt?: string;
 }
 
 // ── Data Contract: TestResult ──────────────────────────────────────────

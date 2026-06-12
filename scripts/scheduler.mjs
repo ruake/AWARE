@@ -1,33 +1,53 @@
 #!/usr/bin/env node
 
 /**
- * AWARE Scheduler — Suite Orchestrator
+ * AWARE Scheduler — Kubernetes-inspired reconciler for test suite orchestration.
  *
- * Reads config/test-suites.yml, evaluates cron schedules against the
- * current time, dispatches run-tests.yml for due suites, and persists
- * scheduler-status.json for the AWARE portal to consume.
+ * On every reconciliation tick:
+ *   1. **Poll phase**: reconcile RUNNING runs against GitHub workflow state
+ *   2. **Cron evaluation**: check which suites are due
+ *   3. **Dispatch phase**: dispatch run-tests.yml for due suites × environments
+ *   4. **Status commit**: push updated runs.json + scheduler-status.json to `data` branch
  *
- * Environment:
- *   GITHUB_TOKEN       — GitHub PAT or actions token
- *   GITHUB_SHA         — commit SHA for status
- *   GITHUB_REPOSITORY  — owner/repo
- *   GITHUB_STEP_SUMMARY — path to step summary file
- *   GITHUB_ACTOR       — triggering user
- *   GITHUB_REF_NAME    — branch name
- *   GITHUB_EVENT_NAME  — event name
+ * Controller pattern (like k8s):
+ *   - Each Run has `conditions[]` (Dispatched, WorkflowRunning, Completed, Passed)
+ *   - Conditions drive the derived `status` ("PENDING"|"RUNNING"|"PASS"|"FAIL"|"ERROR")
+ *   - The reconciler polls GitHub workflow runs and updates conditions accordingly
+ *   - A "garbage collection" pass cleans up stale RUNNING entries
  */
 
-import { execSync } from "child_process";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { execSync } from "child_process";
+
+import { Reconciler, ResourceReconciler } from "./lib/reconciler.mjs";
+import {
+  getWorkflowRun,
+  findLatestDispatch,
+  dispatchWorkflow,
+} from "./lib/ghApi.mjs";
+import {
+  RUN_STATUSES,
+  CONDITION_TYPES,
+  CONDITION_STATUS,
+  condition,
+  deriveRunStatus,
+  upsertCondition,
+  initialRunConditions,
+  completeRunConditions,
+  readRuns,
+  writeRuns,
+} from "./lib/runStatus.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
-const DATA_DIR = join(ROOT, "artifacts", "aware-app", "src", "data");
+const DATA_DIR = join(ROOT, "artifacts", "aware-app", "data");
+const RUNS_FILE = join(DATA_DIR, "runs.json");
 const STATUS_FILE = join(DATA_DIR, "scheduler-status.json");
 const CONFIG_FILE = join(ROOT, "config", "test-suites.yml");
-const WORKFLOW = "run-tests.yml";
+const WORKFLOW_FILE = "run-tests.yml";
+const DATA_BRANCH = "data";
 
 // ── Utilities ────────────────────────────────────────────────────────────────
 
@@ -43,20 +63,7 @@ function yq(expr, file) {
   return JSON.parse(sh(`yq -o=json '${expr}' "${file}"`));
 }
 
-function gh(args) {
-  const token = process.env.GITHUB_TOKEN;
-  const env = token ? { ...process.env, GH_TOKEN: token } : process.env;
-  try {
-    return sh(`gh ${args}`, { env });
-  } catch (e) {
-    const short = e.message.slice(0, 200);
-    console.error(`  \u26a0 gh ${args.split(/\s/)[0]} … ${short}`);
-    return null;
-  }
-}
-
 const isoNow = () => new Date().toISOString();
-
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ── Cron matching ────────────────────────────────────────────────────────────
@@ -99,98 +106,6 @@ function nextCron(cronExp, from = new Date()) {
   return null;
 }
 
-// ── GitHub API ───────────────────────────────────────────────────────────────
-
-function getActiveRuns(suiteId) {
-  const out = gh(
-    `run list --workflow "${WORKFLOW}" --limit 50 --json databaseId,displayTitle,status,createdAt`
-  );
-  if (!out) return [];
-  try {
-    const runs = JSON.parse(out);
-    const activeStatuses = new Set([
-      "in_progress",
-      "pending",
-      "queued",
-      "waiting",
-      "requested",
-    ]);
-    return runs.filter(
-      (r) =>
-        r.displayTitle &&
-        r.displayTitle.includes(suiteId) &&
-        activeStatuses.has(r.status)
-    );
-  } catch {
-    return [];
-  }
-}
-
-function dispatchSuite(suiteId, envLabel, parallelism) {
-  const ref = process.env.GITHUB_REF_NAME || "main";
-  const out = gh(
-    `workflow run "${WORKFLOW}" --ref "${ref}" -f suite=${suiteId} -f environment="${envLabel}" -f parallelism=${parallelism}`
-  );
-  return out !== null;
-}
-
-function getLatestRunForSuite(suiteId) {
-  const out = gh(
-    `run list --workflow "${WORKFLOW}" --limit 10 --json databaseId,displayTitle,status,conclusion,createdAt,updatedAt`
-  );
-  if (!out) return null;
-  try {
-    const runs = JSON.parse(out).filter(
-      (r) => r.displayTitle && r.displayTitle.includes(suiteId)
-    );
-    if (runs.length === 0) return null;
-    runs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    return runs[0];
-  } catch {
-    return null;
-  }
-}
-
-// ── Status file I/O ──────────────────────────────────────────────────────────
-
-function readStatus() {
-  if (!existsSync(STATUS_FILE)) {
-    return { lastRun: null, status: "healthy", suites: [], recentDispatches: [] };
-  }
-  try {
-    return JSON.parse(readFileSync(STATUS_FILE, "utf-8"));
-  } catch {
-    return { lastRun: null, status: "healthy", suites: [], recentDispatches: [] };
-  }
-}
-
-function writeStatus(status) {
-  mkdirSync(DATA_DIR, { recursive: true });
-  writeFileSync(STATUS_FILE, JSON.stringify(status, null, 2) + "\n");
-}
-
-// ── Git commit ───────────────────────────────────────────────────────────────
-
-function commitStatusFile() {
-  try {
-    sh(`git config user.name "AWARE Scheduler"`);
-    sh(`git config user.email "scheduler@aware.dev"`);
-    sh(`git add "${STATUS_FILE}"`);
-    const diff = sh("git diff --cached --stat");
-    if (!diff) {
-      console.log("  \u2139 No status changes to commit");
-      return;
-    }
-    sh(`git commit -m "scheduler: update status [skip ci]"`);
-    sh(`git push`);
-    console.log("  \u2713 Status committed to repo");
-  } catch (e) {
-    console.error(`  \u26a0 Git commit/push: ${e.message.slice(0, 200)}`);
-  }
-}
-
-// ── Schedule descriptions ───────────────────────────────────────────────────
-
 function describeSchedule(cron) {
   if (!cron || cron === "null") return null;
   const known = {
@@ -202,7 +117,65 @@ function describeSchedule(cron) {
   return known[cron] || cron;
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
+// ── Env map ──────────────────────────────────────────────────────────────────
+
+const ENV_MAP = {
+  "QA / Staging":     { target: "QA",   network: "staging" },
+  "QA / Production":  { target: "QA",   network: "production" },
+  "UAT / Staging":    { target: "UAT",  network: "staging" },
+  "UAT / Production": { target: "UAT",  network: "production" },
+  "PROD / Staging":   { target: "PROD", network: "staging" },
+  "PROD / Production":{ target: "PROD", network: "production" },
+};
+
+function makeRunId(suiteId, envLabel) {
+  const slug = suiteId.replace(/^suite_/, "").slice(0, 8);
+  const ts = Date.now().toString(36);
+  return `${slug}_${ts}`;
+}
+
+// ── Git commit (pushes data files to the `data` branch) ─────────────────────
+
+function commitDataFiles() {
+  const mainBranch = process.env.GITHUB_REF_NAME || "main";
+  try {
+    const runsContent = readFileSync(RUNS_FILE, "utf-8");
+    const statusContent = readFileSync(STATUS_FILE, "utf-8");
+
+    sh(`git config user.name "AWARE Scheduler"`);
+    sh(`git config user.email "scheduler@aware.dev"`);
+
+    sh(`git fetch origin ${DATA_BRANCH}:${DATA_BRANCH} 2>/dev/null || true`);
+    try {
+      sh(`git checkout ${DATA_BRANCH}`);
+    } catch {
+      sh(`git checkout --orphan ${DATA_BRANCH}`);
+      for (const e of readdirSync(ROOT)) {
+        if (e !== ".git") rmSync(join(ROOT, e), { recursive: true, force: true });
+      }
+    }
+
+    writeFileSync(join(ROOT, "runs.json"), runsContent);
+    writeFileSync(join(ROOT, "scheduler-status.json"), statusContent);
+
+    sh(`git add "runs.json" "scheduler-status.json"`);
+    const diff = sh("git diff --cached --stat");
+    if (!diff) {
+      console.log("  \u2139 No data changes to commit");
+      sh(`git checkout -f ${mainBranch}`);
+      return;
+    }
+    sh(`git commit -m "scheduler: update runs + status [skip ci]"`);
+    sh(`git push origin ${DATA_BRANCH}`);
+    sh(`git checkout -f ${mainBranch}`);
+    console.log(`  \u2713 Data committed to ${DATA_BRANCH} branch`);
+  } catch (e) {
+    console.error(`  \u26a0 Git commit/push: ${e.message.slice(0, 200)}`);
+    try { sh(`git checkout -f ${mainBranch}`); } catch {}
+  }
+}
+
+// ── Main controller ─────────────────────────────────────────────────────────
 
 async function main() {
   const now = new Date();
@@ -232,8 +205,36 @@ async function main() {
   const suites = config.suites || [];
   console.log(`  \u{1F4CB} ${suites.length} suites defined\n`);
 
-  //── Process each suite ───────────────────────────────────────────────────
-  const prevStatus = readStatus();
+  //── Load existing runs ──────────────────────────────────────────────────
+  let runs = readRuns(RUNS_FILE);
+
+  //── Phase 1: Reconcile RUNNING runs (poll GH workflow state) ─────────
+  console.log("  \u{1F504} Reconcile phase — polling active workflows...");
+  let runsMutated = false;
+  const runningRuns = runs.filter((r) => r.status === "RUNNING" && r.workflowRunId);
+  for (const run of runningRuns) {
+    const wf = getWorkflowRun(run.workflowRunId);
+    if (!wf) continue;
+
+    if (!run.conditions) run.conditions = initialRunConditions();
+
+    if (wf.isCompleted) {
+      const passed = wf.isSuccess;
+      run.conditions = completeRunConditions(passed);
+      run.status = deriveRunStatus(run.conditions);
+      run.passPct = passed ? 100 : 0;
+      run.updatedAt = wf.updatedAt || timestamp;
+      runsMutated = true;
+      console.log(`  \u2705 Run ${run.id} reconciled → ${run.status}`);
+    } else if (wf.isActive) {
+      // Still running — update timestamp
+      run.updatedAt = wf.updatedAt || timestamp;
+    }
+  }
+  if (runsMutated) writeRuns(RUNS_FILE, runs);
+
+  //── Phase 2: Evaluate cron + dispatch due suites ─────────────────────
+  console.log("\n  \u{1F4C5} Dispatch phase — evaluating schedules...");
   const dispatchResults = [];
   const suiteStatuses = [];
   let totalDispatched = 0;
@@ -244,13 +245,13 @@ async function main() {
     const parallelism = suite.parallelism || 4;
     const envs = suite.environments || [];
 
-    let activeCount = 0;
-    let latestRun = null;
     let dispatchAction = null;
+    let activeCount = 0;
 
     if (due) {
-      const active = getActiveRuns(suite.id);
-      activeCount = active.length;
+      // Check for active runs via GH API
+      const active = []; // simplified — we check via runs.json below
+      activeCount = runs.filter((r) => r.suite === suite.id && r.status === "RUNNING").length;
 
       if (activeCount > 0) {
         dispatchAction = `\u23F3 ${activeCount} active run(s)`;
@@ -258,14 +259,44 @@ async function main() {
         let dispatched = 0;
         let errors = [];
         for (const env of envs) {
-          const ok = dispatchSuite(suite.id, env, parallelism);
+          const ok = dispatchWorkflow(WORKFLOW_FILE, process.env.GITHUB_REF_NAME || "main", {
+            suite: suite.id,
+            environment: env,
+            parallelism: String(parallelism),
+          });
           if (ok) {
+            const runId = makeRunId(suite.id, env);
+            const envInfo = ENV_MAP[env] || { target: "QA", network: "staging" };
+
+            // Wait for GH to index, then find workflowRunId
+            await sleep(2000);
+            const latest = findLatestDispatch(WORKFLOW_FILE, suite.id, env);
+
+            runs.unshift({
+              id: runId,
+              label: `${suite.name} — ${env}`,
+              suite: suite.id,
+              target: envInfo.target,
+              status: "RUNNING",
+              conditions: initialRunConditions(),
+              passPct: 0,
+              failures: 0,
+              duration: "\u2014",
+              durationMs: 0,
+              started: timestamp,
+              build: (process.env.GITHUB_SHA || "?").slice(0, 7),
+              rev: process.env.GITHUB_SHA || "?",
+              env: envInfo.target,
+              network: envInfo.network,
+              workflowRunId: latest?.databaseId || null,
+            });
             dispatched++;
-            await sleep(500);
+            await sleep(1000);
           } else {
             errors.push(env);
           }
         }
+        writeRuns(RUNS_FILE, runs);
         totalDispatched += dispatched;
         dispatchAction = `\u{1F680} ${dispatched}/${envs.length} envs`;
         if (errors.length > 0) {
@@ -280,34 +311,22 @@ async function main() {
             dispatched,
             failed: errors.length,
             errors: errors.length > 0 ? errors : undefined,
-            workflow: WORKFLOW,
+            workflow: WORKFLOW_FILE,
           });
         }
       }
     }
 
-    // Fetch latest run info regardless of due state
-    latestRun = getLatestRunForSuite(suite.id);
-    if (!latestRun && activeCount === 0 && !dispatchAction) {
-      dispatchAction = "\u2014";
-    }
-
-    // Determine suite status
+    // Determine suite status for status object
+    const runningCount = runs.filter((r) => r.suite === suite.id && r.status === "RUNNING").length;
+    const lastRun = runs.find((r) => r.suite === suite.id && r.status !== "RUNNING");
     let suiteStatus = "idle";
-    if (dispatchAction && dispatchAction.includes("\u{1F680}")) {
+    if (runningCount > 0) {
       suiteStatus = "running";
-    } else if (activeCount > 0) {
-      suiteStatus = "running";
-    } else if (latestRun) {
-      suiteStatus =
-        latestRun.conclusion === "success"
-          ? "passed"
-          : latestRun.conclusion === "failure"
-            ? "failed"
-            : "idle";
+    } else if (lastRun) {
+      suiteStatus = lastRun.status === "PASS" ? "passed" : lastRun.status === "FAIL" ? "failed" : "idle";
     }
 
-    // Put icon first in console output
     const glyph = due ? "\u{1F7E2}" : "\u26AA";
     console.log(`  ${glyph} ${suite.id.padEnd(28)} ${dispatchAction || "\u2014"}`);
 
@@ -317,13 +336,10 @@ async function main() {
       schedule: cron,
       scheduleDesc: describeSchedule(cron),
       due,
-      lastDispatched: latestRun?.createdAt || null,
-      lastConclusion: latestRun?.conclusion || null,
-      lastRunUrl:
-        latestRun?.databaseId
-          ? `https://github.com/${repo}/actions/runs/${latestRun.databaseId}`
-          : null,
-      activeRuns: activeCount,
+      lastDispatched: timestamp,
+      lastConclusion: lastRun?.status || null,
+      lastRunUrl: null,
+      activeRuns: runningCount,
       status: suiteStatus,
       nextDue: due ? null : nextCron(cron, now),
       environments: envs,
@@ -331,15 +347,29 @@ async function main() {
     });
   }
 
-  //── Build status object ─────────────────────────────────────────────────
-  const hasErrors = dispatchResults.some((d) => d.failed > 0);
-  const overall = hasErrors ? "degraded" : "healthy";
+  //── Phase 3: Garbage collect stale runs ──────────────────────────────
+  const staleThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const staleCount = runs.filter(
+    (r) => r.status === "RUNNING" && r.started < staleThreshold
+  ).length;
+  if (staleCount > 0) {
+    console.log(`  \u{1F9F9} GC: ${staleCount} stale RUNNING run(s) older than 24h — marking ERROR`);
+    for (const run of runs) {
+      if (run.status === "RUNNING" && run.started < staleThreshold) {
+        run.status = "ERROR";
+        run.conditions = completeRunConditions(false);
+        run.conditions = upsertCondition(run.conditions, condition("Reconciled", "True", "StaleGC", "Marked as ERROR by garbage collector (no workflow update in 24h)"));
+        run.updatedAt = timestamp;
+        runsMutated = true;
+      }
+    }
+    if (runsMutated) writeRuns(RUNS_FILE, runs);
+  }
 
-  // Keep recent dispatches (last 50)
-  const allDispatches = [...dispatchResults, ...(prevStatus.recentDispatches || [])].slice(
-    0,
-    50
-  );
+  //── Phase 4: Build + persist scheduler status ────────────────────────
+  const prevStatus = readSchedulerStatus();
+  const overall = dispatchResults.some((d) => d.failed > 0) ? "degraded" : "healthy";
+  const allDispatches = [...dispatchResults, ...(prevStatus.recentDispatches || [])].slice(0, 50);
 
   const newStatus = {
     lastRun: timestamp,
@@ -356,9 +386,12 @@ async function main() {
     },
   };
 
-  writeStatus(newStatus);
+  writeSchedulerStatus(newStatus);
 
-  //── Generate GITHUB_STEP_SUMMARY ────────────────────────────────────────
+  //── Phase 5: Commit to data branch ───────────────────────────────────
+  commitDataFiles();
+
+  //── Generate GITHUB_STEP_SUMMARY ─────────────────────────────────────
   const summaryLines = [
     `# AWARE Scheduler Report`,
     ``,
@@ -369,6 +402,7 @@ async function main() {
     `| **Status** | \`${overall}\` |`,
     `| **Suites due** | ${newStatus.summary.due} |`,
     `| **Environments dispatched** | ${totalDispatched} |`,
+    `| **Stale runs GC'd** | ${staleCount} |`,
     ``,
     `## Suite Status`,
     ``,
@@ -378,22 +412,13 @@ async function main() {
 
   for (const s of suiteStatuses) {
     const statusGlyph =
-      s.status === "running"
-        ? "\u{1F7E2}"
-        : s.status === "passed"
-          ? "\u2705"
-          : s.status === "failed"
-            ? "\u274C"
-            : "\u26AA";
-    const actionStr = s.due
-      ? "\u{1F680} dispatching"
-      : s.activeRuns > 0
-        ? `\u23F3 ${s.activeRuns} active`
-        : s.lastConclusion === "success"
-          ? "\u2705 passed"
-          : s.lastConclusion === "failure"
-            ? "\u274C failed"
-            : "\u2014";
+      s.status === "running" ? "\u{1F7E2}" :
+      s.status === "passed" ? "\u2705" :
+      s.status === "failed" ? "\u274C" : "\u26AA";
+    const actionStr = s.due ? "\u{1F680} dispatching" :
+      s.activeRuns > 0 ? `\u23F3 ${s.activeRuns} active` :
+      s.lastConclusion === "PASS" ? "\u2705 passed" :
+      s.lastConclusion === "FAIL" ? "\u274C failed" : "\u2014";
     summaryLines.push(
       `| ${s.id} | ${s.scheduleDesc || "\u2014"} | ${statusGlyph} ${s.status} | ${actionStr} |`
     );
@@ -408,6 +433,7 @@ async function main() {
     `- **Due now**: ${newStatus.summary.due}`,
     `- **Dispatched**: ${totalDispatched} environment(s)`,
     `- **Running**: ${newStatus.summary.running} suite(s)`,
+    `- **Stale GC'd**: ${staleCount} run(s)`,
     ``,
   );
 
@@ -416,12 +442,27 @@ async function main() {
     writeFileSync(summaryPath, summaryLines.join("\n"));
   }
 
-  //── Commit status file ──────────────────────────────────────────────────
-  commitStatusFile();
-
   console.log(`\n${"=".repeat(60)}`);
-  console.log(`  \u2705 Scheduler complete \u2014 ${totalDispatched} env(s) dispatched`);
+  console.log(`  \u2705 Scheduler complete \u2014 ${totalDispatched} env(s) dispatched, ${staleCount} stale GC'd`);
   console.log(`${"=".repeat(60)}\n`);
+}
+
+// ── Scheduler status I/O ─────────────────────────────────────────────────
+
+function readSchedulerStatus() {
+  if (!existsSync(STATUS_FILE)) {
+    return { lastRun: null, status: "healthy", suites: [], recentDispatches: [] };
+  }
+  try {
+    return JSON.parse(readFileSync(STATUS_FILE, "utf-8"));
+  } catch {
+    return { lastRun: null, status: "healthy", suites: [], recentDispatches: [] };
+  }
+}
+
+function writeSchedulerStatus(status) {
+  mkdirSync(DATA_DIR, { recursive: true });
+  writeFileSync(STATUS_FILE, JSON.stringify(status, null, 2) + "\n");
 }
 
 //── Run ───────────────────────────────────────────────────────────────────

@@ -1,12 +1,12 @@
 import type { TestResult, TestDetail, TestRunPoint } from "./types";
 import { RUNS, DIFF_ROWS } from "./runs";
+import { dataUrl } from "./dataFetcher";
 
 const cache = new Map<string, TestResult[]>();
 const inflight = new Map<string, Promise<TestResult[]>>();
 
-function dataUrl(runId: string): string {
-  const b = import.meta.env.BASE_URL;
-  return `${b}data/test-results/${runId}.json`;
+function resultsUrl(runId: string): string {
+  return dataUrl(`test-results/${runId}.json`);
 }
 
 export function getCachedResults(runId: string): TestResult[] {
@@ -20,7 +20,7 @@ export async function loadResultsForRun(runId: string): Promise<TestResult[]> {
   const pending = inflight.get(runId);
   if (pending) return pending;
 
-  const p = fetch(dataUrl(runId))
+  const p = fetch(resultsUrl(runId))
     .then((r) => {
       if (!r.ok) throw new Error(`Failed to load results for ${runId}: ${r.status}`);
       return r.json() as Promise<TestResult[]>;

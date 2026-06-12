@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ErrorBoundary } from "@/components/aware/ErrorBoundary";
 import NotFound from "@/pages/not-found";
+import { loadAllData } from "@/lib/data";
 
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const Runs = React.lazy(() => import("@/pages/Runs"));
@@ -48,6 +49,44 @@ function PageLoader() {
       </div>
     </div>
   );
+}
+
+function DataGate({ children }: { children: React.ReactNode }) {
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+
+  useEffect(() => {
+    loadAllData()
+      .then(() => setReady(true))
+      .catch(setError);
+  }, []);
+
+  if (error) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          background: "var(--proof-grey-bg)",
+          color: "var(--proof-red, #ef4444)",
+          fontSize: 18,
+          flexDirection: "column",
+          gap: 12,
+        }}
+      >
+        <span>Failed to load application data</span>
+        <pre style={{ fontSize: 13, color: "var(--proof-muted, #6b7280)" }}>
+          {String(error)}
+        </pre>
+      </div>
+    );
+  }
+
+  if (!ready) return <PageLoader />;
+
+  return <>{children}</>;
 }
 
 function Router() {
@@ -142,9 +181,11 @@ function App() {
   return (
     <ErrorBoundary label="Application crashed">
       <QueryClientProvider client={queryClient}>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
+        <DataGate>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+        </DataGate>
       </QueryClientProvider>
     </ErrorBoundary>
   );
