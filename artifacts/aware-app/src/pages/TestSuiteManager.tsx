@@ -1127,7 +1127,7 @@ export default function TestSuiteManager() {
               <div
                 style={{
                   flex: 1,
-                  overflow: "hidden",
+                  overflow: "auto",
                   display: "flex",
                   flexDirection: "column",
                   padding: 16,
@@ -1248,10 +1248,7 @@ export default function TestSuiteManager() {
                     </button>
                   </div>
                 </div>
-                <div
-                  className="proof-card"
-                  style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}
-                >
+                <div className="proof-card" style={{ overflow: "hidden" }}>
                   <div
                     style={{
                       padding: "10px 14px",
@@ -1261,12 +1258,11 @@ export default function TestSuiteManager() {
                       color: "var(--proof-text-secondary)",
                       textTransform: "uppercase",
                       letterSpacing: "0.5px",
-                      flexShrink: 0,
                     }}
                   >
                     All Suites
                   </div>
-                  <div style={{ flex: 1, overflow: "auto" }}>
+                  <div style={{ overflowX: "auto" }}>
                     <table className="proof-table" style={{ tableLayout: "fixed", width: "100%" }}>
                       <colgroup>
                         <col />
