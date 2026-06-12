@@ -87,7 +87,7 @@ export default function Dashboard() {
     return (
       <AppLayout activeHref="/">
         <div style={{ textAlign: "center", padding: 64 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text)" }}>
             No runs available
           </h2>
           <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
@@ -1008,7 +1008,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => {
-                const summary = `PROOF Regression Report\nOverall Pass Rate: ${overallPassRate}%\nActive Regressions: ${DIFF_ROWS.filter((d) => d.state === "regression").length}\nLatest Run: ${latestRun.id}`;
+                const summary = `A.W.A.R.E. Regression Report\nOverall Pass Rate: ${overallPassRate}%\nActive Regressions: ${DIFF_ROWS.filter((d) => d.state === "regression").length}\nLatest Run: ${latestRun.id}`;
                 navigator.clipboard
                   .writeText(summary)
                   .then(() => show("Summary copied — paste into Slack/JIRA"));
@@ -1018,7 +1018,7 @@ export default function Dashboard() {
               <Share2 size={13} /> Export to Slack
             </button>
             <a
-              href="https://github.com/ruake/PROOF/actions"
+              href="https://github.com/ruake/AWARE/actions"
               target="_blank"
               rel="noopener noreferrer"
               className="proof-button proof-button-sm"

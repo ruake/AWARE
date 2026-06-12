@@ -55,7 +55,7 @@ const STAGES: Stage[] = [
     id: "detect",
     title: "Portal Detects",
     icon: Eye,
-    desc: "PROOF portal polls for status.json updates every 30 seconds",
+    desc: "A.W.A.R.E. portal polls for status.json updates every 30 seconds",
     detail:
       "useLiveStatus() hook polls every 30s\n→ Compares ETag / last-modified\n→ New status detected → triggers notification",
   },
@@ -109,7 +109,7 @@ jobs:
       - run: pnpm install
       - run: pnpm test:regression --suite=\${{ inputs.suite }}
 
-      # Publish status to PROOF portal
+      # Publish status to A.W.A.R.E. portal
       - run: pnpm publish:status
       - uses: peaceiris/actions-gh-pages@v4
         with:
@@ -187,7 +187,7 @@ export default function Status() {
         {/* Header */}
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)" }}>
-            How PROOF Works
+            How A.W.A.R.E. Works
           </h1>
           <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 3 }}>
             End-to-end pipeline: GitHub Actions → test results → promotion decision
@@ -390,7 +390,7 @@ export default function Status() {
             >
               <h3 style={{ fontSize: 13, fontWeight: 600 }}>Live GitHub Actions Runs</h3>
               <a
-                href="https://github.com/ruake/PROOF/actions"
+                href="https://github.com/ruake/AWARE/actions"
                 target="_blank"
                 rel="noopener"
                 className="proof-button proof-button-xs"

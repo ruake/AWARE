@@ -165,11 +165,6 @@ function Router() {
           <Sharing />
         </React.Suspense>
       </Route>
-      <Route path="/status">
-        <React.Suspense fallback={<PageLoader />}>
-          <Status />
-        </React.Suspense>
-      </Route>
       <Route component={NotFound} />
     </Switch>
   );

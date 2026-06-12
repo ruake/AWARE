@@ -686,7 +686,7 @@ function CarouselSlides() {
             >
               {"16:9"}
             </span>
-            <span>PROOF · {slide.title}</span>
+            <span>A.W.A.R.E. · {slide.title}</span>
           </div>
         </div>
       </div>
@@ -903,7 +903,7 @@ const DOC_SECTIONS: DocEntry[] = [
     content: () => (
       <>
         <p>
-          <strong>PROOF</strong> is a web-based observability dashboard for your GitHub Actions test
+          <strong>A.W.A.R.E.</strong> is a web-based observability dashboard for your GitHub Actions test
           pipeline. It runs entirely in your browser — no backend or API setup needed.
         </p>
         <ol style={{ paddingLeft: 18, margin: "8px 0" }}>
@@ -1618,7 +1618,7 @@ export default function About() {
                     lineHeight: 1,
                   }}
                 >
-                  PROOF
+                  A.W.A.R.E.
                 </h1>
                 <span
                   style={{
@@ -1642,11 +1642,11 @@ export default function About() {
                 }}
               >
                 <strong style={{ color: "var(--proof-text)" }}>
-                  Pipeline for Regression Observation and Output Framework
+                  Akamai Web Analytics Regression Engine
                 </strong>{" "}
-                — a web application regression testing platform for GitHub Actions. Observe pass
-                rates, compare baseline vs candidate, manage test cases, and gate promotions with
-                confidence.
+                — a CDN test observability dashboard for Playwright + pytest suites across QA, UAT,
+                and PROD Akamai environments. Surface pass-rate trends, compare regressions, and
+                gate promotions with confidence.
               </p>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[
@@ -1688,7 +1688,7 @@ export default function About() {
           <h2
             style={{ fontSize: 20, fontWeight: 800, color: "var(--proof-text)", marginBottom: 10 }}
           >
-            What is PROOF?
+            What is A.W.A.R.E.?
           </h2>
           <p
             style={{
@@ -1699,10 +1699,10 @@ export default function About() {
               maxWidth: 720,
             }}
           >
-            <strong>PROOF</strong> is a web dashboard that tracks your website's test health after
-            every code change. When your automated tests run (via GitHub Actions), PROOF shows you
-            which tests passed, which failed, and whether it's safe to deploy — across all your
-            environments (production, staging, UAT).
+            <strong>A.W.A.R.E.</strong> is a web dashboard that tracks your Akamai CDN test health after
+            every code change. When your automated tests run (via GitHub Actions), A.W.A.R.E. shows you
+            which tests passed, which failed, and whether it's safe to promote — across QA, UAT, and PROD
+            Akamai environments.
           </p>
 
           {/* Architecture flow as SVG */}
@@ -1801,7 +1801,7 @@ export default function About() {
                 fill="#e8eaed"
                 fontFamily="system-ui, sans-serif"
               >
-                🌐 PROOF Portal
+                🌐 A.W.A.R.E. Portal
               </text>
               <text
                 x="320"
@@ -2211,8 +2211,7 @@ export default function About() {
             textAlign: "center",
           }}
         >
-          PROOF — Pipeline for Regression Observation and Output Framework · v2.0.0 · GHA
-          Observability Platform
+          A.W.A.R.E. — Akamai Web Analytics Regression Engine · v2.0.0 · CDN Observability Platform
         </div>
       </div>
     </AppLayout>
