@@ -20,9 +20,9 @@ jobs:
       run:
         working-directory: artifacts/aware-app
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Generate test-cases data
@@ -51,9 +51,9 @@ jobs:
       run:
         working-directory: artifacts/aware-app
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Generate test-runs data
@@ -82,9 +82,9 @@ jobs:
       run:
         working-directory: artifacts/aware-app
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Setup Python
@@ -119,7 +119,7 @@ jobs:
   sync-data-branch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Push data files to data branch
@@ -151,9 +151,9 @@ jobs:
       run:
         working-directory: artifacts/aware-app
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Generate stats data
