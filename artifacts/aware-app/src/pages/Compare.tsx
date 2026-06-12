@@ -1535,46 +1535,6 @@ export default function Compare() {
                             </span>
                           </td>
                           <td>{stateBadge(d.state)}</td>
-                          <td>
-                            <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  copy(`${window.location.origin}/analytics?diffId=${d.id}`);
-                                  show("Permalink copied");
-                                }}
-                                style={{
-                                  padding: "3px 5px",
-                                  border: "none",
-                                  background: "transparent",
-                                  cursor: "pointer",
-                                  color: "var(--proof-text-secondary)",
-                                }}
-                                title="Copy permalink"
-                              >
-                                <Link2 size={12} />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  copy(
-                                    `Regression: ${d.name}\nBaseline: ${d.baseStatus} (${d.durBase}ms)\nCandidate: ${d.candStatus} (${d.durCand}ms)`,
-                                  );
-                                  show("Issue template copied");
-                                }}
-                                style={{
-                                  padding: "3px 5px",
-                                  border: "none",
-                                  background: "transparent",
-                                  cursor: "pointer",
-                                  color: "var(--proof-text-secondary)",
-                                }}
-                                title="File issue"
-                              >
-                                <Github size={12} />
-                              </button>
-                            </div>
-                          </td>
                         </tr>
                       );
                     })}
