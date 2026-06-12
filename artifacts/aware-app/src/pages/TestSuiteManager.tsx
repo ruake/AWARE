@@ -570,7 +570,14 @@ export default function TestSuiteManager() {
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 12,
+                      marginBottom: 12,
+                    }}
+                  >
                     <div className="proof-card" style={{ padding: 12 }}>
                       <h4
                         style={{
@@ -966,7 +973,13 @@ export default function TestSuiteManager() {
                   >
                     <Beaker size={12} /> Tests ({selectedTests.length})
                   </h4>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 4 }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+                      gap: 4,
+                    }}
+                  >
                     {selectedTests.map((tc) => (
                       <div
                         key={tc.id}

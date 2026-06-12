@@ -410,7 +410,10 @@ export default function Copilot() {
               {providerAvail[currentProvider] === "available" ? (
                 <Wifi size={11} style={{ color: "#22c55e" }} />
               ) : providerAvail[currentProvider] === "downloading" ? (
-                <Loader2 size={11} style={{ color: "#f59e0b", animation: "spin 1s linear infinite" }} />
+                <Loader2
+                  size={11}
+                  style={{ color: "#f59e0b", animation: "spin 1s linear infinite" }}
+                />
               ) : (
                 <WifiOff size={11} style={{ color: "#ef4444" }} />
               )}
@@ -503,17 +506,42 @@ export default function Copilot() {
                       <span style={{ color: meta.color }}>{meta.icon}</span>
                       <span style={{ flex: 1 }}>{meta.label}</span>
                       {status === "available" && (
-                        <span style={{ fontSize: 10, color: "#22c55e", display: "flex", alignItems: "center", gap: 3 }}>
+                        <span
+                          style={{
+                            fontSize: 10,
+                            color: "#22c55e",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 3,
+                          }}
+                        >
                           <Wifi size={10} /> Ready
                         </span>
                       )}
                       {status === "downloading" && (
-                        <span style={{ fontSize: 10, color: "#f59e0b", display: "flex", alignItems: "center", gap: 3 }}>
-                          <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} /> Downloading
+                        <span
+                          style={{
+                            fontSize: 10,
+                            color: "#f59e0b",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 3,
+                          }}
+                        >
+                          <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} />{" "}
+                          Downloading
                         </span>
                       )}
                       {status === "unavailable" && (
-                        <span style={{ fontSize: 10, color: "#ef4444", display: "flex", alignItems: "center", gap: 3 }}>
+                        <span
+                          style={{
+                            fontSize: 10,
+                            color: "#ef4444",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 3,
+                          }}
+                        >
                           <WifiOff size={10} /> Unavailable
                         </span>
                       )}

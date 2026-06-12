@@ -5,9 +5,9 @@ import { getEnvConfigs } from "@/lib/envConfig";
 import type { EnvironmentConfig } from "@/lib/types";
 
 const TIER_META: Record<string, { accent: string; stagingBg: string; prodBg: string }> = {
-  QA:   { accent: "#a855f7", stagingBg: "rgba(168,85,247,0.07)",  prodBg: "rgba(192,132,252,0.10)" },
-  UAT:  { accent: "#f59e0b", stagingBg: "rgba(245,158,11,0.07)",  prodBg: "rgba(251,191,36,0.10)"  },
-  PROD: { accent: "#22c55e", stagingBg: "rgba(34,197,94,0.07)",   prodBg: "rgba(74,222,128,0.10)"  },
+  QA: { accent: "#a855f7", stagingBg: "rgba(168,85,247,0.07)", prodBg: "rgba(192,132,252,0.10)" },
+  UAT: { accent: "#f59e0b", stagingBg: "rgba(245,158,11,0.07)", prodBg: "rgba(251,191,36,0.10)" },
+  PROD: { accent: "#22c55e", stagingBg: "rgba(34,197,94,0.07)", prodBg: "rgba(74,222,128,0.10)" },
 };
 
 function StatusPill({ status }: { status: EnvironmentConfig["propertyStatus"] }) {
@@ -15,8 +15,8 @@ function StatusPill({ status }: { status: EnvironmentConfig["propertyStatus"] })
     status === "active"
       ? { color: "#22c55e", bg: "rgba(34,197,94,0.13)", icon: CheckCircle2, label: "active" }
       : status === "pending"
-      ? { color: "#f59e0b", bg: "rgba(245,158,11,0.13)", icon: Clock,        label: "pending" }
-      : { color: "#ef4444", bg: "rgba(239,68,68,0.13)",  icon: AlertCircle,  label: "inactive" };
+        ? { color: "#f59e0b", bg: "rgba(245,158,11,0.13)", icon: Clock, label: "pending" }
+        : { color: "#ef4444", bg: "rgba(239,68,68,0.13)", icon: AlertCircle, label: "inactive" };
   const Icon = cfg.icon;
   return (
     <span
@@ -68,7 +68,13 @@ function NetworkCard({
         gap: 4,
         padding: "7px 10px",
         borderRadius: 6,
-        background: hovered ? (isStaging ? "rgba(255,255,255,0.06)" : bg) : (isStaging ? "transparent" : bg + "88"),
+        background: hovered
+          ? isStaging
+            ? "rgba(255,255,255,0.06)"
+            : bg
+          : isStaging
+            ? "transparent"
+            : bg + "88",
         border: `1px solid ${hovered ? accent + "50" : "var(--proof-border)"}`,
         cursor: "pointer",
         transition: "all 0.14s ease",
@@ -76,7 +82,9 @@ function NetworkCard({
       }}
     >
       {/* Network badge + status */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
+      <div
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}
+      >
         <span
           style={{
             fontSize: 9,
@@ -122,7 +130,8 @@ function NetworkCard({
               whiteSpace: "nowrap",
             }}
           >
-            {env.ips[0]}{env.ips.length > 1 ? ` +${env.ips.length - 1}` : ""}
+            {env.ips[0]}
+            {env.ips.length > 1 ? ` +${env.ips.length - 1}` : ""}
           </span>
         </div>
       )}
@@ -280,9 +289,7 @@ export function PropertyStatusBar() {
             tier={tier}
             staging={staging}
             production={production}
-            onNavigate={(env) =>
-              navigate(`/runs?env=${encodeURIComponent(env.label)}`)
-            }
+            onNavigate={(env) => navigate(`/runs?env=${encodeURIComponent(env.label)}`)}
           />
         ))}
       </div>

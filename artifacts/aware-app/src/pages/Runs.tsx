@@ -23,10 +23,10 @@ import { useSimpleToast } from "@/hooks/useSimpleToast";
 
 function statusBadge(status: Run["status"]) {
   const map: Record<string, { cls: string; label: string }> = {
-    PASS:    { cls: "proof-badge-pass",    label: "PASS"    },
-    FAIL:    { cls: "proof-badge-fail",    label: "FAIL"    },
+    PASS: { cls: "proof-badge-pass", label: "PASS" },
+    FAIL: { cls: "proof-badge-fail", label: "FAIL" },
     PARTIAL: { cls: "proof-badge-partial", label: "PARTIAL" },
-    FLAKY:   { cls: "proof-badge-flaky",   label: "FLAKY"   },
+    FLAKY: { cls: "proof-badge-flaky", label: "FLAKY" },
     RUNNING: { cls: "proof-badge-running", label: "RUNNING" },
   };
   const s = map[status] ?? { cls: "proof-badge-skip", label: status };
@@ -37,20 +37,22 @@ function NetworkBadge({ network }: { network?: string }) {
   if (!network) return null;
   const isProd = network === "production";
   return (
-    <span style={{
-      fontSize: 9,
-      fontWeight: 700,
-      textTransform: "uppercase",
-      letterSpacing: "0.3px",
-      color: isProd ? "var(--proof-green)" : "#d97706",
-      background: isProd ? "var(--proof-green-bg)" : "var(--proof-yellow-bg)",
-      border: `1px solid ${isProd ? "rgba(34,197,94,0.2)" : "rgba(217,119,6,0.2)"}`,
-      padding: "1px 5px",
-      borderRadius: 3,
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 2,
-    }}>
+    <span
+      style={{
+        fontSize: 9,
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: "0.3px",
+        color: isProd ? "var(--proof-green)" : "#d97706",
+        background: isProd ? "var(--proof-green-bg)" : "var(--proof-yellow-bg)",
+        border: `1px solid ${isProd ? "rgba(34,197,94,0.2)" : "rgba(217,119,6,0.2)"}`,
+        padding: "1px 5px",
+        borderRadius: 3,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
       {isProd ? <Globe size={7} /> : <Network size={7} />}
       {network}
     </span>
@@ -75,8 +77,8 @@ function RunRow({
         background: isSelected
           ? "var(--proof-blue-bg)"
           : hovered
-          ? "rgba(255,255,255,0.025)"
-          : undefined,
+            ? "rgba(255,255,255,0.025)"
+            : undefined,
         borderLeft: isSelected ? "3px solid var(--proof-blue)" : "3px solid transparent",
         cursor: "pointer",
         transition: "background 0.12s ease",
@@ -101,7 +103,14 @@ function RunRow({
           >
             {run.id}
           </span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--proof-text-muted)", whiteSpace: "nowrap" }}>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 9.5,
+              color: "var(--proof-text-muted)",
+              whiteSpace: "nowrap",
+            }}
+          >
             {run.build} · {run.rev?.slice(0, 7)}
           </span>
         </div>
@@ -110,11 +119,22 @@ function RunRow({
       {/* Suite / Env */}
       <td style={{ verticalAlign: "middle" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              fontWeight: 500,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
             {run.suite}
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}>
+            <span
+              style={{ fontSize: 10, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}
+            >
               {run.env}
             </span>
             <NetworkBadge network={run.network} />
@@ -126,12 +146,33 @@ function RunRow({
       <td style={{ verticalAlign: "middle" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
           {statusBadge(run.status)}
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}>
-            <span style={{ color: run.passPct === 100 ? "var(--proof-green)" : run.passPct < 90 ? "var(--proof-red)" : "var(--proof-text)", fontWeight: 700 }}>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span
+              style={{
+                color:
+                  run.passPct === 100
+                    ? "var(--proof-green)"
+                    : run.passPct < 90
+                      ? "var(--proof-red)"
+                      : "var(--proof-text)",
+                fontWeight: 700,
+              }}
+            >
               {run.passPct}%
             </span>
             {" · "}
-            <span style={{ color: run.failures > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)" }}>
+            <span
+              style={{
+                color: run.failures > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)",
+              }}
+            >
               {run.failures > 0 ? `${run.failures}✗` : "0 fail"}
             </span>
           </span>
@@ -141,7 +182,14 @@ function RunRow({
       {/* When */}
       <td style={{ verticalAlign: "middle" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              color: "var(--proof-text-secondary)",
+              whiteSpace: "nowrap",
+            }}
+          >
             {run.duration}
           </span>
           <span style={{ fontSize: 10, color: "var(--proof-text-muted)", whiteSpace: "nowrap" }}>
@@ -166,9 +214,18 @@ function RunRow({
             Detail
           </button>
           <button
-            onClick={() => onNavigate(`/compare?baseline=${RUNS[RUNS.length - 1]?.id}&candidate=${run.id}`)}
+            onClick={() =>
+              onNavigate(`/compare?baseline=${RUNS[RUNS.length - 1]?.id}&candidate=${run.id}`)
+            }
             className="proof-button"
-            style={{ fontSize: 11, padding: "3px 8px", display: "flex", alignItems: "center", gap: 3, whiteSpace: "nowrap" }}
+            style={{
+              fontSize: 11,
+              padding: "3px 8px",
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              whiteSpace: "nowrap",
+            }}
           >
             <GitCompare size={11} /> Compare
           </button>
@@ -268,8 +325,18 @@ export default function Runs() {
               subtitle="all environments"
               accentColor="var(--proof-blue)"
               icon={<BarChart3 size={16} />}
-              onClick={() => { setStatusFilter("all"); setEnvFilter("all"); setSuiteFilter("all"); setSearch(""); }}
-              active={statusFilter === "all" && envFilter === "all" && suiteFilter === "all" && search === ""}
+              onClick={() => {
+                setStatusFilter("all");
+                setEnvFilter("all");
+                setSuiteFilter("all");
+                setSearch("");
+              }}
+              active={
+                statusFilter === "all" &&
+                envFilter === "all" &&
+                suiteFilter === "all" &&
+                search === ""
+              }
             />
             <CTAStatCard
               label="Passing"
@@ -303,9 +370,23 @@ export default function Runs() {
         <PanelErrorBoundary label="Filters">
           <div
             className="proof-card"
-            style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}
+            style={{
+              padding: "10px 14px",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              flexWrap: "wrap",
+            }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flex: "1 1 200px", minWidth: 160 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                flex: "1 1 200px",
+                minWidth: 160,
+              }}
+            >
               <Search size={14} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
               <input
                 className="proof-input"
@@ -317,7 +398,11 @@ export default function Runs() {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Filter size={13} style={{ color: "var(--proof-text-secondary)" }} />
-              <select className="proof-input" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <select
+                className="proof-input"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
                 <option value="all">All statuses</option>
                 <option value="PASS">PASS</option>
                 <option value="FAIL">FAIL</option>
@@ -325,23 +410,61 @@ export default function Runs() {
                 <option value="FLAKY">FLAKY</option>
               </select>
             </div>
-            <select className="proof-input" value={suiteFilter} onChange={(e) => setSuiteFilter(e.target.value)}>
+            <select
+              className="proof-input"
+              value={suiteFilter}
+              onChange={(e) => setSuiteFilter(e.target.value)}
+            >
               <option value="all">All suites</option>
-              {suites.map((s) => <option key={s} value={s}>{s}</option>)}
+              {suites.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
             </select>
-            <select className="proof-input" value={envFilter} onChange={(e) => setEnvFilter(e.target.value)}>
+            <select
+              className="proof-input"
+              value={envFilter}
+              onChange={(e) => setEnvFilter(e.target.value)}
+            >
               <option value="all">All environments</option>
-              {envs.map((e) => <option key={e} value={e}>{e}</option>)}
+              {envs.map((e) => (
+                <option key={e} value={e}>
+                  {e}
+                </option>
+              ))}
             </select>
             {hasActiveFilters && (
               <button
-                onClick={() => { setStatusFilter("all"); setSuiteFilter("all"); setEnvFilter("all"); setSearch(""); }}
-                style={{ fontSize: 11, color: "var(--proof-red)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 3 }}
+                onClick={() => {
+                  setStatusFilter("all");
+                  setSuiteFilter("all");
+                  setEnvFilter("all");
+                  setSearch("");
+                }}
+                style={{
+                  fontSize: 11,
+                  color: "var(--proof-red)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3,
+                }}
               >
                 <X size={12} /> Clear
               </button>
             )}
-            <span style={{ fontSize: 12, color: "var(--proof-text-secondary)", marginLeft: "auto", whiteSpace: "nowrap" }}>
+            <span
+              style={{
+                fontSize: 12,
+                color: "var(--proof-text-secondary)",
+                marginLeft: "auto",
+                whiteSpace: "nowrap",
+              }}
+            >
               {filtered.length} of {RUNS.length}
             </span>
           </div>
@@ -352,17 +475,29 @@ export default function Runs() {
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
             <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>Filters:</span>
             {statusFilter !== "all" && (
-              <span className="proof-badge proof-badge-skip" style={{ fontSize: 10, cursor: "pointer" }} onClick={() => setStatusFilter("all")}>
+              <span
+                className="proof-badge proof-badge-skip"
+                style={{ fontSize: 10, cursor: "pointer" }}
+                onClick={() => setStatusFilter("all")}
+              >
                 status={statusFilter} <X size={10} style={{ marginLeft: 3 }} />
               </span>
             )}
             {suiteFilter !== "all" && (
-              <span className="proof-badge proof-badge-skip" style={{ fontSize: 10, cursor: "pointer" }} onClick={() => setSuiteFilter("all")}>
+              <span
+                className="proof-badge proof-badge-skip"
+                style={{ fontSize: 10, cursor: "pointer" }}
+                onClick={() => setSuiteFilter("all")}
+              >
                 suite={suiteFilter} <X size={10} style={{ marginLeft: 3 }} />
               </span>
             )}
             {envFilter !== "all" && (
-              <span className="proof-badge proof-badge-skip" style={{ fontSize: 10, cursor: "pointer" }} onClick={() => setEnvFilter("all")}>
+              <span
+                className="proof-badge proof-badge-skip"
+                style={{ fontSize: 10, cursor: "pointer" }}
+                onClick={() => setEnvFilter("all")}
+              >
                 env={envFilter} <X size={10} style={{ marginLeft: 3 }} />
               </span>
             )}
@@ -384,7 +519,14 @@ export default function Runs() {
                   <col style={{ width: 140 }} />
                   <col style={{ width: 155 }} />
                 </colgroup>
-                <thead style={{ position: "sticky", top: 0, background: "var(--proof-surface)", zIndex: 10 }}>
+                <thead
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    background: "var(--proof-surface)",
+                    zIndex: 10,
+                  }}
+                >
                   <tr>
                     <th>Run</th>
                     <th>Suite / Env</th>
@@ -404,7 +546,15 @@ export default function Runs() {
                   ))}
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={5} style={{ textAlign: "center", padding: "40px 32px", color: "var(--proof-text-secondary)", fontSize: 13 }}>
+                      <td
+                        colSpan={5}
+                        style={{
+                          textAlign: "center",
+                          padding: "40px 32px",
+                          color: "var(--proof-text-secondary)",
+                          fontSize: 13,
+                        }}
+                      >
                         No runs match your filters
                       </td>
                     </tr>

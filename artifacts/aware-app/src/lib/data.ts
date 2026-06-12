@@ -34,7 +34,6 @@ export {
   getRunIndex,
   getRunById,
   DIFF_ROWS,
-  TEST_DETAILS,
   computeTestDetailForName,
   ENV_SUMMARY,
   PASS_RATE_CHART,
@@ -43,6 +42,13 @@ export {
   getTestResultsForRun,
   computeRunFrequency,
 } from "./runs";
+
+export {
+  loadResultsForRun,
+  loadAllResults,
+  getTestDetailsAsync,
+  getCachedResults,
+} from "./runsLoader";
 
 export {
   getTestCases,

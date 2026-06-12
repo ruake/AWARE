@@ -1184,8 +1184,8 @@ const DOC_SECTIONS: DocEntry[] = [
     content: () => (
       <>
         <p>
-          The app ships with 3 environment targets: <strong>QA</strong>,{" "}
-          <strong>UAT</strong>, and <strong>PROD</strong>. Each environment has:
+          The app ships with 3 environment targets: <strong>QA</strong>, <strong>UAT</strong>, and{" "}
+          <strong>PROD</strong>. Each environment has:
         </p>
         <ul style={{ paddingLeft: 18, margin: "8px 0" }}>
           <li>
@@ -1252,8 +1252,8 @@ const DOC_SECTIONS: DocEntry[] = [
             Returns a portable YAML test definition.
           </li>
           <li>
-            <strong>Analyze Results</strong> — "My pass rate dropped in UAT." Returns
-            regression analysis with root cause suggestions.
+            <strong>Analyze Results</strong> — "My pass rate dropped in UAT." Returns regression
+            analysis with root cause suggestions.
           </li>
           <li>
             <strong>Explain Diff</strong> — "Compare the last two production runs." Returns a

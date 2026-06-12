@@ -91,10 +91,25 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
       {/* Workflow: label + short ID */}
       <td style={{ verticalAlign: "middle" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <span style={{ fontSize: 12, fontWeight: 500, color: "var(--proof-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 500,
+              color: "var(--proof-text)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
             {run.label}
           </span>
-          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)" }}>
+          <span
+            style={{
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+              fontFamily: "var(--font-mono)",
+            }}
+          >
             {run.id.slice(-12)}
           </span>
         </div>
@@ -105,20 +120,57 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
       </td>
       {/* Pass % */}
       <td style={{ verticalAlign: "middle" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: run.passPct === 100 ? "var(--proof-green)" : run.passPct < 90 ? "var(--proof-red)" : "var(--proof-text)" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 12,
+            fontWeight: 700,
+            color:
+              run.passPct === 100
+                ? "var(--proof-green)"
+                : run.passPct < 90
+                  ? "var(--proof-red)"
+                  : "var(--proof-text)",
+          }}
+        >
           {run.passPct}%
         </span>
       </td>
       {/* Suite · Env */}
       <td style={{ verticalAlign: "middle" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              fontWeight: 500,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
             {run.suite}
           </span>
-          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}>
+          <span
+            style={{ fontSize: 10, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}
+          >
             {run.env}
             {run.network && (
-              <span style={{ marginLeft: 5, fontSize: 9, fontWeight: 700, textTransform: "uppercase", color: run.network === "production" ? "var(--proof-green)" : "#d97706", background: run.network === "production" ? "var(--proof-green-bg)" : "var(--proof-yellow-bg)", padding: "1px 4px", borderRadius: 3 }}>
+              <span
+                style={{
+                  marginLeft: 5,
+                  fontSize: 9,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  color: run.network === "production" ? "var(--proof-green)" : "#d97706",
+                  background:
+                    run.network === "production"
+                      ? "var(--proof-green-bg)"
+                      : "var(--proof-yellow-bg)",
+                  padding: "1px 4px",
+                  borderRadius: 3,
+                }}
+              >
                 {run.network}
               </span>
             )}
@@ -127,7 +179,14 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
       </td>
       {/* Duration */}
       <td style={{ verticalAlign: "middle" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            color: "var(--proof-text-secondary)",
+            whiteSpace: "nowrap",
+          }}
+        >
           {formatDuration(run.durationMs)}
         </span>
       </td>
@@ -139,7 +198,18 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
       </td>
       {/* Build */}
       <td style={{ verticalAlign: "middle" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--proof-text-secondary)", background: "var(--proof-grey-bg)", border: "1px solid var(--proof-border)", padding: "2px 6px", borderRadius: 3, whiteSpace: "nowrap" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 10,
+            color: "var(--proof-text-secondary)",
+            background: "var(--proof-grey-bg)",
+            border: "1px solid var(--proof-border)",
+            padding: "2px 6px",
+            borderRadius: 3,
+            whiteSpace: "nowrap",
+          }}
+        >
           {run.build?.slice(0, 7) || "—"}
         </span>
       </td>
@@ -345,7 +415,13 @@ export default function Pulse() {
             label="Avg Pass Rate"
             value={`${avgPassRate}%`}
             subtitle={`${total} workflows`}
-            accentColor={avgPassRate >= 80 ? "var(--proof-green)" : avgPassRate >= 50 ? "var(--proof-yellow)" : "var(--proof-red)"}
+            accentColor={
+              avgPassRate >= 80
+                ? "var(--proof-green)"
+                : avgPassRate >= 50
+                  ? "var(--proof-yellow)"
+                  : "var(--proof-red)"
+            }
             icon={<BarChart3 size={16} />}
           />
           <CTAStatCard
@@ -646,7 +722,10 @@ export default function Pulse() {
             </div>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table className="proof-table" style={{ minWidth: 820, tableLayout: "fixed", width: "100%" }}>
+              <table
+                className="proof-table"
+                style={{ minWidth: 820, tableLayout: "fixed", width: "100%" }}
+              >
                 <colgroup>
                   <col />
                   <col style={{ width: 110 }} />
@@ -669,11 +748,7 @@ export default function Pulse() {
                 </thead>
                 <tbody>
                   {filtered.map((run) => (
-                    <RunRow
-                      key={run.id}
-                      run={run}
-                      onClick={(id) => navigate(`/runs/${id}`)}
-                    />
+                    <RunRow key={run.id} run={run} onClick={(id) => navigate(`/runs/${id}`)} />
                   ))}
                 </tbody>
               </table>

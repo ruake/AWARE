@@ -1161,9 +1161,9 @@ export default function Compare() {
             ].map((tile) => {
               const iconMap: Record<string, React.ReactNode> = {
                 regression: <XCircle size={16} />,
-                fixed:      <CheckCircle2 size={16} />,
-                duration:   <Clock size={16} />,
-                unchanged:  <Minus size={16} />,
+                fixed: <CheckCircle2 size={16} />,
+                duration: <Clock size={16} />,
+                unchanged: <Minus size={16} />,
               };
               return (
                 <CTAStatCard
