@@ -305,18 +305,28 @@ jobs:
     name: "Promotion gate — UAT → PROD"
     runs-on: ubuntu-latest
     needs: [report]
-    if: ${{ contains(env.AWARE_ENV, 'UAT') && env.AWARE_SUITE == 'suite_regression_uat' }}
     environment:
       name: production
       url: ${{ needs.parse-config.outputs.base_url }}
     steps:
+      - name: Check UAT regression conditions
+        id: check_uat
+        run: |
+          if [[ "$AWARE_ENV" != *UAT* || "$AWARE_SUITE" != "suite_regression_uat" ]]; then
+            echo "Skipping promotion gate: AWARE_ENV=$AWARE_ENV AWARE_SUITE=$AWARE_SUITE"
+            exit 0
+          fi
+          echo "gate_triggered=true" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v6
+        if: steps.check_uat.outputs.gate_triggered == 'true'
       - name: Install yq
+        if: steps.check_uat.outputs.gate_triggered == 'true'
         run: |
           sudo wget -qO /usr/local/bin/yq \
             https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
       - name: Check promotion gate
+        if: steps.check_uat.outputs.gate_triggered == 'true'
         run: |
           MIN_PASS=$(yq ".properties[0].promotionGate.minPassRate" config/akamai-config.yml)
           REQ_SUITES=$(yq ".properties[0].promotionGate.requiredSuites | join(\", \")" config/akamai-config.yml)
