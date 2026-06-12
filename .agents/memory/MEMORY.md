@@ -9,3 +9,5 @@
 - [AWARE anomaly detection](aware-anomaly-detection.md) — two modules: run-level Z-score and test-level 7-day latency Z-score; severity thresholds at 1.5/2/2.5/3σ.
 - [AWARE CI pipeline](aware-ci-pipeline.md) — GitHub Actions run-tests.yml; Playwright + pytest parallel jobs; config/*.yml drives CI; nightly cron schedules per suite.
 - [AWARE config system](aware-config-system.md) — config-as-code in config/; envConfig.ts is runtime source of truth with localStorage override key `aware-env-configs-v3`.
+- [AWARE data file locations](aware-data-locations.md) — served JSON lives in `data/` (fetched at runtime via fetchJson); `src/data/` is a stale duplicate — always edit `data/` for runtime fixes.
+- [AWARE branding audit](aware-branding.md) — app was renamed from PROOF to A.W.A.R.E.; all "PROOF" user-visible text updated; CSS class prefix remains `proof-` (intentional design token prefix, not a brand reference).

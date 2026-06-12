@@ -184,7 +184,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       },
       {
         id: "nav_about",
-        label: "About PROOF",
+        label: "About A.W.A.R.E.",
         description: "Platform information and tech stack",
         type: "run" as const,
         href: "/about",

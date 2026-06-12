@@ -358,7 +358,11 @@ export default function Runs() {
             />
             <CTAStatCard
               label="Avg Duration"
-              value={`${Math.round(RUNS.reduce((s, r) => s + r.durationMs, 0) / RUNS.length / 60000)}m`}
+              value={(() => {
+                const avgMs = RUNS.reduce((s, r) => s + r.durationMs, 0) / RUNS.length;
+                if (avgMs < 60000) return `${(avgMs / 1000).toFixed(1)}s`;
+                return `${Math.round(avgMs / 60000)}m`;
+              })()}
               subtitle="per run"
               accentColor="var(--proof-text-secondary)"
               icon={<Clock size={16} />}

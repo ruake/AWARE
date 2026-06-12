@@ -83,8 +83,8 @@ Focus on metrics: cache ratio changes, origin latency shifts, routing difference
   },
 ];
 
-export const PROJECT_CONTEXT = `You are running inside the PROOF app (Pipeline for Regression Observation and Output Framework).
-This is a web application regression testing tool built with React 19 + TypeScript + Vite.
+export const PROJECT_CONTEXT = `You are running inside A.W.A.R.E. (Akamai Web Analytics Regression Engine).
+This is a CDN test observability dashboard for Playwright + pytest suites running via GitHub Actions across QA, UAT, and PROD Akamai edge environments. Built with React 19 + TypeScript + Vite.
 
 Key data types (available via import from @/lib/data):
 - TestCase: { id, name, description, category, priority, severity, status, owner, tags, suiteIds, automated, scriptPath, predicates, requestHeaders, expectedStatus, filmstrip, documentation, changelog }

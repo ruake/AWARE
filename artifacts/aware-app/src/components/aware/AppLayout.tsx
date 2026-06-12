@@ -86,7 +86,7 @@ export function AppLayout({
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [navigate]);
+  }, []);
 
   React.useEffect(() => {
     if (isDark) {
@@ -226,6 +226,7 @@ export function AppLayout({
         <nav style={{ display: "flex", height: "100%", overflowX: "auto", flex: 1 }}>
           {PRIMARY_NAV.map((item) => {
             const active = isActive(item.href);
+            const Icon = item.icon;
             return (
               <Link
                 key={item.href}
@@ -247,6 +248,7 @@ export function AppLayout({
                   flexShrink: 0,
                 }}
               >
+                <Icon size={13} style={{ opacity: active ? 1 : 0.65, flexShrink: 0 }} />
                 {item.label}
               </Link>
             );
@@ -594,6 +596,7 @@ export function AppLayout({
                 <Link
                   key={item.href}
                   href={item.href}
+                  title={sidebarExpanded ? undefined : item.label}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -647,6 +650,7 @@ export function AppLayout({
                 <Link
                   key={item.href}
                   href={item.href}
+                  title={sidebarExpanded ? undefined : item.label}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -686,7 +690,8 @@ export function AppLayout({
         <main
           style={{
             flex: 1,
-            overflow: "hidden",
+            overflowY: "auto",
+            overflowX: "hidden",
             display: "flex",
             flexDirection: "column",
             padding: "20px 24px",

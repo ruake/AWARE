@@ -64,6 +64,10 @@
 
   /* Transitions */
   --proof-transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Aliases */
+  --proof-text-primary: var(--proof-text);
+  --proof-muted: var(--proof-text-secondary);
 }
 
 /* ── Base ──────────────────────────────────────────────────────────── */
@@ -599,6 +603,8 @@ select.proof-input {
   --proof-text: #111827;
   --proof-text-secondary: #6b7280;
   --proof-text-muted: #9ca3af;
+  --proof-text-primary: var(--proof-text);
+  --proof-muted: var(--proof-text-secondary);
 
   --proof-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --proof-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
