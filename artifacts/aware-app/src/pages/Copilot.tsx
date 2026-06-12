@@ -21,10 +21,12 @@ import {
   Globe,
   Settings,
   Loader2,
+  RefreshCw,
+  Copy,
+  Check,
 } from "lucide-react";
 import {
   AI_USE_CASES,
-  runAnalysis,
   runFallbackAnalysis,
   generateInsights,
   buildAIContext,
@@ -48,7 +50,62 @@ const USE_CASE_ICONS: Record<string, React.ReactNode> = {
   "category-health": <Activity size={14} />,
   "env-comparison": <Layers size={14} />,
   "build-risk-assessment": <Shield size={14} />,
+  "failure-clustering": <Layers size={14} />,
+  "duration-budget": <Zap size={14} />,
+  "coverage-gap": <Search size={14} />,
+  "smart-alerting": <AlertCircle size={14} />,
+  "run-frequency": <Activity size={14} />,
+  "cross-category-correlation": <TrendingUp size={14} />,
+  "promotion-decision-support": <Shield size={14} />,
+  "trend-forecasting": <LineChart size={14} />,
+  "failure-impact": <AlertCircle size={14} />,
+  "env-drift": <Layers size={14} />,
+  "quality-gate": <Shield size={14} />,
+  "suite-health": <Activity size={14} />,
+  "test-doc-gen": <Search size={14} />,
+  "test-redundancy": <Bug size={14} />,
+  "release-readiness": <Shield size={14} />,
+  "env-health-summary": <Activity size={14} />,
+  "regression-report": <TrendingUp size={14} />,
 };
+
+// Follow-up suggestions: which quick actions to suggest after each analysis
+const FOLLOW_UP_MAP: Record<string, string[]> = {
+  "failure-analysis": ["root-cause-analysis", "failure-clustering", "failure-impact"],
+  "flaky-detection": ["failure-analysis", "quality-gate"],
+  "regression-prediction": ["build-risk-assessment", "category-health"],
+  "performance-trends": ["duration-budget", "anomaly-detection"],
+  "anomaly-detection": ["failure-analysis", "smart-alerting"],
+  "root-cause-analysis": ["failure-analysis", "regression-report"],
+  "risk-scoring": ["build-risk-assessment", "release-readiness"],
+  "category-health": ["coverage-gap", "env-health-summary"],
+  "env-comparison": ["env-drift", "env-health-summary"],
+  "build-risk-assessment": ["release-readiness", "promotion-decision-support"],
+  "failure-clustering": ["root-cause-analysis", "failure-impact"],
+  "duration-budget": ["performance-trends", "anomaly-detection"],
+  "coverage-gap": ["test-doc-gen", "category-health"],
+  "smart-alerting": ["anomaly-detection", "failure-analysis"],
+  "run-frequency": ["env-health-summary", "suite-health"],
+  "cross-category-correlation": ["regression-prediction", "trend-forecasting"],
+  "promotion-decision-support": ["release-readiness", "quality-gate"],
+  "trend-forecasting": ["regression-prediction", "anomaly-detection"],
+  "failure-impact": ["root-cause-analysis", "build-risk-assessment"],
+  "env-drift": ["env-comparison", "env-health-summary"],
+  "quality-gate": ["release-readiness", "build-risk-assessment"],
+  "suite-health": ["category-health", "coverage-gap"],
+  "test-doc-gen": ["coverage-gap", "category-health"],
+  "test-redundancy": ["coverage-gap", "test-doc-gen"],
+  "release-readiness": ["build-risk-assessment", "promotion-decision-support", "env-health-summary"],
+  "env-health-summary": ["env-comparison", "env-drift", "smart-alerting"],
+  "regression-report": ["failure-analysis", "build-risk-assessment", "cross-category-correlation"],
+};
+
+function getFollowUpSuggestions(useCaseId: string): { id: string; name: string }[] {
+  const ids = FOLLOW_UP_MAP[useCaseId] || [];
+  return ids
+    .map((id) => AI_USE_CASES.find((uc) => uc.id === id))
+    .filter(Boolean) as { id: string; name: string }[];
+}
 
 const PROCESSING_MESSAGES = [
   "Analyzing test data…",
@@ -96,7 +153,7 @@ async function probeProvider(type: LLMProviderType): Promise<ProviderStatus> {
 export default function Copilot() {
   const [_activeUseCase, setActiveUseCase] = React.useState<string | null>(null);
   const [messages, setMessages] = React.useState<
-    { role: string; content: string; type?: string }[]
+    { role: string; content: string; type?: string; followUps?: { id: string; name: string }[] }[]
   >([]);
   const [input, setInput] = React.useState("");
   const [busy, setBusy] = React.useState(false);
@@ -115,6 +172,8 @@ export default function Copilot() {
   const [thinkingMsg, setThinkingMsg] = React.useState(PROCESSING_MESSAGES[0]);
   const providerRef = React.useRef<HTMLDivElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const [copiedIndex, setCopiedIndex] = React.useState<number | null>(null);
 
   const cfg = getLLMConfig();
   const currentProvider = cfg.provider;
@@ -130,6 +189,12 @@ export default function Copilot() {
 
   const init = React.useCallback(async () => {
     try {
+      const persisted = loadPersistedMessages();
+      if (persisted.length > 0) {
+        setMessages(persisted);
+        setLoading(false);
+        return;
+      }
       const ctx = buildAIContext();
       const [insightsList, avail] = await Promise.all([generateInsights(), probeAllProviders()]);
       setInsights(insightsList);
@@ -139,13 +204,13 @@ export default function Copilot() {
       const lastRun = [...RUNS].sort(
         (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
       )[0];
-      setMessages([
-        {
-          role: "assistant",
-          content: `Hello! I'm **PROOF Copilot** — analyzing **${ctx.stats.totalRuns} runs** across **${ctx.stats.totalSuites} suites** with **${ctx.stats.totalTests} tests** (avg ${ctx.stats.avgPassRate}% pass rate).\n\n**Provider:** ${PROVIDER_META[currentProvider].label} — ${currentOk ? "✅ Connected" : "❌ Unavailable"}${currentOk ? "" : "\n\n> Switch providers using the dropdown above, or configure an API key."}\n\n### Latest Run: \`${lastRun?.id}\`\n\n| Detail | Value |\n|--------|-------|\n| Label | ${lastRun?.label} |\n| Status | **${lastRun?.status}** |\n| Pass Rate | ${lastRun?.passPct}% |\n| Failures | ${lastRun?.failures} |\n| Duration | ${lastRun?.duration} |\n| Environment | ${lastRun?.env} / ${lastRun?.target} |\n| Build | \`${lastRun?.build}\` |\n\nSelect an analysis type from the sidebar or ask a question.`,
-          type: "intro",
-        },
-      ]);
+      const intro = {
+        role: "assistant",
+        content: `Hello! I'm **PROOF Copilot** — analyzing **${ctx.stats.totalRuns} runs** across **${ctx.stats.totalSuites} suites** with **${ctx.stats.totalTests} tests** (avg ${ctx.stats.avgPassRate}% pass rate).\n\n**Provider:** ${PROVIDER_META[currentProvider].label} — ${currentOk ? "✅ Connected" : "❌ Unavailable"}${currentOk ? "" : "\n\n> Switch providers using the dropdown above, or configure an API key."}\n\n### Latest Run: \`${lastRun?.id}\`\n\n| Detail | Value |\n|--------|-------|\n| Label | ${lastRun?.label} |\n| Status | **${lastRun?.status}** |\n| Pass Rate | ${lastRun?.passPct}% |\n| Failures | ${lastRun?.failures} |\n| Duration | ${lastRun?.duration} |\n| Environment | ${lastRun?.env} / ${lastRun?.target} |\n| Build | \`${lastRun?.build}\` |\n\nSelect an analysis type from the sidebar or ask a question.`,
+        type: "intro",
+      };
+      setMessages([intro]);
+      persistMessages([intro]);
     } catch {
       /* ignore */
     } finally {
@@ -160,6 +225,13 @@ export default function Copilot() {
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Persist messages to localStorage whenever they change
+  React.useEffect(() => {
+    if (!loading && messages.length > 0) {
+      persistMessages(messages);
+    }
+  }, [messages, loading]);
 
   // Cycle processing messages when busy
   React.useEffect(() => {
@@ -226,14 +298,12 @@ export default function Copilot() {
     setMessages((prev) => [...prev, { role: "user", content: useCase.name, type: "use-case" }]);
     setBusy(true);
     try {
-      // Use the real LLM when available; runAnalysis falls back internally if the provider fails
-      const result = aiReady
-        ? await runAnalysis({ useCaseId: useCase.id, parameters: {} })
-        : runFallbackAnalysis({ useCaseId: useCase.id, parameters: {} });
+      // Quick actions use deterministic fallback only — no AI provider needed
+      const result = runFallbackAnalysis({ useCaseId: useCase.id, parameters: {} });
       const resultText = result.details || result.summary;
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: resultText, type: "analysis" },
+        { role: "assistant", content: resultText, type: "analysis", followUps: getFollowUpSuggestions(useCase.id) },
       ]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -249,6 +319,36 @@ export default function Copilot() {
   const CAPABILITY_RE =
     /\b(capabilities|what you can do|what can you do|what do you do|what are you|how can you help|what can i (ask|do)|help me|get started|show me what|what can i use you for|what do you know|what.{0,10}can.{0,10}do|your capabilities|your features|show (me )?(what|your))\b/i;
 
+  // Intent → use case mapping for smart question routing
+  const INTENT_MAP: [RegExp, string][] = [
+    [/\b(release|deploy|rollout|go.?live|ready|ship)\b.*\b(safe|ready|check|status)\b/i, "release-readiness"],
+    [/\b(env|environment)\b.*\b(health|status|snapshot|check|how)\b/i, "env-health-summary"],
+    [/\bhow are\b.*\b(env|environment|stage|prod|qa|uat)\b/i, "env-health-summary"],
+    [/\b(regress|regression|what changed|diff|compare)\b.*\b(build|last|latest|run)\b/i, "regression-report"],
+    [/\bcompare\b.*\b(build|run|two|last)\b/i, "regression-report"],
+    [/\b(flaky|flip|flakiness|inconsistent)\b/i, "flaky-detection"],
+    [/\b(fail|error|broken|crash|what.*wrong)\b/i, "failure-analysis"],
+    [/\b(risk|safe.*deploy|deploy.*safe|should.*deploy|can.*deploy)\b/i, "build-risk-assessment"],
+    [/\b(promot|gate|promotion|uat.*prod|stage.*prod)\b/i, "promotion-decision-support"],
+    [/\b(quality.gate|gate.check|pass.*gate)\b/i, "quality-gate"],
+    [/\b(category|group)\b.*\b(health|score|status)\b/i, "category-health"],
+    [/\b(coverage|gap|missing|underrepresent)\b/i, "coverage-gap"],
+    [/\b(slow|duration|budget|timeout|perf)\b/i, "duration-budget"],
+    [/\b(anomaly|outlier|unusual|spike|drop)\b/i, "anomaly-detection"],
+    [/\b(cluster|group.*fail|pattern|common.*fail)\b/i, "failure-clustering"],
+    [/\b(redundant|duplicate|overlap|consolidat)\b/i, "test-redundancy"],
+    [/\b(trend|forecast|predict|projection)\b/i, "trend-forecasting"],
+    [/\b(perf|performance)\b.*\b(trend|change|slow)\b/i, "performance-trends"],
+    [/\b(root.cause|why.*fail|reason.*fail)\b/i, "root-cause-analysis"],
+    [/\b(alert|notif|watch|monitor)\b/i, "smart-alerting"],
+    [/\b(doc|document|inventory|list.*test)\b/i, "test-doc-gen"],
+    [/\b(suite)\b.*\b(health|status|score)\b/i, "suite-health"],
+    [/\b(drift|config.*diff|env.*diff)\b/i, "env-drift"],
+    [/\b(impact|blast.radius|affect|blast)\b.*\b(fail|error)\b/i, "failure-impact"],
+    [/\b(correlat|relation|move.*together)\b/i, "cross-category-correlation"],
+    [/\b(frequency|run.*often|schedule|gap)\b/i, "run-frequency"],
+  ];
+
   const handleSend = async () => {
     if (!input.trim() || busy) return;
     const userMsg = input.trim();
@@ -259,6 +359,29 @@ export default function Copilot() {
     if (CAPABILITY_RE.test(userMsg)) {
       setMessages((prev) => [...prev, { role: "assistant", content: "", type: "capabilities" }]);
       return;
+    }
+
+    // Intent-based routing: map question to a quick action use case
+    const matchedIntent = INTENT_MAP.find(([re]) => re.test(userMsg));
+    if (matchedIntent) {
+      const [, useCaseId] = matchedIntent;
+      const useCase = AI_USE_CASES.find((uc) => uc.id === useCaseId);
+      if (useCase) {
+        setBusy(true);
+        try {
+          const result = runFallbackAnalysis({ useCaseId, parameters: {} });
+          const resultText = result.details || result.summary;
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: resultText, type: "analysis", followUps: getFollowUpSuggestions(useCaseId) },
+          ]);
+        } catch {
+          // fall through to LLM below
+        } finally {
+          setBusy(false);
+        }
+        return;
+      }
     }
 
     // Snapshot current messages synchronously before any state updates
@@ -331,6 +454,45 @@ export default function Copilot() {
       else next.add(i);
       return next;
     });
+  };
+
+  const CHAT_STORAGE_KEY = "aware_copilot_v2";
+
+  const persistMessages = (msgs: typeof messages) => {
+    try {
+      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(msgs));
+    } catch {}
+  };
+
+  const loadPersistedMessages = (): typeof messages => {
+    try {
+      const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const clearPersistedMessages = () => {
+    try {
+      localStorage.removeItem(CHAT_STORAGE_KEY);
+    } catch {}
+  };
+
+  const copyMessage = async (i: number, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedIndex(i);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch {}
+  };
+
+  const newChat = () => {
+    setMessages([]);
+    setActiveUseCase(null);
+    setInput("");
+    clearPersistedMessages();
+    setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
   const MAX_PREVIEW = 2000;
@@ -437,12 +599,31 @@ export default function Copilot() {
                   : "Unavailable"}
             </span>
             <button
+              onClick={newChat}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "3px 8px",
+                borderRadius: 4,
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                border: "1px solid var(--proof-grey)",
+                background: "var(--proof-surface)",
+                color: "var(--proof-text-secondary)",
+              }}
+              title="Clear conversation"
+            >
+              <RefreshCw size={11} />
+              New Chat
+            </button>
+            <button
               onClick={() => {
                 setShowProviderMenu(false);
                 setShowSettings((p) => !p);
               }}
               style={{
-                marginLeft: "auto",
                 display: "flex",
                 alignItems: "center",
                 gap: 4,
@@ -947,6 +1128,125 @@ export default function Copilot() {
                           )}
                         </button>
                       )}
+                      {msg.type === "error" && (
+                        <button
+                          onClick={newChat}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 5,
+                            marginTop: 8,
+                            padding: "4px 10px",
+                            borderRadius: 4,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            border: "1px solid var(--proof-red)",
+                            background: "transparent",
+                            color: "var(--proof-red)",
+                          }}
+                        >
+                          <RefreshCw size={11} /> Clear & Try Again
+                        </button>
+                      )}
+                      {msg.type !== "error" && msg.role === "assistant" && (
+                        <button
+                          onClick={() => copyMessage(i, msg.content)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                            marginTop: 8,
+                            padding: "4px 8px",
+                            borderRadius: 4,
+                            fontSize: 10,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            border: "1px solid var(--proof-grey)",
+                            background: "transparent",
+                            color:
+                              copiedIndex === i
+                                ? "var(--proof-green)"
+                                : "var(--proof-text-secondary)",
+                            transition: "color 0.12s",
+                          }}
+                        >
+                          {copiedIndex === i ? (
+                            <><Check size={10} /> Copied</>
+                          ) : (
+                            <><Copy size={10} /> Copy</>
+                          )}
+                        </button>
+                      )}
+                      {msg.followUps && msg.followUps.length > 0 && (
+                        <div
+                          style={{
+                            marginTop: 12,
+                            paddingTop: 10,
+                            borderTop: "1px solid var(--proof-border)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 9,
+                              fontWeight: 700,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.08em",
+                              color: "var(--proof-text-muted)",
+                              marginBottom: 8,
+                            }}
+                          >
+                            Quick Next Steps
+                          </div>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                            {msg.followUps.map((f) => {
+                              const uc = AI_USE_CASES.find((u) => u.id === f.id);
+                              const cat = uc?.category || "analysis";
+                              const catColor: Record<string, string> = {
+                                analysis: "#5b8af5",
+                                alert: "#ef4444",
+                                recommendation: "#22c55e",
+                                report: "#a855f7",
+                              };
+                              const c = catColor[cat] || "#5b8af5";
+                              return (
+                                <button
+                                  key={f.id}
+                                  onClick={() => {
+                                    const ucFound = AI_USE_CASES.find((u) => u.id === f.id);
+                                    if (ucFound) handleUseCase(ucFound);
+                                  }}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    padding: "4px 10px",
+                                    borderRadius: 14,
+                                    fontSize: 10,
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    border: `1px solid ${c}40`,
+                                    background: `${c}12`,
+                                    color: c,
+                                    transition: "all 0.12s",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = `${c}25`;
+                                    e.currentTarget.style.borderColor = `${c}70`;
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = `${c}12`;
+                                    e.currentTarget.style.borderColor = `${c}40`;
+                                  }}
+                                >
+                                  {USE_CASE_ICONS[f.id] || <Zap size={10} />}
+                                  {f.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
@@ -1046,11 +1346,16 @@ export default function Copilot() {
             }}
           >
             <textarea
+              ref={textareaRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = Math.min(e.target.scrollHeight, 250) + "px";
+              }}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about test runs, CDN health, or select an analysis type from the sidebar…"
-              rows={2}
+              placeholder='Ask about test runs, CDN health…  (Enter to send, Ctrl+Enter for new line)'
+              rows={1}
               style={{
                 flex: 1,
                 padding: "10px 14px",
@@ -1063,6 +1368,8 @@ export default function Copilot() {
                 fontFamily: "var(--font-sans)",
                 outline: "none",
                 lineHeight: 1.5,
+                minHeight: 40,
+                maxHeight: 250,
                 transition: "border-color 0.15s, box-shadow 0.15s",
               }}
               onFocus={(e) => {
@@ -1173,15 +1480,24 @@ export default function Copilot() {
                         padding: "6px 10px",
                         borderRadius: 7,
                         fontSize: 11,
-                        fontWeight: 500,
+                        fontWeight: _activeUseCase === uc.id ? 700 : 500,
                         cursor: "pointer",
-                        border: `1px solid ${catColor[cat]}28`,
-                        background: `${catColor[cat]}0c`,
-                        color: "var(--proof-text)",
+                        border: `1px solid ${
+                          _activeUseCase === uc.id ? catColor[cat] : `${catColor[cat]}28`
+                        }`,
+                        background:
+                          _activeUseCase === uc.id
+                            ? `${catColor[cat]}22`
+                            : `${catColor[cat]}0c`,
+                        color: _activeUseCase === uc.id ? catColor[cat] : "var(--proof-text)",
                         textAlign: "left",
                         width: "100%",
                         transition: "all 0.12s",
                         lineHeight: 1.3,
+                        boxShadow:
+                          _activeUseCase === uc.id
+                            ? `0 0 0 1px ${catColor[cat]}40`
+                            : "none",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = `${catColor[cat]}1e`;
@@ -1189,9 +1505,16 @@ export default function Copilot() {
                         e.currentTarget.style.color = catColor[cat];
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = `${catColor[cat]}0c`;
-                        e.currentTarget.style.borderColor = `${catColor[cat]}28`;
-                        e.currentTarget.style.color = "var(--proof-text)";
+                        e.currentTarget.style.background =
+                          _activeUseCase === uc.id
+                            ? `${catColor[cat]}22`
+                            : `${catColor[cat]}0c`;
+                        e.currentTarget.style.borderColor =
+                          _activeUseCase === uc.id
+                            ? catColor[cat]
+                            : `${catColor[cat]}28`;
+                        e.currentTarget.style.color =
+                          _activeUseCase === uc.id ? catColor[cat] : "var(--proof-text)";
                       }}
                     >
                       <span style={{ flexShrink: 0, opacity: 0.8 }}>

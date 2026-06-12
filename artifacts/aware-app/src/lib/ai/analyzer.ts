@@ -118,6 +118,12 @@ export function runFallbackAnalysis(request: AIAnalysisRequest): AIAnalysisResul
       return fallbackPromotionDecisionSupport();
     case "test-doc-gen":
       return fallbackTestDocGen();
+    case "release-readiness":
+      return fallbackReleaseReadiness();
+    case "env-health-summary":
+      return fallbackEnvHealthSummary();
+    case "regression-report":
+      return fallbackRegressionReport();
     default:
       return genericFallback(request);
   }
@@ -1354,6 +1360,134 @@ function fallbackTestDocGen(): AIAnalysisResult {
     recommendations: testInventory
       .filter((c) => c.coverage < 50)
       .map((c) => `Increase automation in ${c.category} (${c.coverage}% coverage)`),
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackReleaseReadiness(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
+  );
+  const latest = sortedRuns[0];
+  if (!latest) return genericFallback({ useCaseId: "release-readiness", parameters: {} });
+
+  const envGroups: Record<string, { passPct: number; failures: number; status: string }> = {};
+  for (const run of RUNS) {
+    const key = `${run.env}/${run.target}`;
+    if (!envGroups[key] || new Date(run.started).getTime() > new Date(envGroups[key].status).getTime()) {
+      envGroups[key] = { passPct: run.passPct, failures: run.failures, status: run.status };
+    }
+  }
+
+  const envCount = Object.keys(envGroups).length;
+  const healthyEnvs = Object.values(envGroups).filter((e) => e.passPct >= 90).length;
+  const failingEnvs = Object.values(envGroups).filter((e) => e.failures > 0).length;
+  const overallScore = Math.round(
+    (latest.passPct * 0.4) +
+    ((healthyEnvs / Math.max(envCount, 1)) * 100 * 0.3) +
+    (Math.max(0, 100 - latest.failures * 5) * 0.3),
+  );
+  const verdict = overallScore >= 80 ? "✅ RELEASE READY" : overallScore >= 50 ? "⚠️ CAUTION" : "❌ BLOCKED";
+
+  const summary = `Release readiness: ${overallScore}/100. ${verdict}. Latest build \`${latest.build}\` at ${latest.passPct}% pass rate. ${healthyEnvs}/${envCount} environments healthy.`;
+  return {
+    useCaseId: "release-readiness",
+    summary,
+    details: `## Release Readiness Check\n\n**Overall Score: ${overallScore}/100 — ${verdict}**\n\n### Latest Build: \`${latest.build}\`\n| Metric | Value |\n|--------|-------|\n| Pass rate | ${latest.passPct}% |\n| Failures | ${latest.failures} |\n| Environment | ${latest.env} / ${latest.target} |\n| Status | **${latest.status}** |\n\n### Environment Health\n| Env | Pass Rate | Failures |\n|-----|-----------|----------|\n${Object.entries(envGroups).map(([k, v]) => `| ${k} | ${v.passPct}% | ${v.failures} |`).join("\n")}\n\n**Gate:** UAT must pass ≥95% before PROD promotion.`,
+    data: { score: overallScore, verdict, healthyEnvs, totalEnvs: envCount, build: latest.build },
+    confidence: 1,
+    recommendations:
+      verdict === "✅ RELEASE READY"
+        ? [`Build ${latest.build} approved for release`]
+        : verdict === "⚠️ CAUTION"
+          ? [`Review ${failingEnvs} environment(s) with failures`, `Check latest run: ${latest.failures} failures`]
+          : [`RELEASE BLOCKED: ${latest.failures} failures at ${latest.passPct}% pass rate`, "Fix blocking issues before release attempt"],
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackEnvHealthSummary(): AIAnalysisResult {
+  const envMap: Record<string, { runs: number; passRates: number[]; failures: number; duration: number }> = {};
+  for (const run of RUNS) {
+    const key = `${run.env}/${run.target}`;
+    if (!envMap[key]) envMap[key] = { runs: 0, passRates: [], failures: 0, duration: 0 };
+    envMap[key].runs++;
+    envMap[key].passRates.push(run.passPct);
+    envMap[key].failures += run.failures;
+    envMap[key].duration += run.durationMs || 0;
+  }
+
+  const health = Object.entries(envMap).map(([key, v]) => {
+    const avgPass = Math.round(v.passRates.reduce((s, p) => s + p, 0) / v.passRates.length);
+    const status = avgPass >= 90 ? "✅" : avgPass >= 75 ? "⚠️" : "❌";
+    return { env: key, avgPass, failures: v.failures, runs: v.runs, avgDuration: Math.round(v.duration / v.runs), status };
+  }).sort((a, b) => b.avgPass - a.avgPass);
+
+  const healthy = health.filter((h) => h.status === "✅").length;
+  const summary = `Environment health: ${healthy}/${health.length} healthy. ${health.map((h) => `${h.env}: ${h.avgPass}% ${h.status}`).join(" | ")}`;
+  return {
+    useCaseId: "env-health-summary",
+    summary,
+    details: `## Environment Health Snapshot\n\n| Environment | Avg Pass Rate | Total Failures | Runs | Avg Duration | Status |\n|-------------|---------------|----------------|------|-------------|--------|\n${health.map((h) => `| ${h.env} | ${h.avgPass}% | ${h.failures} | ${h.runs} | ${h.avgDuration}ms | ${h.status} |`).join("\n")}\n\n**Summary:** ${healthy}/${health.length} environments healthy. ${health.filter((h) => h.status === "❌").map((h) => h.env).join(", ")} need attention.`,
+    data: { environments: health, totalEnvs: health.length, healthyEnvs: healthy },
+    confidence: 1,
+    recommendations: health.filter((h) => h.status !== "✅").map((h) => `Investigate ${h.env} (${h.avgPass}% avg pass rate)`),
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function fallbackRegressionReport(): AIAnalysisResult {
+  const sortedRuns = [...RUNS].sort(
+    (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
+  );
+  const latest = sortedRuns[0];
+  const prev = sortedRuns[1];
+  if (!latest || !prev) {
+    return {
+      useCaseId: "regression-report",
+      summary: "Need at least 2 runs to compare.",
+      details: "Insufficient run data for regression comparison.",
+      data: { runCount: RUNS.length, minRequired: 2 },
+      confidence: 0.5,
+      recommendations: ["Add more test runs for regression analysis"],
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  const latestResults = getTestResultsForRun(latest.id);
+  const prevResults = getTestResultsForRun(prev.id);
+
+  const latestMap = new Map(latestResults.map((r) => [r.id, r]));
+  const prevMap = new Map(prevResults.map((r) => [r.id, r]));
+
+  let regressed = 0, improved = 0, same = 0;
+  const regressedTests: { id: string; name: string; from: string; to: string }[] = [];
+  const improvedTests: { id: string; name: string; from: string; to: string }[] = [];
+
+  for (const [id, lr] of latestMap) {
+    const pr = prevMap.get(id);
+    if (!pr) continue;
+    if (pr.status === "PASS" && lr.status === "FAIL") {
+      regressed++;
+      regressedTests.push({ id, name: lr.name, from: pr.status, to: lr.status });
+    } else if (pr.status === "FAIL" && lr.status === "PASS") {
+      improved++;
+      improvedTests.push({ id, name: lr.name, from: pr.status, to: lr.status });
+    } else {
+      same++;
+    }
+  }
+
+  const summary = `Regression report: ${regressed} regressed, ${improved} improved, ${same} unchanged. Pass rate ${prev.passPct}% → ${latest.passPct}%.`;
+  return {
+    useCaseId: "regression-report",
+    summary,
+    details: `## Quick Regression Report\n\n| Metric | Value |\n|--------|-------|\n| Previous build | \`${prev.build}\` (${prev.passPct}%) |\n| Latest build | \`${latest.build}\` (${latest.passPct}%) |\n| Change | ${latest.passPct - prev.passPct >= 0 ? "+" : ""}${(latest.passPct - prev.passPct).toFixed(1)}% |\n\n### Regressed Tests (${regressed})\n${regressedTests.map((t) => `- \`${t.id}\`: ${t.from} → **${t.to}**`).join("\n") || "- None"}\n\n### Improved Tests (${improved})\n${improvedTests.map((t) => `- \`${t.id}\`: ${t.from} → **${t.to}**`).join("\n") || "- None"}\n\n**Summary:** ${regressed === 0 ? "✅ No regressions detected." : `⚠️ ${regressed} test(s) regressed. Review recommended.`}`,
+    data: { regressed, improved, same, prevBuild: prev.build, latestBuild: latest.build, prevPassPct: prev.passPct, latestPassPct: latest.passPct },
+    confidence: 1,
+    recommendations: regressed > 0
+      ? [`Investigate ${regressed} regressed test(s)`, `Run diff between ${prev.build} and ${latest.build}`]
+      : ["No regressions — good to proceed"],
     generatedAt: new Date().toISOString(),
   };
 }
