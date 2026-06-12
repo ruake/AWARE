@@ -77,9 +77,7 @@ function DataGate({ children }: { children: React.ReactNode }) {
         }}
       >
         <span>Failed to load application data</span>
-        <pre style={{ fontSize: 13, color: "var(--proof-muted, #6b7280)" }}>
-          {String(error)}
-        </pre>
+        <pre style={{ fontSize: 13, color: "var(--proof-muted, #6b7280)" }}>{String(error)}</pre>
       </div>
     );
   }

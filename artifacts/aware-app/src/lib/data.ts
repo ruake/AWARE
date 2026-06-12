@@ -96,7 +96,11 @@ export {
   subscribeToEnvConfigs,
 } from "./envConfig";
 
-export { getAutoDiscoveredTests, getAutoDiscoverySummary, loadAutoDiscoveredTests } from "./testDiscovery";
+export {
+  getAutoDiscoveredTests,
+  getAutoDiscoverySummary,
+  loadAutoDiscoveredTests,
+} from "./testDiscovery";
 
 export {
   getSchedulerStatus,
