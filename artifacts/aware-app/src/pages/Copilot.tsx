@@ -1047,7 +1047,7 @@ export default function Copilot() {
                       >
                         Here's what I can do with your test data:
                       </div>
-                      {(["analysis", "alert", "recommendation", "report"] as const).map((cat) => {
+                      {(["analysis", "alert", "recommendation", "report", "setup"] as const).map((cat) => {
                         const catUcs = AI_USE_CASES.filter((uc) => uc.category === cat);
                         if (!catUcs.length) return null;
                         const catLabel: Record<string, string> = {
@@ -1055,12 +1055,14 @@ export default function Copilot() {
                           alert: "Alerts & Detection",
                           recommendation: "Recommendations",
                           report: "Reports",
+                          setup: "Setup & Config",
                         };
                         const catColor: Record<string, string> = {
                           analysis: "#5b8af5",
                           alert: "#ef4444",
                           recommendation: "#22c55e",
                           report: "#a855f7",
+                          setup: "#f59e0b",
                         };
                         return (
                           <div key={cat} style={{ marginBottom: 10 }}>
@@ -1475,7 +1477,7 @@ export default function Copilot() {
           >
             Quick Analysis
           </div>
-          {(["analysis", "alert", "recommendation", "report"] as const).map((cat) => {
+          {(["analysis", "alert", "recommendation", "report", "setup"] as const).map((cat) => {
             const catUcs = AI_USE_CASES.filter((uc) => uc.category === cat);
             if (!catUcs.length) return null;
             const catLabel: Record<string, string> = {
@@ -1483,12 +1485,14 @@ export default function Copilot() {
               alert: "Alerts",
               recommendation: "Recommendations",
               report: "Reports",
+              setup: "Setup & Config",
             };
             const catColor: Record<string, string> = {
               analysis: "#5b8af5",
               alert: "#ef4444",
               recommendation: "#22c55e",
               report: "#a855f7",
+              setup: "#f59e0b",
             };
             return (
               <div key={cat} style={{ marginBottom: 10 }}>
