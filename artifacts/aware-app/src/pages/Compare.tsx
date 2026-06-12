@@ -1360,9 +1360,9 @@ export default function Compare() {
                 <table className="proof-table">
                   <colgroup>
                     <col />
-                    <col style={{ width: 80 }} />
-                    <col style={{ width: 80 }} />
-                    <col style={{ width: 90 }} />
+                    <col style={{ width: 120 }} />
+                    <col style={{ width: 120 }} />
+                    <col style={{ width: 100 }} />
                     <col style={{ width: 110 }} />
                     <col style={{ width: 110 }} />
                   </colgroup>
