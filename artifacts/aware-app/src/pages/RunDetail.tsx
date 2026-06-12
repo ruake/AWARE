@@ -80,11 +80,11 @@ export default function RunDetail() {
   const { show, Toast } = useSimpleToast();
 
   const run = getRunById(runId) ?? RUNS[0] ?? null;
-  const [loaded, setLoaded] = React.useState(false);
+  const [_loaded, setLoaded] = React.useState(false);
   React.useEffect(() => {
-    if (!run) return;
-    loadResultsForRun(run.id).then(() => setLoaded(true));
-  }, [run?.id]);
+    if (!runId) return;
+    loadResultsForRun(runId).then(() => setLoaded(true));
+  }, [runId]);
   const results = run ? getTestResultsForRun(run.id) : [];
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
