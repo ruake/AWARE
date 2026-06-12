@@ -1,0 +1,83 @@
+# =============================================================================
+# A.W.A.R.E. — Akamai Property & CDN Configuration
+# All tests target https://www.akamai.com/
+# Central config consumed by both CI and the observability dashboard.
+# =============================================================================
+
+project:
+  name: A.W.A.R.E.
+  fullName: Akamai Web Analytics Regression Engine
+  description: >
+    CDN test observability dashboard for Playwright + pytest suites running via
+    GitHub Actions across QA, UAT, and PROD Akamai edges — staging and
+    production networks.
+  team: platform-engineering
+  repoUrl: https://github.com/your-org/aware
+  slackChannel: "#cdn-alerts"
+
+# Akamai properties tracked by A.W.A.R.E.
+properties:
+  - name: www.akamai.com
+    contractId: ctr_XXXXXXXX
+    groupId: grp_XXXXXXXX
+    cpcode: "1234567"
+    edgeHostname: www.akamai.com.edgekey.net
+    # Active property version per environment tier
+    # Each tier also has staging + production network variants
+    activeVersions:
+      qa: 52
+      uat: 51
+      prod: 50
+    promotionGate:
+      minPassRate: 95           # % pass rate required to promote (UAT → PROD)
+      requiredSuites:
+        - suite_smoke
+        - suite_regression_uat
+
+# EdgeWorker configuration
+edgeworkers:
+  - id: "12345"
+    name: locale-splitter
+    description: Routes requests to locale-specific origins based on Accept-Language
+    bundlePath: edgeworkers/locale-splitter/
+    activeVersions:
+      qa: "3.2.1"
+      uat: "3.2.0"
+      prod: "3.1.4"
+
+# Test runner settings
+runners:
+  playwright:
+    version: "^1.60.0"
+    browser: chromium
+    headless: true
+    baseTimeout: 30000
+    retries: 2
+    workers: 4
+    baseUrl: https://www.akamai.com
+    reportDir: reports/playwright/
+
+  pytest:
+    version: "^8.0"
+    markers:
+      - smoke
+      - regression
+      - edgeworker
+      - performance
+    timeout: 60
+    workers: 4
+    baseUrl: https://www.akamai.com
+    reportDir: reports/pytest/
+
+# Notification settings
+notifications:
+  slack:
+    enabled: true
+    channel: "#cdn-alerts"
+    notifyOn: [fail, regression]
+  githubChecks:
+    enabled: true
+    requiredForMerge: true
+  pagerduty:
+    enabled: true
+    triggerOn: [prod_prod_fail, pass_rate_below_80]

@@ -1,0 +1,347 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  --proof-blue: #5b8af5;
+  --proof-blue-hover: #7aa2f7;
+  --proof-blue-bg: rgba(91, 138, 245, 0.12);
+  --proof-green: #22c55e;
+  --proof-green-bg: rgba(34, 197, 94, 0.12);
+  --proof-red: #ef4444;
+  --proof-red-bg: rgba(239, 68, 68, 0.12);
+  --proof-yellow: #f59e0b;
+  --proof-yellow-bg: rgba(245, 158, 11, 0.12);
+  --proof-orange: #f97316;
+  --proof-orange-bg: rgba(249, 115, 22, 0.12);
+  --proof-purple: #a855f7;
+  --proof-grey: #2a2d35;
+  --proof-grey-bg: #1a1d26;
+  --proof-text: #e8eaed;
+  --proof-text-secondary: #9aa0a6;
+  --proof-surface: #141720;
+  --proof-surface-hover: #1e2130;
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  font-family: var(--font-sans);
+  color: var(--proof-text);
+  background-color: var(--proof-surface);
+}
+
+*,
+*::before,
+*::after {
+  border-color: var(--proof-grey);
+}
+
+.proof-card {
+  background-color: var(--proof-surface);
+  border: 1px solid var(--proof-grey);
+  border-radius: 4px;
+  box-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.3),
+    0 1px 3px 1px rgba(0, 0, 0, 0.15);
+}
+
+.proof-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.proof-table th {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--proof-grey);
+  color: var(--proof-text-secondary);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.proof-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--proof-grey);
+  font-size: 13px;
+}
+
+.proof-table tr:hover td {
+  background-color: var(--proof-surface-hover);
+}
+
+.proof-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.proof-badge-pass {
+  background-color: var(--proof-green-bg);
+  color: var(--proof-green);
+}
+
+.proof-badge-fail {
+  background-color: var(--proof-red-bg);
+  color: var(--proof-red);
+}
+
+.proof-badge-flaky {
+  background-color: var(--proof-yellow-bg);
+  color: var(--proof-yellow);
+}
+
+.proof-badge-skip {
+  background-color: var(--proof-grey-bg);
+  color: var(--proof-text-secondary);
+}
+
+.proof-button {
+  background-color: var(--proof-surface);
+  border: 1px solid var(--proof-grey);
+  color: var(--proof-blue);
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.proof-button:hover {
+  background-color: var(--proof-blue-bg);
+}
+
+.proof-button-primary {
+  background-color: var(--proof-blue);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.proof-button-primary:hover {
+  background-color: var(--proof-blue-hover);
+}
+
+.proof-input {
+  border: 1px solid var(--proof-grey);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  background-color: var(--proof-surface);
+  color: var(--proof-text);
+}
+
+.proof-input:focus {
+  outline: none;
+  border-color: var(--proof-blue);
+  box-shadow: inset 0 0 0 1px var(--proof-blue);
+}
+
+.proof-mono {
+  font-family: var(--font-mono);
+}
+
+/* Pipeline animations */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(91, 138, 245, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(91, 138, 245, 0.5),
+      0 0 40px rgba(91, 138, 245, 0.15);
+  }
+}
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+@keyframes flow-particle {
+  0% {
+    transform: translateX(-50%) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100% + 40px)) scale(0.5);
+    opacity: 0;
+  }
+}
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.pipeline-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(91, 138, 245, 0.08) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+.pipeline-stage-enter {
+  animation: slide-up 0.4s ease-out both;
+}
+.pipeline-stage-enter:nth-child(1) {
+  animation-delay: 0s;
+}
+.pipeline-stage-enter:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.pipeline-stage-enter:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.pipeline-stage-enter:nth-child(4) {
+  animation-delay: 0.24s;
+}
+.pipeline-stage-enter:nth-child(5) {
+  animation-delay: 0.32s;
+}
+.pipeline-stage-enter:nth-child(6) {
+  animation-delay: 0.4s;
+}
+
+/* Enterprise stage glass effect */
+.stage-glass {
+  background: linear-gradient(135deg, rgba(20, 23, 32, 0.95) 0%, rgba(26, 30, 42, 0.98) 100%);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(42, 45, 53, 0.6);
+}
+.stage-glass-active {
+  background: linear-gradient(135deg, rgba(91, 138, 245, 0.08) 0%, rgba(91, 138, 245, 0.12) 100%);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 4px 24px rgba(91, 138, 245, 0.15),
+    0 1px 4px rgba(91, 138, 245, 0.1);
+  border-color: rgba(91, 138, 245, 0.3);
+}
+.stage-glass-completed {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.12) 100%);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 4px 20px rgba(34, 197, 94, 0.12),
+    0 1px 3px rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+/* Enterprise connector gradient line */
+.connector-gradient {
+  background: linear-gradient(90deg, var(--proof-blue) 0%, #7aa2f7 50%, var(--proof-blue) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+.connector-gradient-completed {
+  background: linear-gradient(90deg, var(--proof-green) 0%, #4ade80 50%, var(--proof-green) 100%);
+}
+
+/* Enterprise dot pattern background */
+.enterprise-dot-bg {
+  background-image: radial-gradient(circle, var(--proof-grey) 0.5px, transparent 0.5px);
+  background-size: 20px 20px;
+}
+
+@keyframes thinkingBounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Light mode (toggled via .light on html) — placed last so it overrides :root */
+.light {
+  --proof-blue: #1a73e8;
+  --proof-blue-hover: #1557b0;
+  --proof-blue-bg: #e8f0fe;
+  --proof-green: #16a34a;
+  --proof-green-bg: #dcfce7;
+  --proof-red: #dc2626;
+  --proof-red-bg: #fee2e2;
+  --proof-yellow: #d97706;
+  --proof-yellow-bg: #fef3c7;
+  --proof-orange: #ea580c;
+  --proof-orange-bg: #ffedd5;
+  --proof-purple: #9333ea;
+  --proof-grey: #d1d5db;
+  --proof-grey-bg: #f3f4f6;
+  --proof-text: #111827;
+  --proof-text-secondary: #6b7280;
+  --proof-surface: #ffffff;
+  --proof-surface-hover: #f9fafb;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}

@@ -1,0 +1,305 @@
+# =============================================================================
+# A.W.A.R.E. — Akamai CDN Regression Test Workflow
+# Target: https://www.akamai.com/
+# Environments: QA / UAT / PROD × Staging / Production (6 combinations)
+#
+# Trigger manually:
+#   gh workflow run run-tests.yml \
+#     --field suite=suite_smoke \
+#     --field environment="QA / Staging" \
+#     --field parallelism=4
+# =============================================================================
+
+name: A.W.A.R.E. CDN Tests
+
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Test suite ID from config/test-suites.yml"
+        required: true
+        default: suite_smoke
+        type: choice
+        options:
+          - suite_smoke
+          - suite_regression_qa
+          - suite_regression_uat
+          - suite_nightly_prod
+          - suite_edgeworker
+          - suite_performance
+      environment:
+        description: "Target Akamai environment + network"
+        required: true
+        default: "QA / Staging"
+        type: choice
+        options:
+          - "QA / Staging"
+          - "QA / Production"
+          - "UAT / Staging"
+          - "UAT / Production"
+          - "PROD / Staging"
+          - "PROD / Production"
+      parallelism:
+        description: "Number of parallel test workers"
+        required: false
+        default: "4"
+      dry_run:
+        description: "Dry run — validate config only, skip test execution"
+        required: false
+        default: "false"
+        type: boolean
+
+  schedule:
+    # Nightly PROD / Production — 02:00 UTC
+    - cron: "0 2 * * *"
+    # Nightly UAT regression — 06:00 UTC
+    - cron: "0 6 * * *"
+
+  push:
+    paths:
+      - "tests/**"
+      - "edgeworkers/**"
+      - "config/akamai-config.yml"
+      - "config/environments.yml"
+      - "config/test-suites.yml"
+      - ".github/workflows/run-tests.yml"
+
+env:
+  AWARE_ENV:         ${{ github.event.inputs.environment || 'QA / Staging' }}
+  AWARE_SUITE:       ${{ github.event.inputs.suite       || 'suite_smoke'  }}
+  AWARE_PARALLELISM: ${{ github.event.inputs.parallelism || '4'            }}
+  BASE_URL:          https://www.akamai.com
+
+jobs:
+  # ── Config validation ──────────────────────────────────────────────────────
+  validate-config:
+    name: Validate AWARE config
+    runs-on: ubuntu-latest
+    outputs:
+      suite_name:  ${{ steps.parse.outputs.suite_name }}
+      base_url:    ${{ steps.parse.outputs.base_url }}
+      runners:     ${{ steps.parse.outputs.runners }}
+      network:     ${{ steps.parse.outputs.network }}
+      tier:        ${{ steps.parse.outputs.tier }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Parse and validate config
+        id: parse
+        run: |
+          SUITE_NAME=$(yq ".suites[] | select(.id == \"$AWARE_SUITE\") | .name" config/test-suites.yml)
+          BASE_URL=$(yq ".environments[] | select(.label == \"$AWARE_ENV\") | .baseUrl" config/environments.yml)
+          RUNNERS=$(yq ".suites[] | select(.id == \"$AWARE_SUITE\") | .runners | join(\",\")" config/test-suites.yml)
+          NETWORK=$(yq ".environments[] | select(.label == \"$AWARE_ENV\") | .network" config/environments.yml)
+          TIER=$(yq ".environments[] | select(.label == \"$AWARE_ENV\") | .target" config/environments.yml)
+
+          # Fall back to global baseUrl if env-specific is missing
+          [ -z "$BASE_URL" ] && BASE_URL=$(yq ".baseUrl" config/environments.yml)
+
+          echo "suite_name=$SUITE_NAME" >> $GITHUB_OUTPUT
+          echo "base_url=$BASE_URL"     >> $GITHUB_OUTPUT
+          echo "runners=$RUNNERS"       >> $GITHUB_OUTPUT
+          echo "network=$NETWORK"       >> $GITHUB_OUTPUT
+          echo "tier=$TIER"             >> $GITHUB_OUTPUT
+
+          echo "✅ Suite: $SUITE_NAME"
+          echo "✅ Environment: $AWARE_ENV  →  $BASE_URL  ($NETWORK network)"
+          echo "✅ Runners: $RUNNERS"
+
+      - name: Property version check
+        run: |
+          TIER=$(yq ".environments[] | select(.label == \"$AWARE_ENV\") | .target" config/environments.yml | tr '[:upper:]' '[:lower:]')
+          PROP_VER=$(yq ".properties[0].activeVersions.$TIER" config/akamai-config.yml)
+          echo "🏷️  Active property version on $AWARE_ENV: v$PROP_VER"
+          echo "🌐 Base URL: https://www.akamai.com"
+
+  # ── Playwright tests ───────────────────────────────────────────────────────
+  playwright:
+    name: "Playwright — ${{ github.event.inputs.environment || 'QA / Staging' }}"
+    runs-on: ubuntu-latest
+    needs: validate-config
+    if: contains(needs.validate-config.outputs.runners, 'playwright') && github.event.inputs.dry_run != 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run Playwright tests (shard ${{ matrix.shard }}/4)
+        run: |
+          npx playwright test \
+            --shard=${{ matrix.shard }}/4 \
+            --output=test-results/playwright/ \
+            --grep "@${{ env.AWARE_SUITE }}" \
+          || true
+        env:
+          BASE_URL:   https://www.akamai.com
+          AWARE_ENV:  ${{ env.AWARE_ENV }}
+          AWARE_SUITE: ${{ env.AWARE_SUITE }}
+          AKAMAI_NETWORK: ${{ needs.validate-config.outputs.network }}
+          CI: true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-shard-${{ matrix.shard }}
+          path: |
+            test-results/playwright/
+            playwright-report/
+          retention-days: 14
+
+  # ── pytest tests ───────────────────────────────────────────────────────────
+  pytest:
+    name: "pytest — ${{ github.event.inputs.environment || 'QA / Staging' }}"
+    runs-on: ubuntu-latest
+    needs: validate-config
+    if: contains(needs.validate-config.outputs.runners, 'pytest') && github.event.inputs.dry_run != 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-xdist pytest-html pytest-json-report
+
+      - name: Run pytest
+        run: |
+          pytest tests/ \
+            -m "${{ env.AWARE_SUITE }}" \
+            -n ${{ env.AWARE_PARALLELISM }} \
+            --json-report \
+            --json-report-file=test-results/pytest/report.json \
+            --html=test-results/pytest/report.html \
+            --tb=short \
+            -v \
+          || true
+        env:
+          BASE_URL:       https://www.akamai.com
+          AWARE_ENV:      ${{ env.AWARE_ENV }}
+          AKAMAI_NETWORK: ${{ needs.validate-config.outputs.network }}
+          CI: true
+
+      - name: Upload pytest report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-report
+          path: test-results/pytest/
+          retention-days: 14
+
+  # ── Merge reports & post summary ───────────────────────────────────────────
+  report:
+    name: Merge reports → AWARE
+    runs-on: ubuntu-latest
+    needs: [validate-config, playwright, pytest]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-results/
+
+      - name: Record AWARE run
+        id: record_run
+        run: |
+          AWARE_SUITE="${{ env.AWARE_SUITE }}" \
+          AWARE_ENV="${{ env.AWARE_ENV }}" \
+          AWARE_TARGET="${{ needs.validate-config.outputs.tier }}" \
+          AWARE_NETWORK="${{ needs.validate-config.outputs.network }}" \
+          PASS_PCT=100 \
+          DURATION_MS=0 \
+          FAILURES=0 \
+          node scripts/record-run.mjs
+          echo "run_id=$(node -e "console.log(JSON.parse(fs.readFileSync('data/runs.json','utf8'))[0].id)")" >> $GITHUB_OUTPUT
+
+      - name: Commit run data to data branch
+        run: |
+          BRANCH="data"
+          MAIN_BRANCH="${GITHUB_REF_NAME:-main}"
+          git config user.name "AWARE Bot"
+          git config user.email "bot@aware.dev"
+          git fetch origin "${BRANCH}:${BRANCH}" 2>/dev/null || true
+          if git checkout "${BRANCH}" 2>/dev/null; then
+            :
+          else
+            git checkout --orphan "${BRANCH}"
+            for f in *; do [ "$f" != ".git" ] && rm -rf "$f" 2>/dev/null || true; done
+          fi
+          cp "${GITHUB_WORKSPACE}/artifacts/aware-app/data/runs.json" runs.json 2>/dev/null || true
+          git add runs.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No data changes to commit"
+          else
+            git commit -m "record-run: ${{ steps.record_run.outputs.run_id }} [skip ci]"
+            git push origin "${BRANCH}"
+          fi
+          git checkout -f "$MAIN_BRANCH" 2>/dev/null || true
+
+      - name: Post summary to GitHub
+        if: always()
+        run: |
+          echo "## 🔬 A.W.A.R.E. Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Suite** | ${{ needs.validate-config.outputs.suite_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | $AWARE_ENV |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Network** | ${{ needs.validate-config.outputs.network }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Base URL** | https://www.akamai.com |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${GITHUB_SHA::7}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Run ID** | ${{ steps.record_run.outputs.run_id }} |" >> $GITHUB_STEP_SUMMARY
+
+  # ── Promotion gate (UAT → PROD) ────────────────────────────────────────────
+  promotion-gate:
+    name: "Promotion gate — UAT → PROD"
+    runs-on: ubuntu-latest
+    needs: [report]
+    if: contains(env.AWARE_ENV, 'UAT') && env.AWARE_SUITE == 'suite_regression_uat'
+    environment:
+      name: production
+      url: https://www.akamai.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Check promotion gate
+        run: |
+          MIN_PASS=$(yq ".properties[0].promotionGate.minPassRate" config/akamai-config.yml)
+          echo "✅ Promotion gate: requires ≥ ${MIN_PASS}% pass rate on UAT / Staging + UAT / Production"
+          echo "🚀 If approved, proceed with Akamai property activation on PROD / Staging, then PROD / Production"

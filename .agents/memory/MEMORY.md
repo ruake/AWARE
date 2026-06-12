@@ -1,0 +1,11 @@
+- [AWARE app routing pattern](aware-routing.md) — use `useLocation` + `navigate()` or pass props to `Link` directly; never nest `<a>` inside `<Link>` (wouter renders Link as `<a>` already).
+- [AWARE app architecture](aware-app-arch.md) — inline styles + CSS vars (no Tailwind in main app), wouter routing, recharts, localStorage v3 keys; React 19 + Vite 7.
+- [AWARE port decisions](aware-port-decisions.md) — mockup → main app porting rules; key conversions needed each time.
+- [AWARE Akamai environment model](aware-akamai-envs.md) — three tiers QA/UAT/PROD × two networks = 6 envs; promotion gate ≥95%; PropertyStatusBar always visible on Dashboard.
+- [AWARE project overview](aware-project-overview.md) — full project map: stack, pages, scripts, monorepo layout, all route paths, key constraints.
+- [AWARE data layer](aware-data-layer.md) — static-first; seed JSON in data/; in-memory stores with localStorage persistence; subscription model for reactivity.
+- [AWARE AI copilot](aware-ai-copilot.md) — three LLM providers (OpenAI/WebLLM/Chrome); 20+ skill use-cases; context.ts builds full system prompt; dataQueries.ts safe AI data access.
+- [AWARE test model](aware-test-model.md) — TestCase, TestSuite, TestResult, DiffRow, PromotionDecision types; testType: web|api|http|edgeworker|transaction|pytest; flakiness formula.
+- [AWARE anomaly detection](aware-anomaly-detection.md) — two modules: run-level Z-score and test-level 7-day latency Z-score; severity thresholds at 1.5/2/2.5/3σ.
+- [AWARE CI pipeline](aware-ci-pipeline.md) — GitHub Actions run-tests.yml; Playwright + pytest parallel jobs; config/*.yml drives CI; nightly cron schedules per suite.
+- [AWARE config system](aware-config-system.md) — config-as-code in config/; envConfig.ts is runtime source of truth with localStorage override key `aware-env-configs-v3`.

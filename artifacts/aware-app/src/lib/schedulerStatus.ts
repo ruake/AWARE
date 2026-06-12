@@ -1,0 +1,38 @@
+import type { SchedulerStatus } from "./types";
+import { fetchJson } from "./dataFetcher";
+
+let _cached: SchedulerStatus = {
+  lastRun: null,
+  lastRunBy: null,
+  status: "healthy",
+  suites: [],
+  recentDispatches: [],
+  summary: { total: 0, scheduled: 0, due: 0, dispatched: 0, running: 0 },
+};
+let _loaded = false;
+const _listeners = new Set<() => void>();
+
+export async function loadSchedulerStatus(): Promise<void> {
+  if (_loaded) return;
+  _loaded = true;
+  const data = await fetchJson<SchedulerStatus>("scheduler-status.json");
+  _cached = {
+    ...data,
+    suites: [...data.suites],
+    recentDispatches: [...data.recentDispatches],
+  };
+}
+
+export function getSchedulerStatus(): SchedulerStatus {
+  return _cached;
+}
+
+export function refreshSchedulerStatus(status: SchedulerStatus): void {
+  _cached = status;
+  _listeners.forEach((cb) => cb());
+}
+
+export function subscribeToSchedulerStatus(cb: () => void): () => void {
+  _listeners.add(cb);
+  return () => _listeners.delete(cb);
+}
