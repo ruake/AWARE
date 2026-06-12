@@ -305,7 +305,7 @@ jobs:
     name: "Promotion gate — UAT → PROD"
     runs-on: ubuntu-latest
     needs: [report]
-    if: contains(env.AWARE_ENV, 'UAT') && env.AWARE_SUITE == 'suite_regression_uat'
+    if: ${{ contains(env.AWARE_ENV, 'UAT') && env.AWARE_SUITE == 'suite_regression_uat' }}
     environment:
       name: production
       url: ${{ needs.parse-config.outputs.base_url }}

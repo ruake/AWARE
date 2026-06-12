@@ -298,8 +298,8 @@ const testResults = extractTestResults(raw, runId, resultsDir);
 const run = {
   id: runId,
   label: `${suite} — ${envLabel}`,
-  suite,
-  target,
+  suiteId: suite,
+  envId: target,
   status: results.status,
   passPct: results.passPct,
   failures: results.failed,
@@ -318,14 +318,17 @@ let updated = false;
 
 // If the scheduler pre-created a RUNNING entry, update it in place
 for (let i = 0; i < runs.length; i++) {
+  const r = runs[i];
+  const runningSuite = r.suiteId || r.suite;
+  const runningTarget = r.envId || r.target;
   const match =
-    runs[i].status === "RUNNING" &&
-    runs[i].suite === suite &&
-    runs[i].target === target &&
-    runs[i].network === network;
+    r.status === "RUNNING" &&
+    runningSuite === suite &&
+    runningTarget === target &&
+    r.network === network;
   if (match) {
-    run.id = runs[i].id;
-    run.started = runs[i].started; // preserve original dispatch time
+    run.id = r.id;
+    run.started = r.started; // preserve original dispatch time
     runs[i] = run;
     updated = true;
     console.log(`✓ Updated existing run ${run.id} from RUNNING → ${run.status}`);
