@@ -1,31 +1,27 @@
 {
-  "generated": "2026-06-12T06:14:57.632Z",
-  "total": 112,
-  "automated": 112,
+  "generated": "2026-06-12T06:25:01.383Z",
+  "total": 20,
+  "automated": 20,
   "manual": 0,
   "byStatus": {
-    "active": 112
+    "active": 20
   },
   "byPriority": {
     "P0": 10,
-    "P1": 13,
-    "P2": 89
+    "P1": 9,
+    "P2": 1
   },
   "byCategory": {
-    "geo-match": 14,
+    "geo-match": 4,
     "caching": 4,
-    "performance": 24,
-    "security": 32,
-    "functional": 6,
-    "general": 7,
-    "network": 5,
-    "screenshots": 5,
-    "url-health": 15
+    "security": 4,
+    "edge-routing": 4,
+    "http-protocol": 4
   },
   "bySeverity": {
     "critical": 10,
-    "major": 13,
-    "minor": 89
+    "major": 9,
+    "minor": 1
   },
-  "coverage": 9
+  "coverage": 5
 }
