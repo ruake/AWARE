@@ -21,7 +21,7 @@ export default function TestDoc() {
   const testId = params.get("testId") || "";
   const diffRow = DIFF_ROWS.find((d) => d.id === testId);
   const testCase = React.useMemo(() => getTestCaseById(testId), [testId]);
-  const [loaded, setLoaded] = React.useState(false);
+  const [_loaded, setLoaded] = React.useState(false);
   React.useEffect(() => {
     Promise.all(RUNS.map((r) => loadResultsForRun(r.id))).then(() => setLoaded(true));
   }, []);
@@ -34,7 +34,7 @@ export default function TestDoc() {
       if (match) return match;
     }
     return null;
-  }, [testCase, diffRow, loaded]);
+  }, [testCase, diffRow]);
   const testName =
     testCase?.name ?? diffRow?.name ?? (testId || "test_geo_match_us_locale_prod[/us/]");
   const testStatus = diffRow?.candStatus ?? "FAIL";
