@@ -18,7 +18,7 @@ import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { RUNS } from "@/lib/data";
 import type { Run } from "@/lib/types";
-const GH_ACTIONS_URL = `${window.location.origin}/ruake/PROOF/actions`;
+const GH_ACTIONS_URL = `https://github.com/your-org/your-repo/actions`;
 
 const STATUS_CONFIG: Record<
   Run["status"],
@@ -29,13 +29,13 @@ const STATUS_CONFIG: Record<
     icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
   }
 > = {
-  PASS: { label: "Passed", color: "#22c55e", bg: "rgba(34,197,94,0.10)", icon: Check },
-  FAIL: { label: "Failed", color: "#ef4444", bg: "rgba(239,68,68,0.10)", icon: X },
-  PARTIAL: { label: "Partial", color: "#f59e0b", bg: "rgba(245,158,11,0.10)", icon: AlertTriangle },
-  FLAKY: { label: "Flaky", color: "#f97316", bg: "rgba(247,147,26,0.10)", icon: AlertTriangle },
-  RUNNING: { label: "Running", color: "#3b82f6", bg: "rgba(59,130,246,0.10)", icon: Loader2 },
-  PENDING: { label: "Pending", color: "#9aa0a6", bg: "rgba(154,160,166,0.10)", icon: Clock },
-  ERROR: { label: "Error", color: "#dc2626", bg: "rgba(220,38,38,0.10)", icon: X },
+  PASS: { label: "Passed", color: "var(--proof-green)", bg: "var(--proof-green-bg)", icon: Check },
+  FAIL: { label: "Failed", color: "var(--proof-red)", bg: "var(--proof-red-bg)", icon: X },
+  PARTIAL: { label: "Partial", color: "var(--proof-yellow)", bg: "var(--proof-yellow-bg)", icon: AlertTriangle },
+  FLAKY: { label: "Flaky", color: "var(--proof-orange)", bg: "var(--proof-orange-bg)", icon: AlertTriangle },
+  RUNNING: { label: "Running", color: "var(--proof-blue)", bg: "var(--proof-blue-bg)", icon: Loader2 },
+  PENDING: { label: "Pending", color: "var(--proof-text-secondary)", bg: "rgba(126,138,158,0.10)", icon: Clock },
+  ERROR: { label: "Error", color: "var(--proof-red)", bg: "var(--proof-red-bg)", icon: X },
 };
 
 function formatDuration(ms: number): string {

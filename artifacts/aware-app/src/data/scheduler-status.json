@@ -4,55 +4,82 @@
   "status": "healthy",
   "suites": [
     {
-      "suiteId": "suite_full",
-      "suiteName": "Full Regression Suite",
+      "id": "suite_full",
+      "name": "Full Regression Suite",
       "schedule": "0 6 * * 1-5",
-      "lastTriggered": "2026-06-12T06:00:00.000Z",
-      "nextDue": "2026-06-12T08:00:00.000Z",
-      "status": "idle"
+      "scheduleDesc": "Weekdays at 06:00 UTC",
+      "due": false,
+      "lastDispatched": "2026-06-12T06:00:01.000Z",
+      "lastConclusion": "success",
+      "lastRunUrl": "https://github.com/your-org/your-repo/actions/runs/123",
+      "activeRuns": 0,
+      "status": "idle",
+      "nextDue": "2026-06-13T06:00:00.000Z",
+      "environments": ["QA", "UAT", "PROD"],
+      "runners": ["ubuntu-latest"]
     },
     {
-      "suiteId": "suite_geo",
-      "suiteName": "Geo & PoP Routing",
+      "id": "suite_geo",
+      "name": "Geo & PoP Routing",
       "schedule": "0 */4 * * *",
-      "lastTriggered": "2026-06-12T06:00:00.000Z",
-      "nextDue": "2026-06-12T08:00:00.000Z",
-      "status": "idle"
+      "scheduleDesc": "Every 4 hours",
+      "due": false,
+      "lastDispatched": "2026-06-12T06:00:01.000Z",
+      "lastConclusion": "success",
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "idle",
+      "nextDue": "2026-06-12T10:00:00.000Z",
+      "environments": ["QA", "PROD"],
+      "runners": ["ubuntu-latest"]
     },
     {
-      "suiteId": "suite_perf",
-      "suiteName": "Performance & Caching",
+      "id": "suite_perf",
+      "name": "Performance & Caching",
       "schedule": "0 */2 * * *",
-      "lastTriggered": "2026-06-12T06:00:00.000Z",
+      "scheduleDesc": "Every 2 hours",
+      "due": false,
+      "lastDispatched": "2026-06-12T04:00:01.000Z",
+      "lastConclusion": "skipped",
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "idle",
       "nextDue": "2026-06-12T08:00:00.000Z",
-      "status": "idle"
+      "environments": ["QA"],
+      "runners": ["ubuntu-latest"]
     }
   ],
   "recentDispatches": [
     {
-      "suiteId": "suite_full",
-      "triggeredAt": "2026-06-12T06:00:01.000Z",
-      "runId": "marble",
-      "status": "complete"
+      "timestamp": "2026-06-12T06:00:01.000Z",
+      "suite": "Full Regression Suite",
+      "environments": ["QA", "UAT", "PROD"],
+      "dispatched": 3,
+      "failed": 0,
+      "workflow": "run-tests.yml"
     },
     {
-      "suiteId": "suite_perf",
-      "triggeredAt": "2026-06-12T04:00:01.000Z",
-      "runId": null,
-      "status": "skipped"
+      "timestamp": "2026-06-12T04:00:01.000Z",
+      "suite": "Performance & Caching",
+      "environments": ["QA"],
+      "dispatched": 1,
+      "failed": 0,
+      "workflow": "run-tests.yml"
     },
     {
-      "suiteId": "suite_geo",
-      "triggeredAt": "2026-06-12T00:00:01.000Z",
-      "runId": null,
-      "status": "skipped"
+      "timestamp": "2026-06-12T00:00:01.000Z",
+      "suite": "Geo & PoP Routing",
+      "environments": ["QA", "PROD"],
+      "dispatched": 2,
+      "failed": 0,
+      "workflow": "run-tests.yml"
     }
   ],
   "summary": {
     "total": 3,
     "scheduled": 3,
-    "due": 1,
-    "dispatched": 1,
+    "due": 0,
+    "dispatched": 6,
     "running": 0
   }
 }

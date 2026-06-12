@@ -993,7 +993,7 @@ export default function Compare() {
     return (
       <AppLayout activeHref="/compare">
         <div style={{ textAlign: "center", padding: 64 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text)" }}>
             No runs to compare
           </h2>
           <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>

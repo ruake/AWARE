@@ -77,7 +77,7 @@ export default function Home() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              PROOF
+              A.W.A.R.E.
             </h1>
             <p
               style={{
@@ -314,7 +314,7 @@ export default function Home() {
           borderTop: "1px solid var(--proof-border)",
         }}
       >
-        PROOF &middot; Bring Your Own Testing Tool &middot; Open source &middot; MIT License
+        A.W.A.R.E. &middot; Akamai Web Analytics Regression Engine &middot; Open source &middot; MIT License
       </footer>
     </div>
   );

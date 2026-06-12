@@ -248,7 +248,7 @@ export default function RunDetail() {
               <GitCompare size={11} /> Compare
             </button>
             <a
-              href={`https://github.com/ruake/PROOF/actions/runs/${run.id}`}
+              href={`https://github.com/ruake/AWARE/actions/runs/${run.id}`}
               target="_blank"
               rel="noopener"
               className="proof-button proof-button-xs"

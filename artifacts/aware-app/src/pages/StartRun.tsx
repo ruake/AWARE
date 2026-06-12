@@ -52,7 +52,7 @@ export default function StartRun() {
               </div>
             </div>
             <a
-              href="https://github.com/ruake/PROOF/actions"
+              href="https://github.com/ruake/AWARE/actions"
               target="_blank"
               rel="noopener noreferrer"
               className="proof-button proof-button-sm"

@@ -125,7 +125,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
                 </div>
                 <div>
                   <span style={{ color: "#60a5fa" }}>$</span> git commit -m "update proof test
-                  config from PROOF"
+                  config from AWARE"
                 </div>
                 <div>
                   <span style={{ color: "#60a5fa" }}>$</span> git push
