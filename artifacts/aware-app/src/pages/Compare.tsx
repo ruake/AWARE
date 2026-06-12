@@ -909,9 +909,6 @@ export default function Compare() {
   const [, navigate] = useLocation();
   const { show, Toast } = useSimpleToast();
 
-  type ApprovalState = "none" | "approved" | "blocked" | "pending" | "error";
-  const [approvals, setApprovals] = React.useState<Record<string, ApprovalState>>({});
-
   const [baseline, setBaseline] = useSyncedUrlState("baseline", RUNS[RUNS.length - 1]?.id ?? "");
   const [candidate, setCandidate] = useSyncedUrlState("candidate", RUNS[0]?.id ?? "");
   const [selectedId, setSelectedId] = useSyncedUrlState<string | null>("sel", null);
@@ -1016,34 +1013,9 @@ export default function Compare() {
   const duration = diffs.filter((d) => d.state === "duration");
   const unchanged = diffs.filter((d) => d.state === "unchanged");
   const categories = [...new Set(DIFF_ROWS.map((d) => d.category))];
-  const approvedCount = Object.values(approvals).filter((a) => a === "approved").length;
-  const blockedCount = Object.values(approvals).filter((a) => a === "blocked").length;
 
   const selectedDiff = selectedId ? (diffs.find((d) => d.id === selectedId) ?? null) : null;
   const hasActiveFilters = Object.values(colFilters).some((v) => v);
-
-  const handleApproval = async (diffId: string, action: "approved" | "blocked") => {
-    setApprovals((prev) => ({ ...prev, [diffId]: "pending" }));
-
-    await new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        if (Math.random() > 0.3) resolve();
-        else reject(new Error("API timeout"));
-      }, 1000);
-    }).then(
-      () => {
-        setApprovals((prev) => ({ ...prev, [diffId]: action }));
-        show(action === "approved" ? "✓ Approved" : "✗ Blocked");
-      },
-      () => {
-        setApprovals((prev) => ({ ...prev, [diffId]: "error" }));
-        show("Failed to sync — reverted");
-        setTimeout(() => {
-          setApprovals((prev) => ({ ...prev, [diffId]: "none" }));
-        }, 1500);
-      },
-    );
-  };
 
   return (
     <AppLayout activeHref="/compare">
@@ -1307,49 +1279,6 @@ export default function Compare() {
           </span>
         </div>
 
-        {/* Approval summary header */}
-        <div
-          className="proof-card"
-          style={{
-            padding: "8px 14px",
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>
-            Approvals
-          </span>
-          <div
-            style={{
-              flex: 1,
-              height: 6,
-              background: "var(--proof-grey-bg)",
-              borderRadius: 3,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                width: `${diffs.length > 0 ? ((approvedCount + blockedCount) / diffs.length) * 100 : 0}%`,
-                height: "100%",
-                background: "var(--proof-green)",
-                borderRadius: 3,
-                transition: "width 0.3s ease",
-              }}
-            />
-          </div>
-          <span
-            style={{
-              fontSize: 12,
-              color: "var(--proof-text-secondary)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {approvedCount + blockedCount}/{diffs.length} reviewed
-          </span>
-        </div>
-
         {/* Table + side panel */}
         <PanelErrorBoundary label="Diff area">
           <div style={{ display: "flex", gap: 14 }}>
@@ -1436,7 +1365,6 @@ export default function Compare() {
                     <col style={{ width: 90 }} />
                     <col style={{ width: 110 }} />
                     <col style={{ width: 110 }} />
-                    <col style={{ width: 170 }} />
                   </colgroup>
                   <thead
                     style={{
@@ -1526,15 +1454,6 @@ export default function Compare() {
                           <option value="unchanged">Unchanged</option>
                         </select>
                       </th>
-                      <th
-                        style={{
-                          textAlign: "center",
-                          fontSize: 10,
-                          color: "var(--proof-text-secondary)",
-                        }}
-                      >
-                        Actions
-                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1618,82 +1537,6 @@ export default function Compare() {
                           <td>{stateBadge(d.state)}</td>
                           <td>
                             <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
-                              {approvals[d.id] === "approved" ? (
-                                <span
-                                  style={{
-                                    color: "var(--proof-green)",
-                                    fontSize: 12,
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  ✓
-                                </span>
-                              ) : approvals[d.id] === "blocked" ? (
-                                <span
-                                  style={{
-                                    color: "var(--proof-red)",
-                                    fontSize: 12,
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  ✗
-                                </span>
-                              ) : approvals[d.id] === "pending" ? (
-                                <span
-                                  style={{
-                                    color: "var(--proof-text-secondary)",
-                                    fontSize: 11,
-                                  }}
-                                >
-                                  Saving...
-                                </span>
-                              ) : approvals[d.id] === "error" ? (
-                                <span
-                                  style={{
-                                    color: "var(--proof-yellow)",
-                                    fontSize: 11,
-                                  }}
-                                >
-                                  Failed
-                                </span>
-                              ) : (
-                                <>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleApproval(d.id, "approved");
-                                    }}
-                                    style={{
-                                      padding: "2px 8px",
-                                      border: "1px solid var(--proof-green)",
-                                      borderRadius: 4,
-                                      background: "transparent",
-                                      color: "var(--proof-green)",
-                                      fontSize: 11,
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    ✓ Approve
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleApproval(d.id, "blocked");
-                                    }}
-                                    style={{
-                                      padding: "2px 8px",
-                                      border: "1px solid var(--proof-red)",
-                                      borderRadius: 4,
-                                      background: "transparent",
-                                      color: "var(--proof-red)",
-                                      fontSize: 11,
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    ✗ Block
-                                  </button>
-                                </>
-                              )}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1738,7 +1581,7 @@ export default function Compare() {
                     {filtered.length === 0 && (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={6}
                           style={{
                             textAlign: "center",
                             padding: "28px",

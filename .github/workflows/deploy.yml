@@ -18,15 +18,21 @@ env:
   NODE_OPTIONS: --max-old-space-size=4096
 
 jobs:
+  # ── Step 0: Validate config before doing anything ──────────────────────────
+  validate-config:
+    name: Validate AWARE config
+    uses: ./.github/workflows/validate-config.yml
+
   ci:
+    needs: [validate-config]
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: artifacts/aware-app
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
@@ -47,14 +53,15 @@ jobs:
         run: pnpm run audit
 
   e2e:
+    needs: [validate-config]
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: artifacts/aware-app
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
@@ -97,38 +104,6 @@ jobs:
           retention-days: 1
           if-no-files-found: warn
 
-  sync-data:
-    needs: [build-and-deploy]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Download updated data
-        uses: actions/download-artifact@v4
-        with:
-          name: updated-data
-          path: data/
-      - name: Commit run data to data branch
-        run: |
-          BRANCH="data"
-          git config user.name "AWARE Bot"
-          git config user.email "bot@aware.dev"
-          git fetch origin "+${BRANCH}:refs/remotes/origin/${BRANCH}" 2>/dev/null || true
-          if git show-ref --verify --quiet "refs/heads/${BRANCH}"; then
-            git checkout "${BRANCH}"
-          else
-            git checkout -b "${BRANCH}" "origin/${BRANCH}" 2>/dev/null || git checkout --orphan "${BRANCH}"
-          fi
-          cp "${GITHUB_WORKSPACE}/data/"*.json . 2>/dev/null || true
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to run data"
-          else
-            git commit -m "record CI run [skip ci]"
-            git push --force origin "${BRANCH}"
-          fi
-          git checkout -f main 2>/dev/null || true
-
   build-and-deploy:
     needs: [ci, e2e]
     runs-on: ubuntu-latest
@@ -141,9 +116,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
@@ -156,6 +131,7 @@ jobs:
         with:
           name: e2e-results
           path: artifacts/aware-app/test-results/
+        continue-on-error: true
 
       - name: Record run from Playwright results
         run: node scripts/record-run.mjs test-results/playwright-results.json --label "(Playwright)" --suffix pw
@@ -193,10 +169,10 @@ jobs:
             console.log('Manifest:', JSON.stringify(manifest, null, 2));
           "
 
-      - name: Build (production — non-mock)
+      - name: Build (production)
         run: pnpm build
         env:
-          BASE_PATH: /AWARE
+          BASE_PATH: /aware
           PORT: "1"
           NODE_ENV: production
 
@@ -204,13 +180,13 @@ jobs:
         run: cp dist/public/index.html dist/public/404.html
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@v3
         with:
           path: artifacts/aware-app/dist/public
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v4
 
       - name: Upload updated data for data branch sync
         if: always()
@@ -220,3 +196,63 @@ jobs:
           path: artifacts/aware-app/data/
           retention-days: 1
           if-no-files-found: warn
+
+  # ── Initialize data branch on first deploy ─────────────────────────────────
+  init-data-branch:
+    needs: [build-and-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install scripts dependencies
+        run: pnpm --filter @workspace/scripts install --frozen-lockfile
+
+      - name: Initialize data branch (if needed)
+        run: node scripts/init-data-branch.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sync-data:
+    needs: [build-and-deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download updated data
+        uses: actions/download-artifact@v4
+        with:
+          name: updated-data
+          path: data/
+        continue-on-error: true
+      - name: Commit run data to data branch
+        run: |
+          BRANCH="data"
+          git config user.name "AWARE Bot"
+          git config user.email "bot@aware.dev"
+          git fetch origin "+${BRANCH}:refs/remotes/origin/${BRANCH}" 2>/dev/null || true
+          if git show-ref --verify --quiet "refs/remotes/origin/${BRANCH}"; then
+            git checkout -b "${BRANCH}" "origin/${BRANCH}" 2>/dev/null || git checkout "${BRANCH}"
+          else
+            echo "Data branch does not exist yet — skipping sync (init-data-branch will create it)"
+            exit 0
+          fi
+          cp "${GITHUB_WORKSPACE}/data/"*.json . 2>/dev/null || true
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to run data"
+          else
+            git commit -m "record CI run [skip ci]"
+            git push --force origin "${BRANCH}"
+          fi
+          git checkout -f main 2>/dev/null || true

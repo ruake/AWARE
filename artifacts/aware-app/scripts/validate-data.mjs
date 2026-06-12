@@ -20,7 +20,7 @@ const REQUIRED_FIELDS = {
   },
   "runs.json": {
     type: "array",
-    itemRequired: ["id", "label", "suite", "target", "status", "passPct", "failures", "duration", "durationMs", "started", "build", "rev", "env", "network"],
+    itemRequired: ["id", "label", "suiteId", "envId", "status", "passPct", "failures", "duration", "durationMs", "started", "build", "rev", "env", "network"],
   },
   "test-suites.json": {
     type: "array",

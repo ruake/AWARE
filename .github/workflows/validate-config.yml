@@ -1,0 +1,106 @@
+# =============================================================================
+# A.W.A.R.E. — Config Validation
+#
+# Runs on every push / PR that touches config/ files.
+# Blocks merges when configuration is invalid or incomplete.
+#
+# Also runs as the first step of run-tests.yml (see that workflow).
+# =============================================================================
+
+name: Validate AWARE Config
+
+on:
+  push:
+    paths:
+      - "config/**"
+      - "scripts/validate-config.mjs"
+      - ".github/workflows/validate-config.yml"
+  pull_request:
+    paths:
+      - "config/**"
+      - "scripts/validate-config.mjs"
+      - ".github/workflows/validate-config.yml"
+  workflow_dispatch:
+    inputs:
+      warn_only:
+        description: "Warn on errors instead of failing (exit 0)"
+        required: false
+        default: "false"
+        type: boolean
+  workflow_call:
+    outputs:
+      valid:
+        description: "Whether the config is valid"
+        value: ${{ jobs.validate.outputs.valid }}
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    name: Validate config files
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.validate.outputs.valid }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate AWARE config files
+        id: validate
+        run: |
+          if node scripts/validate-config.mjs ${{ inputs.warn_only == 'true' && '--warn-only' || '' }}; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Post validation summary
+        if: always()
+        run: |
+          echo "## AWARE Config Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.validate.outputs.valid }}" = "true" ]; then
+            echo "✅ All config files are valid" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Config validation failed — fix the errors before merging" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Check the job log for details. See [SETUP.md](./SETUP.md) for configuration instructions." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Purpose |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| \`config/akamai-config.yml\` | Property metadata, EdgeWorker versions, promotion gate |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`config/environments.yml\`  | 6 target environments (QA/UAT/PROD × staging/production) |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`config/test-suites.yml\`   | Suite definitions, schedules, runners |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const valid = "${{ steps.validate.outputs.valid }}" === "true";
+            const icon = valid ? "✅" : "❌";
+            const status = valid ? "Config is valid" : "Config validation **failed**";
+            const body = `### ${icon} AWARE Config Validation\n\n${status}\n\n` +
+              (valid ? "All three config files pass validation." :
+               "Fix the errors shown in the [workflow log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) before merging.\n\nSee [SETUP.md](./SETUP.md) for configuration instructions.");
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
