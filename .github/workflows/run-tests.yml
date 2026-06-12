@@ -94,7 +94,7 @@ jobs:
       network:     ${{ steps.parse.outputs.network }}
       tier:        ${{ steps.parse.outputs.tier }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Install yq
         run: |
@@ -145,10 +145,10 @@ jobs:
       matrix:
         shard: [1, 2, 3, 4]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: pnpm
@@ -175,7 +175,7 @@ jobs:
           CI: true
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report-shard-${{ matrix.shard }}
@@ -189,7 +189,7 @@ jobs:
     needs: parse-config
     if: contains(needs.parse-config.outputs.runners, 'pytest') && github.event.inputs.dry_run != 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -220,7 +220,7 @@ jobs:
           CI: true
 
       - name: Upload pytest report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: pytest-report
@@ -234,18 +234,18 @@ jobs:
     needs: [parse-config, playwright, pytest]
     if: always()
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           path: all-results/
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -319,7 +319,7 @@ jobs:
             exit 0
           fi
           echo "gate_triggered=true" >> $GITHUB_OUTPUT
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         if: steps.check_uat.outputs.gate_triggered == 'true'
       - name: Install yq
         if: steps.check_uat.outputs.gate_triggered == 'true'
