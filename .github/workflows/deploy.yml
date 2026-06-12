@@ -30,9 +30,9 @@ jobs:
       run:
         working-directory: artifacts/aware-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
@@ -59,9 +59,9 @@ jobs:
       run:
         working-directory: artifacts/aware-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
@@ -70,7 +70,7 @@ jobs:
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Cache Playwright browsers
         id: pw-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: pw-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload E2E results and screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-results
           path: artifacts/aware-app/test-results/
@@ -116,9 +116,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
@@ -127,7 +127,7 @@ jobs:
         run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Download E2E results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: e2e-results
           path: artifacts/aware-app/test-results/
@@ -180,17 +180,17 @@ jobs:
         run: cp dist/public/index.html dist/public/404.html
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: artifacts/aware-app/dist/public
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
       - name: Upload updated data for data branch sync
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: updated-data
           path: artifacts/aware-app/data/
@@ -202,14 +202,14 @@ jobs:
     needs: [build-and-deploy]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
 
@@ -226,11 +226,11 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Download updated data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: updated-data
           path: data/
