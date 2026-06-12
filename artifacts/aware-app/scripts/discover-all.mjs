@@ -60,34 +60,43 @@ function runHttp(args = []) {
   return runScript("HTTP", cmd, HTTP_OUTPUT);
 }
 
-function mergeWithExisting(tests) {
-  // Preserve filmstrip, predicates, config, assertions from previous runs
-  // so manually-maintained metadata isn't lost on re-discovery.
-  if (!fs.existsSync(OUTPUT_FILE)) return tests;
-  let existing = [];
-  try {
-    existing = JSON.parse(fs.readFileSync(OUTPUT_FILE, "utf-8"));
-  } catch { return tests; }
+function mergeWithExisting(tests, existing) {
+  if (!existing || existing.length === 0) return tests;
 
   const oldByScript = {};
+  const oldById = {};
   for (const t of existing) {
-    oldByScript[t.scriptPath] = t;
+    if (t.scriptPath) oldByScript[t.scriptPath] = t;
+    oldById[t.id] = t;
   }
 
-  let preserved = 0;
+  // Update newly-discovered tests, preserving filmstrip metadata
+  let updated = 0;
   for (const t of tests) {
-    const old = oldByScript[t.scriptPath];
+    const old = oldByScript[t.scriptPath] || oldById[t.id];
     if (old) {
       if (old.filmstrip) t.filmstrip = old.filmstrip;
       if (old.screenshotOnFailure !== undefined) t.screenshotOnFailure = old.screenshotOnFailure;
-      preserved++;
+      updated++;
     }
   }
-  if (preserved > 0) console.error(`  Preserved filmstrip for ${preserved} tests`);
-  return tests;
+  if (updated > 0) console.error(`  Updated ${updated} tests from filesystem`);
+
+  // Merge: start with filesystem-discovered tests, then add any existing
+  // tests not found on filesystem (preserving seed data)
+  const discoveredIds = new Set(tests.map(t => t.id));
+  const preserved = [];
+  for (const t of existing) {
+    if (!discoveredIds.has(t.id)) {
+      preserved.push(t);
+    }
+  }
+  if (preserved.length > 0) console.error(`  Preserved ${preserved.length} seed tests not on filesystem`);
+
+  return [...tests, ...preserved];
 }
 
-function mergeAndWrite(pytestTests, playwrightTests, puppeteerTests, httpTests) {
+function mergeAndWrite(pytestTests, playwrightTests, puppeteerTests, httpTests, existingSeed) {
   let all = [...pytestTests, ...playwrightTests, ...puppeteerTests, ...httpTests];
 
   // Collision check
@@ -104,8 +113,8 @@ function mergeAndWrite(pytestTests, playwrightTests, puppeteerTests, httpTests) 
   ids.clear();
   all = null;
 
-  // Preserve filmstrip from previous run
-  const merged = mergeWithExisting(unique);
+  // Preserve filmstrip from previous run + any seed tests not on filesystem
+  const merged = mergeWithExisting(unique, existingSeed);
 
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(merged, null, 2), "utf-8");
   console.error(`\n  Merged: ${unique.length} tests (${pytestTests.length} pytest + ${playwrightTests.length} playwright + ${puppeteerTests.length} puppeteer + ${httpTests.length} http)`);
@@ -123,6 +132,14 @@ function mergeAndWrite(pytestTests, playwrightTests, puppeteerTests, httpTests) 
 function main() {
   const args = process.argv.slice(2);
 
+  // Snapshot existing seed data before any discovery overwrites it
+  let existingSeed = [];
+  if (fs.existsSync(OUTPUT_FILE)) {
+    try {
+      existingSeed = JSON.parse(fs.readFileSync(OUTPUT_FILE, "utf-8"));
+    } catch { /* ignore */ }
+  }
+
   const pytestDirsIdx = args.indexOf("--pytest-dirs");
   const playwrightDirsIdx = args.indexOf("--playwright-dirs");
 
@@ -130,11 +147,16 @@ function main() {
   const playwrightArgs = playwrightDirsIdx >= 0 ? ["--dirs", args[playwrightDirsIdx + 1]] : [];
 
   const pytestTests = runPytest(pytestArgs);
+
+  // Restore seed data snapshot (pytest may have overwritten it)
+  if (existingSeed.length > 0) {
+    fs.writeFileSync(OUTPUT_FILE, JSON.stringify(existingSeed, null, 2), "utf-8");
+  }
   const playwrightTests = runPlaywright(playwrightArgs);
   const puppeteerTests = runPuppeteer();
   const httpTests = runHttp();
 
-  mergeAndWrite(pytestTests, playwrightTests, puppeteerTests, httpTests);
+  mergeAndWrite(pytestTests, playwrightTests, puppeteerTests, httpTests, existingSeed);
 
   // Clean up intermediate files
   for (const f of [PLAYWRIGHT_OUTPUT, PUPPETEER_OUTPUT, HTTP_OUTPUT]) {
