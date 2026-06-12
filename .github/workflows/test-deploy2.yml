@@ -1,0 +1,22 @@
+name: Test Deploy 2
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: test-pages-2
+  cancel-in-progress: true
+jobs:
+  validate-config:
+    name: Validate AWARE config
+    uses: ./.github/workflows/validate-config.yml
+    with:
+      warn_only: "false"
+    secrets: inherit
+  test-job:
+    needs: [validate-config]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "OK"
