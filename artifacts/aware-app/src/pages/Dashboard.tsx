@@ -33,7 +33,7 @@ import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { PropertyStatusBar } from "@/components/aware/PropertyStatusBar";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 
-import { GoogleFilterableTable, GoogleAreaChart } from "@/components/aware/GoogleCharts";
+import { GoogleAreaChart } from "@/components/aware/GoogleCharts";
 import { PassRateHeatmap } from "@/components/aware/PassRateHeatmap";
 import { Chart } from "react-google-charts";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";

@@ -34,7 +34,7 @@ import type { AIInsight, AIUseCase } from "@/lib/ai";
 import { getProvider, getLLMConfig, setLLMConfig } from "@/lib/llm";
 import { RUNS } from "@/lib/runs";
 import type { LLMProviderType } from "@/lib/types";
-import { checkWebLLM, checkChromeAI, getChromeAIStatus } from "@/lib/llm";
+import { checkWebLLM, getChromeAIStatus } from "@/lib/llm";
 import { Markdown } from "@/components/aware/Markdown";
 
 const USE_CASE_ICONS: Record<string, React.ReactNode> = {
