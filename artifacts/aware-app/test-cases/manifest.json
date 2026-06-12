@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-12T08:11:12.658Z",
+  "generated": "2026-06-12T09:41:24.077Z",
   "totalTests": 114,
   "categories": [
     "geo-match",
@@ -17,11 +17,11 @@
   "suites": [
     "suite_auto",
     "suite_e2e",
-    "suite_full",
-    "suite_geo",
+    "suite_regression_qa",
+    "suite_edgeworker",
     "suite_smoke",
-    "suite_perf",
-    "suite_security"
+    "suite_performance",
+    "suite_nightly_prod"
   ],
   "automated": 114
 }

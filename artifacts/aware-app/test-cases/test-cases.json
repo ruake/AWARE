@@ -4014,8 +4014,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_geo",
+      "suite_regression_qa",
+      "suite_edgeworker",
       "suite_smoke"
     ],
     "automated": true,
@@ -4074,8 +4074,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_geo"
+      "suite_regression_qa",
+      "suite_edgeworker"
     ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_eu_west_resolves_to_dub",
@@ -4133,8 +4133,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_geo"
+      "suite_regression_qa",
+      "suite_edgeworker"
     ],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_ap_southeast_resolves_to_sin",
@@ -4192,8 +4192,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_geo",
+      "suite_regression_qa",
+      "suite_edgeworker",
       "suite_smoke"
     ],
     "automated": true,
@@ -4250,8 +4250,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_perf",
+      "suite_regression_qa",
+      "suite_performance",
       "suite_smoke"
     ],
     "automated": true,
@@ -4309,8 +4309,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_perf"
+      "suite_regression_qa",
+      "suite_performance"
     ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_ttl_respects_max_age",
@@ -4366,8 +4366,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_perf"
+      "suite_regression_qa",
+      "suite_performance"
     ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_purge_invalidates_within_5s",
@@ -4423,8 +4423,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_perf"
+      "suite_regression_qa",
+      "suite_performance"
     ],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_stale_on_origin_timeout",
@@ -4479,8 +4479,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_security",
+      "suite_regression_qa",
+      "suite_nightly_prod",
       "suite_smoke"
     ],
     "automated": true,
@@ -4537,8 +4537,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_security"
+      "suite_regression_qa",
+      "suite_nightly_prod"
     ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWAF::test_rate_limit_at_100_rps",
@@ -4594,8 +4594,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_security"
+      "suite_regression_qa",
+      "suite_nightly_prod"
     ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestTLS::test_tls13_negotiated",
@@ -4649,8 +4649,8 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
-      "suite_security"
+      "suite_regression_qa",
+      "suite_nightly_prod"
     ],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestTLS::test_hsts_max_age",
@@ -4703,7 +4703,7 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
+      "suite_regression_qa",
       "suite_smoke"
     ],
     "automated": true,
@@ -4758,7 +4758,7 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full"
+      "suite_regression_qa"
     ],
     "automated": true,
     "scriptPath": "tests/e2e/test_error_pages.spec.ts::test_custom_404_page",
@@ -4813,7 +4813,7 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full"
+      "suite_regression_qa"
     ],
     "automated": true,
     "scriptPath": "tests/e2e/test_access_control.spec.ts::test_signed_url_enforced",
@@ -4867,7 +4867,7 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full"
+      "suite_regression_qa"
     ],
     "automated": true,
     "scriptPath": "tests/e2e/test_edgeworker.spec.ts::test_ew_rewrites_xfh_header",
@@ -4922,7 +4922,7 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
+      "suite_regression_qa",
       "suite_smoke"
     ],
     "automated": true,
@@ -4979,7 +4979,7 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full",
+      "suite_regression_qa",
       "suite_smoke"
     ],
     "automated": true,
@@ -5036,7 +5036,7 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full"
+      "suite_regression_qa"
     ],
     "automated": true,
     "scriptPath": "tests/http/compression.http",
@@ -5092,7 +5092,7 @@
     ],
     "owner": "platform-team@example.com",
     "suiteIds": [
-      "suite_full"
+      "suite_regression_qa"
     ],
     "automated": true,
     "scriptPath": "tests/http/cors_headers.http",
