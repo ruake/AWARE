@@ -1,3 +1,8 @@
+---
+name: aware-config-expert
+description: Expert in config-as-code YAML files (akamai-config.yml, environments.yml, test-suites.yml), runtime envConfig.ts with localStorage override (aware-env-configs-v3), and CiConfig generation. Use when modifying environment definitions, adding suites, changing promotion gate thresholds, or debugging config mismatches.
+---
+
 # AWARE Config Expert
 
 ## Role

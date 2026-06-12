@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, Clock, Activity, Play, ExternalLink } from "lucide-react";
+import { Calendar, Clock, Activity } from "lucide-react";
 import { getSchedulerStatus, subscribeToSchedulerStatus } from "@/lib/data";
 import type { SchedulerStatus } from "@/lib/data";
 
@@ -254,7 +254,9 @@ export function SchedulerStatusCard() {
                   {new Date(d.timestamp).toLocaleTimeString()}
                 </span>
                 <span style={{ fontWeight: 500, color: "var(--proof-text)" }}>{d.suite}</span>
-                <span>{d.dispatched}/{d.environments.length} envs</span>
+                <span>
+                  {d.dispatched}/{d.environments.length} envs
+                </span>
                 {d.failed > 0 && (
                   <span style={{ color: "var(--proof-red)" }}>({d.failed} failed)</span>
                 )}

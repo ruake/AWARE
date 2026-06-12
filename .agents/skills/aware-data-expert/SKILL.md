@@ -1,3 +1,8 @@
+---
+name: aware-data-expert
+description: Expert in seed JSON data, TypeScript type definitions, in-memory stores (pub/sub), localStorage persistence, flakiness computation, and data validation. Use when modifying data types, seed JSON, stores, run history, flakiness scores, or diff computation.
+---
+
 # AWARE Data Expert
 
 ## Role

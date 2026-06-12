@@ -1,3 +1,8 @@
+---
+name: aware-security-expert
+description: Expert in WAF/bot management test coverage, TLS validation, security header assertions, CSP policy testing, and security-category test case design for Akamai CDN properties. Use when designing security test cases, configuring WAF/bot manager assertions, or analyzing security-category failures.
+---
+
 # AWARE Security Expert
 
 ## Role
