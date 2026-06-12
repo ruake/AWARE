@@ -1360,11 +1360,11 @@ export default function Compare() {
                 <table className="proof-table">
                   <colgroup>
                     <col />
-                    <col style={{ width: 120 }} />
-                    <col style={{ width: 120 }} />
-                    <col style={{ width: 100 }} />
-                    <col style={{ width: 110 }} />
-                    <col style={{ width: 110 }} />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
                   </colgroup>
                   <thead
                     style={{
@@ -1486,10 +1486,6 @@ export default function Compare() {
                               fontSize: 11,
                               color: "var(--proof-blue)",
                               fontWeight: 500,
-                              maxWidth: 260,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
                             }}
                           >
                             {d.name}

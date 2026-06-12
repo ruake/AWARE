@@ -98,10 +98,6 @@ function RelatedTests({ testCase }: { testCase: TestCase }) {
                     style={{
                       fontFamily: "var(--font-mono)",
                       fontSize: 11,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      maxWidth: 180,
-                      whiteSpace: "nowrap",
                     }}
                     title={name}
                   >

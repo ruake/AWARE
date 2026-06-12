@@ -94,11 +94,6 @@ function RunRow({
               fontSize: 11,
               color: "var(--proof-blue)",
               fontWeight: 600,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: 220,
-              display: "block",
             }}
           >
             {run.id}
@@ -108,7 +103,6 @@ function RunRow({
               fontFamily: "var(--font-mono)",
               fontSize: 9.5,
               color: "var(--proof-text-muted)",
-              whiteSpace: "nowrap",
             }}
           >
             {run.build} · {run.rev?.slice(0, 7)}
@@ -124,16 +118,13 @@ function RunRow({
               fontFamily: "var(--font-mono)",
               fontSize: 11,
               fontWeight: 500,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
             }}
           >
             {run.suiteId}
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
             <span
-              style={{ fontSize: 10, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}
+              style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}
             >
               {run.env}
             </span>
@@ -151,7 +142,6 @@ function RunRow({
               fontFamily: "var(--font-mono)",
               fontSize: 10,
               color: "var(--proof-text-secondary)",
-              whiteSpace: "nowrap",
             }}
           >
             <span
@@ -187,12 +177,11 @@ function RunRow({
               fontFamily: "var(--font-mono)",
               fontSize: 11,
               color: "var(--proof-text-secondary)",
-              whiteSpace: "nowrap",
             }}
           >
             {run.duration}
           </span>
-          <span style={{ fontSize: 10, color: "var(--proof-text-muted)", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
             {new Date(run.started).toLocaleString(undefined, {
               month: "short",
               day: "numeric",
@@ -513,14 +502,14 @@ export default function Runs() {
             <div style={{ overflowX: "auto" }}>
               <table
                 className="proof-table"
-                style={{ tableLayout: "fixed", width: "100%", minWidth: 600 }}
+                style={{ width: "100%" }}
               >
                 <colgroup>
-                  <col style={{ width: "30%" }} />
-                  <col style={{ width: "25%" }} />
-                  <col style={{ width: "15%" }} />
-                  <col style={{ width: "15%" }} />
-                  <col style={{ width: "15%" }} />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
                 </colgroup>
                 <thead
                   style={{

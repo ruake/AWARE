@@ -346,10 +346,6 @@ export default function RunDetail() {
                           style={{
                             fontFamily: "var(--font-mono)",
                             fontSize: 11,
-                            maxWidth: 260,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
                           }}
                         >
                           {r.name}

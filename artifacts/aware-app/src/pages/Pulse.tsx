@@ -118,9 +118,6 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
               fontSize: 12,
               fontWeight: 500,
               color: "var(--proof-text)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
             }}
           >
             {run.label}
@@ -166,15 +163,12 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
               fontFamily: "var(--font-mono)",
               fontSize: 11,
               fontWeight: 500,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
             }}
           >
             {run.suiteId}
           </span>
           <span
-            style={{ fontSize: 10, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}
+            style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}
           >
             {run.env}
             {run.network && (
@@ -206,7 +200,6 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
             fontFamily: "var(--font-mono)",
             fontSize: 11,
             color: "var(--proof-text-secondary)",
-            whiteSpace: "nowrap",
           }}
         >
           {formatDuration(run.durationMs)}
@@ -214,7 +207,7 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
       </td>
       {/* When */}
       <td style={{ verticalAlign: "middle" }}>
-        <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
           {timeAgo(run.started)}
         </span>
       </td>
@@ -229,7 +222,6 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
             border: "1px solid var(--proof-border)",
             padding: "2px 6px",
             borderRadius: 3,
-            whiteSpace: "nowrap",
           }}
         >
           {run.build?.slice(0, 7) || "—"}
@@ -746,16 +738,16 @@ export default function Pulse() {
             <div style={{ overflowX: "auto" }}>
               <table
                 className="proof-table"
-                style={{ minWidth: 820, tableLayout: "fixed", width: "100%" }}
+                style={{ width: "100%" }}
               >
                 <colgroup>
                   <col />
-                  <col style={{ width: 110 }} />
-                  <col style={{ width: 72 }} />
-                  <col style={{ width: 200 }} />
-                  <col style={{ width: 90 }} />
-                  <col style={{ width: 80 }} />
-                  <col style={{ width: 75 }} />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
                 </colgroup>
                 <thead>
                   <tr>
