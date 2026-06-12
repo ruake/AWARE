@@ -107,7 +107,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         label: s.name,
         description: `${s.testIds.length} tests · ${s.config.target}/${s.config.environment}`,
         type: "suite" as const,
-        href: "/tests",
+        href: "/suites",
         icon: "📁",
       })),
       ...testCases.slice(0, 30).map((tc) => ({
@@ -115,7 +115,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         label: tc.name,
         description: `${tc.category} · ${tc.priority} · ${tc.status}`,
         type: "test" as const,
-        href: `/tests`,
+        href: `/suites`,
         icon: "🧪",
       })),
       ...RUNS.map((r) => ({

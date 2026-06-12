@@ -311,7 +311,7 @@ export default function TestAnalytics() {
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Header with searchable selector */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Link href={isTcMode ? "/tests" : "/compare"} className="proof-button proof-button-sm">
+          <Link href={isTcMode ? "/suites" : "/compare"} className="proof-button proof-button-sm">
             <ArrowLeft size={13} /> {isTcMode ? "Tests" : "Compare"}
           </Link>
           <ChevronRight size={14} style={{ color: "var(--proof-text-secondary)" }} />

@@ -920,8 +920,8 @@ const DOC_SECTIONS: DocEntry[] = [
             candidate run. Review regressions, fixed tests, and approve or block the promotion.
           </li>
           <li>
-            <strong>Manage Tests</strong> (<code>/tests</code>) — Create, edit, import, export, and
-            organize test cases. Use bulk actions to update statuses or add to suites.
+            <strong>Manage Tests</strong> (<code>/suites</code>) — View test cases, browse suites,
+            and download the full test registry.
           </li>
           <li>
             <strong>Organize Suites</strong> (<code>/suites</code>) — Group test cases into suites
@@ -961,9 +961,9 @@ const DOC_SECTIONS: DocEntry[] = [
             "Select baseline and candidate runs from the dropdowns. The diff table shows regressions, fixes, duration changes. Click a row for the side panel. Use column filters (status, env, duration). The green banner shows promotion readiness.",
           ],
           [
-            "Test Manager",
-            "/tests",
-            "Full CRUD for test cases. The table has search, column toggles, and bulk actions (delete, change status/priority, add to suite). Use the + button to add a case with the tabbed form. Import auto-detects JSON/YAML/JUnit XML. Use the Generate Wizard to AI-generate tests.",
+            "Test Suites",
+            "/suites",
+            "Browse and organize test cases within suites. View test metadata, category distribution, and priority breakdown. Export the full test registry as JSON, CSV, or JUnit XML.",
           ],
           [
             "Test Suites",
@@ -2183,7 +2183,7 @@ export default function About() {
               <BarChart3 size={14} /> Dashboard
             </Link>
             <Link
-              href="/tests"
+              href="/suites"
               style={{
                 display: "flex",
                 alignItems: "center",

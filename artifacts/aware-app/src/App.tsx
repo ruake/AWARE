@@ -8,7 +8,6 @@ const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const Runs = React.lazy(() => import("@/pages/Runs"));
 const RunDetail = React.lazy(() => import("@/pages/RunDetail"));
 const Compare = React.lazy(() => import("@/pages/Compare"));
-const TestManager = React.lazy(() => import("@/pages/TestManager"));
 const TestSuiteManager = React.lazy(() => import("@/pages/TestSuiteManager"));
 const TestAnalytics = React.lazy(() => import("@/pages/TestAnalytics"));
 const TestDoc = React.lazy(() => import("@/pages/TestDoc"));
@@ -87,11 +86,6 @@ function Router() {
       <Route path="/analytics">
         <React.Suspense fallback={<PageLoader />}>
           <TestAnalytics />
-        </React.Suspense>
-      </Route>
-      <Route path="/tests">
-        <React.Suspense fallback={<PageLoader />}>
-          <TestManager />
         </React.Suspense>
       </Route>
       <Route path="/suites">
