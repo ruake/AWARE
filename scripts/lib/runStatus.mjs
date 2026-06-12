@@ -139,7 +139,7 @@ export function writeRuns(runsFile, runs) {
 }
 
 export function findRun(runs, suiteId, envLabel) {
-  return runs.find((r) => r.suite === suiteId && r.env === envLabel && r.status === "RUNNING");
+  return runs.find((r) => (r.suiteId || r.suite) === suiteId && r.env === envLabel && r.status === "RUNNING");
 }
 
 export function updateRunInPlace(runs, runId, patch) {
