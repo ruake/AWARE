@@ -97,6 +97,38 @@ jobs:
           retention-days: 1
           if-no-files-found: warn
 
+  sync-data:
+    needs: [build-and-deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Download updated data
+        uses: actions/download-artifact@v4
+        with:
+          name: updated-data
+          path: data/
+      - name: Commit run data to data branch
+        run: |
+          BRANCH="data"
+          git config user.name "AWARE Bot"
+          git config user.email "bot@aware.dev"
+          git fetch origin "+${BRANCH}:refs/remotes/origin/${BRANCH}" 2>/dev/null || true
+          if git show-ref --verify --quiet "refs/heads/${BRANCH}"; then
+            git checkout "${BRANCH}"
+          else
+            git checkout -b "${BRANCH}" "origin/${BRANCH}" 2>/dev/null || git checkout --orphan "${BRANCH}"
+          fi
+          cp "${GITHUB_WORKSPACE}/data/"*.json . 2>/dev/null || true
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to run data"
+          else
+            git commit -m "record CI run [skip ci]"
+            git push origin "${BRANCH}"
+          fi
+          git checkout -f main 2>/dev/null || true
+
   build-and-deploy:
     needs: [ci, e2e]
     runs-on: ubuntu-latest
@@ -180,26 +212,11 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v5
 
-      - name: Commit run data to data branch
+      - name: Upload updated data for data branch sync
         if: always()
-        run: |
-          BRANCH="data"
-          git config user.name "AWARE Bot"
-          git config user.email "bot@aware.dev"
-          git fetch origin "${BRANCH}:${BRANCH}" 2>/dev/null || true
-          if git checkout "${BRANCH}" 2>/dev/null; then
-            :
-          else
-            git checkout --orphan "${BRANCH}"
-            for f in *; do [ "$f" != ".git" ] && rm -rf "$f" 2>/dev/null || true; done
-          fi
-          cp "${GITHUB_WORKSPACE}/artifacts/aware-app/data/runs.json" runs.json 2>/dev/null || true
-          cp "${GITHUB_WORKSPACE}/artifacts/aware-app/data/test-results.json" test-results.json 2>/dev/null || true
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to run data"
-          else
-            git commit -m "record CI run [skip ci]"
-            git push origin "${BRANCH}"
-          fi
-          git checkout -f main 2>/dev/null || true
+        uses: actions/upload-artifact@v4
+        with:
+          name: updated-data
+          path: artifacts/aware-app/data/
+          retention-days: 1
+          if-no-files-found: warn

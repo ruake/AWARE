@@ -127,12 +127,11 @@ jobs:
           BRANCH="data"
           git config user.name "AWARE Bot"
           git config user.email "bot@aware.dev"
-          git fetch origin "${BRANCH}:${BRANCH}" 2>/dev/null || true
-          if git checkout "${BRANCH}" 2>/dev/null; then
-            :
+          git fetch origin "+${BRANCH}:refs/remotes/origin/${BRANCH}" 2>/dev/null || true
+          if git show-ref --verify --quiet "refs/heads/${BRANCH}"; then
+            git checkout "${BRANCH}"
           else
-            git checkout --orphan "${BRANCH}"
-            for f in *; do [ "$f" != ".git" ] && rm -rf "$f" 2>/dev/null || true; done
+            git checkout -b "${BRANCH}" "origin/${BRANCH}" 2>/dev/null || git checkout --orphan "${BRANCH}"
           fi
           # Copy every file from artifacts/aware-app/data to the branch root
           mkdir -p test-results
