@@ -34,10 +34,6 @@ on:
         required: false
         default: "false"
         type: boolean
-    outputs:
-      valid:
-        description: "Whether the config is valid"
-        value: ${{ jobs.validate.outputs.valid }}
 
 permissions:
   contents: read
