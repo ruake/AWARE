@@ -1,42 +1,36 @@
 // @ts-nocheck
 /*
- * HTTP security headers and response validation tests.
- * Tests security headers, caching behavior, and content-type.
+ * HTTP CDN headers and response validation tests for Akamai edge properties.
+ * Tests Akamai CDN headers, security headers, caching behavior, and content-type.
  */
 
-const TEST_BASE = "https://the-internet.herokuapp.com";
+const TEST_BASE = process.env.BASE_URL || "https://www.akamai.com";
 
-function test(name, fn) { if (typeof globalThis.__httpRegister === "function") globalThis.__httpRegister(name, "Security", "herokuapp-http", fn); }
+function test(name, fn) { if (typeof globalThis.__httpRegister === "function") globalThis.__httpRegister(name, "CDN", "akamai-http", fn); }
 
-test.describe("HTTP Security Headers", () => {
+test.describe("HTTP CDN Headers", () => {
 
-  test("login page has X-Content-Type-Options: nosniff", async () => {
+  test("homepage has X-Cache header", async () => {
   });
 
-  test("login page has X-Frame-Options: SAMEORIGIN", async () => {
+  test("homepage has Cache-Control header", async () => {
   });
 
-  test("login page has X-XSS-Protection header", async () => {
+  test("homepage has Strict-Transport-Security header", async () => {
   });
 
-  test("login page has Content-Type: text/html", async () => {
+  test("homepage has X-Content-Type-Options header", async () => {
   });
 
-  test("all pages have Server header", async () => {
+  test("homepage has Content-Type header", async () => {
   });
 
-  test("login page sets cookies on authentication", async () => {
+  test("server header does not expose version", async () => {
   });
 
-  test("checkboxes page returns Content-Type: text/html", async () => {
+  test("/en has Content-Type header", async () => {
   });
 
-  test("dropdown page response has Content-Length header", async () => {
-  });
-
-  test("all herokuapp pages use UTF-8 charset", async () => {
-  });
-
-  test("no page exposes internal server version", async () => {
+  test("/robots.txt has Content-Type header", async () => {
   });
 });

@@ -13,7 +13,8 @@ export const RUNNER_DEFS: JobRunnerDef[] = [
     id: "runner_playwright",
     name: "Playwright",
     type: "test-run",
-    description: "Browser-based CDN tests via Playwright (geo-match, edge-routing, HTTP assertions)",
+    description:
+      "Browser-based CDN tests via Playwright (geo-match, edge-routing, HTTP assertions)",
     icon: "browser",
     defaultSuiteId: "suite_smoke",
   },

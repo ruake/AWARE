@@ -1,58 +1,28 @@
 // @ts-nocheck
 /*
- * HTTP URL health check tests for the-internet.herokuapp.com
+ * HTTP CDN health check tests for Akamai edge properties.
  * Discovered by discover-http.mjs; run by scripts/run-http.mjs
  * Tests basic URL reachability and response codes.
  */
 
-const TEST_BASE = "https://the-internet.herokuapp.com";
+const TEST_BASE = process.env.BASE_URL || "https://www.akamai.com";
 
-function test(name, fn) { if (typeof globalThis.__httpRegister === "function") globalThis.__httpRegister(name, "URL Health", "herokuapp-http", fn); }
+function test(name, fn) { if (typeof globalThis.__httpRegister === "function") globalThis.__httpRegister(name, "URL Health", "akamai-http", fn); }
 
-test.describe("HTTP Health Checks", () => {
+test.describe("HTTP CDN Health Checks", () => {
 
-  test("login page returns 200", async () => {
+  test("homepage returns 200 via Akamai CDN", async () => {
   });
 
-  test("checkboxes page returns 200", async () => {
+  test("/en returns 200 via Akamai CDN", async () => {
   });
 
-  test("dropdown page returns 200", async () => {
+  test("/robots.txt returns 200 via Akamai CDN", async () => {
   });
 
-  test("dynamic loading page returns 200", async () => {
+  test("/sitemap.xml returns 200 via Akamai CDN", async () => {
   });
 
-  test("javascript alerts page returns 200", async () => {
-  });
-
-  test("frames page returns 200", async () => {
-  });
-
-  test("windows page returns 200", async () => {
-  });
-
-  test("key presses page returns 200", async () => {
-  });
-
-  test("file upload page returns 200", async () => {
-  });
-
-  test("drag and drop page returns 200", async () => {
-  });
-
-  test("secure page redirects to login", async () => {
-  });
-
-  test("non-existent page returns 404", async () => {
-  });
-
-  test("basic auth page prompts for credentials", async () => {
-  });
-
-  test("digest auth page prompts for credentials", async () => {
-  });
-
-  test("status codes page returns 200", async () => {
+  test("non-existent path returns 404 via Akamai CDN", async () => {
   });
 });

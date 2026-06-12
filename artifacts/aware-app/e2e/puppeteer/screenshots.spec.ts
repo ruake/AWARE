@@ -1,34 +1,25 @@
 // @ts-nocheck
 /*
- * Puppeteer screenshot tests for the-internet.herokuapp.com
+ * Puppeteer CDN screenshot tests for Akamai edge properties.
  * Discovered by discover-puppeteer.mjs; run by scripts/run-puppeteer.mjs
  * Tests Puppeteer's screenshot and visual capture capabilities.
  */
 
-const TEST_BASE = "https://the-internet.herokuapp.com";
+const TEST_BASE = process.env.BASE_URL || "https://www.akamai.com";
 
-function test(name, fn) { if (typeof globalThis.__puppeteerRegister === "function") globalThis.__puppeteerRegister(name, "Screenshots", "herokuapp-puppeteer", fn); }
+function test(name, fn) { if (typeof globalThis.__puppeteerRegister === "function") globalThis.__puppeteerRegister(name, "Screenshots", "akamai-puppeteer", fn); }
 
-test.describe("Puppeteer Screenshot Tests", () => {
+test.describe("Puppeteer CDN Screenshot Tests", () => {
 
-  test("capture login page screenshot", async () => {
-    // Navigate and capture full-page screenshot
-    // Puppeteer excels at full-page screenshots vs Playwright
+  test("capture Akamai homepage full-page screenshot", async () => {
   });
 
-  test("capture dynamic loading element screenshot", async () => {
-    // Wait for element to appear, then capture
+  test("capture /en page screenshot", async () => {
   });
 
-  test("capture dropdown options screenshot", async () => {
-    // Open dropdown, capture the open state
+  test("capture robots.txt as rendered", async () => {
   });
 
-  test("capture frames page screenshot", async () => {
-    // Capture nested frames as rendered
-  });
-
-  test("capture file upload page screenshot", async () => {
-    // Capture before and after upload states
+  test("capture sitemap.xml screenshot", async () => {
   });
 });
