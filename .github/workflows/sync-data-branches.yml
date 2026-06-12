@@ -141,7 +141,7 @@ jobs:
             echo "No changes to data branch"
           else
             git commit -m "sync: update data branch ($(date -u +%Y-%m-%d))"
-            git push origin "${BRANCH}"
+            git push --force origin "${BRANCH}"
           fi
           git checkout -f main 2>/dev/null || true
 
