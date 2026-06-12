@@ -234,21 +234,24 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: updated-data
-          path: data/
+          path: updated-data/
         continue-on-error: true
       - name: Commit run data to data branch
         run: |
+          DATA_DIR="${GITHUB_WORKSPACE}/updated-data"
           BRANCH="data"
           git config user.name "AWARE Bot"
           git config user.email "bot@aware.dev"
           git fetch origin "+${BRANCH}:refs/remotes/origin/${BRANCH}" 2>/dev/null || true
           if git show-ref --verify --quiet "refs/remotes/origin/${BRANCH}"; then
-            git checkout -b "${BRANCH}" "origin/${BRANCH}" 2>/dev/null || git checkout "${BRANCH}" --
+            git checkout -b "${BRANCH}" "origin/${BRANCH}" 2>/dev/null || git checkout "${BRANCH}"
           else
             echo "Data branch does not exist yet — skipping sync (init-data-branch will create it)"
             exit 0
           fi
-          cp "${GITHUB_WORKSPACE}/data/"*.json . 2>/dev/null || true
+          if [ -d "$DATA_DIR" ]; then
+            cp "$DATA_DIR"/*.json . 2>/dev/null || true
+          fi
           git add -A
           if git diff --cached --quiet; then
             echo "No changes to run data"
