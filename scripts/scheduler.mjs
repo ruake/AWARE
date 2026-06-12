@@ -147,7 +147,7 @@ function commitDataFiles() {
 
     sh(`git fetch origin ${DATA_BRANCH}:${DATA_BRANCH} 2>/dev/null || true`);
     try {
-      sh(`git checkout ${DATA_BRANCH}`);
+      sh(`git checkout -f ${DATA_BRANCH}`);
     } catch {
       sh(`git checkout --orphan ${DATA_BRANCH}`);
       for (const e of readdirSync(ROOT)) {
@@ -251,7 +251,7 @@ async function main() {
     if (due) {
       // Check for active runs via GH API
       const active = []; // simplified — we check via runs.json below
-      activeCount = runs.filter((r) => r.suite === suite.id && r.status === "RUNNING").length;
+      activeCount = runs.filter((r) => (r.suiteId || r.suite) === suite.id && r.status === "RUNNING").length;
 
       if (activeCount > 0) {
         dispatchAction = `\u23F3 ${activeCount} active run(s)`;
@@ -275,8 +275,8 @@ async function main() {
             runs.unshift({
               id: runId,
               label: `${suite.name} — ${env}`,
-              suite: suite.id,
-              target: envInfo.target,
+              suiteId: suite.id,
+              envId: envInfo.target,
               status: "RUNNING",
               conditions: initialRunConditions(),
               passPct: 0,
@@ -318,8 +318,8 @@ async function main() {
     }
 
     // Determine suite status for status object
-    const runningCount = runs.filter((r) => r.suite === suite.id && r.status === "RUNNING").length;
-    const lastRun = runs.find((r) => r.suite === suite.id && r.status !== "RUNNING");
+    const runningCount = runs.filter((r) => (r.suiteId || r.suite) === suite.id && r.status === "RUNNING").length;
+    const lastRun = runs.find((r) => (r.suiteId || r.suite) === suite.id && r.status !== "RUNNING");
     let suiteStatus = "idle";
     if (runningCount > 0) {
       suiteStatus = "running";
