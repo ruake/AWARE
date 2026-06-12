@@ -19,6 +19,7 @@ import {
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { HeatmapCalendar } from "@/components/aware/HeatmapCalendar";
 import { computeRunFrequency } from "@/lib/data";
+import { SchedulerStatusCard } from "@/components/aware/SchedulerStatusCard";
 
 interface Stage {
   id: string;
@@ -516,6 +517,9 @@ export default function Status() {
             </pre>
           </div>
         </div>
+
+        {/* Scheduler Status */}
+        <SchedulerStatusCard />
 
         {/* Quick nav */}
         <div className="proof-card" style={{ padding: "14px 18px" }}>

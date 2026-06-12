@@ -1,0 +1,14 @@
+{
+  "lastRun": null,
+  "lastRunBy": null,
+  "status": "healthy",
+  "suites": [],
+  "recentDispatches": [],
+  "summary": {
+    "total": 0,
+    "scheduled": 0,
+    "due": 0,
+    "dispatched": 0,
+    "running": 0
+  }
+}
