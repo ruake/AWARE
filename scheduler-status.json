@@ -1,82 +1,95 @@
 {
-  "lastRun": "2026-06-12T06:00:00.000Z",
-  "lastRunBy": "ci-bot@aware.dev",
+  "lastRun": "2026-06-12T12:29:42.509Z",
+  "lastRunBy": "ruake",
   "status": "healthy",
   "suites": [
-    {
-      "id": "suite_regression_qa",
-      "name": "Full Regression — QA (Staging + Production)",
-      "schedule": "0 */2 * * *",
-      "scheduleDesc": "Every 2 hours",
-      "due": false,
-      "lastDispatched": "2026-06-12T06:00:01.000Z",
-      "lastConclusion": "success",
-      "lastRunUrl": "https://github.com/your-org/your-repo/actions/runs/123",
-      "activeRuns": 0,
-      "status": "idle",
-      "nextDue": "2026-06-12T08:00:00.000Z",
-      "environments": ["qa_staging", "qa_prod"],
-      "runners": ["playwright", "pytest"]
-    },
-    {
-      "id": "suite_regression_uat",
-      "name": "Full Regression — UAT (Staging + Production)",
-      "schedule": "0 6 * * *",
-      "scheduleDesc": "Daily at 06:00 UTC",
-      "due": false,
-      "lastDispatched": "2026-06-12T06:00:01.000Z",
-      "lastConclusion": "success",
-      "lastRunUrl": null,
-      "activeRuns": 0,
-      "status": "idle",
-      "nextDue": "2026-06-13T06:00:00.000Z",
-      "environments": ["uat_staging", "uat_prod"],
-      "runners": ["playwright", "pytest"]
-    },
-    {
-      "id": "suite_nightly_prod",
-      "name": "Nightly Regression — PROD (Staging + Production)",
-      "schedule": "0 2 * * *",
-      "scheduleDesc": "Daily at 02:00 UTC",
-      "due": false,
-      "lastDispatched": "2026-06-12T02:00:01.000Z",
-      "lastConclusion": "success",
-      "lastRunUrl": null,
-      "activeRuns": 0,
-      "status": "idle",
-      "nextDue": "2026-06-13T02:00:00.000Z",
-      "environments": ["prod_staging", "prod_prod"],
-      "runners": ["playwright", "pytest"]
-    },
-    {
-      "id": "suite_performance",
-      "name": "Performance Benchmarks",
-      "schedule": "0 4 * * 1",
-      "scheduleDesc": "Weekly on Monday at 04:00 UTC",
-      "due": false,
-      "lastDispatched": "2026-06-08T04:00:01.000Z",
-      "lastConclusion": "success",
-      "lastRunUrl": null,
-      "activeRuns": 0,
-      "status": "idle",
-      "nextDue": "2026-06-15T04:00:00.000Z",
-      "environments": ["qa_prod", "uat_prod", "prod_prod"],
-      "runners": ["playwright"]
-    },
     {
       "id": "suite_smoke",
       "name": "Smoke — All Environments",
       "schedule": null,
       "scheduleDesc": null,
       "due": false,
-      "lastDispatched": null,
+      "lastDispatched": "2026-06-12T12:29:42.509Z",
       "lastConclusion": null,
       "lastRunUrl": null,
       "activeRuns": 0,
       "status": "idle",
       "nextDue": null,
-      "environments": ["qa_staging", "qa_prod", "uat_staging", "uat_prod", "prod_staging", "prod_prod"],
-      "runners": ["playwright", "pytest"]
+      "environments": [
+        "QA / Staging",
+        "QA / Production",
+        "UAT / Staging",
+        "UAT / Production",
+        "PROD / Staging",
+        "PROD / Production"
+      ],
+      "runners": [
+        "playwright",
+        "pytest"
+      ]
+    },
+    {
+      "id": "suite_regression_qa",
+      "name": "Full Regression — QA (Staging + Production)",
+      "schedule": "0 */2 * * *",
+      "scheduleDesc": "Every 2 hours",
+      "due": false,
+      "lastDispatched": "2026-06-12T12:29:42.509Z",
+      "lastConclusion": "PASS",
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "passed",
+      "nextDue": "2026-06-12T14:00:42.509Z",
+      "environments": [
+        "QA / Staging",
+        "QA / Production"
+      ],
+      "runners": [
+        "playwright",
+        "pytest"
+      ]
+    },
+    {
+      "id": "suite_regression_uat",
+      "name": "Full Regression — UAT (Staging + Production)",
+      "schedule": "0 6 * * *",
+      "scheduleDesc": "Daily 06:00 UTC",
+      "due": false,
+      "lastDispatched": "2026-06-12T12:29:42.509Z",
+      "lastConclusion": "PASS",
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "passed",
+      "nextDue": "2026-06-13T06:00:42.509Z",
+      "environments": [
+        "UAT / Staging",
+        "UAT / Production"
+      ],
+      "runners": [
+        "playwright",
+        "pytest"
+      ]
+    },
+    {
+      "id": "suite_nightly_prod",
+      "name": "Nightly Regression — PROD (Staging + Production)",
+      "schedule": "0 2 * * *",
+      "scheduleDesc": "Daily 02:00 UTC",
+      "due": false,
+      "lastDispatched": "2026-06-12T12:29:42.509Z",
+      "lastConclusion": "PASS",
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "passed",
+      "nextDue": "2026-06-13T02:00:42.509Z",
+      "environments": [
+        "PROD / Staging",
+        "PROD / Production"
+      ],
+      "runners": [
+        "playwright",
+        "pytest"
+      ]
     },
     {
       "id": "suite_edgeworker",
@@ -84,21 +97,50 @@
       "schedule": null,
       "scheduleDesc": null,
       "due": false,
-      "lastDispatched": null,
+      "lastDispatched": "2026-06-12T12:29:42.509Z",
       "lastConclusion": null,
       "lastRunUrl": null,
       "activeRuns": 0,
       "status": "idle",
       "nextDue": null,
-      "environments": ["qa_staging", "uat_staging"],
-      "runners": ["pytest"]
+      "environments": [
+        "QA / Staging",
+        "UAT / Staging"
+      ],
+      "runners": [
+        "pytest"
+      ]
+    },
+    {
+      "id": "suite_performance",
+      "name": "Performance Benchmarks",
+      "schedule": "0 4 * * 1",
+      "scheduleDesc": "Monday 04:00 UTC",
+      "due": false,
+      "lastDispatched": "2026-06-12T12:29:42.509Z",
+      "lastConclusion": null,
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "idle",
+      "nextDue": "2026-06-15T04:00:42.509Z",
+      "environments": [
+        "QA / Production",
+        "UAT / Production",
+        "PROD / Production"
+      ],
+      "runners": [
+        "playwright"
+      ]
     }
   ],
   "recentDispatches": [
     {
       "timestamp": "2026-06-12T06:00:01.000Z",
       "suite": "suite_regression_qa",
-      "environments": ["qa_staging", "qa_prod"],
+      "environments": [
+        "qa_staging",
+        "qa_prod"
+      ],
       "dispatched": 2,
       "failed": 0,
       "workflow": "run-tests.yml"
@@ -106,7 +148,10 @@
     {
       "timestamp": "2026-06-12T06:00:01.000Z",
       "suite": "suite_regression_uat",
-      "environments": ["uat_staging", "uat_prod"],
+      "environments": [
+        "uat_staging",
+        "uat_prod"
+      ],
       "dispatched": 2,
       "failed": 0,
       "workflow": "run-tests.yml"
@@ -114,7 +159,10 @@
     {
       "timestamp": "2026-06-12T02:00:01.000Z",
       "suite": "suite_nightly_prod",
-      "environments": ["prod_staging", "prod_prod"],
+      "environments": [
+        "prod_staging",
+        "prod_prod"
+      ],
       "dispatched": 2,
       "failed": 0,
       "workflow": "run-tests.yml"
@@ -122,9 +170,9 @@
   ],
   "summary": {
     "total": 6,
-    "scheduled": 3,
+    "scheduled": 4,
     "due": 0,
-    "dispatched": 6,
+    "dispatched": 0,
     "running": 0
   }
 }
