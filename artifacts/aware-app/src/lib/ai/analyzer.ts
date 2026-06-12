@@ -124,6 +124,8 @@ export function runFallbackAnalysis(request: AIAnalysisRequest): AIAnalysisResul
       return fallbackEnvHealthSummary();
     case "regression-report":
       return fallbackRegressionReport();
+    case "setup-guide":
+      return fallbackSetupGuide();
     default:
       return genericFallback(request);
   }
@@ -1648,4 +1650,116 @@ export async function generateInsights(): Promise<AIInsight[]> {
   }
 
   return insights;
+}
+
+function fallbackSetupGuide(): AIAnalysisResult {
+  return {
+    useCaseId: "setup-guide",
+    summary: "AWARE Setup & Configuration Guide",
+    details: `## AWARE Setup & Configuration
+
+### Quick start (5 steps)
+1. **Fork** the repo on GitHub
+2. **Edit** the three files in \`config/\`:
+   - \`akamai-config.yml\` — your property name, contractId (\`ctr_…\`), groupId (\`grp_…\`), cpcode
+   - \`environments.yml\` — QA / UAT / PROD base URLs (must be \`https://\`)
+   - \`test-suites.yml\` — suite IDs, cron schedules, runner (playwright | pytest), tags
+3. **Validate** locally: \`node scripts/validate-config.mjs\`
+4. **Enable GitHub Pages**: repo Settings → Pages → Source: GitHub Actions
+5. **Push** — CI validates config, builds the dashboard, and deploys it automatically
+
+---
+
+### Required GitHub secrets
+Go to **Settings → Secrets and variables → Actions** and add:
+
+| Secret | Purpose |
+|--------|---------|
+| \`AKAMAI_CLIENT_TOKEN\` | Akamai EdgeGrid client token |
+| \`AKAMAI_ACCESS_TOKEN\` | Akamai EdgeGrid access token |
+| \`AKAMAI_CLIENT_SECRET\` | Akamai EdgeGrid client secret |
+| \`AKAMAI_HOST\` | EdgeGrid host (\`akab-xxxx.luna.akamaiapis.net\`) |
+
+\`GITHUB_TOKEN\` is automatic — you do not need to add it.
+
+---
+
+### Config file reference
+
+**\`config/akamai-config.yml\`**
+\`\`\`yaml
+properties:
+  - name: www.example.com
+    contractId: ctr_ABCDEFGH   # from Akamai Control Center → Properties → sidebar
+    groupId: grp_IJKLMNOP
+    cpcode: "9876543"
+    activeVersions:
+      qa: 10
+      uat: 9
+      prod: 8
+    promotionGate:
+      minPassRate: 95          # % required for UAT → PROD
+\`\`\`
+
+**\`config/environments.yml\`**
+\`\`\`yaml
+environments:
+  - id: qa_staging
+    label: "QA / Staging"
+    target: QA
+    network: staging
+    baseUrl: https://www.example.com
+    propertyVersion: 10
+    propertyStatus: active
+\`\`\`
+
+**\`config/test-suites.yml\`**
+\`\`\`yaml
+suites:
+  - id: suite_smoke
+    name: Smoke — All Environments
+    environments: ["QA / Staging", "UAT / Staging"]
+    runners: [playwright, pytest]
+    tags: [smoke]
+    schedule: "0 6 * * *"    # 06:00 UTC daily, or null to disable
+\`\`\`
+
+---
+
+### Common validation errors
+
+| Error | File | Fix |
+|-------|------|-----|
+| \`contractId must start with ctr_\` | akamai-config.yml | Update contractId field |
+| \`groupId must start with grp_\` | akamai-config.yml | Update groupId field |
+| \`baseUrl must start with https://\` | environments.yml | Use https:// in baseUrl |
+| \`Unknown environment X in suite Y\` | test-suites.yml | Environment label must match environments.yml exactly |
+| \`Duplicate suite id\` | test-suites.yml | Give each suite a unique id |
+| \`Invalid cron expression\` | test-suites.yml | Use 5-field cron e.g. \`0 6 * * *\` |
+
+---
+
+### Tagging tests
+- **Playwright**: include \`@suite_<id>\` in the test name: \`test('@suite_smoke homepage loads', …)\`
+- **pytest**: use \`@pytest.mark.<suite_id>\` decorator
+
+---
+
+### Trigger a manual test run
+\`\`\`bash
+gh workflow run run-tests.yml \\
+  --field suite=suite_smoke \\
+  --field environment="QA / Staging"
+\`\`\`
+
+For more detail see **SETUP.md** in the repo root.`,
+    data: null,
+    confidence: 100,
+    recommendations: [
+      "Run `node scripts/validate-config.mjs` to check your config before pushing",
+      "Enable GitHub Pages (Settings → Pages → Source: GitHub Actions) before first push",
+      "Add all four Akamai secrets to GitHub before running tests",
+    ],
+    generatedAt: new Date().toISOString(),
+  };
 }

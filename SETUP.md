@@ -295,3 +295,145 @@ Playwright tests must be tagged `@suite_<id>` in the test name. pytest tests mus
 
 **Scheduler not dispatching:**
 Check `.github/workflows/scheduler.yml` is enabled (Actions tab → enable if disabled). The scheduler runs every 15 minutes — check the cron expression in your suite config.
+
+---
+
+## FAQ
+
+**Q: I get "contractId must start with ctr_" — where do I fix this?**
+
+Open `config/akamai-config.yml` and update the `contractId` field under your property:
+```yaml
+properties:
+  - name: www.example.com
+    contractId: ctr_ABCDEFGH   # ← replace with your real contract ID from Akamai Control Center
+```
+Find it in Akamai Control Center → Properties → click your property → sidebar shows Contract ID.
+
+---
+
+**Q: I get "groupId must start with grp_" — where do I fix this?**
+
+Same file, same property block:
+```yaml
+    groupId: grp_IJKLMNOP   # ← replace with your real group ID
+```
+
+---
+
+**Q: I get "baseUrl must start with https://" — where do I fix this?**
+
+Open `config/environments.yml`. Every `baseUrl` field must use `https://`:
+```yaml
+environments:
+  - id: qa_staging
+    baseUrl: https://www.example.com   # ← must be https
+```
+
+---
+
+**Q: My CI validate-config step fails with "Unknown environment X in suite Y".**
+
+The `envs` list in a suite (`config/test-suites.yml`) references an environment label that doesn't exist in `config/environments.yml`. Check the spelling matches exactly:
+```yaml
+# test-suites.yml
+suites:
+  - id: suite_smoke
+    environments:
+      - "QA / Staging"   # ← must exactly match the 'label' field in environments.yml
+```
+
+---
+
+**Q: How do I change which Akamai property the tests run against?**
+
+Update `config/akamai-config.yml` (property name, contractId, groupId, activeVersions) and `config/environments.yml` (baseUrl, edgeHostname, IPs). Then run `node scripts/validate-config.mjs` before pushing.
+
+---
+
+**Q: How do I add a new test suite?**
+
+Add an entry to `config/test-suites.yml`:
+```yaml
+  - id: suite_my_new_suite
+    name: My New Suite
+    environments:
+      - "QA / Staging"
+    parallelism: 4
+    retries: 1
+    failFast: false
+    timeoutMinutes: 15
+    runners: [playwright]
+    tags: [my_tag]
+    schedule: "0 8 * * *"   # 08:00 UTC daily, or null to disable
+```
+Then tag your Playwright tests with `@suite_my_new_suite` in the test name.
+
+---
+
+**Q: How do I change the promotion gate threshold (currently 95%)?**
+
+Open `config/akamai-config.yml` and update `promotionGate.minPassRate` under your property:
+```yaml
+    promotionGate:
+      minPassRate: 90   # ← change from 95 to whatever you need
+```
+The same value is enforced in `.github/workflows/run-tests.yml` under the `gate-check` job — update `PASS_RATE_THRESHOLD` there too.
+
+---
+
+**Q: The dashboard is live but showing demo data, not my real test results.**
+
+Real test results are written to the `data` branch by the `run-tests.yml` workflow after each CI run. Until you run actual tests, the dashboard shows the seed data from `data/`. Trigger a test run:
+```bash
+gh workflow run run-tests.yml --field suite=suite_smoke --field environment="QA / Staging"
+```
+
+---
+
+**Q: I pushed but the dashboard hasn't updated.**
+
+Check the Actions tab on GitHub:
+1. Did `validate-config.yml` pass? If not, fix the config errors first.
+2. Did `deploy.yml` complete? If it failed, check the logs for the specific step.
+3. GitHub Pages can take 1–2 minutes to propagate after a successful deploy.
+
+---
+
+**Q: How do I use a self-hosted LLM (Ollama, LM Studio) with the Copilot?**
+
+In the Copilot page, click the **gear icon** (top right). Set:
+- **API URL**: your Ollama/LM Studio endpoint (e.g. `http://localhost:11434/v1`)
+- **API Key**: any non-empty string (Ollama ignores it)
+- **Model**: the model name (e.g. `llama3`, `mistral`)
+
+Or use **WebLLM** mode — runs entirely in the browser, no server needed. Requires a WebGPU-capable browser (Chrome 113+).
+
+---
+
+**Q: How do I point the Copilot at OpenAI instead of a local model?**
+
+In the Copilot settings panel, set:
+- **API URL**: leave blank (defaults to `https://api.openai.com/v1`)
+- **API Key**: your OpenAI API key (`sk-…`)
+- **Model**: `gpt-4o-mini` (recommended) or `gpt-4o`
+
+---
+
+**Q: What is the `data` branch and can I delete it?**
+
+The `data` branch is an orphan branch (no commit history shared with `main`) that stores live run results as JSON files. The `run-tests.yml` workflow appends to it after each CI run. The dashboard fetches from it at runtime.
+
+**Do not delete it** once test runs are recorded — you'll lose all run history. If it was accidentally deleted, re-run the deploy workflow to recreate an empty one.
+
+---
+
+**Q: The `scripts/validate-config.mjs` script fails with "Cannot find module 'js-yaml'".**
+
+Run `pnpm install` from the repo root first. The `js-yaml` dependency is declared in `scripts/package.json` and installed as part of the workspace.
+
+---
+
+**Q: Can I run AWARE without Akamai credentials?**
+
+Yes — for local development and dashboard exploration, no Akamai credentials are needed. The dashboard runs entirely on seed data from `data/`. GitHub secrets are only required when running actual CDN tests via the `run-tests.yml` workflow.

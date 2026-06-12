@@ -24,6 +24,7 @@ import {
   RefreshCw,
   Copy,
   Check,
+  BookOpen,
 } from "lucide-react";
 import {
   AI_USE_CASES,
@@ -67,6 +68,7 @@ const USE_CASE_ICONS: Record<string, React.ReactNode> = {
   "release-readiness": <Shield size={14} />,
   "env-health-summary": <Activity size={14} />,
   "regression-report": <TrendingUp size={14} />,
+  "setup-guide": <BookOpen size={14} />,
 };
 
 // Follow-up suggestions: which quick actions to suggest after each analysis
@@ -102,6 +104,7 @@ const FOLLOW_UP_MAP: Record<string, string[]> = {
   ],
   "env-health-summary": ["env-comparison", "env-drift", "smart-alerting"],
   "regression-report": ["failure-analysis", "build-risk-assessment", "cross-category-correlation"],
+  "setup-guide": ["env-health-summary", "release-readiness"],
 };
 
 function getFollowUpSuggestions(useCaseId: string): { id: string; name: string }[] {
@@ -363,6 +366,10 @@ export default function Copilot() {
     [/\b(impact|blast.radius|affect|blast)\b.*\b(fail|error)\b/i, "failure-impact"],
     [/\b(correlat|relation|move.*together)\b/i, "cross-category-correlation"],
     [/\b(frequency|run.*often|schedule|gap)\b/i, "run-frequency"],
+    [
+      /\b(setup|set.?up|fork|configure|config|install|deploy|secret|github.pages|data.branch|validate.config|akamai.?config|environments.yml|test.suites|getting.started|how.do.i|not.working|broken.*ci|ci.*broken|yml.*error|yaml.*error|contractid|groupid|baseur|edgeworker)\b/i,
+      "setup-guide",
+    ],
   ];
 
   const handleSend = async () => {
