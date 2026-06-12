@@ -274,7 +274,7 @@ jobs:
           git config user.email "bot@aware.dev"
           git fetch origin "+${BRANCH}:refs/remotes/origin/${BRANCH}" 2>/dev/null || true
           if git show-ref --verify --quiet "refs/remotes/origin/${BRANCH}"; then
-            git checkout -b "${BRANCH}" "origin/${BRANCH}" 2>/dev/null || git checkout "${BRANCH}"
+            git checkout -f "${BRANCH}" 2>/dev/null || git checkout -b "${BRANCH}" "origin/${BRANCH}"
             cp "${GITHUB_WORKSPACE}/artifacts/aware-app/data/runs.json" runs.json 2>/dev/null || true
             git add runs.json 2>/dev/null || true
             if git diff --cached --quiet; then
