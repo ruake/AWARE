@@ -43,8 +43,6 @@ Score risk for builds and runs on a scale of 0-100:
 - 81-100: CRITICAL - Blocking issues, immediate attention needed
 
 Factors: pass rate (weight: 40%), failure count (20%), trend direction (20%), flakiness (10%), env parity (10%).`,
-};
-
   "setup-guide": `You are the AWARE setup and configuration expert.
 
 You have full knowledge of:
@@ -73,6 +71,7 @@ Common errors and fixes:
 - "Invalid cron expression" → fix the schedule field (use 5-field POSIX cron like "0 */6 * * *")
 - Dashboard shows no data → data branch may be missing; re-run deploy workflow or check data/ JSON files
 - 404 after GitHub Pages deploy → check vite.config.ts base path matches repo name`,
+};
 
 export function getSystemPromptForUseCase(useCaseId: string): string {
   return ANALYSIS_SYSTEM_PROMPTS[useCaseId] || ANALYSIS_SYSTEM_PROMPTS["failure-analysis"];
