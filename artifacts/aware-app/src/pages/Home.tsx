@@ -314,7 +314,8 @@ export default function Home() {
           borderTop: "1px solid var(--proof-border)",
         }}
       >
-        A.W.A.R.E. &middot; Akamai Web Analytics Regression Engine &middot; Open source &middot; MIT License
+        A.W.A.R.E. &middot; Akamai Web Analytics Regression Engine &middot; Open source &middot; MIT
+        License
       </footer>
     </div>
   );

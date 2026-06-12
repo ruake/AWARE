@@ -392,6 +392,23 @@ export const AI_USE_CASES: AIUseCase[] = [
     ],
   },
   {
+    id: "setup-guide",
+    name: "Setup & Configuration Help",
+    description: "Get help forking, configuring, and deploying AWARE",
+    icon: "BookOpen",
+    category: "setup",
+    systemPrompt:
+      "You are the AWARE setup and configuration expert. You help users fork the repo, edit config YAML files, add GitHub secrets, enable GitHub Pages, troubleshoot CI failures, and understand the data branch. You know every field in akamai-config.yml, environments.yml, and test-suites.yml. You know all required secrets, common validation errors, and deployment steps. Give concrete, step-by-step answers.",
+    tools: ["query_data"],
+    exampleQueries: [
+      "How do I fork and set up AWARE?",
+      "Why is my validate-config CI step failing?",
+      "What GitHub secrets do I need?",
+      "How do I point this at my Akamai property?",
+      "Why is the dashboard showing no data after deploy?",
+    ],
+  },
+  {
     id: "regression-report",
     name: "Quick Regression Report",
     description: "Compare last two builds for regressions and improvements",

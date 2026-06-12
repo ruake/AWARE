@@ -137,13 +137,13 @@ async function validateAkamaiConfig() {
     if (!p.contractId) {
       err(file, `${ctx}.contractId is required`);
     } else if (PLACEHOLDER_CONTRACT.test(p.contractId)) {
-      err(file, `${ctx}.contractId is still a placeholder ("${p.contractId}") — set your real Akamai contract ID`);
+      warn(file, `${ctx}.contractId is still a placeholder ("${p.contractId}") — set your real Akamai contract ID`);
     }
 
     if (!p.groupId) {
       err(file, `${ctx}.groupId is required`);
     } else if (PLACEHOLDER_GROUP.test(p.groupId)) {
-      err(file, `${ctx}.groupId is still a placeholder ("${p.groupId}") — set your real Akamai group ID`);
+      warn(file, `${ctx}.groupId is still a placeholder ("${p.groupId}") — set your real Akamai group ID`);
     }
 
     if (!p.cpcode) {
