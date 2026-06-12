@@ -878,7 +878,7 @@ function SidePanel({
           </button>
           <button
             onClick={() => {
-              copy(`${window.location.origin}/tests/${diff.id}`);
+              copy(`${window.location.origin}/analytics?diffId=${diff.id}`);
               show("Test permalink copied");
             }}
             className="proof-button proof-button-xs"
@@ -1697,7 +1697,7 @@ export default function Compare() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  copy(`${window.location.origin}/tests/${d.id}`);
+                                  copy(`${window.location.origin}/analytics?diffId=${d.id}`);
                                   show("Permalink copied");
                                 }}
                                 style={{

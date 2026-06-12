@@ -117,7 +117,6 @@ export function AppLayout({
         const navMap: Record<string, string> = {
           d: "/",
           r: "/runs",
-          t: "/tests",
           s: "/suites",
           c: "/copilot",
           a: "/about",

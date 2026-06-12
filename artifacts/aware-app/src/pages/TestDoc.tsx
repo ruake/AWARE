@@ -42,7 +42,7 @@ export default function TestDoc() {
   const testSuite = "full_suite";
 
   return (
-    <AppLayout activeHref="/tests">
+    <AppLayout activeHref="/suites">
       <div
         style={{
           display: "flex",

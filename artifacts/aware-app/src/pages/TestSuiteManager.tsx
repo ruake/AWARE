@@ -6,8 +6,13 @@ import { AppLayout } from "@/components/aware/AppLayout";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useTestData } from "@/hooks/useTestData";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
+import { StatsDashboard } from "@/components/aware/StatsDashboard";
 import { getGitHubUrl, cleanScriptPath } from "@/lib/utils";
+import { useSyncedUrlState } from "@/lib/urlState";
+import { computeTestStats, getAutoDiscoverySummary } from "@/lib/data";
+import { exportAndDownload, exportAsXML, downloadFile } from "@/lib/testImportExport";
 import type { TestCase, TestSuite } from "@/lib/types";
+import type { ColumnFilterState } from "@/components/aware/ColumnFilter";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import {
   FolderTree,
@@ -21,6 +26,12 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  Download,
+  FileJson,
+  FileSpreadsheet,
+  FileCode,
+  History,
+  Upload,
 } from "lucide-react";
 
 type FlatTreeItem =
@@ -82,11 +93,16 @@ function getVisibleFlatItems(
 export default function TestSuiteManager() {
   const { tcs, suites } = useTestData();
   const [, navigate] = useLocation();
-  const { Toast } = useSimpleToast();
+  const { show: toast, Toast } = useSimpleToast();
+
+  const stats = React.useMemo(() => computeTestStats(), []);
+  const discovery = React.useMemo(() => getAutoDiscoverySummary(), []);
 
   const [selectedSuiteId, setSelectedSuiteId] = React.useState<string | null>(null);
   const [selectedTestId, setSelectedTestId] = React.useState<string | null>(null);
   const [suiteSearch, setSuiteSearch] = React.useState("");
+  const [showChanges, setShowChanges] = React.useState(false);
+  const [selId, setSelId] = useSyncedUrlState<string | null>("sel", null);
   const [expandedIds, setExpandedIds] = React.useState<Set<string>>(
     new Set(suites.map((s) => s.id)),
   );
@@ -107,6 +123,41 @@ export default function TestSuiteManager() {
   selectedTests.forEach((tc) => {
     priorityCounts[tc.priority] = (priorityCounts[tc.priority] || 0) + 1;
   });
+
+  React.useEffect(() => {
+    if (selId && !selectedSuiteId && !selectedTestId) {
+      const tc = tcs.find((t) => t.id === selId);
+      if (tc) {
+        const parent = suites.find((s) => s.testIds.includes(tc.id));
+        if (parent) setSelectedSuiteId(parent.id);
+        else setSelectedTestId(tc.id);
+      }
+    }
+  }, [selId, tcs, suites, selectedSuiteId, selectedTestId]);
+
+  const handleExport = (format: "json" | "csv" | "junit_xml") => {
+    if (format === "json") {
+      exportAndDownload(tcs, "json");
+    } else if (format === "junit_xml") {
+      downloadFile(exportAsXML(tcs), "aware-tests.xml", "application/xml");
+    } else {
+      const csv =
+        "id,name,category,priority,status,owner\n" +
+        tcs
+          .map((t) => `${t.id},"${t.name}",${t.category},${t.priority},${t.status},${t.owner}`)
+          .join("\n");
+      downloadFile(csv, "aware-tests.csv", "text/csv");
+    }
+    toast(`Exported as ${format.toUpperCase()}`);
+  };
+
+  const allChanges = React.useMemo(() => {
+    const entries = tcs.flatMap((tc) =>
+      tc.changelog.map((entry) => ({ ...entry, testId: tc.id, testName: tc.name })),
+    );
+    entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return entries;
+  }, [tcs]);
 
   const priorityChart = Object.entries(priorityCounts)
     .sort()
@@ -1003,7 +1054,7 @@ export default function TestSuiteManager() {
                           <tr
                             key={tc.id}
                             style={{ cursor: "pointer" }}
-                            onClick={() => navigate(`/tests?sel=${tc.id}`)}
+                            onClick={() => navigate(`/suites?sel=${tc.id}`)}
                           >
                             <td style={{ verticalAlign: "middle" }}>
                               <span
@@ -1143,6 +1194,58 @@ export default function TestSuiteManager() {
                     >
                       Scheduled Suites
                     </div>
+                  </div>
+                </div>
+                <PanelErrorBoundary label="Stats dashboard">
+                  <StatsDashboard
+                    stats={stats}
+                    colFilters={{} as Record<string, ColumnFilterState>}
+                    onToggleFilter={() => {}}
+                  />
+                </PanelErrorBoundary>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexShrink: 0,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      fontSize: 11,
+                      color: "var(--proof-text-secondary)",
+                    }}
+                  >
+                    {discovery.total > 0 && (
+                      <>
+                        <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                          <Beaker size={12} style={{ color: "var(--proof-blue)" }} />
+                          <strong style={{ color: "var(--proof-blue)" }}>
+                            {discovery.total}
+                          </strong>{" "}
+                          auto-discovered
+                        </span>
+                        <span>·</span>
+                        <span>{discovery.sourceFiles} pytest files</span>
+                      </>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button
+                      onClick={() => handleExport("json")}
+                      className="proof-button proof-button-xs"
+                    >
+                      <Download size={11} /> Export
+                    </button>
+                    <button
+                      onClick={() => setShowChanges(true)}
+                      className="proof-button proof-button-xs"
+                    >
+                      <History size={11} /> Changes
+                    </button>
                   </div>
                 </div>
                 <div

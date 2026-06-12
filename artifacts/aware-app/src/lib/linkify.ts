@@ -5,7 +5,7 @@ export interface LinkifyRule {
 }
 
 const RULES: LinkifyRule[] = [
-  { pattern: /(?<!`|\w)\b(tc_\d+)\b(?!`)/g, href: (id) => `/tests?sel=${id}` },
+  { pattern: /(?<!`|\w)\b(tc_\d+)\b(?!`)/g, href: (id) => `/suites?sel=${id}` },
   { pattern: /(?<!`|\w)\b(diff_\d+)\b(?!`)/g, href: (id) => `/analytics?diffId=${id}` },
   { pattern: /(?<!`|\w)\b(run_\S+)\b(?!`)/g, href: (id) => `/runs/${id}` },
   { pattern: /(?<!`|\w)\b(TC-\d{3})\b(?!`)/g, href: (id) => `/analytics?testId=${id}` },
