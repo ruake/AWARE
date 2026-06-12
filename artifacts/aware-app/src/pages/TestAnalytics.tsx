@@ -965,9 +965,6 @@ export default function TestAnalytics() {
                       <td style={{ fontSize: 12 }}>{h.env}</td>
                       <td
                         style={{
-                          maxWidth: 280,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
                           fontSize: 11,
                         }}
                       >

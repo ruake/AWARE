@@ -760,12 +760,12 @@ export default function Dashboard() {
                   <>
                     <table className="proof-table">
                       <colgroup>
-                        <col style={{ width: 148 }} />
-                        <col style={{ width: 130 }} />
-                        <col style={{ width: 100 }} />
-                        <col style={{ width: 90 }} />
-                        <col style={{ width: 68 }} />
-                        <col style={{ width: 68 }} />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
                         <col />
                       </colgroup>
                       <thead>

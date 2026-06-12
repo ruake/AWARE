@@ -367,15 +367,15 @@ export default function TestSuiteManager() {
               style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}
             >
               <div style={{ overflow: "auto", flex: 1 }}>
-                <table className="proof-table" style={{ width: "100%", tableLayout: "fixed" }}>
+                <table className="proof-table" style={{ width: "100%" }}>
                   <colgroup>
                     <col />
-                    <col style={{ width: "7%" }} />
-                    <col style={{ width: "13%" }} />
-                    <col style={{ width: "9%" }} />
-                    <col style={{ width: "9%" }} />
-                    <col style={{ width: "22%" }} />
-                    <col style={{ width: "9%" }} />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
                   </colgroup>
                   <thead
                     style={{
@@ -989,11 +989,11 @@ function SuiteDetailPanel({
             <Beaker size={10} /> Tests ({tests.length})
           </h4>
           <div className="proof-card" style={{ overflow: "hidden" }}>
-            <table className="proof-table" style={{ width: "100%", tableLayout: "fixed" }}>
+            <table className="proof-table" style={{ width: "100%" }}>
               <colgroup>
                 <col style={{ width: 20 }} />
                 <col />
-                <col style={{ width: "14%" }} />
+                <col />
               </colgroup>
               <thead
                 style={{
@@ -1031,9 +1031,6 @@ function SuiteDetailPanel({
                     <td
                       style={{
                         fontSize: 12,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
                       }}
                     >
                       {tc.name}

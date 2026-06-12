@@ -656,13 +656,13 @@ export default function TestManager() {
                   <colgroup>
                     <col style={{ width: 40 }} />
                     <col />
-                    <col style={{ width: 90 }} />
-                    <col style={{ width: 72 }} />
-                    <col style={{ width: 112 }} />
-                    <col style={{ width: 120 }} />
-                    <col style={{ width: 90 }} />
-                    <col style={{ width: 100 }} />
-                    <col style={{ width: 80 }} />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
                   </colgroup>
                   <thead
                     style={{
@@ -763,10 +763,6 @@ export default function TestManager() {
                                 fontSize: 11,
                                 color: "var(--proof-blue)",
                                 fontWeight: 600,
-                                maxWidth: 280,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
                               }}
                               title={tc.name}
                             >
