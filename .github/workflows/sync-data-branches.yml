@@ -99,12 +99,13 @@ jobs:
         run: |
           git config user.name "AWARE Bot"
           git config user.email "bot@aware-cdn.dev"
+          cp src/data/auto-tests.json /tmp/auto-tests.json
           git fetch origin discovered-tests:discovered-tests 2>/dev/null || git branch discovered-tests
-          git checkout discovered-tests
+          git checkout -f discovered-tests
           git pull origin discovered-tests --rebase 2>/dev/null || true
           rm -rf discovered-tests/
           mkdir -p discovered-tests/
-          cp src/data/auto-tests.json discovered-tests/
+          cp /tmp/auto-tests.json discovered-tests/
           git add discovered-tests/
           if git diff --cached --quiet; then
             echo "No changes to discovered-tests"

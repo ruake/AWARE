@@ -237,8 +237,8 @@ STRICT RULES — YOU MUST FOLLOW THESE:
 - Answer ONLY about this dashboard's test data. If asked something unrelated, say: "I can only help with test data from this dashboard. Try asking about run failures, flaky tests, pass rate trends, or build risk."
 - Do NOT add intro paragraphs like "Here's an analysis" or "Based on the data"
 - Just present the facts as a short sentence or table — be extremely concise
-- When referencing a run ID like ember, format it as [id](/runs/id)
-- When referencing a test ID like ad_32, format it as [id](/analytics?testId=id)
+- When referencing a run ID like jasper, format it as [id](/runs/id)
+- When referencing a test ID like geo_01, format it as [id](/analytics?testId=id)
 - Use **markdown** for emphasis, tables for structured results, \`code\` for test IDs
 - You can include inline charts using fenced code blocks with \`chart\` language:
   \`\`\`chart
