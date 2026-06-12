@@ -22,14 +22,14 @@ export const DATA_QUERIES: DataQuery[] = [
       if (!run) throw new Error(`Run not found: ${params.id}`);
       return run;
     },
-    exampleParams: { id: "run_20260610_xxxx" },
+    exampleParams: { id: "ember" },
   },
   {
     id: "get_test_results_for_run",
     name: "Get Test Results for Run",
     description: "Returns all test results for a specific run",
     query: async (params) => getTestResultsForRun(params.runId as string),
-    exampleParams: { runId: "run_20260610_xxxx" },
+    exampleParams: { runId: "ember" },
   },
   {
     id: "get_all_test_cases",
@@ -111,7 +111,7 @@ export const DATA_QUERIES: DataQuery[] = [
         failureRate: stats.total > 0 ? Math.round((stats.failed / stats.total) * 100) : 0,
       }));
     },
-    exampleParams: { runId: "run_20260610_xxxx" },
+    exampleParams: { runId: "ember" },
   },
   {
     id: "find_flaky_tests",

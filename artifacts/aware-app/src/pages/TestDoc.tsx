@@ -1,7 +1,13 @@
 import React from "react";
 import { useLocation } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { DIFF_ROWS, getTestCaseById, RUNS, getTestResultsForRun } from "@/lib/data";
+import {
+  DIFF_ROWS,
+  getTestCaseById,
+  RUNS,
+  getTestResultsForRun,
+  loadResultsForRun,
+} from "@/lib/data";
 
 import { TestDocTopBar } from "@/components/aware/TestDocTopBar";
 import { TestDocSidebar } from "@/components/aware/TestDocSidebar";
@@ -15,6 +21,10 @@ export default function TestDoc() {
   const testId = params.get("testId") || "";
   const diffRow = DIFF_ROWS.find((d) => d.id === testId);
   const testCase = React.useMemo(() => getTestCaseById(testId), [testId]);
+  const [loaded, setLoaded] = React.useState(false);
+  React.useEffect(() => {
+    Promise.all(RUNS.map((r) => loadResultsForRun(r.id))).then(() => setLoaded(true));
+  }, []);
   const latestResult = React.useMemo(() => {
     const name = testCase?.name ?? diffRow?.name;
     if (!name) return null;
@@ -24,7 +34,7 @@ export default function TestDoc() {
       if (match) return match;
     }
     return null;
-  }, [testCase, diffRow]);
+  }, [testCase, diffRow, loaded]);
   const testName =
     testCase?.name ?? diffRow?.name ?? (testId || "test_geo_match_us_locale_prod[/us/]");
   const testStatus = diffRow?.candStatus ?? "FAIL";

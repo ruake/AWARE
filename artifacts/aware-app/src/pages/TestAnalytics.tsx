@@ -99,8 +99,17 @@ export default function TestAnalytics() {
   const [, navigate] = useLocation();
   const { show, Toast } = useSimpleToast();
   const { tcs } = useTestData();
-  const [testDetails, setTestDetails] = React.useState<{ history: { runId: string; status: "PASS" | "FAIL"; duration: number; env: string }[]; passRate: number; flakinessScore: number; avgDuration: number }[]>([]);
-  React.useEffect(() => { getTestDetailsAsync().then(setTestDetails); }, []);
+  const [testDetails, setTestDetails] = React.useState<
+    {
+      history: { runId: string; status: "PASS" | "FAIL"; duration: number; env: string }[];
+      passRate: number;
+      flakinessScore: number;
+      avgDuration: number;
+    }[]
+  >([]);
+  React.useEffect(() => {
+    getTestDetailsAsync().then(setTestDetails);
+  }, []);
 
   const rawTestId = (() => {
     const id = params.get("testId") ?? "";

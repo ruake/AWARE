@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
-    "prebuild": "node scripts/validate-data.mjs",
+    "presplit": "node scripts/split-test-results.mjs",
+"prebuild": "node scripts/validate-data.mjs && node scripts/split-test-results.mjs",
     "build": "vite build --config vite.config.ts",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",

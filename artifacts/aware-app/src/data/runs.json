@@ -1,7 +1,7 @@
 [
   {
-    "id": "run_20260611_mq9ble56",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "zenith",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -16,8 +16,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260611_mq9bldyy",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "wisp",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -32,8 +32,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260611_mq9bldsx",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "violet",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -48,8 +48,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260611_mq97mbg4",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "vega",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "UAT",
     "status": "FLAKY",
@@ -64,8 +64,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260611_mq97mbac",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "topaz",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "FLAKY",
@@ -80,8 +80,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260611_mq97mb4s",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "teal",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -96,8 +96,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260611_mq91l27t",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "sol",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -112,8 +112,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260611_mq91l228",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "sable",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -128,8 +128,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260611_mq91l1wr",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "ruby",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "UAT",
     "status": "FLAKY",
@@ -144,8 +144,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260611_mq8r8qq9",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "rigel",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "FLAKY",
@@ -160,8 +160,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260611_mq8r8qm7",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "pulsar",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -176,8 +176,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260611_mq8r8qg7",
-    "label": "CI \u2014 Jun 11, 2026",
+    "id": "orion",
+    "label": "CI — Jun 11, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -192,8 +192,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_mq8o58js",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "nova",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -208,8 +208,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260610_mq8o58f8",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "nebula",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "UAT",
     "status": "FLAKY",
@@ -224,8 +224,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260610_mq8o58ao",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "lunar",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "FLAKY",
@@ -240,8 +240,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260610_mq8jam3d",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "knoll",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -256,8 +256,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_mq8jalyn",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "jade",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -272,8 +272,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260610_mq8jaltz",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "islet",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -288,8 +288,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_mq8d0bz3",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "indigo",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "UAT",
     "status": "FLAKY",
@@ -304,8 +304,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_mq8d0bv1",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "havoc",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "FLAKY",
@@ -320,8 +320,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_mq8d0br0",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "glyph",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -336,8 +336,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260610_yixwd9ng",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "opal",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "PASS",
@@ -352,8 +352,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260610_mq861gxe",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "geode",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -368,8 +368,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_mq861gtq",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "garnet",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -384,8 +384,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260610_mq861gq2",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "flux",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "UAT",
     "status": "FLAKY",
@@ -400,8 +400,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260610_uvycb4y1",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "onyx",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "UAT",
     "status": "PASS",
@@ -416,8 +416,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_mq82aorc",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "fjord",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "FLAKY",
@@ -432,8 +432,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260610_mq82aono",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "emerald",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -448,8 +448,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_mq82aoju",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "ember",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -464,8 +464,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260610_mq81vqlt",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "echo",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -480,8 +480,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_mq81vqj3",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "dune",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "UAT",
     "status": "FLAKY",
@@ -496,8 +496,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_mq81vqgg",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "drift",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "FLAKY",
@@ -512,8 +512,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_59rlbr66",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "diamond",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "PASS",
@@ -528,8 +528,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_e8at6ywl",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "draco",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "PASS",
@@ -544,8 +544,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260610_t4z1lbtc",
-    "label": "CI \u2014 Jun 10, 2026",
+    "id": "ochre",
+    "label": "CI — Jun 10, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "PASS",
@@ -560,8 +560,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260609_4xl80ac1",
-    "label": "CI \u2014 Jun 9, 2026",
+    "id": "citrine",
+    "label": "CI — Jun 9, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "FAIL",
@@ -576,8 +576,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260609_pn3mogt7",
-    "label": "CI \u2014 Jun 9, 2026",
+    "id": "coral",
+    "label": "CI — Jun 9, 2026",
     "suite": "suite_full",
     "target": "UAT",
     "status": "PASS",
@@ -592,8 +592,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260609_r0acomrc",
-    "label": "CI \u2014 Jun 9, 2026",
+    "id": "cosmo",
+    "label": "CI — Jun 9, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "FLAKY",
@@ -608,8 +608,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260609_y6h9ive6",
-    "label": "CI \u2014 Jun 9, 2026",
+    "id": "crimson",
+    "label": "CI — Jun 9, 2026",
     "suite": "suite_full",
     "target": "UAT",
     "status": "PASS",
@@ -624,8 +624,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260609_jtoc3wqm",
-    "label": "CI \u2014 Jun 9, 2026",
+    "id": "comet",
+    "label": "CI — Jun 9, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "PASS",
@@ -640,8 +640,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260608_4ab6feob",
-    "label": "CI \u2014 Jun 8, 2026",
+    "id": "amber",
+    "label": "CI — Jun 8, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "FLAKY",
@@ -656,8 +656,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260608_tqlkw9yk",
-    "label": "CI \u2014 Jun 8, 2026",
+    "id": "cipher",
+    "label": "CI — Jun 8, 2026",
     "suite": "suite_full",
     "target": "UAT",
     "status": "PASS",
@@ -672,8 +672,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260608_haeczwm8",
-    "label": "CI \u2014 Jun 8, 2026",
+    "id": "blitz",
+    "label": "CI — Jun 8, 2026",
     "suite": "suite_full",
     "target": "QA",
     "status": "PASS",
@@ -688,8 +688,8 @@
     "network": "staging"
   },
   {
-    "id": "run_20260608_8ls1oztb",
-    "label": "CI \u2014 Jun 8, 2026",
+    "id": "basalt",
+    "label": "CI — Jun 8, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "PASS",
@@ -704,8 +704,8 @@
     "network": "production"
   },
   {
-    "id": "run_20260608_84ebu1nu",
-    "label": "CI \u2014 Jun 8, 2026",
+    "id": "atoll",
+    "label": "CI — Jun 8, 2026",
     "suite": "suite_full",
     "target": "PROD",
     "status": "PASS",

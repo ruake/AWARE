@@ -20,7 +20,7 @@ export interface Run {
 // Fields marked REQUIRED are always present (null never allowed).
 // Fields marked OPTIONAL may be absent or undefined.
 export interface TestResult {
-  /** REQUIRED — Unique result ID (e.g. tr_run_20260609_mq69skci_0, pw_0) */
+  /** REQUIRED — Unique result ID (e.g. tr_amber_0, pw_0) */
   id: string;
   /** REQUIRED — Human-readable test name */
   name: string;
