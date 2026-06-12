@@ -510,14 +510,14 @@ export default function Runs() {
             <div style={{ overflowX: "auto" }}>
               <table
                 className="proof-table"
-                style={{ tableLayout: "fixed", width: "100%", minWidth: 820 }}
+                style={{ tableLayout: "fixed", width: "100%", minWidth: 600 }}
               >
                 <colgroup>
-                  <col />
-                  <col style={{ width: 220 }} />
-                  <col style={{ width: 130 }} />
-                  <col style={{ width: 140 }} />
-                  <col style={{ width: 155 }} />
+                  <col style={{ width: "30%" }} />
+                  <col style={{ width: "25%" }} />
+                  <col style={{ width: "15%" }} />
+                  <col style={{ width: "15%" }} />
+                  <col style={{ width: "15%" }} />
                 </colgroup>
                 <thead
                   style={{
