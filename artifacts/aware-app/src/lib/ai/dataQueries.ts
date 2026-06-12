@@ -47,7 +47,7 @@ export const DATA_QUERIES: DataQuery[] = [
       if (!tc) throw new Error(`Test case not found: ${params.id}`);
       return tc;
     },
-    exampleParams: { id: "ad_0" },
+    exampleParams: { id: "geo_01" },
   },
   {
     id: "get_all_suites",
@@ -75,7 +75,7 @@ export const DATA_QUERIES: DataQuery[] = [
     name: "Get Runs by Environment",
     description: "Returns runs filtered by environment (production/staging)",
     query: async (params) => RUNS.filter((r) => r.env === (params.env as string)),
-    exampleParams: { env: "production" },
+    exampleParams: { env: "QA" },
   },
   {
     id: "get_runs_by_date_range",
@@ -237,7 +237,7 @@ export const DATA_QUERIES: DataQuery[] = [
         history,
       };
     },
-    exampleParams: { testId: "ad_0" },
+    exampleParams: { testId: "geo_01" },
   },
 ];
 

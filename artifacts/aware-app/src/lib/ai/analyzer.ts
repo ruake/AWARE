@@ -297,7 +297,7 @@ function fallbackRiskScoring(request: AIAnalysisRequest): AIAnalysisResult {
   );
   const prevRun = sortedRuns.find((r) => r.id !== runId);
   const trendScore = prevRun ? (run.passPct < prevRun.passPct ? 20 : 0) : 10;
-  const envScore = run.failures > 0 && run.env === "production" ? 20 : 5;
+  const envScore = run.failures > 0 && run.env === "PROD" ? 20 : 5;
   const totalScore = Math.round(passRateScore + failureScore + trendScore + envScore);
   const level =
     totalScore <= 20 ? "LOW" : totalScore <= 50 ? "MEDIUM" : totalScore <= 80 ? "HIGH" : "CRITICAL";

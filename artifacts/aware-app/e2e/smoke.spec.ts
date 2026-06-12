@@ -36,7 +36,7 @@ test.describe("PROOF App Smoke Tests", () => {
   });
 
   test("Test Analytics loads with search params", async ({ page }) => {
-    await page.goto("/analytics?testId=ad_0");
+    await page.goto("/analytics?testId=geo_01");
     await expect(page).toHaveURL(/analytics/);
   });
 });

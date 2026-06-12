@@ -1,31 +1,11 @@
-export const ENVS = [
-  "QA / Staging",
-  "QA / Production",
-  "UAT / Staging",
-  "UAT / Production",
-  "PROD / Staging",
-  "PROD / Production",
-];
+export const ENVS = ["QA", "UAT", "PROD"];
 
 export const CATEGORIES = [
   "geo-match",
   "caching",
-  "routing",
   "security",
-  "performance",
-  "tls",
-  "ddos",
-  "edgeworker",
-  "origin-offload",
-  "image-manager",
-  "ion",
-  "api-gateway",
-  "waf",
-  "bot-manager",
-  "network",
-  "functional",
-  "smoke",
-  "regression",
+  "edge-routing",
+  "http-protocol",
 ];
 
 export const PRIORITIES: string[] = ["P0", "P1", "P2", "P3"];
