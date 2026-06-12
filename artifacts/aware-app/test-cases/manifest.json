@@ -1,19 +1,27 @@
 {
-  "generated": "2026-06-12T06:25:03.675Z",
-  "totalTests": 20,
+  "generated": "2026-06-12T06:32:18.432Z",
+  "totalTests": 114,
   "categories": [
     "geo-match",
     "caching",
+    "performance",
     "security",
+    "functional",
+    "general",
+    "network",
+    "screenshots",
+    "url-health",
     "edge-routing",
     "http-protocol"
   ],
   "suites": [
+    "suite_auto",
+    "suite_e2e",
     "suite_full",
     "suite_geo",
     "suite_smoke",
     "suite_perf",
     "suite_security"
   ],
-  "automated": 20
+  "automated": 114
 }
