@@ -684,7 +684,17 @@ export function AppLayout({
         </aside>
 
         {/* Main content */}
-        <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", padding: "20px 24px" }}>{children}</main>
+        <main
+          style={{
+            flex: 1,
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            padding: "20px 24px",
+          }}
+        >
+          {children}
+        </main>
       </div>
 
       {/* Command Palette */}

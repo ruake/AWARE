@@ -788,28 +788,76 @@ export default function Dashboard() {
                           >
                             <td>
                               <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)", fontWeight: 500 }}>
+                                <span
+                                  style={{
+                                    fontFamily: "var(--font-mono)",
+                                    fontSize: 11,
+                                    color: "var(--proof-blue)",
+                                    fontWeight: 500,
+                                  }}
+                                >
                                   {r.id}
                                 </span>
-                                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--proof-text-secondary)" }}>
+                                <span
+                                  style={{
+                                    fontFamily: "var(--font-mono)",
+                                    fontSize: 10,
+                                    color: "var(--proof-text-secondary)",
+                                  }}
+                                >
                                   {r.build} · {r.rev}
                                 </span>
                               </div>
                             </td>
-                            <td style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{r.suite}</td>
+                            <td style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>
+                              {r.suite}
+                            </td>
                             <td style={{ fontSize: 12 }}>{r.env}</td>
                             <td>
-                              <span className={`proof-badge proof-badge-${r.status === "PASS" ? "pass" : r.status === "FAIL" ? "fail" : r.status === "PARTIAL" ? "partial" : r.status === "FLAKY" ? "flaky" : "skip"}`}>
+                              <span
+                                className={`proof-badge proof-badge-${r.status === "PASS" ? "pass" : r.status === "FAIL" ? "fail" : r.status === "PARTIAL" ? "partial" : r.status === "FLAKY" ? "flaky" : "skip"}`}
+                              >
                                 {r.status}
                               </span>
                             </td>
-                            <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 13, color: r.passPct === 100 ? "var(--proof-green)" : r.passPct < 90 ? "var(--proof-red)" : "var(--proof-text)" }}>
+                            <td
+                              style={{
+                                textAlign: "right",
+                                fontFamily: "var(--font-mono)",
+                                fontWeight: 700,
+                                fontSize: 13,
+                                color:
+                                  r.passPct === 100
+                                    ? "var(--proof-green)"
+                                    : r.passPct < 90
+                                      ? "var(--proof-red)"
+                                      : "var(--proof-text)",
+                              }}
+                            >
                               {r.passPct}%
                             </td>
-                            <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 12, color: r.failures > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)" }}>
+                            <td
+                              style={{
+                                textAlign: "right",
+                                fontFamily: "var(--font-mono)",
+                                fontSize: 12,
+                                color:
+                                  r.failures > 0
+                                    ? "var(--proof-red)"
+                                    : "var(--proof-text-secondary)",
+                              }}
+                            >
                               {r.failures || "—"}
                             </td>
-                            <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)" }}>{r.duration}</td>
+                            <td
+                              style={{
+                                fontFamily: "var(--font-mono)",
+                                fontSize: 11,
+                                color: "var(--proof-text-secondary)",
+                              }}
+                            >
+                              {r.duration}
+                            </td>
                           </tr>
                         ))}
                       </tbody>

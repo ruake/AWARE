@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, useLocation, useSearch } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
-import { getRunById, getTestResultsForRun, RUNS, getPromotionDecision } from "@/lib/data";
+import { getRunById, getTestResultsForRun, RUNS, getPromotionDecision, loadResultsForRun } from "@/lib/data";
 import type { TestResult, TestAssertionResult, FilmstripFrame } from "@/lib/types";
 import {
   ArrowLeft,
@@ -74,6 +74,11 @@ export default function RunDetail() {
   const { show, Toast } = useSimpleToast();
 
   const run = getRunById(runId) ?? RUNS[0] ?? null;
+  const [loaded, setLoaded] = React.useState(false);
+  React.useEffect(() => {
+    if (!run) return;
+    loadResultsForRun(run.id).then(() => setLoaded(true));
+  }, [run?.id]);
   const results = run ? getTestResultsForRun(run.id) : [];
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
