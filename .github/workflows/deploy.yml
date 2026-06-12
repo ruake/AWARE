@@ -125,7 +125,7 @@ jobs:
             echo "No changes to run data"
           else
             git commit -m "record CI run [skip ci]"
-            git push origin "${BRANCH}"
+            git push --force origin "${BRANCH}"
           fi
           git checkout -f main 2>/dev/null || true
 
