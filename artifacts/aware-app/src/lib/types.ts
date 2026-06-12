@@ -9,8 +9,10 @@ export interface RunCondition {
 export interface Run {
   id: string;
   label: string;
-  suite: string;
-  target: string;
+  suiteId: string;
+  envId: string;
+  env: string;
+  network: "staging" | "production";
   status: "PASS" | "FAIL" | "PARTIAL" | "FLAKY" | "RUNNING" | "PENDING" | "ERROR";
   passPct: number;
   failures: number;
@@ -19,8 +21,6 @@ export interface Run {
   started: string;
   build: string;
   rev: string;
-  env: string;
-  network: "staging" | "production";
   /** Optional K8s-style conditions for granular status tracking */
   conditions?: RunCondition[];
   /** GitHub Actions workflow run ID for status polling */
@@ -34,8 +34,12 @@ export interface Run {
 // Fields marked REQUIRED are always present (null never allowed).
 // Fields marked OPTIONAL may be absent or undefined.
 export interface TestResult {
-  /** REQUIRED — Unique result ID (e.g. tr_amber_0, pw_0) */
+  /** REQUIRED — Unique result ID (e.g. geo_01, pw_0) */
   id: string;
+  /** REQUIRED — Links to TestCase.id */
+  testCaseId: string;
+  /** REQUIRED — Links to Run.id */
+  runId: string;
   /** REQUIRED — Human-readable test name */
   name: string;
   /** REQUIRED — Test outcome */
@@ -251,8 +255,6 @@ export interface TestSuiteIntegration {
 }
 
 export interface TestSuiteConfig {
-  target: string;
-  environment: string;
   parallelism: number;
   retries: number;
   failFast: boolean;
@@ -266,6 +268,8 @@ export interface TestSuite {
   description: string;
   parentId: string | null;
   testIds: string[];
+  envIds: string[];
+  runners: string[];
   config: TestSuiteConfig;
   tags: string[];
   schedule: string | null;

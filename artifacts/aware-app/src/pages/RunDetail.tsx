@@ -226,7 +226,7 @@ export default function RunDetail() {
               color: "var(--proof-text-secondary)",
             }}
           >
-            {run.target} · {run.env} · Build {run.build}
+            {run.env} · {run.envId} · Build {run.build}
           </span>
           <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
             <button

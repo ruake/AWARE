@@ -74,22 +74,22 @@ function RunPicker({
   }, [open]);
 
   const envs = [...new Set(RUNS.map((r) => r.env))];
-  const targets = [...new Set(RUNS.map((r) => r.target))];
+  const targets = [...new Set(RUNS.map((r) => r.env))];
   const statuses = [...new Set(RUNS.map((r) => r.status))] as Run["status"][];
-  const suites = [...new Set(RUNS.map((r) => r.suite))];
+  const suites = [...new Set(RUNS.map((r) => r.suiteId))];
 
   const filtered = RUNS.filter((r) => {
     if (envFilter && r.env !== envFilter) return false;
-    if (targetFilter && r.target !== targetFilter) return false;
+    if (targetFilter && r.envId !== targetFilter) return false;
     if (statusFilter && r.status !== statusFilter) return false;
-    if (suiteFilter && r.suite !== suiteFilter) return false;
+    if (suiteFilter && r.suiteId !== suiteFilter) return false;
     if (search) {
       const q = search.toLowerCase();
       if (
         !r.id.toLowerCase().includes(q) &&
         !r.env.toLowerCase().includes(q) &&
-        !r.suite.toLowerCase().includes(q) &&
-        !r.target.toLowerCase().includes(q) &&
+        !r.suiteId.toLowerCase().includes(q) &&
+        !r.envId.toLowerCase().includes(q) &&
         !r.build.toLowerCase().includes(q) &&
         !r.rev.toLowerCase().includes(q)
       )
@@ -171,7 +171,7 @@ function RunPicker({
                 flexShrink: 0,
               }}
             >
-              {selectedRun.env} · {selectedRun.target}
+              {selectedRun.env} · {selectedRun.envId}
             </span>
           </>
         ) : (
@@ -191,7 +191,7 @@ function RunPicker({
       {selectedRun && (
         <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
           <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
-            {selectedRun.target}
+            {selectedRun.envId}
           </span>
           <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
             {selectedRun.env}
@@ -498,7 +498,7 @@ function RunPicker({
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {r.env} · {r.target} · {r.suite}
+                      {r.env} · {r.envId} · {r.suiteId}
                     </span>
                     <span
                       style={{
@@ -1213,7 +1213,7 @@ export default function Compare() {
             Comparison
           </span>
           <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
-            {baselineRun?.target} / {baselineRun?.env}
+            {baselineRun?.envId} / {baselineRun?.env}
           </span>
           <span
             className={`proof-badge ${baselineRun?.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}
@@ -1241,7 +1241,7 @@ export default function Compare() {
           </span>
           <span style={{ color: "var(--proof-grey)", fontSize: 12 }}>|</span>
           <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
-            {candidateRun?.target} / {candidateRun?.env}
+            {candidateRun?.envId} / {candidateRun?.env}
           </span>
           <span
             className={`proof-badge ${candidateRun?.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}

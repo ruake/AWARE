@@ -129,7 +129,7 @@ function RunRow({
               whiteSpace: "nowrap",
             }}
           >
-            {run.suite}
+            {run.suiteId}
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
             <span
@@ -246,19 +246,18 @@ export default function Runs() {
   const selectedRunIdRef = React.useRef<string | null>(null);
 
   const envs = [...new Set(RUNS.map((r) => r.env))].sort();
-  const suites = [...new Set(RUNS.map((r) => r.suite))].sort();
+  const suites = [...new Set(RUNS.map((r) => r.suiteId))].sort();
 
   const filtered = RUNS.filter((r) => {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
-    if (suiteFilter !== "all" && r.suite !== suiteFilter) return false;
+    if (suiteFilter !== "all" && r.suiteId !== suiteFilter) return false;
     if (envFilter !== "all" && r.env !== envFilter) return false;
     if (search) {
       const q = search.toLowerCase();
       if (
         !r.id.toLowerCase().includes(q) &&
         !r.env.toLowerCase().includes(q) &&
-        !r.suite.toLowerCase().includes(q) &&
-        !r.target.toLowerCase().includes(q)
+        !r.suiteId.toLowerCase().includes(q)
       )
         return false;
     }

@@ -7,7 +7,7 @@ export const RUNNER_DEFS: JobRunnerDef[] = [
     type: "test-run",
     description: "Python AST-based test suite (geo-match, security, performance, caching)",
     icon: "test-tube",
-    defaultSuiteId: "suite_full",
+    defaultSuiteId: "suite_regression_qa",
   },
   {
     id: "runner_playwright",
@@ -24,7 +24,7 @@ export const RUNNER_DEFS: JobRunnerDef[] = [
     type: "test-run",
     description: "Lightweight browser tests via Puppeteer (navigation, screenshots, header checks)",
     icon: "camera",
-    defaultSuiteId: "suite_full",
+    defaultSuiteId: "suite_regression_qa",
   },
   {
     id: "runner_http",
@@ -32,7 +32,7 @@ export const RUNNER_DEFS: JobRunnerDef[] = [
     type: "test-run",
     description: "Direct HTTP-level tests (health checks, security headers, performance)",
     icon: "activity",
-    defaultSuiteId: "suite_perf",
+    defaultSuiteId: "suite_performance",
   },
   {
     id: "runner_discovery",

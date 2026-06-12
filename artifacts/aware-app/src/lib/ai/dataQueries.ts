@@ -182,7 +182,7 @@ export const DATA_QUERIES: DataQuery[] = [
     query: async () => {
       const groups: Record<string, Run[]> = {};
       for (const run of RUNS) {
-        const key = `${run.target}/${run.env}`;
+        const key = `${run.envId}`;
         if (!groups[key]) groups[key] = [];
         groups[key].push(run);
       }

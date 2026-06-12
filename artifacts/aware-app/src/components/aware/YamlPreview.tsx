@@ -6,7 +6,9 @@ export function generateGitHubActionsYaml(suite: {
   id: string;
   name: string;
   schedule: string | null;
-  config: { target: string; environment: string; parallelism: number };
+  envIds: string[];
+  runners: string[];
+  config: { parallelism: number };
 }): string {
   const suiteName = suite.name.toLowerCase().replace(/\s+/g, "_");
   return `name: ${suite.name}
@@ -19,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [${suite.config.target}]
-        environment: [${suite.config.environment}]
+        env: [${suite.envIds.join(", ")}]
+        runner: [${suite.runners.join(", ")}]
       max-parallel: ${suite.config.parallelism}
     steps:
       - uses: actions/checkout@v6

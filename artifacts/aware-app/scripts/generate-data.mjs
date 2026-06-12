@@ -43,23 +43,23 @@ for (const t of ALL_TESTS) {
 // 15 runs across 3 days, mixing production + staging environments
 const RUN_DEFS = [
   // Day 1: Jun 8 — mostly green
-  { day: 8, hour: 7, min: 12, env: "production", target: "Prod", status: "PASS", passPct: 100, failures: 0, build: "a1b2c3d", rev: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b" },
-  { day: 8, hour: 9, min: 45, env: "production", target: "Prod", status: "PASS", passPct: 99, failures: 1, build: "b2c3d4e", rev: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0" },
-  { day: 8, hour: 12, min: 0, env: "staging", target: "UAT", status: "PASS", passPct: 98, failures: 2, build: "c3d4e5f", rev: "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c" },
-  { day: 8, hour: 15, min: 30, env: "production", target: "Prod", status: "PASS", passPct: 100, failures: 0, build: "d4e5f6a", rev: "d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1" },
-  { day: 8, hour: 18, min: 22, env: "staging", target: "UAT", status: "FLAKY", passPct: 91, failures: 9, build: "e5f6a7b", rev: "e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2" },
+  { day: 8, hour: 7, min: 12, tier: "QA", network: "staging", suiteId: "suite_regression_qa", envId: "qa_staging", status: "PASS", passPct: 100, failures: 0, build: "a1b2c3d", rev: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b" },
+  { day: 8, hour: 9, min: 45, tier: "QA", network: "production", suiteId: "suite_regression_qa", envId: "qa_prod", status: "PASS", passPct: 99, failures: 1, build: "b2c3d4e", rev: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0" },
+  { day: 8, hour: 12, min: 0, tier: "UAT", network: "staging", suiteId: "suite_regression_uat", envId: "uat_staging", status: "PASS", passPct: 98, failures: 2, build: "c3d4e5f", rev: "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c" },
+  { day: 8, hour: 15, min: 30, tier: "PROD", network: "production", suiteId: "suite_nightly_prod", envId: "prod_prod", status: "PASS", passPct: 100, failures: 0, build: "d4e5f6a", rev: "d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1" },
+  { day: 8, hour: 18, min: 22, tier: "UAT", network: "staging", suiteId: "suite_regression_uat", envId: "uat_staging", status: "FLAKY", passPct: 91, failures: 9, build: "e5f6a7b", rev: "e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2" },
   // Day 2: Jun 9 — some regressions
-  { day: 9, hour: 6, min: 30, env: "production", target: "Prod", status: "PASS", passPct: 100, failures: 0, build: "f6a7b8c", rev: "f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3" },
-  { day: 9, hour: 8, min: 15, env: "staging", target: "Prod", status: "PASS", passPct: 97, failures: 3, build: "a7b8c9d", rev: "a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4" },
-  { day: 9, hour: 10, min: 0, env: "production", target: "Prod", status: "FLAKY", passPct: 88, failures: 12, build: "b8c9d0e", rev: "b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5" },
-  { day: 9, hour: 13, min: 45, env: "staging", target: "UAT", status: "PASS", passPct: 96, failures: 4, build: "c9d0e1f", rev: "c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6" },
-  { day: 9, hour: 16, min: 20, env: "production", target: "Prod", status: "FAIL", passPct: 72, failures: 29, build: "d0e1f2a", rev: "d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7" },
+  { day: 9, hour: 6, min: 30, tier: "PROD", network: "production", suiteId: "suite_nightly_prod", envId: "prod_prod", status: "PASS", passPct: 100, failures: 0, build: "f6a7b8c", rev: "f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3" },
+  { day: 9, hour: 8, min: 15, tier: "PROD", network: "staging", suiteId: "suite_nightly_prod", envId: "prod_staging", status: "PASS", passPct: 97, failures: 3, build: "a7b8c9d", rev: "a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4" },
+  { day: 9, hour: 10, min: 0, tier: "PROD", network: "production", suiteId: "suite_nightly_prod", envId: "prod_prod", status: "FLAKY", passPct: 88, failures: 12, build: "b8c9d0e", rev: "b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5" },
+  { day: 9, hour: 13, min: 45, tier: "UAT", network: "staging", suiteId: "suite_regression_uat", envId: "uat_staging", status: "PASS", passPct: 96, failures: 4, build: "c9d0e1f", rev: "c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6" },
+  { day: 9, hour: 16, min: 20, tier: "PROD", network: "production", suiteId: "suite_nightly_prod", envId: "prod_prod", status: "FAIL", passPct: 72, failures: 29, build: "d0e1f2a", rev: "d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7" },
   // Day 3: Jun 10 — recovery
-  { day: 10, hour: 5, min: 0, env: "production", target: "Prod", status: "PASS", passPct: 99, failures: 1, build: "e1f2a3b", rev: "e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8" },
-  { day: 10, hour: 8, min: 30, env: "staging", target: "UAT", status: "PASS", passPct: 100, failures: 0, build: "f2a3b4c", rev: "f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9" },
-  { day: 10, hour: 10, min: 15, env: "production", target: "Prod", status: "PASS", passPct: 98, failures: 2, build: "a3b4c5d", rev: "a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0" },
-  { day: 10, hour: 13, min: 0, env: "staging", target: "Prod", status: "PASS", passPct: 100, failures: 0, build: "b4c5d6e", rev: "b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1" },
-  { day: 10, hour: 16, min: 45, env: "production", target: "Prod", status: "PASS", passPct: 100, failures: 0, build: "c5d6e7f", rev: "c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2" },
+  { day: 10, hour: 5, min: 0, tier: "PROD", network: "production", suiteId: "suite_nightly_prod", envId: "prod_prod", status: "PASS", passPct: 99, failures: 1, build: "e1f2a3b", rev: "e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8" },
+  { day: 10, hour: 8, min: 30, tier: "UAT", network: "staging", suiteId: "suite_regression_uat", envId: "uat_staging", status: "PASS", passPct: 100, failures: 0, build: "f2a3b4c", rev: "f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9" },
+  { day: 10, hour: 10, min: 15, tier: "PROD", network: "production", suiteId: "suite_nightly_prod", envId: "prod_prod", status: "PASS", passPct: 98, failures: 2, build: "a3b4c5d", rev: "a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0" },
+  { day: 10, hour: 13, min: 0, tier: "PROD", network: "staging", suiteId: "suite_nightly_prod", envId: "prod_staging", status: "PASS", passPct: 100, failures: 0, build: "b4c5d6e", rev: "b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1" },
+  { day: 10, hour: 16, min: 45, tier: "PROD", network: "production", suiteId: "suite_nightly_prod", envId: "prod_prod", status: "PASS", passPct: 100, failures: 0, build: "c5d6e7f", rev: "c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2" },
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -232,9 +232,11 @@ function makeEvidence(test, status) {
   };
 }
 
-function makeTestResult(test, status, duration) {
+function makeTestResult(test, status, duration, runId) {
   return {
     id: test.id,
+    testCaseId: test.id,
+    runId,
     name: test.name,
     status,
     duration,
@@ -259,8 +261,10 @@ for (const def of RUN_DEFS) {
   runs.push({
     id,
     label: `CI — Jun ${def.day}, 2026`,
-    suite: "suite_full",
-    target: def.target,
+    suiteId: def.suiteId,
+    envId: def.envId,
+    env: def.tier,
+    network: def.network,
     status: def.status,
     passPct: def.passPct,
     failures: def.failures,
@@ -269,8 +273,6 @@ for (const def of RUN_DEFS) {
     started,
     build: def.build,
     rev: def.rev,
-    env: def.env,
-    network: def.target === "Prod" ? "production" : "staging",
   });
 
   // Generate test results for this run
@@ -281,7 +283,7 @@ for (const def of RUN_DEFS) {
     const status = shouldPass ? "PASS" : "FAIL";
     if (!shouldPass) failureCount++;
     const duration = Math.floor(Math.random() * 1500) + 50;
-    results.push(makeTestResult(test, status, duration));
+    results.push(makeTestResult(test, status, duration, id));
   }
   // Ensure failure count matches (approximate)
   if (failureCount !== def.failures && results.length > 0) {

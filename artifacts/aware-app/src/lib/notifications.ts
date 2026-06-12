@@ -13,7 +13,7 @@ export function getNotifications(): Notification[] {
 
   for (const run of RUNS) {
     const ts = new Date(run.started).getTime();
-    const envLabel = `${run.target}/${run.env}`;
+    const envLabel = run.env;
 
     if (run.status === "PASS") {
       notifs.push({
