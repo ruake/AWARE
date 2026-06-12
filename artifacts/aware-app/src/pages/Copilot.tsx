@@ -1106,6 +1106,105 @@ export default function Copilot() {
             </button>
           </div>
         </div>
+        {/* Analysis use-cases sidebar */}
+        <div
+          style={{
+            width: 220,
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            overflowY: "auto",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "var(--proof-text-secondary)",
+              padding: "4px 2px 8px",
+              flexShrink: 0,
+            }}
+          >
+            Quick Analysis
+          </div>
+          {(["analysis", "alert", "recommendation", "report"] as const).map((cat) => {
+            const catUcs = AI_USE_CASES.filter((uc) => uc.category === cat);
+            if (!catUcs.length) return null;
+            const catLabel: Record<string, string> = {
+              analysis: "Analysis",
+              alert: "Alerts",
+              recommendation: "Recommendations",
+              report: "Reports",
+            };
+            const catColor: Record<string, string> = {
+              analysis: "#5b8af5",
+              alert: "#ef4444",
+              recommendation: "#22c55e",
+              report: "#a855f7",
+            };
+            return (
+              <div key={cat} style={{ marginBottom: 10 }}>
+                <div
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    color: catColor[cat],
+                    marginBottom: 4,
+                    paddingLeft: 2,
+                  }}
+                >
+                  {catLabel[cat]}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  {catUcs.map((uc) => (
+                    <button
+                      key={uc.id}
+                      onClick={() => handleUseCase(uc)}
+                      title={uc.description}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        padding: "6px 10px",
+                        borderRadius: 7,
+                        fontSize: 11,
+                        fontWeight: 500,
+                        cursor: "pointer",
+                        border: `1px solid ${catColor[cat]}28`,
+                        background: `${catColor[cat]}0c`,
+                        color: "var(--proof-text)",
+                        textAlign: "left",
+                        width: "100%",
+                        transition: "all 0.12s",
+                        lineHeight: 1.3,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = `${catColor[cat]}1e`;
+                        e.currentTarget.style.borderColor = `${catColor[cat]}55`;
+                        e.currentTarget.style.color = catColor[cat];
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = `${catColor[cat]}0c`;
+                        e.currentTarget.style.borderColor = `${catColor[cat]}28`;
+                        e.currentTarget.style.color = "var(--proof-text)";
+                      }}
+                    >
+                      <span style={{ flexShrink: 0, opacity: 0.8 }}>
+                        {USE_CASE_ICONS[uc.id] || <Zap size={11} />}
+                      </span>
+                      {uc.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </AppLayout>
   );
