@@ -239,18 +239,25 @@ jobs:
       - name: Commit run data to data branch
         run: |
           DATA_DIR="${GITHUB_WORKSPACE}/updated-data"
+          TMP_DIR="/tmp/data-sync"
           BRANCH="data"
           git config user.name "AWARE Bot"
           git config user.email "bot@aware.dev"
+          if [ -d "$DATA_DIR" ]; then
+            mkdir -p "$TMP_DIR"
+            cp "$DATA_DIR"/*.json "$TMP_DIR/" 2>/dev/null || true
+          fi
           git fetch origin "+${BRANCH}:refs/remotes/origin/${BRANCH}" 2>/dev/null || true
           if git show-ref --verify --quiet "refs/remotes/origin/${BRANCH}"; then
+            git clean -fd
             git checkout -b "${BRANCH}" "origin/${BRANCH}" 2>/dev/null || git checkout "${BRANCH}"
           else
             echo "Data branch does not exist yet — skipping sync (init-data-branch will create it)"
             exit 0
           fi
-          if [ -d "$DATA_DIR" ]; then
-            cp "$DATA_DIR"/*.json . 2>/dev/null || true
+          if [ -d "$TMP_DIR" ]; then
+            cp "$TMP_DIR"/*.json . 2>/dev/null || true
+            rm -rf "$TMP_DIR"
           fi
           git add -A
           if git diff --cached --quiet; then
