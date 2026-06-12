@@ -1,0 +1,105 @@
+# =============================================================================
+# A.W.A.R.E. — Suite Scheduler
+#
+# Central orchestrator that reads config/test-suites.yml, evaluates cron
+# schedules, and dispatches run-tests.yml for any suite that is due.
+#
+# Also persists scheduler-status.json to src/data/ so the AWARE portal
+# can render scheduler health, recent dispatches, and per-suite status.
+# =============================================================================
+
+name: AWARE Scheduler
+
+on:
+  schedule:
+    # Every 15 minutes — fine-grained enough to catch all cron windows
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Validate schedule logic without dispatching workflows"
+        required: false
+        default: "false"
+        type: boolean
+      force_suite:
+        description: "Force-dispatch a specific suite (bypass cron check)"
+        required: false
+        default: ""
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - "config/test-suites.yml"
+      - ".github/workflows/scheduler.yml"
+      - "scripts/scheduler.mjs"
+
+permissions:
+  actions: write
+  contents: write
+  statuses: write
+
+concurrency:
+  group: scheduler-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_OPTIONS: --max-old-space-size=2048
+
+jobs:
+  orchestrate:
+    name: Orchestrate scheduled suites
+    runs-on: ubuntu-latest
+    outputs:
+      dispatched: ${{ steps.run.outputs.dispatched }}
+      status: ${{ steps.run.outputs.status }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Validate test-suites.yml
+        run: |
+          echo "Validating suite config …"
+          yq -o=json '.' config/test-suites.yml | jq '.suites | length' > /dev/null
+          echo "✓ Valid — $(yq -o=json '.' config/test-suites.yml | jq '.suites | length') suites"
+
+      - name: Run scheduler
+        id: run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_STEP_SUMMARY: ${{ github.step_summary }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          SCHEDULER_DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          SCHEDULER_FORCE_SUITE: ${{ inputs.force_suite || '' }}
+        run: node scripts/scheduler.mjs
+
+      - name: Upload scheduler status artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheduler-status
+          path: artifacts/aware-app/src/data/scheduler-status.json
+          retention-days: 30
+
+      - name: Set commit status
+        if: always()
+        run: |
+          CONCLUSION="${{ job.status }}"
+          gh api "repos/${{ github.repository }}/statuses/${{ github.sha }}" \
+            -f state="$([ "$CONCLUSION" = "success" ] && echo "success" || echo "failure")" \
+            -f description="Scheduler: ${{ steps.run.outputs.dispatched || '0' }} env(s) dispatched" \
+            -f context="AWARE Scheduler" \
+            -f target_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

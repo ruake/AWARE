@@ -500,3 +500,48 @@ export class ValidationError extends Error {
     this.name = "ValidationError";
   }
 }
+
+// ── Scheduler Types ────────────────────────────────────────────────────
+
+export interface SchedulerSuiteStatus {
+  id: string;
+  name: string;
+  schedule: string | null;
+  scheduleDesc: string | null;
+  due: boolean;
+  lastDispatched: string | null;
+  lastConclusion: string | null;
+  lastRunUrl: string | null;
+  activeRuns: number;
+  status: string;
+  nextDue: string | null;
+  environments: string[];
+  runners: string[];
+}
+
+export interface SchedulerDispatch {
+  timestamp: string;
+  suite: string;
+  environments: string[];
+  dispatched: number;
+  failed: number;
+  errors?: string[];
+  workflow: string;
+}
+
+export interface SchedulerSummary {
+  total: number;
+  scheduled: number;
+  due: number;
+  dispatched: number;
+  running: number;
+}
+
+export interface SchedulerStatus {
+  lastRun: string | null;
+  lastRunBy: string | null;
+  status: "healthy" | "degraded" | "error";
+  suites: SchedulerSuiteStatus[];
+  recentDispatches: SchedulerDispatch[];
+  summary: SchedulerSummary;
+}

@@ -23,6 +23,10 @@ export type {
   TestPriority,
   TestSeverity,
   TestStatus,
+  SchedulerStatus,
+  SchedulerSuiteStatus,
+  SchedulerDispatch,
+  SchedulerSummary,
 } from "./types";
 
 export type { RunFrequency } from "./runs";
@@ -96,3 +100,9 @@ export {
 } from "./envConfig";
 
 export { getAutoDiscoveredTests, getAutoDiscoverySummary } from "./testDiscovery";
+
+export {
+  getSchedulerStatus,
+  refreshSchedulerStatus,
+  subscribeToSchedulerStatus,
+} from "./schedulerStatus";
