@@ -151,7 +151,7 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
               whiteSpace: "nowrap",
             }}
           >
-            {run.suite}
+            {run.suiteId}
           </span>
           <span
             style={{ fontSize: 10, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}

@@ -105,7 +105,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       ...suites.map((s) => ({
         id: s.id,
         label: s.name,
-        description: `${s.testIds.length} tests · ${s.config.target}/${s.config.environment}`,
+        description: `${s.testIds.length} tests · ${s.envIds.join(", ")}`,
         type: "suite" as const,
         href: "/suites",
         icon: "📁",

@@ -96,7 +96,7 @@ export default function TestSuiteManager() {
   const filtered = React.useMemo(() => {
     const q = search.toLowerCase();
     return suites.filter((s) => {
-      if (targetFilter && s.config.target !== targetFilter) return false;
+      if (targetFilter && !s.envIds.includes(targetFilter)) return false;
       if (scheduleFilter === "scheduled" && !s.schedule) return false;
       if (scheduleFilter === "manual" && s.schedule) return false;
       if (!q) return true;
@@ -109,7 +109,7 @@ export default function TestSuiteManager() {
   }, [suites, tcs, search, targetFilter, scheduleFilter]);
 
   const flatSuites = React.useMemo(() => flattenSuites(filtered, suites), [filtered, suites]);
-  const targets = React.useMemo(() => [...new Set(suites.map((s) => s.config.target))], [suites]);
+  const targets = React.useMemo(() => [...new Set(suites.flatMap((s) => s.envIds))], [suites]);
 
   const selectedSuite = selId ? (suites.find((s) => s.id === selId) ?? null) : null;
   const selectedTest = selId ? (tcs.find((tc) => tc.id === selId) ?? null) : null;
@@ -389,8 +389,8 @@ export default function TestSuiteManager() {
                       <th>Suite</th>
                       <th style={{ textAlign: "center" }}>Tests</th>
                       <th>Schedule</th>
-                      <th>Target</th>
-                      <th>Env</th>
+                      <th>Env IDs</th>
+                      <th>Runners</th>
                       <th>Categories</th>
                       <th style={{ textAlign: "center" }}>Active</th>
                     </tr>
@@ -515,7 +515,7 @@ export default function TestSuiteManager() {
                           </td>
                           <td style={{ verticalAlign: "middle" }}>
                             <span className="proof-badge proof-badge-pass" style={{ fontSize: 10 }}>
-                              {s.config.target}
+                              {s.envIds.join(", ")}
                             </span>
                           </td>
                           <td
@@ -526,7 +526,7 @@ export default function TestSuiteManager() {
                               textTransform: "capitalize",
                             }}
                           >
-                            {s.config.environment}
+                            {s.runners.join(", ")}
                           </td>
                           <td style={{ verticalAlign: "middle" }}>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
@@ -750,13 +750,13 @@ function SuiteDetailPanel({
             className="proof-badge proof-badge-pass"
             style={{ fontSize: 10, textTransform: "uppercase" }}
           >
-            {suite.config.target}
+            {suite.envIds.join(", ")}
           </span>
           <span
             className="proof-badge proof-badge-skip"
             style={{ fontSize: 10, textTransform: "capitalize" }}
           >
-            {suite.config.environment}
+            {suite.runners.join(", ")}
           </span>
           {cats.map((cat) => {
             const ci = CATEGORIES.indexOf(cat) % CATEGORY_COLORS.length;
@@ -897,8 +897,8 @@ function SuiteDetailPanel({
             }}
           >
             {[
-              ["Target", suite.config.target],
-              ["Environment", suite.config.environment],
+              ["Env IDs", suite.envIds.join(", ")],
+              ["Runners", suite.runners.join(", ")],
               ["Parallelism", `${suite.config.parallelism}x`],
               ["Retries", String(suite.config.retries)],
               ["Timeout", `${suite.config.timeoutMinutes}m`],

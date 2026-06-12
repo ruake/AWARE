@@ -164,7 +164,7 @@ export function buildSystemPrompt(context: AIContext): string {
     .slice(0, 5)
     .map(
       (r) =>
-        `- ${r.id}: "${r.label}" | env=${r.env} | target=${r.target} | status=${r.status} | passRate=${r.passPct}% | failures=${r.failures} | duration=${r.duration} | build=${r.build} | started=${r.started.slice(0, 16)}`,
+        `- ${r.id}: "${r.label}" | env=${r.env} | envId=${r.envId} | status=${r.status} | passRate=${r.passPct}% | failures=${r.failures} | duration=${r.duration} | build=${r.build} | started=${r.started.slice(0, 16)}`,
     )
     .join("\n");
 

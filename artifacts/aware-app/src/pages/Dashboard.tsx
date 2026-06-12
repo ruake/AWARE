@@ -810,7 +810,7 @@ export default function Dashboard() {
                               </div>
                             </td>
                             <td style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>
-                              {r.suite}
+                              {r.suiteId}
                             </td>
                             <td style={{ fontSize: 12 }}>{r.env}</td>
                             <td>
