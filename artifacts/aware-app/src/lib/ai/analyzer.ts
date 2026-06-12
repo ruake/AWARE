@@ -355,7 +355,7 @@ function fallbackRiskScoring(request: AIAnalysisRequest): AIAnalysisResult {
 function fallbackEnvComparison(): AIAnalysisResult {
   const envGroups: Record<string, { runs: number; avgPass: number; failures: number }> = {};
   for (const run of RUNS) {
-    const key = `${run.target}/${run.env}`;
+    const key = run.envId;
     if (!envGroups[key]) envGroups[key] = { runs: 0, avgPass: 0, failures: 0 };
     envGroups[key].runs++;
     envGroups[key].avgPass += run.passPct;
@@ -1122,7 +1122,7 @@ function fallbackEnvDrift(): AIAnalysisResult {
     }
   > = {};
   for (const run of RUNS) {
-    const key = `${run.target}/${run.env}`;
+    const key = run.envId;
     if (!envGroups[key]) envGroups[key] = { runs: 0, avgPass: 0, failures: 0, categories: {} };
     envGroups[key].runs++;
     envGroups[key].avgPass += run.passPct;
@@ -1341,7 +1341,7 @@ function fallbackTestDocGen(): AIAnalysisResult {
   const suiteList = suites
     .map(
       (s) =>
-        `${s.name} (\`${s.id}\`): ${s.testIds.length} tests, target ${s.config.target}, parallelism ${s.config.parallelism}`,
+        `${s.name} (\`${s.id}\`): ${s.testIds.length} tests, envs [${s.envIds.join(", ")}], parallelism ${s.config.parallelism}`,
     )
     .join("\n");
   const summary = `Documentation generated: ${testCases.length} tests across ${testInventory.length} categories in ${suites.length} suites.`;
@@ -1373,7 +1373,7 @@ function fallbackReleaseReadiness(): AIAnalysisResult {
 
   const envGroups: Record<string, { passPct: number; failures: number; status: string }> = {};
   for (const run of RUNS) {
-    const key = `${run.env}/${run.target}`;
+    const key = run.envId;
     if (
       !envGroups[key] ||
       new Date(run.started).getTime() > new Date(envGroups[key].status).getTime()
@@ -1397,7 +1397,7 @@ function fallbackReleaseReadiness(): AIAnalysisResult {
   return {
     useCaseId: "release-readiness",
     summary,
-    details: `## Release Readiness Check\n\n**Overall Score: ${overallScore}/100 — ${verdict}**\n\n### Latest Build: \`${latest.build}\`\n| Metric | Value |\n|--------|-------|\n| Pass rate | ${latest.passPct}% |\n| Failures | ${latest.failures} |\n| Environment | ${latest.env} / ${latest.target} |\n| Status | **${latest.status}** |\n\n### Environment Health\n| Env | Pass Rate | Failures |\n|-----|-----------|----------|\n${Object.entries(
+    details: `## Release Readiness Check\n\n**Overall Score: ${overallScore}/100 — ${verdict}**\n\n### Latest Build: \`${latest.build}\`\n| Metric | Value |\n|--------|-------|\n| Pass rate | ${latest.passPct}% |\n| Failures | ${latest.failures} |\n| Environment | ${latest.envId} |\n| Status | **${latest.status}** |\n\n### Environment Health\n| Env | Pass Rate | Failures |\n|-----|-----------|----------|\n${Object.entries(
       envGroups,
     )
       .map(([k, v]) => `| ${k} | ${v.passPct}% | ${v.failures} |`)
@@ -1426,7 +1426,7 @@ function fallbackEnvHealthSummary(): AIAnalysisResult {
     { runs: number; passRates: number[]; failures: number; duration: number }
   > = {};
   for (const run of RUNS) {
-    const key = `${run.env}/${run.target}`;
+    const key = run.envId;
     if (!envMap[key]) envMap[key] = { runs: 0, passRates: [], failures: 0, duration: 0 };
     envMap[key].runs++;
     envMap[key].passRates.push(run.passPct);
@@ -1629,7 +1629,7 @@ export async function generateInsights(): Promise<AIInsight[]> {
 
   const envGroups: Record<string, number> = {};
   for (const run of RUNS) {
-    const key = `${run.target}/${run.env}`;
+    const key = `${run.envId}`;
     if (!envGroups[key]) envGroups[key] = 0;
     envGroups[key] += run.failures;
   }

@@ -64,7 +64,7 @@ export function computeTestDetailForName(name: string): TestDetail {
 
 // ── Env label helper ──────────────────────────────────────────────────
 function envLabel(run: Run): string {
-  return run.env ?? run.target ?? "QA";
+  return run.env ?? "QA";
 }
 
 const ENV_COLOR_MAP: Record<string, string> = {
