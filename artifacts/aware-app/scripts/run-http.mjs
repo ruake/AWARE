@@ -1,16 +1,10 @@
 #!/usr/bin/env node
 /**
- * HTTP Test Runner
+ * HTTP Test Runner — Akamai CDN Edge Tests
  *
- * Executes HTTP-level tests against target URLs using Node.js fetch,
- * validating status codes, headers, response times, and content types.
- * Outputs Playwright-compatible JSON for record-run.mjs.
- *
- * Usage:
- *   node scripts/run-http.mjs [--output path]
- *
- * Defaults:
- *   --output  test-results/http-results.json
+ * Executes HTTP-level CDN edge tests against the target Akamai property,
+ * validating status codes, Akamai CDN headers, cache behavior, security
+ * headers, and response times. Outputs Playwright-compatible JSON.
  */
 
 import fs from "fs";
@@ -20,31 +14,33 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 
-const TEST_BASE = "https://the-internet.herokuapp.com";
+const args = process.argv.slice(2);
+const outputIdx = args.indexOf("--output");
+const baseUrlIdx = args.indexOf("--base-url");
 
-const ENDPOINTS = [
-  "/login",
-  "/checkboxes",
-  "/dropdown",
-  "/dynamic_loading/2",
-  "/javascript_alerts",
-  "/frames",
-  "/windows",
-  "/key_presses",
-  "/upload",
-  "/drag_and_drop",
-  "/status_codes",
-  "/basic_auth",
-  "/digest_auth",
-  "/secure",
-  "/redirector",
+const TEST_BASE = baseUrlIdx >= 0 ? args[baseUrlIdx + 1] : (process.env.BASE_URL || "https://www.akamai.com");
+
+const CDN_ENDPOINTS = [
+  "/",
+  "/en",
+  "/robots.txt",
+  "/sitemap.xml",
 ];
 
 const SECURITY_HEADERS = [
+  "strict-transport-security",
   "x-content-type-options",
   "x-frame-options",
-  "x-xss-protection",
-  "strict-transport-security",
+  "content-security-policy",
+];
+
+const CDN_HEADERS = [
+  "x-cache",
+  "x-akamai-transformed",
+  "x-akamai-request-id",
+  "server",
+  "vary",
+  "age",
 ];
 
 async function checkUrl(url, timeout = 10000) {
@@ -67,16 +63,17 @@ function testResult(name, category, suite, passed, duration, statusCode, request
   return { name, category, suite, passed, duration, statusCode, requestUrl, responseHeaders, error, extras };
 }
 
-async function runHealthTests() {
-  const suite = "HTTP Health Checks";
+async function runCdnHealthTests() {
+  const suite = "HTTP CDN Health Checks";
   const results = [];
-  for (const ep of ENDPOINTS) {
+
+  for (const ep of CDN_ENDPOINTS) {
     const url = `${TEST_BASE}${ep}`;
     const r = await checkUrl(url);
-    const expected = ep === "/secure" ? 302 : ep === "/basic_auth" || ep === "/digest_auth" ? 401 : 200;
+    const expected = ep === "/nonexistent-page" ? 404 : 200;
     const passed = r.status === expected;
     results.push(testResult(
-      `${ep} returns ${expected}`,
+      `${ep || "homepage"} returns ${expected} via Akamai CDN`,
       "URL Health",
       suite,
       passed,
@@ -88,24 +85,22 @@ async function runHealthTests() {
     ));
   }
 
-  // Additional: non-existent page returns 404
-  const notFound = await checkUrl(`${TEST_BASE}/nonexistent-page-12345`);
+  const notFound = await checkUrl(`${TEST_BASE}/nonexistent-test-path-xyz`);
   results.push(testResult(
-    "non-existent page returns 404",
+    "non-existent path returns 404 via Akamai CDN",
     "URL Health",
     suite,
     notFound.status === 404,
     notFound.duration,
     notFound.status,
-    `${TEST_BASE}/nonexistent-page-12345`,
+    `${TEST_BASE}/nonexistent-test-path-xyz`,
     notFound.headers,
     notFound.status !== 404 ? `Expected 404, got ${notFound.status}` : undefined,
   ));
 
-  // All-pages response time check
   const allOk = results.filter(r => r.passed).length;
   results.push(testResult(
-    `all health checks passed (${allOk}/${results.length + 1})`,
+    `all CDN health checks passed (${allOk}/${results.length})`,
     "URL Health",
     suite,
     allOk === results.length,
@@ -119,108 +114,143 @@ async function runHealthTests() {
   return results;
 }
 
-async function runSecurityHeaderTests() {
-  const suite = "HTTP Security Headers";
+async function runCdnHeaderTests() {
+  const suite = "HTTP CDN Headers";
   const results = [];
 
-  // Check security headers on login page
-  const login = await checkUrl(`${TEST_BASE}/login`);
-  for (const h of SECURITY_HEADERS) {
-    const val = login.headers[h] || login.headers[h.toLowerCase()] || "";
+  const homepage = await checkUrl(TEST_BASE);
+
+  for (const h of CDN_HEADERS) {
+    const val = homepage.headers[h] || homepage.headers[h.toLowerCase()] || "";
     const present = val.length > 0;
     results.push(testResult(
-      `login page has ${h} header`,
+      `homepage has ${h} header`,
+      "CDN",
+      suite,
+      present,
+      homepage.duration,
+      homepage.status,
+      TEST_BASE,
+      homepage.headers,
+      !present ? `Missing CDN header: ${h}` : undefined,
+      present ? { value: val } : undefined,
+    ));
+  }
+
+  for (const h of SECURITY_HEADERS) {
+    const val = homepage.headers[h] || homepage.headers[h.toLowerCase()] || "";
+    const present = val.length > 0;
+    results.push(testResult(
+      `homepage has ${h} security header`,
       "Security",
       suite,
       present,
-      login.duration,
-      login.status,
-      `${TEST_BASE}/login`,
-      login.headers,
-      !present ? `Missing header: ${h}` : undefined,
+      homepage.duration,
+      homepage.status,
+      TEST_BASE,
+      homepage.headers,
+      !present ? `Missing security header: ${h}` : undefined,
     ));
   }
 
-  // Content-Type checks on all pages
-  for (const ep of ["/login", "/checkboxes", "/dropdown", "/frames", "/windows"]) {
-    const r = await checkUrl(`${TEST_BASE}${ep}`);
-    const ct = (r.headers["content-type"] || "").toLowerCase();
-    const hasHtml = ct.includes("text/html");
-    results.push(testResult(
-      `${ep} has text/html content type`,
-      "Security",
-      suite,
-      hasHtml,
-      r.duration,
-      r.status,
-      `${TEST_BASE}${ep}`,
-      r.headers,
-      !hasHtml ? `Expected text/html, got ${ct}` : undefined,
-    ));
-  }
-
-  // Server header present
-  for (const ep of ["/login", "/checkboxes"]) {
-    const r = await checkUrl(`${TEST_BASE}${ep}`);
-    const server = r.headers["server"] || "";
-    results.push(testResult(
-      `${ep} has Server header`,
-      "Security",
-      suite,
-      server.length > 0,
-      r.duration,
-      r.status,
-      `${TEST_BASE}${ep}`,
-      r.headers,
-      !server ? "Missing Server header" : undefined,
-    ));
-  }
-
-  // Content-Length present
-  const dropdown = await checkUrl(`${TEST_BASE}/dropdown`);
-  const cl = dropdown.headers["content-length"] || "";
+  const server = homepage.headers["server"] || "";
+  const noVersion = !server.match(/\d+\.\d+/);
   results.push(testResult(
-    "dropdown response has Content-Length header",
-    "Security",
-    suite,
-    cl.length > 0,
-    dropdown.duration,
-    dropdown.status,
-    `${TEST_BASE}/dropdown`,
-    dropdown.headers,
-    !cl ? "Missing Content-Length header" : undefined,
-  ));
-
-  // No server version leak
-  const windows = await checkUrl(`${TEST_BASE}/windows`);
-  const serverVal = (windows.headers["server"] || "").toLowerCase();
-  const noVersion = !serverVal.match(/\d+\.\d+/);
-  results.push(testResult(
-    "no page exposes internal server version",
+    "server header does not expose version",
     "Security",
     suite,
     noVersion,
-    windows.duration,
-    windows.status,
-    `${TEST_BASE}/windows`,
-    windows.headers,
-    !noVersion ? `Server header may expose version: ${windows.headers["server"]}` : undefined,
+    homepage.duration,
+    homepage.status,
+    TEST_BASE,
+    homepage.headers,
+    !noVersion ? `Server header may expose version: ${server}` : undefined,
+  ));
+
+  for (const ep of ["/en", "/robots.txt"]) {
+    const r = await checkUrl(`${TEST_BASE}${ep}`);
+    const ct = (r.headers["content-type"] || "").toLowerCase();
+    const hasValidCt = ct.includes("text/html") || ct.includes("text/plain");
+    results.push(testResult(
+      `${ep} has valid Content-Type via Akamai CDN`,
+      "CDN",
+      suite,
+      hasValidCt,
+      r.duration,
+      r.status,
+      `${TEST_BASE}${ep}`,
+      r.headers,
+      !hasValidCt ? `Unexpected Content-Type: ${ct}` : undefined,
+    ));
+  }
+
+  return results;
+}
+
+async function runCdnCacheTests() {
+  const suite = "HTTP CDN Cache";
+  const results = [];
+
+  const first = await checkUrl(TEST_BASE);
+  await new Promise(r => setTimeout(r, 200));
+  const second = await checkUrl(TEST_BASE);
+
+  const firstCache = first.headers["x-cache"] || first.headers["X-Cache"] || "";
+  const secondCache = second.headers["x-cache"] || second.headers["X-Cache"] || "";
+  results.push(testResult(
+    "Akamai CDN serves cached content (X-Cache present)",
+    "Cache",
+    suite,
+    firstCache.length > 0,
+    first.duration,
+    first.status,
+    TEST_BASE,
+    first.headers,
+    firstCache.length === 0 ? "No X-Cache header on first request" : undefined,
+    { firstRequest: firstCache, secondRequest: secondCache },
+  ));
+
+  const ageVal = parseInt(second.headers["age"] || "0", 10);
+  results.push(testResult(
+    "served from edge with Age header",
+    "Cache",
+    suite,
+    ageVal >= 0,
+    second.duration,
+    second.status,
+    TEST_BASE,
+    second.headers,
+    undefined,
+    { age: second.headers["age"] || "0" },
+  ));
+
+  const cc = (second.headers["cache-control"] || "").toLowerCase();
+  const hasCacheControl = cc.includes("public") || cc.includes("max-age") || cc.includes("s-maxage");
+  results.push(testResult(
+    "response has Cache-Control directive",
+    "Cache",
+    suite,
+    hasCacheControl,
+    second.duration,
+    second.status,
+    TEST_BASE,
+    second.headers,
+    !hasCacheControl ? `No cache directive in Cache-Control: ${cc}` : undefined,
   ));
 
   return results;
 }
 
-async function runPerformanceTests() {
-  const suite = "HTTP Performance";
+async function runCdnPerformanceTests() {
+  const suite = "HTTP CDN Performance";
   const results = [];
 
-  // Response time checks
-  for (const ep of ["/login", "/checkboxes", "/dropdown", "/frames", "/windows", "/key_presses"]) {
+  for (const ep of ["/", "/en", "/robots.txt"]) {
     const r = await checkUrl(`${TEST_BASE}${ep}`);
-    const limit = ep === "/dynamic_loading/2" || ep === "/frames" ? 3000 : 2000;
+    const limit = 3000;
     const underLimit = r.duration < limit;
     results.push(testResult(
-      `${ep} responds within ${limit}ms`,
+      `${ep || "homepage"} responds within ${limit}ms via Akamai CDN`,
       "Performance",
       suite,
       underLimit,
@@ -232,47 +262,43 @@ async function runPerformanceTests() {
     ));
   }
 
-  // All pages under 5s
   const allFast = results.filter(r => r.passed).length;
-  const allCount = results.length;
   results.push(testResult(
-    `all herokuapp pages respond under 5s (${allFast}/${allCount})`,
+    `all Akamai CDN pages respond under 3s (${allFast}/${results.length})`,
     "Performance",
     suite,
-    allFast === allCount,
+    allFast === results.length,
     0,
     0,
     TEST_BASE,
     {},
-    allFast !== allCount ? `${allCount - allFast} pages exceeded limit` : undefined,
+    allFast !== results.length ? `${results.length - allFast} pages exceeded limit` : undefined,
   ));
 
-  // Connection header check
-  const login = await checkUrl(`${TEST_BASE}/login`);
-  const conn = login.headers["connection"] || "";
+  const homepage = await checkUrl(TEST_BASE);
   results.push(testResult(
-    "login page supports HTTP/1.1 with Connection header",
+    "response includes Date header via Akamai CDN",
     "Performance",
     suite,
-    conn.length > 0,
-    login.duration,
-    login.status,
-    `${TEST_BASE}/login`,
-    login.headers,
-    !conn ? "Missing Connection header" : undefined,
+    !!homepage.headers["date"],
+    homepage.duration,
+    homepage.status,
+    TEST_BASE,
+    homepage.headers,
+    !homepage.headers["date"] ? "Missing Date header" : undefined,
   ));
 
-  // Date header check
+  const cl = homepage.headers["content-length"] || "";
   results.push(testResult(
-    "login page response includes Date header",
+    "response includes Content-Length header via Akamai CDN",
     "Performance",
     suite,
-    !!login.headers["date"],
-    login.duration,
-    login.status,
-    `${TEST_BASE}/login`,
-    login.headers,
-    !login.headers["date"] ? "Missing Date header" : undefined,
+    cl.length > 0,
+    homepage.duration,
+    homepage.status,
+    TEST_BASE,
+    homepage.headers,
+    !cl ? "Missing Content-Length header" : undefined,
   ));
 
   return results;
@@ -298,7 +324,6 @@ function buildPlaywrightJson(allResults) {
           }],
         }],
       };
-      // Attach HTTP evidence
       if (r.statusCode > 0 || r.requestUrl) {
         entry.tests[0].results[0].request = {
           method: "GET",
@@ -310,6 +335,13 @@ function buildPlaywrightJson(allResults) {
           headers: r.responseHeaders || {},
         };
       }
+      if (r.extras) {
+        entry.tests[0].results[0].attachments = [{
+          name: "extras",
+          contentType: "application/json",
+          body: Buffer.from(JSON.stringify(r.extras)).toString("base64"),
+        }];
+      }
       return entry;
     }),
   }));
@@ -318,23 +350,25 @@ function buildPlaywrightJson(allResults) {
 }
 
 async function main() {
-  console.error("\n--- HTTP test runner ---");
+  console.error("\n--- HTTP CDN Edge Test Runner ---");
   console.error(`  Target: ${TEST_BASE}`);
 
-  const health = await runHealthTests();
+  const health = await runCdnHealthTests();
   console.error(`  Health: ${health.filter(r => r.passed).length}/${health.length}`);
 
-  const security = await runSecurityHeaderTests();
-  console.error(`  Security: ${security.filter(r => r.passed).length}/${security.length}`);
+  const headers = await runCdnHeaderTests();
+  console.error(`  Headers: ${headers.filter(r => r.passed).length}/${headers.length}`);
 
-  const perf = await runPerformanceTests();
+  const cache = await runCdnCacheTests();
+  console.error(`  Cache: ${cache.filter(r => r.passed).length}/${cache.length}`);
+
+  const perf = await runCdnPerformanceTests();
   console.error(`  Performance: ${perf.filter(r => r.passed).length}/${perf.length}`);
 
-  const all = [...health, ...security, ...perf];
+  const all = [...health, ...headers, ...cache, ...perf];
   const result = buildPlaywrightJson(all);
 
-  const outputIdx = process.argv.indexOf("--output");
-  const outputPath = outputIdx >= 0 ? process.argv[outputIdx + 1] : "test-results/http-results.json";
+  const outputPath = outputIdx >= 0 ? args[outputIdx + 1] : "test-results/http-results.json";
   const absOutput = path.resolve(PROJECT_ROOT, outputPath);
 
   fs.mkdirSync(path.dirname(absOutput), { recursive: true });

@@ -8,15 +8,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo",
-      "suite_smoke"
-    ],
+    "suiteIds": ["suite_full", "suite_geo", "suite_smoke"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_us_east_resolves_to_iad",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -30,12 +24,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "X-PoP",
-      "X-Cache",
-      "Server"
-    ],
+    "captureResponseHeaders": ["Content-Type", "X-PoP", "X-Cache", "Server"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -68,14 +57,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
+    "suiteIds": ["suite_full", "suite_geo"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_eu_west_resolves_to_dub",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -89,12 +73,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "X-PoP",
-      "X-Cache",
-      "Server"
-    ],
+    "captureResponseHeaders": ["Content-Type", "X-PoP", "X-Cache", "Server"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -127,14 +106,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo"
-    ],
+    "suiteIds": ["suite_full", "suite_geo"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::test_ap_southeast_resolves_to_sin",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -148,12 +122,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "X-PoP",
-      "X-Cache",
-      "Server"
-    ],
+    "captureResponseHeaders": ["Content-Type", "X-PoP", "X-Cache", "Server"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -186,15 +155,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "geo-match"
-    ],
+    "tags": ["geo-match"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_geo",
-      "suite_smoke"
-    ],
+    "suiteIds": ["suite_full", "suite_geo", "suite_smoke"],
     "automated": true,
     "scriptPath": "tests/test_geo_matching.py::TestGeoFailover::test_pop_failover_under_5s",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -207,11 +170,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "X-PoP",
-      "Server"
-    ],
+    "captureResponseHeaders": ["Content-Type", "X-PoP", "Server"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -244,15 +203,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "caching"
-    ],
+    "tags": ["caching"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf",
-      "suite_smoke"
-    ],
+    "suiteIds": ["suite_full", "suite_perf", "suite_smoke"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_hit_ratio_exceeds_80",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -265,12 +218,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "X-Cache",
-      "X-Check-Cacheable",
-      "Cache-Control"
-    ],
+    "captureResponseHeaders": ["Content-Type", "X-Cache", "X-Check-Cacheable", "Cache-Control"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -303,14 +251,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "caching"
-    ],
+    "tags": ["caching"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
+    "suiteIds": ["suite_full", "suite_perf"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_ttl_respects_max_age",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -322,12 +265,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "Cache-Control",
-      "Age",
-      "X-Cache"
-    ],
+    "captureResponseHeaders": ["Content-Type", "Cache-Control", "Age", "X-Cache"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -360,14 +298,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "caching"
-    ],
+    "tags": ["caching"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
+    "suiteIds": ["suite_full", "suite_perf"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_purge_invalidates_within_5s",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -380,11 +313,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "X-Cache",
-      "Purge-Status"
-    ],
+    "captureResponseHeaders": ["Content-Type", "X-Cache", "Purge-Status"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -417,14 +346,9 @@
     "priority": "P2",
     "severity": "minor",
     "status": "active",
-    "tags": [
-      "caching"
-    ],
+    "tags": ["caching"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_perf"
-    ],
+    "suiteIds": ["suite_full", "suite_perf"],
     "automated": true,
     "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_stale_on_origin_timeout",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -436,11 +360,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "X-Cache",
-      "Warning"
-    ],
+    "captureResponseHeaders": ["Content-Type", "X-Cache", "Warning"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -473,15 +393,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "security"
-    ],
+    "tags": ["security"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_security",
-      "suite_smoke"
-    ],
+    "suiteIds": ["suite_full", "suite_security", "suite_smoke"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWAF::test_waf_blocks_sqli",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -494,11 +408,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "Server",
-      "X-Akamai-Session-Info"
-    ],
+    "captureResponseHeaders": ["Content-Type", "Server", "X-Akamai-Session-Info"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -531,14 +441,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "security"
-    ],
+    "tags": ["security"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_security"
-    ],
+    "suiteIds": ["suite_full", "suite_security"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestWAF::test_rate_limit_at_100_rps",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -551,11 +456,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "Retry-After",
-      "Server"
-    ],
+    "captureResponseHeaders": ["Content-Type", "Retry-After", "Server"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -588,14 +489,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "security"
-    ],
+    "tags": ["security"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_security"
-    ],
+    "suiteIds": ["suite_full", "suite_security"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestTLS::test_tls13_negotiated",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -607,10 +503,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Strict-Transport-Security",
-      "X-TLS-Version"
-    ],
+    "captureResponseHeaders": ["Strict-Transport-Security", "X-TLS-Version"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -643,14 +536,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "security"
-    ],
+    "tags": ["security"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_security"
-    ],
+    "suiteIds": ["suite_full", "suite_security"],
     "automated": true,
     "scriptPath": "tests/test_security.py::TestTLS::test_hsts_max_age",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -662,9 +550,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Strict-Transport-Security"
-    ],
+    "captureResponseHeaders": ["Strict-Transport-Security"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -697,14 +583,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "edge-routing"
-    ],
+    "tags": ["edge-routing"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_smoke"
-    ],
+    "suiteIds": ["suite_full", "suite_smoke"],
     "automated": true,
     "scriptPath": "tests/e2e/test_redirects.spec.ts::test_http_to_https_redirect",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -716,10 +597,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Location",
-      "Server"
-    ],
+    "captureResponseHeaders": ["Location", "Server"],
     "filmstrip": {
       "enabled": true,
       "threshold": 0,
@@ -752,13 +630,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "edge-routing"
-    ],
+    "tags": ["edge-routing"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full"
-    ],
+    "suiteIds": ["suite_full"],
     "automated": true,
     "scriptPath": "tests/e2e/test_error_pages.spec.ts::test_custom_404_page",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -770,11 +644,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "Server",
-      "X-Edge-Error-Page"
-    ],
+    "captureResponseHeaders": ["Content-Type", "Server", "X-Edge-Error-Page"],
     "filmstrip": {
       "enabled": true,
       "threshold": 0,
@@ -807,13 +677,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "edge-routing"
-    ],
+    "tags": ["edge-routing"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full"
-    ],
+    "suiteIds": ["suite_full"],
     "automated": true,
     "scriptPath": "tests/e2e/test_access_control.spec.ts::test_signed_url_enforced",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -825,10 +691,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Server",
-      "X-Akamai-Session-Info"
-    ],
+    "captureResponseHeaders": ["Server", "X-Akamai-Session-Info"],
     "filmstrip": {
       "enabled": true,
       "threshold": 0,
@@ -861,13 +724,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "edge-routing"
-    ],
+    "tags": ["edge-routing"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full"
-    ],
+    "suiteIds": ["suite_full"],
     "automated": true,
     "scriptPath": "tests/e2e/test_edgeworker.spec.ts::test_ew_rewrites_xfh_header",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -880,10 +739,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "X-EW-Version"
-    ],
+    "captureResponseHeaders": ["Content-Type", "X-EW-Version"],
     "filmstrip": {
       "enabled": true,
       "threshold": 0,
@@ -916,14 +772,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "http-protocol"
-    ],
+    "tags": ["http-protocol"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_smoke"
-    ],
+    "suiteIds": ["suite_full", "suite_smoke"],
     "automated": true,
     "scriptPath": "tests/http/homepage_health.http",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -936,11 +787,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "Server",
-      "X-Cache"
-    ],
+    "captureResponseHeaders": ["Content-Type", "Server", "X-Cache"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -973,14 +820,9 @@
     "priority": "P0",
     "severity": "critical",
     "status": "active",
-    "tags": [
-      "http-protocol"
-    ],
+    "tags": ["http-protocol"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full",
-      "suite_smoke"
-    ],
+    "suiteIds": ["suite_full", "suite_smoke"],
     "automated": true,
     "scriptPath": "tests/http/api_health.http",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -993,11 +835,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "Server",
-      "X-Cache"
-    ],
+    "captureResponseHeaders": ["Content-Type", "Server", "X-Cache"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -1030,13 +868,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "http-protocol"
-    ],
+    "tags": ["http-protocol"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full"
-    ],
+    "suiteIds": ["suite_full"],
     "automated": true,
     "scriptPath": "tests/http/compression.http",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",
@@ -1049,11 +883,7 @@
     },
     "cookies": {},
     "expectedStatus": 200,
-    "captureResponseHeaders": [
-      "Content-Type",
-      "Content-Encoding",
-      "Vary"
-    ],
+    "captureResponseHeaders": ["Content-Type", "Content-Encoding", "Vary"],
     "filmstrip": {
       "enabled": false,
       "threshold": 0,
@@ -1086,13 +916,9 @@
     "priority": "P1",
     "severity": "major",
     "status": "active",
-    "tags": [
-      "http-protocol"
-    ],
+    "tags": ["http-protocol"],
     "owner": "platform-team@example.com",
-    "suiteIds": [
-      "suite_full"
-    ],
+    "suiteIds": ["suite_full"],
     "automated": true,
     "scriptPath": "tests/http/cors_headers.http",
     "preconditions": "Akamai property 'www.example.com' version 42 must be active in the target environment.",

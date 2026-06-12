@@ -1,12 +1,6 @@
 export const ENVS = ["QA", "UAT", "PROD"];
 
-export const CATEGORIES = [
-  "geo-match",
-  "caching",
-  "security",
-  "edge-routing",
-  "http-protocol",
-];
+export const CATEGORIES = ["geo-match", "caching", "security", "edge-routing", "http-protocol"];
 
 export const PRIORITIES: string[] = ["P0", "P1", "P2", "P3"];
 
