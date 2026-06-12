@@ -3,7 +3,7 @@
 - [AWARE port decisions](aware-port-decisions.md) — mockup → main app porting rules; key conversions needed each time.
 - [AWARE Akamai environment model](aware-akamai-envs.md) — three tiers QA/UAT/PROD × two networks = 6 envs; promotion gate ≥95%; PropertyStatusBar always visible on Dashboard.
 - [AWARE project overview](aware-project-overview.md) — full project map: stack, pages, scripts, monorepo layout, all route paths, key constraints.
-- [AWARE data layer](aware-data-layer.md) — static-first; seed JSON in src/data/; in-memory stores with localStorage persistence; subscription model for reactivity.
+- [AWARE data layer](aware-data-layer.md) — static-first; seed JSON in data/; in-memory stores with localStorage persistence; subscription model for reactivity.
 - [AWARE AI copilot](aware-ai-copilot.md) — three LLM providers (OpenAI/WebLLM/Chrome); 20+ skill use-cases; context.ts builds full system prompt; dataQueries.ts safe AI data access.
 - [AWARE test model](aware-test-model.md) — TestCase, TestSuite, TestResult, DiffRow, PromotionDecision types; testType: web|api|http|edgeworker|transaction|pytest; flakiness formula.
 - [AWARE anomaly detection](aware-anomaly-detection.md) — two modules: run-level Z-score and test-level 7-day latency Z-score; severity thresholds at 1.5/2/2.5/3σ.

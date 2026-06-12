@@ -11,7 +11,7 @@ Usage:
 
 Defaults:
     --dirs    tests/             (relative to project root)
-    --output  src/data/auto-tests.json
+    --output  data/auto-tests.json
 """
 
 import ast
@@ -281,7 +281,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Discover pytest tests and generate JSON")
     parser.add_argument("--dirs", nargs="+", default=["tests"],
                         help="Directories to search for pytest files (relative to project root)")
-    parser.add_argument("--output", default="src/data/auto-tests.json",
+    parser.add_argument("--output", default="data/auto-tests.json",
                         help="Output path for generated JSON (relative to project root)")
 
     args = parser.parse_args()

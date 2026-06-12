@@ -12,15 +12,27 @@ You are the AWARE data layer expert. You own all data access patterns, seed JSON
 - **Types**: `src/lib/types.ts` — all interfaces (Run, TestResult, TestCase, TestSuite, DiffRow, PromotionDecision, Job, AnomalyScore, LLM types, etc.)
 - **Runs data**: `src/lib/runs.ts` — RUNS[], DIFF_ROWS[], TEST_DETAILS[], chart data exports, flakiness computation
 - **CRUD data**: `src/lib/data.ts` — getTestCases/saveTestCases, getTestSuites/saveTestSuites, subscription model
-- **Seed JSON**: `src/data/runs.json`, `test-results.json`, `test-suites.json`, `auto-tests.json`, `diff-rows.json`, `promotions.json`
-- **Validation**: `src/data/schemas/test-results.schema.json`, `scripts/validate-data.mjs`
+- **Seed JSON**: `data/runs.json`, `test-results.json`, `test-suites.json`, `auto-tests.json`, `diff-rows.json`, `promotions.json`
+- **Validation**: `data/schemas/test-results.schema.json`, `scripts/validate-data.mjs`
 
-## Static-First Data Strategy
-All data ships as JSON seed files. There is no backend in production. At module load time, data is imported and kept in memory. Changes are persisted via localStorage for user-created/modified entities.
+## Runtime-Fetch Data Strategy
 
-## Key Data Access Patterns
+All seed data ships as JSON files in `data/` but is **fetched at runtime** — never statically imported. In production, data is fetched from `raw.githubusercontent.com/ruake/AWARE/data/` (`data` branch); in dev, Vite serves it from `/data/`. There is no backend.
 
-### Read-Only Run Data (runs.ts)
+### Data Fetching Pipeline
+
+- **`src/lib/dataFetcher.ts`** — `fetchJson<T>(path)` resolves URLs: dev uses `import.meta.env.BASE_URL + "/data/"`, production uses `https://raw.githubusercontent.com/ruake/AWARE/data/`. Single entry point for all runtime data access.
+- **`src/lib/initData.ts`** — `loadAllData()` is the orchestration entry point, called in `App.tsx` before rendering via a `DataGate` loading component. Fires parallel `Promise.all` for all data modules.
+- **Each data module** (`runs.ts`, `testSuites.ts`, `promotions.ts`, `schedulerStatus.ts`, `testDiscovery.ts`) exposes both:
+  - A synchronous getter (`getXxx()`) returning the current (initially empty) state
+  - An async `loadXxx()` that fetches from GitHub and populates the in-memory store
+- `RUNS` and `DIFF_ROWS` in `runs.ts` are `let` bindings reassigned after fetch.
+- `_snapshot` caching in stores provides stable references for `useSyncExternalStore`.
+- Changes to user-created/modified entities are persisted via localStorage (keys: `aware-env-configs-v3`, `aware_test_cases_v2`).
+
+### Key Data Access Patterns
+
+#### Read-Only Run Data (runs.ts)
 ```ts
 import { RUNS, getRunById, getTestResultsForRun, ENV_SUMMARY, PASS_RATE_CHART } from "@/lib/runs"
 ```
@@ -31,7 +43,7 @@ import { RUNS, getRunById, getTestResultsForRun, ENV_SUMMARY, PASS_RATE_CHART } 
 - `ENV_PASS_RATE_CHART` — area chart data (keyed by day, env columns)
 - `computeRunFrequency()` — cadence analytics
 
-### Mutable Stores (data.ts)
+#### Mutable Stores (data.ts)
 ```ts
 import { getTestCases, saveTestCases, subscribeToTestCases } from "@/lib/data"
 
@@ -80,4 +92,4 @@ node scripts/discover-all.mjs    # discovers tests and updates auto-tests.json
 1. `artifacts/aware-app/src/lib/types.ts` — all type definitions
 2. `artifacts/aware-app/src/lib/runs.ts` — run data module
 3. `artifacts/aware-app/src/lib/data.ts` — mutable store pattern
-4. `artifacts/aware-app/src/data/runs.json` — sample of seed data shape
+4. `artifacts/aware-app/data/runs.json` — sample of seed data shape

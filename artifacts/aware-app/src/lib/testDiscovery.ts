@@ -1,13 +1,17 @@
 import type { TestCase } from "./types";
-import autoTestsSeed from "@/data/auto-tests.json";
+import { fetchJson } from "./dataFetcher";
 
-const BASE_AUTO_TESTS = autoTestsSeed as unknown as TestCase[];
+let _autoTests: TestCase[] = [];
+let _testsLoaded = false;
 
-let _autoSnapshot: TestCase[] = [];
+export async function loadAutoDiscoveredTests(): Promise<void> {
+  if (_testsLoaded) return;
+  _testsLoaded = true;
+  _autoTests = await fetchJson<TestCase[]>("auto-tests.json");
+}
 
 export function getAutoDiscoveredTests(): TestCase[] {
-  if (_autoSnapshot.length === 0) _autoSnapshot = [...BASE_AUTO_TESTS];
-  return _autoSnapshot;
+  return _autoTests;
 }
 
 export function getAutoDiscoverySummary() {
@@ -29,6 +33,6 @@ export function getAutoDiscoverySummary() {
     byCategory,
     byPriority,
     sourceFiles: sources.size,
-    lastUpdated: BASE_AUTO_TESTS.length > 0 ? BASE_AUTO_TESTS[0].updatedAt : null,
+    lastUpdated: _autoTests.length > 0 ? _autoTests[0].updatedAt : null,
   };
 }

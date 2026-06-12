@@ -21,10 +21,10 @@ const PYTEST_SCRIPT = path.join(__dirname, "discover-tests.py");
 const PLAYWRIGHT_SCRIPT = path.join(__dirname, "discover-playwright.mjs");
 const PUPPETEER_SCRIPT = path.join(__dirname, "discover-puppeteer.mjs");
 const HTTP_SCRIPT = path.join(__dirname, "discover-http.mjs");
-const OUTPUT_FILE = path.join(PROJECT_ROOT, "src/data/auto-tests.json");
-const PLAYWRIGHT_OUTPUT = path.join(PROJECT_ROOT, "src/data/auto-tests-playwright.json");
-const PUPPETEER_OUTPUT = path.join(PROJECT_ROOT, "src/data/auto-tests-puppeteer.json");
-const HTTP_OUTPUT = path.join(PROJECT_ROOT, "src/data/auto-tests-http.json");
+const OUTPUT_FILE = path.join(PROJECT_ROOT, "data/auto-tests.json");
+const PLAYWRIGHT_OUTPUT = path.join(PROJECT_ROOT, "data/auto-tests-playwright.json");
+const PUPPETEER_OUTPUT = path.join(PROJECT_ROOT, "data/auto-tests-puppeteer.json");
+const HTTP_OUTPUT = path.join(PROJECT_ROOT, "data/auto-tests-http.json");
 
 function runScript(label, cmd, outputPath) {
   console.error(`\n--- Running ${label} discovery ---`);

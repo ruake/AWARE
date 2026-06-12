@@ -111,6 +111,6 @@ The Copilot's `risk-scoring` use case incorporates a security dimension:
 
 ## Files to Read First
 1. `artifacts/aware-app/src/lib/types.ts` — TestAssertion and Predicate types
-2. `artifacts/aware-app/src/data/auto-tests.json` — existing security test cases
+2. `artifacts/aware-app/data/auto-tests.json` — existing security test cases
 3. `config/akamai-config.yml` — WAF, bot manager, and notification config
 4. `artifacts/aware-app/e2e/http/headers.spec.ts` — HTTP header test specs

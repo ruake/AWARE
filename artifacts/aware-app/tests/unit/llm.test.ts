@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { clearChatHistory, getLLMConfig, setLLMConfig, getProvider } from "./llm";
-import "./skills";
+import { clearChatHistory, getLLMConfig, setLLMConfig, getProvider } from "@/lib/llm";
+import "@/lib/skills";
 
 beforeEach(() => {
   clearChatHistory();

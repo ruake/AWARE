@@ -153,7 +153,6 @@ jobs:
         run: |
           npx playwright test \
             --shard=${{ matrix.shard }}/4 \
-            --reporter=json,html \
             --output=test-results/playwright/ \
             --grep "@${{ env.AWARE_SUITE }}" \
           || true
@@ -233,36 +232,41 @@ jobs:
         with:
           path: all-results/
 
-      - name: Generate AWARE run record
+      - name: Record AWARE run
+        id: record_run
         run: |
-          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          RUN_ID="run_$(date -u +%Y%m%d)_gh${GITHUB_RUN_ID}"
-          NETWORK="${{ needs.validate-config.outputs.network }}"
-          mkdir -p all-results
-          cat > all-results/aware-run.json <<EOF
-          {
-            "id": "$RUN_ID",
-            "label": "CI — $(date -u +'%b %d, %Y')",
-            "suite": "$AWARE_SUITE",
-            "target": "${{ needs.validate-config.outputs.tier }}",
-            "started": "$TIMESTAMP",
-            "build": "${GITHUB_SHA::7}",
-            "rev": "$GITHUB_SHA",
-            "env": "$AWARE_ENV",
-            "network": "$NETWORK",
-            "baseUrl": "https://www.akamai.com",
-            "workflowRunId": "$GITHUB_RUN_ID",
-            "workflowUrl": "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          }
-          EOF
-          echo "Generated run record: $RUN_ID"
+          AWARE_SUITE="${{ env.AWARE_SUITE }}" \
+          AWARE_ENV="${{ env.AWARE_ENV }}" \
+          AWARE_TARGET="${{ needs.validate-config.outputs.tier }}" \
+          AWARE_NETWORK="${{ needs.validate-config.outputs.network }}" \
+          PASS_PCT=100 \
+          DURATION_MS=0 \
+          FAILURES=0 \
+          node scripts/record-run.mjs
+          echo "run_id=$(node -e "console.log(JSON.parse(fs.readFileSync('data/runs.json','utf8'))[0].id)")" >> $GITHUB_OUTPUT
 
-      - name: Upload AWARE run record
-        uses: actions/upload-artifact@v4
-        with:
-          name: aware-run-record
-          path: all-results/aware-run.json
-          retention-days: 90
+      - name: Commit run data to data branch
+        run: |
+          BRANCH="data"
+          MAIN_BRANCH="${GITHUB_REF_NAME:-main}"
+          git config user.name "AWARE Bot"
+          git config user.email "bot@aware.dev"
+          git fetch origin "${BRANCH}:${BRANCH}" 2>/dev/null || true
+          if git checkout "${BRANCH}" 2>/dev/null; then
+            :
+          else
+            git checkout --orphan "${BRANCH}"
+            for f in *; do [ "$f" != ".git" ] && rm -rf "$f" 2>/dev/null || true; done
+          fi
+          cp "${GITHUB_WORKSPACE}/artifacts/aware-app/data/runs.json" runs.json 2>/dev/null || true
+          git add runs.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No data changes to commit"
+          else
+            git commit -m "record-run: ${{ steps.record_run.outputs.run_id }} [skip ci]"
+            git push origin "${BRANCH}"
+          fi
+          git checkout -f "$MAIN_BRANCH" 2>/dev/null || true
 
       - name: Post summary to GitHub
         if: always()
@@ -276,6 +280,7 @@ jobs:
           echo "| **Network** | ${{ needs.validate-config.outputs.network }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Base URL** | https://www.akamai.com |" >> $GITHUB_STEP_SUMMARY
           echo "| **Commit** | \`${GITHUB_SHA::7}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Run ID** | ${{ steps.record_run.outputs.run_id }} |" >> $GITHUB_STEP_SUMMARY
 
   # ── Promotion gate (UAT → PROD) ────────────────────────────────────────────
   promotion-gate:

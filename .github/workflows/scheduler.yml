@@ -4,7 +4,7 @@
 # Central orchestrator that reads config/test-suites.yml, evaluates cron
 # schedules, and dispatches run-tests.yml for any suite that is due.
 #
-# Also persists scheduler-status.json to src/data/ so the AWARE portal
+# Also persists scheduler-status.json to data/ so the AWARE portal
 # can render scheduler health, recent dispatches, and per-suite status.
 # =============================================================================
 
@@ -89,7 +89,7 @@ jobs:
         if: always()
         with:
           name: scheduler-status
-          path: artifacts/aware-app/src/data/scheduler-status.json
+          path: artifacts/aware-app/data/scheduler-status.json
           retention-days: 30
 
       - name: Set commit status

@@ -10,7 +10,7 @@
  *
  * Defaults:
  *   --dir     e2e/http
- *   --output  src/data/auto-tests-http.json
+ *   --output  data/auto-tests-http.json
  */
 
 import fs from "fs";
@@ -136,7 +136,7 @@ function main() {
   const outputIdx = args.indexOf("--output");
 
   const dir = dirIdx >= 0 ? args[dirIdx + 1] : "e2e/http";
-  const outputPath = outputIdx >= 0 ? args[outputIdx + 1] : "src/data/auto-tests-http.json";
+  const outputPath = outputIdx >= 0 ? args[outputIdx + 1] : "data/auto-tests-http.json";
 
   const absOutput = path.resolve(PROJECT_ROOT, outputPath);
   const tests = discoverHttpTests(dir);

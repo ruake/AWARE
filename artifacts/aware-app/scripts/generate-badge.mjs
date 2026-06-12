@@ -3,7 +3,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const runsPath = join(__dirname, "..", "src", "data", "runs.json");
+const runsPath = join(__dirname, "..", "data", "runs.json");
 const badgePath = join(__dirname, "..", "public", "proof-health.svg");
 
 let runs;

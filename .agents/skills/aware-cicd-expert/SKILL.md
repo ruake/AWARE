@@ -61,6 +61,24 @@ promotionGate:
 - `generateCiConfigYaml()` serializes to YAML with embedded instructions
 - `downloadCiConfig()` triggers browser download as `aware-test-config-<date>.yml`
 
+## Scheduler / Reconciler Pattern (Kubernetes-inspired)
+
+Run status management follows a K8s-style controller pattern. The reconciler loop lives in `scripts/` and is shared by the scheduler and CI record-run script:
+
+### Core Library (`scripts/lib/`)
+
+- **`reconciler.mjs`** — Base `Reconciler` class with `start()`/`stop()`/`reconcile()` loop; `ResourceReconciler` for list-reconcile workloads. Each tick calls `reconcile()` which should read current state, diff against desired, and take corrective action.
+- **`runStatus.mjs`** — Run conditions (`Dispatched`, `WorkflowRunning`, `Completed`, `Passed`) with `True`/`False`/`Unknown` status. `deriveRunStatus()` computes overall run status from conditions (`PENDING`|`RUNNING`|`PASS`|`FAIL`|`ERROR`). Includes GC pass to mark stale `RUNNING` entries as `ERROR`.
+- **`ghApi.mjs`** — Facade over `gh` CLI for `listWorkflowRuns()`, `getWorkflowRun()`, `dispatchWorkflow()`, `findLatestDispatch()`. Treats workflow runs as resources with status.
+
+### Controller Scripts
+
+- **`scripts/scheduler.mjs`** — Main controller with phases: **Reconcile** (poll GH for running workflows) → **Cron** (evaluate suite schedules) → **Dispatch** (trigger `run-tests.yml` for due suites × environments) → **GC** (stale cleanup) → **Persist** (commit `runs.json` + `scheduler-status.json` to `data` branch).
+- **`scripts/record-run.mjs`** — Called by CI after test execution (via env vars `AWARE_SUITE`, `AWARE_ENV`, `PASS_PCT`, `DURATION_MS`, etc.). Updates or creates runs with full conditions using `completeRunConditions()` and writes back to `runs.json`.
+- **Run types** include `conditions?: RunCondition[]` and `workflowRunId?: number`. All runs use conditions even outside the scheduler for consistent tracking.
+
+Flow: `scheduler.mjs` (reconciler) dispatches GH workflow → `run-tests.yml` runs tests → `record-run.mjs` records result with conditions → scheduler poll phase picks up completed status → GC cleans stale entries >24h.
+
 ## Notifications
 ```yaml
 notifications:

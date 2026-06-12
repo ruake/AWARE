@@ -4,7 +4,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const dataDir = join(__dirname, "..", "src", "data");
+const dataDir = join(__dirname, "..", "data");
 const schemaDir = join(dataDir, "schemas");
 const files = readdirSync(dataDir).filter(f => f.endsWith(".json") && f !== "schemas");
 

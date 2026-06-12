@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "artifacts/aware-app/src/data/**"
+      - "artifacts/aware-app/data/**"
       - "artifacts/aware-app/src/lib/runs.ts"
   schedule:
     - cron: "0 6 * * 1" # every Monday 6am UTC
@@ -99,7 +99,7 @@ jobs:
         run: |
           git config user.name "AWARE Bot"
           git config user.email "bot@aware-cdn.dev"
-          cp src/data/auto-tests.json /tmp/auto-tests.json
+          cp data/auto-tests.json /tmp/auto-tests.json
           git fetch origin discovered-tests:discovered-tests 2>/dev/null || git branch discovered-tests
           git checkout -f discovered-tests
           git pull origin discovered-tests --rebase 2>/dev/null || true
@@ -113,6 +113,38 @@ jobs:
             git commit -m "sync: update discovered tests ($(date -u +%Y-%m-%d))"
             git push origin discovered-tests
           fi
+
+  # ── Sync all data/ files to the `data` branch ──────────────────────────────
+  # The AWARE app fetches seed JSON from raw.githubusercontent.com on this branch.
+  sync-data-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Push data files to data branch
+        run: |
+          BRANCH="data"
+          git config user.name "AWARE Bot"
+          git config user.email "bot@aware.dev"
+          git fetch origin "${BRANCH}:${BRANCH}" 2>/dev/null || true
+          if git checkout "${BRANCH}" 2>/dev/null; then
+            :
+          else
+            git checkout --orphan "${BRANCH}"
+            for f in *; do [ "$f" != ".git" ] && rm -rf "$f" 2>/dev/null || true; done
+          fi
+          # Copy every file from artifacts/aware-app/data to the branch root
+          mkdir -p test-results
+          cp -r "${GITHUB_WORKSPACE}/artifacts/aware-app/data/"* . 2>/dev/null || true
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to data branch"
+          else
+            git commit -m "sync: update data branch ($(date -u +%Y-%m-%d))"
+            git push origin "${BRANCH}"
+          fi
+          git checkout -f main 2>/dev/null || true
 
   sync-stats:
     runs-on: ubuntu-latest

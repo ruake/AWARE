@@ -56,7 +56,7 @@ The CI workflow reads directly from:
 | PagerDuty | `prod_prod_fail`, pass rate below 80% |
 
 ## How to Apply
-- To add a new suite, add it to both `config/test-suites.yml` and update `src/data/test-suites.json`
+- To add a new suite, add it to both `config/test-suites.yml` and update `data/test-suites.json`
 - Suite IDs must be consistent between YAML (for CI) and JSON (for the app)
 - `failFast: true` on smoke suite — any failure stops the suite immediately
 - Performance suite runs on production network only (needs real traffic characteristics)

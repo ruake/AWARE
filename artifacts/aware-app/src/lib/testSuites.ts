@@ -1,32 +1,37 @@
 import type { TestSuite, SuiteNode } from "./types";
 import { subscribeToTestSuites } from "./store";
-import testSuitesSeed from "@/data/test-suites.json";
+import { fetchJson } from "./dataFetcher";
 
 export { subscribeToTestSuites };
 
-const BASE_TEST_SUITES = testSuitesSeed as unknown as TestSuite[];
+let _testSuitesStore: TestSuite[] = [];
+let _tsSnapshot: TestSuite[] = [];
+let _suitesLoaded = false;
 
-const testSuitesStore: TestSuite[] = [...BASE_TEST_SUITES];
-
-export function getTestSuitesStore(): TestSuite[] {
-  return testSuitesStore;
+export async function loadTestSuites(): Promise<void> {
+  if (_suitesLoaded) return;
+  _suitesLoaded = true;
+  _testSuitesStore = await fetchJson<TestSuite[]>("test-suites.json");
+  _tsSnapshot = [..._testSuitesStore];
 }
 
-let _tsSnapshot: TestSuite[] = [];
+export function getTestSuitesStore(): TestSuite[] {
+  return _testSuitesStore;
+}
+
 export function getTestSuites(): TestSuite[] {
-  if (_tsSnapshot.length === 0) _tsSnapshot = [...testSuitesStore];
   return _tsSnapshot;
 }
 
 export function getTestSuiteById(id: string): TestSuite | undefined {
-  return testSuitesStore.find((s) => s.id === id);
+  return _testSuitesStore.find((s) => s.id === id);
 }
 
 export function buildSuiteTree(): SuiteNode[] {
-  const rootSuites = testSuitesStore.filter((s) => s.parentId === null);
+  const rootSuites = _testSuitesStore.filter((s) => s.parentId === null);
   return rootSuites.map((s) => ({
     suite: s,
-    children: testSuitesStore
+    children: _testSuitesStore
       .filter((c) => c.parentId === s.id)
       .map((c) => ({ suite: c, children: [], depth: 1 })),
     depth: 0,

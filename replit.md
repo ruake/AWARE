@@ -21,7 +21,7 @@ A.W.A.R.E. is a CDN test observability dashboard for Playwright + pytest suites 
 - `artifacts/aware-app/src/` — main React app source
 - `artifacts/aware-app/src/pages/` — Dashboard, Runs, Compare, Analytics, Suites, Copilot, CI Pipeline, About
 - `artifacts/aware-app/src/lib/` — data layer (runs, testCases, envConfig, ciConfig, types, constants)
-- `artifacts/aware-app/src/data/` — seed JSON (runs, test-results, test-suites, auto-tests)
+- `artifacts/aware-app/data/` — seed JSON (runs, test-results, test-suites, auto-tests)
 - `artifacts/aware-app/src/components/aware/` — domain components (AppLayout, PropertyStatusBar, …)
 - `config/` — repo-committed YAML config (akamai-config.yml, environments.yml, test-suites.yml)
 - `.github/workflows/run-tests.yml` — GitHub Actions CDN test workflow
@@ -32,7 +32,7 @@ A.W.A.R.E. is a CDN test observability dashboard for Playwright + pytest suites 
 - **PropertyStatusBar always visible on Dashboard** — shows active Akamai property name, version, and status for all three envs at a glance.
 - **Config-as-code** — `config/environments.yml`, `config/test-suites.yml`, and `config/akamai-config.yml` are the single source of truth; CI reads them directly.
 - **Playwright + pytest both supported** — TestCase.testType includes `"pytest"` and `"web"` (Playwright); the CI workflow runs both in parallel jobs.
-- **All data in repo** — seed JSON in `src/data/` and YAML in `config/` live alongside code; no external database required.
+- **All data in repo** — seed JSON in `data/` and YAML in `config/` live alongside code; no external database required.
 
 ## Product
 
