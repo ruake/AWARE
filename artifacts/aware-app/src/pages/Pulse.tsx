@@ -269,7 +269,7 @@ export default function Pulse() {
     <AppLayout activeHref="/pulse">
       <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div className="proof-page-header" style={{ alignItems: "flex-start" }}>
           <div>
             <h1
               style={{

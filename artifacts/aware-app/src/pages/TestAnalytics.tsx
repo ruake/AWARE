@@ -310,7 +310,7 @@ export default function TestAnalytics() {
     <AppLayout activeHref="/analytics">
       <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Header with searchable selector */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div className="proof-page-header" style={{ alignItems: "center", gap: 10 }}>
           <Link href={isTcMode ? "/suites" : "/compare"} className="proof-button proof-button-sm">
             <ArrowLeft size={13} /> {isTcMode ? "Tests" : "Compare"}
           </Link>

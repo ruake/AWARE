@@ -107,7 +107,8 @@ body {
   font-family: var(--font-sans);
   color: var(--proof-text);
   background-color: var(--proof-bg);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -562,6 +563,7 @@ select.proof-input {
 }
 .proof-page {
   animation: page-enter 0.22s ease-out both;
+  padding-top: 20px;
 }
 
 /* ── Page header ───────────────────────────────────────────────────── */
@@ -570,6 +572,14 @@ select.proof-input {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--proof-grey-bg);
+  padding-top: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--proof-border);
+  margin-bottom: 16px;
 }
 .proof-page-title {
   font-size: 18px;

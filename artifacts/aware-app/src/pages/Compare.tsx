@@ -1322,6 +1322,9 @@ export default function Compare() {
               alignItems: "center",
               gap: 16,
               flexWrap: "wrap",
+              position: "sticky",
+              top: 0,
+              zIndex: 20,
             }}
           >
             <RunPicker
