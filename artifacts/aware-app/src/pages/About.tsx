@@ -1564,7 +1564,7 @@ export default function About() {
 
   return (
     <AppLayout>
-      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div className="proof-page" style={{ maxWidth: 900, margin: "0 auto" }}>
         {/* Hero */}
         <div
           className="proof-card"

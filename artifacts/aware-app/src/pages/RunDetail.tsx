@@ -142,49 +142,71 @@ export default function RunDetail() {
 
   return (
     <AppLayout activeHref="/runs">
-      <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}>
-        {/* Top bar: breadcrumb + promotion + actions + KPI inline */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+      <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}>
+        {/* Top bar: breadcrumb + meta + actions */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            flexWrap: "wrap",
+            padding: "8px 12px",
+            background: "var(--proof-surface)",
+            border: "1px solid var(--proof-border)",
+            borderRadius: "var(--proof-radius)",
+          }}
+        >
           <button onClick={() => navigate("/runs")} className="proof-button proof-button-xs">
             <ArrowLeft size={11} /> Runs
           </button>
+          <span style={{ color: "var(--proof-border-strong)", fontSize: 14 }}>/</span>
           <span
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 11,
-              color: "var(--proof-text-secondary)",
+              fontWeight: 600,
+              color: "var(--proof-text)",
             }}
           >
             {run.id}
           </span>
-          <span style={{ width: 1, height: 16, background: "var(--proof-grey)" }} />
           <span
-            className={`proof-badge ${run.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
+            className={`proof-badge ${run.status === "PASS" ? "proof-badge-pass" : run.status === "FAIL" ? "proof-badge-fail" : "proof-badge-partial"}`}
             style={{ fontSize: 10 }}
           >
             {run.status}
           </span>
-          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
-            Pass{" "}
-            <b style={{ color: passRate === 100 ? "var(--proof-green)" : "var(--proof-red)" }}>
-              {passRate}%
-            </b>
-          </span>
-          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
-            ✓{passCount} ✗{failCount}
-          </span>
-          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>{run.duration}</span>
-          <span style={{ width: 1, height: 16, background: "var(--proof-grey)" }} />
-          <span
-            style={{
-              fontSize: 10,
-              fontFamily: "var(--font-mono)",
-              color: "var(--proof-text-secondary)",
-            }}
-          >
-            {run.env} · {run.envId} · Build {run.build}
-          </span>
-          <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: 4 }}>
+            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+              <span
+                style={{
+                  fontWeight: 700,
+                  fontFamily: "var(--font-mono)",
+                  color: passRate === 100 ? "var(--proof-green)" : passRate < 90 ? "var(--proof-red)" : "var(--proof-text)",
+                }}
+              >{passRate}%</span> pass
+            </span>
+            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)" }}>
+              <span style={{ color: "var(--proof-green)" }}>+{passCount}</span>
+              {" / "}
+              <span style={{ color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-muted)" }}>-{failCount}</span>
+            </span>
+            <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--proof-text-muted)" }}>{run.duration}</span>
+            <span
+              style={{
+                fontSize: 10,
+                fontFamily: "var(--font-mono)",
+                color: "var(--proof-text-muted)",
+                padding: "1px 6px",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid var(--proof-border)",
+                borderRadius: "var(--proof-radius-xs)",
+              }}
+            >
+              {run.env} · {run.envId} · build {run.build}
+            </span>
+          </div>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 5, alignItems: "center" }}>
             <button
               onClick={() => {
                 navigator.clipboard
@@ -192,6 +214,7 @@ export default function RunDetail() {
                   .then(() => show("Permalink copied"));
               }}
               className="proof-button proof-button-xs"
+              title="Copy permalink"
             >
               <Share2 size={11} />
             </button>

@@ -550,7 +550,7 @@ export default function Copilot() {
 
   return (
     <AppLayout activeHref="/copilot">
-      <div style={{ display: "flex", height: "calc(100vh - 96px)", gap: 16 }}>
+      <div className="proof-page" style={{ display: "flex", height: "calc(100vh - 96px)", gap: 16 }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
           {/* Provider selector bar */}
           <div

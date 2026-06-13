@@ -11,62 +11,63 @@
 /* ── Design Tokens ─────────────────────────────────────────────────── */
 :root {
   /* Brand palette */
-  --proof-blue: #5b8af5;
-  --proof-blue-hover: #7aa2f7;
-  --proof-blue-bg: rgba(91, 138, 245, 0.1);
-  --proof-blue-glow: rgba(91, 138, 245, 0.25);
-  --proof-green: #22c55e;
-  --proof-green-bg: rgba(34, 197, 94, 0.1);
+  --proof-blue: #2563eb;
+  --proof-blue-hover: #3b82f6;
+  --proof-blue-bg: rgba(37, 99, 235, 0.15);
+  --proof-blue-glow: rgba(37, 99, 235, 0.35);
+  --proof-green: #10b981;
+  --proof-green-bg: rgba(16, 185, 129, 0.15);
   --proof-red: #ef4444;
-  --proof-red-bg: rgba(239, 68, 68, 0.1);
+  --proof-red-bg: rgba(239, 68, 68, 0.15);
   --proof-yellow: #f59e0b;
-  --proof-yellow-bg: rgba(245, 158, 11, 0.1);
+  --proof-yellow-bg: rgba(245, 158, 11, 0.15);
   --proof-orange: #f97316;
-  --proof-orange-bg: rgba(249, 115, 22, 0.1);
-  --proof-purple: #a855f7;
-  --proof-purple-bg: rgba(168, 85, 247, 0.1);
+  --proof-orange-bg: rgba(249, 115, 22, 0.15);
+  --proof-purple: #8b5cf6;
+  --proof-purple-bg: rgba(139, 92, 246, 0.15);
 
   /* Surfaces */
-  --proof-bg: #0c0f1a;
-  --proof-grey-bg: #0c0f1a;
-  --proof-surface: #131728;
-  --proof-surface-2: #181d30;
-  --proof-surface-hover: #1d2238;
-  --proof-surface-3: #1e2338;
+  --proof-bg: #030712;
+  --proof-grey-bg: #030712;
+  --proof-surface: #0f172a;
+  --proof-surface-2: #1e293b;
+  --proof-surface-hover: #1e293b;
+  --proof-surface-3: #334155;
 
   /* Borders */
-  --proof-grey: rgba(255, 255, 255, 0.07);
-  --proof-border: rgba(255, 255, 255, 0.07);
-  --proof-border-strong: rgba(255, 255, 255, 0.13);
-  --proof-border-focus: rgba(91, 138, 245, 0.5);
+  --proof-grey: rgba(148, 163, 184, 0.2);
+  --proof-border: rgba(148, 163, 184, 0.2);
+  --proof-border-strong: rgba(148, 163, 184, 0.4);
+  --proof-border-focus: rgba(59, 130, 246, 0.5);
 
   /* Text */
-  --proof-text: #dde3f0;
-  --proof-text-secondary: #7e8a9e;
-  --proof-text-muted: #4e566a;
+  --proof-text: #f8fafc;
+  --proof-text-secondary: #94a3b8;
+  --proof-text-muted: #64748b;
 
   /* Shadows */
-  --proof-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
-  --proof-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
-  --proof-shadow-lg: 0 4px 24px rgba(0, 0, 0, 0.5), 0 8px 40px rgba(0, 0, 0, 0.3);
-  --proof-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --proof-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.8);
+  --proof-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.8), 0 2px 4px -2px rgba(0, 0, 0, 0.8);
+  --proof-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.8), 0 4px 6px -4px rgba(0, 0, 0, 0.8);
+  --proof-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.8);
 
   /* Radius */
-  --proof-radius-xs: 4px;
-  --proof-radius-sm: 7px;
-  --proof-radius: 10px;
-  --proof-radius-lg: 14px;
-  --proof-radius-xl: 20px;
+  --proof-radius-xs: 2px;
+  --proof-radius-sm: 4px;
+  --proof-radius: 6px;
+  --proof-radius-lg: 8px;
+  --proof-radius-xl: 12px;
 
   /* Typography */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
   /* Transitions */
-  --proof-transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --proof-transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Aliases */
   --proof-text-primary: var(--proof-text);
+  --proof-text-tertiary: #475569;
   --proof-muted: var(--proof-text-secondary);
 }
 
@@ -515,6 +516,288 @@ select.proof-input {
   color: var(--proof-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.7px;
+}
+
+/* ── Page entry animation ──────────────────────────────────────────── */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.proof-page {
+  animation: page-enter 0.22s ease-out both;
+}
+
+/* ── Page header ───────────────────────────────────────────────────── */
+.proof-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.proof-page-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--proof-text);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin: 0;
+}
+.proof-page-subtitle {
+  font-size: 12px;
+  color: var(--proof-text-secondary);
+  margin: 3px 0 0;
+  letter-spacing: -0.1px;
+}
+
+/* ── Section header (vertical bar + title) ─────────────────────────── */
+.proof-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+.proof-section-bar {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  background: var(--proof-blue);
+}
+.proof-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--proof-text);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  flex: 1;
+}
+.proof-section-meta {
+  font-size: 10px;
+  color: var(--proof-text-muted);
+  font-family: var(--font-mono);
+}
+
+/* ── Empty state ───────────────────────────────────────────────────── */
+.proof-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 24px;
+  color: var(--proof-text-secondary);
+  text-align: center;
+}
+.proof-empty-icon {
+  color: var(--proof-text-muted);
+  opacity: 0.4;
+  margin-bottom: 2px;
+}
+.proof-empty-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--proof-text);
+  margin: 0;
+}
+.proof-empty-desc {
+  font-size: 12px;
+  color: var(--proof-text-secondary);
+  max-width: 300px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Tags / env chips ─────────────────────────────────────────────── */
+.proof-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 7px;
+  border-radius: var(--proof-radius-sm);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  border: 1px solid;
+  font-family: var(--font-mono);
+}
+.proof-tag-blue {
+  color: var(--proof-blue);
+  background: var(--proof-blue-bg);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+.proof-tag-green {
+  color: var(--proof-green);
+  background: var(--proof-green-bg);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.proof-tag-red {
+  color: var(--proof-red);
+  background: var(--proof-red-bg);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.proof-tag-yellow {
+  color: var(--proof-yellow);
+  background: var(--proof-yellow-bg);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.proof-tag-purple {
+  color: var(--proof-purple);
+  background: var(--proof-purple-bg);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+.proof-tag-muted {
+  color: var(--proof-text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--proof-border);
+}
+
+/* ── Pass rate bar ────────────────────────────────────────────────── */
+.proof-pass-bar-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.proof-pass-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+/* ── Divider ──────────────────────────────────────────────────────── */
+.proof-divider {
+  height: 1px;
+  background: var(--proof-border);
+  border: none;
+  margin: 0;
+}
+.proof-divider-strong {
+  background: var(--proof-border-strong);
+}
+
+/* ── Staggered grid animation ─────────────────────────────────────── */
+.proof-stagger > * {
+  animation: slide-up 0.22s ease-out both;
+}
+.proof-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.proof-stagger > *:nth-child(2) { animation-delay: 35ms; }
+.proof-stagger > *:nth-child(3) { animation-delay: 70ms; }
+.proof-stagger > *:nth-child(4) { animation-delay: 105ms; }
+.proof-stagger > *:nth-child(5) { animation-delay: 140ms; }
+.proof-stagger > *:nth-child(6) { animation-delay: 175ms; }
+
+/* ── Keyboard hint ────────────────────────────────────────────────── */
+.proof-kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 5px;
+  border: 1px solid var(--proof-border-strong);
+  border-radius: var(--proof-radius-xs);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--proof-text-muted);
+  background: rgba(255, 255, 255, 0.03);
+  line-height: 1.6;
+}
+
+/* ── Card accent variants ─────────────────────────────────────────── */
+.proof-card-accent-blue { border-top: 2px solid var(--proof-blue); }
+.proof-card-accent-green { border-top: 2px solid var(--proof-green); }
+.proof-card-accent-red { border-top: 2px solid var(--proof-red); }
+.proof-card-accent-yellow { border-top: 2px solid var(--proof-yellow); }
+.proof-card-accent-purple { border-top: 2px solid var(--proof-purple); }
+
+/* ── Mono stat number ─────────────────────────────────────────────── */
+.proof-stat-number {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--proof-text);
+  line-height: 1;
+}
+
+/* ── Metadata row ─────────────────────────────────────────────────── */
+.proof-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.proof-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--proof-text-secondary);
+}
+.proof-meta-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--proof-text-muted);
+}
+.proof-meta-value {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--proof-text);
+  font-weight: 500;
+}
+
+/* ── Nav link hover ───────────────────────────────────────────────── */
+.proof-nav-link {
+  transition: background var(--proof-transition), color var(--proof-transition) !important;
+}
+.proof-nav-link:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--proof-text) !important;
+}
+
+/* ── Inline code ──────────────────────────────────────────────────── */
+.proof-code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--proof-border);
+  border-radius: var(--proof-radius-xs);
+  padding: 1px 5px;
+  color: var(--proof-blue);
+}
+
+/* ── Dot status indicator ─────────────────────────────────────────── */
+.proof-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.proof-status-dot-green {
+  background: var(--proof-green);
+  box-shadow: 0 0 5px var(--proof-green);
+}
+.proof-status-dot-red {
+  background: var(--proof-red);
+  box-shadow: 0 0 5px var(--proof-red);
+}
+.proof-status-dot-yellow {
+  background: var(--proof-yellow);
+  box-shadow: 0 0 5px var(--proof-yellow);
+}
+.proof-status-dot-blue {
+  background: var(--proof-blue);
+  animation: pulseDot 1.5s ease-in-out infinite;
+}
+.proof-status-dot-muted {
+  background: var(--proof-text-muted);
 }
 
 /* ── Pipeline stages ───────────────────────────────────────────────── */

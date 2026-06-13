@@ -282,27 +282,23 @@ export default function Runs() {
 
   return (
     <AppLayout activeHref="/runs">
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div className="proof-page-header" style={{ alignItems: "center" }}>
           <div>
-            <h1 style={{ fontSize: 20, fontWeight: 700 }}>Regression Runs</h1>
-            <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 3 }}>
-              {RUNS.length} runs · All GitHub Actions executions across QA / UAT / PROD
+            <h1 className="proof-page-title" style={{ fontSize: 20 }}>Regression Runs</h1>
+            <p className="proof-page-subtitle">
+              {RUNS.length} runs &nbsp;·&nbsp; GitHub Actions across QA / UAT / PROD
             </p>
           </div>
-          <button
-            onClick={() => navigate("/start")}
-            className="proof-button-primary"
-            style={{ fontSize: 13 }}
-          >
+          <button onClick={() => navigate("/start")} className="proof-button-primary">
             <Play size={14} /> Start New Run
           </button>
         </div>
 
         {/* Stat cards — clickable CTA filters */}
         <PanelErrorBoundary label="Stats cards">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
+          <div className="proof-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
             <CTAStatCard
               label="Total Runs"
               value={RUNS.length}

@@ -183,15 +183,15 @@ export default function Status() {
 
   return (
     <AppLayout activeHref="/ci-pipeline">
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {/* Header */}
-        <div>
-          <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)" }}>
-            How A.W.A.R.E. Works
-          </h1>
-          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 3 }}>
-            End-to-end pipeline: GitHub Actions → test results → promotion decision
-          </p>
+        <div className="proof-page-header" style={{ alignItems: "center" }}>
+          <div>
+            <h1 className="proof-page-title" style={{ fontSize: 20 }}>CI Pipeline</h1>
+            <p className="proof-page-subtitle">
+              GitHub Actions &rarr; test results &rarr; promotion decision
+            </p>
+          </div>
         </div>
 
         {/* Pipeline visualization */}

@@ -1032,7 +1032,7 @@ export default function Compare() {
 
   return (
     <AppLayout activeHref="/compare">
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {/* Run selectors */}
         <PanelErrorBoundary label="Run selectors">
           <div
@@ -1117,7 +1117,7 @@ export default function Compare() {
 
         {/* Summary tiles — clickable filters */}
         <PanelErrorBoundary label="Stat cards">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
+          <div className="proof-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
             {[
               {
                 label: "New Failures",

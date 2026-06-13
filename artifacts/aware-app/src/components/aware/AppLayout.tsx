@@ -198,23 +198,25 @@ export function AppLayout({
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
           <ProofLogo />
-          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
+          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
             <span
               style={{
                 fontWeight: 800,
-                fontSize: 14,
+                fontSize: 16,
                 color: "var(--proof-text)",
-                letterSpacing: "-0.4px",
+                letterSpacing: "1px",
+                fontFamily: "var(--font-mono)",
               }}
             >
               A.W.A.R.E.
             </span>
             <span
               style={{
-                fontSize: 9,
-                color: "var(--proof-text-secondary)",
+                fontSize: 8,
+                color: "var(--proof-blue)",
                 textTransform: "uppercase",
-                letterSpacing: "0.5px",
+                letterSpacing: "1.5px",
+                fontWeight: 700,
               }}
             >
               Akamai CDN Observability
@@ -231,6 +233,7 @@ export function AppLayout({
               <Link
                 key={item.href}
                 href={item.href}
+                className="proof-nav-link"
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -244,7 +247,7 @@ export function AppLayout({
                   borderBottom: `2px solid ${active ? "var(--proof-blue)" : "transparent"}`,
                   textDecoration: "none",
                   whiteSpace: "nowrap",
-                  transition: "color 0.15s, border-color 0.15s",
+                  transition: "color 0.15s, border-color 0.15s, background 0.15s",
                   flexShrink: 0,
                 }}
               >

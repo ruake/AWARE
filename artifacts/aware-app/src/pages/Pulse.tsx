@@ -267,19 +267,19 @@ export default function Pulse() {
 
   return (
     <AppLayout activeHref="/pulse">
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <h1
               style={{
                 fontSize: 20,
-                fontWeight: 700,
+                fontWeight: 800,
                 color: "var(--proof-text)",
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                letterSpacing: "-0.3px",
+                letterSpacing: "-0.5px",
               }}
             >
               <div
@@ -381,6 +381,7 @@ export default function Pulse() {
 
         {/* Summary cards — clickable to filter the workflow table */}
         <div
+          className="proof-stagger"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(6, 1fr)",
