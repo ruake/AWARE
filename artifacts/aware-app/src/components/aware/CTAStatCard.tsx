@@ -21,66 +21,51 @@ export function CTAStatCard({
 }: CTAStatCardProps) {
   const [hovered, setHovered] = React.useState(false);
 
+  const isInteractive = !!onClick;
+  const isHighlit = active || hovered;
+
   return (
     <div
       onClick={onClick}
-      onMouseEnter={() => onClick && setHovered(true)}
-      onMouseLeave={() => onClick && setHovered(false)}
+      onMouseEnter={() => isInteractive && setHovered(true)}
+      onMouseLeave={() => isInteractive && setHovered(false)}
       style={{
         position: "relative",
         overflow: "hidden",
-        padding: "18px 20px 20px",
-        background: "var(--proof-surface)",
-        border: `1px solid ${active || hovered ? `${accentColor}35` : "var(--proof-border)"}`,
+        padding: "14px 16px",
+        background: active
+          ? `linear-gradient(135deg, ${accentColor}12 0%, transparent 60%)`
+          : hovered
+            ? "var(--proof-surface-hover)"
+            : "var(--proof-surface)",
+        border: `1px solid ${isHighlit ? accentColor + "55" : "var(--proof-border)"}`,
+        borderTop: `2px solid ${isHighlit ? accentColor : "var(--proof-border-strong)"}`,
         borderRadius: "var(--proof-radius)",
-        boxShadow: hovered
-          ? `0 0 0 1px ${accentColor}20, 0 8px 32px rgba(0,0,0,0.4)`
-          : active
-            ? `0 0 0 2px ${accentColor}25, var(--proof-shadow)`
-            : "var(--proof-shadow)",
         cursor: onClick ? "pointer" : "default",
-        transform: hovered ? "translateY(-2px)" : "translateY(0)",
-        transition:
-          "transform 0.18s cubic-bezier(0.4,0,0.2,1), box-shadow 0.18s ease, border-color 0.18s ease",
+        transition: "all 0.15s ease",
         display: "flex",
         flexDirection: "column",
-        gap: 2,
+        gap: 6,
         userSelect: "none",
+        boxShadow: active ? `0 4px 16px ${accentColor}20` : "none",
       }}
     >
-      {/* Ambient glow blob */}
-      <div
-        style={{
-          position: "absolute",
-          top: -24,
-          right: -24,
-          width: 88,
-          height: 88,
-          borderRadius: "50%",
-          background: accentColor,
-          opacity: hovered ? 0.1 : 0.055,
-          transition: "opacity 0.2s ease",
-          pointerEvents: "none",
-          filter: "blur(12px)",
-        }}
-      />
-
       {/* Label + Icon row */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 6,
         }}
       >
         <span
           style={{
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: 700,
-            color: "var(--proof-text-secondary)",
+            color: isHighlit ? accentColor : "var(--proof-text-secondary)",
             textTransform: "uppercase",
-            letterSpacing: "0.65px",
+            letterSpacing: "0.7px",
+            transition: "color 0.15s ease",
           }}
         >
           {label}
@@ -88,17 +73,9 @@ export function CTAStatCard({
         {icon && (
           <div
             style={{
-              width: 30,
-              height: 30,
-              borderRadius: 8,
-              background: `${accentColor}14`,
-              border: `1px solid ${accentColor}22`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
               color: accentColor,
-              flexShrink: 0,
-              transition: "background 0.18s ease",
+              opacity: isHighlit ? 1 : 0.55,
+              transition: "opacity 0.15s ease",
             }}
           >
             {icon}
@@ -109,12 +86,12 @@ export function CTAStatCard({
       {/* Value */}
       <div
         style={{
-          fontSize: 32,
-          fontWeight: 800,
+          fontSize: 26,
+          fontWeight: 700,
+          fontFamily: "var(--font-mono)",
           color: "var(--proof-text)",
-          letterSpacing: "-1.5px",
+          letterSpacing: "-1px",
           lineHeight: 1,
-          fontVariantNumeric: "tabular-nums",
         }}
       >
         {value}
@@ -124,30 +101,29 @@ export function CTAStatCard({
       {subtitle && (
         <div
           style={{
-            fontSize: 11.5,
-            color: "var(--proof-text-secondary)",
-            marginTop: 4,
-            letterSpacing: "-0.1px",
+            fontSize: 11,
+            color: "var(--proof-text-muted)",
+            marginTop: 1,
           }}
         >
           {subtitle}
         </div>
       )}
 
-      {/* Bottom accent bar */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 2.5,
-          background: `linear-gradient(90deg, ${accentColor}90 0%, ${accentColor}15 100%)`,
-          borderRadius: "0 0 var(--proof-radius) var(--proof-radius)",
-          opacity: hovered || active ? 1 : 0.5,
-          transition: "opacity 0.2s ease",
-        }}
-      />
+      {/* Active indicator bar at bottom */}
+      {active && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 2,
+            background: accentColor,
+            opacity: 0.6,
+          }}
+        />
+      )}
     </div>
   );
 }

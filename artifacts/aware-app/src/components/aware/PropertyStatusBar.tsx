@@ -161,9 +161,9 @@ function TierGroup({
         flexDirection: "column",
         gap: 5,
         padding: "8px 10px",
-        borderRadius: 8,
-        border: `1px solid ${meta.accent}28`,
-        background: `linear-gradient(135deg, ${meta.accent}08 0%, transparent 100%)`,
+        borderRadius: 4,
+        border: `1px solid ${meta.accent}`,
+        background: `linear-gradient(135deg, ${meta.accent}15 0%, transparent 100%)`,
       }}
     >
       {/* Tier header */}

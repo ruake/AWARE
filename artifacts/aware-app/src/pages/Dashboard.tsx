@@ -107,34 +107,19 @@ export default function Dashboard() {
 
   return (
     <AppLayout activeHref="/">
-      <div style={{ display: "flex", gap: 18 }}>
+      <div className="proof-page" style={{ display: "flex", gap: 18 }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 18 }}>
           {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div className="proof-page-header" style={{ alignItems: "center" }}>
             <div>
-              <h1
-                style={{
-                  fontSize: 20,
-                  fontWeight: 800,
-                  color: "var(--proof-text)",
-                  letterSpacing: "-0.6px",
-                  lineHeight: 1.2,
-                }}
-              >
+              <h1 className="proof-page-title" style={{ fontSize: 20 }}>
                 Regression Dashboard
               </h1>
-              <p
-                style={{
-                  fontSize: 12.5,
-                  color: "var(--proof-text-secondary)",
-                  marginTop: 4,
-                  letterSpacing: "-0.1px",
-                }}
-              >
-                Akamai CDN · Playwright + pytest · GitHub Actions
+              <p className="proof-page-subtitle">
+                Akamai CDN &nbsp;·&nbsp; Playwright + pytest &nbsp;·&nbsp; GitHub Actions
               </p>
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
               <button
                 onClick={() => show("Run data refreshed")}
                 className="proof-button proof-button-sm"
@@ -158,46 +143,41 @@ export default function Dashboard() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 10,
-                padding: "12px 16px",
-                borderRadius: 8,
-                background: "linear-gradient(135deg, rgba(239,68,68,0.1), rgba(245,158,11,0.1))",
-                border: "1px solid rgba(239,68,68,0.2)",
+                gap: 12,
+                padding: "10px 14px",
+                borderRadius: "var(--proof-radius)",
+                background: "rgba(239,68,68,0.07)",
+                border: "1px solid rgba(239,68,68,0.25)",
+                borderLeft: "3px solid var(--proof-red)",
               }}
             >
-              <AlertTriangle size={16} style={{ color: "var(--proof-red)", flexShrink: 0 }} />
-              <div style={{ flex: 1 }}>
-                <span
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 12,
-                    color: "var(--proof-red)",
-                  }}
-                >
+              <AlertTriangle size={15} style={{ color: "var(--proof-red)", flexShrink: 0 }} />
+              <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <span style={{ fontWeight: 700, fontSize: 12, color: "var(--proof-red)" }}>
+                  Anomaly Detected
+                </span>
+                <span style={{ fontSize: 11.5, color: "var(--proof-text-secondary)" }}>
                   {anomalyBanner.message}
                 </span>
                 <span
                   style={{
-                    fontSize: 11,
-                    color: "var(--proof-text-secondary)",
-                    marginLeft: 8,
+                    fontSize: 10.5,
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--proof-text-muted)",
+                    background: "rgba(255,255,255,0.05)",
+                    padding: "1px 6px",
+                    borderRadius: "var(--proof-radius-xs)",
                   }}
                 >
-                  {anomalyBanner.lastValue.toFixed(0)}ms vs {anomalyBanner.avgValue.toFixed(0)}ms
-                  avg · {anomalyBanner.zScore.toFixed(1)}σ
+                  {anomalyBanner.lastValue.toFixed(0)}ms vs {anomalyBanner.avgValue.toFixed(0)}ms avg &nbsp;·&nbsp; {anomalyBanner.zScore.toFixed(1)}σ
                 </span>
               </div>
               <button
                 onClick={() => navigate("/runs")}
-                style={{
-                  fontSize: 11,
-                  color: "var(--proof-blue)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                }}
+                className="proof-button proof-button-sm"
+                style={{ fontSize: 11, flexShrink: 0 }}
               >
-                View Runs →
+                View Runs
               </button>
             </div>
           )}
@@ -315,7 +295,7 @@ export default function Dashboard() {
 
           {/* Comparison Summary */}
           <PanelErrorBoundary label="Comparison summary">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
+            <div className="proof-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
               {[
                 {
                   label: "Pass Rate Trend",

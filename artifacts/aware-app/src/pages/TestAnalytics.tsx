@@ -308,7 +308,7 @@ export default function TestAnalytics() {
 
   return (
     <AppLayout activeHref="/analytics">
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Header with searchable selector */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Link href={isTcMode ? "/suites" : "/compare"} className="proof-button proof-button-sm">
@@ -625,7 +625,7 @@ export default function TestAnalytics() {
         )}
 
         {/* KPI tiles */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
+        <div className="proof-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
           <CTAStatCard
             label="Pass Rate"
             value={`${detail.passRate}%`}

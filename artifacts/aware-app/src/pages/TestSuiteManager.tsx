@@ -168,6 +168,7 @@ export default function TestSuiteManager() {
   return (
     <AppLayout activeHref="/suites">
       <div
+        className="proof-page"
         style={{
           height: "calc(100vh - 100px)",
           maxWidth: 1600,
@@ -179,30 +180,16 @@ export default function TestSuiteManager() {
         }}
       >
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexShrink: 0,
-            paddingTop: 2,
-          }}
+          className="proof-page-header"
+          style={{ alignItems: "center", flexShrink: 0, paddingTop: 2 }}
         >
           <div>
-            <h1
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                margin: 0,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <FolderTree size={20} style={{ color: "var(--proof-blue)" }} />
+            <h1 className="proof-page-title" style={{ fontSize: 20, display: "flex", alignItems: "center", gap: 8 }}>
+              <FolderTree size={18} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
               Test Suites
             </h1>
-            <p style={{ fontSize: 12, color: "var(--proof-text-secondary)", margin: "2px 0 0 0" }}>
-              {suites.length} suites · {tcs.length} test cases
+            <p className="proof-page-subtitle">
+              {suites.length} suites &nbsp;·&nbsp; {tcs.length} test cases
             </p>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
@@ -233,6 +220,7 @@ export default function TestSuiteManager() {
         </div>
 
         <div
+          className="proof-stagger"
           style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, flexShrink: 0 }}
         >
           {kpis.map((kpi) => (
