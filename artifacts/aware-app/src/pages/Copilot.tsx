@@ -190,7 +190,7 @@ export default function CopilotPage() {
   const [providerStatus, setProviderStatus] = React.useState<Record<ProviderType, ProviderStatus>>({
     webllm: "unavailable",
     openai: "available",
-    chrome: "available",
+    chrome: "unavailable", // updated after async availability check
   });
   const [downloadProgress, setDownloadProgress] = React.useState<{
     progress: number;
@@ -403,7 +403,7 @@ export default function CopilotPage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <AppLayout>
+    <AppLayout fullBleed>
       {/* Keyframe for blink cursor + spinner */}
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
@@ -413,7 +413,7 @@ export default function CopilotPage() {
       <div
         style={{
           display: "flex",
-          height: "calc(100vh - 64px)",
+          height: "100%",
           overflow: "hidden",
         }}
       >
