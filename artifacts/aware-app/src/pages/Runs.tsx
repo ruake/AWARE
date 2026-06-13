@@ -286,7 +286,9 @@ export default function Runs() {
         {/* Header */}
         <div className="proof-page-header" style={{ alignItems: "center" }}>
           <div>
-            <h1 className="proof-page-title" style={{ fontSize: 20 }}>Regression Runs</h1>
+            <h1 className="proof-page-title" style={{ fontSize: 20 }}>
+              Regression Runs
+            </h1>
             <p className="proof-page-subtitle">
               {RUNS.length} runs &nbsp;·&nbsp; GitHub Actions across QA / UAT / PROD
             </p>
@@ -298,7 +300,10 @@ export default function Runs() {
 
         {/* Stat cards — clickable CTA filters */}
         <PanelErrorBoundary label="Stats cards">
-          <div className="proof-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
+          <div
+            className="proof-stagger"
+            style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}
+          >
             <CTAStatCard
               label="Total Runs"
               value={RUNS.length}

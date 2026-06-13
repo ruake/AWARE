@@ -919,16 +919,13 @@ export default function Compare() {
   const [swapped, setSwapped] = React.useState(false);
   const [selectedIdx, setSelectedIdx] = React.useState(-1);
   const [computedRows, setComputedRows] = React.useState<DiffRow[]>(DIFF_ROWS);
-  const [diffLoading, setDiffLoading] = React.useState(false);
   const baselineRun = RUNS.find((r) => r.id === baseline);
   const candidateRun = RUNS.find((r) => r.id === candidate);
 
   React.useEffect(() => {
     if (!baseline || !candidate) return;
-    setDiffLoading(true);
     Promise.all([loadResultsForRun(baseline), loadResultsForRun(candidate)]).then(() => {
       setComputedRows(computeDiffRows(baseline, candidate));
-      setDiffLoading(false);
     });
   }, [baseline, candidate]);
 
@@ -1117,7 +1114,10 @@ export default function Compare() {
 
         {/* Summary tiles — clickable filters */}
         <PanelErrorBoundary label="Stat cards">
-          <div className="proof-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
+          <div
+            className="proof-stagger"
+            style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}
+          >
             {[
               {
                 label: "New Failures",

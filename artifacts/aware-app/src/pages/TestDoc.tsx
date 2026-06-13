@@ -43,7 +43,15 @@ import {
   Gauge,
 } from "lucide-react";
 
-function CountUp({ value, suffix = "", decimals = 0 }: { value: number; suffix?: string; decimals?: number }) {
+function CountUp({
+  value,
+  suffix = "",
+  decimals = 0,
+}: {
+  value: number;
+  suffix?: string;
+  decimals?: number;
+}) {
   const [display, setDisplay] = React.useState(0);
   const ref = React.useRef<number>(0);
   React.useEffect(() => {
@@ -63,10 +71,21 @@ function CountUp({ value, suffix = "", decimals = 0 }: { value: number; suffix?:
     }
     requestAnimationFrame(step);
   }, [value]);
-  return <>{display.toFixed(decimals)}{suffix}</>;
+  return (
+    <>
+      {display.toFixed(decimals)}
+      {suffix}
+    </>
+  );
 }
 
-function MiniSparkline({ data, color = "var(--proof-blue)" }: { data: { v: number }[]; color?: string }) {
+function MiniSparkline({
+  data,
+  color = "var(--proof-blue)",
+}: {
+  data: { v: number }[];
+  color?: string;
+}) {
   if (data.length < 2) return null;
   const chartData = data.map((d, i) => ({ i, v: d.v }));
   return (
@@ -78,7 +97,14 @@ function MiniSparkline({ data, color = "var(--proof-blue)" }: { data: { v: numbe
             <stop offset="100%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <Area type="monotone" dataKey="v" stroke={color} strokeWidth={2} fill={`url(#spark-${color.replace(/\W/g, "")})`} dot={false} />
+        <Area
+          type="monotone"
+          dataKey="v"
+          stroke={color}
+          strokeWidth={2}
+          fill={`url(#spark-${color.replace(/\W/g, "")})`}
+          dot={false}
+        />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -107,7 +133,7 @@ function MetricCard({
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string | number;
+  value: React.ReactNode;
   sub?: string;
   color: string;
   trend?: { dir: "up" | "down"; val: string };
@@ -161,7 +187,15 @@ function MetricCard({
         >
           {icon}
         </div>
-        <span style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--proof-text-secondary)",
+            textTransform: "uppercase",
+            letterSpacing: "0.3px",
+          }}
+        >
           {label}
         </span>
         {trend && (
@@ -181,7 +215,16 @@ function MetricCard({
           </span>
         )}
       </div>
-      <div style={{ fontSize: 28, fontWeight: 800, fontFamily: "var(--font-mono)", letterSpacing: "-1px", lineHeight: 1, color: "var(--proof-text)" }}>
+      <div
+        style={{
+          fontSize: 28,
+          fontWeight: 800,
+          fontFamily: "var(--font-mono)",
+          letterSpacing: "-1px",
+          lineHeight: 1,
+          color: "var(--proof-text)",
+        }}
+      >
         {value}
       </div>
       {sub && <div style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>{sub}</div>}
@@ -189,7 +232,15 @@ function MetricCard({
   );
 }
 
-function AnomalyTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number; stroke: string }[]; label?: string }) {
+function AnomalyTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { value: number; stroke: string }[];
+  label?: string;
+}) {
   if (!active || !payload?.length) return null;
   return (
     <div
@@ -220,7 +271,9 @@ export default function TestDoc() {
   const diffRow = DIFF_ROWS.find((d) => d.id === testId);
   const testCase = React.useMemo(() => getTestCaseById(testId), [testId]);
   const [_loaded, setLoaded] = React.useState(false);
-  const [activeChartTab, setActiveChartTab] = React.useState<"passrate" | "duration" | "bar">("passrate");
+  const [activeChartTab, setActiveChartTab] = React.useState<"passrate" | "duration" | "bar">(
+    "passrate",
+  );
   const [hoveredExecution, setHoveredExecution] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -244,7 +297,8 @@ export default function TestDoc() {
     return null;
   }, [testCase, diffRow, _loaded]);
 
-  const testName = testCase?.name ?? diffRow?.name ?? (testId || "test_geo_match_us_locale_prod[/us/]");
+  const testName =
+    testCase?.name ?? diffRow?.name ?? (testId || "test_geo_match_us_locale_prod[/us/]");
   const testStatus = diffRow?.candStatus ?? "FAIL";
   const testCategory = testCase?.category ?? diffRow?.category ?? "geo-match";
   const testSuite = "full_suite";
@@ -279,8 +333,12 @@ export default function TestDoc() {
         return {
           key: `${h.runId}-${i}`,
           runId: h.runId,
-          date: run?.started ? new Date(run.started).toLocaleDateString([], { month: "short", day: "numeric" }) : "—",
-          time: run?.started ? new Date(run.started).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "",
+          date: run?.started
+            ? new Date(run.started).toLocaleDateString([], { month: "short", day: "numeric" })
+            : "—",
+          time: run?.started
+            ? new Date(run.started).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            : "",
           status: h.status,
           duration: h.duration,
           env: run?.env ?? "—",
@@ -291,7 +349,10 @@ export default function TestDoc() {
       });
   }, [testDetail]);
 
-  const durationSparkData = React.useMemo(() => testDetail?.history.map((h) => ({ v: h.duration })) ?? [], [testDetail]);
+  const durationSparkData = React.useMemo(
+    () => testDetail?.history.map((h) => ({ v: h.duration })) ?? [],
+    [testDetail],
+  );
   const passFailData = React.useMemo(() => {
     const pass = testDetail?.history.filter((h) => h.status === "PASS").length ?? 0;
     const fail = testDetail?.history.filter((h) => h.status === "FAIL").length ?? 0;
@@ -334,12 +395,17 @@ export default function TestDoc() {
   }, [sortedHistory]);
 
   const categoryColor =
-    testCategory === "geo-match" ? "var(--proof-blue)" :
-    testCategory === "caching" ? "var(--proof-purple)" :
-    testCategory === "security" ? "var(--proof-red)" :
-    testCategory === "edge-routing" ? "var(--proof-yellow)" :
-    testCategory === "http-protocol" ? "var(--proof-cyan, #06b6d4)" :
-    "var(--proof-text-secondary)";
+    testCategory === "geo-match"
+      ? "var(--proof-blue)"
+      : testCategory === "caching"
+        ? "var(--proof-purple)"
+        : testCategory === "security"
+          ? "var(--proof-red)"
+          : testCategory === "edge-routing"
+            ? "var(--proof-yellow)"
+            : testCategory === "http-protocol"
+              ? "var(--proof-cyan, #06b6d4)"
+              : "var(--proof-text-secondary)";
 
   return (
     <AppLayout activeHref="/suites">
@@ -383,11 +449,20 @@ export default function TestDoc() {
               right: "-10%",
               width: "40%",
               height: "150%",
-              background: "radial-gradient(ellipse at center, rgba(139,92,246,0.06) 0%, transparent 70%)",
+              background:
+                "radial-gradient(ellipse at center, rgba(139,92,246,0.06) 0%, transparent 70%)",
               pointerEvents: "none",
             }}
           />
-          <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <TestDocTopBar
                 testId={testId}
@@ -413,30 +488,102 @@ export default function TestDoc() {
           }}
         >
           {/* ── Left Sidebar ── */}
-          <div style={{ overflowY: "auto", paddingRight: 2, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div
+            style={{
+              overflowY: "auto",
+              paddingRight: 2,
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+            }}
+          >
             {/* Quick Stats */}
             {testDetail && (
-              <div className="proof-card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-secondary)" }}>
+              <div
+                className="proof-card"
+                style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}
+              >
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    color: "var(--proof-text-secondary)",
+                  }}
+                >
                   Quick Stats
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                   {[
-                    { label: "Pass Rate", value: passRate, suffix: "%", color: passRate >= 80 ? "var(--proof-green)" : passRate >= 50 ? "var(--proof-yellow)" : "var(--proof-red)" },
-                    { label: "Avg Duration", value: avgDuration, suffix: "ms", color: "var(--proof-blue)" },
-                    { label: "Flakiness", value: flakinessScore, suffix: "%", color: flakinessScore <= 20 ? "var(--proof-green)" : flakinessScore <= 50 ? "var(--proof-yellow)" : "var(--proof-red)" },
-                    { label: "Executions", value: totalExecutions, suffix: "", color: "var(--proof-purple)" },
+                    {
+                      label: "Pass Rate",
+                      value: passRate,
+                      suffix: "%",
+                      color:
+                        passRate >= 80
+                          ? "var(--proof-green)"
+                          : passRate >= 50
+                            ? "var(--proof-yellow)"
+                            : "var(--proof-red)",
+                    },
+                    {
+                      label: "Avg Duration",
+                      value: avgDuration,
+                      suffix: "ms",
+                      color: "var(--proof-blue)",
+                    },
+                    {
+                      label: "Flakiness",
+                      value: flakinessScore,
+                      suffix: "%",
+                      color:
+                        flakinessScore <= 20
+                          ? "var(--proof-green)"
+                          : flakinessScore <= 50
+                            ? "var(--proof-yellow)"
+                            : "var(--proof-red)",
+                    },
+                    {
+                      label: "Executions",
+                      value: totalExecutions,
+                      suffix: "",
+                      color: "var(--proof-purple)",
+                    },
                   ].map((stat, i) => (
-                    <div key={stat.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 8px", borderRadius: 4, background: "rgba(255,255,255,0.02)", animation: `slide-up 0.25s ease-out both`, animationDelay: `${i * 60}ms` }}>
-                      <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>{stat.label}</span>
-                      <span style={{ fontSize: 14, fontWeight: 700, fontFamily: "var(--font-mono)", color: stat.color }}>
+                    <div
+                      key={stat.label}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "5px 8px",
+                        borderRadius: 4,
+                        background: "rgba(255,255,255,0.02)",
+                        animation: `slide-up 0.25s ease-out both`,
+                        animationDelay: `${i * 60}ms`,
+                      }}
+                    >
+                      <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+                        {stat.label}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          fontFamily: "var(--font-mono)",
+                          color: stat.color,
+                        }}
+                      >
                         <CountUp value={stat.value} suffix={stat.suffix} />
                       </span>
                     </div>
                   ))}
                 </div>
                 <div style={{ height: 40, marginTop: 4 }}>
-                  {durationSparkData.length > 1 && <MiniSparkline data={durationSparkData} color="var(--proof-blue)" />}
+                  {durationSparkData.length > 1 && (
+                    <MiniSparkline data={durationSparkData} color="var(--proof-blue)" />
+                  )}
                 </div>
               </div>
             )}
@@ -462,32 +609,56 @@ export default function TestDoc() {
                     icon: <CheckCircle2 size={16} />,
                     label: "Pass Rate",
                     value: <CountUp value={passRate} suffix="%" />,
-                    sub: `${testDetail.history.filter(h => h.status === 'PASS').length} of ${totalExecutions} passes`,
-                    color: passRate >= 80 ? "var(--proof-green)" : passRate >= 50 ? "var(--proof-yellow)" : "var(--proof-red)",
-                    trend: sortedHistory.length >= 2 ? {
-                      dir: sortedHistory[sortedHistory.length - 1].status === "PASS" ? "up" as const : "down" as const,
-                      val: sortedHistory[sortedHistory.length - 1].status === "PASS" ? "Last: Pass" : "Last: Fail",
-                    } : undefined,
+                    sub: `${testDetail.history.filter((h) => h.status === "PASS").length} of ${totalExecutions} passes`,
+                    color:
+                      passRate >= 80
+                        ? "var(--proof-green)"
+                        : passRate >= 50
+                          ? "var(--proof-yellow)"
+                          : "var(--proof-red)",
+                    trend:
+                      sortedHistory.length >= 2
+                        ? {
+                            dir:
+                              sortedHistory[sortedHistory.length - 1].status === "PASS"
+                                ? ("up" as const)
+                                : ("down" as const),
+                            val:
+                              sortedHistory[sortedHistory.length - 1].status === "PASS"
+                                ? "Last: Pass"
+                                : "Last: Fail",
+                          }
+                        : undefined,
                   },
                   {
                     icon: <Clock size={16} />,
                     label: "Avg Duration",
                     value: <CountUp value={avgDuration} suffix="ms" />,
-                    sub: `Min: ${Math.min(...testDetail.history.map(h => h.duration))}ms / Max: ${Math.max(...testDetail.history.map(h => h.duration))}ms`,
+                    sub: `Min: ${Math.min(...testDetail.history.map((h) => h.duration))}ms / Max: ${Math.max(...testDetail.history.map((h) => h.duration))}ms`,
                     color: "var(--proof-blue)",
                   },
                   {
                     icon: <Gauge size={16} />,
                     label: "Flakiness",
                     value: <CountUp value={flakinessScore} suffix="%" />,
-                    sub: flakinessScore <= 10 ? "Stable test" : flakinessScore <= 30 ? "Moderately flaky" : "Highly flaky",
-                    color: flakinessScore <= 10 ? "var(--proof-green)" : flakinessScore <= 30 ? "var(--proof-yellow)" : "var(--proof-red)",
+                    sub:
+                      flakinessScore <= 10
+                        ? "Stable test"
+                        : flakinessScore <= 30
+                          ? "Moderately flaky"
+                          : "Highly flaky",
+                    color:
+                      flakinessScore <= 10
+                        ? "var(--proof-green)"
+                        : flakinessScore <= 30
+                          ? "var(--proof-yellow)"
+                          : "var(--proof-red)",
                   },
                   {
                     icon: <BarChart3 size={16} />,
                     label: "Total Executions",
                     value: <CountUp value={totalExecutions} />,
-                    sub: `${RUNS.length > 0 ? new Set(RUNS.map(r => r.started.slice(0, 10))).size : 0}d span`,
+                    sub: `${RUNS.length > 0 ? new Set(RUNS.map((r) => r.started.slice(0, 10))).size : 0}d span`,
                     color: "var(--proof-purple)",
                   },
                 ].map((metric, i) => (
@@ -520,7 +691,15 @@ export default function TestDoc() {
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ width: 3, height: 16, borderRadius: 2, background: "linear-gradient(180deg, var(--proof-green) 0%, var(--proof-red) 100%)" }} />
+                      <div
+                        style={{
+                          width: 3,
+                          height: 16,
+                          borderRadius: 2,
+                          background:
+                            "linear-gradient(180deg, var(--proof-green) 0%, var(--proof-red) 100%)",
+                        }}
+                      />
                       <span style={{ fontWeight: 600, fontSize: 13 }}>Trends</span>
                     </div>
                     <div style={{ display: "flex", gap: 4 }}>
@@ -539,8 +718,12 @@ export default function TestDoc() {
                             border: "none",
                             borderRadius: 4,
                             cursor: "pointer",
-                            background: activeChartTab === tab.key ? "var(--proof-blue)" : "rgba(255,255,255,0.04)",
-                            color: activeChartTab === tab.key ? "#fff" : "var(--proof-text-secondary)",
+                            background:
+                              activeChartTab === tab.key
+                                ? "var(--proof-blue)"
+                                : "rgba(255,255,255,0.04)",
+                            color:
+                              activeChartTab === tab.key ? "#fff" : "var(--proof-text-secondary)",
                             transition: "all 0.15s ease",
                           }}
                         >
@@ -552,7 +735,10 @@ export default function TestDoc() {
                   <div style={{ padding: "16px 20px", height: 240 }}>
                     {activeChartTab === "passrate" && (
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
+                        <AreaChart
+                          data={chartData}
+                          margin={{ top: 4, right: 8, bottom: 4, left: -16 }}
+                        >
                           <defs>
                             <linearGradient id="passRateGrad" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="0%" stopColor="var(--proof-green)" stopOpacity={0.3} />
@@ -560,16 +746,42 @@ export default function TestDoc() {
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                          <XAxis dataKey="label" tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }} axisLine={false} tickLine={false} />
-                          <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }} axisLine={false} tickLine={false} />
+                          <XAxis
+                            dataKey="label"
+                            tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            domain={[0, 100]}
+                            tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
                           <Tooltip content={<AnomalyTooltip />} />
-                          <Area type="monotone" dataKey="passRate" stroke="var(--proof-green)" strokeWidth={2} fill="url(#passRateGrad)" dot={false} activeDot={{ r: 5, fill: "var(--proof-green)", stroke: "var(--proof-surface)", strokeWidth: 2 }} />
+                          <Area
+                            type="monotone"
+                            dataKey="passRate"
+                            stroke="var(--proof-green)"
+                            strokeWidth={2}
+                            fill="url(#passRateGrad)"
+                            dot={false}
+                            activeDot={{
+                              r: 5,
+                              fill: "var(--proof-green)",
+                              stroke: "var(--proof-surface)",
+                              strokeWidth: 2,
+                            }}
+                          />
                         </AreaChart>
                       </ResponsiveContainer>
                     )}
                     {activeChartTab === "duration" && (
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
+                        <AreaChart
+                          data={chartData}
+                          margin={{ top: 4, right: 8, bottom: 4, left: -16 }}
+                        >
                           <defs>
                             <linearGradient id="durationGrad" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="0%" stopColor="var(--proof-blue)" stopOpacity={0.3} />
@@ -577,22 +789,70 @@ export default function TestDoc() {
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                          <XAxis dataKey="label" tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }} axisLine={false} tickLine={false} />
-                          <YAxis tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }} axisLine={false} tickLine={false} />
+                          <XAxis
+                            dataKey="label"
+                            tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
                           <Tooltip content={<AnomalyTooltip />} />
-                          <Area type="monotone" dataKey="duration" stroke="var(--proof-blue)" strokeWidth={2} fill="url(#durationGrad)" dot={false} activeDot={{ r: 5, fill: "var(--proof-blue)", stroke: "var(--proof-surface)", strokeWidth: 2 }} />
+                          <Area
+                            type="monotone"
+                            dataKey="duration"
+                            stroke="var(--proof-blue)"
+                            strokeWidth={2}
+                            fill="url(#durationGrad)"
+                            dot={false}
+                            activeDot={{
+                              r: 5,
+                              fill: "var(--proof-blue)",
+                              stroke: "var(--proof-surface)",
+                              strokeWidth: 2,
+                            }}
+                          />
                         </AreaChart>
                       </ResponsiveContainer>
                     )}
                     {activeChartTab === "bar" && barChartData.length > 1 && (
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={barChartData} margin={{ top: 4, right: 8, bottom: 4, left: -8 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                          <XAxis dataKey="label" tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }} axisLine={false} tickLine={false} />
-                          <YAxis tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }} axisLine={false} tickLine={false} />
+                        <BarChart
+                          data={barChartData}
+                          margin={{ top: 4, right: 8, bottom: 4, left: -8 }}
+                        >
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke="rgba(255,255,255,0.04)"
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="label"
+                            tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
                           <Tooltip content={<AnomalyTooltip />} />
-                          <Bar dataKey="pass" stackId="a" fill="var(--proof-green)" radius={[2, 2, 0, 0]} />
-                          <Bar dataKey="fail" stackId="a" fill="var(--proof-red)" radius={[2, 2, 0, 0]} />
+                          <Bar
+                            dataKey="pass"
+                            stackId="a"
+                            fill="var(--proof-green)"
+                            radius={[2, 2, 0, 0]}
+                          />
+                          <Bar
+                            dataKey="fail"
+                            stackId="a"
+                            fill="var(--proof-red)"
+                            radius={[2, 2, 0, 0]}
+                          />
                         </BarChart>
                       </ResponsiveContainer>
                     )}
@@ -617,7 +877,13 @@ export default function TestDoc() {
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <Activity size={14} style={{ color: "var(--proof-text-secondary)" }} />
                     <h2 style={{ fontWeight: 600, fontSize: 13 }}>Recent Executions</h2>
-                    <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        color: "var(--proof-text-muted)",
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    >
                       ({executionsData.length})
                     </span>
                   </div>
@@ -643,7 +909,15 @@ export default function TestDoc() {
                     <tbody>
                       {executionsData.length === 0 ? (
                         <tr>
-                          <td colSpan={7} style={{ textAlign: "center", padding: 24, color: "var(--proof-text-secondary)", fontSize: 12 }}>
+                          <td
+                            colSpan={7}
+                            style={{
+                              textAlign: "center",
+                              padding: 24,
+                              color: "var(--proof-text-secondary)",
+                              fontSize: 12,
+                            }}
+                          >
                             No execution data available
                           </td>
                         </tr>
@@ -658,14 +932,27 @@ export default function TestDoc() {
                               onMouseLeave={() => setHoveredExecution(null)}
                               style={{
                                 cursor: "pointer",
-                                background: hoveredExecution === row.runId ? "rgba(255,255,255,0.03)" : isFail ? "var(--proof-red-bg)" : "transparent",
+                                background:
+                                  hoveredExecution === row.runId
+                                    ? "rgba(255,255,255,0.03)"
+                                    : isFail
+                                      ? "var(--proof-red-bg)"
+                                      : "transparent",
                                 transition: "background 0.15s ease",
                                 animation: `slide-up 0.25s ease-out both`,
                                 animationDelay: `${i * 30}ms`,
                               }}
                             >
                               <td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{row.date}</td>
-                              <td style={{ fontSize: 11, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}>{row.time}</td>
+                              <td
+                                style={{
+                                  fontSize: 11,
+                                  color: "var(--proof-text-muted)",
+                                  fontFamily: "var(--font-mono)",
+                                }}
+                              >
+                                {row.time}
+                              </td>
                               <td>
                                 <StatusBadge status={row.status as "PASS" | "FAIL"} />
                               </td>
@@ -696,8 +983,18 @@ export default function TestDoc() {
                                   <span>{row.duration}ms</span>
                                 )}
                               </td>
-                              <td style={{ fontSize: 11, fontFamily: "var(--font-mono)" }}>{row.build}</td>
-                              <td style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--proof-text-secondary)" }}>{row.rev}</td>
+                              <td style={{ fontSize: 11, fontFamily: "var(--font-mono)" }}>
+                                {row.build}
+                              </td>
+                              <td
+                                style={{
+                                  fontSize: 11,
+                                  fontFamily: "var(--font-mono)",
+                                  color: "var(--proof-text-secondary)",
+                                }}
+                              >
+                                {row.rev}
+                              </td>
                               <td>
                                 <span
                                   style={{
@@ -706,13 +1003,17 @@ export default function TestDoc() {
                                     padding: "2px 6px",
                                     borderRadius: 4,
                                     background:
-                                      row.env === "PROD" ? "rgba(16,185,129,0.12)" :
-                                      row.env === "UAT" ? "rgba(245,158,11,0.12)" :
-                                      "rgba(139,92,246,0.12)",
+                                      row.env === "PROD"
+                                        ? "rgba(16,185,129,0.12)"
+                                        : row.env === "UAT"
+                                          ? "rgba(245,158,11,0.12)"
+                                          : "rgba(139,92,246,0.12)",
                                     color:
-                                      row.env === "PROD" ? "var(--proof-green)" :
-                                      row.env === "UAT" ? "var(--proof-yellow)" :
-                                      "var(--proof-purple)",
+                                      row.env === "PROD"
+                                        ? "var(--proof-green)"
+                                        : row.env === "UAT"
+                                          ? "var(--proof-yellow)"
+                                          : "var(--proof-purple)",
                                   }}
                                 >
                                   {row.env}
@@ -782,7 +1083,10 @@ export default function TestDoc() {
                       }}
                     >
                       {rows.map((r) => (
-                        <div key={r.label} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        <div
+                          key={r.label}
+                          style={{ display: "flex", gap: 8, alignItems: "center" }}
+                        >
                           <span
                             style={{
                               color: "var(--proof-text-secondary)",
@@ -795,7 +1099,13 @@ export default function TestDoc() {
                           >
                             {r.label}
                           </span>
-                          <span style={{ color: "var(--proof-text)", wordBreak: "break-all", fontWeight: 500 }}>
+                          <span
+                            style={{
+                              color: "var(--proof-text)",
+                              wordBreak: "break-all",
+                              fontWeight: 500,
+                            }}
+                          >
                             {r.val}
                           </span>
                         </div>
@@ -816,8 +1126,12 @@ export default function TestDoc() {
                             background: "rgba(255,255,255,0.02)",
                             transition: "background 0.15s",
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background = "rgba(255,255,255,0.04)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = "rgba(255,255,255,0.02)")
+                          }
                         >
                           Response Headers ({Object.keys(e.response.headers).length})
                         </summary>
@@ -846,11 +1160,25 @@ export default function TestDoc() {
                                 borderRadius: 2,
                                 transition: "background 0.1s",
                               }}
-                              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
-                              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                              onMouseEnter={(e) =>
+                                (e.currentTarget.style.background = "rgba(255,255,255,0.03)")
+                              }
+                              onMouseLeave={(e) =>
+                                (e.currentTarget.style.background = "transparent")
+                              }
                             >
-                              <span style={{ color: "var(--proof-blue)", minWidth: 160, fontWeight: 500 }}>{k}</span>
-                              <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>{v}</span>
+                              <span
+                                style={{
+                                  color: "var(--proof-blue)",
+                                  minWidth: 160,
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {k}
+                              </span>
+                              <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>
+                                {v}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -871,8 +1199,12 @@ export default function TestDoc() {
                             background: "rgba(255,255,255,0.02)",
                             transition: "background 0.15s",
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background = "rgba(255,255,255,0.04)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = "rgba(255,255,255,0.02)")
+                          }
                         >
                           Request Headers ({Object.keys(e.request.headers).length})
                         </summary>
@@ -901,11 +1233,25 @@ export default function TestDoc() {
                                 borderRadius: 2,
                                 transition: "background 0.1s",
                               }}
-                              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
-                              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                              onMouseEnter={(e) =>
+                                (e.currentTarget.style.background = "rgba(255,255,255,0.03)")
+                              }
+                              onMouseLeave={(e) =>
+                                (e.currentTarget.style.background = "transparent")
+                              }
                             >
-                              <span style={{ color: "var(--proof-purple)", minWidth: 160, fontWeight: 500 }}>{k}</span>
-                              <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>{v}</span>
+                              <span
+                                style={{
+                                  color: "var(--proof-purple)",
+                                  minWidth: 160,
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {k}
+                              </span>
+                              <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>
+                                {v}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -926,12 +1272,18 @@ export default function TestDoc() {
                             background: "rgba(255,255,255,0.02)",
                             transition: "background 0.15s",
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background = "rgba(255,255,255,0.04)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = "rgba(255,255,255,0.02)")
+                          }
                         >
                           Cookies ({e.response.cookies.length})
                         </summary>
-                        <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>
+                        <div
+                          style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}
+                        >
                           {e.response.cookies.map((c, i) => (
                             <div
                               key={i}
@@ -946,19 +1298,49 @@ export default function TestDoc() {
                                 border: "1px solid var(--proof-grey)",
                               }}
                             >
-                              <span style={{ color: "var(--proof-orange)", fontWeight: 600 }}>{c.name}</span>
-                              <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>= {c.value}</span>
+                              <span style={{ color: "var(--proof-orange)", fontWeight: 600 }}>
+                                {c.name}
+                              </span>
+                              <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>
+                                = {c.value}
+                              </span>
                               {c.domain && (
-                                <span style={{ color: "var(--proof-text-secondary)" }}>domain={c.domain}</span>
+                                <span style={{ color: "var(--proof-text-secondary)" }}>
+                                  domain={c.domain}
+                                </span>
                               )}
                               {c.path && (
-                                <span style={{ color: "var(--proof-text-secondary)" }}>path={c.path}</span>
+                                <span style={{ color: "var(--proof-text-secondary)" }}>
+                                  path={c.path}
+                                </span>
                               )}
                               {c.httpOnly && (
-                                <span style={{ color: "var(--proof-green)", fontSize: 9, fontWeight: 600, padding: "1px 4px", background: "rgba(16,185,129,0.1)", borderRadius: 2 }}>HttpOnly</span>
+                                <span
+                                  style={{
+                                    color: "var(--proof-green)",
+                                    fontSize: 9,
+                                    fontWeight: 600,
+                                    padding: "1px 4px",
+                                    background: "rgba(16,185,129,0.1)",
+                                    borderRadius: 2,
+                                  }}
+                                >
+                                  HttpOnly
+                                </span>
                               )}
                               {c.secure && (
-                                <span style={{ color: "var(--proof-green)", fontSize: 9, fontWeight: 600, padding: "1px 4px", background: "rgba(16,185,129,0.1)", borderRadius: 2 }}>Secure</span>
+                                <span
+                                  style={{
+                                    color: "var(--proof-green)",
+                                    fontSize: 9,
+                                    fontWeight: 600,
+                                    padding: "1px 4px",
+                                    background: "rgba(16,185,129,0.1)",
+                                    borderRadius: 2,
+                                  }}
+                                >
+                                  Secure
+                                </span>
                               )}
                             </div>
                           ))}
@@ -989,10 +1371,18 @@ export default function TestDoc() {
                       Assertions ({latestResult.assertions.length})
                     </h2>
                     <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
-                      {latestResult.assertions.filter(a => a.passed).length} passed / {latestResult.assertions.filter(a => !a.passed).length} failed
+                      {latestResult.assertions.filter((a) => a.passed).length} passed /{" "}
+                      {latestResult.assertions.filter((a) => !a.passed).length} failed
                     </span>
                   </div>
-                  <div style={{ padding: "10px 14px", display: "flex", flexDirection: "column", gap: 4 }}>
+                  <div
+                    style={{
+                      padding: "10px 14px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                    }}
+                  >
                     {latestResult.assertions.map((a, i) => (
                       <div
                         key={i}
@@ -1017,17 +1407,38 @@ export default function TestDoc() {
                         }}
                       >
                         {a.passed ? (
-                          <CheckCircle2 size={14} style={{ color: "var(--proof-green)", flexShrink: 0 }} />
+                          <CheckCircle2
+                            size={14}
+                            style={{ color: "var(--proof-green)", flexShrink: 0 }}
+                          />
                         ) : (
                           <XCircle size={14} style={{ color: "var(--proof-red)", flexShrink: 0 }} />
                         )}
                         <span style={{ flex: 1, fontWeight: 500 }}>{a.assertion}</span>
                         <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-                          Expected: <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--proof-text)" }}>{a.expected}</span>
+                          Expected:{" "}
+                          <span
+                            style={{
+                              fontFamily: "var(--font-mono)",
+                              fontWeight: 600,
+                              color: "var(--proof-text)",
+                            }}
+                          >
+                            {a.expected}
+                          </span>
                         </span>
                         {!a.passed && (
                           <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-                            Actual: <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--proof-red)" }}>{a.actual}</span>
+                            Actual:{" "}
+                            <span
+                              style={{
+                                fontFamily: "var(--font-mono)",
+                                fontWeight: 600,
+                                color: "var(--proof-red)",
+                              }}
+                            >
+                              {a.actual}
+                            </span>
                           </span>
                         )}
                       </div>
@@ -1039,61 +1450,145 @@ export default function TestDoc() {
           </div>
 
           {/* ── Right Sidebar — Changelog ── */}
-          <div style={{ overflowY: "auto", paddingLeft: 2, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div
+            style={{
+              overflowY: "auto",
+              paddingLeft: 2,
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+            }}
+          >
             {/* Pass/Fail donut */}
-            {passFailData[0] && passFailData[1] && (passFailData[0].value > 0 || passFailData[1].value > 0) && (
-              <StaggerChildren index={0}>
-                <div className="proof-card" style={{ padding: 14 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-secondary)", marginBottom: 10 }}>
-                    Pass / Fail Distribution
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ position: "relative", width: 80, height: 80, flexShrink: 0 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={passFailData}
-                          layout="vertical"
-                          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                          barCategoryGap={4}
+            {passFailData[0] &&
+              passFailData[1] &&
+              (passFailData[0].value > 0 || passFailData[1].value > 0) && (
+                <StaggerChildren index={0}>
+                  <div className="proof-card" style={{ padding: 14 }}>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        color: "var(--proof-text-secondary)",
+                        marginBottom: 10,
+                      }}
+                    >
+                      Pass / Fail Distribution
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                      <div style={{ position: "relative", width: 80, height: 80, flexShrink: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart
+                            data={passFailData}
+                            layout="vertical"
+                            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                            barCategoryGap={4}
+                          >
+                            <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
+                              {passFailData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Bar>
+                            <YAxis dataKey="name" type="category" hide />
+                            <XAxis type="number" hide />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
                         >
-                          <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
-                            {passFailData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Bar>
-                          <YAxis dataKey="name" type="category" hide />
-                          <XAxis type="number" hide />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--proof-green)" }} />
-                          <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>Pass</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <div
+                              style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                background: "var(--proof-green)",
+                              }}
+                            />
+                            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+                              Pass
+                            </span>
+                          </div>
+                          <span
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 700,
+                              fontFamily: "var(--font-mono)",
+                              color: "var(--proof-green)",
+                            }}
+                          >
+                            {passFailData[0].value}
+                          </span>
                         </div>
-                        <span style={{ fontSize: 13, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--proof-green)" }}>
-                          {passFailData[0].value}
-                        </span>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--proof-red)" }} />
-                          <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>Fail</span>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <div
+                              style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                background: "var(--proof-red)",
+                              }}
+                            />
+                            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+                              Fail
+                            </span>
+                          </div>
+                          <span
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 700,
+                              fontFamily: "var(--font-mono)",
+                              color: "var(--proof-red)",
+                            }}
+                          >
+                            {passFailData[1].value}
+                          </span>
                         </div>
-                        <span style={{ fontSize: 13, fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--proof-red)" }}>
-                          {passFailData[1].value}
-                        </span>
-                      </div>
-                      <div style={{ marginTop: 2, height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden", display: "flex" }}>
-                        <div style={{ width: `${passFailData[0].value / (passFailData[0].value + passFailData[1].value) * 100}%`, background: "var(--proof-green)", transition: "width 0.5s ease" }} />
-                        <div style={{ flex: 1, background: "var(--proof-red)", transition: "width 0.5s ease" }} />
+                        <div
+                          style={{
+                            marginTop: 2,
+                            height: 4,
+                            background: "rgba(255,255,255,0.06)",
+                            borderRadius: 2,
+                            overflow: "hidden",
+                            display: "flex",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: `${(passFailData[0].value / (passFailData[0].value + passFailData[1].value)) * 100}%`,
+                              background: "var(--proof-green)",
+                              transition: "width 0.5s ease",
+                            }}
+                          />
+                          <div
+                            style={{
+                              flex: 1,
+                              background: "var(--proof-red)",
+                              transition: "width 0.5s ease",
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </StaggerChildren>
-            )}
+                </StaggerChildren>
+              )}
             <TestDocChangelog testCase={testCase} />
           </div>
         </div>

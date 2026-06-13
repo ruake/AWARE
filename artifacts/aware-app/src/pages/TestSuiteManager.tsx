@@ -96,7 +96,8 @@ export default function TestSuiteManager() {
   const filtered = React.useMemo(() => {
     const q = search.toLowerCase();
     return suites.filter((s) => {
-      if (targetFilter && !s.envIds.includes(targetFilter as import("@/lib/types").AkamaiEnvId)) return false;
+      if (targetFilter && !s.envIds.includes(targetFilter as import("@/lib/types").AkamaiEnvId))
+        return false;
       if (scheduleFilter === "scheduled" && !s.schedule) return false;
       if (scheduleFilter === "manual" && s.schedule) return false;
       if (!q) return true;
@@ -184,7 +185,10 @@ export default function TestSuiteManager() {
           style={{ alignItems: "center", flexShrink: 0, paddingTop: 2 }}
         >
           <div>
-            <h1 className="proof-page-title" style={{ fontSize: 20, display: "flex", alignItems: "center", gap: 8 }}>
+            <h1
+              className="proof-page-title"
+              style={{ fontSize: 20, display: "flex", alignItems: "center", gap: 8 }}
+            >
               <FolderTree size={18} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
               Test Suites
             </h1>

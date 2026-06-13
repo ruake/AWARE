@@ -3,7 +3,7 @@ import { fetchJson } from "./dataFetcher";
 import { getCachedResults } from "./runsLoader";
 
 export let RUNS: Run[] = [];
-export let DIFF_ROWS: DiffRow[] = [];
+export const DIFF_ROWS: DiffRow[] = [];
 
 let _runsLoaded = false;
 export async function loadRuns(): Promise<void> {

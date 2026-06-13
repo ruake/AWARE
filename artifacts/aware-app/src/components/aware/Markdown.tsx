@@ -65,6 +65,56 @@ function linkifyContent(text: string): string {
     .join("");
 }
 
+// ─── Multi-column layout ──────────────────────────────────────────────────────
+
+/** Parse ```columns ... ``` blocks into column groups */
+function splitByColumns(
+  content: string,
+): { before: string; columns: string[]; after: string } | null {
+  const match = content.match(/```columns\s*\n([\s\S]*?)```/);
+  if (!match) return null;
+  const inner = match[1].trim();
+  const cols = inner
+    .split(/\n---+\n/)
+    .map((c) => c.trim())
+    .filter(Boolean);
+  if (cols.length < 2) return null;
+  const before = content.slice(0, match.index);
+  const after = content.slice(match.index! + match[0].length);
+  return { before, columns: cols, after };
+}
+
+function Columns({ children }: { children: string[] }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${Math.min(children.length, 3)}, 1fr)`,
+        gap: 14,
+        margin: "10px 0",
+      }}
+    >
+      {children.map((col, i) => (
+        <div
+          key={i}
+          style={{
+            minWidth: 0,
+            overflow: "hidden",
+            background: "var(--proof-surface)",
+            borderRadius: 8,
+            border: "1px solid var(--proof-border)",
+            padding: 12,
+          }}
+        >
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+            {badgeifyContent(col)}
+          </ReactMarkdown>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Table parsing ────────────────────────────────────────────────────────────
 
 type Segment =
@@ -163,11 +213,32 @@ const STATUS_COLORS: Record<string, string> = {
   medium: "#f59e0b",
 };
 
+/** Convert bare status words in text into backtick-wrapped inline code.
+ *  Runs only on non-table segments so SmartTable stays clean. */
+const STATUS_WORD_PATTERN = new RegExp(`\\b(${Object.keys(STATUS_COLORS).join("|")})\\b`, "gi");
+
+function badgeifyContent(text: string): string {
+  // Skip text inside code blocks or already-wrapped backticks
+  const segments: { type: "skip" | "text"; content: string }[] = [];
+  let lastIdx = 0;
+  const skipRe = /```[\s\S]*?```|`[^`]*`/g;
+  let m: RegExpExecArray | null;
+  while ((m = skipRe.exec(text)) !== null) {
+    if (m.index > lastIdx) segments.push({ type: "text", content: text.slice(lastIdx, m.index) });
+    segments.push({ type: "skip", content: m[0] });
+    lastIdx = m.index + m[0].length;
+  }
+  if (lastIdx < text.length) segments.push({ type: "text", content: text.slice(lastIdx) });
+  return segments
+    .map((s) => (s.type === "skip" ? s.content : s.content.replace(STATUS_WORD_PATTERN, "`$1`")))
+    .join("");
+}
+
 function colorCellHtml(value: string): string {
   const v = value.toLowerCase().trim();
   if (STATUS_COLORS[v]) {
     const c = STATUS_COLORS[v];
-    return `<span style="display:inline-flex;align-items:center;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;background:${c}20;color:${c};border:1px solid ${c}40">${value}</span>`;
+    return `<span style="display:inline-flex;align-items:center;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:0.35px;background:${c}18;color:${c};border:1px solid ${c}35">${value}</span>`;
   }
   if (/^[\d.]+%$/.test(value)) {
     const pct = parseFloat(value);
@@ -382,6 +453,30 @@ const components = {
     }
     const isInline = !className;
     if (isInline) {
+      const text = String(children).trim();
+      const statusKey = text.toLowerCase();
+      const statusColor = STATUS_COLORS[statusKey];
+      if (statusColor) {
+        return (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "1px 8px",
+              borderRadius: 10,
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.35px",
+              background: `${statusColor}18`,
+              color: statusColor,
+              border: `1px solid ${statusColor}35`,
+              lineHeight: 1.5,
+            }}
+          >
+            {text}
+          </span>
+        );
+      }
       return (
         <code
           style={{
@@ -543,18 +638,43 @@ const components = {
 // ─── Public export ────────────────────────────────────────────────────────────
 
 export function Markdown({ content, mono = false }: MarkdownProps) {
-  const segments = React.useMemo(() => splitByTables(linkifyContent(content)), [content]);
+  const linked = React.useMemo(() => linkifyContent(content), [content]);
+
+  const rendered = React.useMemo(() => {
+    // Check for columns layout
+    const cols = splitByColumns(linked);
+    if (cols) {
+      const segments = splitByTables(cols.before + cols.after);
+      return { columns: cols.columns, segments };
+    }
+    return { columns: null, segments: splitByTables(linked) };
+  }, [linked]);
 
   return (
     <div style={{ fontFamily: mono ? "var(--font-mono)" : "var(--font-sans)" }}>
-      {segments.map((seg, i) =>
-        seg.type === "table" ? (
-          <SmartTable key={i} headers={seg.headers} rows={seg.rows} />
-        ) : (
-          <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} components={components}>
-            {seg.raw}
-          </ReactMarkdown>
-        ),
+      {rendered.columns ? (
+        <>
+          {rendered.segments.map((seg, i) =>
+            seg.type === "table" ? (
+              <SmartTable key={i} headers={seg.headers} rows={seg.rows} />
+            ) : (
+              <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} components={components}>
+                {badgeifyContent(seg.raw)}
+              </ReactMarkdown>
+            ),
+          )}
+          <Columns>{rendered.columns}</Columns>
+        </>
+      ) : (
+        rendered.segments.map((seg, i) =>
+          seg.type === "table" ? (
+            <SmartTable key={i} headers={seg.headers} rows={seg.rows} />
+          ) : (
+            <ReactMarkdown key={i} remarkPlugins={[remarkGfm]} components={components}>
+              {badgeifyContent(seg.raw)}
+            </ReactMarkdown>
+          ),
+        )
       )}
     </div>
   );

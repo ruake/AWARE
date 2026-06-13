@@ -114,9 +114,4 @@ export {
 
 export { loadAllData, getDataInitState, subscribeToDataInit } from "./initData";
 
-export {
-  getImageSource,
-  preloadImage,
-  revokeAllImages,
-  isExternalImage,
-} from "./images";
+export { getImageSource, preloadImage, revokeAllImages, isExternalImage } from "./images";

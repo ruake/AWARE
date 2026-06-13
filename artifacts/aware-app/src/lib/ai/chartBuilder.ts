@@ -1,6 +1,14 @@
 import type { ChartOutput, GoogleChartType } from "./langGraphTypes";
 
-export const CHART_COLORS = ["#5b8af5", "#f59e0b", "#22c55e", "#a855f7", "#ef4444", "#06b6d4", "#ec4899"];
+export const CHART_COLORS = [
+  "#5b8af5",
+  "#f59e0b",
+  "#22c55e",
+  "#a855f7",
+  "#ef4444",
+  "#06b6d4",
+  "#ec4899",
+];
 
 export function buildTable(
   title: string,

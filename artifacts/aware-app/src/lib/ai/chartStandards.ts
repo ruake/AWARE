@@ -33,11 +33,14 @@ const INTRO_PATTERNS = [
 // ── Chart Type Guidelines ────────────────────────────────────────
 export const CHART_TYPE_GUIDELINES: Record<GoogleChartType, string> = {
   Table: "Raw data display. Use for showing lists of runs, tests, or configuration details.",
-  ColumnChart: "Comparing values across categories. Use for env pass rates, failures by suite, durations by env.",
+  ColumnChart:
+    "Comparing values across categories. Use for env pass rates, failures by suite, durations by env.",
   BarChart: "Ranking data. Use for top-flaky tests, slowest tests, most-failing tests.",
-  PieChart: "Composition / distribution. Use for category breakdown, pass/fail split, env distribution.",
+  PieChart:
+    "Composition / distribution. Use for category breakdown, pass/fail split, env distribution.",
   LineChart: "Time series trends. Use for pass rate over time, failure trend, flakiness trend.",
-  AreaChart: "Cumulative or volume trends. Use for total failures over time, total runs accumulated.",
+  AreaChart:
+    "Cumulative or volume trends. Use for total failures over time, total runs accumulated.",
   Gauge: "Single-metric against target. Use for overall pass rate against threshold.",
   Sankey: "Flow or comparison between stages. Use for UAT→PROD promotion flow, env transitions.",
 };
@@ -80,7 +83,10 @@ export function validateChart(chart: ChartOutput): ValidationWarning[] {
   if (!chart.title || chart.title.trim().length === 0) {
     warnings.push({ field: "title", message: "Chart title is required" });
   } else if (chart.title.length > MAX_CHART_TITLE_LENGTH) {
-    warnings.push({ field: "title", message: `Title too long (${chart.title.length} > ${MAX_CHART_TITLE_LENGTH})` });
+    warnings.push({
+      field: "title",
+      message: `Title too long (${chart.title.length} > ${MAX_CHART_TITLE_LENGTH})`,
+    });
   }
 
   if (!chart.headers || chart.headers.length === 0) {
@@ -104,7 +110,10 @@ export function validateChart(chart: ChartOutput): ValidationWarning[] {
       STANDARD_PALETTE.some((sc) => sc.toLowerCase() === c.toLowerCase()),
     );
     if (!hasStandardColor) {
-      warnings.push({ field: "colors", message: "Non-standard color used — stick to PROOF palette" });
+      warnings.push({
+        field: "colors",
+        message: "Non-standard color used — stick to PROOF palette",
+      });
     }
   }
 
@@ -172,7 +181,11 @@ function extractAndNormalizeCharts(text: string): {
       logWarn("chart_standards", "Chart block failed JSON parse, dropping");
       found.push(""); // placeholder — will be skipped in rebuild
     }
-    replacements.push({ start: match.index, end: match.index + match[0].length, json: found[found.length - 1] });
+    replacements.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      json: found[found.length - 1],
+    });
   }
 
   // Remove chart blocks from text (replace with nothing — they'll be appended at the end)
@@ -191,11 +204,19 @@ function findJsonEnd(text: string): number {
   for (let i = 0; i < text.length; i++) {
     const ch = text[i];
     if (inString) {
-      if (ch === "\\") { i++; continue; } // skip escaped char
-      if (ch === '"') { inString = false; }
+      if (ch === "\\") {
+        i++;
+        continue;
+      } // skip escaped char
+      if (ch === '"') {
+        inString = false;
+      }
       continue;
     }
-    if (ch === '"') { inString = true; continue; }
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
     if (ch === "{" || ch === "[") depth++;
     if (ch === "}" || ch === "]") {
       depth--;
@@ -210,7 +231,12 @@ function findJsonEnd(text: string): number {
 function extractJson(raw: string): string | null {
   const trimmed = raw.trim();
   // Direct parse
-  try { JSON.parse(trimmed); return trimmed; } catch { /* fall through */ }
+  try {
+    JSON.parse(trimmed);
+    return trimmed;
+  } catch {
+    /* fall through */
+  }
 
   // Find the start of a JSON construct
   const startIdx = trimmed.search(/[{[]/);
@@ -218,7 +244,12 @@ function extractJson(raw: string): string | null {
   const fromStart = trimmed.slice(startIdx);
   const end = findJsonEnd(fromStart);
   const candidate = fromStart.slice(0, end);
-  try { JSON.parse(candidate); return candidate; } catch { /* try relaxed */ }
+  try {
+    JSON.parse(candidate);
+    return candidate;
+  } catch {
+    /* try relaxed */
+  }
 
   // Try relaxing: unescape, fix trailing commas
   try {
@@ -228,7 +259,9 @@ function extractJson(raw: string): string | null {
       .replace(/,(\s*[}\]])/g, "$1");
     JSON.parse(relaxed);
     return relaxed;
-  } catch { /* give up */ }
+  } catch {
+    /* give up */
+  }
 
   return null;
 }
@@ -265,7 +298,11 @@ export function enforceChartStandards(response: string): string {
 
     const warnings = validateChart(chart);
     if (warnings.length > 0) {
-      logWarn("chart_standards", `Chart #${i + 1} violations`, warnings.map((w) => w.message).join("; "));
+      logWarn(
+        "chart_standards",
+        `Chart #${i + 1} violations`,
+        warnings.map((w) => w.message).join("; "),
+      );
       if (chart.title.length > MAX_CHART_TITLE_LENGTH) {
         chart.title = chart.title.slice(0, MAX_CHART_TITLE_LENGTH - 3) + "...";
       }
@@ -286,26 +323,24 @@ export function enforceChartStandards(response: string): string {
   // Rebuild: cleaned text + properly-formatted chart blocks at the end
   let rebuilt = cleaned;
   if (validatedCharts.length > 0) {
-    const chartBlocks = validatedCharts
-      .map((json) => "```chart\n" + json + "\n```")
-      .join("\n\n");
+    const chartBlocks = validatedCharts.map((json) => "```chart\n" + json + "\n```").join("\n\n");
     rebuilt = rebuilt ? rebuilt + "\n\n" + chartBlocks : chartBlocks;
   }
 
   // Truncate sentences if needed
   const senCount = countSentences(rebuilt);
   if (senCount > MAX_SENTENCES) {
-    logWarn("chart_standards", `Response too long: ${senCount} sentences > ${MAX_SENTENCES}, truncating`);
+    logWarn(
+      "chart_standards",
+      `Response too long: ${senCount} sentences > ${MAX_SENTENCES}, truncating`,
+    );
     rebuilt = truncateSentences(rebuilt);
   }
 
   return rebuilt;
 }
 
-export function enforceChartPresence(
-  response: string,
-  fallbackChart: () => ChartOutput,
-): string {
+export function enforceChartPresence(response: string, fallbackChart: () => ChartOutput): string {
   const hasChart = /```chart/.test(response);
   if (!hasChart) {
     logWarn("chart_standards", "No chart in response — appending fallback table");
