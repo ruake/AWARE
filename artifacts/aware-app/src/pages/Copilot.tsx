@@ -166,7 +166,7 @@ export default function CopilotPage() {
   // Save/load messages to localStorage
   React.useEffect(() => {
     if (messages.length > 0 && !busy) {
-      try { localStorage.setItem("aware_copilot_messages_v2", JSON.stringify(messages)); } catch {}
+      try { localStorage.setItem("aware_copilot_messages_v2", JSON.stringify(messages)); } catch { /* empty */ }
     }
   }, [messages, busy]);
 
@@ -183,12 +183,12 @@ export default function CopilotPage() {
   React.useEffect(() => {
     (async () => {
       const avail: Record<string, ProviderStatus> = { openai: "available", webllm: "unavailable", chrome: "unavailable" };
-      try { if (await checkWebLLM()) avail.webllm = "available"; } catch {}
-      try { const s = await getChromeAIStatus(); avail.chrome = s; } catch {}
+      try { if (await checkWebLLM()) avail.webllm = "available"; } catch { /* empty */ }
+      try { const s = await getChromeAIStatus(); avail.chrome = s; } catch { /* empty */ }
       setProviderAvail(avail);
       const saved = localStorage.getItem("aware_copilot_messages_v2");
       if (saved) {
-        try { setMessages(JSON.parse(saved)); } catch {}
+        try { setMessages(JSON.parse(saved)); } catch { /* empty */ }
       } else {
         const ctx = buildAIContext();
         setMessages([{
@@ -299,14 +299,14 @@ export default function CopilotPage() {
   };
 
   const copyMessage = async (i: number, content: string) => {
-    try { await navigator.clipboard.writeText(content); setCopiedIndex(i); setTimeout(() => setCopiedIndex(null), 2000); } catch {}
+    try { await navigator.clipboard.writeText(content); setCopiedIndex(i); setTimeout(() => setCopiedIndex(null), 2000); } catch { /* empty */ }
   };
 
   const newChat = () => {
     setMessages([]);
     setActiveUseCase(null);
     setExpandedMsgs(new Set());
-    try { localStorage.removeItem("aware_copilot_messages_v2"); } catch {}
+    try { localStorage.removeItem("aware_copilot_messages_v2"); } catch { /* empty */ }
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
