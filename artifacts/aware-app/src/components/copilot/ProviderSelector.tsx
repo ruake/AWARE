@@ -188,7 +188,7 @@ export default function ProviderSelector({
               color: "var(--proof-text-secondary)",
             }}
           >
-            WebLLM runs on-device · OpenAI needs API key
+            Chrome AI runs on-device · WebLLM needs download · OpenAI needs API key
           </div>
         </div>
       )}

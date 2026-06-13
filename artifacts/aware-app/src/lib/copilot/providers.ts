@@ -60,8 +60,12 @@ export class WebLLMProvider implements IProvider {
           }))
         : undefined;
 
+    // Some models (Hermes-2-Pro) reject system + tools together.
+    // Merge system prompt into first user message when tools are present.
+    const msgs = toolDefs ? mergeSystemIntoUser(messages) : messages;
+
     const streamResp = await engine.chat.completions.create({
-      messages,
+      messages: msgs,
       tools: toolDefs,
       tool_choice: toolDefs ? "auto" : undefined,
       stream: true,
@@ -138,12 +142,15 @@ export class OpenAIProvider implements IProvider {
           }))
         : undefined;
 
+    // Some models (Hermes-2-Pro) reject system + tools together.
+    const msgs = toolDefs ? mergeSystemIntoUser(messages) : messages;
+
     const resp = await fetch(`${base}/chat/completions`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: model || "gpt-4o-mini",
-        messages,
+        messages: msgs,
         tools: toolDefs,
         tool_choice: toolDefs ? "auto" : undefined,
         stream: true,
@@ -202,26 +209,62 @@ export class OpenAIProvider implements IProvider {
 }
 
 // ── Chrome AI Provider (SECONDARY) ──────────────────────────────────────────
-// Gemini Nano via window.LanguageModel (Chrome 148+, on-device, no key).
+// Gemini Nano via window.ai.languageModel or window.LanguageModel
+// (Chrome 128+ Prompt API, on-device, no API key needed).
 // No native tool calling — we describe tools in the prompt and parse JSON.
 
 declare global {
   interface Window {
-    ai?: { languageModel?: ChromeAIInterface };
-    LanguageModel?: ChromeAIInterface;
+    ai?: {
+      languageModel?: {
+        capabilities(): Promise<{ available: string }>;
+        create(opts?: {
+          systemPrompt?: string;
+          signal?: AbortSignal;
+        }): Promise<{
+          prompt(input: string): Promise<string>;
+          promptStreaming(input: string): ReadableStream<string>;
+          destroy(): void;
+        }>;
+      };
+    };
   }
 }
 
-interface ChromeAIInterface {
+interface ChromePromptAPI {
+  capabilities?(): Promise<{ available: string } | string>;
   availability?(): Promise<string>;
-  create(opts: { systemPrompt?: string }): Promise<{
-    promptStreaming(prompt: string): ReadableStream<string>;
+  create(opts?: {
+    systemPrompt?: string;
+    signal?: AbortSignal;
+  }): Promise<{
+    prompt?(input: string): Promise<string>;
+    promptStreaming(input: string): ReadableStream<string>;
     destroy(): void;
   }>;
 }
 
-function getChromeAI(): ChromeAIInterface | null {
-  return window.LanguageModel ?? window.ai?.languageModel ?? null;
+let _chromeApiSingleton: ChromePromptAPI | null | undefined = undefined;
+
+function getChromeAI(): ChromePromptAPI | null {
+  if (_chromeApiSingleton !== undefined) return _chromeApiSingleton;
+  // Check multiple API surfaces across Chrome versions
+  const api: ChromePromptAPI | null =
+    (window as any).ai?.languageModel ??
+    (window as any).LanguageModel ??
+    null;
+  if (!api) {
+    // Check for newer window.ai top-level prompt API
+    const topAI = (window as any).ai;
+    if (topAI && typeof topAI.create === "function") {
+      _chromeApiSingleton = topAI as ChromePromptAPI;
+      return _chromeApiSingleton;
+    }
+    _chromeApiSingleton = null;
+    return null;
+  }
+  _chromeApiSingleton = api;
+  return api;
 }
 
 export class ChromeProvider implements IProvider {
@@ -231,10 +274,31 @@ export class ChromeProvider implements IProvider {
     const api = getChromeAI();
     if (!api) return "unavailable";
     try {
-      const avail = await api.availability?.();
-      if (avail === "readily") return "available";
-      if (avail === "after-download") return "downloading";
-      return "unavailable";
+      // Try new capabilities() API first
+      if (typeof api.capabilities === "function") {
+        const result = await api.capabilities();
+        if (typeof result === "object" && result !== null) {
+          const avail = (result as { available: string }).available;
+          if (avail === "readily") return "available";
+          if (avail === "after-download") return "downloading";
+          if (avail === "downloadable") return "available";
+          return "unavailable";
+        }
+        if (result === "readily") return "available";
+        if (result === "after-download") return "downloading";
+        if (result === "downloadable") return "available";
+        return "unavailable";
+      }
+      // Fall back to old availability() API
+      if (typeof api.availability === "function") {
+        const avail = await api.availability();
+        if (avail === "readily") return "available";
+        if (avail === "after-download") return "downloading";
+        if (avail === "downloadable") return "available";
+        return "unavailable";
+      }
+      // API exists but no capability check — assume available
+      return "available";
     } catch {
       return "unavailable";
     }
@@ -247,7 +311,10 @@ export class ChromeProvider implements IProvider {
     onDelta: (delta: StreamDelta) => void,
   ): Promise<void> {
     const api = getChromeAI();
-    if (!api) throw new Error("Chrome AI (window.LanguageModel) not available in this browser");
+    if (!api) {
+      onDelta({ content: "⚠️ Chrome AI not available in this browser.", done: true });
+      return;
+    }
 
     const sys = messages.find((m) => m.role === "system")?.content ?? "";
     const history = messages.filter((m) => m.role !== "system");
@@ -260,27 +327,57 @@ export class ChromeProvider implements IProvider {
           tools.map((t) => `- ${t.name}: ${t.description}`).join("\n")
         : "";
 
-    const session = await api.create({ systemPrompt: sys + toolDesc });
-    const stream = session.promptStreaming(userMsg);
-    const reader = stream.getReader();
-    let prev = "";
-
     try {
-      while (true) {
-        if (signal.aborted) break;
-        const { done, value } = await reader.read();
-        if (done) break;
-        // Chrome AI returns cumulative text — compute the delta
-        const newText = (value ?? "").slice(prev.length);
-        if (newText) onDelta({ content: newText, done: false });
-        prev = value ?? "";
+      const session = await api.create({
+        systemPrompt: sys ? sys + toolDesc : toolDesc || undefined,
+        signal,
+      });
+      const stream = session.promptStreaming(userMsg);
+      const reader = stream.getReader();
+      let prev = "";
+
+      try {
+        while (true) {
+          if (signal.aborted) break;
+          const { done, value } = await reader.read();
+          if (done) break;
+          // Chrome AI returns cumulative text — compute the delta
+          const newText = (value ?? "").slice(prev.length);
+          if (newText) onDelta({ content: newText, done: false });
+          prev = value ?? "";
+        }
+      } finally {
+        reader.releaseLock();
+        session.destroy();
       }
-    } finally {
-      reader.releaseLock();
-      session.destroy();
+      onDelta({ done: true });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      onDelta({ content: `⚠️ Chrome AI error: ${msg}`, done: true });
     }
-    onDelta({ done: true });
   }
+}
+
+// ── System Prompt Compatibility Helper ───────────────────────────────────────
+// Some models (e.g. Hermes-2-Pro) reject requests that include both a system
+// role message and the `tools` parameter. This merges the system prompt into
+// the first user message as a prefix.
+function mergeSystemIntoUser(messages: ApiMessage[]): ApiMessage[] {
+  const sysIdx = messages.findIndex((m) => m.role === "system");
+  if (sysIdx === -1) return messages;
+  const sysMsg = messages[sysIdx];
+  const rest = messages.filter((_, i) => i !== sysIdx);
+  const userIdx = rest.findIndex((m) => m.role === "user" || m.role === "assistant");
+  if (userIdx === -1) {
+    return [{ role: "user", content: sysMsg.content }, ...rest];
+  }
+  const merged: ApiMessage = {
+    ...rest[userIdx],
+    content: `${sysMsg.content}\n\n${rest[userIdx].content ?? ""}`,
+  };
+  const out = [...rest];
+  out[userIdx] = merged;
+  return out;
 }
 
 // ── Provider Registry ────────────────────────────────────────────────────────

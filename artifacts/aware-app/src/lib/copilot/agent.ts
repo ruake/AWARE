@@ -7,6 +7,7 @@ import type {
   ToolDefinition,
 } from "./types";
 import { buildSystemPrompt, truncateMessages } from "./context";
+import { logInfo, logDebug, logError } from "@/lib/ai/debugLogger";
 
 export interface AgentOptions {
   userContent: string;
@@ -68,8 +69,11 @@ export async function runAgent(opts: AgentOptions): Promise<void> {
 
   apiMessages = truncateMessages(apiMessages, provider.type);
 
+  logInfo("agent", `Starting agent loop (${apiMessages.length} messages, ${tools.length} tools)`);
+
   for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
     if (signal.aborted) return;
+    logDebug("agent", `Iteration ${iter + 1}/${MAX_ITERATIONS}`);
 
     // Accumulators for this stream pass
     let collectedContent = "";
@@ -77,6 +81,7 @@ export async function runAgent(opts: AgentOptions): Promise<void> {
     let streamDone = false;
 
     // Stream from provider — onDelta fires synchronously for each chunk
+    logInfo("agent", `Streaming from ${provider.type} provider`);
     await new Promise<void>((resolve, reject) => {
       provider
         .stream(apiMessages, tools, signal, (delta) => {
@@ -106,9 +111,12 @@ export async function runAgent(opts: AgentOptions): Promise<void> {
 
     // No tool calls — the model gave a final answer
     if (pendingToolCalls.length === 0) {
+      logInfo("agent", `Final answer received (${collectedContent.length} chars)`);
       onEvent({ type: "done" });
       return;
     }
+
+    logInfo("agent", `Model requested ${pendingToolCalls.length} tool call(s): ${pendingToolCalls.map(t => t.name).join(", ")}`);
 
     // ── Tool calling round ─────────────────────────────────────────────────
     // Record the assistant's tool-requesting message in history
@@ -140,10 +148,12 @@ export async function runAgent(opts: AgentOptions): Promise<void> {
         startedAt: Date.now(),
       };
 
+      logDebug("agent", `Tool call: ${tc.name}(${JSON.stringify(args).slice(0, 100)})`);
       onEvent({ type: "tool_start", toolCall });
 
       const toolDef = tools.find((t) => t.name === tc.name);
       if (!toolDef) {
+        logError("agent", `Unknown tool: ${tc.name}`);
         onEvent({
           type: "tool_done",
           toolCall: { ...toolCall, status: "error", completedAt: Date.now() },
@@ -157,7 +167,10 @@ export async function runAgent(opts: AgentOptions): Promise<void> {
       }
 
       try {
+        const start = performance.now();
         const result = await toolDef.execute(args);
+        const duration = Math.round(performance.now() - start);
+        logInfo("agent", `Tool ${tc.name} completed in ${duration}ms`);
         onEvent({
           type: "tool_done",
           toolCall: { ...toolCall, status: "done", result, completedAt: Date.now() },
@@ -170,6 +183,7 @@ export async function runAgent(opts: AgentOptions): Promise<void> {
           tool_call_id: tc.id,
         });
       } catch (err: any) {
+        logError("agent", `Tool ${tc.name} failed: ${err?.message}`);
         onEvent({
           type: "tool_done",
           toolCall: { ...toolCall, status: "error", completedAt: Date.now() },
