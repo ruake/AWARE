@@ -88,15 +88,27 @@ async function cdnNavTest(page, baseUrl, testPage, suiteTitle) {
   }
 }
 
-async function runCdnScreenshotTests(browser, baseUrl) {
+async function runCdnScreenshotTests(browser, baseUrl, screenshotDir) {
   const page = await browser.newPage();
   const suiteTitle = "Puppeteer CDN Screenshot Tests";
   const results = [];
 
+  // Ensure screenshots directory exists
+  if (screenshotDir) {
+    fs.mkdirSync(screenshotDir, { recursive: true });
+  }
+
   try {
     const start = Date.now();
     await page.goto(baseUrl, { waitUntil: "networkidle0", timeout: 30000 });
-    const screenshot = await page.screenshot({ fullPage: true, encoding: "base64" });
+    const buf = await page.screenshot({ fullPage: true });
+    const b64 = buf.toString("base64");
+    let imagePath;
+    if (screenshotDir) {
+      const filePath = path.join(screenshotDir, "homepage-fullpage.png");
+      fs.writeFileSync(filePath, buf);
+      imagePath = "screenshots/homepage-fullpage.png";
+    }
     results.push({
       title: "capture Akamai homepage full-page screenshot",
       category: "Screenshots",
@@ -106,7 +118,8 @@ async function runCdnScreenshotTests(browser, baseUrl) {
       statusCode: 200,
       requestUrl: baseUrl,
       responseHeaders: {},
-      screenshotData: `data:image/png;base64,${screenshot}`,
+      screenshotData: `data:image/png;base64,${b64}`,
+      ...(imagePath ? { screenshotPath: imagePath } : {}),
     });
   } catch (err) {
     results.push({
@@ -125,7 +138,14 @@ async function runCdnScreenshotTests(browser, baseUrl) {
   try {
     const start = Date.now();
     await page.goto(`${baseUrl}/en`, { waitUntil: "networkidle0", timeout: 30000 });
-    const screenshot = await page.screenshot({ encoding: "base64" });
+    const buf = await page.screenshot();
+    const b64 = buf.toString("base64");
+    let imagePath;
+    if (screenshotDir) {
+      const filePath = path.join(screenshotDir, "en-page.png");
+      fs.writeFileSync(filePath, buf);
+      imagePath = "screenshots/en-page.png";
+    }
     results.push({
       title: "capture Akamai /en page screenshot",
       category: "Screenshots",
@@ -135,7 +155,8 @@ async function runCdnScreenshotTests(browser, baseUrl) {
       statusCode: 200,
       requestUrl: `${baseUrl}/en`,
       responseHeaders: {},
-      screenshotData: `data:image/png;base64,${screenshot}`,
+      screenshotData: `data:image/png;base64,${b64}`,
+      ...(imagePath ? { screenshotPath: imagePath } : {}),
     });
   } catch (err) {
     results.push({
@@ -248,6 +269,8 @@ async function runAll(baseUrl) {
 
   const allResults = [];
 
+  const screenshotDir = path.resolve(PROJECT_ROOT, "test-results", "screenshots");
+
   const navSuiteTitle = "Puppeteer CDN Navigation Tests";
   const page = await browser.newPage();
   for (const testPage of CDN_PAGES) {
@@ -256,7 +279,7 @@ async function runAll(baseUrl) {
   }
   await page.close();
 
-  const screenshotResults = await runCdnScreenshotTests(browser, baseUrl);
+  const screenshotResults = await runCdnScreenshotTests(browser, baseUrl, screenshotDir);
   allResults.push(...screenshotResults);
 
   const networkResults = await runCdnNetworkTests(browser, baseUrl);
@@ -285,7 +308,18 @@ function buildPlaywrightJson(results) {
         }],
       };
 
-      if (r.screenshotData) {
+      if (r.screenshotPath) {
+        const att = {
+          name: r.title.replace(/\s+/g, "-").toLowerCase(),
+          contentType: "image/png",
+          path: r.screenshotPath,
+        };
+        // Keep body as fallback for backward compat
+        if (r.screenshotData) {
+          att.body = r.screenshotData.replace(/^data:image\/png;base64,/, "");
+        }
+        testEntry.results[0].attachments = [att];
+      } else if (r.screenshotData) {
         testEntry.results[0].attachments = [{
           name: r.title.replace(/\s+/g, "-").toLowerCase(),
           contentType: "image/png",

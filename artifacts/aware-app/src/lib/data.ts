@@ -113,3 +113,10 @@ export {
 } from "./schedulerStatus";
 
 export { loadAllData, getDataInitState, subscribeToDataInit } from "./initData";
+
+export {
+  getImageSource,
+  preloadImage,
+  revokeAllImages,
+  isExternalImage,
+} from "./images";

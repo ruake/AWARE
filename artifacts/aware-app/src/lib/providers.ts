@@ -27,7 +27,8 @@ export interface TestRunProvider {
     result: ProviderTestResult,
     raw: unknown,
     attachmentsDir?: string,
-  ): { id: string; label: string; dataUri: string }[];
+    resultsDir?: string,
+  ): { id: string; label: string; dataUri: string; imageUrl?: string }[];
 }
 
 export function getTestRunProvider(name: string): TestRunProvider | undefined {
@@ -136,8 +137,8 @@ registerProvider({
     return results;
   },
 
-  extractFilmstrip(result, raw: any, attachmentsDir?: string) {
-    const frames: { id: string; label: string; dataUri: string }[] = [];
+  extractFilmstrip(result, raw: any, attachmentsDir?: string, resultsDir?: string) {
+    const frames: { id: string; label: string; dataUri: string; imageUrl?: string }[] = [];
     const spec = specForTestName(raw, result.name);
     if (!spec) return frames;
     for (const t of spec.tests || []) {
@@ -162,10 +163,25 @@ registerProvider({
                 const fullPath = p.resolve(attachmentsDir, att.path);
                 if (fs.existsSync(fullPath)) {
                   const buf = fs.readFileSync(fullPath);
+                  const dataUri = `data:${att.contentType || "image/png"};base64,${buf.toString("base64")}`;
+
+                  // If resultsDir is provided, save screenshot to screenshots/ subdirectory
+                  let imageUrl: string | undefined;
+                  if (resultsDir) {
+                    const screenshotsDir = p.resolve(resultsDir, "screenshots");
+                    fs.mkdirSync(screenshotsDir, { recursive: true });
+                    const ext = att.contentType?.includes("jpeg") ? ".jpg" : ".png";
+                    const filename = `${att.name || `screenshot-${frames.length}`}${ext}`;
+                    const destPath = p.join(screenshotsDir, filename);
+                    fs.writeFileSync(destPath, buf);
+                    imageUrl = `screenshots/${filename}`;
+                  }
+
                   frames.push({
                     id: `ss_${frames.length}`,
                     label: att.name || `screenshot-${frames.length}`,
-                    dataUri: `data:${att.contentType || "image/png"};base64,${buf.toString("base64")}`,
+                    dataUri,
+                    ...(imageUrl ? { imageUrl } : {}),
                   });
                 }
               } catch {

@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, useLocation, useSearch } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
-import { getRunById, getTestResultsForRun, RUNS } from "@/lib/data";
+import { getRunById, getTestResultsForRun, RUNS, loadResultsForRun, getImageSource, preloadImage } from "@/lib/data";
 import type { TestResult, TestAssertionResult, FilmstripFrame } from "@/lib/types";
 import {
   ArrowLeft,
@@ -64,6 +64,89 @@ function AssertionRow({ a }: { a: TestAssertionResult }) {
   );
 }
 
+function FilmstripThumbnail({ frame, onExpand }: { frame: FilmstripFrame; onExpand: () => void }) {
+  const [src, setSrc] = React.useState<string>(() => getImageSource(frame));
+  const [loaded, setLoaded] = React.useState(false);
+  const imgRef = React.useRef<HTMLImageElement>(null);
+
+  React.useEffect(() => {
+    const source = getImageSource(frame);
+    // Only preload if it's an external URL (not inline data URI)
+    if (source.startsWith("data:")) {
+      setSrc(source);
+      setLoaded(true);
+    } else {
+      preloadImage(source).then((url) => {
+        setSrc(url);
+        setLoaded(true);
+      });
+    }
+  }, [frame, frame.dataUri, frame.imageUrl]);
+
+  return (
+    <div style={{ flexShrink: 0, width: 140 }}>
+      <button
+        onClick={onExpand}
+        style={{
+          padding: 0,
+          border: "none",
+          background: "none",
+          cursor: "pointer",
+          display: "block",
+          width: "100%",
+        }}
+      >
+        {loaded ? (
+          <img
+            ref={imgRef}
+            src={src}
+            alt={frame.label}
+            loading="lazy"
+            style={{
+              width: "100%",
+              borderRadius: 4,
+              border: "1px solid var(--proof-grey)",
+              display: "block",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: 80,
+              borderRadius: 4,
+              border: "1px solid var(--proof-grey)",
+              background: "var(--proof-grey-bg)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+            }}
+          >
+            Loading…
+          </div>
+        )}
+      </button>
+      <div
+        style={{
+          fontSize: 9,
+          color: "var(--proof-text-secondary)",
+          marginTop: 2,
+          textAlign: "center",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 2,
+        }}
+      >
+        {frame.label}
+        <Maximize2 size={9} style={{ color: "var(--proof-text-secondary)" }} />
+      </div>
+    </div>
+  );
+}
+
 export default function RunDetail() {
   const params = useParams<{ runId: string }>();
   const [, navigate] = useLocation();
@@ -77,6 +160,20 @@ export default function RunDetail() {
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [catFilter, setCatFilter] = React.useState<string>("all");
   const [expandScreenshot, setExpandScreenshot] = React.useState<FilmstripFrame | null>(null);
+  const [lightboxSrc, setLightboxSrc] = React.useState<string>("");
+
+  React.useEffect(() => {
+    if (expandScreenshot) {
+      const source = getImageSource(expandScreenshot);
+      if (source.startsWith("data:")) {
+        setLightboxSrc(source);
+      } else {
+        preloadImage(source).then(setLightboxSrc);
+      }
+    } else {
+      setLightboxSrc("");
+    }
+  }, [expandScreenshot]);
   const urlTestId = React.useMemo(() => new URLSearchParams(urlSearch).get("testId"), [urlSearch]);
   const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(() => {
     if (urlTestId && run) return null;
@@ -587,48 +684,11 @@ export default function RunDetail() {
                       </div>
                       <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
                         {selectedResult.filmstrip.map((f) => (
-                          <div key={f.id} style={{ flexShrink: 0, width: 140 }}>
-                            <button
-                              onClick={() => setExpandScreenshot(f)}
-                              style={{
-                                padding: 0,
-                                border: "none",
-                                background: "none",
-                                cursor: "pointer",
-                                display: "block",
-                                width: "100%",
-                              }}
-                            >
-                              <img
-                                src={f.dataUri}
-                                alt={f.label}
-                                style={{
-                                  width: "100%",
-                                  borderRadius: 4,
-                                  border: "1px solid var(--proof-grey)",
-                                  display: "block",
-                                }}
-                              />
-                            </button>
-                            <div
-                              style={{
-                                fontSize: 9,
-                                color: "var(--proof-text-secondary)",
-                                marginTop: 2,
-                                textAlign: "center",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: 2,
-                              }}
-                            >
-                              {f.label}
-                              <Maximize2
-                                size={9}
-                                style={{ color: "var(--proof-text-secondary)" }}
-                              />
-                            </div>
-                          </div>
+                          <FilmstripThumbnail
+                            key={f.id}
+                            frame={f}
+                            onExpand={() => setExpandScreenshot(f)}
+                          />
                         ))}
                       </div>
                     </div>
@@ -674,16 +734,18 @@ export default function RunDetail() {
                             overflow: "auto",
                           }}
                         >
-                          <img
-                            src={expandScreenshot.dataUri}
-                            alt={expandScreenshot.label}
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "70vh",
-                              borderRadius: 4,
-                              display: "block",
-                            }}
-                          />
+                          {lightboxSrc && (
+                            <img
+                              src={lightboxSrc}
+                              alt={expandScreenshot?.label ?? "Screenshot"}
+                              style={{
+                                maxWidth: "100%",
+                                maxHeight: "70vh",
+                                borderRadius: 4,
+                                display: "block",
+                              }}
+                            />
+                          )}
                         </div>
                       )}
                     </DialogContent>

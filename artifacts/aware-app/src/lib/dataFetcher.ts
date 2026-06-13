@@ -26,3 +26,23 @@ export async function fetchJson<T>(path: string): Promise<T> {
   }
   return res.json() as Promise<T>;
 }
+
+export async function fetchBlob(path: string): Promise<Blob> {
+  const url = dataUrl(path);
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+  }
+  return res.blob();
+}
+
+export async function fetchImage(src: string): Promise<string> {
+  if (src.startsWith("data:") || src.startsWith("http")) return src;
+  const url = dataUrl(src);
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+  }
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}

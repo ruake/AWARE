@@ -112,6 +112,7 @@
         "id": { "type": "string" },
         "label": { "type": "string" },
         "dataUri": { "type": "string", "description": "Base64 data URI of screenshot" },
+        "imageUrl": { "type": "string", "description": "External URL or relative path to screenshot file (OPTIONAL)" },
         "timestamp": { "type": "number" }
       }
     }
