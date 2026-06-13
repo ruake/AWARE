@@ -6,7 +6,11 @@ export function buildSystemPrompt(): string {
   const latestByEnv: Record<string, number> = {};
   for (const run of RUNS) {
     const prev = latestByEnv[run.env];
-    if (prev === undefined || new Date(run.started) > new Date(RUNS.find(r => r.passPct === prev && r.env === run.env)?.started ?? 0)) {
+    if (
+      prev === undefined ||
+      new Date(run.started) >
+        new Date(RUNS.find((r) => r.passPct === prev && r.env === run.env)?.started ?? 0)
+    ) {
       latestByEnv[run.env] = run.passPct;
     }
   }

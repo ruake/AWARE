@@ -10,17 +10,17 @@ interface Props {
 }
 
 const META: Record<ProviderType, { label: string; icon: React.ReactNode; color: string }> = {
-  openai: { label: "OpenAI",     icon: <Globe size={12} />, color: "#10a37f" },
-  webllm: { label: "WebLLM",    icon: <Cpu   size={12} />, color: "#8b5cf6" },
-  chrome: { label: "Chrome AI", icon: <Zap   size={12} />, color: "#4285f4" },
+  openai: { label: "OpenAI", icon: <Globe size={12} />, color: "#10a37f" },
+  webllm: { label: "WebLLM", icon: <Cpu size={12} />, color: "#8b5cf6" },
+  chrome: { label: "Chrome AI", icon: <Zap size={12} />, color: "#4285f4" },
 };
 
 const ORDER: ProviderType[] = ["webllm", "openai", "chrome"];
 
 const STATUS_DOT: Record<ProviderStatus, { color: string; title: string }> = {
-  available:    { color: "#22c55e", title: "Available"    },
-  downloading:  { color: "#f59e0b", title: "Downloading…" },
-  unavailable:  { color: "#6b7280", title: "Unavailable"  },
+  available: { color: "#22c55e", title: "Available" },
+  downloading: { color: "#f59e0b", title: "Downloading…" },
+  unavailable: { color: "#6b7280", title: "Unavailable" },
 };
 
 export default function ProviderSelector({
@@ -64,7 +64,10 @@ export default function ProviderSelector({
         }}
       >
         {currentStatus === "downloading" ? (
-          <Loader2 size={11} style={{ animation: "spin 1s linear infinite", color: current.color }} />
+          <Loader2
+            size={11}
+            style={{ animation: "spin 1s linear infinite", color: current.color }}
+          />
         ) : (
           current.icon
         )}
@@ -152,7 +155,10 @@ export default function ProviderSelector({
               <button
                 key={type}
                 disabled={disabled}
-                onClick={() => { onSwitch(type); setOpen(false); }}
+                onClick={() => {
+                  onSwitch(type);
+                  setOpen(false);
+                }}
                 style={{
                   width: "100%",
                   display: "flex",
@@ -168,11 +174,24 @@ export default function ProviderSelector({
                 }}
               >
                 <span style={{ color: meta.color }}>{meta.icon}</span>
-                <span style={{ flex: 1, fontSize: 12, fontWeight: isActive ? 700 : 500, color: "var(--proof-text)" }}>
+                <span
+                  style={{
+                    flex: 1,
+                    fontSize: 12,
+                    fontWeight: isActive ? 700 : 500,
+                    color: "var(--proof-text)",
+                  }}
+                >
                   {meta.label}
                 </span>
                 <span
-                  style={{ width: 7, height: 7, borderRadius: "50%", background: dot.color, flexShrink: 0 }}
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    background: dot.color,
+                    flexShrink: 0,
+                  }}
                   title={dot.title}
                 />
               </button>

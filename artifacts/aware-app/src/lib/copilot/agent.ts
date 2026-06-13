@@ -1,11 +1,4 @@
-import type {
-  AgentEvent,
-  ApiMessage,
-  IProvider,
-  Message,
-  ToolCall,
-  ToolDefinition,
-} from "./types";
+import type { AgentEvent, ApiMessage, IProvider, Message, ToolCall, ToolDefinition } from "./types";
 import { buildSystemPrompt, truncateMessages } from "./context";
 import { logInfo, logDebug, logError } from "@/lib/ai/debugLogger";
 
@@ -116,7 +109,10 @@ export async function runAgent(opts: AgentOptions): Promise<void> {
       return;
     }
 
-    logInfo("agent", `Model requested ${pendingToolCalls.length} tool call(s): ${pendingToolCalls.map(t => t.name).join(", ")}`);
+    logInfo(
+      "agent",
+      `Model requested ${pendingToolCalls.length} tool call(s): ${pendingToolCalls.map((t) => t.name).join(", ")}`,
+    );
 
     // ── Tool calling round ─────────────────────────────────────────────────
     // Record the assistant's tool-requesting message in history

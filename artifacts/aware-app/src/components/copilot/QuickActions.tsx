@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  Activity,
-  RefreshCw,
-  Layers,
-  ArrowRight,
-  Bug,
-  Rocket,
-  Heart,
-} from "lucide-react";
+import { Activity, RefreshCw, Layers, ArrowRight, Bug, Rocket, Heart } from "lucide-react";
 
 interface Action {
   id: string;
@@ -123,7 +115,8 @@ export default function QuickActions({ onAction, busy }: Props) {
               transition: "background 0.1s",
             }}
             onMouseEnter={(e) => {
-              if (!busy) (e.currentTarget as HTMLButtonElement).style.background = "var(--proof-surface-2)";
+              if (!busy)
+                (e.currentTarget as HTMLButtonElement).style.background = "var(--proof-surface-2)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background = "none";
@@ -139,7 +132,14 @@ export default function QuickActions({ onAction, busy }: Props) {
               {action.icon}
             </span>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text)", lineHeight: 1.2 }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "var(--proof-text)",
+                  lineHeight: 1.2,
+                }}
+              >
                 {action.label}
               </div>
               <div
