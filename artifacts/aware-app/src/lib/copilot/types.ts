@@ -79,6 +79,16 @@ export interface ApiMessage {
 // ── Provider Interface ───────────────────────────────────────────────────────
 export interface IProvider {
   readonly type: ProviderType;
+  /**
+   * When false, the graph agent uses keyword routing for tool selection instead
+   * of prompting the model with JSON tool-calling instructions. The provider's
+   * stream() is then only called for synthesis (after tools run) and for direct
+   * answers to non-data questions.
+   *
+   * Chrome AI (Gemini Nano) sets this to false — its tiny context window cannot
+   * handle full tool descriptions + system prompt + history simultaneously.
+   */
+  readonly supportsToolCalling?: boolean;
   onLoadProgress?: (progress: number, text: string) => void;
   checkAvailability(): Promise<ProviderStatus>;
   stream(

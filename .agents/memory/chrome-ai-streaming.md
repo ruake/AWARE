@@ -1,45 +1,54 @@
 ---
-name: Chrome AI streaming quirk
-description: Chrome AI's promptStreaming yields cumulative text per chunk. initialPrompts must not have assistant-first history — use systemPrompt only.
+name: Chrome AI tool-calling architecture
+description: Chrome AI (Gemini Nano) cannot do LLM tool selection — use keyword routing. Only call Chrome AI for compact synthesis after tools run.
 ---
 
-# Chrome AI Streaming Quirk
+# Chrome AI (Gemini Nano) — Architecture Constraints
 
-## Streaming: cumulative text, not deltas
-Chrome AI's `promptStreaming` ReadableStream yields the **entire response so far** on each chunk, NOT an incremental delta. Track last-emitted length to emit true deltas:
+## Hard limits
+- **Context window**: ~1024 tokens in Replit's preview browser
+- **Our system prompt alone**: ~200 tokens (buildSystemPrompt)
+- **Tool descriptions (5 tools)**: ~200 tokens
+- **History (2+ turns)**: easily 400+ tokens
+- **Result**: context saturated before user query. Model returns 4 chars or hangs indefinitely.
+
+## supportsToolCalling = false
+`ChromeProvider` sets `supportsToolCalling = false`. The graph agent checks this flag in `plan_and_route` and uses **keyword routing** instead of calling the LLM for tool selection.
 
 ```typescript
-let fullText = "";
-let lastEmittedLen = 0;
-while (true) {
-  const { done, value } = await reader.read();
-  if (done) break;
-  fullText = typeof value === "string" ? value : new TextDecoder().decode(value); // = not +=
-  const increment = fullText.slice(lastEmittedLen);
-  if (increment) { onDelta({ content: increment }); lastEmittedLen = fullText.length; }
+if (ctx.provider.supportsToolCalling === false) {
+  const route = routeByKeyword(ctx.query); // instant, deterministic
+  if (route) { ctx.pendingToolCalls.push(...); }
+  return; // no LLM call
 }
 ```
 
-**Why:** Chrome sends the full accumulated text on every `read()` call. Appending via `+=` duplicates all content massively.
+**Why:** Prompting Gemini Nano to output JSON tool-call format reliably requires extensive instructions (>500 tokens) — which already blows the context. Keyword routing is faster, deterministic, and costs zero tokens.
 
-## initialPrompts MUST alternate user/assistant — NEVER assistant-first
-`LanguageModel.create({ initialPrompts })` requires conversation history to start with a user turn (after system). If the only prior message is the assistant's welcome greeting, `initialPrompts` becomes `[system, assistant]` — NO preceding user message. Chrome AI **hangs or throws** on this.
-
-**Fix:** ALWAYS use `systemPrompt` (not `initialPrompts`) for Chrome AI, and format conversation history as text inside the system prompt:
-```typescript
-session = await window.LanguageModel.create({
-  systemPrompt: "You are ...\n\nConversation so far:\nAssistant: Hi! ...",
-  signal,
-});
-// Then: session.promptStreaming(currentUserContent)
+## Synthesis prompt: ~150 tokens max
+`ChromeProvider.stream()` detects synthesis mode (messages contain `role: "tool"`) and builds a compact prompt:
+```
+You are a concise CDN test analytics assistant. Use numbers from the data.
+Data (tool_name): {first 600 chars of result}
+Question: {user query}
+Answer:
 ```
 
-**Why:** `systemPrompt` accepts any string and never validates conversation structure. `initialPrompts` has strict format requirements that break on assistant-first or tool-message history.
+**Why:** Chrome AI only needs to format numbers it already has. The LLM adds the narrative wrapper; we provide the data.
 
-## Always emit { done: true } even on abort or error
-If the stream is aborted or throws, call `onDelta({ done: true })` explicitly before returning, or the planAndRouteNode's Promise will be left unresolved (hanging the graph). The `.then()` fallback in the graph agent handles the case where `done` was already emitted, so double-resolving is safe.
+## Never use initialPrompts for history
+`initialPrompts` requires alternating user/assistant — assistant-first history causes the session to hang or throw. Always use `systemPrompt` (single string, no format constraints).
 
-## Related
-- Applies to both `window.LanguageModel` (Chrome 148+) and `window.ai.languageModel` (Chrome 128-147).
-- When tools are present, buffer full text before checking for JSON tool call (partial JSON looks like plain text mid-stream).
-- `providers.ts` → `ChromeProvider.stream()` implements all of this correctly.
+## Always emit { done: true } in all code paths
+Every exit path (abort, error, stream end) must call `onDelta({ done: true })`. Failure leaves the graph Promise unresolved forever.
+
+## Streaming: cumulative text, not deltas
+`promptStreaming` yields the full text accumulated so far on every chunk. Track `lastEmittedLen` and emit `text.slice(lastLen)` as the delta. Never use `+=`.
+
+## Stream timeout: 20s (not 60s)
+Chrome AI synthesis on a small prompt completes in 2-5s. A 60s timeout makes failures feel broken. 20s is the cap.
+
+## Related files
+- `providers.ts` → `ChromeProvider` + `routeByKeyword()`
+- `graphAgent.ts` → `planAndRouteNode()` checks `supportsToolCalling`
+- `types.ts` → `IProvider.supportsToolCalling?: boolean`

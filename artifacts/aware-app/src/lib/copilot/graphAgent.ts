@@ -11,6 +11,7 @@ import type {
 } from "./types";
 import type { AgentNode, AgentGraphContext, AgentNodeResult } from "./graphTypes";
 import { buildSystemPrompt, truncateMessages } from "./context";
+import { routeByKeyword } from "./providers";
 import { logInfo, logDebug, logError } from "@/lib/ai/debugLogger";
 
 export interface GraphAgentOptions {
@@ -126,13 +127,24 @@ function sessionCarveNode(): AgentNode {
   };
 }
 
-// Stream timeout — if the provider hangs without emitting done, resolve after
-// this many milliseconds so the graph isn't stuck forever.
-const STREAM_TIMEOUT_MS = 60_000;
+// Stream timeout — providers that hang without emitting done will resolve after
+// this many milliseconds. 20s is enough for Chrome AI synthesis; WebLLM/OpenAI
+// are faster and also benefit from the shorter cap.
+const STREAM_TIMEOUT_MS = 20_000;
 
 // ── Node: plan_and_route ────────────────────────────────────────────────────
-// Stream from provider. If tool calls come back, route to execute_tools.
-// If no tools, route to synthesize (the content IS the final answer).
+// Two paths:
+//
+//   supportsToolCalling === false (Chrome AI / Gemini Nano):
+//     • Keyword-route the user query deterministically — zero LLM cost.
+//     • If a tool matches, push to pendingToolCalls; the execute_tools node
+//       runs it, then synthesize calls the provider with a compact prompt.
+//     • If no tool matches, let synthesize call the provider directly.
+//
+//   supportsToolCalling !== false (WebLLM, OpenAI):
+//     • Stream from provider; parse JSON tool-call deltas.
+//     • Route to execute_tools if tool calls emitted, otherwise finalContent.
+//
 function planAndRouteNode(): AgentNode {
   return {
     id: "plan_and_route",
@@ -141,27 +153,69 @@ function planAndRouteNode(): AgentNode {
     async execute(ctx: AgentGraphContext): Promise<AgentNodeResult> {
       const steps: SubAgentStep[] = [];
 
-      // Emit an immediate "Thinking" step so the LangGraph indicator appears
+      // Emit an immediate "Thinking" step so the progress indicator appears
       // right away — gives the user visual feedback that the agent is running.
-      const thinkingStep: SubAgentStep = {
-        id: uid(),
-        label: "Thinking…",
-        status: "running",
-        detail: `${ctx.provider.type} · ${ctx.tools.length} tools available`,
-      };
-      ctx.onEvent({ type: "step", step: thinkingStep });
+      ctx.onEvent({
+        type: "step",
+        step: {
+          id: uid(),
+          label: "Thinking…",
+          status: "running",
+          detail: `${ctx.provider.type} · ${ctx.tools.length} tools`,
+        },
+      });
 
-      // Streaming accumulator
+      // ── Keyword routing for providers that can't do tool calling ──────────
+      if (ctx.provider.supportsToolCalling === false) {
+        const route = routeByKeyword(ctx.query);
+
+        if (route) {
+          const callId = `kw-${uid()}`;
+          logInfo("plan_and_route", `Keyword routed → ${route.tool} (query: "${ctx.query.slice(0, 60)}")`);
+
+          // Push as pending tool call for execute_tools node
+          ctx.pendingToolCalls.push({ id: callId, name: route.tool, args: route.args });
+
+          // Record assistant tool-call message so execute_tools can push result
+          ctx.apiMessages.push({
+            role: "assistant",
+            content: null,
+            tool_calls: [
+              {
+                id: callId,
+                type: "function" as const,
+                function: { name: route.tool, arguments: JSON.stringify(route.args) },
+              },
+            ],
+          });
+
+          steps.push({
+            id: uid(),
+            label: "Keyword routed",
+            status: "completed",
+            detail: route.tool,
+          });
+        } else {
+          // No tool needed — synthesize will answer directly via Chrome AI
+          logInfo("plan_and_route", `Keyword: no tool matched — will answer directly`);
+          steps.push({
+            id: uid(),
+            label: "Direct answer",
+            status: "completed",
+            detail: "No data tool needed",
+          });
+        }
+
+        return { status: "completed", steps };
+      }
+
+      // ── LLM tool-calling path (WebLLM, OpenAI) ───────────────────────────
       let collectedContent = "";
       const localPendingCalls: Array<{ id: string; name: string; argsJson: string }> = [];
       let streamDone = false;
-
-      const step = uid();
+      const stepId = uid();
 
       await new Promise<void>((resolve, reject) => {
-        // Timeout guard — some providers (e.g. Chrome AI during model load)
-        // can stall indefinitely. Resolve after STREAM_TIMEOUT_MS with whatever
-        // content has been collected so far.
         const timeout = setTimeout(() => {
           if (!streamDone) {
             logError("plan_and_route", `Stream timeout after ${STREAM_TIMEOUT_MS}ms`);
@@ -203,24 +257,18 @@ function planAndRouteNode(): AgentNode {
 
       if (localPendingCalls.length > 0) {
         steps.push({
-          id: step,
+          id: stepId,
           label: "Planned tool calls",
           status: "completed",
           detail: localPendingCalls.map((t) => t.name).join(", "),
         });
 
-        // Parse and store tool calls for the execute_tools node
         for (const tc of localPendingCalls) {
           let args: Record<string, unknown> = {};
-          try {
-            args = JSON.parse(tc.argsJson);
-          } catch {
-            /* malformed args — pass empty object */
-          }
+          try { args = JSON.parse(tc.argsJson); } catch { /* use empty */ }
           ctx.pendingToolCalls.push({ id: tc.id, name: tc.name, args });
         }
 
-        // Record the assistant's tool-requesting message in history
         ctx.apiMessages.push({
           role: "assistant",
           content: collectedContent || null,
@@ -232,7 +280,7 @@ function planAndRouteNode(): AgentNode {
         });
       } else {
         steps.push({
-          id: step,
+          id: stepId,
           label: "Answered directly",
           status: "completed",
           detail: "No tools needed",
