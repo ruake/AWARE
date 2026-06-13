@@ -234,88 +234,100 @@ export class OpenAIProvider implements IProvider {
 }
 
 // ── Chrome AI Provider (SECONDARY) ──────────────────────────────────────────
-// Gemini Nano via window.ai.languageModel or window.LanguageModel
-// (Chrome 128+ Prompt API, on-device, no API key needed).
-// No native tool calling — we describe tools in the prompt and parse JSON.
+// Gemini Nano via window.LanguageModel (Chrome 148+, shipped May 2026).
+// Falls back to window.ai.languageModel (Chrome 128-147 experimental).
+// On-device, no API key needed. No native tool calling — we describe
+// tools in the prompt and parse JSON.
+
+// New Chrome 148+ API: window.LanguageModel
+interface ChromeLanguageModel {
+  availability(options?: {
+    expectedInputs?: Array<{ type: string; languages?: string[] }>;
+    expectedOutputs?: Array<{ type: string; languages?: string[] }>;
+  }): Promise<"unavailable" | "downloadable" | "downloading" | "available">;
+  create(options?: {
+    systemPrompt?: string;
+    initialPrompts?: Array<{
+      role: "system" | "user" | "assistant";
+      content: string;
+    }>;
+    signal?: AbortSignal;
+    monitor?(m: EventTarget): void;
+    temperature?: number;
+    topK?: number;
+  }): Promise<ChromeAISession>;
+}
+
+interface ChromeAISession {
+  prompt(input: string): Promise<string>;
+  promptStreaming(input: string): ReadableStream<string>;
+  destroy(): void;
+  clone(): Promise<ChromeAISession>;
+}
+
+// Old Chrome 128-147 API: window.ai.languageModel
+interface OldChromeAI {
+  capabilities(): Promise<{ available: string }>;
+  create(opts?: { systemPrompt?: string; signal?: AbortSignal }): Promise<OldChromeAISession>;
+}
+
+interface OldChromeAISession {
+  prompt(input: string): Promise<string>;
+  promptStreaming(input: string): ReadableStream<string>;
+  destroy(): void;
+}
 
 declare global {
   interface Window {
     ai?: {
-      languageModel?: {
-        capabilities(): Promise<{ available: string }>;
-        create(opts?: { systemPrompt?: string; signal?: AbortSignal }): Promise<{
-          prompt(input: string): Promise<string>;
-          promptStreaming(input: string): ReadableStream<string>;
-          destroy(): void;
-        }>;
-      };
+      languageModel?: OldChromeAI;
     };
+    LanguageModel?: ChromeLanguageModel;
   }
 }
 
-interface ChromePromptAPI {
-  capabilities?(): Promise<{ available: string } | string>;
-  availability?(): Promise<string>;
-  create(opts?: { systemPrompt?: string; signal?: AbortSignal }): Promise<{
-    prompt?(input: string): Promise<string>;
-    promptStreaming(input: string): ReadableStream<string>;
-    destroy(): void;
-  }>;
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Check if the new Chrome 148+ API is available */
+function hasNewAPI(): boolean {
+  return typeof (window as any).LanguageModel?.create === "function";
 }
 
-let _chromeApiSingleton: ChromePromptAPI | null | undefined = undefined;
-
-function getChromeAI(): ChromePromptAPI | null {
-  if (_chromeApiSingleton !== undefined) return _chromeApiSingleton;
-  // Check multiple API surfaces across Chrome versions
-  const api: ChromePromptAPI | null =
-    (window as any).ai?.languageModel ?? (window as any).LanguageModel ?? null;
-  if (!api) {
-    // Check for newer window.ai top-level prompt API
-    const topAI = (window as any).ai;
-    if (topAI && typeof topAI.create === "function") {
-      _chromeApiSingleton = topAI as ChromePromptAPI;
-      return _chromeApiSingleton;
-    }
-    _chromeApiSingleton = null;
-    return null;
-  }
-  _chromeApiSingleton = api;
-  return api;
+/** Check if the old Chrome 128-147 API is available */
+function hasOldAPI(): boolean {
+  const lm = (window as any).ai?.languageModel;
+  return typeof lm?.create === "function";
 }
+
+// ── Availability ─────────────────────────────────────────────────────────────
 
 export class ChromeProvider implements IProvider {
   readonly type: ProviderType = "chrome";
 
   async checkAvailability(): Promise<ProviderStatus> {
-    const api = getChromeAI();
-    if (!api) return "unavailable";
     try {
-      // Try new capabilities() API first
-      if (typeof api.capabilities === "function") {
-        const result = await api.capabilities();
-        if (typeof result === "object" && result !== null) {
-          const avail = (result as { available: string }).available;
-          if (avail === "readily") return "available";
-          if (avail === "after-download") return "downloading";
-          if (avail === "downloadable") return "available";
-          return "unavailable";
-        }
-        if (result === "readily") return "available";
-        if (result === "after-download") return "downloading";
+      // New API (Chrome 148+)
+      if (hasNewAPI()) {
+        const result = await (window as any).LanguageModel.availability();
+        if (result === "available") return "available";
         if (result === "downloadable") return "available";
+        if (result === "downloading") return "downloading";
         return "unavailable";
       }
-      // Fall back to old availability() API
-      if (typeof api.availability === "function") {
-        const avail = await api.availability();
+
+      // Old API (Chrome 128-147)
+      if (hasOldAPI()) {
+        const api = (window as any).ai.languageModel as OldChromeAI;
+        const result = await api.capabilities();
+        const avail =
+          typeof result === "object" ? (result as { available: string }).available : result;
         if (avail === "readily") return "available";
         if (avail === "after-download") return "downloading";
         if (avail === "downloadable") return "available";
         return "unavailable";
       }
-      // API exists but no capability check — assume available
-      return "available";
+
+      return "unavailable";
     } catch {
       return "unavailable";
     }
@@ -327,19 +339,8 @@ export class ChromeProvider implements IProvider {
     signal: AbortSignal,
     onDelta: (delta: StreamDelta) => void,
   ): Promise<void> {
-    const api = getChromeAI();
-    if (!api) {
-      onDelta({ content: "⚠️ Chrome AI not available in this browser.", done: true });
-      return;
-    }
-
     const sys = messages.find((m) => m.role === "system")?.content ?? "";
-    const allMessages = messages.filter((m) => m.role !== "system");
-
-    // Include full conversation history so Chrome AI has context for follow-ups
-    const historyText = allMessages
-      .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content ?? ""}`)
-      .join("\n\n");
+    const chatMessages = messages.filter((m) => m.role !== "system");
 
     // Describe tools in the system prompt (Chrome AI has no native tool calling)
     const toolDesc =
@@ -348,39 +349,87 @@ export class ChromeProvider implements IProvider {
           tools.map((t) => `- ${t.name}: ${t.description}`).join("\n")
         : "";
 
+    // ── Build the full prompt with conversation history ─────────────────────
+    const historyText = chatMessages
+      .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content ?? ""}`)
+      .join("\n\n");
+
     try {
-      const session = await api.create({
-        systemPrompt: sys ? sys + toolDesc : toolDesc || undefined,
-        signal,
-      });
+      let session: ChromeAISession | OldChromeAISession;
+
+      if (hasNewAPI()) {
+        // Chrome 148+ API — use initialPrompts for system prompt + history
+        const initialPrompts: Array<{
+          role: "system" | "user" | "assistant";
+          content: string;
+        }> = [];
+        if (sys || toolDesc) {
+          initialPrompts.push({
+            role: "system",
+            content: sys + toolDesc,
+          });
+        }
+        session = await (window as any).LanguageModel.create({
+          initialPrompts,
+          signal,
+        });
+      } else if (hasOldAPI()) {
+        const api = (window as any).ai.languageModel as OldChromeAI;
+        session = await api.create({
+          systemPrompt: sys ? sys + toolDesc : toolDesc || undefined,
+          signal,
+        });
+      } else {
+        onDelta({ content: "⚠️ Chrome AI not available in this browser.", done: true });
+        return;
+      }
+
       const stream = session.promptStreaming(historyText);
       const reader = stream.getReader();
-      let prev = "";
       const decoder = new TextDecoder();
+
+      // Buffer full output — Chrome AI has no native tool calling, so we
+      // must accumulate the full text and check for JSON tool call at the end
+      let fullText = "";
 
       try {
         while (true) {
           if (signal.aborted) break;
           const { done, value } = await reader.read();
           if (done) break;
-          // Chrome AI may return Uint8Array or string — normalize to string
-          const text =
-            typeof value === "string"
-              ? value
-              : decoder.decode(value, { stream: true });
-          // Cumulative text assumption may be violated if model restructures output
-          // Find the first divergence point rather than blindly slicing
-          if (text !== prev) {
-            let i = 0;
-            while (i < prev.length && i < text.length && prev[i] === text[i]) i++;
-            if (i < text.length) onDelta({ content: text.slice(i), done: false });
-            prev = text;
-          }
+          const text = typeof value === "string" ? value : decoder.decode(value, { stream: true });
+          fullText = text;
         }
       } finally {
         reader.releaseLock();
         session.destroy();
       }
+
+      // Check if the output is a JSON tool call from the non-native
+      // tool-calling prompt (respond with JSON {tool, args})
+      if (tools.length > 0) {
+        const trimmed = fullText.trim();
+        if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+          try {
+            const parsed = JSON.parse(trimmed);
+            if (typeof parsed.tool === "string" && parsed.args && typeof parsed.args === "object") {
+              onDelta({
+                toolCallId: `chrome-${Date.now()}`,
+                toolCallName: parsed.tool,
+                toolCallArgsChunk: JSON.stringify(parsed.args),
+                done: false,
+              });
+              onDelta({ done: true });
+              return;
+            }
+          } catch {
+            /* not valid JSON — treat as regular text */
+          }
+        }
+      }
+
+      // Not a tool call — emit buffered text as a single content block
+      if (fullText) onDelta({ content: fullText, done: false });
       onDelta({ done: true });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Unknown error";

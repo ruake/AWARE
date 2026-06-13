@@ -94,13 +94,36 @@ jobs:
           echo "✅ Added 404.html and _headers"
 
       - name: Push dist to site branch
-        uses: ./.github/actions/data-writer
-        with:
-          files: "${{ env.WORKING_DIR }}/dist/public/."
-          dest-paths: "."
-          commit-message: "deploy: ${{ github.sha }} (${{ github.ref_name }}) [skip ci]"
-          branch: ${{ env.SITE_BRANCH }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          WORK_DIR=$(mktemp -d)
+          trap "rm -rf $WORK_DIR" EXIT
+          cd "$WORK_DIR"
+
+          # Init orphan branch with the build output
+          git init
+          git remote add origin "$REMOTE"
+          git checkout --orphan "${{ env.SITE_BRANCH }}"
+
+          # Copy build output
+          cp -rf "${{ github.workspace }}/${{ env.WORKING_DIR }}/dist/public/." .
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes — site branch already up to date"
+            exit 0
+          fi
+
+          git commit -m "deploy: ${{ github.sha }} (${{ github.ref_name }}) [skip ci]"
+          git push --force "$REMOTE" "HEAD:${{ env.SITE_BRANCH }}"
+          echo "✅ Pushed to ${{ env.SITE_BRANCH }}"
 
       - name: Summary
         run: |
