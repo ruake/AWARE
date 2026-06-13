@@ -19,8 +19,6 @@ export type {
   GoogleChartType,
   DebugLogEntry,
 } from "./langGraphTypes";
-export type { ChartOutput, GoogleChartType } from "./langGraphTypes";
-export type { DebugLogEntry } from "./langGraphTypes";
 export {
   clearLogs,
   getLogs,
