@@ -46,7 +46,7 @@ export function loadProviderType(): ProviderType {
   } catch {
     /* empty */
   }
-  return "webllm";
+  return "chrome";
 }
 
 export function saveProviderType(type: ProviderType): void {

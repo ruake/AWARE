@@ -1,8 +1,10 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Bot, User } from "lucide-react";
-import type { Message } from "@/lib/copilot/types";
+import type { Message, ProviderType } from "@/lib/copilot/types";
 import ToolCallCard from "./ToolCallCard";
+import AgentTrace from "./AgentTrace";
+import { loadProviderType } from "@/lib/copilot/storage";
 
 interface BubbleProps {
   message: Message;
@@ -58,7 +60,7 @@ export function UserBubble({ message }: BubbleProps) {
 export function AssistantBubble({ message }: BubbleProps) {
   const hasContent = message.content.length > 0;
   const hasToolCalls = (message.toolCalls?.length ?? 0) > 0;
-  const isStreaming = message.streaming;
+  const isStreaming = !!message.streaming;
 
   return (
     <div
@@ -88,6 +90,13 @@ export function AssistantBubble({ message }: BubbleProps) {
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Agent trace — shows tool call summary */}
+        <AgentTrace
+          toolCalls={message.toolCalls ?? []}
+          providerType={loadProviderType()}
+          streaming={isStreaming}
+        />
+
         {/* Tool call cards */}
         {hasToolCalls && (
           <div style={{ marginBottom: hasContent ? 8 : 0 }}>

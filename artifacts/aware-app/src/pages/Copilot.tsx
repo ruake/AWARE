@@ -18,6 +18,9 @@ import MessageFeed from "@/components/copilot/MessageFeed";
 import QuickActions from "@/components/copilot/QuickActions";
 import InputBar from "@/components/copilot/InputBar";
 import ProviderSelector from "@/components/copilot/ProviderSelector";
+import DebugPanel from "@/components/copilot/DebugPanel";
+import { getLogs, subscribeLogs, clearLogs } from "@/lib/ai/debugLogger";
+import type { DebugLogEntry } from "@/lib/ai/langGraphTypes";
 
 // ── uid helper ───────────────────────────────────────────────────────────────
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -144,41 +147,60 @@ function SettingsPanel({ config, onSave, onClose }: SettingsPanelProps) {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function CopilotPage() {
-  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [messages, setMessages] = React.useState<Message[]>(() => {
+    const session = loadSession();
+    return session?.messages?.length
+      ? session.messages
+      : [{
+          id: uid(),
+          role: "assistant",
+          content: "Hi! I'm the **AWARE Copilot**. I call live data tools to answer questions about your test runs, failures, flakiness, and Akamai environment health.\n\nTry a Quick Action on the left, or just ask me anything.",
+          timestamp: Date.now(),
+        }];
+  });
   const [busy, setBusy] = React.useState(false);
-  const [providerType, setProviderType] = React.useState<ProviderType>(loadProviderType);
+  const [providerType, setProviderType] = React.useState<ProviderType>(() => {
+    const session = loadSession();
+    return session?.providerType ?? loadProviderType();
+  });
   const [providerStatus, setProviderStatus] = React.useState<Record<ProviderType, ProviderStatus>>({
     webllm: "unavailable",
     openai: "available",
-    chrome: "unavailable",
+    chrome: "available",
   });
   const [downloadProgress, setDownloadProgress] = React.useState<{
     progress: number;
     text: string;
   } | null>(null);
   const [showSettings, setShowSettings] = React.useState(false);
+  const [showDebug, setShowDebug] = React.useState(false);
   const [openaiConfig, setOpenaiConfig] = React.useState(loadOpenAIConfig);
   const [input, setInput] = React.useState("");
+  const [debugLogs, setDebugLogs] = React.useState<DebugLogEntry[]>(() => getLogs());
+  const logEndRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Subscribe to debug logger updates
+  React.useEffect(() => {
+    const unsub = subscribeLogs(() => setDebugLogs([...getLogs()]));
+    return unsub;
+  }, []);
 
   const abortRef = React.useRef<AbortController | null>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
-  // Create providers once per session (singletons)
-  const providers = React.useMemo(() => ({
-    webllm: createProvider("webllm") as WebLLMProvider,
-    openai: createProvider("openai"),
-    chrome: createProvider("chrome"),
-  }), []);
-
-  // Wire up WebLLM download-progress callback
-  React.useEffect(() => {
-    (providers.webllm as WebLLMProvider).onLoadProgress = (progress, text) => {
+  const providers = React.useMemo(() => {
+    const wllm = createProvider("webllm") as WebLLMProvider;
+    wllm.onLoadProgress = (progress, text) => {
       setDownloadProgress({ progress, text });
       if (progress >= 1) setTimeout(() => setDownloadProgress(null), 2000);
     };
-  }, [providers.webllm]);
+    return {
+      webllm: wllm,
+      openai: createProvider("openai"),
+      chrome: createProvider("chrome"),
+    };
+  }, []);
 
-  // Check provider availability on mount
   React.useEffect(() => {
     (async () => {
       const [webllmStatus, chromeStatus] = await Promise.all([
@@ -188,25 +210,6 @@ export default function CopilotPage() {
       setProviderStatus((prev) => ({ ...prev, webllm: webllmStatus, chrome: chromeStatus }));
     })();
   }, [providers]);
-
-  // Load session on mount
-  React.useEffect(() => {
-    const session = loadSession();
-    if (session?.messages?.length) {
-      setMessages(session.messages);
-      setProviderType(session.providerType ?? loadProviderType());
-    } else {
-      setMessages([
-        {
-          id: uid(),
-          role: "assistant",
-          content:
-            "Hi! I'm the **AWARE Copilot**. I call live data tools to answer questions about your test runs, failures, flakiness, and Akamai environment health.\n\nTry a Quick Action on the left, or just ask me anything.",
-          timestamp: Date.now(),
-        },
-      ]);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Persist session whenever messages change
   React.useEffect(() => {
@@ -426,6 +429,14 @@ export default function CopilotPage() {
             <button onClick={handleNewChat} style={topBtnStyle}>
               <Plus size={12} /> New Chat
             </button>
+
+            <DebugPanel
+              show={showDebug}
+              logs={debugLogs}
+              logEndRef={logEndRef}
+              onToggle={() => setShowDebug((p) => !p)}
+              onClear={() => clearLogs()}
+            />
 
             {busy && (
               <button
