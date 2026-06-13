@@ -413,8 +413,9 @@ export default function CopilotPage() {
       <div
         style={{
           display: "flex",
-          height: "100%",
+          flex: 1,
           overflow: "hidden",
+          minHeight: 0,
         }}
       >
         {/* Quick actions sidebar */}
@@ -427,10 +428,11 @@ export default function CopilotPage() {
             display: "flex",
             flexDirection: "column",
             minWidth: 0,
+            minHeight: 0,
             borderLeft: "1px solid var(--proof-border)",
           }}
         >
-          {/* Top bar */}
+          {/* Top bar — always visible */}
           <div
             style={{
               display: "flex",
@@ -439,6 +441,8 @@ export default function CopilotPage() {
               padding: "8px 14px",
               borderBottom: "1px solid var(--proof-border)",
               flexShrink: 0,
+              background: "var(--proof-surface)",
+              zIndex: 10,
             }}
           >
             <Bot size={15} style={{ color: "var(--proof-blue)" }} />
