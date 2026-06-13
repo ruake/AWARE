@@ -1,0 +1,1819 @@
+[
+  {
+    "id": "geo_01",
+    "testCaseId": "geo_01",
+    "runId": "willow",
+    "name": "US East resolves to IAD PoP",
+    "status": "PASS",
+    "duration": 235,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_01",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (14ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MTRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 14
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (9ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj45bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 24
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (24ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MjRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 47
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (155ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MTU1bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 202
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (33ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4zM21zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 235
+      }
+    ]
+  },
+  {
+    "id": "geo_02",
+    "testCaseId": "geo_02",
+    "runId": "willow",
+    "name": "EU West resolves to DUB PoP",
+    "status": "PASS",
+    "duration": 888,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_02",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (53ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NTNtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 53
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (36ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4zNm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 89
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (89ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+ODltczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 178
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (586ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NTg2bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 764
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (124ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xMjRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 888
+      }
+    ]
+  },
+  {
+    "id": "geo_03",
+    "testCaseId": "geo_03",
+    "runId": "willow",
+    "name": "AP Southeast resolves to SIN PoP",
+    "status": "PASS",
+    "duration": 710,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_03",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://techdocs.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000",
+          "X-Frame-Options": "Deny",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (43ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NDNtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 43
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (28ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4yOG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 71
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (71ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+NzFtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 142
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (469ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NDY5bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 611
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (99ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij45OW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 710
+      }
+    ]
+  },
+  {
+    "id": "geo_04",
+    "testCaseId": "geo_04",
+    "runId": "willow",
+    "name": "Primary PoP failover within 2s",
+    "status": "PASS",
+    "duration": 257,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_04",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (15ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MTVtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 15
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (10ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4xMG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 26
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (26ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MjZtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 51
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (170ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MTcwbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 221
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (36ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4zNm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 257
+      }
+    ]
+  },
+  {
+    "id": "cache_01",
+    "testCaseId": "cache_01",
+    "runId": "willow",
+    "name": "Cache hit ratio exceeds 80% for static",
+    "status": "PASS",
+    "duration": 1170,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_01",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/content/dam/site/en/images/backgrounds/homepage.jpg",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, private, max-age=86400"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (70ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NzBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 70
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (47ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj40N21zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 117
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (117ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTE3bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 234
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (772ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NzcybXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 1006
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (164ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xNjRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 1170
+      }
+    ]
+  },
+  {
+    "id": "cache_02",
+    "testCaseId": "cache_02",
+    "runId": "willow",
+    "name": "Cache-Control max-age on CSS assets",
+    "status": "PASS",
+    "duration": 149,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_02",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/css/main.css",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=0"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (9ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+OW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 9
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (6ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj42bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 15
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (15ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTVtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 30
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (98ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+OThtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 128
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (21ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4yMW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 149
+      }
+    ]
+  },
+  {
+    "id": "cache_03",
+    "testCaseId": "cache_03",
+    "runId": "willow",
+    "name": "Stale-while-revalidate honored on API",
+    "status": "PASS",
+    "duration": 1356,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_03",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/content/dam/site/en/images/backgrounds/homepage.jpg",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "DFW",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, private, max-age=86400"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (81ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+ODFtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 81
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (54ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj41NG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 136
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (136ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTM2bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 271
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (895ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+ODk1bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 1166
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (190ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xOTBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 1356
+      }
+    ]
+  },
+  {
+    "id": "cache_04",
+    "testCaseId": "cache_04",
+    "runId": "willow",
+    "name": "Surrogate-Control overrides Cache-Control",
+    "status": "PASS",
+    "duration": 142,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_04",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/css/main.css",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=0"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (9ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+OW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 9
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (6ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj42bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 14
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (14ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 28
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (94ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+OTRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 122
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (20ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4yMG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 142
+      }
+    ]
+  },
+  {
+    "id": "sec_01",
+    "testCaseId": "sec_01",
+    "runId": "willow",
+    "name": "HSTS header present on all responses",
+    "status": "FAIL",
+    "duration": 654,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_01",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "nosniff",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 504,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "nosniff",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (39ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MzltczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 39
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (26ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4yNm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 65
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (65ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+NjVtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 131
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (432ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNlZjQ0NDQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2VmNDQ0NCI+NDMybXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 562
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (92ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij45Mm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 654
+      }
+    ],
+    "error": "Assertion failed — unexpected response"
+  },
+  {
+    "id": "sec_02",
+    "testCaseId": "sec_02",
+    "runId": "willow",
+    "name": "CSP blocks inline scripts",
+    "status": "PASS",
+    "duration": 786,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_02",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "missing",
+        "passed": false
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "missing",
+          "passed": false
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (47ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NDdtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 47
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (31ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4zMW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 79
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (79ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+NzltczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 157
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (519ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NTE5bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 676
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (110ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xMTBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 786
+      }
+    ]
+  },
+  {
+    "id": "sec_03",
+    "testCaseId": "sec_03",
+    "runId": "willow",
+    "name": "WAF blocks SQLi in query params",
+    "status": "PASS",
+    "duration": 292,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_03",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "nosniff",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "nosniff",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (18ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MThtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 18
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (12ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4xMm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 29
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (29ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MjltczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 58
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (193ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MTkzbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 251
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (41ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij40MW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 292
+      }
+    ]
+  },
+  {
+    "id": "sec_04",
+    "testCaseId": "sec_04",
+    "runId": "willow",
+    "name": "X-Frame-Options DENY on auth pages",
+    "status": "PASS",
+    "duration": 705,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_04",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "missing",
+        "passed": false
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "missing",
+          "passed": false
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (42ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NDJtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 42
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (28ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4yOG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 71
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (71ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+NzFtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 141
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (465ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NDY1bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 606
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (99ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij45OW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 705
+      }
+    ]
+  },
+  {
+    "id": "edge_01",
+    "testCaseId": "edge_01",
+    "runId": "willow",
+    "name": "EdgeWorker activates on /api/* routes",
+    "status": "PASS",
+    "duration": 122,
+    "category": "Edge-Routing",
+    "suite": "tests/edge_routing_suite.py::test_edge_01",
+    "assertions": [
+      {
+        "assertion": "EdgeWorker activation confirmed",
+        "expected": "active",
+        "actual": "active",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/robots.txt",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/plain;charset=iso-8859-1",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, max-age=2265713"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "EdgeWorker activation confirmed",
+          "expected": "active",
+          "actual": "active",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (7ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+N21zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 7
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (5ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj41bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 12
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (12ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTJtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 24
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (81ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+ODFtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 105
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (17ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xN21zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 122
+      }
+    ]
+  },
+  {
+    "id": "edge_02",
+    "testCaseId": "edge_02",
+    "runId": "willow",
+    "name": "EdgeWorker injects X-Akamai-RUM header",
+    "status": "FAIL",
+    "duration": 616,
+    "category": "Edge-Routing",
+    "suite": "tests/edge_routing_suite.py::test_edge_02",
+    "assertions": [
+      {
+        "assertion": "EdgeWorker activation confirmed",
+        "expected": "active",
+        "actual": "inactive",
+        "passed": false
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/robots.txt",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 504,
+        "headers": {
+          "Content-Type": "text/plain;charset=iso-8859-1",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, max-age=2265713"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "EdgeWorker activation confirmed",
+          "expected": "active",
+          "actual": "inactive",
+          "passed": false
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (37ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MzdtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 37
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (25ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4yNW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 62
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (62ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+NjJtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 123
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (407ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNlZjQ0NDQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2VmNDQ0NCI+NDA3bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 530
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (86ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij44Nm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 616
+      }
+    ],
+    "error": "Assertion failed — EdgeWorker activation confirmed"
+  },
+  {
+    "id": "edge_03",
+    "testCaseId": "edge_03",
+    "runId": "willow",
+    "name": "Property version matches activation",
+    "status": "PASS",
+    "duration": 203,
+    "category": "Edge-Routing",
+    "suite": "tests/edge_routing_suite.py::test_edge_03",
+    "assertions": [
+      {
+        "assertion": "EdgeWorker activation confirmed",
+        "expected": "active",
+        "actual": "active",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/robots.txt",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/plain;charset=iso-8859-1",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, max-age=2265713"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "EdgeWorker activation confirmed",
+          "expected": "active",
+          "actual": "active",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (12ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MTJtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 12
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (8ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj44bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 20
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (20ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MjBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 41
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (134ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MTM0bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 175
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (28ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4yOG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 203
+      }
+    ]
+  },
+  {
+    "id": "http_01",
+    "testCaseId": "http_01",
+    "runId": "willow",
+    "name": "HTTP/2 negotiated via ALPN",
+    "status": "PASS",
+    "duration": 383,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_01",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/xml;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "MIA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=640800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (23ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MjNtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 23
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (15ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4xNW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 38
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (38ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MzhtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 77
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (253ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MjUzbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 329
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (54ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij41NG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 383
+      }
+    ]
+  },
+  {
+    "id": "http_02",
+    "testCaseId": "http_02",
+    "runId": "willow",
+    "name": "TLS 1.3 enforced, TLS 1.0 rejected",
+    "status": "PASS",
+    "duration": 907,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_02",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (54ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NTRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 54
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (36ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4zNm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 91
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (91ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+OTFtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 181
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (599ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NTk5bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 780
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (127ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xMjdtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 907
+      }
+    ]
+  },
+  {
+    "id": "http_03",
+    "testCaseId": "http_03",
+    "runId": "willow",
+    "name": "Brotli encoding returned when accepted",
+    "status": "PASS",
+    "duration": 348,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_03",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/xml;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=640800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (21ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MjFtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 21
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (14ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4xNG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 35
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (35ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MzVtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 70
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (230ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MjMwbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 299
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (49ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij40OW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 348
+      }
+    ]
+  },
+  {
+    "id": "http_04",
+    "testCaseId": "http_04",
+    "runId": "willow",
+    "name": "TTFB under 200ms from US-East",
+    "status": "FAIL",
+    "duration": 1740,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_04",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "503",
+        "passed": false
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "Content-Type": "application/xml;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=640800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "503",
+          "passed": false
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (104ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MTA0bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 104
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (70ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj43MG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 174
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (174ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTc0bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 348
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (1148ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNlZjQ0NDQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2VmNDQ0NCI+MTE0OG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 1496
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (244ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4yNDRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 1740
+      }
+    ],
+    "error": "Assertion failed — HTTP status 2xx"
+  },
+  {
+    "id": "http_05",
+    "testCaseId": "http_05",
+    "runId": "willow",
+    "name": "Redirect chain ≤ 2 hops to canonical URL",
+    "status": "PASS",
+    "duration": 807,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_05",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (48ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NDhtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 48
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (32ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4zMm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 81
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (81ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+ODFtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 161
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (533ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NTMzbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 694
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (113ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xMTNtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 807
+      }
+    ]
+  }
+]

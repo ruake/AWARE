@@ -1,0 +1,1816 @@
+[
+  {
+    "id": "geo_01",
+    "testCaseId": "geo_01",
+    "runId": "cobalt",
+    "name": "US East resolves to IAD PoP",
+    "status": "PASS",
+    "duration": 331,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_01",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (20ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MjBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 20
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (13ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4xM21zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 33
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (33ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MzNtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 66
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (218ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MjE4bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 285
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (46ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij40Nm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 331
+      }
+    ]
+  },
+  {
+    "id": "geo_02",
+    "testCaseId": "geo_02",
+    "runId": "cobalt",
+    "name": "EU West resolves to DUB PoP",
+    "status": "PASS",
+    "duration": 576,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_02",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (35ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MzVtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 35
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (23ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4yM21zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 58
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (58ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+NThtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 115
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (380ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MzgwbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 495
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (81ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij44MW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 576
+      }
+    ]
+  },
+  {
+    "id": "geo_03",
+    "testCaseId": "geo_03",
+    "runId": "cobalt",
+    "name": "AP Southeast resolves to SIN PoP",
+    "status": "PASS",
+    "duration": 1162,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_03",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://techdocs.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000",
+          "X-Frame-Options": "Deny",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (70ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NzBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 70
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (46ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj40Nm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 116
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (116ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTE2bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 232
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (767ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NzY3bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 999
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (163ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xNjNtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 1162
+      }
+    ]
+  },
+  {
+    "id": "geo_04",
+    "testCaseId": "geo_04",
+    "runId": "cobalt",
+    "name": "Primary PoP failover within 2s",
+    "status": "PASS",
+    "duration": 297,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_04",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (18ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MThtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 18
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (12ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4xMm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 30
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (30ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MzBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 59
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (196ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MTk2bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 255
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (42ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij40Mm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 297
+      }
+    ]
+  },
+  {
+    "id": "cache_01",
+    "testCaseId": "cache_01",
+    "runId": "cobalt",
+    "name": "Cache hit ratio exceeds 80% for static",
+    "status": "PASS",
+    "duration": 1171,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_01",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/content/dam/site/en/images/backgrounds/homepage.jpg",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, private, max-age=86400"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (70ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NzBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 70
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (47ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj40N21zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 117
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (117ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTE3bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 234
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (773ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NzczbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 1007
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (164ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xNjRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 1171
+      }
+    ]
+  },
+  {
+    "id": "cache_02",
+    "testCaseId": "cache_02",
+    "runId": "cobalt",
+    "name": "Cache-Control max-age on CSS assets",
+    "status": "PASS",
+    "duration": 103,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_02",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/css/main.css",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "DFW",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=0"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (6ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+Nm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 6
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (4ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj40bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 10
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (10ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 21
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (68ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NjhtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 89
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (14ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xNG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 103
+      }
+    ]
+  },
+  {
+    "id": "cache_03",
+    "testCaseId": "cache_03",
+    "runId": "cobalt",
+    "name": "Stale-while-revalidate honored on API",
+    "status": "PASS",
+    "duration": 1414,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_03",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/content/dam/site/en/images/backgrounds/homepage.jpg",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, private, max-age=86400"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (85ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+ODVtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 85
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (57ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj41N21zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 141
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (141ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTQxbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 283
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (933ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+OTMzbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 1216
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (198ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xOThtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 1414
+      }
+    ]
+  },
+  {
+    "id": "cache_04",
+    "testCaseId": "cache_04",
+    "runId": "cobalt",
+    "name": "Surrogate-Control overrides Cache-Control",
+    "status": "PASS",
+    "duration": 159,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_04",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/css/main.css",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=0"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (10ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MTBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 10
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (6ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj42bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 16
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (16ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTZtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 32
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (105ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MTA1bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 137
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (22ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4yMm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 159
+      }
+    ]
+  },
+  {
+    "id": "sec_01",
+    "testCaseId": "sec_01",
+    "runId": "cobalt",
+    "name": "HSTS header present on all responses",
+    "status": "PASS",
+    "duration": 304,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_01",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "nosniff",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "nosniff",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (18ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MThtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 18
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (12ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4xMm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 30
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (30ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MzBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 61
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (201ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MjAxbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 261
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (43ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij40M21zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 304
+      }
+    ]
+  },
+  {
+    "id": "sec_02",
+    "testCaseId": "sec_02",
+    "runId": "cobalt",
+    "name": "CSP blocks inline scripts",
+    "status": "PASS",
+    "duration": 774,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_02",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "missing",
+        "passed": false
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "missing",
+          "passed": false
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (46ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NDZtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 46
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (31ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4zMW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 77
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (77ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+NzdtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 155
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (511ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NTExbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 666
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (108ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xMDhtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 774
+      }
+    ]
+  },
+  {
+    "id": "sec_03",
+    "testCaseId": "sec_03",
+    "runId": "cobalt",
+    "name": "WAF blocks SQLi in query params",
+    "status": "PASS",
+    "duration": 289,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_03",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "nosniff",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "nosniff",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (17ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MTdtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 17
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (12ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4xMm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 29
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (29ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MjltczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 58
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (191ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MTkxbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 249
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (40ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij40MG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 289
+      }
+    ]
+  },
+  {
+    "id": "sec_04",
+    "testCaseId": "sec_04",
+    "runId": "cobalt",
+    "name": "X-Frame-Options DENY on auth pages",
+    "status": "PASS",
+    "duration": 882,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_04",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "missing",
+        "passed": false
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "missing",
+          "passed": false
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (53ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NTNtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 53
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (35ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4zNW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 88
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (88ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+ODhtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 176
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (582ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NTgybXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 759
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (123ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xMjNtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 882
+      }
+    ]
+  },
+  {
+    "id": "edge_01",
+    "testCaseId": "edge_01",
+    "runId": "cobalt",
+    "name": "EdgeWorker activates on /api/* routes",
+    "status": "PASS",
+    "duration": 196,
+    "category": "Edge-Routing",
+    "suite": "tests/edge_routing_suite.py::test_edge_01",
+    "assertions": [
+      {
+        "assertion": "EdgeWorker activation confirmed",
+        "expected": "active",
+        "actual": "active",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/robots.txt",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/plain;charset=iso-8859-1",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, max-age=2265713"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "EdgeWorker activation confirmed",
+          "expected": "active",
+          "actual": "active",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (12ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MTJtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 12
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (8ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj44bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 20
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (20ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MjBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 39
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (129ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MTI5bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 169
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (27ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4yN21zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 196
+      }
+    ]
+  },
+  {
+    "id": "edge_02",
+    "testCaseId": "edge_02",
+    "runId": "cobalt",
+    "name": "EdgeWorker injects X-Akamai-RUM header",
+    "status": "PASS",
+    "duration": 130,
+    "category": "Edge-Routing",
+    "suite": "tests/edge_routing_suite.py::test_edge_02",
+    "assertions": [
+      {
+        "assertion": "EdgeWorker activation confirmed",
+        "expected": "active",
+        "actual": "active",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/robots.txt",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/plain;charset=iso-8859-1",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "DFW",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, max-age=2265713"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "EdgeWorker activation confirmed",
+          "expected": "active",
+          "actual": "active",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (8ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+OG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 8
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (5ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj41bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 13
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (13ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTNtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 26
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (86ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+ODZtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 112
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (18ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xOG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 130
+      }
+    ]
+  },
+  {
+    "id": "edge_03",
+    "testCaseId": "edge_03",
+    "runId": "cobalt",
+    "name": "Property version matches activation",
+    "status": "PASS",
+    "duration": 149,
+    "category": "Edge-Routing",
+    "suite": "tests/edge_routing_suite.py::test_edge_03",
+    "assertions": [
+      {
+        "assertion": "EdgeWorker activation confirmed",
+        "expected": "active",
+        "actual": "active",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/robots.txt",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/plain;charset=iso-8859-1",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "MIA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, max-age=2265713"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "EdgeWorker activation confirmed",
+          "expected": "active",
+          "actual": "active",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (9ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+OW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 9
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (6ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj42bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 15
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (15ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MTVtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 30
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (98ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+OThtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 128
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (21ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4yMW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 149
+      }
+    ]
+  },
+  {
+    "id": "http_01",
+    "testCaseId": "http_01",
+    "runId": "cobalt",
+    "name": "HTTP/2 negotiated via ALPN",
+    "status": "PASS",
+    "duration": 392,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_01",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/xml;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=640800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (24ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MjRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 24
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (16ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4xNm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 39
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (39ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+MzltczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 78
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (259ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MjU5bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 337
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (55ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij41NW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 392
+      }
+    ]
+  },
+  {
+    "id": "http_02",
+    "testCaseId": "http_02",
+    "runId": "cobalt",
+    "name": "TLS 1.3 enforced, TLS 1.0 rejected",
+    "status": "PASS",
+    "duration": 899,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_02",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (54ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NTRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 54
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (36ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4zNm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 90
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (90ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+OTBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 180
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (593ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NTkzbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 773
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (126ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xMjZtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 899
+      }
+    ]
+  },
+  {
+    "id": "http_03",
+    "testCaseId": "http_03",
+    "runId": "cobalt",
+    "name": "Brotli encoding returned when accepted",
+    "status": "PASS",
+    "duration": 411,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_03",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/xml;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "MIA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=640800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (25ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MjVtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 25
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (16ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4xNm1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 41
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (41ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+NDFtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 82
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (271ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MjcxbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 353
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (58ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij41OG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 411
+      }
+    ]
+  },
+  {
+    "id": "http_04",
+    "testCaseId": "http_04",
+    "runId": "cobalt",
+    "name": "TTFB under 200ms from US-East",
+    "status": "PASS",
+    "duration": 508,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_04",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/xml;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "MIA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=640800"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (30ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+MzBtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 30
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (20ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4yMG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 51
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (51ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+NTFtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 102
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (335ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+MzM1bXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 437
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (71ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij43MW1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 508
+      }
+    ]
+  },
+  {
+    "id": "http_05",
+    "testCaseId": "http_05",
+    "runId": "cobalt",
+    "name": "Redirect chain ≤ 2 hops to canonical URL",
+    "status": "PASS",
+    "duration": 744,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_05",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "DFW",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_dns_0",
+        "label": "DNS (45ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iI2E3OGJmYSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkROUzwvdGV4dD48dGV4dCB4PSIxNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2E3OGJmYSI+NDVtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 45
+      },
+      {
+        "id": "frame_tcp_1",
+        "label": "TCP (30ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjNjBhNWZhIi8+PHRleHQgeD0iNCIgeT0iMTQiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzk0YTNiOCI+VENQPC90ZXh0Pjx0ZXh0IHg9IjEyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjNjBhNWZhIj4zMG1zPC90ZXh0Pjwvc3ZnPg==",
+        "timestamp": 74
+      },
+      {
+        "id": "frame_tls_2",
+        "label": "TLS (74ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPlRMUzwvdGV4dD48dGV4dCB4PSIyNCIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzM4YmRmOCI+NzRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 149
+      },
+      {
+        "id": "frame_ttfb_3",
+        "label": "TTFB (491ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxNiIgcng9IjIiIGZpbGw9IiNmYmJmMjQiLz48dGV4dCB4PSI0IiB5PSIxNCIgZm9udC1zaXplPSI5IiBmaWxsPSIjOTRhM2I4Ij5UVEZCPC90ZXh0Pjx0ZXh0IHg9IjEzNiIgeT0iMzIiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI2ZiYmYyNCI+NDkxbXM8L3RleHQ+PC9zdmc+",
+        "timestamp": 640
+      },
+      {
+        "id": "frame_download_4",
+        "label": "Download (104ms)",
+        "dataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHN0eWxlPSJmb250LWZhbWlseTptb25vc3BhY2UiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB4PSIwIiB5PSIyMCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzM0ZDM5OSIvPjx0ZXh0IHg9IjQiIHk9IjE0IiBmb250LXNpemU9IjkiIGZpbGw9IiM5NGEzYjgiPkRvd25sb2FkPC90ZXh0Pjx0ZXh0IHg9IjMyIiB5PSIzMiIgZm9udC1zaXplPSI5IiBmaWxsPSIjMzRkMzk5Ij4xMDRtczwvdGV4dD48L3N2Zz4=",
+        "timestamp": 744
+      }
+    ]
+  }
+]

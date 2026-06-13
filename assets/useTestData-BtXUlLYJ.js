@@ -1,0 +1,1 @@
+import{b as t}from"./vendor-mV1Lv48O.js";import{o,p as u}from"./index-CG66Q2f0.js";const s=new Set,r=new Set;function c(e){return s.add(e),()=>s.delete(e)}function i(e){return r.add(e),()=>r.delete(e)}function T(){const e=t.useSyncExternalStore(c,o),n=t.useSyncExternalStore(i,u);return{tcs:e,suites:n}}export{T as u};
