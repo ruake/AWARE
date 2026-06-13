@@ -334,8 +334,12 @@ export class ChromeProvider implements IProvider {
     }
 
     const sys = messages.find((m) => m.role === "system")?.content ?? "";
-    const history = messages.filter((m) => m.role !== "system");
-    const userMsg = history[history.length - 1]?.content ?? "";
+    const allMessages = messages.filter((m) => m.role !== "system");
+
+    // Include full conversation history so Chrome AI has context for follow-ups
+    const historyText = allMessages
+      .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content ?? ""}`)
+      .join("\n\n");
 
     // Describe tools in the system prompt (Chrome AI has no native tool calling)
     const toolDesc =
@@ -349,19 +353,29 @@ export class ChromeProvider implements IProvider {
         systemPrompt: sys ? sys + toolDesc : toolDesc || undefined,
         signal,
       });
-      const stream = session.promptStreaming(userMsg);
+      const stream = session.promptStreaming(historyText);
       const reader = stream.getReader();
       let prev = "";
+      const decoder = new TextDecoder();
 
       try {
         while (true) {
           if (signal.aborted) break;
           const { done, value } = await reader.read();
           if (done) break;
-          // Chrome AI returns cumulative text — compute the delta
-          const newText = (value ?? "").slice(prev.length);
-          if (newText) onDelta({ content: newText, done: false });
-          prev = value ?? "";
+          // Chrome AI may return Uint8Array or string — normalize to string
+          const text =
+            typeof value === "string"
+              ? value
+              : decoder.decode(value, { stream: true });
+          // Cumulative text assumption may be violated if model restructures output
+          // Find the first divergence point rather than blindly slicing
+          if (text !== prev) {
+            let i = 0;
+            while (i < prev.length && i < text.length && prev[i] === text[i]) i++;
+            if (i < text.length) onDelta({ content: text.slice(i), done: false });
+            prev = text;
+          }
         }
       } finally {
         reader.releaseLock();
