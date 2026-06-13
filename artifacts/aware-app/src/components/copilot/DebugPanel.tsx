@@ -90,9 +90,7 @@ export default function DebugPanel({ show, logs, logEndRef, onToggle, onClear }:
           </div>
           <div style={{ flex: 1, overflowY: "auto", padding: "6px 8px" }}>
             {logs.length === 0 ? (
-              <div style={{ color: "#484f58", padding: 8, textAlign: "center" }}>
-                No logs yet
-              </div>
+              <div style={{ color: "#484f58", padding: 8, textAlign: "center" }}>No logs yet</div>
             ) : (
               logs.map((log, i) => (
                 <div
@@ -109,19 +107,27 @@ export default function DebugPanel({ show, logs, logEndRef, onToggle, onClear }:
                   <span style={{ color: "#484f58", flexShrink: 0, width: 50 }}>
                     {log.timestamp.slice(11, 19)}
                   </span>
-                  <span style={{ color: "#58a6ff", flexShrink: 0, width: 60 }}>
-                    {log.node}
-                  </span>
+                  <span style={{ color: "#58a6ff", flexShrink: 0, width: 60 }}>{log.node}</span>
                   <span style={{ flex: 1 }}>{log.event}</span>
                   {log.details && (
-                    <span style={{ color: "#484f58", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span
+                      style={{
+                        color: "#484f58",
+                        maxWidth: 160,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {log.details}
                     </span>
                   )}
                   {log.duration !== undefined && (
                     <span style={{ color: "#d2a8ff", flexShrink: 0 }}>{log.duration}ms</span>
                   )}
-                  {log.level === "error" && <XCircle size={10} style={{ color: "#ef4444", flexShrink: 0 }} />}
+                  {log.level === "error" && (
+                    <XCircle size={10} style={{ color: "#ef4444", flexShrink: 0 }} />
+                  )}
                   {log.level === "warn" && <span style={{ color: "#f59e0b" }}>⚠</span>}
                 </div>
               ))

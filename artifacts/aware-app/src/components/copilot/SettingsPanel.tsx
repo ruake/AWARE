@@ -13,7 +13,18 @@ interface Props {
   onClose: () => void;
 }
 
-export default function SettingsPanel({ show, apiKey, apiUrl, model, saved, onApiKeyChange, onApiUrlChange, onModelChange, onSave, onClose }: Props) {
+export default function SettingsPanel({
+  show,
+  apiKey,
+  apiUrl,
+  model,
+  saved,
+  onApiKeyChange,
+  onApiUrlChange,
+  onModelChange,
+  onSave,
+  onClose,
+}: Props) {
   if (!show) return null;
 
   return (
@@ -37,7 +48,16 @@ export default function SettingsPanel({ show, apiKey, apiUrl, model, saved, onAp
       <div style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)" }}>
         OpenAI Settings
       </div>
-      <label style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-secondary)", display: "flex", flexDirection: "column", gap: 3 }}>
+      <label
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          color: "var(--proof-text-secondary)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
         API Key
         <input
           value={apiKey}
@@ -55,7 +75,16 @@ export default function SettingsPanel({ show, apiKey, apiUrl, model, saved, onAp
           }}
         />
       </label>
-      <label style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-secondary)", display: "flex", flexDirection: "column", gap: 3 }}>
+      <label
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          color: "var(--proof-text-secondary)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
         API URL
         <input
           value={apiUrl}
@@ -72,7 +101,16 @@ export default function SettingsPanel({ show, apiKey, apiUrl, model, saved, onAp
           }}
         />
       </label>
-      <label style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-secondary)", display: "flex", flexDirection: "column", gap: 3 }}>
+      <label
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          color: "var(--proof-text-secondary)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
         Model
         <input
           value={model}

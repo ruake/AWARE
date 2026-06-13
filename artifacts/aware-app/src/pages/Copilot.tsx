@@ -1,14 +1,38 @@
 import React from "react";
 import { AppLayout } from "@/components/aware/AppLayout";
 import {
-  Bot, AlertCircle, AlertTriangle, Zap, Bug, TrendingUp, Shield, Layers,
-  LineChart, Activity, Search, Wifi, WifiOff, RefreshCw, Bell, Calendar,
-  Copy, Rocket, Heart, Target, FileText, GitCompare, GitFork, BookOpen,
-  GitBranch, ArrowRight, BarChart3, CheckCircle2, XCircle, Timer,
+  Bot,
+  AlertCircle,
+  AlertTriangle,
+  Zap,
+  Bug,
+  TrendingUp,
+  Shield,
+  Layers,
+  LineChart,
+  Activity,
+  Search,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  Bell,
+  Calendar,
+  Copy,
+  Rocket,
+  Heart,
+  Target,
+  FileText,
+  GitCompare,
+  GitFork,
+  BookOpen,
+  GitBranch,
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  XCircle,
+  Timer,
 } from "lucide-react";
-import {
-  AI_USE_CASES, runLangGraphAnalysis, runLangGraphChat, buildAIContext,
-} from "@/lib/ai";
+import { AI_USE_CASES, runLangGraphAnalysis, runLangGraphChat, buildAIContext } from "@/lib/ai";
 import type { AIUseCase } from "@/lib/ai";
 import { getProvider, getLLMConfig, setLLMConfig } from "@/lib/llm";
 import { RUNS } from "@/lib/runs";
@@ -81,7 +105,11 @@ const FOLLOW_UP_MAP: Record<string, string[]> = {
   "suite-health": ["category-health", "coverage-gap"],
   "test-doc-gen": ["coverage-gap", "category-health"],
   "test-redundancy": ["coverage-gap", "test-doc-gen"],
-  "release-readiness": ["build-risk-assessment", "promotion-decision-support", "env-health-summary"],
+  "release-readiness": [
+    "build-risk-assessment",
+    "promotion-decision-support",
+    "env-health-summary",
+  ],
   "env-health-summary": ["env-comparison", "env-drift", "smart-alerting"],
   "regression-report": ["failure-analysis", "build-risk-assessment", "cross-category-correlation"],
   "setup-guide": ["env-health-summary", "release-readiness"],
@@ -94,10 +122,16 @@ function getFollowUpSuggestions(useCaseId: string): { id: string; name: string }
 }
 
 const INTENT_MAP: [RegExp, string][] = [
-  [/\b(release|deploy|rollout|go.?live|ready|ship)\b.*\b(safe|ready|check|status)\b/i, "release-readiness"],
+  [
+    /\b(release|deploy|rollout|go.?live|ready|ship)\b.*\b(safe|ready|check|status)\b/i,
+    "release-readiness",
+  ],
   [/\b(env|environment)\b.*\b(health|status|snapshot|check|how)\b/i, "env-health-summary"],
   [/\bhow are\b.*\b(env|environment|stage|prod|qa|uat)\b/i, "env-health-summary"],
-  [/\b(regress|regression|what changed|diff|compare)\b.*\b(build|last|latest|run)\b/i, "regression-report"],
+  [
+    /\b(regress|regression|what changed|diff|compare)\b.*\b(build|last|latest|run)\b/i,
+    "regression-report",
+  ],
   [/\b(flaky|flip|flakiness|inconsistent)\b/i, "flaky-detection"],
   [/\b(fail|error|broken|crash|what.*wrong)\b/i, "failure-analysis"],
   [/\b(risk|safe.*deploy|deploy.*safe|should.*deploy|can.*deploy)\b/i, "build-risk-assessment"],
@@ -119,7 +153,10 @@ const INTENT_MAP: [RegExp, string][] = [
   [/\b(impact|blast.radius|affect|blast)\b.*\b(fail|error)\b/i, "failure-impact"],
   [/\b(correlat|relation|move.*together)\b/i, "cross-category-correlation"],
   [/\b(frequency|run.*often|schedule|gap)\b/i, "run-frequency"],
-  [/\b(setup|set.?up|fork|configure|config|install|deploy|secret|github.pages|data.branch|validate.config|akamai.?config|environments.yml|test.suites|getting.started|how.do.i|not.working|broken.*ci|ci.*broken|yml.*error|yaml.*error|contractid|groupid|baseur|edgeworker)\b/i, "setup-guide"],
+  [
+    /\b(setup|set.?up|fork|configure|config|install|deploy|secret|github.pages|data.branch|validate.config|akamai.?config|environments.yml|test.suites|getting.started|how.do.i|not.working|broken.*ci|ci.*broken|yml.*error|yaml.*error|contractid|groupid|baseur|edgeworker)\b/i,
+    "setup-guide",
+  ],
 ];
 
 type ProviderStatus = "available" | "downloading" | "unavailable";
@@ -152,10 +189,14 @@ export default function CopilotPage() {
   const debugEndRef = React.useRef<HTMLDivElement | null>(null);
 
   // Auto-scroll messages
-  React.useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  React.useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   // Auto-scroll debug panel
-  React.useEffect(() => { if (showDebugPanel) debugEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [debugLogs, showDebugPanel]);
+  React.useEffect(() => {
+    if (showDebugPanel) debugEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [debugLogs, showDebugPanel]);
 
   // Subscribe to debug logs
   React.useEffect(() => {
@@ -166,14 +207,19 @@ export default function CopilotPage() {
   // Save/load messages to localStorage
   React.useEffect(() => {
     if (messages.length > 0 && !busy) {
-      try { localStorage.setItem("aware_copilot_messages_v2", JSON.stringify(messages)); } catch { /* empty */ }
+      try {
+        localStorage.setItem("aware_copilot_messages_v2", JSON.stringify(messages));
+      } catch {
+        /* empty */
+      }
     }
   }, [messages, busy]);
 
   // Click outside provider menu
   React.useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (providerRef.current && !providerRef.current.contains(e.target as Node)) setShowProviderMenu(false);
+      if (providerRef.current && !providerRef.current.contains(e.target as Node))
+        setShowProviderMenu(false);
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -182,21 +228,40 @@ export default function CopilotPage() {
   // Init
   React.useEffect(() => {
     (async () => {
-      const avail: Record<string, ProviderStatus> = { openai: "available", webllm: "unavailable", chrome: "unavailable" };
-      try { if (await checkWebLLM()) avail.webllm = "available"; } catch { /* empty */ }
-      try { const s = await getChromeAIStatus(); avail.chrome = s; } catch { /* empty */ }
+      const avail: Record<string, ProviderStatus> = {
+        openai: "available",
+        webllm: "unavailable",
+        chrome: "unavailable",
+      };
+      try {
+        if (await checkWebLLM()) avail.webllm = "available";
+      } catch {
+        /* empty */
+      }
+      try {
+        const s = await getChromeAIStatus();
+        avail.chrome = s;
+      } catch {
+        /* empty */
+      }
       setProviderAvail(avail);
       const saved = localStorage.getItem("aware_copilot_messages_v2");
       if (saved) {
-        try { setMessages(JSON.parse(saved)); } catch { /* empty */ }
+        try {
+          setMessages(JSON.parse(saved));
+        } catch {
+          /* empty */
+        }
       } else {
         const ctx = buildAIContext();
-        setMessages([{
-          role: "assistant",
-          content: `Hi! I'm the AWARE Copilot. ${ctx.stats.totalRuns > 0 ? `I see ${ctx.stats.totalRuns} runs across ${Object.keys(ctx.stats.envs || {}).length || "all"} environments. ` : ""}Try a **Quick Analysis** from the sidebar, or just ask me something!`,
-          type: "text",
-          timestamp: Date.now(),
-        }]);
+        setMessages([
+          {
+            role: "assistant",
+            content: `Hi! I'm the AWARE Copilot. ${ctx.stats.totalRuns > 0 ? `I see ${ctx.stats.totalRuns} runs across ${Object.keys(ctx.stats.envs || {}).length || "all"} environments. ` : ""}Try a **Quick Analysis** from the sidebar, or just ask me something!`,
+            type: "text",
+            timestamp: Date.now(),
+          },
+        ]);
       }
       setAiReady(true);
       setLoading(false);
@@ -208,67 +273,145 @@ export default function CopilotPage() {
     setLgState(state);
     setLgHistory((prev) => {
       const existing = prev.findIndex((s) => s.nodeId === state.nodeId);
-      if (existing >= 0) { const n = [...prev]; n[existing] = state; return n; }
+      if (existing >= 0) {
+        const n = [...prev];
+        n[existing] = state;
+        return n;
+      }
       return [...prev, state];
     });
   }, []);
 
   const handleUseCase = async (useCase: AIUseCase) => {
     if (useCase.category !== "setup" && RUNS.length === 0) {
-      setMessages((prev) => [...prev,
+      setMessages((prev) => [
+        ...prev,
         { role: "user", content: useCase.name, type: "use-case", timestamp: Date.now() },
-        { role: "assistant", content: "No test runs loaded yet. Data is fetched at runtime from the `data` branch. Seed data or try **Setup & Configuration Help**.", type: "analysis", timestamp: Date.now() },
+        {
+          role: "assistant",
+          content:
+            "No test runs loaded yet. Data is fetched at runtime from the `data` branch. Seed data or try **Setup & Configuration Help**.",
+          type: "analysis",
+          timestamp: Date.now(),
+        },
       ]);
       return;
     }
     setActiveUseCase(useCase.id);
-    setMessages((prev) => [...prev, { role: "user", content: useCase.name, type: "use-case", timestamp: Date.now() }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", content: useCase.name, type: "use-case", timestamp: Date.now() },
+    ]);
     setBusy(true);
     setLgHistory([]);
     setLgState(null);
     clearLogs();
     try {
-      const result = await runLangGraphAnalysis({ useCaseId: useCase.id, parameters: {} }, handleLgNodeChange);
-      setMessages((prev) => [...prev, { role: "assistant", content: result.details || result.summary, type: "analysis", followUps: getFollowUpSuggestions(useCase.id), timestamp: Date.now() }]);
+      const result = await runLangGraphAnalysis(
+        { useCaseId: useCase.id, parameters: {} },
+        handleLgNodeChange,
+      );
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: result.details || result.summary,
+          type: "analysis",
+          followUps: getFollowUpSuggestions(useCase.id),
+          timestamp: Date.now(),
+        },
+      ]);
     } catch (err: any) {
-      setMessages((prev) => [...prev, { role: "assistant", content: `Error: ${err.message}`, type: "error", timestamp: Date.now() }]);
-    } finally { setBusy(false); }
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Error: ${err.message}`,
+          type: "error",
+          timestamp: Date.now(),
+        },
+      ]);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const handleSend = async () => {
     if (!input.trim() || busy) return;
     const userMsg = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMsg, type: "text", timestamp: Date.now() }]);
-    if (/\b(capabilities|what you can do|what can you do|what do you do|how can you help|what can i (ask|do)|help me|show me what|what do you know)\b/i.test(userMsg)) {
-      setMessages((prev) => [...prev, { role: "assistant", content: "", type: "capabilities", timestamp: Date.now() }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", content: userMsg, type: "text", timestamp: Date.now() },
+    ]);
+    if (
+      /\b(capabilities|what you can do|what can you do|what do you do|how can you help|what can i (ask|do)|help me|show me what|what do you know)\b/i.test(
+        userMsg,
+      )
+    ) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "", type: "capabilities", timestamp: Date.now() },
+      ]);
       return;
     }
     const matched = INTENT_MAP.find(([re]) => re.test(userMsg));
     if (matched) {
       const useCase = AI_USE_CASES.find((uc) => uc.id === matched[1]);
-      if (useCase) { await handleUseCase(useCase); return; }
+      if (useCase) {
+        await handleUseCase(useCase);
+        return;
+      }
     }
     setBusy(true);
     setLgHistory([]);
     setLgState(null);
     clearLogs();
     try {
-      const historyMessages: import("@/lib/types").LLMMessage[] = messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+      const historyMessages: import("@/lib/types").LLMMessage[] = messages.map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      }));
       historyMessages.push({ role: "user", content: userMsg });
       const result = await runLangGraphChat(historyMessages, handleLgNodeChange);
-      setMessages((prev) => [...prev, { role: "assistant", content: result.response, timestamp: Date.now(), charts: result.charts }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: result.response,
+          timestamp: Date.now(),
+          charts: result.charts,
+        },
+      ]);
     } catch (err: any) {
-      setMessages((prev) => [...prev, { role: "assistant", content: `Error: ${err.message}`, type: "error", timestamp: Date.now() }]);
-    } finally { setBusy(false); }
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Error: ${err.message}`,
+          type: "error",
+          timestamp: Date.now(),
+        },
+      ]);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   const handleSaveSettings = async () => {
-    setLLMConfig({ provider: "openai", apiKey: settingsApiKey.trim(), apiUrl: settingsApiUrl.trim() || undefined, model: settingsModel.trim() || "gpt-4o-mini" });
+    setLLMConfig({
+      provider: "openai",
+      apiKey: settingsApiKey.trim(),
+      apiUrl: settingsApiUrl.trim() || undefined,
+      model: settingsModel.trim() || "gpt-4o-mini",
+    });
     setSettingsSaved(true);
     setTimeout(() => setSettingsSaved(false), 2500);
     setShowSettings(false);
@@ -277,7 +420,14 @@ export default function CopilotPage() {
     setActiveUseCase(null);
     setTimeout(() => {
       const ctx = buildAIContext();
-      setMessages([{ role: "assistant", content: `Settings saved. I'm the AWARE Copilot. ${RUNS.length > 0 ? `I see ${RUNS.length} runs.` : ""} Ask me anything!`, type: "text", timestamp: Date.now() }]);
+      setMessages([
+        {
+          role: "assistant",
+          content: `Settings saved. I'm the AWARE Copilot. ${RUNS.length > 0 ? `I see ${RUNS.length} runs.` : ""} Ask me anything!`,
+          type: "text",
+          timestamp: Date.now(),
+        },
+      ]);
       setLoading(false);
     }, 0);
   };
@@ -289,24 +439,46 @@ export default function CopilotPage() {
     setMessages([]);
     setActiveUseCase(null);
     setTimeout(() => {
-      setMessages([{ role: "assistant", content: `Switched to ${type}. Ask me anything!`, type: "text", timestamp: Date.now() }]);
+      setMessages([
+        {
+          role: "assistant",
+          content: `Switched to ${type}. Ask me anything!`,
+          type: "text",
+          timestamp: Date.now(),
+        },
+      ]);
       setLoading(false);
     }, 0);
   };
 
   const toggleExpand = (i: number) => {
-    setExpandedMsgs((prev) => { const n = new Set(prev); if (n.has(i)) n.delete(i); else n.add(i); return n; });
+    setExpandedMsgs((prev) => {
+      const n = new Set(prev);
+      if (n.has(i)) n.delete(i);
+      else n.add(i);
+      return n;
+    });
   };
 
   const copyMessage = async (i: number, content: string) => {
-    try { await navigator.clipboard.writeText(content); setCopiedIndex(i); setTimeout(() => setCopiedIndex(null), 2000); } catch { /* empty */ }
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedIndex(i);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch {
+      /* empty */
+    }
   };
 
   const newChat = () => {
     setMessages([]);
     setActiveUseCase(null);
     setExpandedMsgs(new Set());
-    try { localStorage.removeItem("aware_copilot_messages_v2"); } catch { /* empty */ }
+    try {
+      localStorage.removeItem("aware_copilot_messages_v2");
+    } catch {
+      /* empty */
+    }
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
@@ -314,9 +486,28 @@ export default function CopilotPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1, gap: 10 }}>
-          <div style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid var(--proof-border)", borderTopColor: "var(--proof-blue)", animation: "spin 0.8s linear infinite" }} />
-          <span style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>Loading Copilot…</span>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flex: 1,
+            gap: 10,
+          }}
+        >
+          <div
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: "50%",
+              border: "2px solid var(--proof-border)",
+              borderTopColor: "var(--proof-blue)",
+              animation: "spin 0.8s linear infinite",
+            }}
+          />
+          <span style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>
+            Loading Copilot…
+          </span>
         </div>
       </AppLayout>
     );
@@ -326,16 +517,42 @@ export default function CopilotPage() {
     <AppLayout>
       <div style={{ display: "flex", height: "calc(100vh - 64px)", gap: 8, padding: 4 }}>
         {/* Sidebar */}
-        <Sidebar activeUseCase={activeUseCase} useCaseIcons={USE_CASE_ICONS} onSelect={handleUseCase} />
+        <Sidebar
+          activeUseCase={activeUseCase}
+          useCaseIcons={USE_CASE_ICONS}
+          onSelect={handleUseCase}
+        />
 
         {/* Main Chat Area */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
           {/* Top Bar */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, paddingBottom: 8, borderBottom: "1px solid var(--proof-border)", flexWrap: "wrap" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              paddingBottom: 8,
+              borderBottom: "1px solid var(--proof-border)",
+              flexWrap: "wrap",
+            }}
+          >
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Bot size={16} style={{ color: "var(--proof-blue)" }} />
               <span style={{ fontSize: 13, fontWeight: 700 }}>AWARE Copilot</span>
-              {aiReady && <span style={{ fontSize: 9, padding: "1px 5px", borderRadius: 3, background: "#22c55e20", color: "#22c55e", fontWeight: 600 }}>Ready</span>}
+              {aiReady && (
+                <span
+                  style={{
+                    fontSize: 9,
+                    padding: "1px 5px",
+                    borderRadius: 3,
+                    background: "#22c55e20",
+                    color: "#22c55e",
+                    fontWeight: 600,
+                  }}
+                >
+                  Ready
+                </span>
+              )}
             </span>
             <div style={{ flex: 1 }} />
             <ProviderSelector
@@ -344,7 +561,10 @@ export default function CopilotPage() {
               showProviderMenu={showProviderMenu}
               providerRef={providerRef}
               onSwitch={switchProvider}
-              onToggleMenu={() => { setShowSettings((p) => !p); setShowProviderMenu(false); }}
+              onToggleMenu={() => {
+                setShowSettings((p) => !p);
+                setShowProviderMenu(false);
+              }}
             />
             <SettingsPanel
               show={showSettings}
@@ -365,7 +585,22 @@ export default function CopilotPage() {
               onToggle={() => setShowDebugPanel((p) => !p)}
               onClear={clearLogs}
             />
-            <button onClick={newChat} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: "pointer", border: "1px solid var(--proof-border)", background: "var(--proof-surface)", color: "var(--proof-text-secondary)" }}>
+            <button
+              onClick={newChat}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "4px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 600,
+                cursor: "pointer",
+                border: "1px solid var(--proof-border)",
+                background: "var(--proof-surface)",
+                color: "var(--proof-text-secondary)",
+              }}
+            >
               New Chat
             </button>
           </div>

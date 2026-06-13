@@ -13,7 +13,10 @@ interface Props {
   onToggleMenu: () => void;
 }
 
-const PROVIDER_META: Record<LLMProviderType, { label: string; icon: React.ReactNode; color: string }> = {
+const PROVIDER_META: Record<
+  LLMProviderType,
+  { label: string; icon: React.ReactNode; color: string }
+> = {
   openai: { label: "OpenAI", icon: <Globe size={12} />, color: "#10a37f" },
   webllm: { label: "WebLLM", icon: <Cpu size={12} />, color: "#8b5cf6" },
   chrome: { label: "Chrome AI", icon: <Zap size={12} />, color: "#4285f4" },
@@ -66,7 +69,11 @@ export default function ProviderSelector({
                 transition: "all 0.12s",
               }}
             >
-              {loading ? <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} /> : meta.icon}
+              {loading ? (
+                <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} />
+              ) : (
+                meta.icon
+              )}
               {meta.label}
               {status === "available" && <CheckCircle2 size={9} style={{ color: meta.color }} />}
             </button>
