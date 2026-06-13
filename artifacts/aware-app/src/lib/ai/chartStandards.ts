@@ -315,9 +315,7 @@ export function enforceChartStandards(response: string): string {
       if (!chart.colors || chart.colors.length === 0) {
         chart.colors = chart.rows.map((_, i) => STANDARD_PALETTE[i % STANDARD_PALETTE.length]);
       } else if (chart.colors.length === 1 && chart.rows.length > 1) {
-        chart.colors = chart.rows.map(
-          (_, i) => STANDARD_PALETTE[i % STANDARD_PALETTE.length],
-        );
+        chart.colors = chart.rows.map((_, i) => STANDARD_PALETTE[i % STANDARD_PALETTE.length]);
       }
     }
 

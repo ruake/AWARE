@@ -51,14 +51,38 @@ export default function MessageList({
   });
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, padding: "8px 0" }}>
+    <div
+      style={{
+        flex: 1,
+        overflowY: "auto",
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        padding: "8px 0",
+      }}
+    >
       {messages.map((msg, i) => {
         if (msg.type === "capabilities") {
           return (
-            <div key={i} style={{ display: "flex", gap: 8, alignItems: "center", padding: "12px 16px", borderRadius: 10, background: "var(--proof-surface-2)", border: "1px solid var(--proof-border-strong)", fontSize: 12, color: "var(--proof-text-secondary)" }}>
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                padding: "12px 16px",
+                borderRadius: 10,
+                background: "var(--proof-surface-2)",
+                border: "1px solid var(--proof-border-strong)",
+                fontSize: 12,
+                color: "var(--proof-text-secondary)",
+              }}
+            >
               <Bot size={18} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
               <span>
-                I can analyze test runs, detect flaky tests, compare environments, assess deployment risk, generate reports, and more. Try a <strong>Quick Analysis</strong> from the sidebar or just ask a question.
+                I can analyze test runs, detect flaky tests, compare environments, assess deployment
+                risk, generate reports, and more. Try a <strong>Quick Analysis</strong> from the
+                sidebar or just ask a question.
               </span>
             </div>
           );

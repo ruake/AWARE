@@ -97,7 +97,10 @@ function unwrapSingleColumns(content: string): string {
   const closeIdx = findMatchingClose(content, startIdx + startMatch[0].length);
   if (closeIdx === -1) return content;
   const inner = content.slice(startIdx + startMatch[0].length, closeIdx).trim();
-  const cols = inner.split(/\n---+\n/).map((c) => c.trim()).filter(Boolean);
+  const cols = inner
+    .split(/\n---+\n/)
+    .map((c) => c.trim())
+    .filter(Boolean);
   if (cols.length >= 2) return content;
   return content.slice(0, startIdx) + inner + content.slice(closeIdx + 3);
 }

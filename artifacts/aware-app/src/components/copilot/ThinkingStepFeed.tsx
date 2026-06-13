@@ -67,9 +67,7 @@ export default function ThinkingStepFeed({ lgState, lgHistory, busy }: Props) {
             {lgState.label}
           </span>
         ) : (
-          <span style={{ color: "var(--proof-text-secondary)", fontSize: 12 }}>
-            Analyzing…
-          </span>
+          <span style={{ color: "var(--proof-text-secondary)", fontSize: 12 }}>Analyzing…</span>
         )}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -96,9 +94,17 @@ export default function ThinkingStepFeed({ lgState, lgHistory, busy }: Props) {
               ) : st.status === "error" ? (
                 <XCircle size={9} style={{ color: "#ef4444", flexShrink: 0 }} />
               ) : (
-                <Loader2 size={9} style={{ color: "#5b8af5", flexShrink: 0, animation: "spin 1s linear infinite" }} />
+                <Loader2
+                  size={9}
+                  style={{ color: "#5b8af5", flexShrink: 0, animation: "spin 1s linear infinite" }}
+                />
               )}
-              <span style={{ color: "var(--proof-text)", fontWeight: st.status === "running" ? 600 : 400 }}>
+              <span
+                style={{
+                  color: "var(--proof-text)",
+                  fontWeight: st.status === "running" ? 600 : 400,
+                }}
+              >
                 {st.label}
               </span>
               {st.detail && (
@@ -115,8 +121,22 @@ export default function ThinkingStepFeed({ lgState, lgHistory, busy }: Props) {
                 fontSize: 8,
                 padding: "1px 5px",
                 borderRadius: 3,
-                background: s.status === "completed" ? "#22c55e20" : s.status === "running" ? "#5b8af520" : s.status === "error" ? "#ef444420" : "var(--proof-grey-bg)",
-                color: s.status === "completed" ? "#22c55e" : s.status === "running" ? "#5b8af5" : s.status === "error" ? "#ef4444" : "var(--proof-text-muted)",
+                background:
+                  s.status === "completed"
+                    ? "#22c55e20"
+                    : s.status === "running"
+                      ? "#5b8af520"
+                      : s.status === "error"
+                        ? "#ef444420"
+                        : "var(--proof-grey-bg)",
+                color:
+                  s.status === "completed"
+                    ? "#22c55e"
+                    : s.status === "running"
+                      ? "#5b8af5"
+                      : s.status === "error"
+                        ? "#ef4444"
+                        : "var(--proof-text-muted)",
                 fontWeight: 600,
                 display: "flex",
                 alignItems: "center",
