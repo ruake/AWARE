@@ -123,11 +123,7 @@ function RunRow({
             {run.suiteId}
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
-            <span
-              style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}
-            >
-              {run.env}
-            </span>
+            <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>{run.env}</span>
             <NetworkBadge network={run.network} />
           </div>
         </div>
@@ -500,10 +496,7 @@ export default function Runs() {
         <PanelErrorBoundary label="Runs table">
           <div className="proof-card" style={{ overflow: "hidden" }}>
             <div style={{ overflowX: "auto" }}>
-              <table
-                className="proof-table"
-                style={{ width: "100%" }}
-              >
+              <table className="proof-table" style={{ width: "100%" }}>
                 <colgroup>
                   <col />
                   <col />

@@ -167,9 +167,7 @@ function RunRow({ run, onClick }: { run: Run; onClick: (id: string) => void }) {
           >
             {run.suiteId}
           </span>
-          <span
-            style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}
-          >
+          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
             {run.env}
             {run.network && (
               <span
@@ -736,10 +734,7 @@ export default function Pulse() {
             </div>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table
-                className="proof-table"
-                style={{ width: "100%" }}
-              >
+              <table className="proof-table" style={{ width: "100%" }}>
                 <colgroup>
                   <col />
                   <col />
@@ -762,11 +757,7 @@ export default function Pulse() {
                 </thead>
                 <tbody>
                   {filtered.map((run) => (
-                    <RunRow
-                      key={run.id}
-                      run={run}
-                      onClick={(id) => navigate(`/runs/${id}`)}
-                    />
+                    <RunRow key={run.id} run={run} onClick={(id) => navigate(`/runs/${id}`)} />
                   ))}
                 </tbody>
               </table>
