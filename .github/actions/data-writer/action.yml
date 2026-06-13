@@ -1,0 +1,146 @@
+# =============================================================================
+# Data Writer — PersistentVolume Controller (Kubernetes pattern)
+#
+# The ONLY composite action that may commit to the `data` branch.
+# Every other job produces files locally, then calls this action once.
+#
+# Enforces the single-writer invariant: no other workflow or action
+# should ever `git push` to the data branch directly. Like a K8s PV
+# controller, it serializes all writes through one authority.
+#
+# Features:
+#   - Exponential backoff retry (up to 3 attempts) for push conflicts
+#   - Creates branch if it doesn't exist (orphan init)
+#   - Preserves all existing data (fetch → merge strategy)
+#   - Signs commits with the github-actions bot identity
+#
+# Called by: job-playwright.yml, job-pytest.yml, controller.yml, sync-data.yml
+# =============================================================================
+name: "Data Writer"
+description: "Single-authority writer to the data branch (PV controller pattern)"
+
+inputs:
+  files:
+    description: "Space-separated list of local file paths to copy to the branch"
+    required: true
+  dest-paths:
+    description: "Space-separated destination filenames on the branch (same order as files)"
+    required: true
+  commit-message:
+    description: "Git commit message"
+    required: true
+  branch:
+    description: "Target branch name"
+    required: false
+    default: "data"
+  github-token:
+    description: "GitHub token with contents: write permission"
+    required: true
+  max-retries:
+    description: "Max push retry attempts (exponential backoff)"
+    required: false
+    default: "3"
+
+outputs:
+  committed:
+    description: "'true' if a commit was made, 'false' if nothing changed"
+    value: ${{ steps.write.outputs.committed }}
+  sha:
+    description: "Commit SHA if committed, empty otherwise"
+    value: ${{ steps.write.outputs.sha }}
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Write to data branch
+      id: write
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        DATA_BRANCH: ${{ inputs.branch }}
+        FILES: ${{ inputs.files }}
+        DEST_PATHS: ${{ inputs.dest-paths }}
+        COMMIT_MSG: ${{ inputs.commit-message }}
+        MAX_RETRIES: ${{ inputs.max-retries }}
+      run: |
+        set -euo pipefail
+
+        git config --global user.name  "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+
+        # ── Work in a temp directory to avoid polluting the main checkout ────
+        WORK_DIR=$(mktemp -d)
+        trap "rm -rf $WORK_DIR" EXIT
+
+        # Resolve source files to absolute paths before cd
+        declare -a SRC_ABS=()
+        for F in $FILES; do
+          ABS=$(realpath "$F" 2>/dev/null || echo "$GITHUB_WORKSPACE/$F")
+          SRC_ABS+=("$ABS")
+        done
+
+        cd "$WORK_DIR"
+
+        # ── Clone or init the data branch ─────────────────────────────────
+        if git ls-remote --heads "$REMOTE" "$DATA_BRANCH" | grep -q "$DATA_BRANCH"; then
+          git clone --depth=1 --branch="$DATA_BRANCH" "$REMOTE" repo
+        else
+          echo "Branch '$DATA_BRANCH' not found — initializing as orphan"
+          mkdir repo && cd repo
+          git init
+          git remote add origin "$REMOTE"
+          git checkout --orphan "$DATA_BRANCH"
+          git commit --allow-empty -m "chore: initialize $DATA_BRANCH branch [skip ci]"
+          cd ..
+        fi
+
+        # ── Copy source files into the branch workspace ───────────────────
+        read -ra DESTS <<< "$DEST_PATHS"
+        IDX=0
+        for SRC in "${SRC_ABS[@]}"; do
+          DEST="${DESTS[$IDX]:-$(basename $SRC)}"
+          # Create parent dirs if needed
+          mkdir -p "repo/$(dirname $DEST)"
+          cp -f "$SRC" "repo/$DEST"
+          echo "  Wrote: $DEST"
+          IDX=$((IDX + 1))
+        done
+
+        cd repo
+
+        # ── Check if anything actually changed ────────────────────────────
+        git add -A
+        if git diff --cached --quiet; then
+          echo "No changes to commit — data branch already up to date"
+          echo "committed=false" >> "$GITHUB_OUTPUT"
+          echo "sha="            >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        git commit -m "$COMMIT_MSG"
+
+        # ── Push with exponential backoff (handles race conditions) ──────
+        ATTEMPT=1
+        DELAY=2
+        while [ $ATTEMPT -le $MAX_RETRIES ]; do
+          echo "Push attempt $ATTEMPT / $MAX_RETRIES …"
+          if git push "$REMOTE" "HEAD:$DATA_BRANCH"; then
+            SHA=$(git rev-parse HEAD)
+            echo "committed=true" >> "$GITHUB_OUTPUT"
+            echo "sha=$SHA"       >> "$GITHUB_OUTPUT"
+            echo "✅ Pushed $DATA_BRANCH @ $SHA"
+            exit 0
+          fi
+          echo "Push failed — fetching and rebasing before retry"
+          git fetch "$REMOTE" "$DATA_BRANCH"
+          git rebase "origin/$DATA_BRANCH" || git rebase --abort
+          ATTEMPT=$((ATTEMPT + 1))
+          sleep $DELAY
+          DELAY=$((DELAY * 2))
+        done
+
+        echo "::error::Data writer: all $MAX_RETRIES push attempts failed"
+        exit 1

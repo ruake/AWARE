@@ -1,0 +1,81 @@
+# =============================================================================
+# Promotion Gate — Readiness Probe (Kubernetes pattern)
+#
+# Evaluates whether a test run meets the quality threshold required for
+# UAT → PROD promotion. Analogous to a K8s readiness probe: the pod
+# (run) is only marked Ready if the probe passes.
+#
+# Decision matrix:
+#   tier = QA   → always "skip"  (QA never auto-promotes)
+#   tier = UAT  → "promote" if pass-rate ≥ min-pass-rate, else "block"
+#   tier = PROD → always "skip"  (PROD is the destination, not origin)
+#
+# Called by: aware-operator
+# =============================================================================
+name: "Promotion Gate"
+description: "Readiness probe: evaluates pass-rate against promotion threshold"
+
+inputs:
+  pass-rate:
+    description: "Observed pass rate 0–100"
+    required: true
+  tier:
+    description: "Environment tier: QA | UAT | PROD"
+    required: true
+  min-pass-rate:
+    description: "Minimum pass rate required for promotion (default: 95)"
+    required: false
+    default: "95"
+
+outputs:
+  decision:
+    description: "promote | block | skip"
+    value: ${{ steps.evaluate.outputs.decision }}
+  reason:
+    description: "Human-readable explanation of the decision"
+    value: ${{ steps.evaluate.outputs.reason }}
+  promoted:
+    description: "'true' if decision == promote"
+    value: ${{ steps.evaluate.outputs.promoted }}
+  gate-triggered:
+    description: "'true' if the gate actually evaluated (tier == UAT)"
+    value: ${{ steps.evaluate.outputs.gate_triggered }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Evaluate promotion gate
+      id: evaluate
+      shell: bash
+      run: |
+        TIER="${{ inputs.tier }}"
+        PASS_RATE="${{ inputs.pass-rate }}"
+        MIN_RATE="${{ inputs.min-pass-rate }}"
+
+        # Only UAT tier triggers promotion evaluation
+        if [ "$TIER" != "UAT" ]; then
+          echo "decision=skip"         >> "$GITHUB_OUTPUT"
+          echo "reason=Gate only applies to UAT tier (this is $TIER)" >> "$GITHUB_OUTPUT"
+          echo "promoted=false"        >> "$GITHUB_OUTPUT"
+          echo "gate_triggered=false"  >> "$GITHUB_OUTPUT"
+          echo "ℹ️  Gate skipped — tier is $TIER (gate only fires on UAT)"
+          exit 0
+        fi
+
+        echo "gate_triggered=true" >> "$GITHUB_OUTPUT"
+
+        # Floating-point safe comparison using awk
+        PASSES=$(awk "BEGIN { print ($PASS_RATE >= $MIN_RATE) ? 1 : 0 }")
+
+        if [ "$PASSES" = "1" ]; then
+          echo "decision=promote"  >> "$GITHUB_OUTPUT"
+          echo "reason=Pass rate ${PASS_RATE}% meets threshold ${MIN_RATE}% — UAT → PROD promotion approved" >> "$GITHUB_OUTPUT"
+          echo "promoted=true"     >> "$GITHUB_OUTPUT"
+          echo "✅ PROMOTE: ${PASS_RATE}% ≥ ${MIN_RATE}%"
+        else
+          echo "decision=block"    >> "$GITHUB_OUTPUT"
+          echo "reason=Pass rate ${PASS_RATE}% is below threshold ${MIN_RATE}% — UAT → PROD promotion blocked" >> "$GITHUB_OUTPUT"
+          echo "promoted=false"    >> "$GITHUB_OUTPUT"
+          echo "::warning title=Promotion Blocked::Pass rate ${PASS_RATE}% is below the ${MIN_RATE}% threshold. UAT → PROD promotion blocked."
+          echo "🚫 BLOCK: ${PASS_RATE}% < ${MIN_RATE}%"
+        fi

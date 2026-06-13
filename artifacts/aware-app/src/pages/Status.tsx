@@ -34,36 +34,21 @@ const HEALTH = {
 };
 
 const STAGES = [
-  { id: "code", n: "Code Push", icon: Code2, c: "#2563eb", d: "Push triggers CI pipeline" },
-  { id: "ci", n: "GitHub Actions", icon: Github, c: "#8b5cf6", d: "Workflow dispatches tests" },
-  {
-    id: "test",
-    n: "Test Execution",
-    icon: Server,
-    c: "#f59e0b",
-    d: "Playwright + pytest across 6 envs",
-  },
-  {
-    id: "ingest",
-    n: "Results Ingest",
-    icon: Zap,
-    c: "#10b981",
-    d: "Outcomes pushed to AWARE store",
-  },
-  {
-    id: "analyze",
-    n: "Analysis",
-    icon: Activity,
-    c: "#f97316",
-    d: "Rates, diffs, anomalies computed",
-  },
-  {
-    id: "gate",
-    n: "Promotion Gate",
-    icon: Shield,
-    c: "#ef4444",
-    d: "≥95% pass rate required for PROD",
-  },
+  { id: "push",     n: "Git Push",        icon: Code2,           c: "#2563eb", d: "Push to main triggers controller.yml" },
+  { id: "ctrl",     n: "Controller",      icon: Github,          c: "#8b5cf6", d: "Cron reconciler dispatches job workflows" },
+  { id: "operator", n: "aware-operator",  icon: Box,             c: "#0ea5e9", d: "Job lifecycle: pending → running → done" },
+  { id: "runner",   n: "test-runner",     icon: Server,          c: "#f59e0b", d: "Playwright + pytest pods run in parallel" },
+  { id: "writer",   n: "data-writer",     icon: Zap,             c: "#10b981", d: "Results committed to data branch" },
+  { id: "gate",     n: "promotion-gate",  icon: Shield,          c: "#ef4444", d: "≥95% pass rate required for PROD" },
+  { id: "deploy",   n: "deploy-site",     icon: LayoutDashboard, c: "#a855f7", d: "Site branch → GitHub Pages" },
+];
+
+const COMPOSITE_ACTIONS = [
+  { name: "aware-operator",  role: "Operator",      color: "#0ea5e9", desc: "Run lifecycle controller — pending → running → done → promoted" },
+  { name: "test-runner",     role: "Pod Template",  color: "#f59e0b", desc: "Checkout tests branch, install, run Playwright or pytest" },
+  { name: "data-writer",     role: "Data Authority", color: "#10b981", desc: "Sole writer to the data branch — commits results JSON" },
+  { name: "promotion-gate",  role: "Readiness Probe", color: "#ef4444", desc: "Evaluates ≥95% pass rate; blocks or approves UAT→PROD" },
+  { name: "setup-node",      role: "Init Container", color: "#8b5cf6", desc: "Reusable Node 20 + pnpm bootstrap for all jobs" },
 ];
 
 export default function Status() {
@@ -172,7 +157,7 @@ export default function Status() {
                     lineHeight: 1.5,
                   }}
                 >
-                  GitHub Actions → test results → promotion decision · {sorted.length} runs,{" "}
+                  Composite actions + K8s-inspired operators · controller.yml → test-runner pods → promotion gate · {sorted.length} runs,{" "}
                   {sched.summary.total} suites, {sched.summary.scheduled} scheduled
                 </p>
               </div>
@@ -459,6 +444,47 @@ export default function Status() {
                   </span>
                 </div>
               </div>
+            </div>
+          </section>
+
+          {/* ══════════ COMPOSITE ACTIONS — K8s operator cards ══════════ */}
+          <section style={{ padding: "20px 0 8px" }}>
+            <div style={{ marginBottom: 10 }}>
+              <span style={{ fontSize: 9, fontWeight: 700, color: "var(--proof-text-muted)", textTransform: "uppercase", letterSpacing: "1px" }}>
+                Architecture
+              </span>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "var(--proof-text)", letterSpacing: "-0.5px", marginTop: 2 }}>
+                Composite Actions
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
+              {COMPOSITE_ACTIONS.map((a) => (
+                <div
+                  key={a.name}
+                  style={{
+                    padding: "12px 10px",
+                    borderRadius: 8,
+                    border: `1px solid ${a.color}18`,
+                    background: `linear-gradient(135deg, ${a.color}06, transparent)`,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: a.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: 9, fontWeight: 700, color: a.color, textTransform: "uppercase", letterSpacing: "0.4px" }}>
+                      {a.role}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-text)", fontFamily: "var(--font-mono)" }}>
+                    {a.name}
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", lineHeight: 1.4 }}>
+                    {a.desc}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 

@@ -1,0 +1,143 @@
+# =============================================================================
+# pytest Job — Job Template (Kubernetes pattern)
+#
+# Pure pytest execution template. Parallel workers via pytest-xdist.
+# Checks out the `tests` branch where Python test files and config live.
+#
+# Triggered by: controller.yml (via gh workflow run) or manual dispatch
+# =============================================================================
+name: "Job: pytest"
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite_id:
+        description: "Suite ID / pytest marker"
+        required: true
+        default: "suite_api"
+      env_label:
+        description: "Environment label (e.g. 'UAT / Staging')"
+        required: true
+        default: "UAT / Staging"
+      tier:
+        description: "Tier: QA | UAT | PROD"
+        required: true
+        default: "UAT"
+      network:
+        description: "Akamai network: staging | production"
+        required: true
+        default: "staging"
+      base_url:
+        description: "Target base URL"
+        required: true
+        default: "https://your-domain.com"
+      parallelism:
+        description: "pytest-xdist workers"
+        required: false
+        default: "4"
+      tests_ref:
+        description: "tests branch ref"
+        required: false
+        default: "tests"
+
+concurrency:
+  group: "pytest-${{ inputs.suite_id }}-${{ inputs.env_label }}"
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  statuses: write
+  actions: read
+
+env:
+  WORKING_DIR: artifacts/aware-app
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  run:
+    name: "pytest — ${{ inputs.suite_id }} @ ${{ inputs.env_label }}"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Setup Node + pnpm
+        uses: ./.github/actions/setup-node
+        with:
+          working-dir: ${{ env.WORKING_DIR }}
+
+      - name: Run pytest
+        id: runner
+        uses: ./.github/actions/test-runner
+        with:
+          runner-type: pytest
+          suite-id: ${{ inputs.suite_id }}
+          env-label: ${{ inputs.env_label }}
+          base-url: ${{ inputs.base_url }}
+          network: ${{ inputs.network }}
+          tier: ${{ inputs.tier }}
+          parallelism: ${{ inputs.parallelism }}
+          working-dir: ${{ env.WORKING_DIR }}
+          tests-ref: ${{ inputs.tests_ref }}
+
+      - name: Generate run JSON
+        id: run-json
+        shell: bash
+        run: |
+          RUN_TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          RUN_ID="${{ inputs.suite_id }}-$(date -u +%Y%m%dT%H%M%S)"
+          cat > /tmp/new-run.json << EOF
+          {
+            "id": "$RUN_ID",
+            "suite": "${{ inputs.suite_id }}",
+            "env": "${{ inputs.tier }}",
+            "envLabel": "${{ inputs.env_label }}",
+            "tier": "${{ inputs.tier }}",
+            "network": "${{ inputs.network }}",
+            "started": "$RUN_TS",
+            "duration": ${{ steps.runner.outputs.duration-ms }},
+            "passed": ${{ steps.runner.outputs.passed }},
+            "failed": ${{ steps.runner.outputs.failed }},
+            "total": ${{ steps.runner.outputs.total }},
+            "passPct": ${{ steps.runner.outputs.pass-rate }},
+            "failures": ${{ steps.runner.outputs.failed }},
+            "runnerType": "pytest",
+            "ghRunId": "${{ github.run_id }}"
+          }
+          EOF
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          node -e "
+            const fs = require('fs');
+            const existing = JSON.parse(fs.readFileSync('${{ env.WORKING_DIR }}/data/runs.json','utf8'));
+            const newRun = JSON.parse(fs.readFileSync('/tmp/new-run.json','utf8'));
+            existing.unshift(newRun);
+            fs.writeFileSync('${{ env.WORKING_DIR }}/data/runs.json', JSON.stringify(existing, null, 2));
+          "
+
+      - name: Run AWARE Operator
+        uses: ./.github/actions/aware-operator
+        with:
+          suite-id: ${{ inputs.suite_id }}
+          env-label: ${{ inputs.env_label }}
+          tier: ${{ inputs.tier }}
+          network: ${{ inputs.network }}
+          run-id: ${{ steps.run-json.outputs.run_id }}
+          pass-rate: ${{ steps.runner.outputs.pass-rate }}
+          failures: ${{ steps.runner.outputs.failed }}
+          total-tests: ${{ steps.runner.outputs.total }}
+          duration-ms: ${{ steps.runner.outputs.duration-ms }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write runs.json to data branch
+        uses: ./.github/actions/data-writer
+        with:
+          files: "${{ env.WORKING_DIR }}/data/runs.json"
+          dest-paths: "runs.json"
+          commit-message: "run: ${{ steps.run-json.outputs.run_id }} — ${{ inputs.suite_id }} @ ${{ inputs.env_label }} (${{ steps.runner.outputs.pass-rate }}%) [skip ci]"
+          github-token: ${{ secrets.GITHUB_TOKEN }}

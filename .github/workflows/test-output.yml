@@ -1,14 +1,4 @@
-name: Test Output Removal
-on:
-  workflow_dispatch:
-permissions:
-  contents: read
-jobs:
-  validate-config:
-    name: Validate AWARE config
-    uses: ./.github/workflows/validate-config.yml
-  test-job:
-    needs: [validate-config]
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "OK"
+# DEPRECATED — functionality absorbed into data-writer composite action
+# This file is intentionally inert (no triggers). Safe to delete.
+on: {}
+jobs: {}
