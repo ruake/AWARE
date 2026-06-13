@@ -3,7 +3,6 @@ import { AppLayout } from "@/components/aware/AppLayout";
 import {
   Send,
   Bot,
-  User,
   AlertCircle,
   Zap,
   Bug,
@@ -13,8 +12,6 @@ import {
   LineChart,
   Activity,
   Search,
-  ChevronDown,
-  ChevronUp,
   Wifi,
   WifiOff,
   Cpu,
@@ -22,11 +19,8 @@ import {
   Settings,
   Loader2,
   RefreshCw,
-  Copy,
-  Check,
   BookOpen,
   Terminal,
-  Eye,
   EyeOff,
   GitBranch,
   ArrowRight,
@@ -48,7 +42,7 @@ import { getProvider, getLLMConfig, setLLMConfig } from "@/lib/llm";
 import { RUNS } from "@/lib/runs";
 import type { LLMProviderType, LLMMessage } from "@/lib/types";
 import { checkWebLLM, getChromeAIStatus } from "@/lib/llm";
-import { Markdown } from "@/components/aware/Markdown";
+import ChatMessage, { type ChatMsg } from "@/components/aware/ChatMessage";
 import type { LangGraphExecutionState } from "@/lib/ai/langGraphTypes";
 import { getLogs, subscribeLogs, clearLogs } from "@/lib/ai/debugLogger";
 import { getSkillDefinition } from "@/lib/ai/skillRegistry";
@@ -174,9 +168,7 @@ async function probeProvider(type: LLMProviderType): Promise<ProviderStatus> {
 
 export default function Copilot() {
   const [_activeUseCase, setActiveUseCase] = React.useState<string | null>(null);
-  const [messages, setMessages] = React.useState<
-    { role: string; content: string; type?: string; followUps?: { id: string; name: string }[] }[]
-  >([]);
+  const [messages, setMessages] = React.useState<ChatMsg[]>([]);
   const [input, setInput] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const [aiReady, setAiReady] = React.useState(false);
@@ -235,6 +227,7 @@ export default function Copilot() {
         role: "assistant",
         content: `Hello! I'm **A.W.A.R.E. Copilot** — analyzing **${ctx.stats.totalRuns} runs** across **${ctx.stats.totalSuites} suites** with **${ctx.stats.totalTests} tests** (avg ${ctx.stats.avgPassRate}% pass rate).\n\n**Provider:** ${PROVIDER_META[currentProvider].label} — ${currentOk ? "✅ Connected" : "❌ Unavailable"}${currentOk ? "" : "\n\n> Switch providers using the dropdown above, or configure an API key."}\n\n### Latest Run: \`${lastRun?.id}\`\n\n| Detail | Value |\n|--------|-------|\n| Label | ${lastRun?.label} |\n| Status | **${lastRun?.status}** |\n| Pass Rate | ${lastRun?.passPct}% |\n| Failures | ${lastRun?.failures} |\n| Duration | ${lastRun?.duration} |\n| Environment | ${lastRun?.env} / ${lastRun?.envId} |\n| Build | \`${lastRun?.build}\` |\n\nSelect an analysis type from the sidebar or ask a question.`,
         type: "intro",
+        timestamp: Date.now(),
       };
       setMessages([intro]);
       persistMessages([intro]);
@@ -354,7 +347,7 @@ export default function Copilot() {
 
   const handleUseCase = async (useCase: AIUseCase) => {
     setActiveUseCase(useCase.id);
-    setMessages((prev) => [...prev, { role: "user", content: useCase.name, type: "use-case" }]);
+    setMessages((prev) => [...prev, { role: "user", content: useCase.name, type: "use-case", timestamp: Date.now() }]);
     setBusy(true);
     setLgHistory([]);
     setLgState(null);
@@ -373,13 +366,14 @@ export default function Copilot() {
           content: resultText,
           type: "analysis",
           followUps: getFollowUpSuggestions(useCase.id),
+          timestamp: Date.now(),
         },
       ]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: `Error: ${err.message}`, type: "error" },
+        { role: "assistant", content: `Error: ${err.message}`, type: "error", timestamp: Date.now() },
       ]);
     } finally {
       setBusy(false);
@@ -433,11 +427,11 @@ export default function Copilot() {
     if (!input.trim() || busy) return;
     const userMsg = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMsg, type: "text" }]);
+    setMessages((prev) => [...prev, { role: "user", content: userMsg, type: "text", timestamp: Date.now() }]);
 
     // Intercept capability questions — show quick-action bubbles instantly
     if (CAPABILITY_RE.test(userMsg)) {
-      setMessages((prev) => [...prev, { role: "assistant", content: "", type: "capabilities" }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "", type: "capabilities", timestamp: Date.now() }]);
       return;
     }
 
@@ -464,6 +458,7 @@ export default function Copilot() {
               content: resultText,
               type: "analysis",
               followUps: getFollowUpSuggestions(useCaseId),
+              timestamp: Date.now(),
             },
           ]);
         } catch {
@@ -496,12 +491,12 @@ export default function Copilot() {
       const { response, charts } = await runLangGraphChat(historyMessages, handleLgNodeChange);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: response, type: "chat", charts },
+        { role: "assistant", content: response, type: "chat", charts, timestamp: Date.now() },
       ]);
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: `Error: ${err.message}`, type: "error" },
+        { role: "assistant", content: `Error: ${err.message}`, type: "error", timestamp: Date.now() },
       ]);
     } finally {
       setBusy(false);
@@ -1052,330 +1047,36 @@ export default function Copilot() {
               padding: "8px 0",
             }}
           >
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  alignItems: "flex-start",
-                  alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-                  maxWidth: msg.role === "user" ? "75%" : "92%",
-                }}
-              >
-                {msg.role === "assistant" && (
-                  <div
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: "50%",
-                      background: "linear-gradient(135deg, #3d6ff5 0%, #7c6af5 100%)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                      marginTop: 2,
-                      boxShadow: "0 0 0 2px rgba(91,138,245,0.2)",
-                    }}
-                  >
-                    <Bot size={13} style={{ color: "white" }} />
-                  </div>
-                )}
-                <div
-                  style={{
-                    padding: msg.role === "user" ? "10px 15px" : "14px 18px",
-                    borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "4px 16px 16px 16px",
-                    fontSize: 13,
-                    lineHeight: 1.7,
-                    background:
-                      msg.role === "user"
-                        ? "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)"
-                        : "var(--proof-surface-2)",
-                    color: msg.role === "user" ? "white" : "var(--proof-text)",
-                    border: msg.role === "user" ? "none" : "1px solid var(--proof-border)",
-                    boxShadow: msg.role === "user" ? "0 2px 10px rgba(91,138,245,0.25)" : "none",
-                    maxWidth: "100%",
-                    overflow: "hidden",
-                  }}
-                >
-                  {msg.role === "user" ? (
-                    msg.content
-                  ) : msg.type === "capabilities" ? (
-                    <div style={{ minWidth: 320 }}>
-                      <div
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: "var(--proof-text)",
-                          marginBottom: 12,
-                        }}
-                      >
-                        Here's what I can do with your test data:
-                      </div>
-                      {(["analysis", "alert", "recommendation", "report", "setup"] as const).map(
-                        (cat) => {
-                          const catUcs = AI_USE_CASES.filter((uc) => uc.category === cat);
-                          if (!catUcs.length) return null;
-                          const catLabel: Record<string, string> = {
-                            analysis: "Analysis",
-                            alert: "Alerts & Detection",
-                            recommendation: "Recommendations",
-                            report: "Reports",
-                            setup: "Setup & Config",
-                          };
-                          const catColor: Record<string, string> = {
-                            analysis: "#5b8af5",
-                            alert: "#ef4444",
-                            recommendation: "#22c55e",
-                            report: "#a855f7",
-                            setup: "#f59e0b",
-                          };
-                          return (
-                            <div key={cat} style={{ marginBottom: 10 }}>
-                              <div
-                                style={{
-                                  fontSize: 9,
-                                  fontWeight: 700,
-                                  textTransform: "uppercase",
-                                  letterSpacing: "0.1em",
-                                  color: catColor[cat],
-                                  marginBottom: 6,
-                                }}
-                              >
-                                {catLabel[cat]}
-                              </div>
-                              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                                {catUcs.map((uc) => (
-                                  <button
-                                    key={uc.id}
-                                    onClick={() => handleUseCase(uc)}
-                                    title={uc.description}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 5,
-                                      padding: "5px 11px",
-                                      borderRadius: 20,
-                                      fontSize: 11,
-                                      fontWeight: 500,
-                                      cursor: "pointer",
-                                      border: `1px solid ${catColor[cat]}30`,
-                                      background: `${catColor[cat]}0f`,
-                                      color: "var(--proof-text)",
-                                      transition: "all 0.12s",
-                                      whiteSpace: "nowrap",
-                                    }}
-                                    onMouseEnter={(e) => {
-                                      e.currentTarget.style.background = `${catColor[cat]}22`;
-                                      e.currentTarget.style.borderColor = `${catColor[cat]}60`;
-                                      e.currentTarget.style.color = catColor[cat];
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      e.currentTarget.style.background = `${catColor[cat]}0f`;
-                                      e.currentTarget.style.borderColor = `${catColor[cat]}30`;
-                                      e.currentTarget.style.color = "var(--proof-text)";
-                                    }}
-                                  >
-                                    {USE_CASE_ICONS[uc.id] || <Zap size={11} />}
-                                    {uc.name}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        },
-                      )}
-                      <div
-                        style={{ marginTop: 12, fontSize: 11, color: "var(--proof-text-muted)" }}
-                      >
-                        Or just type a question about your runs, tests, or environments.
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <Markdown
-                        content={
-                          expandedMsgs.has(i) || msg.content.length <= MAX_PREVIEW
-                            ? msg.content
-                            : msg.content.slice(0, MAX_PREVIEW) + "\n\n*…response truncated*"
-                        }
-                        mono={msg.type === "analysis"}
-                      />
-                      {msg.content.length > MAX_PREVIEW && (
-                        <button
-                          onClick={() => toggleExpand(i)}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 4,
-                            marginTop: 6,
-                            padding: "4px 10px",
-                            borderRadius: 4,
-                            fontSize: 11,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            border: "1px solid var(--proof-grey)",
-                            background: "transparent",
-                            color: "var(--proof-blue)",
-                          }}
-                        >
-                          {expandedMsgs.has(i) ? (
-                            <>
-                              <ChevronUp size={12} /> Show less
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown size={12} /> Show full response ({msg.content.length}{" "}
-                              chars)
-                            </>
-                          )}
-                        </button>
-                      )}
-                      {msg.type === "error" && (
-                        <button
-                          onClick={newChat}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 5,
-                            marginTop: 8,
-                            padding: "4px 10px",
-                            borderRadius: 4,
-                            fontSize: 11,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            border: "1px solid var(--proof-red)",
-                            background: "transparent",
-                            color: "var(--proof-red)",
-                          }}
-                        >
-                          <RefreshCw size={11} /> Clear & Try Again
-                        </button>
-                      )}
-                      {msg.type !== "error" && msg.role === "assistant" && (
-                        <button
-                          onClick={() => copyMessage(i, msg.content)}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 4,
-                            marginTop: 8,
-                            padding: "4px 8px",
-                            borderRadius: 4,
-                            fontSize: 10,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            border: "1px solid var(--proof-grey)",
-                            background: "transparent",
-                            color:
-                              copiedIndex === i
-                                ? "var(--proof-green)"
-                                : "var(--proof-text-secondary)",
-                            transition: "color 0.12s",
-                          }}
-                        >
-                          {copiedIndex === i ? (
-                            <>
-                              <Check size={10} /> Copied
-                            </>
-                          ) : (
-                            <>
-                              <Copy size={10} /> Copy
-                            </>
-                          )}
-                        </button>
-                      )}
-                      {msg.followUps && msg.followUps.length > 0 && (
-                        <div
-                          style={{
-                            marginTop: 12,
-                            paddingTop: 10,
-                            borderTop: "1px solid var(--proof-border)",
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: 9,
-                              fontWeight: 700,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.08em",
-                              color: "var(--proof-text-muted)",
-                              marginBottom: 8,
-                            }}
-                          >
-                            Quick Next Steps
-                          </div>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                            {msg.followUps.map((f) => {
-                              const uc = AI_USE_CASES.find((u) => u.id === f.id);
-                              const cat = uc?.category || "analysis";
-                              const catColor: Record<string, string> = {
-                                analysis: "#5b8af5",
-                                alert: "#ef4444",
-                                recommendation: "#22c55e",
-                                report: "#a855f7",
-                              };
-                              const c = catColor[cat] || "#5b8af5";
-                              return (
-                                <button
-                                  key={f.id}
-                                  onClick={() => {
-                                    const ucFound = AI_USE_CASES.find((u) => u.id === f.id);
-                                    if (ucFound) handleUseCase(ucFound);
-                                  }}
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 4,
-                                    padding: "4px 10px",
-                                    borderRadius: 14,
-                                    fontSize: 10,
-                                    fontWeight: 600,
-                                    cursor: "pointer",
-                                    border: `1px solid ${c}40`,
-                                    background: `${c}12`,
-                                    color: c,
-                                    transition: "all 0.12s",
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = `${c}25`;
-                                    e.currentTarget.style.borderColor = `${c}70`;
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = `${c}12`;
-                                    e.currentTarget.style.borderColor = `${c}40`;
-                                  }}
-                                >
-                                  {USE_CASE_ICONS[f.id] || <Zap size={10} />}
-                                  {f.name}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-                {msg.role === "user" && (
-                  <div
-                    style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: "50%",
-                      background: "var(--proof-surface-3)",
-                      border: "1px solid var(--proof-border-strong)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <User size={13} style={{ color: "var(--proof-text-secondary)" }} />
-                  </div>
-                )}
-              </div>
-            ))}
+            {(() => {
+              const msgMeta = messages.map((msg, i) => {
+                const prev = messages[i - 1];
+                const next = messages[i + 1];
+                const sameRoleAsPrev = prev && prev.role === msg.role;
+                const sameRoleAsNext = next && next.role === msg.role;
+                return {
+                  isFirstInGroup: !sameRoleAsPrev,
+                  isLastInGroup: !sameRoleAsNext,
+                  showAvatar: msg.role === "assistant" ? !sameRoleAsPrev : !sameRoleAsNext,
+                };
+              });
+              return messages.map((msg, i) => (
+                <ChatMessage
+                  key={i}
+                  msg={msg}
+                  index={i}
+                  {...msgMeta[i]}
+                  expanded={expandedMsgs.has(i)}
+                  copied={copiedIndex === i}
+                  useCases={AI_USE_CASES}
+                  useCaseIcons={USE_CASE_ICONS}
+                  onToggleExpand={() => toggleExpand(i)}
+                  onCopy={() => copyMessage(i, msg.content)}
+                  onNewChat={newChat}
+                  onFollowUp={handleUseCase}
+                  MAX_PREVIEW={MAX_PREVIEW}
+                />
+              ));
+            })()}
             {busy && (
               <div
                 style={{

@@ -215,6 +215,30 @@ export async function runLangGraphChat(
         logDebug("llm_chat", `Extracted ${charts.length} chart(s) from LLM response`);
       }
 
+      // Check if LLM invoked a skill
+      const skillInvocation = extractSkillFromText(completion.content);
+      if (skillInvocation) {
+        logInfo("llm_chat", `LLM invoked skill: ${skillInvocation.skillId}`);
+        try {
+          const skillResult = runFallbackAnalysis({
+            useCaseId: skillInvocation.skillId,
+            parameters: {},
+          });
+          const skillCharts = extractChartBlocksFromText(skillResult.details);
+          const mergedText =
+            skillInvocation.cleanText + "\n\n" + skillResult.details;
+          const allCharts = [...charts, ...skillCharts];
+          return {
+            status: "completed",
+            dataUpdate: { details: mergedText, response: mergedText, skillInvoked: skillInvocation.skillId },
+            charts: allCharts,
+          };
+        } catch (err) {
+          logError("llm_chat", `Skill execution failed: ${err}`);
+          // Fall through to normal response
+        }
+      }
+
       return {
         status: "completed",
         dataUpdate: { details: completion.content, response: completion.content },
@@ -264,6 +288,7 @@ export async function runLangGraphChat(
 }
 
 const CHART_PATTERN = /```chart\s*\n?([\s\S]*?)```/g;
+const SKILL_PATTERN = /```skill\s*\n?(\{[\s\S]*?\})```/g;
 
 function extractChartBlocksFromText(text: string): ChartOutput[] {
   const charts: ChartOutput[] = [];
@@ -287,6 +312,26 @@ function extractChartBlocksFromText(text: string): ChartOutput[] {
   }
   CHART_PATTERN.lastIndex = 0;
   return charts;
+}
+
+/** Detect and extract a skill invocation (e.g. \`\`\`skill {"id":"failure-analysis"}\`\`\`) from LLM response. */
+function extractSkillFromText(text: string): { skillId: string; cleanText: string } | null {
+  SKILL_PATTERN.lastIndex = 0;
+  const match = SKILL_PATTERN.exec(text);
+  SKILL_PATTERN.lastIndex = 0;
+  if (match) {
+    try {
+      const parsed = JSON.parse(match[1].trim());
+      const skillId = parsed.id;
+      if (skillId) {
+        const cleanText = text.replace(match[0], "").trim();
+        return { skillId, cleanText };
+      }
+    } catch {
+      /* ignore malformed */
+    }
+  }
+  return null;
 }
 
 function buildAnalysisNode(useCaseId: string): LangGraphNode {
