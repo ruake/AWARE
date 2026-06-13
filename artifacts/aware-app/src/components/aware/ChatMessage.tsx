@@ -1,9 +1,7 @@
 import React from "react";
 import { Bot, User, Copy, Check, ChevronUp, ChevronDown, RefreshCw, Zap } from "lucide-react";
-import { AI_USE_CASES } from "@/lib/ai";
 import type { AIUseCase } from "@/lib/ai";
 import { Markdown } from "./Markdown";
-import { USE_CASE_ICONS } from "@/pages/Copilot";
 
 export interface ChatMsg {
   role: string;
@@ -11,6 +9,7 @@ export interface ChatMsg {
   type?: string;
   followUps?: { id: string; name: string }[];
   timestamp?: number;
+  charts?: unknown[];
 }
 
 interface Props {
@@ -21,6 +20,8 @@ interface Props {
   showAvatar: boolean;
   expanded: boolean;
   copied: boolean;
+  useCases: AIUseCase[];
+  useCaseIcons: Record<string, React.ReactNode>;
   onToggleExpand: () => void;
   onCopy: () => void;
   onNewChat: () => void;
@@ -54,25 +55,15 @@ function fmtTime(ts: number): string {
 }
 
 export default function ChatMessage({
-  msg,
-  index,
-  isLastInGroup,
-  isFirstInGroup,
-  showAvatar,
-  expanded,
-  copied,
-  onToggleExpand,
-  onCopy,
-  onNewChat,
-  onFollowUp,
-  MAX_PREVIEW,
+  msg, index, isLastInGroup, isFirstInGroup, showAvatar,
+  expanded, copied, useCases, useCaseIcons,
+  onToggleExpand, onCopy, onNewChat, onFollowUp, MAX_PREVIEW,
 }: Props) {
   const isUser = msg.role === "user";
   const isAssistant = msg.role === "assistant";
   const isError = msg.type === "error";
   const isCapabilities = msg.type === "capabilities";
-  const [fallbackTs] = React.useState(() => Date.now());
-  const ts = msg.timestamp ?? fallbackTs;
+  const ts = msg.timestamp ?? Date.now();
 
   return (
     <div
@@ -89,7 +80,6 @@ export default function ChatMessage({
         animationDelay: `${index * 30}ms`,
       }}
     >
-      {/* Avatar */}
       <div
         style={{
           width: 30,
@@ -107,7 +97,6 @@ export default function ChatMessage({
             ? {
                 background: "linear-gradient(135deg, #3d6ff5 0%, #7c6af5 100%)",
                 boxShadow: "0 0 0 2px rgba(91,138,245,0.2), 0 2px 8px rgba(91,138,245,0.3)",
-                animation: showAvatar ? "chat-avatar-glow 3s ease-in-out infinite" : "none",
               }
             : {
                 background: "var(--proof-surface-3)",
@@ -122,22 +111,13 @@ export default function ChatMessage({
         )}
       </div>
 
-      {/* Bubble */}
-      <div
-        style={{
-          position: "relative",
-          minWidth: 0,
-          flex: "0 1 auto",
-        }}
-      >
+      <div style={{ position: "relative", minWidth: 0, flex: "0 1 auto" }}>
         <div
           style={{
             padding: isUser ? "10px 15px" : "14px 18px",
             borderRadius: isUser
               ? "16px 16px 4px 16px"
-              : isError
-                ? "4px 16px 16px 16px"
-                : "4px 16px 16px 16px",
+              : "4px 16px 16px 16px",
             fontSize: 13,
             lineHeight: 1.7,
             background: isUser
@@ -151,16 +131,19 @@ export default function ChatMessage({
               : isError
                 ? "1px solid rgba(239,68,68,0.3)"
                 : "1px solid var(--proof-border)",
-            boxShadow: isUser ? "0 2px 12px rgba(91,138,245,0.25)" : "0 1px 3px rgba(0,0,0,0.15)",
+            boxShadow: isUser
+              ? "0 2px 12px rgba(91,138,245,0.25)"
+              : "0 1px 3px rgba(0,0,0,0.15)",
             maxWidth: "100%",
             overflow: "hidden",
-            transition: "box-shadow 0.15s",
           }}
         >
           {isUser ? (
-            <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.content}</span>
+            <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+              {msg.content}
+            </span>
           ) : isCapabilities ? (
-            <CapabilitiesContent />
+            <CapabilitiesContent useCases={useCases} useCaseIcons={useCaseIcons} />
           ) : (
             <>
               {isError && (
@@ -205,21 +188,13 @@ export default function ChatMessage({
                     color: "var(--proof-blue)",
                     transition: "all 0.12s",
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(91,138,245,0.1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(91,138,245,0.1)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
                 >
                   {expanded ? (
-                    <>
-                      <ChevronUp size={12} /> Show less
-                    </>
+                    <><ChevronUp size={12} /> Show less</>
                   ) : (
-                    <>
-                      <ChevronDown size={12} /> Show full ({msg.content.length} chars)
-                    </>
+                    <><ChevronDown size={12} /> Show full ({msg.content.length} chars)</>
                   )}
                 </button>
               )}
@@ -227,7 +202,6 @@ export default function ChatMessage({
           )}
         </div>
 
-        {/* Footer: timestamp + copy */}
         <div
           style={{
             display: "flex",
@@ -238,19 +212,11 @@ export default function ChatMessage({
             opacity: 0,
             transition: "opacity 0.15s",
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = "1";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = "0";
-          }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0"; }}
         >
           <span
-            style={{
-              fontSize: 10,
-              color: "var(--proof-text-muted)",
-              fontFamily: "var(--font-mono)",
-            }}
+            style={{ fontSize: 10, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}
             title={fmtTime(ts)}
           >
             {relTime(ts)}
@@ -279,7 +245,6 @@ export default function ChatMessage({
           )}
         </div>
 
-        {/* Error retry */}
         {isError && (
           <button
             onClick={onNewChat}
@@ -298,26 +263,15 @@ export default function ChatMessage({
               color: "#ef4444",
               transition: "all 0.12s",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(239,68,68,0.15)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(239,68,68,0.08)";
-            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.15)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
           >
             <RefreshCw size={11} /> Clear & Try Again
           </button>
         )}
 
-        {/* Follow-ups */}
         {msg.followUps && msg.followUps.length > 0 && (
-          <div
-            style={{
-              marginTop: 10,
-              paddingTop: 8,
-              borderTop: "1px solid var(--proof-border)",
-            }}
-          >
+          <div style={{ marginTop: 10, paddingTop: 8, borderTop: "1px solid var(--proof-border)" }}>
             <div
               style={{
                 fontSize: 9,
@@ -332,15 +286,13 @@ export default function ChatMessage({
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {msg.followUps.map((f) => {
-                const uc = AI_USE_CASES.find((u) => u.id === f.id);
+                const uc = useCases.find((u) => u.id === f.id);
                 const cat = uc?.category || "analysis";
                 const c = CAT_COLORS[cat] || "#5b8af5";
                 return (
                   <button
                     key={f.id}
-                    onClick={() => {
-                      if (uc) onFollowUp(uc);
-                    }}
+                    onClick={() => { if (uc) onFollowUp(uc); }}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -364,7 +316,7 @@ export default function ChatMessage({
                       e.currentTarget.style.borderColor = `${c}35`;
                     }}
                   >
-                    {USE_CASE_ICONS?.[f.id] || <Zap size={10} />}
+                    {useCaseIcons[f.id] || <Zap size={10} />}
                     {f.name}
                   </button>
                 );
@@ -379,7 +331,13 @@ export default function ChatMessage({
 
 // ─── Capabilities section ──────────────────────────────────────────────
 
-function CapabilitiesContent() {
+function CapabilitiesContent({
+  useCases,
+  useCaseIcons,
+}: {
+  useCases: AIUseCase[];
+  useCaseIcons: Record<string, React.ReactNode>;
+}) {
   const catOrder = ["analysis", "alert", "recommendation", "report", "setup"] as const;
   const catLabels: Record<string, string> = {
     analysis: "Analysis",
@@ -390,18 +348,11 @@ function CapabilitiesContent() {
   };
   return (
     <div style={{ minWidth: 300 }}>
-      <div
-        style={{
-          fontSize: 13,
-          fontWeight: 600,
-          color: "var(--proof-text)",
-          marginBottom: 12,
-        }}
-      >
+      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)", marginBottom: 12 }}>
         Here's what I can do with your test data:
       </div>
       {catOrder.map((cat) => {
-        const catUcs = AI_USE_CASES.filter((uc) => uc.category === cat);
+        const catUcs = useCases.filter((uc) => uc.category === cat);
         if (!catUcs.length) return null;
         const c = CAT_COLORS[cat] || "#5b8af5";
         return (
@@ -449,7 +400,7 @@ function CapabilitiesContent() {
                     e.currentTarget.style.color = "var(--proof-text)";
                   }}
                 >
-                  {USE_CASE_ICONS?.[uc.id] || <Zap size={10} />}
+                  {useCaseIcons[uc.id] || <Zap size={10} />}
                   {uc.name}
                 </button>
               ))}
@@ -457,13 +408,7 @@ function CapabilitiesContent() {
           </div>
         );
       })}
-      <div
-        style={{
-          marginTop: 12,
-          fontSize: 11,
-          color: "var(--proof-text-muted)",
-        }}
-      >
+      <div style={{ marginTop: 12, fontSize: 11, color: "var(--proof-text-muted)" }}>
         Or just type a question about your runs, tests, or environments.
       </div>
     </div>

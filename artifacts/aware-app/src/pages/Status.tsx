@@ -708,7 +708,7 @@ export default function Status() {
                         </span>
                       </div>
                       <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 6 }}>
-                        {suite.environments.slice(0, 3).map((e) => (
+                        {(suite.environments ?? []).slice(0, 3).map((e) => (
                           <span
                             key={e}
                             style={{
@@ -723,12 +723,12 @@ export default function Status() {
                             {e}
                           </span>
                         ))}
-                        {suite.environments.length > 3 && (
+                        {(suite.environments?.length ?? 0) > 3 && (
                           <span style={{ fontSize: 8, color: "var(--proof-text-muted)" }}>
                             +{suite.environments.length - 3}
                           </span>
                         )}
-                        {suite.runners.map((r) => (
+                        {(suite.runners ?? []).map((r) => (
                           <span
                             key={r}
                             style={{
