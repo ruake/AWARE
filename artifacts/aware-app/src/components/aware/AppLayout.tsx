@@ -49,9 +49,12 @@ const SECONDARY_NAV: NavItem[] = [
 export function AppLayout({
   children,
   activeHref,
+  fullBleed = false,
 }: {
   children: React.ReactNode;
   activeHref?: string;
+  /** Remove main content padding for pages that manage their own layout */
+  fullBleed?: boolean;
 }) {
   const [location, navigate] = useLocation();
   const [isDark, setIsDark] = React.useState<boolean>(() => {
@@ -693,11 +696,11 @@ export function AppLayout({
         <main
           style={{
             flex: 1,
-            overflowY: "auto",
+            overflowY: fullBleed ? "hidden" : "auto",
             overflowX: "hidden",
             display: "flex",
             flexDirection: "column",
-            padding: "20px 24px",
+            padding: fullBleed ? 0 : "20px 24px",
           }}
         >
           {children}

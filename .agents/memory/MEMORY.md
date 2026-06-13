@@ -5,6 +5,9 @@
 - [AWARE project overview](aware-project-overview.md) — full project map: stack, pages, scripts, monorepo layout, all route paths, key constraints.
 - [AWARE data layer](aware-data-layer.md) — static-first; seed JSON in data/; monolithic test-results.json keyed by runId; DIFF_ROWS computed dynamically (no static diff-rows.json).
 - [AWARE AI copilot](aware-ai-copilot.md) — rearchitected: lib/copilot/ (types/tools/providers/agent/context/storage); streaming tool-calling agent; TanStack Virtual feed; WebLLM primary.
+- [Chrome AI streaming quirk](chrome-ai-streaming.md) — promptStreaming yields CUMULATIVE text on each chunk (full response so far), not deltas. Use `fullText = text`, never `fullText += text`.
+- [AWARE AppLayout fullBleed prop](aware-app-layout.md) — AppLayout has a `fullBleed` prop that removes 20px/24px padding and switches overflow to hidden; use for full-viewport pages like Copilot.
+- [AWARE navTo SPA fix](aware-nav-spa.md) — navTo() now uses History API + popstate dispatch instead of window.location.href; wouter picks up the popstate event without a full reload.
 - [AWARE test model](aware-test-model.md) — TestCase, TestSuite, TestResult, DiffRow, PromotionDecision types; testType: web|api|http|edgeworker|transaction|pytest; flakiness formula.
 - [AWARE anomaly detection](aware-anomaly-detection.md) — two modules: run-level Z-score and test-level 7-day latency Z-score; severity thresholds at 1.5/2/2.5/3σ.
 - [AWARE CI pipeline](aware-ci-pipeline.md) — rearchitected to K8s-inspired composite actions: controller.yml + job-playwright.yml + job-pytest.yml + 5 composite actions in .github/actions/.

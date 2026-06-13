@@ -1,5 +1,12 @@
+/**
+ * SPA navigation using the History API.
+ * Pushes state and dispatches a popstate event so wouter picks up the change
+ * without a full page reload (which would destroy React state).
+ */
 export function navTo(path: string) {
-  window.location.href = path.startsWith("/") ? path : `/${path}`;
+  const resolved = path.startsWith("/") ? path : `/${path}`;
+  window.history.pushState(null, "", resolved);
+  window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
 }
 
 export function copyToClipboard(text: string) {
@@ -25,4 +32,4 @@ export function showToast(msg: string) {
   (window as any).__showToast?.(msg);
 }
 
-export const repo = "https://github.com/ruake/PROOF";
+export const repo = "https://github.com/ruake/AWARE";

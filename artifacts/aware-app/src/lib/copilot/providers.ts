@@ -238,6 +238,10 @@ export class OpenAIProvider implements IProvider {
 // Falls back to window.ai.languageModel (Chrome 128-147 experimental).
 // On-device, no API key needed. No native tool calling — we describe
 // tools in the prompt and parse JSON.
+//
+// IMPORTANT: Chrome AI's promptStreaming yields CUMULATIVE text on each chunk
+// (the full response so far), not incremental deltas. We must take the latest
+// value as the full text, not append chunks together.
 
 // New Chrome 148+ API: window.LanguageModel
 interface ChromeLanguageModel {
@@ -299,6 +303,73 @@ function hasOldAPI(): boolean {
   return typeof lm?.create === "function";
 }
 
+/**
+ * Extract a JSON tool call from Chrome AI output.
+ * Handles raw JSON, markdown code blocks, and JSON embedded in prose.
+ * Returns null if no valid {tool, args} object is found.
+ */
+function extractJsonToolCall(
+  text: string,
+): { tool: string; args: Record<string, unknown> } | null {
+  const trimmed = text.trim();
+
+  // Helper: try to parse and validate a JSON object as a tool call
+  const tryParse = (s: string): { tool: string; args: Record<string, unknown> } | null => {
+    try {
+      const parsed = JSON.parse(s.trim());
+      if (
+        parsed &&
+        typeof parsed.tool === "string" &&
+        parsed.args &&
+        typeof parsed.args === "object" &&
+        !Array.isArray(parsed.args)
+      ) {
+        return parsed as { tool: string; args: Record<string, unknown> };
+      }
+    } catch {
+      /* not valid JSON */
+    }
+    return null;
+  };
+
+  // 1. Direct JSON object at top level
+  if (trimmed.startsWith("{")) {
+    const result = tryParse(trimmed);
+    if (result) return result;
+  }
+
+  // 2. Markdown code block (```json ... ``` or ``` ... ```)
+  const codeBlock = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeBlock) {
+    const result = tryParse(codeBlock[1]);
+    if (result) return result;
+  }
+
+  // 3. Inline JSON — find the first { that contains "tool" and parse greedily
+  const jsonStart = trimmed.indexOf("{");
+  if (jsonStart !== -1) {
+    // Walk from the start brace, find matching close brace
+    let depth = 0;
+    let end = -1;
+    for (let i = jsonStart; i < trimmed.length; i++) {
+      if (trimmed[i] === "{") depth++;
+      else if (trimmed[i] === "}") {
+        depth--;
+        if (depth === 0) {
+          end = i;
+          break;
+        }
+      }
+    }
+    if (end !== -1) {
+      const result = tryParse(trimmed.slice(jsonStart, end + 1));
+      if (result) return result;
+    }
+  }
+
+  return null;
+}
+
 // ── Availability ─────────────────────────────────────────────────────────────
 
 export class ChromeProvider implements IProvider {
@@ -310,7 +381,7 @@ export class ChromeProvider implements IProvider {
       if (hasNewAPI()) {
         const result = await (window as any).LanguageModel.availability();
         if (result === "available") return "available";
-        if (result === "downloadable") return "available";
+        if (result === "downloadable") return "downloading"; // model needs to download
         if (result === "downloading") return "downloading";
         return "unavailable";
       }
@@ -323,7 +394,7 @@ export class ChromeProvider implements IProvider {
           typeof result === "object" ? (result as { available: string }).available : result;
         if (avail === "readily") return "available";
         if (avail === "after-download") return "downloading";
-        if (avail === "downloadable") return "available";
+        if (avail === "downloadable") return "downloading";
         return "unavailable";
       }
 
@@ -342,98 +413,114 @@ export class ChromeProvider implements IProvider {
     const sys = messages.find((m) => m.role === "system")?.content ?? "";
     const chatMessages = messages.filter((m) => m.role !== "system");
 
-    // Describe tools in the system prompt (Chrome AI has no native tool calling)
+    // Describe tools in the system prompt (Chrome AI has no native tool calling).
+    // Instruct the model to respond ONLY with JSON when calling a tool.
     const toolDesc =
       tools.length > 0
-        ? `\n\nAvailable tools (respond with JSON {tool, args} to call one):\n` +
-          tools.map((t) => `- ${t.name}: ${t.description}`).join("\n")
+        ? `\n\nAvailable tools — to call a tool respond ONLY with a JSON object (no other text):\n` +
+          `Format: {"tool": "<name>", "args": {<arguments>}}\n` +
+          tools.map((t) => `- ${t.name}: ${t.description}`).join("\n") +
+          `\n\nIf no tool is needed, respond in plain text.`
         : "";
 
-    // ── Build the full prompt with conversation history ─────────────────────
-    const historyText = chatMessages
-      .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content ?? ""}`)
-      .join("\n\n");
+    // Separate history from the current (latest) user message
+    const historyMessages = chatMessages.slice(0, -1);
+    const latestMsg = chatMessages[chatMessages.length - 1];
+    const currentUserContent =
+      latestMsg?.role === "user" && latestMsg.content ? latestMsg.content : "Hello";
 
     try {
       let session: ChromeAISession | OldChromeAISession;
 
       if (hasNewAPI()) {
-        // Chrome 148+ API — use initialPrompts for system prompt + history
-        const initialPrompts: Array<{
-          role: "system" | "user" | "assistant";
-          content: string;
-        }> = [];
+        // Chrome 148+ API — pass system prompt + conversation history via initialPrompts,
+        // then prompt with just the latest user message for a clean exchange.
+        const initialPrompts: Array<{ role: "system" | "user" | "assistant"; content: string }> =
+          [];
+
         if (sys || toolDesc) {
-          initialPrompts.push({
-            role: "system",
-            content: sys + toolDesc,
-          });
+          initialPrompts.push({ role: "system", content: sys + toolDesc });
         }
-        session = await (window as any).LanguageModel.create({
-          initialPrompts,
-          signal,
-        });
+
+        // Inject prior conversation as structured turns (skip tool messages)
+        for (const m of historyMessages) {
+          if (m.role === "user" && m.content) {
+            initialPrompts.push({ role: "user", content: m.content });
+          } else if (m.role === "assistant" && m.content) {
+            initialPrompts.push({ role: "assistant", content: m.content });
+          }
+          // tool/system roles are not supported in Chrome AI initialPrompts
+        }
+
+        session = await (window as any).LanguageModel.create({ initialPrompts, signal });
       } else if (hasOldAPI()) {
+        // Old API — bake history into the system prompt as formatted text
+        const historyText = historyMessages
+          .filter((m) => (m.role === "user" || m.role === "assistant") && m.content)
+          .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
+          .join("\n\n");
+
+        const systemWithHistory = [
+          sys + toolDesc,
+          historyText ? `\n\nConversation so far:\n${historyText}` : "",
+        ]
+          .filter(Boolean)
+          .join("");
+
         const api = (window as any).ai.languageModel as OldChromeAI;
         session = await api.create({
-          systemPrompt: sys ? sys + toolDesc : toolDesc || undefined,
+          systemPrompt: systemWithHistory || undefined,
           signal,
         });
       } else {
-        onDelta({ content: "⚠️ Chrome AI not available in this browser.", done: true });
+        onDelta({ content: "⚠️ Chrome AI is not available in this browser.", done: true });
         return;
       }
 
-      const stream = session.promptStreaming(historyText);
+      // Stream the response for the latest user message only.
+      // CRITICAL: Chrome AI's promptStreaming yields CUMULATIVE text on each chunk
+      // (the entire response so far), not incremental deltas. We always use the
+      // latest chunk value as the full response — never append chunks together.
+      const stream = session.promptStreaming(currentUserContent);
       const reader = stream.getReader();
-      const decoder = new TextDecoder();
 
-      // Buffer full output — Chrome AI has no native tool calling, so we
-      // must accumulate the full text and check for JSON tool call at the end
       let fullText = "";
-      // Chrome AI promptStreaming yields incremental chunks — accumulate
       try {
         while (true) {
           if (signal.aborted) break;
           const { done, value } = await reader.read();
           if (done) break;
-          const text = typeof value === "string" ? value : decoder.decode(value, { stream: true });
-          fullText += text;
+          // Chrome AI yields cumulative text — take latest value as full response
+          fullText = typeof value === "string" ? value : new TextDecoder().decode(value);
         }
-        // Flush TextDecoder for Uint8Array-stream path
-        if (!signal.aborted) fullText += decoder.decode();
       } finally {
         reader.releaseLock();
         session.destroy();
       }
 
-      // Check if the output is a JSON tool call from the non-native
-      // tool-calling prompt (respond with JSON {tool, args})
+      if (signal.aborted) return;
+
+      // Check if the output is a JSON tool call.
+      // Handles raw JSON, markdown code blocks, and inline JSON.
       if (tools.length > 0) {
-        const trimmed = fullText.trim();
-        if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-          try {
-            const parsed = JSON.parse(trimmed);
-            if (typeof parsed.tool === "string" && parsed.args && typeof parsed.args === "object") {
-              onDelta({
-                toolCallId: `chrome-${Date.now()}`,
-                toolCallName: parsed.tool,
-                toolCallArgsChunk: JSON.stringify(parsed.args),
-                done: false,
-              });
-              onDelta({ done: true });
-              return;
-            }
-          } catch {
-            /* not valid JSON — treat as regular text */
-          }
+        const toolCall = extractJsonToolCall(fullText);
+        if (toolCall) {
+          onDelta({
+            toolCallId: `chrome-${Date.now()}`,
+            toolCallName: toolCall.tool,
+            toolCallArgsChunk: JSON.stringify(toolCall.args),
+            done: false,
+          });
+          onDelta({ done: true });
+          return;
         }
       }
 
-      // Not a tool call — emit buffered text as a single content block
+      // Not a tool call — emit the full text as content
       if (fullText) onDelta({ content: fullText, done: false });
       onDelta({ done: true });
     } catch (err: unknown) {
+      if (signal.aborted) return; // suppress errors from user-initiated stops
       const msg = err instanceof Error ? err.message : "Unknown error";
       onDelta({ content: `⚠️ Chrome AI error: ${msg}`, done: true });
     }
