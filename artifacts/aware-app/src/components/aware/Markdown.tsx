@@ -67,21 +67,61 @@ function linkifyContent(text: string): string {
 
 // ─── Multi-column layout ──────────────────────────────────────────────────────
 
-/** Parse ```columns ... ``` blocks into column groups */
+/** Walk forward from `startIdx` to find the matching closing ``` for a fenced block,
+ *  correctly tracking nested ```fence blocks (```chart, ```columns, etc.) */
+function findMatchingClose(content: string, startIdx: number): number {
+  let depth = 0;
+  let pos = startIdx;
+  while (true) {
+    const fenceIdx = content.indexOf("```", pos);
+    if (fenceIdx === -1) return -1;
+    const after = fenceIdx + 3;
+    if (after >= content.length || content[after] === "\n" || content[after] === "\r") {
+      if (depth === 0) return fenceIdx;
+      depth--;
+      pos = after;
+    } else {
+      depth++;
+      const nlIdx = content.indexOf("\n", after);
+      if (nlIdx === -1) return -1;
+      pos = nlIdx + 1;
+    }
+  }
+}
+
+/** Strip single-column ```columns...``` wrappers (passthrough inner content) */
+function unwrapSingleColumns(content: string): string {
+  const startMatch = content.match(/```columns\s*\n/);
+  if (!startMatch) return content;
+  const startIdx = startMatch.index!;
+  const closeIdx = findMatchingClose(content, startIdx + startMatch[0].length);
+  if (closeIdx === -1) return content;
+  const inner = content.slice(startIdx + startMatch[0].length, closeIdx).trim();
+  const cols = inner.split(/\n---+\n/).map((c) => c.trim()).filter(Boolean);
+  if (cols.length >= 2) return content;
+  return content.slice(0, startIdx) + inner + content.slice(closeIdx + 3);
+}
+
+/** Parse ```columns ... ``` blocks into column groups (only multi-column) */
 function splitByColumns(
   content: string,
 ): { before: string; columns: string[]; after: string } | null {
-  const match = content.match(/```columns\s*\n([\s\S]*?)```/);
-  if (!match) return null;
-  const inner = match[1].trim();
+  const startMatch = content.match(/```columns\s*\n/);
+  if (!startMatch) return null;
+  const startIdx = startMatch.index!;
+  const closeIdx = findMatchingClose(content, startIdx + startMatch[0].length);
+  if (closeIdx === -1) return null;
+  const inner = content.slice(startIdx + startMatch[0].length, closeIdx).trim();
   const cols = inner
     .split(/\n---+\n/)
     .map((c) => c.trim())
     .filter(Boolean);
   if (cols.length < 2) return null;
-  const before = content.slice(0, match.index);
-  const after = content.slice(match.index! + match[0].length);
-  return { before, columns: cols, after };
+  return {
+    before: content.slice(0, startIdx),
+    columns: cols,
+    after: content.slice(closeIdx + 3),
+  };
 }
 
 function Columns({ children }: { children: string[] }) {
@@ -641,13 +681,13 @@ export function Markdown({ content, mono = false }: MarkdownProps) {
   const linked = React.useMemo(() => linkifyContent(content), [content]);
 
   const rendered = React.useMemo(() => {
-    // Check for columns layout
-    const cols = splitByColumns(linked);
+    const cleaned = unwrapSingleColumns(linked);
+    const cols = splitByColumns(cleaned);
     if (cols) {
       const segments = splitByTables(cols.before + cols.after);
       return { columns: cols.columns, segments };
     }
-    return { columns: null, segments: splitByTables(linked) };
+    return { columns: null, segments: splitByTables(cleaned) };
   }, [linked]);
 
   return (

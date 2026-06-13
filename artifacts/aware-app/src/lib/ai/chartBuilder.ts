@@ -10,6 +10,16 @@ export const CHART_COLORS = [
   "#ec4899",
 ];
 
+function ensureColors(colors: string[] | undefined, rowCount: number): string[] {
+  if (!colors || colors.length === 0) {
+    return Array.from({ length: rowCount }, (_, i) => CHART_COLORS[i % CHART_COLORS.length]);
+  }
+  if (colors.length === 1 && rowCount > 1) {
+    return Array.from({ length: rowCount }, (_, i) => CHART_COLORS[i % CHART_COLORS.length]);
+  }
+  return colors;
+}
+
 export function buildTable(
   title: string,
   headers: string[],
@@ -43,7 +53,7 @@ export function buildColumnChart(
     title,
     headers,
     rows,
-    colors: colors || [CHART_COLORS[0]],
+    colors: ensureColors(colors, rows.length),
     options: {
       legend: { position: "none" },
       vAxis: { textStyle: { fontSize: 10 } },
@@ -65,7 +75,7 @@ export function buildBarChart(
     title,
     headers,
     rows,
-    colors: colors || [CHART_COLORS[0]],
+    colors: ensureColors(colors, rows.length),
     options: {
       legend: { position: "none" },
       hAxis: { textStyle: { fontSize: 10 } },
@@ -87,7 +97,7 @@ export function buildPieChart(
     title,
     headers,
     rows,
-    colors: colors || CHART_COLORS,
+    colors: ensureColors(colors, rows.length),
     options: {
       pieHole: 0.4,
       legend: { position: "right", textStyle: { fontSize: 10 } },
@@ -103,12 +113,13 @@ export function buildLineChart(
   colors?: string[],
   options?: Record<string, unknown>,
 ): ChartOutput {
+  const seriesCount = headers.length - 1;
   return {
     type: "LineChart",
     title,
     headers,
     rows,
-    colors: colors || [CHART_COLORS[0]],
+    colors: ensureColors(colors, seriesCount),
     options: {
       legend: { position: "bottom", textStyle: { fontSize: 10 } },
       curveType: "function",
@@ -127,12 +138,13 @@ export function buildAreaChart(
   colors?: string[],
   options?: Record<string, unknown>,
 ): ChartOutput {
+  const seriesCount = headers.length - 1;
   return {
     type: "AreaChart",
     title,
     headers,
     rows,
-    colors: colors || [CHART_COLORS[0]],
+    colors: ensureColors(colors, seriesCount),
     options: {
       legend: { position: "bottom", textStyle: { fontSize: 10 } },
       curveType: "function",
