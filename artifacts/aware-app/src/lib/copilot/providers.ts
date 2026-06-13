@@ -344,31 +344,129 @@ export function routeByKeyword(
   return null;
 }
 
-// ── Compact prompts for Chrome AI synthesis ───────────────────────────────────
+// ── Template synthesis (Chrome AI path) ──────────────────────────────────────
+// Chrome AI (Gemini Nano) generates gibberish when asked to synthesize tool
+// results even with compact prompts. Instead, we build the response directly
+// from the structured tool data — fast, accurate, zero hallucination.
 
-function buildSynthesisPrompt(
-  userQuery: string,
-  toolName: string,
-  toolResultJson: string,
-): string {
-  // Target: ~150 tokens total — well within Gemini Nano's context
-  const summary = toolResultJson.slice(0, 600);
-  return `You are a CDN test analytics assistant. Be concise (2-4 sentences, use numbers).
+function buildTemplateSynthesis(toolName: string, toolDataJson: string, _userQuery: string): string {
+  try {
+    const data = JSON.parse(toolDataJson);
 
-Data (${toolName}): ${summary}
+    switch (toolName) {
+      case "query_runs": {
+        const runs: any[] = Array.isArray(data) ? data : [];
+        if (!runs.length) return "No test runs found in the dataset.";
+        const header = `Here are the **last ${Math.min(runs.length, 10)} test runs**:\n\n`;
+        const rows = runs
+          .slice(0, 10)
+          .map(
+            (r: any) =>
+              `- **${r.label || r.id}** · ${r.env} · **${r.passPct ?? "?"}%** pass · ${r.failures ?? 0} failure${(r.failures ?? 0) !== 1 ? "s" : ""}`,
+          )
+          .join("\n");
+        return header + rows;
+      }
 
-Question: ${userQuery}
+      case "get_flaky_tests": {
+        const tests: any[] = Array.isArray(data) ? data : [];
+        if (!tests.length)
+          return "✅ No flaky tests detected in recent runs — all tests are stable.";
+        const header = `Found **${tests.length} flaky test${tests.length !== 1 ? "s" : ""}** (flipping between PASS and FAIL):\n\n`;
+        const rows = tests
+          .slice(0, 10)
+          .map(
+            (t: any) =>
+              `- **${t.id}** · score **${t.score}%** · ${t.flips} flip${t.flips !== 1 ? "s" : ""} in ${t.runs} runs`,
+          )
+          .join("\n");
+        return header + rows;
+      }
 
-Answer:`;
+      case "compare_environments": {
+        const rows: any[] = Array.isArray(data) ? data : [];
+        if (!rows.length) return "No environment data available.";
+        const header = "**Environment Comparison** (QA → UAT → PROD):\n\n";
+        const items = rows
+          .map(
+            (r: any) =>
+              `- **${r.env}**: avg **${r.avgPassRate}%** pass rate · ${r.totalFailures} failures · ${r.runs} runs`,
+          )
+          .join("\n");
+        return header + items;
+      }
+
+      case "get_promotion_status": {
+        const { total = 0, promoted = 0, blocked = 0, pending = 0 } = data as any;
+        const pct = total > 0 ? Math.round((promoted / total) * 100) : 0;
+        return (
+          `**Promotion Gate** (${total} decision${total !== 1 ? "s" : ""} total):\n\n` +
+          `- ✅ Promoted to PROD: **${promoted}** (${pct}%)\n` +
+          `- 🚫 Blocked: **${blocked}**\n` +
+          `- ⏳ Pending: **${pending}**`
+        );
+      }
+
+      case "get_failure_breakdown": {
+        const { label, passPct, rows = [] } = data as any;
+        const header = `**Failure Breakdown** — ${label || "Latest Run"} (**${passPct}%** pass rate):\n\n`;
+        if (!rows.length) return header + "No failures in this run. ✅";
+        const items = (rows as any[])
+          .slice(0, 8)
+          .map(
+            (r: any) =>
+              `- **${r.category}**: ${r.failed} failed / ${r.total} total (**${r.passRate}%** pass)`,
+          )
+          .join("\n");
+        return header + items;
+      }
+
+      default:
+        return `**${toolName}** results:\n\`\`\`\n${toolDataJson.slice(0, 300)}\n\`\`\``;
+    }
+  } catch {
+    return `Data retrieved from ${toolName} (could not render structured view).`;
+  }
 }
 
-function buildDirectPrompt(userQuery: string): string {
-  return `You are an assistant for AWARE, an Akamai CDN test dashboard.
-Key facts: QA → UAT → PROD environments. Promotion gate needs ≥95% pass rate.
-Answer in 1-3 sentences.
+// Emit a pre-built string as streaming deltas (simulates typing feel)
+function emitAsStream(text: string, onDelta: (delta: StreamDelta) => void): void {
+  const CHUNK = 10;
+  for (let i = 0; i < text.length; i += CHUNK) {
+    onDelta({ content: text.slice(i, i + CHUNK), done: false });
+  }
+  onDelta({ done: true });
+}
 
-Question: ${userQuery}
-Answer:`;
+// Canned responses for casual queries that don't need data tools.
+// Chrome AI is unreliable even for simple chat — use canned responses instead.
+const CASUAL_PATTERNS: Array<{ pattern: RegExp; response: string }> = [
+  {
+    pattern: /^\s*(hi|hello|hey|howdy|sup|yo)\s*[!?.]*\s*$/i,
+    response:
+      "Hi! I'm the **AWARE Copilot**. I can analyze your test runs, find flaky tests, compare environments, and check your promotion gate. Try a **Quick Action** on the left, or ask me anything about your CDN test data!",
+  },
+  {
+    pattern: /how are you|how.*doing|how.*going/i,
+    response:
+      "Ready to help! I can surface pass rates, flakiness trends, environment comparisons, and promotion gate decisions. What would you like to know?",
+  },
+  {
+    pattern: /what.*(can|do) you|what.*(help|know|support)|your (capabilities|features)/i,
+    response:
+      "I can help with:\n- **Latest Runs** — pass rates & failure counts\n- **Flaky Tests** — tests flipping PASS↔FAIL\n- **Compare Envs** — QA vs UAT vs PROD\n- **Promotion Gate** — UAT→PROD readiness\n- **Failure Breakdown** — categories failing\n\nTry a Quick Action or just ask!",
+  },
+  {
+    pattern: /thank|thanks|great|awesome|nice|cool|perfect/i,
+    response: "Glad to help! Let me know if you need anything else about your test data.",
+  },
+];
+
+function getCasualResponse(query: string): string | null {
+  for (const { pattern, response } of CASUAL_PATTERNS) {
+    if (pattern.test(query)) return response;
+  }
+  return null;
 }
 
 // ── Chrome AI streaming helper ─────────────────────────────────────────────────
@@ -451,54 +549,64 @@ export class ChromeProvider implements IProvider {
     } catch { return "unavailable"; }
   }
 
-  // stream() is called by the graph ONLY for synthesis (after tools have run),
-  // or for direct answers (when the graph determines no tool is needed).
+  // stream() is called by the graph for synthesis (after tools have run)
+  // or for direct answers (no tool matched the query).
   //
   // Two modes detected by message shape:
-  //   Synthesis:  messages contains a { role: "tool", ... } message
-  //   Direct:     no tool messages — Chrome AI answers from context
+  //   Synthesis:  messages contains { role: "tool", ... }
+  //   Direct:     no tool messages
+  //
+  // Chrome AI (Gemini Nano) generates gibberish when asked to synthesize or
+  // follow complex instructions, so we bypass it entirely:
+  //   • Synthesis → template-built response from structured tool data (no LLM)
+  //   • Direct    → canned response for common patterns; Chrome AI for the rest
   async stream(
     messages: ApiMessage[],
     _tools: ToolDefinition[],
     signal: AbortSignal,
     onDelta: (delta: StreamDelta) => void,
   ): Promise<void> {
-    if (!hasNewAPI() && !hasOldAPI()) {
-      onDelta({ content: "⚠️ Chrome AI is not available in this browser.", done: true });
-      return;
-    }
-
-    const userQuery =
-      [...messages].reverse().find((m) => m.role === "user")?.content ?? "Hello";
-
+    const userQuery = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
+    const query = typeof userQuery === "string" ? userQuery : JSON.stringify(userQuery);
     const toolMessages = messages.filter((m) => m.role === "tool");
 
     if (toolMessages.length > 0) {
       // ── SYNTHESIS MODE ──────────────────────────────────────────────────────
-      // We have tool results. Build a compact synthesis prompt.
-      const assistantMsg = [...messages].reverse().find(
-        (m) => m.role === "assistant" && m.tool_calls,
-      );
+      // Gemini Nano can't reliably follow synthesis instructions — use templates.
+      const assistantMsg = [...messages]
+        .reverse()
+        .find((m) => m.role === "assistant" && m.tool_calls);
       const toolName = assistantMsg?.tool_calls?.[0]?.function?.name ?? "tool";
-      const toolResultJson = toolMessages.map((m) => m.content).join("\n").slice(0, 600);
+      const toolDataJson = toolMessages
+        .map((m) => m.content ?? "")
+        .join("\n")
+        .slice(0, 4000);
 
-      const systemPrompt = `You are a concise CDN test analytics assistant. Use numbers from the data.`;
-      const userPrompt = buildSynthesisPrompt(
-        typeof userQuery === "string" ? userQuery : JSON.stringify(userQuery),
-        toolName,
-        toolResultJson,
-      );
-
-      await streamFromChromeAI(systemPrompt, userPrompt, signal, onDelta);
-    } else {
-      // ── DIRECT MODE ────────────────────────────────────────────────────────
-      // No tool results — Chrome AI answers a general question directly.
-      const query = typeof userQuery === "string" ? userQuery : JSON.stringify(userQuery);
-      const systemPrompt = `You are a concise assistant for AWARE, an Akamai CDN test dashboard.`;
-      const userPrompt = buildDirectPrompt(query);
-
-      await streamFromChromeAI(systemPrompt, userPrompt, signal, onDelta);
+      const response = buildTemplateSynthesis(toolName, toolDataJson, query);
+      emitAsStream(response, onDelta);
+      return;
     }
+
+    // ── DIRECT MODE ──────────────────────────────────────────────────────────
+    // No tool was called. Try canned patterns first (instant, reliable).
+    const canned = getCasualResponse(query);
+    if (canned) {
+      emitAsStream(canned, onDelta);
+      return;
+    }
+
+    // For non-casual questions that still don't need data tools, try Chrome AI
+    // with a minimal prompt. If unavailable, show a helpful fallback.
+    if (!hasNewAPI() && !hasOldAPI()) {
+      emitAsStream(
+        "I'm the **AWARE Copilot**. I can analyze test runs, flakiness, environment health, and promotion gate status. Try a Quick Action on the left!",
+        onDelta,
+      );
+      return;
+    }
+
+    // Ultra-minimal Chrome AI call — system + user query only (~30 tokens total)
+    await streamFromChromeAI("Reply in 1-2 sentences.", query, signal, onDelta);
   }
 }
 

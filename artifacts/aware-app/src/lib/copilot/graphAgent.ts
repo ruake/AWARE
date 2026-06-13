@@ -539,7 +539,7 @@ export async function runGraphAgent(opts: GraphAgentOptions): Promise<void> {
   }
   for (const s of planResult.steps ?? []) emitStep(s);
 
-  // Phase 2: Execute tools (loop in case synthesize spawns more tool calls)
+  // Phase 2: Execute tools (loop until no pending calls or max iterations)
   let iterations = 0;
   while (ctx.pendingToolCalls.length > 0 && iterations < MAX_ITERATIONS && !signal.aborted) {
     iterations++;
@@ -552,18 +552,22 @@ export async function runGraphAgent(opts: GraphAgentOptions): Promise<void> {
       return;
     }
     for (const s of execResult.steps ?? []) emitStep(s);
+  }
 
-    // Phase 3: Synthesize
-    if (ctx.pendingToolCalls.length === 0 || signal.aborted) {
-      logInfo("graph", "Phase 3: synthesize");
-      const synthNode = nodes.get("synthesize")!;
-      const synthResult = await synthNode.execute(ctx);
-      if (synthResult.error || signal.aborted) {
-        onEvent({ type: "done" });
-        return;
-      }
-      for (const s of synthResult.steps ?? []) emitStep(s);
+  // Phase 3: Synthesize — always runs after tool loop.
+  // synthesizeNode short-circuits immediately when ctx.finalContent is already set
+  // (direct LLM answer), so it's safe to always call it.
+  // This also covers the case where no tools matched (direct/casual query) and
+  // finalContent was never set — the provider handles a direct response.
+  if (!signal.aborted) {
+    logInfo("graph", "Phase 3: synthesize");
+    const synthNode = nodes.get("synthesize")!;
+    const synthResult = await synthNode.execute(ctx);
+    if (synthResult.error || signal.aborted) {
+      onEvent({ type: "done" });
+      return;
     }
+    for (const s of synthResult.steps ?? []) emitStep(s);
   }
 
   if (iterations >= MAX_ITERATIONS) {
