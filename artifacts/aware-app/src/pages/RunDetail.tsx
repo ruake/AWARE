@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, useLocation, useSearch } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
-import { getRunById, getTestResultsForRun, RUNS, loadResultsForRun } from "@/lib/data";
+import { getRunById, getTestResultsForRun, RUNS } from "@/lib/data";
 import type { TestResult, TestAssertionResult, FilmstripFrame } from "@/lib/types";
 import {
   ArrowLeft,
@@ -71,16 +71,7 @@ export default function RunDetail() {
   const runId = params.runId ?? "";
   const { show, Toast } = useSimpleToast();
 
-<<<<<<< HEAD
-  const run = getRunById(runId) ?? RUNS[0] ?? null;
-  const [_loaded, setLoaded] = React.useState(false);
-  React.useEffect(() => {
-    if (!runId) return;
-    loadResultsForRun(runId).then(() => setLoaded(true));
-  }, [runId]);
-=======
   const run = getRunById(runId) ?? null;
->>>>>>> 0a804f5 (fix: Pulse navigation uses wouter navigate() instead of window.location.href; RunDetail removes RUNS[0] fallback on unknown run IDs)
   const results = run ? getTestResultsForRun(run.id) : [];
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
