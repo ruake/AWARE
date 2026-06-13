@@ -7,13 +7,18 @@ export { buildAIContext, buildSystemPrompt } from "./context";
 export { executeDataQuery, DATA_QUERIES, getDataQueryById } from "./dataQueries";
 export type { DataQuery, AITool, AIToolResult } from "./types";
 
-export { LangGraph, buildDefaultGraph } from "./langGraph";
+export { LangGraph, buildDefaultGraph, SubAgentGraph, buildDefaultSubAgentGraph } from "./langGraph";
 export type {
   LangGraphNode,
   LangGraphEdge,
   LangGraphExecutionContext,
   LangGraphNodeResult,
   LangGraphExecutionState,
+  SubAgentDef,
+  SubAgentContext,
+  SubAgentResult,
+  SubAgentStep,
+  ContextBudget,
 } from "./langGraphTypes";
 export type { ChartOutput, GoogleChartType } from "./langGraphTypes";
 export type { DebugLogEntry } from "./langGraphTypes";

@@ -63,7 +63,8 @@ export default function ChatMessage({
   const isAssistant = msg.role === "assistant";
   const isError = msg.type === "error";
   const isCapabilities = msg.type === "capabilities";
-  const ts = msg.timestamp ?? Date.now();
+  const [fallbackTs] = React.useState(() => Date.now());
+  const ts = msg.timestamp ?? fallbackTs;
 
   return (
     <div
