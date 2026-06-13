@@ -114,11 +114,7 @@ export default function ChartCard({ chartData }: Props) {
       {/* ── Bar Chart — horizontal bars (for rankings / flakiness) ──────── */}
       {type === "bar" && (
         <ResponsiveContainer width="100%" height={Math.max(120, rows.length * 24)}>
-          <BarChart
-            layout="vertical"
-            data={rows}
-            margin={{ top: 4, right: 8, left: 4, bottom: 0 }}
-          >
+          <BarChart layout="vertical" data={rows} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" horizontal={false} />
             <XAxis type="number" tick={TICK_STYLE} />
             <YAxis
@@ -130,7 +126,12 @@ export default function ChartCard({ chartData }: Props) {
             />
             <Tooltip {...TOOLTIP_STYLE} />
             {yKeys.map((k, i) => (
-              <Bar key={k} dataKey={k} fill={colors[i] ?? DEFAULT_COLORS[i]} radius={[0, 3, 3, 0]} />
+              <Bar
+                key={k}
+                dataKey={k}
+                fill={colors[i] ?? DEFAULT_COLORS[i]}
+                radius={[0, 3, 3, 0]}
+              />
             ))}
           </BarChart>
         </ResponsiveContainer>

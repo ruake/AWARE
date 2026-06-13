@@ -8,20 +8,24 @@ interface Props {
 }
 
 const TOOL_LABELS: Record<string, { label: string; verb: string }> = {
-  query_runs:            { label: "Run History",        verb: "Querying run history…"       },
-  get_flaky_tests:       { label: "Flaky Tests",        verb: "Analyzing test flakiness…"   },
-  compare_environments:  { label: "Env Comparison",     verb: "Comparing environments…"     },
-  get_promotion_status:  { label: "Promotion Gate",     verb: "Checking promotion gate…"    },
-  get_failure_breakdown: { label: "Failure Breakdown",  verb: "Breaking down failures…"     },
+  query_runs: { label: "Run History", verb: "Querying run history…" },
+  get_flaky_tests: { label: "Flaky Tests", verb: "Analyzing test flakiness…" },
+  compare_environments: { label: "Env Comparison", verb: "Comparing environments…" },
+  get_promotion_status: { label: "Promotion Gate", verb: "Checking promotion gate…" },
+  get_failure_breakdown: { label: "Failure Breakdown", verb: "Breaking down failures…" },
 };
 
 export default function ToolCallCard({ toolCall }: Props) {
   const [expanded, setExpanded] = React.useState(false);
-  const meta = TOOL_LABELS[toolCall.name] ?? { label: toolCall.name, verb: `Running ${toolCall.name}…` };
+  const meta = TOOL_LABELS[toolCall.name] ?? {
+    label: toolCall.name,
+    verb: `Running ${toolCall.name}…`,
+  };
   const isDone = toolCall.status === "done";
   const isError = toolCall.status === "error";
   const isRunning = toolCall.status === "running" || toolCall.status === "pending";
-  const durationMs = isDone && toolCall.completedAt ? toolCall.completedAt - toolCall.startedAt : null;
+  const durationMs =
+    isDone && toolCall.completedAt ? toolCall.completedAt - toolCall.startedAt : null;
   const hasChart = !!toolCall.result?.chartData;
 
   return (
@@ -53,14 +57,20 @@ export default function ToolCallCard({ toolCall }: Props) {
         {isRunning && (
           <Loader2
             size={13}
-            style={{ color: "var(--proof-blue)", flexShrink: 0, animation: "spin 1s linear infinite" }}
+            style={{
+              color: "var(--proof-blue)",
+              flexShrink: 0,
+              animation: "spin 1s linear infinite",
+            }}
           />
         )}
         {isDone && <CheckCircle2 size={13} style={{ color: "#22c55e", flexShrink: 0 }} />}
         {isError && <XCircle size={13} style={{ color: "#ef4444", flexShrink: 0 }} />}
 
         {/* Label */}
-        <span style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", flex: 1 }}>
+        <span
+          style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", flex: 1 }}
+        >
           {isRunning ? meta.verb : meta.label}
         </span>
 
@@ -72,11 +82,18 @@ export default function ToolCallCard({ toolCall }: Props) {
         )}
 
         {/* Expand chevron */}
-        {isDone && (
-          expanded
-            ? <ChevronDown size={12} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
-            : <ChevronRight size={12} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
-        )}
+        {isDone &&
+          (expanded ? (
+            <ChevronDown
+              size={12}
+              style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }}
+            />
+          ) : (
+            <ChevronRight
+              size={12}
+              style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }}
+            />
+          ))}
       </button>
 
       {/* Chart (always visible when done) */}

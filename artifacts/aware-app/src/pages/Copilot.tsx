@@ -86,7 +86,14 @@ function SettingsPanel({ config, onSave, onClose }: SettingsPanelProps) {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
         <div>
-          <label style={{ fontSize: 10, color: "var(--proof-text-secondary)", display: "block", marginBottom: 3 }}>
+          <label
+            style={{
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+              display: "block",
+              marginBottom: 3,
+            }}
+          >
             API Key
           </label>
           <input
@@ -98,7 +105,14 @@ function SettingsPanel({ config, onSave, onClose }: SettingsPanelProps) {
           />
         </div>
         <div>
-          <label style={{ fontSize: 10, color: "var(--proof-text-secondary)", display: "block", marginBottom: 3 }}>
+          <label
+            style={{
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+              display: "block",
+              marginBottom: 3,
+            }}
+          >
             API URL (optional)
           </label>
           <input
@@ -109,7 +123,14 @@ function SettingsPanel({ config, onSave, onClose }: SettingsPanelProps) {
           />
         </div>
         <div>
-          <label style={{ fontSize: 10, color: "var(--proof-text-secondary)", display: "block", marginBottom: 3 }}>
+          <label
+            style={{
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+              display: "block",
+              marginBottom: 3,
+            }}
+          >
             Model
           </label>
           <input
@@ -151,12 +172,15 @@ export default function CopilotPage() {
     const session = loadSession();
     return session?.messages?.length
       ? session.messages
-      : [{
-          id: uid(),
-          role: "assistant",
-          content: "Hi! I'm the **AWARE Copilot**. I call live data tools to answer questions about your test runs, failures, flakiness, and Akamai environment health.\n\nTry a Quick Action on the left, or just ask me anything.",
-          timestamp: Date.now(),
-        }];
+      : [
+          {
+            id: uid(),
+            role: "assistant",
+            content:
+              "Hi! I'm the **AWARE Copilot**. I call live data tools to answer questions about your test runs, failures, flakiness, and Akamai environment health.\n\nTry a Quick Action on the left, or just ask me anything.",
+            timestamp: Date.now(),
+          },
+        ];
   });
   const [busy, setBusy] = React.useState(false);
   const [providerType, setProviderType] = React.useState<ProviderType>(() => {

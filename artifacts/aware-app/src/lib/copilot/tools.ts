@@ -79,8 +79,7 @@ const getFlakyTests: ToolDefinition = {
     const flaky = Object.entries(history)
       .map(([id, statuses]) => {
         const flips = statuses.filter((s, i) => i > 0 && s !== statuses[i - 1]).length;
-        const score =
-          statuses.length > 1 ? Math.round((flips / (statuses.length - 1)) * 100) : 0;
+        const score = statuses.length > 1 ? Math.round((flips / (statuses.length - 1)) * 100) : 0;
         return { id, flips, score, sequence: statuses.join("→"), runs: statuses.length };
       })
       .filter((t) => t.flips > 0)
@@ -198,9 +197,7 @@ const getFailureBreakdown: ToolDefinition = {
     const runId = args.runId as string | undefined;
     const targetRun = runId
       ? RUNS.find((r) => r.id === runId)
-      : [...RUNS].sort(
-          (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
-        )[0];
+      : [...RUNS].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())[0];
 
     if (!targetRun) return { data: { error: "No runs found" } };
 

@@ -171,9 +171,7 @@ export function AssistantBubble({ message }: BubbleProps) {
                       {children}
                     </h3>
                   ),
-                  strong: ({ children }) => (
-                    <strong style={{ fontWeight: 700 }}>{children}</strong>
-                  ),
+                  strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
                   blockquote: ({ children }) => (
                     <blockquote
                       style={{

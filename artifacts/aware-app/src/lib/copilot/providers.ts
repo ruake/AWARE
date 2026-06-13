@@ -1,4 +1,11 @@
-import type { IProvider, ProviderStatus, ProviderType, ApiMessage, ToolDefinition, StreamDelta } from "./types";
+import type {
+  IProvider,
+  ProviderStatus,
+  ProviderType,
+  ApiMessage,
+  ToolDefinition,
+  StreamDelta,
+} from "./types";
 import { loadOpenAIConfig } from "./storage";
 
 // ── WebLLM Provider (PRIMARY) ────────────────────────────────────────────────
@@ -99,7 +106,12 @@ export class WebLLMProvider implements IProvider {
       const reason = choice.finish_reason;
       if (reason === "tool_calls") {
         for (const a of Object.values(accum)) {
-          onDelta({ toolCallId: a.id, toolCallName: a.name, toolCallArgsChunk: a.args, done: false });
+          onDelta({
+            toolCallId: a.id,
+            toolCallName: a.name,
+            toolCallArgsChunk: a.args,
+            done: false,
+          });
         }
         onDelta({ done: true });
       } else if (reason && reason !== "null") {
@@ -130,7 +142,10 @@ export class OpenAIProvider implements IProvider {
     const base = apiUrl || "https://api.openai.com/v1";
 
     if (!apiKey) {
-      onDelta({ content: "⚠️ No OpenAI API key — open **Settings** (top right) to add one.", done: true });
+      onDelta({
+        content: "⚠️ No OpenAI API key — open **Settings** (top right) to add one.",
+        done: true,
+      });
       return;
     }
 
@@ -176,7 +191,10 @@ export class OpenAIProvider implements IProvider {
       for (const line of decoder.decode(value, { stream: true }).split("\n")) {
         if (!line.startsWith("data: ")) continue;
         const json = line.slice(6).trim();
-        if (json === "[DONE]") { onDelta({ done: true }); return; }
+        if (json === "[DONE]") {
+          onDelta({ done: true });
+          return;
+        }
         try {
           const chunk = JSON.parse(json);
           const choice = chunk.choices?.[0];
@@ -194,7 +212,12 @@ export class OpenAIProvider implements IProvider {
           const reason = choice?.finish_reason;
           if (reason === "tool_calls") {
             for (const a of Object.values(accum)) {
-              onDelta({ toolCallId: a.id, toolCallName: a.name, toolCallArgsChunk: a.args, done: false });
+              onDelta({
+                toolCallId: a.id,
+                toolCallName: a.name,
+                toolCallArgsChunk: a.args,
+                done: false,
+              });
             }
             onDelta({ done: true });
           } else if (reason && reason !== "null" && reason !== "stop") {
@@ -202,7 +225,9 @@ export class OpenAIProvider implements IProvider {
           } else if (reason === "stop") {
             onDelta({ done: true });
           }
-        } catch { /* skip malformed SSE chunks */ }
+        } catch {
+          /* skip malformed SSE chunks */
+        }
       }
     }
   }
@@ -218,10 +243,7 @@ declare global {
     ai?: {
       languageModel?: {
         capabilities(): Promise<{ available: string }>;
-        create(opts?: {
-          systemPrompt?: string;
-          signal?: AbortSignal;
-        }): Promise<{
+        create(opts?: { systemPrompt?: string; signal?: AbortSignal }): Promise<{
           prompt(input: string): Promise<string>;
           promptStreaming(input: string): ReadableStream<string>;
           destroy(): void;
@@ -234,10 +256,7 @@ declare global {
 interface ChromePromptAPI {
   capabilities?(): Promise<{ available: string } | string>;
   availability?(): Promise<string>;
-  create(opts?: {
-    systemPrompt?: string;
-    signal?: AbortSignal;
-  }): Promise<{
+  create(opts?: { systemPrompt?: string; signal?: AbortSignal }): Promise<{
     prompt?(input: string): Promise<string>;
     promptStreaming(input: string): ReadableStream<string>;
     destroy(): void;
@@ -250,9 +269,7 @@ function getChromeAI(): ChromePromptAPI | null {
   if (_chromeApiSingleton !== undefined) return _chromeApiSingleton;
   // Check multiple API surfaces across Chrome versions
   const api: ChromePromptAPI | null =
-    (window as any).ai?.languageModel ??
-    (window as any).LanguageModel ??
-    null;
+    (window as any).ai?.languageModel ?? (window as any).LanguageModel ?? null;
   if (!api) {
     // Check for newer window.ai top-level prompt API
     const topAI = (window as any).ai;
@@ -383,8 +400,11 @@ function mergeSystemIntoUser(messages: ApiMessage[]): ApiMessage[] {
 // ── Provider Registry ────────────────────────────────────────────────────────
 export function createProvider(type: ProviderType): IProvider {
   switch (type) {
-    case "webllm": return new WebLLMProvider();
-    case "openai": return new OpenAIProvider();
-    case "chrome": return new ChromeProvider();
+    case "webllm":
+      return new WebLLMProvider();
+    case "openai":
+      return new OpenAIProvider();
+    case "chrome":
+      return new ChromeProvider();
   }
 }

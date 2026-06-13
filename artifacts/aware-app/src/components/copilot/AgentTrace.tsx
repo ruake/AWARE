@@ -56,7 +56,10 @@ export default function AgentTrace({ toolCalls, providerType, streaming }: Props
           {total > 0 && (
             <>
               {" · "}
-              <strong>{done}/{total}</strong> tool{total !== 1 ? "s" : ""} called
+              <strong>
+                {done}/{total}
+              </strong>{" "}
+              tool{total !== 1 ? "s" : ""} called
               {totalMs > 0 && ` · ${(totalMs / 1000).toFixed(1)}s`}
             </>
           )}
@@ -105,10 +108,14 @@ export default function AgentTrace({ toolCalls, providerType, streaming }: Props
               </span>
               <span style={{ color: "var(--proof-text)", fontSize: 11 }}>{tc.name}</span>
               <span style={{ color: "var(--proof-text-secondary)", fontSize: 10 }}>
-                ({Object.keys(tc.args).length > 0 ? JSON.stringify(tc.args).slice(0, 40) : "no args"})
+                (
+                {Object.keys(tc.args).length > 0 ? JSON.stringify(tc.args).slice(0, 40) : "no args"}
+                )
               </span>
               {tc.completedAt && (
-                <span style={{ color: "var(--proof-text-secondary)", fontSize: 10, marginLeft: "auto" }}>
+                <span
+                  style={{ color: "var(--proof-text-secondary)", fontSize: 10, marginLeft: "auto" }}
+                >
                   {tc.completedAt - tc.startedAt}ms
                 </span>
               )}
