@@ -1,4 +1,5 @@
 import { loadRuns, recomputeAll } from "./runs";
+import { loadAllResults } from "./runsLoader";
 import { loadTestSuites } from "./testSuites";
 import { loadPromotions } from "./promotions";
 import { loadSchedulerStatus } from "./schedulerStatus";
@@ -29,6 +30,7 @@ export async function loadAllData(): Promise<void> {
   try {
     await Promise.all([
       loadRuns(),
+      loadAllResults(),
       loadTestSuites(),
       loadPromotions(),
       loadSchedulerStatus(),
