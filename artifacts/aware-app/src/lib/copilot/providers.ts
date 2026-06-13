@@ -391,15 +391,17 @@ export class ChromeProvider implements IProvider {
       // Buffer full output — Chrome AI has no native tool calling, so we
       // must accumulate the full text and check for JSON tool call at the end
       let fullText = "";
-
+      // Chrome AI promptStreaming yields incremental chunks — accumulate
       try {
         while (true) {
           if (signal.aborted) break;
           const { done, value } = await reader.read();
           if (done) break;
           const text = typeof value === "string" ? value : decoder.decode(value, { stream: true });
-          fullText = text;
+          fullText += text;
         }
+        // Flush TextDecoder for Uint8Array-stream path
+        if (!signal.aborted) fullText += decoder.decode();
       } finally {
         reader.releaseLock();
         session.destroy();

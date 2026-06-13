@@ -89,10 +89,20 @@ export interface IProvider {
   ): Promise<void>;
 }
 
+// ── Sub-Agent Step (for UI progress display in LangGraph-style execution) ──
+export interface SubAgentStep {
+  id: string;
+  label: string;
+  status: "running" | "completed" | "error" | "pending";
+  detail?: string;
+  duration?: number;
+}
+
 // ── Agent Events (emitted by agent.ts during a run) ─────────────────────────
 export type AgentEvent =
   | { type: "delta"; content: string }
   | { type: "tool_start"; toolCall: ToolCall }
   | { type: "tool_done"; toolCall: ToolCall }
+  | { type: "step"; step: SubAgentStep }
   | { type: "error"; error: string }
   | { type: "done" };

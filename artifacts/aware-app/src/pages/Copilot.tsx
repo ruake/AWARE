@@ -1,6 +1,6 @@
 import React from "react";
 import { AppLayout } from "@/components/aware/AppLayout";
-import { Bot, Settings, Plus, Square, X } from "lucide-react";
+import { Bot, Settings, Plus, Square, X, Loader2 } from "lucide-react";
 import { TOOLS } from "@/lib/copilot/tools";
 import { runAgent } from "@/lib/copilot/agent";
 import { createProvider, WebLLMProvider } from "@/lib/copilot/providers";
@@ -13,7 +13,7 @@ import {
   loadOpenAIConfig,
   saveOpenAIConfig,
 } from "@/lib/copilot/storage";
-import type { Message, ProviderType, ProviderStatus, AgentEvent } from "@/lib/copilot/types";
+import type { Message, ProviderType, ProviderStatus, AgentEvent, SubAgentStep } from "@/lib/copilot/types";
 import MessageFeed from "@/components/copilot/MessageFeed";
 import QuickActions from "@/components/copilot/QuickActions";
 import InputBar from "@/components/copilot/InputBar";
@@ -201,6 +201,7 @@ export default function CopilotPage() {
   const [openaiConfig, setOpenaiConfig] = React.useState(loadOpenAIConfig);
   const [input, setInput] = React.useState("");
   const [debugLogs, setDebugLogs] = React.useState<DebugLogEntry[]>(() => getLogs());
+  const [agentSteps, setAgentSteps] = React.useState<SubAgentStep[]>([]);
   const logEndRef = React.useRef<HTMLDivElement | null>(null);
 
   // Subscribe to debug logger updates
@@ -281,6 +282,10 @@ export default function CopilotPage() {
         });
         break;
 
+      case "step":
+        setAgentSteps((prev) => [...prev.filter((s) => s.status !== "running"), event.step]);
+        break;
+
       case "done":
         setMessages((prev) => {
           const last = prev[prev.length - 1];
@@ -288,6 +293,7 @@ export default function CopilotPage() {
           return prev;
         });
         setBusy(false);
+        setAgentSteps([]);
         abortRef.current = null;
         break;
 
@@ -483,6 +489,49 @@ export default function CopilotPage() {
 
           {/* Message feed (virtualized) */}
           <MessageFeed messages={messages} />
+
+          {/* Sub-agent steps indicator (LangGraph-style progress) */}
+          {agentSteps.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "4px 14px",
+                borderTop: "1px solid var(--proof-border)",
+                background: "var(--proof-surface-2)",
+                fontSize: 11,
+                color: "var(--proof-text-secondary)",
+                flexShrink: 0,
+                overflow: "hidden",
+              }}
+            >
+              <Loader2 size={10} style={{ animation: "spin 1s linear infinite", flexShrink: 0 }} />
+              {agentSteps
+                .filter((s) => s.status === "running" || s.status === "completed")
+                .slice(-3)
+                .map((s, i) => (
+                  <React.Fragment key={s.id}>
+                    {i > 0 && (
+                      <span style={{ color: "var(--proof-border)", margin: "0 2px" }}>
+                        {"\u2192"}
+                      </span>
+                    )}
+                    <span
+                      style={{
+                        color:
+                          s.status === "completed"
+                            ? "var(--proof-text-secondary)"
+                            : "var(--proof-text)",
+                        fontWeight: s.status === "running" ? 600 : 400,
+                      }}
+                    >
+                      {s.label}
+                    </span>
+                  </React.Fragment>
+                ))}
+            </div>
+          )}
 
           {/* Input bar */}
           <InputBar
