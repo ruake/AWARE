@@ -174,7 +174,8 @@ export function AppLayout({
   return (
     <div
       style={{
-        minHeight: "100vh",
+        height: "100vh",
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         background: "var(--proof-grey-bg)",
@@ -518,7 +519,7 @@ export function AppLayout({
         </div>
       </header>
 
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0 }}>
         {/* Sidebar */}
         <aside
           style={{
@@ -696,11 +697,12 @@ export function AppLayout({
         <main
           style={{
             flex: 1,
+            minHeight: 0,
             overflowY: fullBleed ? "hidden" : "auto",
             overflowX: "hidden",
             display: "flex",
             flexDirection: "column",
-            padding: fullBleed ? 0 : "20px 24px",
+            padding: fullBleed ? 0 : "0 24px 20px",
           }}
         >
           {children}

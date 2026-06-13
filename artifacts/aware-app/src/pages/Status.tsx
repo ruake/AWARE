@@ -151,7 +151,7 @@ export default function Status() {
 
   return (
     <AppLayout activeHref="/ci-pipeline">
-      <div className="proof-page" style={{ overflow: "hidden" }}>
+      <div className="proof-page">
         {/* ══════════ FULL-BLEED DASHBOARD HEADER ══════════ */}
         <section
           style={{
