@@ -1,71 +1,54 @@
 import type { TestResult, TestDetail, TestRunPoint } from "./types";
-import { RUNS, DIFF_ROWS } from "./runs";
-import { dataUrl } from "./dataFetcher";
+import { RUNS } from "./runs";
+import { fetchJson } from "./dataFetcher";
 
-const cache = new Map<string, TestResult[]>();
-const inflight = new Map<string, Promise<TestResult[]>>();
+const _resultsByRun = new Map<string, TestResult[]>();
+let _allResultsLoaded = false;
+let _allResultsLoading: Promise<void> | null = null;
 
-function resultsUrl(runId: string): string {
-  return dataUrl(`test-results/${runId}.json`);
+async function ensureAllResultsLoaded(): Promise<void> {
+  if (_allResultsLoaded) return;
+  if (_allResultsLoading) return _allResultsLoading;
+  _allResultsLoading = fetchJson<Record<string, TestResult[]>>("test-results.json")
+    .then((dict) => {
+      for (const [runId, results] of Object.entries(dict)) {
+        _resultsByRun.set(runId, results);
+      }
+      _allResultsLoaded = true;
+    })
+    .catch((err) => {
+      _allResultsLoading = null;
+      throw err;
+    });
+  return _allResultsLoading;
 }
 
 export function getCachedResults(runId: string): TestResult[] {
-  return cache.get(runId) ?? [];
+  return _resultsByRun.get(runId) ?? [];
 }
 
 export async function loadResultsForRun(runId: string): Promise<TestResult[]> {
-  const existing = cache.get(runId);
-  if (existing) return existing;
-
-  const pending = inflight.get(runId);
-  if (pending) return pending;
-
-  const p = fetch(resultsUrl(runId))
-    .then((r) => {
-      if (!r.ok) throw new Error(`Failed to load results for ${runId}: ${r.status}`);
-      return r.json() as Promise<TestResult[]>;
-    })
-    .then((data) => {
-      cache.set(runId, data);
-      inflight.delete(runId);
-      return data;
-    })
-    .catch((err) => {
-      inflight.delete(runId);
-      throw err;
-    });
-
-  inflight.set(runId, p);
-  return p;
+  await ensureAllResultsLoaded();
+  return _resultsByRun.get(runId) ?? [];
 }
 
-let allLoaded = false;
-let allLoading: Promise<void> | null = null;
-
 export async function loadAllResults(): Promise<void> {
-  if (allLoaded) return;
-  if (allLoading) return allLoading;
-  allLoading = Promise.all(RUNS.map((r) => loadResultsForRun(r.id))).then(() => {
-    allLoaded = true;
-  });
-  return allLoading;
+  await ensureAllResultsLoaded();
 }
 
 let detailCache: TestDetail[] | null = null;
 
 function computeTestDetailsFromCache(): TestDetail[] {
-  return DIFF_ROWS.map((diff) => {
+  const allNames = new Set<string>();
+  for (const results of _resultsByRun.values()) {
+    for (const r of results) allNames.add(r.name);
+  }
+
+  return [...allNames].map((name) => {
     const history: TestRunPoint[] = [];
-    const diffSuffix = diff.id.replace("diff_", "");
     for (const run of RUNS) {
       const results = getCachedResults(run.id);
-      const match = results.find((r) => {
-        if (r.id === diffSuffix) return true;
-        if (r.id === diffSuffix.replace(/^0+/, "")) return true;
-        const rn = r.name.toLowerCase();
-        const dn = diff.name.toLowerCase().replace(/_/g, " ");
-        return rn === dn || rn.includes(dn) || dn.includes(rn);
-      });
+      const match = results.find((r) => r.name === name);
       if (match) {
         history.push({
           runId: run.id,
@@ -98,14 +81,14 @@ function computeTestDetailsFromCache(): TestDetail[] {
 
 export async function getTestDetailsAsync(): Promise<TestDetail[]> {
   if (detailCache) return detailCache;
-  await loadAllResults();
+  await ensureAllResultsLoaded();
   detailCache = computeTestDetailsFromCache();
   return detailCache;
 }
 
 export function getTestDetailsSync(): TestDetail[] {
   if (detailCache) return detailCache;
-  if (allLoaded) {
+  if (_allResultsLoaded) {
     detailCache = computeTestDetailsFromCache();
     return detailCache;
   }
@@ -113,5 +96,5 @@ export function getTestDetailsSync(): TestDetail[] {
 }
 
 export function isAllLoaded(): boolean {
-  return allLoaded;
+  return _allResultsLoaded;
 }

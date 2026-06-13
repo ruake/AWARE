@@ -96,7 +96,7 @@ export default function TestSuiteManager() {
   const filtered = React.useMemo(() => {
     const q = search.toLowerCase();
     return suites.filter((s) => {
-      if (targetFilter && !s.envIds.includes(targetFilter)) return false;
+      if (targetFilter && !s.envIds.includes(targetFilter as import("@/lib/types").AkamaiEnvId)) return false;
       if (scheduleFilter === "scheduled" && !s.schedule) return false;
       if (scheduleFilter === "manual" && s.schedule) return false;
       if (!q) return true;

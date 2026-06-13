@@ -1,4 +1,5 @@
 import type { EnvironmentConfig } from "./types";
+import type { AkamaiEnvId, AkamaiTier, AkamaiNetwork } from "./types";
 
 // Akamai uses two networks per environment tier:
 //   - staging   → Akamai staging network (validate before activating)
@@ -6,8 +7,11 @@ import type { EnvironmentConfig } from "./types";
 //
 // All three tiers (QA / UAT / PROD) exist on both networks,
 // giving 6 environment+network combinations.
+//
+// This config is read-only — the site is static and no environment
+// configuration is mutable from the UI.
 
-const DEFAULT_ENVIRONMENTS: EnvironmentConfig[] = [
+export const ENV_CONFIGS: EnvironmentConfig[] = [
   // ── QA ──────────────────────────────────────────────────────────────
   {
     id: "qa_staging",
@@ -97,62 +101,35 @@ const DEFAULT_ENVIRONMENTS: EnvironmentConfig[] = [
   },
 ];
 
-let _overrides: EnvironmentConfig[] | null = null;
-const _listeners: Set<() => void> = new Set();
-
-function _load(): EnvironmentConfig[] {
-  if (_overrides) return _overrides;
-  try {
-    const raw = localStorage.getItem("aware-env-configs-v3");
-    if (raw) {
-      const parsed = JSON.parse(raw) as EnvironmentConfig[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch {
-    /* ignore */
-  }
-  return DEFAULT_ENVIRONMENTS;
-}
-
 export function getEnvConfigs(): EnvironmentConfig[] {
-  return _load();
-}
-
-export function saveEnvConfigs(configs: EnvironmentConfig[]): void {
-  _overrides = configs;
-  try {
-    localStorage.setItem("aware-env-configs-v3", JSON.stringify(configs));
-  } catch {
-    /* ignore */
-  }
-  _listeners.forEach((cb) => cb());
-}
-
-export function resetEnvConfigs(): void {
-  _overrides = null;
-  try {
-    localStorage.removeItem("aware-env-configs-v3");
-  } catch {
-    /* ignore */
-  }
-  _listeners.forEach((cb) => cb());
+  return ENV_CONFIGS;
 }
 
 export function getEnvLabels(): string[] {
-  return _load().map((e) => e.label);
+  return ENV_CONFIGS.map((e) => e.label);
 }
 
 export function getEnvConfig(label: string): EnvironmentConfig | undefined {
-  return _load().find((e) => e.label === label);
+  return ENV_CONFIGS.find((e) => e.label === label);
 }
 
 export function getEnvConfigById(id: string): EnvironmentConfig | undefined {
-  return _load().find((e) => e.id === id);
+  return ENV_CONFIGS.find((e) => e.id === id);
 }
 
-export function subscribeToEnvConfigs(cb: () => void): () => void {
-  _listeners.add(cb);
-  return () => _listeners.delete(cb);
+export function getEnvByTierAndNetwork(
+  tier: AkamaiTier,
+  network: AkamaiNetwork,
+): EnvironmentConfig | undefined {
+  return ENV_CONFIGS.find((e) => e.target === tier && e.network === network);
 }
 
-export { DEFAULT_ENVIRONMENTS };
+export function envIdToLabel(envId: AkamaiEnvId): string {
+  return ENV_CONFIGS.find((e) => e.id === envId)?.label ?? envId;
+}
+
+export function labelToEnvId(label: string): AkamaiEnvId | undefined {
+  return ENV_CONFIGS.find((e) => e.label === label)?.id as AkamaiEnvId | undefined;
+}
+
+export { ENV_CONFIGS as DEFAULT_ENVIRONMENTS };

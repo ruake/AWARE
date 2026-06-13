@@ -32,6 +32,7 @@ export {
   getRunIndex,
   getRunById,
   DIFF_ROWS,
+  computeDiffRows,
   computeTestDetailForName,
   ENV_SUMMARY,
   PASS_RATE_CHART,
@@ -93,7 +94,9 @@ export {
   getEnvLabels,
   getEnvConfig,
   getEnvConfigById,
-  subscribeToEnvConfigs,
+  getEnvByTierAndNetwork,
+  envIdToLabel,
+  labelToEnvId,
 } from "./envConfig";
 
 export {

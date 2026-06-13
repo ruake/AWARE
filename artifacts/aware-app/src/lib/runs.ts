@@ -9,12 +9,7 @@ let _runsLoaded = false;
 export async function loadRuns(): Promise<void> {
   if (_runsLoaded) return;
   _runsLoaded = true;
-  const [runs, diffs] = await Promise.all([
-    fetchJson<Run[]>("runs.json"),
-    fetchJson<DiffRow[]>("diff-rows.json"),
-  ]);
-  RUNS = runs;
-  DIFF_ROWS = diffs;
+  RUNS = await fetchJson<Run[]>("runs.json");
 }
 
 export function getRunIndex(runId: string): number {
@@ -23,6 +18,46 @@ export function getRunIndex(runId: string): number {
 
 export function getRunById(id: string): Run | undefined {
   return RUNS.find((r) => r.id === id);
+}
+
+// ── Dynamic diff computation ───────────────────────────────────────────────
+// Computes a DiffRow array from two runs' test results.
+// Used by the Compare page and as the default DIFF_ROWS source.
+export function computeDiffRows(baseRunId: string, candRunId: string): DiffRow[] {
+  const baseResults = getCachedResults(baseRunId);
+  const candResults = getCachedResults(candRunId);
+  if (baseResults.length === 0 && candResults.length === 0) return [];
+
+  const baseMap = new Map<string, TestResult>(baseResults.map((r) => [r.name, r]));
+  const candMap = new Map<string, TestResult>(candResults.map((r) => [r.name, r]));
+  const allNames = new Set([...baseMap.keys(), ...candMap.keys()]);
+
+  return [...allNames].map((name, i) => {
+    const base = baseMap.get(name);
+    const cand = candMap.get(name);
+    const baseStatus: "PASS" | "FAIL" = base?.status === "PASS" ? "PASS" : "FAIL";
+    const candStatus: "PASS" | "FAIL" = cand?.status === "PASS" ? "PASS" : "FAIL";
+    const durBase = base?.duration ?? 0;
+    const durCand = cand?.duration ?? 0;
+    const durDiff = durBase > 0 ? Math.abs(durCand - durBase) / durBase : 0;
+
+    let state: DiffRow["state"];
+    if (baseStatus === "PASS" && candStatus === "FAIL") state = "regression";
+    else if (baseStatus === "FAIL" && candStatus === "PASS") state = "fixed";
+    else if (durDiff > 0.25 && baseStatus === candStatus) state = "duration";
+    else state = "unchanged";
+
+    return {
+      id: `diff_${i}`,
+      name,
+      baseStatus,
+      candStatus,
+      durBase,
+      durCand,
+      category: base?.category ?? cand?.category ?? "Unknown",
+      state,
+    };
+  });
 }
 
 export function computeTestDetailForName(name: string): TestDetail {
@@ -62,30 +97,6 @@ export function computeTestDetailForName(name: string): TestDetail {
   return { history, passRate, flakinessScore, avgDuration };
 }
 
-// ── Env label helper ──────────────────────────────────────────────────
-function envLabel(run: Run): string {
-  return run.env ?? "QA";
-}
-
-const ENV_COLOR_MAP: Record<string, string> = {
-  "QA / Staging": "#a855f7",
-  "QA / Production": "#c084fc",
-  "UAT / Staging": "#f59e0b",
-  "UAT / Production": "#fbbf24",
-  "PROD / Staging": "#22c55e",
-  "PROD / Production": "#4ade80",
-  QA: "#a855f7",
-  UAT: "#f59e0b",
-  PROD: "#22c55e",
-  "Prod/Production": "#5b8af5",
-  "Prod/Staging": "#f59e0b",
-  "UAT/Production": "#22c55e",
-  "UAT/Staging": "#a855f7",
-};
-function envColor(label: string): string {
-  return ENV_COLOR_MAP[label] ?? "#9aa0a6";
-}
-
 // ── ENV_SUMMARY ──────────────────────────────────────────────────────
 export const ENV_SUMMARY: {
   label: string;
@@ -100,7 +111,7 @@ export function computeEnvSummary(): void {
   ENV_SUMMARY.length = 0;
   const groups = new Map<string, Run[]>();
   for (const run of RUNS) {
-    const key = envLabel(run);
+    const key = run.env;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(run);
   }
@@ -149,6 +160,21 @@ export const PER_ENV_PASS_RATE: {
   data: { runId: string; label: string; passRate: number }[];
 }[] = [];
 
+const ENV_COLOR_MAP: Record<string, string> = {
+  QA: "#a855f7",
+  UAT: "#f59e0b",
+  PROD: "#22c55e",
+  "QA / Staging": "#a855f7",
+  "QA / Production": "#c084fc",
+  "UAT / Staging": "#f59e0b",
+  "UAT / Production": "#fbbf24",
+  "PROD / Staging": "#22c55e",
+  "PROD / Production": "#4ade80",
+};
+function envColor(label: string): string {
+  return ENV_COLOR_MAP[label] ?? "#9aa0a6";
+}
+
 export function computePerEnvPassRate(): void {
   PER_ENV_PASS_RATE.length = 0;
   const groups = new Map<string, { runId: string; label: string; passRate: number }[]>();
@@ -156,7 +182,7 @@ export function computePerEnvPassRate(): void {
     (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
   );
   for (const run of sorted) {
-    const key = envLabel(run);
+    const key = run.env;
     if (!groups.has(key)) groups.set(key, []);
     groups
       .get(key)!
@@ -173,14 +199,14 @@ export const ENV_PASS_RATE_CHART: Record<string, unknown>[] = [];
 
 export function computeEnvPassRateChart(): void {
   ENV_PASS_RATE_CHART.length = 0;
-  const envLabels = [...new Set(RUNS.map(envLabel))].sort();
+  const envLabels = [...new Set(RUNS.map((r) => r.env))].sort();
   const dayMap = new Map<string, Record<string, unknown>>();
   const sorted = [...RUNS].sort(
     (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
   );
   for (const run of sorted) {
     const day = run.started.slice(0, 10);
-    const key = envLabel(run);
+    const key = run.env;
     if (!dayMap.has(day)) {
       const entry: Record<string, unknown> = { day, runId: run.id };
       for (const l of envLabels) entry[l] = 0;
@@ -199,6 +225,24 @@ export function recomputeAll(): void {
   computePassRateChart();
   computePerEnvPassRate();
   computeEnvPassRateChart();
+  // Compute default DIFF_ROWS from the two most recent runs in the same env
+  const byEnv = new Map<string, Run[]>();
+  for (const run of RUNS) {
+    const k = run.envId;
+    if (!byEnv.has(k)) byEnv.set(k, []);
+    byEnv.get(k)!.push(run);
+  }
+  DIFF_ROWS.length = 0;
+  for (const runs of byEnv.values()) {
+    const sorted = [...runs].sort(
+      (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
+    );
+    if (sorted.length >= 2) {
+      const rows = computeDiffRows(sorted[1].id, sorted[0].id);
+      rows.forEach((r) => DIFF_ROWS.push(r));
+      break;
+    }
+  }
 }
 
 export interface RunFrequency {
@@ -258,7 +302,11 @@ export function computeRunFrequency(): RunFrequency {
     totalRuns: sorted.length,
     daysCovered,
     runsPerDay,
-    byDay: dayKeys.map((d) => ({ date: d, count: byDay.get(d)!.count, envs: byDay.get(d)!.envs })),
+    byDay: dayKeys.map((d) => ({
+      date: d,
+      count: byDay.get(d)!.count,
+      envs: byDay.get(d)!.envs,
+    })),
     byEnv,
     byHour,
     avgIntervalHours,

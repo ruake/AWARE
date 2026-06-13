@@ -5,7 +5,8 @@ import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useSyncedUrlState } from "@/lib/urlState";
-import { RUNS, DIFF_ROWS } from "@/lib/data";
+import { RUNS, DIFF_ROWS, computeDiffRows } from "@/lib/data";
+import { loadResultsForRun } from "@/lib/runsLoader";
 import type { DiffRow } from "@/lib/types";
 import {
   Link2,
@@ -917,12 +918,24 @@ export default function Compare() {
   const [activeFilter, setActiveFilter] = React.useState<string | null>(null);
   const [swapped, setSwapped] = React.useState(false);
   const [selectedIdx, setSelectedIdx] = React.useState(-1);
+  const [computedRows, setComputedRows] = React.useState<DiffRow[]>(DIFF_ROWS);
+  const [diffLoading, setDiffLoading] = React.useState(false);
   const baselineRun = RUNS.find((r) => r.id === baseline);
   const candidateRun = RUNS.find((r) => r.id === candidate);
 
+  React.useEffect(() => {
+    if (!baseline || !candidate) return;
+    setDiffLoading(true);
+    Promise.all([loadResultsForRun(baseline), loadResultsForRun(candidate)]).then(() => {
+      setComputedRows(computeDiffRows(baseline, candidate));
+      setDiffLoading(false);
+    });
+  }, [baseline, candidate]);
+
   const diffs = React.useMemo(() => {
-    if (!swapped) return DIFF_ROWS;
-    return DIFF_ROWS.map((d) => {
+    const rows = computedRows;
+    if (!swapped) return rows;
+    return rows.map((d) => {
       const state: DiffRow["state"] =
         d.state === "regression" ? "fixed" : d.state === "fixed" ? "regression" : d.state;
       return {
@@ -934,7 +947,7 @@ export default function Compare() {
         durCand: d.durBase,
       };
     });
-  }, [swapped]);
+  }, [computedRows, swapped]);
 
   const [colFilters, setColFilters] = React.useState<Record<string, string>>({});
 

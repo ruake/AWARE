@@ -1,3 +1,18 @@
+// ── Akamai-specific environment types ──────────────────────────────────────
+// Canonical environment identifiers — 3 tiers × 2 networks = 6 slots.
+// These are the only valid envId values in the system.
+export type AkamaiTier = "QA" | "UAT" | "PROD";
+export type AkamaiNetwork = "staging" | "production";
+export type AkamaiEnvId =
+  | "qa_staging"
+  | "qa_prod"
+  | "uat_staging"
+  | "uat_prod"
+  | "prod_staging"
+  | "prod_prod";
+
+export type RunStatus = "PASS" | "FAIL" | "PARTIAL" | "FLAKY" | "RUNNING" | "PENDING" | "ERROR";
+
 export interface RunCondition {
   type: string;
   status: "True" | "False" | "Unknown";
@@ -10,10 +25,10 @@ export interface Run {
   id: string;
   label: string;
   suiteId: string;
-  envId: string;
-  env: string;
-  network: "staging" | "production";
-  status: "PASS" | "FAIL" | "PARTIAL" | "FLAKY" | "RUNNING" | "PENDING" | "ERROR";
+  envId: AkamaiEnvId;
+  env: AkamaiTier;
+  network: AkamaiNetwork;
+  status: RunStatus;
   passPct: number;
   failures: number;
   duration: string;
@@ -120,13 +135,13 @@ export interface DiffRow {
 }
 
 export interface EnvironmentConfig {
-  id: string;
+  id: AkamaiEnvId;
   label: string;
-  target: string;
+  target: AkamaiTier;
   stage: string;
   baseUrl: string;
   ips: string[];
-  network: "staging" | "production";
+  network: AkamaiNetwork;
   property?: string;
   propertyVersion?: number;
   propertyStatus?: "active" | "inactive" | "pending";
@@ -268,8 +283,8 @@ export interface TestSuite {
   description: string;
   parentId: string | null;
   testIds: string[];
-  envIds: string[];
-  runners: string[];
+  envIds: AkamaiEnvId[];
+  runners: ("playwright" | "pytest")[];
   config: TestSuiteConfig;
   tags: string[];
   schedule: string | null;
