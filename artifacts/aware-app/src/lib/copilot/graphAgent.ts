@@ -126,6 +126,10 @@ function sessionCarveNode(): AgentNode {
   };
 }
 
+// Stream timeout — if the provider hangs without emitting done, resolve after
+// this many milliseconds so the graph isn't stuck forever.
+const STREAM_TIMEOUT_MS = 60_000;
+
 // ── Node: plan_and_route ────────────────────────────────────────────────────
 // Stream from provider. If tool calls come back, route to execute_tools.
 // If no tools, route to synthesize (the content IS the final answer).
@@ -137,6 +141,16 @@ function planAndRouteNode(): AgentNode {
     async execute(ctx: AgentGraphContext): Promise<AgentNodeResult> {
       const steps: SubAgentStep[] = [];
 
+      // Emit an immediate "Thinking" step so the LangGraph indicator appears
+      // right away — gives the user visual feedback that the agent is running.
+      const thinkingStep: SubAgentStep = {
+        id: uid(),
+        label: "Thinking…",
+        status: "running",
+        detail: `${ctx.provider.type} · ${ctx.tools.length} tools available`,
+      };
+      ctx.onEvent({ type: "step", step: thinkingStep });
+
       // Streaming accumulator
       let collectedContent = "";
       const localPendingCalls: Array<{ id: string; name: string; argsJson: string }> = [];
@@ -145,6 +159,17 @@ function planAndRouteNode(): AgentNode {
       const step = uid();
 
       await new Promise<void>((resolve, reject) => {
+        // Timeout guard — some providers (e.g. Chrome AI during model load)
+        // can stall indefinitely. Resolve after STREAM_TIMEOUT_MS with whatever
+        // content has been collected so far.
+        const timeout = setTimeout(() => {
+          if (!streamDone) {
+            logError("plan_and_route", `Stream timeout after ${STREAM_TIMEOUT_MS}ms`);
+            streamDone = true;
+            resolve();
+          }
+        }, STREAM_TIMEOUT_MS);
+
         ctx.provider
           .stream(ctx.apiMessages, ctx.tools, ctx.signal, (delta) => {
             if (delta.content) {
@@ -160,13 +185,18 @@ function planAndRouteNode(): AgentNode {
             }
             if (delta.done) {
               streamDone = true;
+              clearTimeout(timeout);
               resolve();
             }
           })
           .then(() => {
+            clearTimeout(timeout);
             if (!streamDone) resolve();
           })
-          .catch(reject);
+          .catch((err) => {
+            clearTimeout(timeout);
+            reject(err);
+          });
       });
 
       if (ctx.signal.aborted) return { status: "completed" };
@@ -342,6 +372,14 @@ function synthesizeNode(): AgentNode {
 
       let streamDone = false;
       await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          if (!streamDone) {
+            logError("synthesize", `Stream timeout after ${STREAM_TIMEOUT_MS}ms`);
+            streamDone = true;
+            resolve();
+          }
+        }, STREAM_TIMEOUT_MS);
+
         ctx.provider
           .stream(ctx.apiMessages, ctx.tools, ctx.signal, (delta) => {
             if (delta.content) {
@@ -365,13 +403,18 @@ function synthesizeNode(): AgentNode {
             }
             if (delta.done) {
               streamDone = true;
+              clearTimeout(timeout);
               resolve();
             }
           })
           .then(() => {
+            clearTimeout(timeout);
             if (!streamDone) resolve();
           })
-          .catch(reject);
+          .catch((err) => {
+            clearTimeout(timeout);
+            reject(err);
+          });
       });
 
       steps[0].status = "completed";
