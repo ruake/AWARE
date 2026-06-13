@@ -437,12 +437,15 @@ function buildTemplateSynthesis(toolName: string, toolDataJson: string, _userQue
       case "query_runs": {
         const runs: any[] = Array.isArray(data) ? data : [];
         if (!runs.length) return "No test runs found in the dataset.";
-        const header = `Here are the **last ${Math.min(runs.length, 10)} test runs**:\n\n`;
+        // Tool returns { run, env, passRate, failures, date } — not the raw run fields
+        const envs = [...new Set(runs.map((r: any) => r.env).filter(Boolean))];
+        const envLabel = envs.length === 1 ? ` (${envs[0]})` : "";
+        const header = `Here are the **last ${Math.min(runs.length, 10)} test runs**${envLabel}:\n\n`;
         const rows = runs
           .slice(0, 10)
           .map(
             (r: any) =>
-              `- **${r.label || r.id}** · ${r.env} · **${r.passPct ?? "?"}%** pass · ${r.failures ?? 0} failure${(r.failures ?? 0) !== 1 ? "s" : ""}`,
+              `- **${r.run ?? r.label ?? r.id ?? "Run"}** · ${r.env} · **${r.passRate ?? r.passPct ?? "?"}%** pass · ${r.failures ?? 0} failure${(r.failures ?? 0) !== 1 ? "s" : ""} · ${r.date ?? ""}`,
           )
           .join("\n");
         return header + rows;
