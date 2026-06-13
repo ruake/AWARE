@@ -152,7 +152,15 @@ export default function Dashboard() {
               }}
             >
               <AlertTriangle size={15} style={{ color: "var(--proof-red)", flexShrink: 0 }} />
-              <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  flexWrap: "wrap",
+                }}
+              >
                 <span style={{ fontWeight: 700, fontSize: 12, color: "var(--proof-red)" }}>
                   Anomaly Detected
                 </span>
@@ -169,7 +177,8 @@ export default function Dashboard() {
                     borderRadius: "var(--proof-radius-xs)",
                   }}
                 >
-                  {anomalyBanner.lastValue.toFixed(0)}ms vs {anomalyBanner.avgValue.toFixed(0)}ms avg &nbsp;·&nbsp; {anomalyBanner.zScore.toFixed(1)}σ
+                  {anomalyBanner.lastValue.toFixed(0)}ms vs {anomalyBanner.avgValue.toFixed(0)}ms
+                  avg &nbsp;·&nbsp; {anomalyBanner.zScore.toFixed(1)}σ
                 </span>
               </div>
               <button
@@ -295,7 +304,10 @@ export default function Dashboard() {
 
           {/* Comparison Summary */}
           <PanelErrorBoundary label="Comparison summary">
-            <div className="proof-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
+            <div
+              className="proof-stagger"
+              style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}
+            >
               {[
                 {
                   label: "Pass Rate Trend",

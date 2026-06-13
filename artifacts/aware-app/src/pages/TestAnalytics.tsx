@@ -625,7 +625,10 @@ export default function TestAnalytics() {
         )}
 
         {/* KPI tiles */}
-        <div className="proof-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
+        <div
+          className="proof-stagger"
+          style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}
+        >
           <CTAStatCard
             label="Pass Rate"
             value={`${detail.passRate}%`}

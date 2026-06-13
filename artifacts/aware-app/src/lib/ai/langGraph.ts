@@ -6,7 +6,15 @@ import type {
   LangGraphExecutionState,
 } from "./langGraphTypes";
 import type { AIAnalysisRequest, AIAnalysisResult } from "./types";
-import { logInfo, logError, logDebug, logWarn, startTiming, endTiming, clearLogs } from "./debugLogger";
+import {
+  logInfo,
+  logError,
+  logDebug,
+  logWarn,
+  startTiming,
+  endTiming,
+  clearLogs,
+} from "./debugLogger";
 import { getSkillDefinition } from "./skillRegistry";
 import { serializeCharts } from "./chartBuilder";
 import { estimateTokenCount } from "@/lib/llm";
@@ -94,7 +102,7 @@ export class LangGraph {
 
     // Log token context if this is an LLM-bound node
     if (node.id === "llm_chat" || node.id === "llm_query") {
-      const systemCtx = ctx.data.systemPrompt as string || "";
+      const systemCtx = (ctx.data.systemPrompt as string) || "";
       const totalTokens = estimateTokenCount(systemCtx);
       logWarn(node.id, `Context audit: ~${totalTokens} tokens in system prompt before LLM call`);
       if (totalTokens > 3500) {
@@ -136,7 +144,10 @@ export class LangGraph {
     // Log compaction events
     if (result.dataUpdate?.compaction) {
       const c = result.dataUpdate.compaction as { before: number; after: number; dropped: number };
-      logWarn(node.id, `Context compaction: ${c.before} → ${c.after} tokens (dropped ${c.dropped} msgs)`);
+      logWarn(
+        node.id,
+        `Context compaction: ${c.before} → ${c.after} tokens (dropped ${c.dropped} msgs)`,
+      );
     }
 
     this.updateNodeState(node.id, "completed");
@@ -183,13 +194,16 @@ export class LangGraph {
       for (const n of unvisited) visited.add(n);
 
       if (unvisited.length > 1) {
-        logDebug("parallel", `Fan-out: executing ${unvisited.length} nodes in parallel`, "debug", unvisited.join(", "));
+        logDebug(
+          "parallel",
+          `Fan-out: executing ${unvisited.length} nodes in parallel`,
+          "debug",
+          unvisited.join(", "),
+        );
       }
 
       // Execute all current nodes in parallel (fan-out)
-      const results = await Promise.all(
-        unvisited.map((nodeId) => this.executeNode(nodeId, ctx)),
-      );
+      const results = await Promise.all(unvisited.map((nodeId) => this.executeNode(nodeId, ctx)));
 
       // Check for errors — stop on first error in a series, but let parallel branches complete
       const errors = results.filter((r) => r.status === "error");
@@ -214,13 +228,18 @@ export class LangGraph {
     }
 
     const totalDuration = Date.now() - ctx.startedAt;
-    logInfo("response", `Graph execution complete`, `${totalDuration}ms (${visited.size} nodes, ${iteration} rounds)`);
+    logInfo(
+      "response",
+      `Graph execution complete`,
+      `${totalDuration}ms (${visited.size} nodes, ${iteration} rounds)`,
+    );
 
     const chartBlocks = serializeCharts(ctx.charts);
 
-    const details = ctx.charts.length > 0
-      ? `${(ctx.data.details as string) || ""}\n\n${chartBlocks}`
-      : (ctx.data.details as string) || "";
+    const details =
+      ctx.charts.length > 0
+        ? `${(ctx.data.details as string) || ""}\n\n${chartBlocks}`
+        : (ctx.data.details as string) || "";
 
     return {
       useCaseId: request.useCaseId,
@@ -343,7 +362,10 @@ export function buildDefaultGraph(analysisFn: LangGraphNode): LangGraph {
       if (sysTokens > 0) {
         logWarn("context_token_audit", `System prompt: ~${sysTokens} tokens`);
         if (sysTokens > 3000) {
-          logWarn("context_token_audit", `⚠ Large context: ${sysTokens}t — compaction may be needed`);
+          logWarn(
+            "context_token_audit",
+            `⚠ Large context: ${sysTokens}t — compaction may be needed`,
+          );
         }
       } else {
         logDebug("context_token_audit", "No system prompt (deterministic path)");

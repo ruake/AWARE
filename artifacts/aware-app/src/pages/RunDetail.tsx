@@ -2,7 +2,14 @@ import React from "react";
 import { useParams, useLocation, useSearch } from "wouter";
 import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
-import { getRunById, getTestResultsForRun, RUNS, loadResultsForRun, getImageSource, preloadImage } from "@/lib/data";
+import {
+  getRunById,
+  getTestResultsForRun,
+  RUNS,
+  loadResultsForRun,
+  getImageSource,
+  preloadImage,
+} from "@/lib/data";
 import type { TestResult, TestAssertionResult, FilmstripFrame } from "@/lib/types";
 import {
   ArrowLeft,
@@ -65,17 +72,14 @@ function AssertionRow({ a }: { a: TestAssertionResult }) {
 }
 
 function FilmstripThumbnail({ frame, onExpand }: { frame: FilmstripFrame; onExpand: () => void }) {
+  const isDataUri = React.useMemo(() => getImageSource(frame).startsWith("data:"), [frame]);
   const [src, setSrc] = React.useState<string>(() => getImageSource(frame));
-  const [loaded, setLoaded] = React.useState(false);
+  const [loaded, setLoaded] = React.useState(isDataUri);
   const imgRef = React.useRef<HTMLImageElement>(null);
 
   React.useEffect(() => {
     const source = getImageSource(frame);
-    // Only preload if it's an external URL (not inline data URI)
-    if (source.startsWith("data:")) {
-      setSrc(source);
-      setLoaded(true);
-    } else {
+    if (!source.startsWith("data:")) {
       preloadImage(source).then((url) => {
         setSrc(url);
         setLoaded(true);
@@ -160,18 +164,21 @@ export default function RunDetail() {
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [catFilter, setCatFilter] = React.useState<string>("all");
   const [expandScreenshot, setExpandScreenshot] = React.useState<FilmstripFrame | null>(null);
-  const [lightboxSrc, setLightboxSrc] = React.useState<string>("");
+  const [preloadedUrl, setPreloadedUrl] = React.useState<string | null>(null);
+
+  const lightboxSrc = React.useMemo(() => {
+    if (!expandScreenshot) return "";
+    const source = getImageSource(expandScreenshot);
+    if (source.startsWith("data:")) return source;
+    return preloadedUrl || "";
+  }, [expandScreenshot, preloadedUrl]);
 
   React.useEffect(() => {
     if (expandScreenshot) {
       const source = getImageSource(expandScreenshot);
-      if (source.startsWith("data:")) {
-        setLightboxSrc(source);
-      } else {
-        preloadImage(source).then(setLightboxSrc);
+      if (!source.startsWith("data:")) {
+        preloadImage(source).then(setPreloadedUrl);
       }
-    } else {
-      setLightboxSrc("");
     }
   }, [expandScreenshot]);
   const urlTestId = React.useMemo(() => new URLSearchParams(urlSearch).get("testId"), [urlSearch]);
@@ -239,7 +246,10 @@ export default function RunDetail() {
 
   return (
     <AppLayout activeHref="/runs">
-      <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}>
+      <div
+        className="proof-page"
+        style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}
+      >
         {/* Top bar: breadcrumb + meta + actions */}
         <div
           style={{
@@ -279,16 +289,42 @@ export default function RunDetail() {
                 style={{
                   fontWeight: 700,
                   fontFamily: "var(--font-mono)",
-                  color: passRate === 100 ? "var(--proof-green)" : passRate < 90 ? "var(--proof-red)" : "var(--proof-text)",
+                  color:
+                    passRate === 100
+                      ? "var(--proof-green)"
+                      : passRate < 90
+                        ? "var(--proof-red)"
+                        : "var(--proof-text)",
                 }}
-              >{passRate}%</span> pass
+              >
+                {passRate}%
+              </span>{" "}
+              pass
             </span>
-            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)" }}>
+            <span
+              style={{
+                fontSize: 11,
+                color: "var(--proof-text-secondary)",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
               <span style={{ color: "var(--proof-green)" }}>+{passCount}</span>
               {" / "}
-              <span style={{ color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-muted)" }}>-{failCount}</span>
+              <span
+                style={{ color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-muted)" }}
+              >
+                -{failCount}
+              </span>
             </span>
-            <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--proof-text-muted)" }}>{run.duration}</span>
+            <span
+              style={{
+                fontSize: 11,
+                fontFamily: "var(--font-mono)",
+                color: "var(--proof-text-muted)",
+              }}
+            >
+              {run.duration}
+            </span>
             <span
               style={{
                 fontSize: 10,

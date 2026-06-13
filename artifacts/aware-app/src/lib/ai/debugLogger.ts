@@ -48,27 +48,15 @@ export function logDebug(
   notifyListeners();
 }
 
-export function logInfo(
-  node: LangGraphNodeId,
-  event: string,
-  details?: string,
-): void {
+export function logInfo(node: LangGraphNodeId, event: string, details?: string): void {
   logDebug(node, event, "info", details);
 }
 
-export function logWarn(
-  node: LangGraphNodeId,
-  event: string,
-  details?: string,
-): void {
+export function logWarn(node: LangGraphNodeId, event: string, details?: string): void {
   logDebug(node, event, "warn", details);
 }
 
-export function logError(
-  node: LangGraphNodeId,
-  event: string,
-  details?: string,
-): void {
+export function logError(node: LangGraphNodeId, event: string, details?: string): void {
   logDebug(node, event, "error", details);
 }
 

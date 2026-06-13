@@ -71,18 +71,35 @@
   --proof-muted: var(--proof-text-secondary);
 
   /* Page-specific backgrounds (About, Status) */
-  --proof-hero-about: linear-gradient(160deg, #030712 0%, #0f172a 40%, rgba(37,99,235,0.08) 70%, #030712 100%);
-  --proof-hero-status: linear-gradient(160deg, #030712 0%, #0f172a 50%, rgba(37,99,235,0.06) 80%, #030712 100%);
-  --proof-subtle-bg: rgba(255,255,255,0.02);
-  --proof-subtle-bg2: rgba(255,255,255,0.04);
-  --proof-subtle-bg3: rgba(255,255,255,0.03);
-  --proof-subtle-bg015: rgba(255,255,255,0.015);
-  --proof-code-bg: rgba(0,0,0,0.3);
-  --proof-cta-bg: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(139,92,246,0.08), rgba(15,23,42,0.9));
-  --proof-flow-bg: linear-gradient(135deg, rgba(37,99,235,0.04), transparent);
-  --proof-bar-track: rgba(255,255,255,0.06);
-  --proof-env-card: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  --proof-tab-bar: rgba(255,255,255,0.03);
+  --proof-hero-about: linear-gradient(
+    160deg,
+    #030712 0%,
+    #0f172a 40%,
+    rgba(37, 99, 235, 0.08) 70%,
+    #030712 100%
+  );
+  --proof-hero-status: linear-gradient(
+    160deg,
+    #030712 0%,
+    #0f172a 50%,
+    rgba(37, 99, 235, 0.06) 80%,
+    #030712 100%
+  );
+  --proof-subtle-bg: rgba(255, 255, 255, 0.02);
+  --proof-subtle-bg2: rgba(255, 255, 255, 0.04);
+  --proof-subtle-bg3: rgba(255, 255, 255, 0.03);
+  --proof-subtle-bg015: rgba(255, 255, 255, 0.015);
+  --proof-code-bg: rgba(0, 0, 0, 0.3);
+  --proof-cta-bg: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.12),
+    rgba(139, 92, 246, 0.08),
+    rgba(15, 23, 42, 0.9)
+  );
+  --proof-flow-bg: linear-gradient(135deg, rgba(37, 99, 235, 0.04), transparent);
+  --proof-bar-track: rgba(255, 255, 255, 0.06);
+  --proof-env-card: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  --proof-tab-bar: rgba(255, 255, 255, 0.03);
 }
 
 /* ── Base ──────────────────────────────────────────────────────────── */
@@ -702,12 +719,63 @@ select.proof-input {
 .proof-stagger > * {
   animation: slide-up 0.22s ease-out both;
 }
-.proof-stagger > *:nth-child(1) { animation-delay: 0ms; }
-.proof-stagger > *:nth-child(2) { animation-delay: 35ms; }
-.proof-stagger > *:nth-child(3) { animation-delay: 70ms; }
-.proof-stagger > *:nth-child(4) { animation-delay: 105ms; }
-.proof-stagger > *:nth-child(5) { animation-delay: 140ms; }
-.proof-stagger > *:nth-child(6) { animation-delay: 175ms; }
+.proof-stagger > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.proof-stagger > *:nth-child(2) {
+  animation-delay: 35ms;
+}
+.proof-stagger > *:nth-child(3) {
+  animation-delay: 70ms;
+}
+.proof-stagger > *:nth-child(4) {
+  animation-delay: 105ms;
+}
+.proof-stagger > *:nth-child(5) {
+  animation-delay: 140ms;
+}
+.proof-stagger > *:nth-child(6) {
+  animation-delay: 175ms;
+}
+
+/* ── Chat message animations ──────────────────────────────────────── */
+@keyframes chat-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes chat-avatar-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(91, 138, 245, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(91, 138, 245, 0.5);
+  }
+}
+@keyframes chat-typing-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+.chat-slide-in {
+  animation: chat-slide-in 0.25s ease-out both;
+}
+.chat-avatar-bot {
+  animation: chat-avatar-glow 2s ease-in-out infinite;
+}
 
 /* ── Keyboard hint ────────────────────────────────────────────────── */
 .proof-kbd {
@@ -724,11 +792,21 @@ select.proof-input {
 }
 
 /* ── Card accent variants ─────────────────────────────────────────── */
-.proof-card-accent-blue { border-top: 2px solid var(--proof-blue); }
-.proof-card-accent-green { border-top: 2px solid var(--proof-green); }
-.proof-card-accent-red { border-top: 2px solid var(--proof-red); }
-.proof-card-accent-yellow { border-top: 2px solid var(--proof-yellow); }
-.proof-card-accent-purple { border-top: 2px solid var(--proof-purple); }
+.proof-card-accent-blue {
+  border-top: 2px solid var(--proof-blue);
+}
+.proof-card-accent-green {
+  border-top: 2px solid var(--proof-green);
+}
+.proof-card-accent-red {
+  border-top: 2px solid var(--proof-red);
+}
+.proof-card-accent-yellow {
+  border-top: 2px solid var(--proof-yellow);
+}
+.proof-card-accent-purple {
+  border-top: 2px solid var(--proof-purple);
+}
 
 /* ── Mono stat number ─────────────────────────────────────────────── */
 .proof-stat-number {
@@ -769,7 +847,9 @@ select.proof-input {
 
 /* ── Nav link hover ───────────────────────────────────────────────── */
 .proof-nav-link {
-  transition: background var(--proof-transition), color var(--proof-transition) !important;
+  transition:
+    background var(--proof-transition),
+    color var(--proof-transition) !important;
 }
 .proof-nav-link:hover {
   background: rgba(255, 255, 255, 0.05) !important;
@@ -997,16 +1077,33 @@ select.proof-input {
 }
 
 .light {
-  --proof-hero-about: linear-gradient(160deg, #f1f3f8 0%, #ffffff 40%, rgba(37,99,235,0.04) 70%, #f1f3f8 100%);
-  --proof-hero-status: linear-gradient(160deg, #f1f3f8 0%, #ffffff 50%, rgba(37,99,235,0.03) 80%, #f1f3f8 100%);
-  --proof-subtle-bg: rgba(0,0,0,0.02);
-  --proof-subtle-bg2: rgba(0,0,0,0.04);
-  --proof-subtle-bg3: rgba(0,0,0,0.03);
-  --proof-subtle-bg015: rgba(0,0,0,0.015);
+  --proof-hero-about: linear-gradient(
+    160deg,
+    #f1f3f8 0%,
+    #ffffff 40%,
+    rgba(37, 99, 235, 0.04) 70%,
+    #f1f3f8 100%
+  );
+  --proof-hero-status: linear-gradient(
+    160deg,
+    #f1f3f8 0%,
+    #ffffff 50%,
+    rgba(37, 99, 235, 0.03) 80%,
+    #f1f3f8 100%
+  );
+  --proof-subtle-bg: rgba(0, 0, 0, 0.02);
+  --proof-subtle-bg2: rgba(0, 0, 0, 0.04);
+  --proof-subtle-bg3: rgba(0, 0, 0, 0.03);
+  --proof-subtle-bg015: rgba(0, 0, 0, 0.015);
   --proof-code-bg: #f4f5f8;
-  --proof-cta-bg: linear-gradient(135deg, rgba(37,99,235,0.06), rgba(139,92,246,0.04), #ffffff);
-  --proof-flow-bg: linear-gradient(135deg, rgba(37,99,235,0.03), transparent);
-  --proof-bar-track: rgba(0,0,0,0.06);
-  --proof-env-card: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
-  --proof-tab-bar: rgba(0,0,0,0.02);
+  --proof-cta-bg: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.06),
+    rgba(139, 92, 246, 0.04),
+    #ffffff
+  );
+  --proof-flow-bg: linear-gradient(135deg, rgba(37, 99, 235, 0.03), transparent);
+  --proof-bar-track: rgba(0, 0, 0, 0.06);
+  --proof-env-card: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
+  --proof-tab-bar: rgba(0, 0, 0, 0.02);
 }

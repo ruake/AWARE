@@ -54,7 +54,7 @@ import { getLogs, subscribeLogs, clearLogs } from "@/lib/ai/debugLogger";
 import { getSkillDefinition } from "@/lib/ai/skillRegistry";
 import type { SkillDefinition } from "@/lib/ai/skillRegistry";
 
-const USE_CASE_ICONS: Record<string, React.ReactNode> = {
+export const USE_CASE_ICONS: Record<string, React.ReactNode> = {
   "failure-analysis": <Bug size={14} />,
   "flaky-detection": <Activity size={14} />,
   "regression-prediction": <TrendingUp size={14} />,
@@ -485,9 +485,7 @@ export default function Copilot() {
       const priorMessages = messages;
       const historyMessages: LLMMessage[] = priorMessages
         .filter((m) => m.role === "user" || m.role === "assistant")
-        .filter(
-          (m) => m.type !== "intro" && m.type !== "capabilities" && m.content.trim() !== "",
-        )
+        .filter((m) => m.type !== "intro" && m.type !== "capabilities" && m.content.trim() !== "")
         .slice(-12) // keep last 6 turns (12 messages)
         .map((m) => ({
           role: m.role as "user" | "assistant",
@@ -495,10 +493,7 @@ export default function Copilot() {
         }));
       historyMessages.push({ role: "user", content: userMsg });
 
-      const { response, charts } = await runLangGraphChat(
-        historyMessages,
-        handleLgNodeChange,
-      );
+      const { response, charts } = await runLangGraphChat(historyMessages, handleLgNodeChange);
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: response, type: "chat", charts },
@@ -595,7 +590,10 @@ export default function Copilot() {
 
   return (
     <AppLayout activeHref="/copilot">
-      <div className="proof-page" style={{ display: "flex", height: "calc(100vh - 96px)", gap: 16 }}>
+      <div
+        className="proof-page"
+        style={{ display: "flex", height: "calc(100vh - 96px)", gap: 16 }}
+      >
         <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
           {/* Provider selector bar */}
           <div
@@ -1476,84 +1474,98 @@ export default function Copilot() {
                         }}
                       >
                         <GitBranch size={9} style={{ color: "var(--proof-text-muted)" }} />
-                      <span
-                        style={{
-                          fontSize: 9,
-                          color: "var(--proof-text-muted)",
-                          fontFamily: "monospace",
-                          lineHeight: 1.6,
-                        }}
-                      >
-                        {(() => {
-                          // Group history by iteration (same-timestamp-started nodes = parallel)
-                          const groups: typeof lgHistory = [];
-                          const seen = new Set<string>();
-                          for (const s of lgHistory) {
-                            if (!seen.has(s.nodeId)) {
-                              seen.add(s.nodeId);
-                              groups.push(s);
+                        <span
+                          style={{
+                            fontSize: 9,
+                            color: "var(--proof-text-muted)",
+                            fontFamily: "monospace",
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          {(() => {
+                            // Group history by iteration (same-timestamp-started nodes = parallel)
+                            const groups: typeof lgHistory = [];
+                            const seen = new Set<string>();
+                            for (const s of lgHistory) {
+                              if (!seen.has(s.nodeId)) {
+                                seen.add(s.nodeId);
+                                groups.push(s);
+                              }
                             }
-                          }
-                          return groups.map((s, i) => (
-                            <span key={s.nodeId} style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
-                              {i > 0 && (
-                                <ArrowRight size={8} style={{ display: "inline", margin: "0 2px", verticalAlign: "middle", opacity: 0.6 }} />
-                              )}
+                            return groups.map((s, i) => (
                               <span
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 2,
-                                  padding: "1px 4px",
-                                  borderRadius: 3,
-                                  background:
-                                    s.status === "completed"
-                                      ? "#22c55e18"
-                                      : s.status === "running"
-                                        ? "#5b8af518"
-                                        : s.status === "error"
-                                          ? "#ef444418"
-                                          : "transparent",
-                                }}
+                                key={s.nodeId}
+                                style={{ display: "inline-flex", alignItems: "center", gap: 1 }}
                               >
+                                {i > 0 && (
+                                  <ArrowRight
+                                    size={8}
+                                    style={{
+                                      display: "inline",
+                                      margin: "0 2px",
+                                      verticalAlign: "middle",
+                                      opacity: 0.6,
+                                    }}
+                                  />
+                                )}
                                 <span
                                   style={{
-                                    width: 5,
-                                    height: 5,
-                                    borderRadius: "50%",
-                                    display: "inline-block",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 2,
+                                    padding: "1px 4px",
+                                    borderRadius: 3,
                                     background:
                                       s.status === "completed"
-                                        ? "#22c55e"
-                                        : s.status === "error"
-                                          ? "#ef4444"
-                                          : s.status === "running"
-                                            ? "#5b8af5"
-                                            : "var(--proof-text-muted)",
+                                        ? "#22c55e18"
+                                        : s.status === "running"
+                                          ? "#5b8af518"
+                                          : s.status === "error"
+                                            ? "#ef444418"
+                                            : "transparent",
                                   }}
-                                />
-                                <span style={{
-                                  color: s.status === "completed"
-                                    ? "#22c55e"
-                                    : s.status === "error"
-                                      ? "#ef4444"
-                                      : s.status === "running"
-                                        ? "#5b8af5"
-                                        : "var(--proof-text-muted)",
-                                  fontWeight: s.status === "running" ? 700 : 400,
-                                }}>
-                                  {s.nodeId.replace(/_/g, " ")}
-                                </span>
-                                {s.duration !== undefined && (
-                                  <span style={{ color: "#a855f770", fontSize: 8 }}>
-                                    {s.duration}ms
+                                >
+                                  <span
+                                    style={{
+                                      width: 5,
+                                      height: 5,
+                                      borderRadius: "50%",
+                                      display: "inline-block",
+                                      background:
+                                        s.status === "completed"
+                                          ? "#22c55e"
+                                          : s.status === "error"
+                                            ? "#ef4444"
+                                            : s.status === "running"
+                                              ? "#5b8af5"
+                                              : "var(--proof-text-muted)",
+                                    }}
+                                  />
+                                  <span
+                                    style={{
+                                      color:
+                                        s.status === "completed"
+                                          ? "#22c55e"
+                                          : s.status === "error"
+                                            ? "#ef4444"
+                                            : s.status === "running"
+                                              ? "#5b8af5"
+                                              : "var(--proof-text-muted)",
+                                      fontWeight: s.status === "running" ? 700 : 400,
+                                    }}
+                                  >
+                                    {s.nodeId.replace(/_/g, " ")}
                                   </span>
-                                )}
+                                  {s.duration !== undefined && (
+                                    <span style={{ color: "#a855f770", fontSize: 8 }}>
+                                      {s.duration}ms
+                                    </span>
+                                  )}
+                                </span>
                               </span>
-                            </span>
-                          ));
-                        })()}
-                      </span>
+                            ));
+                          })()}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -1773,7 +1785,9 @@ export default function Copilot() {
                 </div>
               )}
               {debugLogs.map((entry, idx) => {
-                const isCompaction = entry.event?.toLowerCase().includes("compaction") || entry.node === "context_token_audit";
+                const isCompaction =
+                  entry.event?.toLowerCase().includes("compaction") ||
+                  entry.node === "context_token_audit";
                 const levelColors: Record<string, string> = {
                   info: "#5b8af5",
                   warn: "#f59e0b",

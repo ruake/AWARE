@@ -1,9 +1,6 @@
 import type { AIUseCase } from "./types";
 import { AI_USE_CASES } from "./useCases";
-import {
-  logInfo,
-  logWarn,
-} from "./debugLogger";
+import { logInfo, logWarn } from "./debugLogger";
 
 export interface SkillDefinition {
   id: string;
@@ -263,7 +260,14 @@ export function buildSkillContextPrompt(useCaseId: string, stepIndex: number): s
 }
 
 export function getUseCaseForNode(nodeId: string): SkillDefinition | undefined {
-  if (!nodeId || nodeId === "data_fetch" || nodeId === "context_build" || nodeId === "skill_dispatch" || nodeId === "chart_render" || nodeId === "response") {
+  if (
+    !nodeId ||
+    nodeId === "data_fetch" ||
+    nodeId === "context_build" ||
+    nodeId === "skill_dispatch" ||
+    nodeId === "chart_render" ||
+    nodeId === "response"
+  ) {
     return undefined;
   }
   return getSkillDefinition(nodeId);
