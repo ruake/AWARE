@@ -225,12 +225,15 @@ export async function runLangGraphChat(
             parameters: {},
           });
           const skillCharts = extractChartBlocksFromText(skillResult.details);
-          const mergedText =
-            skillInvocation.cleanText + "\n\n" + skillResult.details;
+          const mergedText = skillInvocation.cleanText + "\n\n" + skillResult.details;
           const allCharts = [...charts, ...skillCharts];
           return {
             status: "completed",
-            dataUpdate: { details: mergedText, response: mergedText, skillInvoked: skillInvocation.skillId },
+            dataUpdate: {
+              details: mergedText,
+              response: mergedText,
+              skillInvoked: skillInvocation.skillId,
+            },
             charts: allCharts,
           };
         } catch (err) {

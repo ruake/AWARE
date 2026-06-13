@@ -86,33 +86,3 @@ export interface SubAgentStep {
   duration?: number;
 }
 
-export interface SubAgentDef {
-  id: string;
-  label: string;
-  description: string;
-  needsContext: string[];
-  execute: (ctx: SubAgentContext) => Promise<SubAgentResult>;
-}
-
-export interface SubAgentContext {
-  request: import("./types").AIAnalysisRequest;
-  data: Record<string, unknown>;
-  useCaseId: string;
-}
-
-export interface SubAgentResult {
-  status: "completed" | "error" | "skip";
-  dataUpdate?: Record<string, unknown>;
-  charts?: ChartOutput[];
-  error?: string;
-  steps?: SubAgentStep[];
-}
-
-export interface ContextBudget {
-  totalTokens: number;
-  systemTokens: number;
-  historyTokens: number;
-  budget: number;
-  overBudget: boolean;
-  compacted?: { before: number; after: number; saved: number };
-}

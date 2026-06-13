@@ -55,9 +55,20 @@ function fmtTime(ts: number): string {
 }
 
 export default function ChatMessage({
-  msg, index, isLastInGroup, isFirstInGroup, showAvatar,
-  expanded, copied, useCases, useCaseIcons,
-  onToggleExpand, onCopy, onNewChat, onFollowUp, MAX_PREVIEW,
+  msg,
+  index,
+  isLastInGroup,
+  isFirstInGroup,
+  showAvatar,
+  expanded,
+  copied,
+  useCases,
+  useCaseIcons,
+  onToggleExpand,
+  onCopy,
+  onNewChat,
+  onFollowUp,
+  MAX_PREVIEW,
 }: Props) {
   const isUser = msg.role === "user";
   const isAssistant = msg.role === "assistant";
@@ -116,9 +127,7 @@ export default function ChatMessage({
         <div
           style={{
             padding: isUser ? "10px 15px" : "14px 18px",
-            borderRadius: isUser
-              ? "16px 16px 4px 16px"
-              : "4px 16px 16px 16px",
+            borderRadius: isUser ? "16px 16px 4px 16px" : "4px 16px 16px 16px",
             fontSize: 13,
             lineHeight: 1.7,
             background: isUser
@@ -132,17 +141,13 @@ export default function ChatMessage({
               : isError
                 ? "1px solid rgba(239,68,68,0.3)"
                 : "1px solid var(--proof-border)",
-            boxShadow: isUser
-              ? "0 2px 12px rgba(91,138,245,0.25)"
-              : "0 1px 3px rgba(0,0,0,0.15)",
+            boxShadow: isUser ? "0 2px 12px rgba(91,138,245,0.25)" : "0 1px 3px rgba(0,0,0,0.15)",
             maxWidth: "100%",
             overflow: "hidden",
           }}
         >
           {isUser ? (
-            <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-              {msg.content}
-            </span>
+            <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{msg.content}</span>
           ) : isCapabilities ? (
             <CapabilitiesContent useCases={useCases} useCaseIcons={useCaseIcons} />
           ) : (
@@ -189,13 +194,21 @@ export default function ChatMessage({
                     color: "var(--proof-blue)",
                     transition: "all 0.12s",
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(91,138,245,0.1)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(91,138,245,0.1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                  }}
                 >
                   {expanded ? (
-                    <><ChevronUp size={12} /> Show less</>
+                    <>
+                      <ChevronUp size={12} /> Show less
+                    </>
                   ) : (
-                    <><ChevronDown size={12} /> Show full ({msg.content.length} chars)</>
+                    <>
+                      <ChevronDown size={12} /> Show full ({msg.content.length} chars)
+                    </>
                   )}
                 </button>
               )}
@@ -213,11 +226,19 @@ export default function ChatMessage({
             opacity: 0,
             transition: "opacity 0.15s",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0"; }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = "1";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = "0";
+          }}
         >
           <span
-            style={{ fontSize: 10, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}
+            style={{
+              fontSize: 10,
+              color: "var(--proof-text-muted)",
+              fontFamily: "var(--font-mono)",
+            }}
             title={fmtTime(ts)}
           >
             {relTime(ts)}
@@ -264,8 +285,12 @@ export default function ChatMessage({
               color: "#ef4444",
               transition: "all 0.12s",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.15)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(239,68,68,0.15)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(239,68,68,0.08)";
+            }}
           >
             <RefreshCw size={11} /> Clear & Try Again
           </button>
@@ -293,7 +318,9 @@ export default function ChatMessage({
                 return (
                   <button
                     key={f.id}
-                    onClick={() => { if (uc) onFollowUp(uc); }}
+                    onClick={() => {
+                      if (uc) onFollowUp(uc);
+                    }}
                     style={{
                       display: "flex",
                       alignItems: "center",
