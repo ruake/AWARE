@@ -313,7 +313,11 @@ export function enforceChartStandards(response: string): string {
         h.length > MAX_HEADER_LENGTH ? h.slice(0, MAX_HEADER_LENGTH) : h,
       );
       if (!chart.colors || chart.colors.length === 0) {
-        chart.colors = [STANDARD_PALETTE[0]];
+        chart.colors = chart.rows.map((_, i) => STANDARD_PALETTE[i % STANDARD_PALETTE.length]);
+      } else if (chart.colors.length === 1 && chart.rows.length > 1) {
+        chart.colors = chart.rows.map(
+          (_, i) => STANDARD_PALETTE[i % STANDARD_PALETTE.length],
+        );
       }
     }
 
@@ -359,12 +363,19 @@ export function enforceChartPresence(response: string, fallbackChart: () => Char
 }
 
 export function populateChartDefaults(chart: Partial<ChartOutput>, index: number): ChartOutput {
+  const rows = chart.rows || [];
+  let colors = chart.colors || [];
+  if (colors.length === 0) {
+    colors = rows.map((_, i) => STANDARD_PALETTE[i % STANDARD_PALETTE.length]);
+  } else if (colors.length === 1 && rows.length > 1) {
+    colors = rows.map((_, i) => STANDARD_PALETTE[i % STANDARD_PALETTE.length]);
+  }
   return {
     type: chart.type || "Table",
     title: chart.title || `Chart ${index + 1}`,
     headers: chart.headers || [],
-    rows: chart.rows || [],
-    colors: chart.colors || [STANDARD_PALETTE[0]],
+    rows,
+    colors,
     options: chart.options || {},
   };
 }
