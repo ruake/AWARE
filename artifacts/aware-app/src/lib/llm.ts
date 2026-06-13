@@ -389,6 +389,66 @@ export function clearChatHistory(): void {
   _chatHistory = [];
 }
 
+// ── Context Window Helpers ──────────────────────────────────────────
+
+/** Rough token estimate: ~4 chars per token for English text */
+export function estimateTokenCount(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+/** Context window sizes per provider type */
+export function getContextWindow(providerType?: LLMProviderType): number {
+  switch (providerType || _config.provider) {
+    case "webllm":
+      return 4096;
+    case "chrome":
+      return 8192;
+    default:
+      return 128000;
+  }
+}
+
+/**
+ * Truncate conversation messages to fit within the model's context window.
+ * Keeps system message(s) and the newest user/assistant exchanges, dropping
+ * the oldest non-system messages first. Returns a new array (does not mutate).
+ */
+export function truncateMessagesToFit(
+  messages: LLMMessage[],
+  maxContextTokens?: number,
+  safetyMargin: number = 600,
+): LLMMessage[] {
+  const maxTokens = maxContextTokens ?? getContextWindow();
+  const maxPrompt = maxTokens - safetyMargin;
+
+  // Estimate total — fast path: already fits
+  const total = messages.reduce((s, m) => s + estimateTokenCount(m.content), 0);
+  if (total <= maxPrompt) return messages;
+
+  // Separate system vs non-system
+  const systemMsgs = messages.filter((m) => m.role === "system");
+  const nonSystem = messages.filter((m) => m.role !== "system");
+
+  const systemTokens = systemMsgs.reduce((s, m) => s + estimateTokenCount(m.content), 0);
+  let available = maxPrompt - systemTokens;
+  if (available <= 0) {
+    // System prompt alone exceeds budget — return system messages only
+    return systemMsgs;
+  }
+
+  // Keep newest messages first (iterate from end, keep dropping oldest)
+  const kept: LLMMessage[] = [];
+  for (let i = nonSystem.length - 1; i >= 0; i--) {
+    const mt = estimateTokenCount(nonSystem[i].content);
+    if (available - mt >= 0) {
+      kept.unshift(nonSystem[i]);
+      available -= mt;
+    }
+  }
+
+  return [...systemMsgs, ...kept];
+}
+
 export function syncChatHistory(
   messages: { role: "system" | "user" | "assistant"; content: string }[],
 ): void {

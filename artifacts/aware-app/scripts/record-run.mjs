@@ -185,22 +185,53 @@ function buildEvidence(name, lastResult) {
 
 function extractScreenshots(spec, resultsDir) {
   const frames = [];
+  // Create screenshots directory relative to resultsDir
+  let screenshotsDir;
+  if (resultsDir) {
+    screenshotsDir = path.resolve(resultsDir, "screenshots");
+    try { fs.mkdirSync(screenshotsDir, { recursive: true }); } catch {}
+  }
+  
   for (const t of spec.tests || []) {
     for (const tr of t.results || []) {
       for (const att of tr.attachments || []) {
         if (!att.contentType?.startsWith("image/")) continue;
         let dataUri = null;
+        let imageUrl = undefined;
+        
         if (att.body) {
           dataUri = `data:${att.contentType};base64,${att.body}`;
+          // Also save to file if we have a screenshots directory
+          if (screenshotsDir && att.name) {
+            try {
+              const ext = att.contentType.includes("jpeg") ? ".jpg" : ".png";
+              const filename = `${att.name.replace(/[^a-zA-Z0-9_-]/g, "_")}${ext}`;
+              const filePath = path.join(screenshotsDir, filename);
+              const buf = Buffer.from(att.body, "base64");
+              fs.writeFileSync(filePath, buf);
+              imageUrl = `screenshots/${filename}`;
+            } catch {}
+          }
         } else if (att.path && resultsDir) {
           const fullPath = path.resolve(resultsDir, att.path);
           try {
             const buf = fs.readFileSync(fullPath);
             dataUri = `data:${att.contentType || "image/png"};base64,${buf.toString("base64")}`;
+            // Copy to screenshots directory for persistent storage
+            if (screenshotsDir) {
+              const ext = att.contentType?.includes("jpeg") ? ".jpg" : ".png";
+              const filename = `${att.name?.replace(/[^a-zA-Z0-9_-]/g, "_") || `screenshot-${frames.length}`}${ext}`;
+              const destPath = path.join(screenshotsDir, filename);
+              fs.writeFileSync(destPath, buf);
+              imageUrl = `screenshots/${filename}`;
+            }
           } catch {}
         }
+        
         if (dataUri) {
-          frames.push({ id: `ss_${frames.length}`, label: att.name || `screenshot-${frames.length}`, dataUri });
+          const frame = { id: `ss_${frames.length}`, label: att.name || `screenshot-${frames.length}`, dataUri };
+          if (imageUrl) frame.imageUrl = imageUrl;
+          frames.push(frame);
         }
       }
     }

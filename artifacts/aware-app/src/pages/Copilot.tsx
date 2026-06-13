@@ -25,6 +25,14 @@ import {
   Copy,
   Check,
   BookOpen,
+  Terminal,
+  Eye,
+  EyeOff,
+  GitBranch,
+  ArrowRight,
+  CheckCircle2,
+  XCircle,
+  Timer,
 } from "lucide-react";
 import {
   AI_USE_CASES,
@@ -32,13 +40,19 @@ import {
   generateInsights,
   buildAIContext,
   buildSystemPrompt,
+  runLangGraphAnalysis,
+  runLangGraphChat,
 } from "@/lib/ai";
 import type { AIInsight, AIUseCase } from "@/lib/ai";
 import { getProvider, getLLMConfig, setLLMConfig } from "@/lib/llm";
 import { RUNS } from "@/lib/runs";
-import type { LLMProviderType } from "@/lib/types";
+import type { LLMProviderType, LLMMessage } from "@/lib/types";
 import { checkWebLLM, getChromeAIStatus } from "@/lib/llm";
 import { Markdown } from "@/components/aware/Markdown";
+import type { LangGraphExecutionState } from "@/lib/ai/langGraphTypes";
+import { getLogs, subscribeLogs, clearLogs } from "@/lib/ai/debugLogger";
+import { getSkillDefinition } from "@/lib/ai/skillRegistry";
+import type { SkillDefinition } from "@/lib/ai/skillRegistry";
 
 const USE_CASE_ICONS: Record<string, React.ReactNode> = {
   "failure-analysis": <Bug size={14} />,
@@ -178,9 +192,14 @@ export default function Copilot() {
   const [settingsModel, setSettingsModel] = React.useState("");
   const [settingsSaved, setSettingsSaved] = React.useState(false);
   const [thinkingMsg, setThinkingMsg] = React.useState(PROCESSING_MESSAGES[0]);
+  const [showDebugPanel, setShowDebugPanel] = React.useState(false);
+  const [debugLogs, setDebugLogs] = React.useState<ReturnType<typeof getLogs>>([]);
+  const [lgState, setLgState] = React.useState<LangGraphExecutionState | null>(null);
+  const [lgHistory, setLgHistory] = React.useState<LangGraphExecutionState[]>([]);
   const providerRef = React.useRef<HTMLDivElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const debugEndRef = React.useRef<HTMLDivElement>(null);
   const [copiedIndex, setCopiedIndex] = React.useState<number | null>(null);
 
   const cfg = getLLMConfig();
@@ -241,19 +260,51 @@ export default function Copilot() {
     }
   }, [messages, loading]);
 
+  // Subscribe to debug logs
+  React.useEffect(() => {
+    const unsub = subscribeLogs(() => {
+      setDebugLogs([...getLogs()]);
+    });
+    return unsub;
+  }, []);
+
+  // Auto-scroll debug panel
+  React.useEffect(() => {
+    if (showDebugPanel) {
+      debugEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [debugLogs, showDebugPanel]);
+
+  // LangGraph node state display
+  const handleLgNodeChange = React.useCallback((state: LangGraphExecutionState) => {
+    setLgState(state);
+    setLgHistory((prev) => {
+      const existing = prev.findIndex((s) => s.nodeId === state.nodeId);
+      if (existing >= 0) {
+        const next = [...prev];
+        next[existing] = state;
+        return next;
+      }
+      return [...prev, state];
+    });
+  }, []);
+
   // Cycle processing messages when busy
   React.useEffect(() => {
     if (!busy) {
       setThinkingMsg(PROCESSING_MESSAGES[0]);
       return;
     }
+    setThinkingMsg("");
     let i = 0;
     const interval = setInterval(() => {
       i = (i + 1) % PROCESSING_MESSAGES.length;
-      setThinkingMsg(PROCESSING_MESSAGES[i]);
+      if (!lgState || lgState.status === "completed") {
+        setThinkingMsg(PROCESSING_MESSAGES[i]);
+      }
     }, 1800);
     return () => clearInterval(interval);
-  }, [busy]);
+  }, [busy, lgState]);
 
   React.useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -305,9 +356,15 @@ export default function Copilot() {
     setActiveUseCase(useCase.id);
     setMessages((prev) => [...prev, { role: "user", content: useCase.name, type: "use-case" }]);
     setBusy(true);
+    setLgHistory([]);
+    setLgState(null);
+    clearLogs();
     try {
-      // Quick actions use deterministic fallback only — no AI provider needed
-      const result = runFallbackAnalysis({ useCaseId: useCase.id, parameters: {} });
+      // Quick actions use LangGraph engine with deterministic fallback
+      const result = await runLangGraphAnalysis(
+        { useCaseId: useCase.id, parameters: {} },
+        handleLgNodeChange,
+      );
       const resultText = result.details || result.summary;
       setMessages((prev) => [
         ...prev,
@@ -384,15 +441,21 @@ export default function Copilot() {
       return;
     }
 
-    // Intent-based routing: map question to a quick action use case
+    // Intent-based routing: map question to a quick action use case via LangGraph
     const matchedIntent = INTENT_MAP.find(([re]) => re.test(userMsg));
     if (matchedIntent) {
       const [, useCaseId] = matchedIntent;
       const useCase = AI_USE_CASES.find((uc) => uc.id === useCaseId);
       if (useCase) {
         setBusy(true);
+        setLgHistory([]);
+        setLgState(null);
+        clearLogs();
         try {
-          const result = runFallbackAnalysis({ useCaseId, parameters: {} });
+          const result = await runLangGraphAnalysis(
+            { useCaseId, parameters: {} },
+            handleLgNodeChange,
+          );
           const resultText = result.details || result.summary;
           setMessages((prev) => [
             ...prev,
@@ -412,52 +475,34 @@ export default function Copilot() {
       }
     }
 
-    // Snapshot current messages synchronously before any state updates
-    const priorMessages = messages;
+    // Route free-text chat through LangGraph pipeline (logs + charts + compaction)
     setBusy(true);
+    setLgHistory([]);
+    setLgState(null);
+    clearLogs();
     try {
-      const provider = getProvider();
-      let response: string;
-      try {
-        const ctx = buildAIContext();
-        const systemPrompt = buildSystemPrompt(ctx);
-        // Build full conversation history: system + prior exchanges + new user msg
-        const historyMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
-          { role: "system", content: systemPrompt },
-          ...priorMessages
-            .filter((m) => m.role === "user" || m.role === "assistant")
-            .filter(
-              (m) => m.type !== "intro" && m.type !== "capabilities" && m.content.trim() !== "",
-            )
-            .slice(-12) // keep last 6 turns (12 messages)
-            .map((m) => ({
-              role: m.role as "user" | "assistant",
-              content: m.content,
-            })),
-          { role: "user", content: userMsg },
-        ];
-        const completion = await provider.complete({
-          messages: historyMessages,
-          temperature: 0.3,
-          maxTokens: 8192,
-        });
-        // If the provider returned an error response, surface it directly
-        if (completion.finishReason === "error") {
-          setMessages((prev) => [
-            ...prev,
-            { role: "assistant", content: completion.content, type: "error" },
-          ]);
-          setBusy(false);
-          return;
-        }
-        response = completion.content;
-      } catch (err) {
-        // Only reach here if the provider threw (shouldn't happen after our fixes, but keep as safety net)
-        const msg = err instanceof Error ? err.message : String(err);
-        response = `**Provider error:** ${msg}\n\nClick **⚙ Configure** to set up a working API key.`;
-      }
-      setMessages((prev) => [...prev, { role: "assistant", content: response, type: "chat" }]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // Build history messages for the LLM
+      const priorMessages = messages;
+      const historyMessages: LLMMessage[] = priorMessages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .filter(
+          (m) => m.type !== "intro" && m.type !== "capabilities" && m.content.trim() !== "",
+        )
+        .slice(-12) // keep last 6 turns (12 messages)
+        .map((m) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        }));
+      historyMessages.push({ role: "user", content: userMsg });
+
+      const { response, charts } = await runLangGraphChat(
+        historyMessages,
+        handleLgNodeChange,
+      );
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: response, type: "chat", charts },
+      ]);
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,
@@ -651,6 +696,28 @@ export default function Copilot() {
             >
               <RefreshCw size={11} />
               New Chat
+            </button>
+            <button
+              onClick={() => setShowDebugPanel((p) => !p)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "3px 8px",
+                borderRadius: 4,
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                border: showDebugPanel
+                  ? "1px solid var(--proof-green)"
+                  : "1px solid var(--proof-grey)",
+                background: showDebugPanel ? "#22c55e20" : "var(--proof-surface)",
+                color: showDebugPanel ? "#22c55e" : "var(--proof-text-secondary)",
+              }}
+              title="Toggle debug log panel"
+            >
+              {showDebugPanel ? <EyeOff size={11} /> : <Terminal size={11} />}
+              Debug
             </button>
             <button
               onClick={() => {
@@ -1345,35 +1412,194 @@ export default function Copilot() {
                     border: "1px solid var(--proof-border-strong)",
                     boxShadow: "var(--proof-shadow-sm)",
                     display: "flex",
-                    alignItems: "center",
-                    gap: 12,
+                    flexDirection: "column",
+                    gap: 8,
+                    minWidth: 200,
                   }}
                 >
-                  <span style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                    {[0, 0.18, 0.36].map((delay, idx) => (
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                      {[0, 0.18, 0.36].map((delay, idx) => (
+                        <span
+                          key={idx}
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: "50%",
+                            background: "var(--proof-blue)",
+                            animation: "thinkingBounce 1.2s ease-in-out infinite",
+                            animationDelay: `${delay}s`,
+                            display: "inline-block",
+                            boxShadow: "0 0 4px rgba(91,138,245,0.5)",
+                          }}
+                        />
+                      ))}
+                    </span>
+                    {lgState ? (
                       <span
-                        key={idx}
                         style={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          background: "var(--proof-blue)",
-                          animation: "thinkingBounce 1.2s ease-in-out infinite",
-                          animationDelay: `${delay}s`,
-                          display: "inline-block",
-                          boxShadow: "0 0 4px rgba(91,138,245,0.5)",
+                          color: "var(--proof-text-secondary)",
+                          fontSize: 11,
+                          fontWeight: 600,
                         }}
-                      />
+                      >
+                        {lgState.label}
+                      </span>
+                    ) : (
+                      <span
+                        style={{
+                          color: "var(--proof-text-secondary)",
+                          fontSize: 12,
+                        }}
+                      >
+                        {thinkingMsg}
+                      </span>
+                    )}
+                  </div>
+                  {lgState && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                      <div
+                        style={{
+                          fontSize: 10,
+                          color: "var(--proof-text-muted)",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {lgState.description}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 4,
+                          alignItems: "center",
+                          marginTop: 4,
+                        }}
+                      >
+                        <GitBranch size={9} style={{ color: "var(--proof-text-muted)" }} />
+                      <span
+                        style={{
+                          fontSize: 9,
+                          color: "var(--proof-text-muted)",
+                          fontFamily: "monospace",
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {(() => {
+                          // Group history by iteration (same-timestamp-started nodes = parallel)
+                          const groups: typeof lgHistory = [];
+                          const seen = new Set<string>();
+                          for (const s of lgHistory) {
+                            if (!seen.has(s.nodeId)) {
+                              seen.add(s.nodeId);
+                              groups.push(s);
+                            }
+                          }
+                          return groups.map((s, i) => (
+                            <span key={s.nodeId} style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
+                              {i > 0 && (
+                                <ArrowRight size={8} style={{ display: "inline", margin: "0 2px", verticalAlign: "middle", opacity: 0.6 }} />
+                              )}
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 2,
+                                  padding: "1px 4px",
+                                  borderRadius: 3,
+                                  background:
+                                    s.status === "completed"
+                                      ? "#22c55e18"
+                                      : s.status === "running"
+                                        ? "#5b8af518"
+                                        : s.status === "error"
+                                          ? "#ef444418"
+                                          : "transparent",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    width: 5,
+                                    height: 5,
+                                    borderRadius: "50%",
+                                    display: "inline-block",
+                                    background:
+                                      s.status === "completed"
+                                        ? "#22c55e"
+                                        : s.status === "error"
+                                          ? "#ef4444"
+                                          : s.status === "running"
+                                            ? "#5b8af5"
+                                            : "var(--proof-text-muted)",
+                                  }}
+                                />
+                                <span style={{
+                                  color: s.status === "completed"
+                                    ? "#22c55e"
+                                    : s.status === "error"
+                                      ? "#ef4444"
+                                      : s.status === "running"
+                                        ? "#5b8af5"
+                                        : "var(--proof-text-muted)",
+                                  fontWeight: s.status === "running" ? 700 : 400,
+                                }}>
+                                  {s.nodeId.replace(/_/g, " ")}
+                                </span>
+                                {s.duration !== undefined && (
+                                  <span style={{ color: "#a855f770", fontSize: 8 }}>
+                                    {s.duration}ms
+                                  </span>
+                                )}
+                              </span>
+                            </span>
+                          ));
+                        })()}
+                      </span>
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                    {lgHistory.map((s) => (
+                      <span
+                        key={s.nodeId}
+                        style={{
+                          fontSize: 8,
+                          padding: "1px 5px",
+                          borderRadius: 3,
+                          background:
+                            s.status === "completed"
+                              ? "#22c55e20"
+                              : s.status === "running"
+                                ? "#5b8af520"
+                                : s.status === "error"
+                                  ? "#ef444420"
+                                  : "var(--proof-grey-bg)",
+                          color:
+                            s.status === "completed"
+                              ? "#22c55e"
+                              : s.status === "running"
+                                ? "#5b8af5"
+                                : s.status === "error"
+                                  ? "#ef4444"
+                                  : "var(--proof-text-muted)",
+                          fontWeight: 600,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 2,
+                        }}
+                      >
+                        {s.status === "completed" ? (
+                          <CheckCircle2 size={7} />
+                        ) : s.status === "error" ? (
+                          <XCircle size={7} />
+                        ) : s.status === "running" ? (
+                          <Loader2 size={7} style={{ animation: "spin 1s linear infinite" }} />
+                        ) : (
+                          <Timer size={7} />
+                        )}
+                        {s.nodeId}
+                      </span>
                     ))}
-                  </span>
-                  <span
-                    style={{
-                      color: "var(--proof-text-secondary)",
-                      fontSize: 12,
-                    }}
-                  >
-                    {thinkingMsg}
-                  </span>
+                  </div>
                 </div>
               </div>
             )}
@@ -1455,6 +1681,190 @@ export default function Copilot() {
             </button>
           </div>
         </div>
+        {/* Debug log panel */}
+        {showDebugPanel && (
+          <div
+            style={{
+              width: 280,
+              flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+              borderLeft: "1px solid var(--proof-border)",
+              paddingLeft: 12,
+              overflowY: "auto",
+              maxHeight: "calc(100vh - 120px)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexShrink: 0,
+                paddingBottom: 6,
+                borderBottom: "1px solid var(--proof-border)",
+                marginBottom: 6,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: "#22c55e",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                }}
+              >
+                <Terminal size={12} />
+                Debug Log
+              </div>
+              <div style={{ display: "flex", gap: 4 }}>
+                <span
+                  style={{
+                    fontSize: 9,
+                    color: "var(--proof-text-muted)",
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {debugLogs.length} events
+                </span>
+                <button
+                  onClick={clearLogs}
+                  style={{
+                    fontSize: 9,
+                    padding: "1px 5px",
+                    borderRadius: 3,
+                    cursor: "pointer",
+                    border: "1px solid var(--proof-grey)",
+                    background: "transparent",
+                    color: "var(--proof-text-muted)",
+                  }}
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                lineHeight: 1.5,
+                overflowY: "auto",
+                flex: 1,
+              }}
+            >
+              {debugLogs.length === 0 && (
+                <div
+                  style={{
+                    color: "var(--proof-text-muted)",
+                    fontSize: 10,
+                    padding: "12px 0",
+                    textAlign: "center",
+                  }}
+                >
+                  No debug events yet. Run an analysis to see the LangGraph execution trace.
+                </div>
+              )}
+              {debugLogs.map((entry, idx) => {
+                const isCompaction = entry.event?.toLowerCase().includes("compaction") || entry.node === "context_token_audit";
+                const levelColors: Record<string, string> = {
+                  info: "#5b8af5",
+                  warn: "#f59e0b",
+                  error: "#ef4444",
+                  debug: "var(--proof-text-muted)",
+                  timing: "#a855f7",
+                };
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      display: "flex",
+                      gap: 6,
+                      padding: "2px 4px",
+                      borderRadius: 3,
+                      background:
+                        entry.level === "error"
+                          ? "#ef444410"
+                          : entry.level === "warn"
+                            ? "#f59e0b10"
+                            : isCompaction
+                              ? "#a855f710"
+                              : "transparent",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: levelColors[entry.level] || "var(--proof-text-muted)",
+                        fontWeight: entry.level === "error" ? 700 : 400,
+                        flexShrink: 0,
+                        width: 40,
+                        fontSize: 8,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      {entry.level}
+                    </span>
+                    <span
+                      style={{
+                        color: "var(--proof-text-muted)",
+                        flexShrink: 0,
+                        fontSize: 8,
+                        width: 14,
+                        textAlign: "right",
+                      }}
+                    >
+                      {entry.timestamp.slice(11, 19)}
+                    </span>
+                    {isCompaction && (
+                      <span style={{ color: "#a855f7", fontSize: 8, flexShrink: 0 }}>🔄</span>
+                    )}
+                    <span
+                      style={{
+                        color: levelColors[entry.level] || "var(--proof-text-secondary)",
+                        fontWeight: 600,
+                        flexShrink: 0,
+                        fontSize: 9,
+                      }}
+                    >
+                      {entry.node}
+                    </span>
+                    <span
+                      style={{
+                        color: isCompaction ? "#a855f7" : "var(--proof-text-secondary)",
+                        flex: 1,
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {entry.event}
+                    </span>
+                    {entry.duration !== undefined && (
+                      <span
+                        style={{
+                          color: "#a855f7",
+                          flexShrink: 0,
+                          fontSize: 8,
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        {entry.duration}ms
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+              <div ref={debugEndRef} />
+            </div>
+          </div>
+        )}
         {/* Analysis use-cases sidebar */}
         <div
           style={{

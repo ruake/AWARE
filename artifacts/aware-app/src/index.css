@@ -69,6 +69,20 @@
   --proof-text-primary: var(--proof-text);
   --proof-text-tertiary: #475569;
   --proof-muted: var(--proof-text-secondary);
+
+  /* Page-specific backgrounds (About, Status) */
+  --proof-hero-about: linear-gradient(160deg, #030712 0%, #0f172a 40%, rgba(37,99,235,0.08) 70%, #030712 100%);
+  --proof-hero-status: linear-gradient(160deg, #030712 0%, #0f172a 50%, rgba(37,99,235,0.06) 80%, #030712 100%);
+  --proof-subtle-bg: rgba(255,255,255,0.02);
+  --proof-subtle-bg2: rgba(255,255,255,0.04);
+  --proof-subtle-bg3: rgba(255,255,255,0.03);
+  --proof-subtle-bg015: rgba(255,255,255,0.015);
+  --proof-code-bg: rgba(0,0,0,0.3);
+  --proof-cta-bg: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(139,92,246,0.08), rgba(15,23,42,0.9));
+  --proof-flow-bg: linear-gradient(135deg, rgba(37,99,235,0.04), transparent);
+  --proof-bar-track: rgba(255,255,255,0.06);
+  --proof-env-card: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  --proof-tab-bar: rgba(255,255,255,0.03);
 }
 
 /* ── Base ──────────────────────────────────────────────────────────── */
@@ -980,4 +994,19 @@ select.proof-input {
 .light .stage-glass {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 252, 0.98));
   border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.light {
+  --proof-hero-about: linear-gradient(160deg, #f1f3f8 0%, #ffffff 40%, rgba(37,99,235,0.04) 70%, #f1f3f8 100%);
+  --proof-hero-status: linear-gradient(160deg, #f1f3f8 0%, #ffffff 50%, rgba(37,99,235,0.03) 80%, #f1f3f8 100%);
+  --proof-subtle-bg: rgba(0,0,0,0.02);
+  --proof-subtle-bg2: rgba(0,0,0,0.04);
+  --proof-subtle-bg3: rgba(0,0,0,0.03);
+  --proof-subtle-bg015: rgba(0,0,0,0.015);
+  --proof-code-bg: #f4f5f8;
+  --proof-cta-bg: linear-gradient(135deg, rgba(37,99,235,0.06), rgba(139,92,246,0.04), #ffffff);
+  --proof-flow-bg: linear-gradient(135deg, rgba(37,99,235,0.03), transparent);
+  --proof-bar-track: rgba(0,0,0,0.06);
+  --proof-env-card: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
+  --proof-tab-bar: rgba(0,0,0,0.02);
 }

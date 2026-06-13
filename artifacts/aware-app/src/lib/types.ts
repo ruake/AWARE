@@ -95,6 +95,8 @@ export interface FilmstripFrame {
   id: string;
   label: string;
   dataUri: string;
+  /** OPTIONAL — External URL to the image (for file-based storage) */
+  imageUrl?: string;
   timestamp?: number;
 }
 
