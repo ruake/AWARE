@@ -2,11 +2,11 @@ import type { IProvider, ProviderStatus, ProviderType, ApiMessage, ToolDefinitio
 import { loadOpenAIConfig } from "./storage";
 
 // ── WebLLM Provider (PRIMARY) ────────────────────────────────────────────────
-// Llama-3.2-3B-Instruct running locally via WebGPU.
-// Downloads ~2 GB on first use, cached in IndexedDB thereafter.
-// Supports full OpenAI-compatible tool calling + streaming.
+// Hermes-3-Llama-3.1-8B running locally via WebGPU.
+// Downloads ~5 GB on first use, cached in IndexedDB thereafter.
+// Hermes-3 is required — smaller Llama models don't support tool calling in WebLLM.
 
-const WEBLLM_MODEL = "Llama-3.2-3B-Instruct-q4f32_1-MLC";
+const WEBLLM_MODEL = "Hermes-3-Llama-3.1-8B-q4f16_1-MLC";
 
 export class WebLLMProvider implements IProvider {
   readonly type: ProviderType = "webllm";
