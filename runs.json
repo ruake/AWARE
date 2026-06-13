@@ -8,13 +8,13 @@
     "passPct": 54,
     "failures": 13,
     "duration": "0m 02s",
-    "durationMs": 2090,
-    "started": "2026-06-13T10:07:49.322Z",
-    "build": "6afdd19",
-    "rev": "6afdd195ada817f99177d0823d4eab6116656c38",
+    "durationMs": 2049,
+    "started": "2026-06-13T10:34:10.591Z",
+    "build": "8bbda4e",
+    "rev": "8bbda4ebcc7dbf582e3557d941ba89764754db48",
     "env": "QA",
     "network": "staging",
-    "workflowRunId": 27463688755
+    "workflowRunId": 27464244254
   },
   {
     "id": "--label",
@@ -24,14 +24,14 @@
     "status": "FAIL",
     "passPct": 44,
     "failures": 5,
-    "duration": "0m 09s",
-    "durationMs": 8757,
-    "started": "2026-06-13T10:07:49.239Z",
-    "build": "6afdd19",
-    "rev": "6afdd195ada817f99177d0823d4eab6116656c38",
+    "duration": "0m 10s",
+    "durationMs": 9770,
+    "started": "2026-06-13T10:34:10.508Z",
+    "build": "8bbda4e",
+    "rev": "8bbda4ebcc7dbf582e3557d941ba89764754db48",
     "env": "QA",
     "network": "staging",
-    "workflowRunId": 27463688755
+    "workflowRunId": 27464244254
   },
   {
     "id": "--label",
@@ -42,13 +42,13 @@
     "passPct": 89,
     "failures": 3,
     "duration": "1m 19s",
-    "durationMs": 78688,
-    "started": "2026-06-13T10:07:49.123Z",
-    "build": "6afdd19",
-    "rev": "6afdd195ada817f99177d0823d4eab6116656c38",
+    "durationMs": 78696,
+    "started": "2026-06-13T10:34:10.397Z",
+    "build": "8bbda4e",
+    "rev": "8bbda4ebcc7dbf582e3557d941ba89764754db48",
     "env": "QA",
     "network": "staging",
-    "workflowRunId": 27463688755
+    "workflowRunId": 27464244254
   },
   {
     "id": "alpine",
