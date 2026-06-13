@@ -357,8 +357,35 @@ export default function Copilot() {
   };
 
   const handleUseCase = async (useCase: AIUseCase) => {
+    // Check data availability before running graph — skip check for setup use case
+    const hasData = RUNS.length > 0;
+    const isSetup = useCase.category === "setup";
+    if (!hasData && !isSetup) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: useCase.name, type: "use-case", timestamp: Date.now() },
+        {
+          role: "assistant",
+          content: [
+            "No test runs loaded yet.",
+            "",
+            "Data is fetched at runtime from the `data` GitHub branch.",
+            "Make sure the branch exists, or seed data by running the deploy workflow.",
+            "",
+            "Tip: try **Setup & Configuration Help** for setup steps.",
+          ].join("\n"),
+          type: "analysis",
+          timestamp: Date.now(),
+        },
+      ]);
+      return;
+    }
+
     setActiveUseCase(useCase.id);
-    setMessages((prev) => [...prev, { role: "user", content: useCase.name, type: "use-case", timestamp: Date.now() }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", content: useCase.name, type: "use-case", timestamp: Date.now() },
+    ]);
     setBusy(true);
     setLgHistory([]);
     setLgState(null);
@@ -384,7 +411,12 @@ export default function Copilot() {
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: `Error: ${err.message}`, type: "error", timestamp: Date.now() },
+        {
+          role: "assistant",
+          content: `Error: ${err.message}`,
+          type: "error",
+          timestamp: Date.now(),
+        },
       ]);
     } finally {
       setBusy(false);
@@ -438,11 +470,17 @@ export default function Copilot() {
     if (!input.trim() || busy) return;
     const userMsg = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMsg, type: "text", timestamp: Date.now() }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", content: userMsg, type: "text", timestamp: Date.now() },
+    ]);
 
     // Intercept capability questions — show quick-action bubbles instantly
     if (CAPABILITY_RE.test(userMsg)) {
-      setMessages((prev) => [...prev, { role: "assistant", content: "", type: "capabilities", timestamp: Date.now() }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "", type: "capabilities", timestamp: Date.now() },
+      ]);
       return;
     }
 
@@ -507,7 +545,12 @@ export default function Copilot() {
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: `Error: ${err.message}`, type: "error", timestamp: Date.now() },
+        {
+          role: "assistant",
+          content: `Error: ${err.message}`,
+          type: "error",
+          timestamp: Date.now(),
+        },
       ]);
     } finally {
       setBusy(false);
@@ -1181,7 +1224,12 @@ export default function Copilot() {
                       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                         {(() => {
                           // Collect all steps from all completed states, plus current running step
-                          const allSteps: { label: string; detail?: string; status: string; duration?: number }[] = [];
+                          const allSteps: {
+                            label: string;
+                            detail?: string;
+                            status: string;
+                            duration?: number;
+                          }[] = [];
                           for (const s of lgHistory) {
                             if (s.steps) {
                               for (const st of s.steps) {
@@ -1193,7 +1241,11 @@ export default function Copilot() {
                           if (lgState.status === "running") {
                             const hasRunning = allSteps.some((st) => st.status === "running");
                             if (!hasRunning) {
-                              allSteps.push({ label: lgState.label, detail: lgState.description, status: "running" });
+                              allSteps.push({
+                                label: lgState.label,
+                                detail: lgState.description,
+                                status: "running",
+                              });
                             }
                           }
                           // Show last 6 steps max
@@ -1211,13 +1263,28 @@ export default function Copilot() {
                               }}
                             >
                               {st.status === "completed" ? (
-                                <CheckCircle2 size={9} style={{ color: "#22c55e", flexShrink: 0 }} />
+                                <CheckCircle2
+                                  size={9}
+                                  style={{ color: "#22c55e", flexShrink: 0 }}
+                                />
                               ) : st.status === "error" ? (
                                 <XCircle size={9} style={{ color: "#ef4444", flexShrink: 0 }} />
                               ) : (
-                                <Loader2 size={9} style={{ color: "#5b8af5", flexShrink: 0, animation: "spin 1s linear infinite" }} />
+                                <Loader2
+                                  size={9}
+                                  style={{
+                                    color: "#5b8af5",
+                                    flexShrink: 0,
+                                    animation: "spin 1s linear infinite",
+                                  }}
+                                />
                               )}
-                              <span style={{ color: "var(--proof-text)", fontWeight: st.status === "running" ? 600 : 400 }}>
+                              <span
+                                style={{
+                                  color: "var(--proof-text)",
+                                  fontWeight: st.status === "running" ? 600 : 400,
+                                }}
+                              >
                                 {st.label}
                               </span>
                               {st.detail && (
@@ -1602,53 +1669,76 @@ export default function Copilot() {
                   {catLabel[cat]}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                  {catUcs.map((uc) => (
-                    <button
-                      key={uc.id}
-                      onClick={() => handleUseCase(uc)}
-                      title={uc.description}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        padding: "6px 10px",
-                        borderRadius: 7,
-                        fontSize: 11,
-                        fontWeight: _activeUseCase === uc.id ? 700 : 500,
-                        cursor: "pointer",
-                        border: `1px solid ${
-                          _activeUseCase === uc.id ? catColor[cat] : `${catColor[cat]}28`
-                        }`,
-                        background:
-                          _activeUseCase === uc.id ? `${catColor[cat]}22` : `${catColor[cat]}0c`,
-                        color: _activeUseCase === uc.id ? catColor[cat] : "var(--proof-text)",
-                        textAlign: "left",
-                        width: "100%",
-                        transition: "all 0.12s",
-                        lineHeight: 1.3,
-                        boxShadow:
-                          _activeUseCase === uc.id ? `0 0 0 1px ${catColor[cat]}40` : "none",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = `${catColor[cat]}1e`;
-                        e.currentTarget.style.borderColor = `${catColor[cat]}55`;
-                        e.currentTarget.style.color = catColor[cat];
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background =
-                          _activeUseCase === uc.id ? `${catColor[cat]}22` : `${catColor[cat]}0c`;
-                        e.currentTarget.style.borderColor =
-                          _activeUseCase === uc.id ? catColor[cat] : `${catColor[cat]}28`;
-                        e.currentTarget.style.color =
-                          _activeUseCase === uc.id ? catColor[cat] : "var(--proof-text)";
-                      }}
-                    >
-                      <span style={{ flexShrink: 0, opacity: 0.8 }}>
-                        {USE_CASE_ICONS[uc.id] || <Zap size={11} />}
-                      </span>
-                      {uc.name}
-                    </button>
-                  ))}
+                  {catUcs.map((uc) => {
+                    const needsData = uc.category !== "setup";
+                    const disabled = needsData && RUNS.length === 0;
+                    const isActive = _activeUseCase === uc.id;
+                    return (
+                      <button
+                        key={uc.id}
+                        onClick={() => !disabled && handleUseCase(uc)}
+                        title={disabled ? "No test runs loaded — seed data first" : uc.description}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                          padding: "6px 10px",
+                          borderRadius: 7,
+                          fontSize: 11,
+                          fontWeight: isActive ? 700 : 500,
+                          cursor: disabled ? "not-allowed" : "pointer",
+                          opacity: disabled ? 0.4 : 1,
+                          border: `1px solid ${isActive ? catColor[cat] : `${catColor[cat]}28`}`,
+                          background: isActive ? `${catColor[cat]}22` : `${catColor[cat]}0c`,
+                          color: isActive ? catColor[cat] : "var(--proof-text)",
+                          textAlign: "left",
+                          width: "100%",
+                          transition: "all 0.12s",
+                          lineHeight: 1.3,
+                          boxShadow: isActive ? `0 0 0 1px ${catColor[cat]}40` : "none",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (disabled) return;
+                          e.currentTarget.style.background = `${catColor[cat]}1e`;
+                          e.currentTarget.style.borderColor = `${catColor[cat]}55`;
+                          e.currentTarget.style.color = catColor[cat];
+                        }}
+                        onMouseLeave={(e) => {
+                          if (disabled) return;
+                          e.currentTarget.style.background = isActive
+                            ? `${catColor[cat]}22`
+                            : `${catColor[cat]}0c`;
+                          e.currentTarget.style.borderColor = isActive
+                            ? catColor[cat]
+                            : `${catColor[cat]}28`;
+                          e.currentTarget.style.color = isActive
+                            ? catColor[cat]
+                            : "var(--proof-text)";
+                        }}
+                      >
+                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ flexShrink: 0, opacity: 0.8 }}>
+                            {USE_CASE_ICONS[uc.id] || <Zap size={11} />}
+                          </span>
+                          {uc.name}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 9,
+                            color: "var(--proof-text-muted)",
+                            lineHeight: 1.3,
+                            marginLeft: 20,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {uc.description}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             );
