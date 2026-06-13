@@ -1,4 +1,5 @@
 export type LangGraphNodeId =
+  | "dispatcher"
   | "data_fetch"
   | "context_build"
   | "skill_dispatch"
@@ -35,17 +36,19 @@ export interface LangGraphNodeResult {
   dataUpdate?: Record<string, unknown>;
   charts?: ChartOutput[];
   error?: string;
+  steps?: SubAgentStep[];
 }
 
 export interface LangGraphExecutionState {
   nodeId: LangGraphNodeId;
   label: string;
   description: string;
-  status: "pending" | "running" | "completed" | "error";
+  status: "pending" | "running" | "completed" | "error" | "skip";
   startedAt: number;
   completedAt?: number;
   duration?: number;
   error?: string;
+  steps?: SubAgentStep[];
 }
 
 export interface DebugLogEntry {
@@ -74,4 +77,42 @@ export interface ChartOutput {
   rows: unknown[][];
   colors?: string[];
   options?: Record<string, unknown>;
+}
+
+export interface SubAgentStep {
+  label: string;
+  status: "running" | "completed" | "error";
+  detail?: string;
+  duration?: number;
+}
+
+export interface SubAgentDef {
+  id: string;
+  label: string;
+  description: string;
+  needsContext: string[];
+  execute: (ctx: SubAgentContext) => Promise<SubAgentResult>;
+}
+
+export interface SubAgentContext {
+  request: import("./types").AIAnalysisRequest;
+  data: Record<string, unknown>;
+  useCaseId: string;
+}
+
+export interface SubAgentResult {
+  status: "completed" | "error" | "skip";
+  dataUpdate?: Record<string, unknown>;
+  charts?: ChartOutput[];
+  error?: string;
+  steps?: SubAgentStep[];
+}
+
+export interface ContextBudget {
+  totalTokens: number;
+  systemTokens: number;
+  historyTokens: number;
+  budget: number;
+  overBudget: boolean;
+  compacted?: { before: number; after: number; saved: number };
 }

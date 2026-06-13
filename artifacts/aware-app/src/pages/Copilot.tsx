@@ -4,6 +4,7 @@ import {
   Send,
   Bot,
   AlertCircle,
+  AlertTriangle,
   Zap,
   Bug,
   TrendingUp,
@@ -19,11 +20,21 @@ import {
   Settings,
   Loader2,
   RefreshCw,
+  Bell,
+  Calendar,
+  Copy,
+  Rocket,
+  Heart,
+  Target,
+  FileText,
+  GitCompare,
+  GitFork,
   BookOpen,
   Terminal,
   EyeOff,
   GitBranch,
   ArrowRight,
+  BarChart3,
   CheckCircle2,
   XCircle,
   Timer,
@@ -50,32 +61,32 @@ import type { SkillDefinition } from "@/lib/ai/skillRegistry";
 
 export const USE_CASE_ICONS: Record<string, React.ReactNode> = {
   "failure-analysis": <Bug size={14} />,
-  "flaky-detection": <Activity size={14} />,
+  "flaky-detection": <RefreshCw size={14} />,
   "regression-prediction": <TrendingUp size={14} />,
-  "performance-trends": <LineChart size={14} />,
-  "anomaly-detection": <AlertCircle size={14} />,
+  "performance-trends": <Timer size={14} />,
+  "anomaly-detection": <AlertTriangle size={14} />,
   "root-cause-analysis": <Search size={14} />,
   "risk-scoring": <Shield size={14} />,
-  "category-health": <Activity size={14} />,
+  "category-health": <Heart size={14} />,
   "env-comparison": <Layers size={14} />,
-  "build-risk-assessment": <Shield size={14} />,
-  "failure-clustering": <Layers size={14} />,
+  "build-risk-assessment": <AlertCircle size={14} />,
+  "failure-clustering": <GitBranch size={14} />,
   "duration-budget": <Zap size={14} />,
-  "coverage-gap": <Search size={14} />,
-  "smart-alerting": <AlertCircle size={14} />,
-  "run-frequency": <Activity size={14} />,
-  "cross-category-correlation": <TrendingUp size={14} />,
-  "promotion-decision-support": <Shield size={14} />,
+  "coverage-gap": <Target size={14} />,
+  "smart-alerting": <Bell size={14} />,
+  "run-frequency": <Calendar size={14} />,
+  "cross-category-correlation": <GitCompare size={14} />,
+  "promotion-decision-support": <ArrowRight size={14} />,
   "trend-forecasting": <LineChart size={14} />,
-  "failure-impact": <AlertCircle size={14} />,
-  "env-drift": <Layers size={14} />,
-  "quality-gate": <Shield size={14} />,
+  "failure-impact": <XCircle size={14} />,
+  "env-drift": <GitFork size={14} />,
+  "quality-gate": <CheckCircle2 size={14} />,
   "suite-health": <Activity size={14} />,
-  "test-doc-gen": <Search size={14} />,
-  "test-redundancy": <Bug size={14} />,
-  "release-readiness": <Shield size={14} />,
-  "env-health-summary": <Activity size={14} />,
-  "regression-report": <TrendingUp size={14} />,
+  "test-doc-gen": <FileText size={14} />,
+  "test-redundancy": <Copy size={14} />,
+  "release-readiness": <Rocket size={14} />,
+  "env-health-summary": <Wifi size={14} />,
+  "regression-report": <BarChart3 size={14} />,
   "setup-guide": <BookOpen size={14} />,
 };
 
@@ -1156,7 +1167,7 @@ export default function Copilot() {
                     )}
                   </div>
                   {lgState && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                       <div
                         style={{
                           fontSize: 10,
@@ -1166,153 +1177,107 @@ export default function Copilot() {
                       >
                         {lgState.description}
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: 4,
-                          alignItems: "center",
-                          marginTop: 4,
-                        }}
-                      >
-                        <GitBranch size={9} style={{ color: "var(--proof-text-muted)" }} />
-                        <span
-                          style={{
-                            fontSize: 9,
-                            color: "var(--proof-text-muted)",
-                            fontFamily: "monospace",
-                            lineHeight: 1.6,
-                          }}
-                        >
-                          {(() => {
-                            // Group history by iteration (same-timestamp-started nodes = parallel)
-                            const groups: typeof lgHistory = [];
-                            const seen = new Set<string>();
-                            for (const s of lgHistory) {
-                              if (!seen.has(s.nodeId)) {
-                                seen.add(s.nodeId);
-                                groups.push(s);
+                      {/* Live step feed */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        {(() => {
+                          // Collect all steps from all completed states, plus current running step
+                          const allSteps: { label: string; detail?: string; status: string; duration?: number }[] = [];
+                          for (const s of lgHistory) {
+                            if (s.steps) {
+                              for (const st of s.steps) {
+                                allSteps.push(st);
                               }
                             }
-                            return groups.map((s, i) => (
-                              <span
-                                key={s.nodeId}
-                                style={{ display: "inline-flex", alignItems: "center", gap: 1 }}
-                              >
-                                {i > 0 && (
-                                  <ArrowRight
-                                    size={8}
-                                    style={{
-                                      display: "inline",
-                                      margin: "0 2px",
-                                      verticalAlign: "middle",
-                                      opacity: 0.6,
-                                    }}
-                                  />
-                                )}
-                                <span
-                                  style={{
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: 2,
-                                    padding: "1px 4px",
-                                    borderRadius: 3,
-                                    background:
-                                      s.status === "completed"
-                                        ? "#22c55e18"
-                                        : s.status === "running"
-                                          ? "#5b8af518"
-                                          : s.status === "error"
-                                            ? "#ef444418"
-                                            : "transparent",
-                                  }}
-                                >
-                                  <span
-                                    style={{
-                                      width: 5,
-                                      height: 5,
-                                      borderRadius: "50%",
-                                      display: "inline-block",
-                                      background:
-                                        s.status === "completed"
-                                          ? "#22c55e"
-                                          : s.status === "error"
-                                            ? "#ef4444"
-                                            : s.status === "running"
-                                              ? "#5b8af5"
-                                              : "var(--proof-text-muted)",
-                                    }}
-                                  />
-                                  <span
-                                    style={{
-                                      color:
-                                        s.status === "completed"
-                                          ? "#22c55e"
-                                          : s.status === "error"
-                                            ? "#ef4444"
-                                            : s.status === "running"
-                                              ? "#5b8af5"
-                                              : "var(--proof-text-muted)",
-                                      fontWeight: s.status === "running" ? 700 : 400,
-                                    }}
-                                  >
-                                    {s.nodeId.replace(/_/g, " ")}
-                                  </span>
-                                  {s.duration !== undefined && (
-                                    <span style={{ color: "#a855f770", fontSize: 8 }}>
-                                      {s.duration}ms
-                                    </span>
-                                  )}
-                                </span>
+                          }
+                          // Add current node as a running step if not already captured
+                          if (lgState.status === "running") {
+                            const hasRunning = allSteps.some((st) => st.status === "running");
+                            if (!hasRunning) {
+                              allSteps.push({ label: lgState.label, detail: lgState.description, status: "running" });
+                            }
+                          }
+                          // Show last 6 steps max
+                          const visible = allSteps.slice(-6);
+                          return visible.map((st, i) => (
+                            <div
+                              key={`${st.label}-${i}`}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 5,
+                                fontSize: 10,
+                                lineHeight: 1.5,
+                                opacity: st.status === "running" ? 1 : 0.85,
+                              }}
+                            >
+                              {st.status === "completed" ? (
+                                <CheckCircle2 size={9} style={{ color: "#22c55e", flexShrink: 0 }} />
+                              ) : st.status === "error" ? (
+                                <XCircle size={9} style={{ color: "#ef4444", flexShrink: 0 }} />
+                              ) : (
+                                <Loader2 size={9} style={{ color: "#5b8af5", flexShrink: 0, animation: "spin 1s linear infinite" }} />
+                              )}
+                              <span style={{ color: "var(--proof-text)", fontWeight: st.status === "running" ? 600 : 400 }}>
+                                {st.label}
                               </span>
-                            ));
-                          })()}
-                        </span>
+                              {st.detail && (
+                                <span style={{ color: "var(--proof-text-muted)", fontSize: 9 }}>
+                                  {st.detail}
+                                </span>
+                              )}
+                            </div>
+                          ));
+                        })()}
+                      </div>
+                      {/* Timeline mini-badges */}
+                      <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginTop: 2 }}>
+                        {lgHistory.map((s) => (
+                          <span
+                            key={s.nodeId}
+                            style={{
+                              fontSize: 8,
+                              padding: "1px 5px",
+                              borderRadius: 3,
+                              background:
+                                s.status === "completed"
+                                  ? "#22c55e20"
+                                  : s.status === "running"
+                                    ? "#5b8af520"
+                                    : s.status === "error"
+                                      ? "#ef444420"
+                                      : "var(--proof-grey-bg)",
+                              color:
+                                s.status === "completed"
+                                  ? "#22c55e"
+                                  : s.status === "running"
+                                    ? "#5b8af5"
+                                    : s.status === "error"
+                                      ? "#ef4444"
+                                      : "var(--proof-text-muted)",
+                              fontWeight: 600,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                            }}
+                          >
+                            {s.status === "completed" ? (
+                              <CheckCircle2 size={7} />
+                            ) : s.status === "error" ? (
+                              <XCircle size={7} />
+                            ) : s.status === "running" ? (
+                              <Loader2 size={7} style={{ animation: "spin 1s linear infinite" }} />
+                            ) : (
+                              <Timer size={7} />
+                            )}
+                            {s.nodeId.replace(/_/g, " ")}
+                            {s.duration !== undefined && (
+                              <span style={{ opacity: 0.6 }}>{s.duration}ms</span>
+                            )}
+                          </span>
+                        ))}
                       </div>
                     </div>
                   )}
-                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                    {lgHistory.map((s) => (
-                      <span
-                        key={s.nodeId}
-                        style={{
-                          fontSize: 8,
-                          padding: "1px 5px",
-                          borderRadius: 3,
-                          background:
-                            s.status === "completed"
-                              ? "#22c55e20"
-                              : s.status === "running"
-                                ? "#5b8af520"
-                                : s.status === "error"
-                                  ? "#ef444420"
-                                  : "var(--proof-grey-bg)",
-                          color:
-                            s.status === "completed"
-                              ? "#22c55e"
-                              : s.status === "running"
-                                ? "#5b8af5"
-                                : s.status === "error"
-                                  ? "#ef4444"
-                                  : "var(--proof-text-muted)",
-                          fontWeight: 600,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 2,
-                        }}
-                      >
-                        {s.status === "completed" ? (
-                          <CheckCircle2 size={7} />
-                        ) : s.status === "error" ? (
-                          <XCircle size={7} />
-                        ) : s.status === "running" ? (
-                          <Loader2 size={7} style={{ animation: "spin 1s linear infinite" }} />
-                        ) : (
-                          <Timer size={7} />
-                        )}
-                        {s.nodeId}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               </div>
             )}
