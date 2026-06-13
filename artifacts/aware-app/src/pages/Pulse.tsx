@@ -762,7 +762,15 @@ export default function Pulse() {
                 </thead>
                 <tbody>
                   {filtered.map((run) => (
+<<<<<<< HEAD
                     <RunRow key={run.id} run={run} onClick={(id) => navigate(`/runs/${id}`)} />
+=======
+                    <RunRow
+                      key={run.id}
+                      run={run}
+                      onClick={(id) => navigate(`/runs/${id}`)}
+                    />
+>>>>>>> 0a804f5 (fix: Pulse navigation uses wouter navigate() instead of window.location.href; RunDetail removes RUNS[0] fallback on unknown run IDs)
                   ))}
                 </tbody>
               </table>
