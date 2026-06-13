@@ -174,12 +174,11 @@ export function AppLayout({
   return (
     <div
       style={{
-        height: "100vh",
+        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         background: "var(--proof-grey-bg)",
         color: "var(--proof-text)",
-        overflow: "hidden",
       }}
     >
       {/* Top Nav */}

@@ -288,6 +288,7 @@ const KEYWORD_ROUTES: Array<{
       /inconsist/i,
       /never.*fail/i,     // "tests that never fail"
       /high.risk.*test/i, // "high-risk flaky tests"
+      /\bstable\b/i,      // "which are most stable envs / tests"
     ],
   },
 
@@ -504,7 +505,17 @@ function buildTemplateSynthesis(toolName: string, toolDataJson: string, _userQue
         return `**${toolName}** results:\n\`\`\`\n${toolDataJson.slice(0, 300)}\n\`\`\``;
     }
   } catch {
-    return `Data retrieved from ${toolName} (could not render structured view).`;
+    // JSON.parse failed or template crashed — show something useful
+    // This can happen if toolDataJson is empty or malformed.
+    const names: Record<string, string> = {
+      query_runs: "Run History",
+      get_flaky_tests: "Flaky Test Analysis",
+      compare_environments: "Environment Comparison",
+      get_promotion_status: "Promotion Gate",
+      get_failure_breakdown: "Failure Breakdown",
+    };
+    const label = names[toolName] ?? toolName;
+    return `**${label}** data retrieved. The chart above shows the results — expand the tool card to see the raw data.`;
   }
 }
 
@@ -656,10 +667,11 @@ export class ChromeProvider implements IProvider {
         .reverse()
         .find((m) => m.role === "assistant" && m.tool_calls);
       const toolName = assistantMsg?.tool_calls?.[0]?.function?.name ?? "tool";
-      const toolDataJson = toolMessages
-        .map((m) => m.content ?? "")
-        .join("\n")
-        .slice(0, 4000);
+
+      // Use only the LAST tool message — joining multiple (from conversation
+      // history) produces invalid multi-JSON that crashes JSON.parse().
+      const lastToolMsg = toolMessages[toolMessages.length - 1];
+      const toolDataJson = (lastToolMsg?.content ?? "").slice(0, 4000);
 
       const response = buildTemplateSynthesis(toolName, toolDataJson, query);
       emitAsStream(response, onDelta);
