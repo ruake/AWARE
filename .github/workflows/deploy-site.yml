@@ -77,7 +77,7 @@ jobs:
 
       - name: Add SPA fallback + headers
         run: |
-          DIST="${{ env.WORKING_DIR }}/dist"
+          DIST="${{ env.WORKING_DIR }}/dist/public"
           # SPA 404 fallback (serves index.html for all routes)
           cp "$DIST/index.html" "$DIST/404.html"
           # Security / cache headers for GitHub Pages
@@ -96,7 +96,7 @@ jobs:
       - name: Push dist to site branch
         uses: ./.github/actions/data-writer
         with:
-          files: "${{ env.WORKING_DIR }}/dist/."
+          files: "${{ env.WORKING_DIR }}/dist/public/."
           dest-paths: "."
           commit-message: "deploy: ${{ github.sha }} (${{ github.ref_name }}) [skip ci]"
           branch: ${{ env.SITE_BRANCH }}
