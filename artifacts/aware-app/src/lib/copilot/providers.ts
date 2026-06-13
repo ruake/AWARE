@@ -267,16 +267,31 @@ function hasOldAPI(): boolean {
 // Deterministic tool selection — no LLM needed. Ordered from most-specific to
 // least-specific so "flaky run history" → get_flaky_tests, not query_runs.
 
+// Routing table — evaluated top-to-bottom, first match wins.
+// More-specific patterns must appear BEFORE general catch-alls.
+// Each action message in QuickActions.tsx is designed to hit exactly one route.
 const KEYWORD_ROUTES: Array<{
   tool: string;
   args: Record<string, unknown>;
   patterns: RegExp[];
 }> = [
+  // ── Flakiness ──────────────────────────────────────────────────────────────
   {
     tool: "get_flaky_tests",
     args: {},
-    patterns: [/flak/i, /unstable/i, /flip/i, /PASS.*FAIL|FAIL.*PASS/i, /reliab/i, /inconsist/i],
+    patterns: [
+      /flak/i,
+      /unstable/i,
+      /\bflip\b/i,
+      /PASS.*FAIL|FAIL.*PASS/i,
+      /reliab/i,          // "most stable and reliable" → stable tests
+      /inconsist/i,
+      /never.*fail/i,     // "tests that never fail"
+      /high.risk.*test/i, // "high-risk flaky tests"
+    ],
   },
+
+  // ── Promotion gate ─────────────────────────────────────────────────────────
   {
     tool: "get_promotion_status",
     args: {},
@@ -287,21 +302,44 @@ const KEYWORD_ROUTES: Array<{
       /go.to.prod/i,
       /can we.*(deploy|ship|release)/i,
       /prod.*(ready|block|gate)/i,
-      /gate/i,
+      /\bgate\b/i,
+      /block.*rate|percent.*block/i,     // "block rate / % blocked"
+      /uat.*threshold|above.*95/i,        // "UAT above 95%"
+      /last.*block/i,                     // "last block decision"
+      /successful.*promot/i,              // "successful promotions"
+      /gate.*trend|block.*often/i,        // "gate trend"
     ],
   },
+
+  // ── Failure breakdown ──────────────────────────────────────────────────────
+  // (before compare_environments so specific keywords win)
   {
     tool: "get_failure_breakdown",
     args: {},
     patterns: [
       /breakdown/i,
-      /\bcategor/i,
+      /\bcategor/i,       // "categories" → category heatmap, top categories, etc.
       /why.*fail/i,
       /what.*failing/i,
       /root.cause/i,
       /failing most/i,
+      /\bwaf\b/i,                           // "WAF tests"
+      /security.*fail|security.*test/i,      // "security failures"
+      /bot.*manager|bot.*protect/i,          // "bot manager"
+      /\btls\b|certificate.*valid/i,         // "TLS / certificate"
+      /performance.*fail|timing.*fail/i,     // "performance failures"
+      /api.*fail|http.*fail/i,               // "API / HTTP failures"
+      /regression.*alert|newly.*fail/i,      // "regression alert"
+      /zero.*pass.*rate|zero.*pass\b/i,      // "zero pass rate"
+      /\bedgeworker\b|edge.*worker/i,        // "EdgeWorker tests"
+      /cache.*behav|cdn.*cache.*test/i,      // "cache behavior tests"
+      /suite.*fail|fail.*suite/i,            // "suite failures"
+      /\bheatmap\b/i,                        // "category heatmap"
     ],
   },
+
+  // ── Compare environments ───────────────────────────────────────────────────
+  // (before env-specific query_runs so prod.*status wins over prod.*run)
   {
     tool: "compare_environments",
     args: {},
@@ -311,8 +349,43 @@ const KEYWORD_ROUTES: Array<{
       /qa.*uat|uat.*prod/i,
       /all.*(env|environment)/i,
       /across.*(env|environment)/i,
+      /qa.*health|qa.*deep.dive/i,          // "QA deep dive / health"
+      /uat.*status|uat.*health/i,            // "UAT status / health"
+      /prod.*status|prod.*health/i,          // "PROD status / health" (before prod.*run)
+      /qa.*vs.*prod|quality.*gap/i,          // "QA vs PROD gap"
+      /worst.*env|env.*worst/i,              // "worst env / env worst pass rate"
+      /\bdegrading\b|env.*trend/i,           // "degrading / env trend"
+      /staging.*network/i,                   // "staging network"
+      /production.*network/i,                // "production network"
+      /cdn.*health|cdn.*summar/i,            // "CDN health summary"
+      /cdn.*report|full.*cdn.*report/i,      // "full CDN report"
+      /playwright.*vs.*pytest|web.*vs.*api/i, // "Web vs API"
+      /akamai.*health|akamai.*property/i,    // "Akamai property health"
     ],
   },
+
+  // ── QA-specific runs (before general query_runs) ──────────────────────────
+  {
+    tool: "query_runs",
+    args: { limit: 10, env: "QA" },
+    patterns: [/\bqa\b.*run|run.*\bqa\b/i],
+  },
+
+  // ── UAT-specific runs ─────────────────────────────────────────────────────
+  {
+    tool: "query_runs",
+    args: { limit: 10, env: "UAT" },
+    patterns: [/\buat\b.*run|run.*\buat\b/i],
+  },
+
+  // ── PROD-specific runs (prod.*status already claimed by compare_environments) ──
+  {
+    tool: "query_runs",
+    args: { limit: 10, env: "PROD" },
+    patterns: [/\bprod\b.*run|run.*\bprod\b/i],
+  },
+
+  // ── General runs (catch-all) ───────────────────────────────────────────────
   {
     tool: "query_runs",
     args: { limit: 10 },
@@ -326,12 +399,18 @@ const KEYWORD_ROUTES: Array<{
       /failure.count/i,
       /test.result/i,
       /recent.*(run|test)/i,
+      /playwright.*pass|playwright.*rate/i,  // "Playwright pass rate"
+      /pytest.*pass|pytest.*rate|pytest.*result/i, // "pytest pass rate"
+      /\bsuite\b/i,                          // "suite overview / all suites"
+      /test.*volume|test.*count|how.many.*test/i, // "test count / volume"
     ],
   },
+
+  // ── Environment health fallback ────────────────────────────────────────────
   {
     tool: "compare_environments",
     args: {},
-    patterns: [/health/i, /overall/i, /summary/i, /status.*env/i],
+    patterns: [/\bhealth\b/i, /\boverall\b/i, /\bsummary\b/i, /status.*env/i],
   },
 ];
 
