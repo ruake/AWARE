@@ -1,7 +1,6 @@
 import React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useLocation } from "wouter";
-import { AppLayout } from "@/components/aware/AppLayout";
 import { CiConfigBanner } from "@/components/aware/CiConfigBanner";
 import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
 import { useSyncedUrlState } from "@/lib/urlState";
@@ -506,7 +505,7 @@ export default function TestManager() {
   };
 
   return (
-    <AppLayout activeHref="/tests">
+    <>
       {Toast}
       <div
         style={{
@@ -933,7 +932,7 @@ export default function TestManager() {
           onClose={() => setShowChanges(false)}
         />
       )}
-    </AppLayout>
+    </>
   );
 }
 

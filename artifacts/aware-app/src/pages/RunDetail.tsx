@@ -1,6 +1,5 @@
 import React from "react";
 import { useParams, useLocation, useSearch } from "wouter";
-import { AppLayout } from "@/components/aware/AppLayout";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
 import {
   getRunById,
@@ -189,23 +188,21 @@ export default function RunDetail() {
 
   if (!run) {
     return (
-      <AppLayout activeHref="/runs">
-        <div style={{ textAlign: "center", padding: 64 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>
-            Run not found
-          </h2>
-          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
-            The requested run does not exist.
-          </p>
-          <button
-            onClick={() => navigate("/runs")}
-            className="proof-button"
-            style={{ fontSize: 13, marginTop: 16 }}
-          >
-            Back to Runs
-          </button>
-        </div>
-      </AppLayout>
+      <div style={{ textAlign: "center", padding: 64 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>
+          Run not found
+        </h2>
+        <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
+          The requested run does not exist.
+        </p>
+        <button
+          onClick={() => navigate("/runs")}
+          className="proof-button"
+          style={{ fontSize: 13, marginTop: 16 }}
+        >
+          Back to Runs
+        </button>
+      </div>
     );
   }
 
@@ -245,7 +242,6 @@ export default function RunDetail() {
   };
 
   return (
-    <AppLayout activeHref="/runs">
       <div
         className="proof-page"
         style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}
@@ -1115,8 +1111,7 @@ export default function RunDetail() {
             </PanelErrorBoundary>
           )}
         </div>
+        {Toast}
       </div>
-      {Toast}
-    </AppLayout>
   );
 }

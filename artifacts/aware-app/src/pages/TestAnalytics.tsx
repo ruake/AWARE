@@ -1,7 +1,6 @@
 import React from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { GoogleBarChart, GoogleAreaChart } from "@/components/aware/GoogleCharts";
-import { AppLayout } from "@/components/aware/AppLayout";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { DIFF_ROWS, RUNS, getTestResultsForRun, getTestDetailsAsync } from "@/lib/data";
 import { getEnvLabels } from "@/lib/envConfig";
@@ -247,23 +246,21 @@ export default function TestAnalytics() {
 
   if (diffs.length === 0) {
     return (
-      <AppLayout activeHref="/analytics">
-        <div style={{ textAlign: "center", padding: 64 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>
-            No test data available
-          </h2>
-          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
-            Run a comparison first to see analytics.
-          </p>
-          <button
-            onClick={() => navigate("/compare")}
-            className="proof-button"
-            style={{ fontSize: 13, marginTop: 16 }}
-          >
-            Go to Compare
-          </button>
-        </div>
-      </AppLayout>
+      <div style={{ textAlign: "center", padding: 64 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>
+          No test data available
+        </h2>
+        <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
+          Run a comparison first to see analytics.
+        </p>
+        <button
+          onClick={() => navigate("/compare")}
+          className="proof-button"
+          style={{ fontSize: 13, marginTop: 16 }}
+        >
+          Go to Compare
+        </button>
+      </div>
     );
   }
 
@@ -307,7 +304,6 @@ export default function TestAnalytics() {
   const errorCount = enriched.filter((r) => r.error).length;
 
   return (
-    <AppLayout activeHref="/analytics">
       <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Header with searchable selector */}
         <div className="proof-page-header" style={{ alignItems: "center", gap: 10 }}>
@@ -1491,8 +1487,7 @@ export default function TestAnalytics() {
               );
             })()}
         </div>
+        {Toast}
       </div>
-      {Toast}
-    </AppLayout>
   );
 }

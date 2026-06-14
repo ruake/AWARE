@@ -1,5 +1,4 @@
 import React from "react";
-import { AppLayout } from "@/components/aware/AppLayout";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useTestData } from "@/hooks/useTestData";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
@@ -167,8 +166,7 @@ export default function TestSuiteManager() {
   };
 
   return (
-    <AppLayout activeHref="/suites">
-      <div
+    <div
         className="proof-page"
         style={{
           height: "calc(100vh - 100px)",
@@ -581,9 +579,8 @@ export default function TestSuiteManager() {
             </PanelErrorBoundary>
           )}
         </div>
+        {Toast}
       </div>
-      {Toast}
-    </AppLayout>
   );
 }
 
