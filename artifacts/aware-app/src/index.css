@@ -31,11 +31,11 @@
   --proof-grey-bg: #030712;
   --proof-surface: #0f172a;
   --proof-surface-2: #1e293b;
-  --proof-surface-hover: #1e293b;
+  --proof-surface-hover: #1e2d3d;
   --proof-surface-3: #334155;
 
   /* Borders */
-  --proof-grey: rgba(148, 163, 184, 0.2);
+  --proof-grey: var(--proof-border);
   --proof-border: rgba(148, 163, 184, 0.2);
   --proof-border-strong: rgba(148, 163, 184, 0.4);
   --proof-border-focus: rgba(59, 130, 246, 0.5);
@@ -117,6 +117,7 @@
   /* Console table */
   --proof-console-table-header-bg: var(--proof-surface);
   --proof-console-table-row-hover: var(--proof-surface-hover);
+  --proof-console-table-row-selected: rgba(37, 99, 235, 0.1);
   --proof-console-table-row-selected: color-mix(in srgb, var(--proof-blue) 10%, transparent);
   --proof-console-table-border: var(--proof-border);
   --proof-console-table-stripe: var(--proof-grey-bg);
@@ -134,8 +135,9 @@ body {
   font-family: var(--font-sans);
   color: var(--proof-text);
   background-color: var(--proof-bg);
-  height: 100vh;
-  overflow: hidden;
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -1019,6 +1021,7 @@ select.proof-input {
   --proof-text-muted: #9ca3af;
   --proof-text-primary: var(--proof-text);
   --proof-muted: var(--proof-text-secondary);
+  --proof-text-tertiary: #64748b;
 
   --proof-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --proof-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
@@ -1150,36 +1153,168 @@ select.proof-input {
 }
 
 /* ── Console layout utilities ──────────────────────────────────────── */
-.console-flex-row { display: flex; flex-direction: row; }
-.console-flex-col { display: flex; flex-direction: column; }
-.console-flex-center { display: flex; align-items: center; justify-content: center; }
-.console-flex-between { display: flex; align-items: center; justify-content: space-between; }
-.console-gap-xs { gap: 4px; }
-.console-gap-sm { gap: 8px; }
-.console-gap-md { gap: 16px; }
+.console-flex-row {
+  display: flex;
+  flex-direction: row;
+}
+.console-flex-col {
+  display: flex;
+  flex-direction: column;
+}
+.console-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.console-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.console-gap-xs {
+  gap: 4px;
+}
+.console-gap-sm {
+  gap: 8px;
+}
+.console-gap-md {
+  gap: 16px;
+}
 
 /* ── Console interactive states ────────────────────────────────────── */
-.console-clickable { cursor: pointer; transition: background-color 0.15s ease; }
-.console-clickable:hover { background: var(--proof-console-nav-hover); }
+.console-clickable {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.console-clickable:hover {
+  background: var(--proof-console-nav-hover);
+}
 
 /* ── Console text truncation ───────────────────────────────────────── */
-.console-text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.console-text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ── Console scrollbar styling ─────────────────────────────────────── */
-.console-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-.console-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.console-scrollbar::-webkit-scrollbar-thumb { background: var(--proof-border); border-radius: 3px; }
-.console-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--proof-text-muted); }
+.console-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.console-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.console-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--proof-border);
+  border-radius: 3px;
+}
+.console-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--proof-text-muted);
+}
 
 /* ── Console animations ────────────────────────────────────────────── */
 @keyframes console-fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.console-fade-in { animation: console-fade-in 0.2s ease-out; }
+.console-fade-in {
+  animation: console-fade-in 0.2s ease-out;
+}
 
 @keyframes console-slide-in {
-  from { opacity: 0; transform: translateX(-8px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
-.console-slide-in { animation: console-slide-in 0.2s ease-out; }
+.console-slide-in {
+  animation: console-slide-in 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Z-Index Scale ─────────────────────────────────────────── */
+:root {
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-fixed: 200;
+  --z-modal: 500;
+  --z-tooltip: 1000;
+  --z-toast: 9999;
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  header {
+    padding: 0 8px !important;
+  }
+  main {
+    padding: 12px !important;
+  }
+  .proof-page {
+    padding-top: 12px;
+  }
+  .proof-page-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .proof-page-title {
+    font-size: 15px;
+  }
+  .proof-section-title {
+    font-size: 10px;
+  }
+  .proof-console-search-text {
+    display: none;
+  }
+}
+
+@media print {
+  header,
+  aside,
+  nav,
+  .proof-sidebar,
+  button,
+  .proof-toast {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+    overflow: visible !important;
+  }
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  .light {
+    --proof-bg: white;
+    --proof-text: black;
+    --proof-text-secondary: #333;
+    --proof-surface: white;
+    --proof-border: #ddd;
+  }
+}

@@ -71,8 +71,8 @@ export interface TestResult {
   assertions?: TestAssertionResult[];
   /** REQUIRED — HTTP request/response evidence */
   evidence: TestEvidence;
-  /** OPTIONAL — Screenshot filmstrip frames from Playwright */
-  filmstrip?: FilmstripFrame[];
+  /** REQUIRED — Screenshot filmstrip frames from Playwright */
+  filmstrip: FilmstripFrame[];
 }
 
 export interface TestAssertionResult {
@@ -100,6 +100,15 @@ export interface FilmstripFrame {
   timestamp?: number;
 }
 
+export interface HttpTimings {
+  dnsLookup: number;
+  tcpConnect: number;
+  tlsHandshake: number;
+  ttfb: number;
+  download: number;
+  total: number;
+}
+
 export interface TestEvidence {
   request: { method: string; url: string; headers: Record<string, string>; body?: string };
   response: {
@@ -107,6 +116,7 @@ export interface TestEvidence {
     headers: Record<string, string>;
     body?: string;
     cookies?: TestCookie[];
+    timings: HttpTimings;
   };
   assertions: TestAssertionResult[];
 }

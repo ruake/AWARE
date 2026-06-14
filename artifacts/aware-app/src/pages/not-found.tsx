@@ -1,4 +1,3 @@
-
 import { AlertCircle } from "lucide-react";
 
 export default function NotFound() {
@@ -14,9 +13,7 @@ export default function NotFound() {
       }}
     >
       <AlertCircle size={40} style={{ color: "var(--proof-red)" }} />
-      <h1
-        style={{ fontSize: 22, fontWeight: 700, color: "var(--proof-text-primary)", margin: 0 }}
-      >
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--proof-text-primary)", margin: 0 }}>
         404 Page Not Found
       </h1>
       <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", margin: 0 }}>

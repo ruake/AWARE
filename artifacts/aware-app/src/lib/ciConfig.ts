@@ -83,18 +83,18 @@ export function generateCiConfig(): CiConfig {
       edgeHostname: c.edgeHostname,
     })),
     workflow: {
-      file: "run-tests.yml",
-      path: ".github/workflows/run-tests.yml",
-      dispatch: `gh workflow run run-tests.yml --field suite=<suite_id> --field environment=<QA|UAT|PROD> --field parallelism=4`,
+      file: "controller.yml",
+      path: ".github/workflows/controller.yml",
+      dispatch: `gh workflow run controller.yml --field force_suite=<suite_id> --field force_env=<"QA / Staging"|"UAT / Production"|...>`,
     },
     runners: {
       playwright: { version: "^1.60.0", browser: "chromium" },
       pytest: { version: "^8.0", markers: ["smoke", "regression", "edgeworker", "performance"] },
     },
     instructions: `1. Commit config/akamai-config.yml, config/environments.yml, config/test-suites.yml to your repo
-2. The workflow at .github/workflows/run-tests.yml reads these files automatically
-3. Trigger manually: gh workflow run run-tests.yml --field suite=suite_smoke --field environment=QA
-4. Nightly runs are scheduled automatically (see cron in workflow file)
+2. The workflow at .github/workflows/controller.yml reads these files automatically
+3. Trigger manually: gh workflow run controller.yml --field force_suite=suite_smoke --field force_env="QA / Staging"
+4. Scheduled runs fire every 15 min (cron reconciler in controller.yml)
 5. Promotion gate: UAT regression must pass ≥ 95% before PROD property activation`,
   };
 }
@@ -112,13 +112,12 @@ export function generateCiConfigYaml(): string {
 #   3. GitHub Actions will use this config when you dispatch a workflow run
 #
 # 🚀 TO TRIGGER A RUN:
-#   gh workflow run run-tests.yml \\
-#     --field suite=suite_smoke \\
-#     --field environment=QA \\
-#     --field parallelism=4
+#   gh workflow run controller.yml \\
+#     --field force_suite=suite_smoke \\
+#     --field force_env="QA / Staging"
 #
 # 📍 WORKFLOW FILE:
-#   .github/workflows/run-tests.yml
+#   .github/workflows/controller.yml
 #
 # 🏷️  ENVIRONMENTS: QA → UAT → PROD (always shown in dashboard)
 # =============================================================================

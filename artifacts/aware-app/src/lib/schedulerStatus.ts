@@ -15,12 +15,16 @@ const _listeners = new Set<() => void>();
 export async function loadSchedulerStatus(): Promise<void> {
   if (_loaded) return;
   _loaded = true;
-  const data = await fetchJson<SchedulerStatus>("scheduler-status.json");
-  _cached = {
-    ...data,
-    suites: [...data.suites],
-    recentDispatches: [...data.recentDispatches],
-  };
+  try {
+    const data = await fetchJson<SchedulerStatus>("scheduler-status.json");
+    _cached = {
+      ...data,
+      suites: [...data.suites],
+      recentDispatches: [...data.recentDispatches],
+    };
+  } catch {
+    /* fetch failed, keep defaults */
+  }
 }
 
 export function getSchedulerStatus(): SchedulerStatus {

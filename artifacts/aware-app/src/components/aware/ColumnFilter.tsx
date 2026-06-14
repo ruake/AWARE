@@ -1,4 +1,5 @@
 import React from "react";
+import { X } from "lucide-react";
 
 export interface ColumnFilterState {
   text: string;
@@ -161,6 +162,7 @@ export function ColumnFilter({
             {filter.text && (
               <button
                 onClick={() => onFilterChange({ ...filter, text: "" })}
+                aria-label="Close"
                 style={{
                   background: "none",
                   border: "none",
@@ -171,7 +173,7 @@ export function ColumnFilter({
                   padding: 0,
                 }}
               >
-                ×
+                <X size={14} />
               </button>
             )}
           </div>

@@ -326,11 +326,13 @@ const results = parseResults(raw);
 const resultsDir = path.dirname(path.resolve(resultsPath));
 const testResults = extractTestResults(raw, runId, resultsDir);
 
+const envId = `${(target || "QA").toLowerCase()}_${network || "staging"}`;
+
 const run = {
   id: runId,
   label: `${suite} — ${envLabel}`,
   suiteId: suite,
-  envId: target,
+  envId,
   status: results.status,
   passPct: results.passPct,
   failures: results.failed,
@@ -339,7 +341,7 @@ const run = {
   started: now.toISOString(),
   build,
   rev,
-  env: target,
+  env: target || "QA",
   network,
   ...(ghRunId ? { workflowRunId: Number(ghRunId) } : {}),
 };
@@ -350,12 +352,11 @@ let updated = false;
 // If the scheduler pre-created a RUNNING entry, update it in place
 for (let i = 0; i < runs.length; i++) {
   const r = runs[i];
-  const runningSuite = r.suiteId || r.suite;
-  const runningTarget = r.envId || r.target;
+  const matchEnv = r.envId || r.target;
   const match =
     r.status === "RUNNING" &&
-    runningSuite === suite &&
-    runningTarget === target &&
+    (r.suiteId || r.suite) === suite &&
+    (matchEnv === envId || matchEnv === target) &&
     r.network === network;
   if (match) {
     run.id = r.id;

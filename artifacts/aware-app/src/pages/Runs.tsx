@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useSyncExternalStore } from "react";
 import { Link, useLocation } from "wouter";
 
 import { ConsoleCard, ConsoleStat } from "@/components/console";
 import { DataTable, type ColumnDef } from "@/components/console/DataTable";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
-import { RUNS } from "@/lib/data";
+import { RUNS, getRunsByEnv } from "@/lib/data";
+import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { useSyncedUrlState } from "@/lib/urlState";
 import type { Run } from "@/lib/types";
 import {
@@ -45,7 +46,7 @@ function NetworkBadge({ network }: { network?: string }) {
         fontWeight: 700,
         textTransform: "uppercase",
         letterSpacing: "0.3px",
-        color: isProd ? "var(--proof-green)" : "#d97706",
+        color: isProd ? "var(--proof-green)" : "var(--proof-yellow)",
         background: isProd ? "var(--proof-green-bg)" : "var(--proof-yellow-bg)",
         border: `1px solid ${isProd ? "rgba(34,197,94,0.2)" : "rgba(217,119,6,0.2)"}`,
         padding: "1px 5px",
@@ -69,10 +70,14 @@ export default function Runs() {
   const [suiteFilter, setSuiteFilter] = useSyncedUrlState("suite", "all");
   const [envFilter, setEnvFilter] = useSyncedUrlState("env", "all");
 
+  const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
+  const envFilteredRuns = envSnap.envIds.length > 0 ? getRunsByEnv(envSnap.envIds) : RUNS;
+  const noRunsForEnv = envSnap.envIds.length > 0 && envFilteredRuns.length === 0;
+
   const envs = [...new Set(RUNS.map((r) => r.env))].sort();
   const suites = [...new Set(RUNS.map((r) => r.suiteId))].sort();
 
-  const filtered = RUNS.filter((r) => {
+  const filtered = envFilteredRuns.filter((r) => {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
     if (suiteFilter !== "all" && r.suiteId !== suiteFilter) return false;
     if (envFilter !== "all" && r.env !== envFilter) return false;
@@ -91,10 +96,10 @@ export default function Runs() {
   const hasActiveFilters =
     statusFilter !== "all" || suiteFilter !== "all" || envFilter !== "all" || search !== "";
 
-  const table = useDataTable(
-    filtered as unknown as Record<string, unknown>[],
-    { defaultPageSize: 25, defaultSort: { key: "started", direction: "desc" } },
-  );
+  const table = useDataTable(filtered as unknown as Record<string, unknown>[], {
+    defaultPageSize: 25,
+    defaultSort: { key: "started", direction: "desc" },
+  });
 
   const columns: ColumnDef<Record<string, unknown>>[] = [
     {
@@ -102,161 +107,182 @@ export default function Runs() {
       header: "Run",
       sortable: true,
       width: 200,
-      render: (row) => { const run = row as unknown as Run; return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <Link
-            href={`/runs/${run.id}`}
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              color: "var(--proof-blue)",
-              fontWeight: 600,
-              textDecoration: "none",
-            }}
-          >
-            {run.id}
-          </Link>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 9.5,
-              color: "var(--proof-text-muted)",
-            }}
-          >
-            {run.build} · {run.rev?.slice(0, 7)}
-          </span>
-        </div>
-      ); },
+      render: (row) => {
+        const run = row as unknown as Run;
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <Link
+              href={`/runs/${run.id}`}
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                color: "var(--proof-blue)",
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              {run.id}
+            </Link>
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 9.5,
+                color: "var(--proof-text-muted)",
+              }}
+            >
+              {run.build} · {run.rev?.slice(0, 7)}
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: "suiteId",
       header: "Suite / Env",
       sortable: true,
       width: 180,
-      render: (row) => { const run = row as unknown as Run; return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              fontWeight: 500,
-            }}
-          >
-            {run.suiteId}
-          </span>
-          <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>{run.env}</span>
-            <NetworkBadge network={run.network} />
+      render: (row) => {
+        const run = row as unknown as Run;
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                fontWeight: 500,
+              }}
+            >
+              {run.suiteId}
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>{run.env}</span>
+              <NetworkBadge network={run.network} />
+            </div>
           </div>
-        </div>
-      ); },
+        );
+      },
     },
     {
       key: "status",
       header: "Result",
       sortable: true,
       width: 140,
-      render: (row) => { const run = row as unknown as Run; return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {statusBadge(run.status)}
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: "var(--proof-text-secondary)",
-            }}
-          >
+      render: (row) => {
+        const run = row as unknown as Run;
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {statusBadge(run.status)}
             <span
               style={{
-                color:
-                  run.passPct === 100
-                    ? "var(--proof-green)"
-                    : run.passPct < 90
-                      ? "var(--proof-red)"
-                      : "var(--proof-text)",
-                fontWeight: 700,
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                color: "var(--proof-text-secondary)",
               }}
             >
-              {run.passPct}%
+              <span
+                style={{
+                  color:
+                    run.passPct === 100
+                      ? "var(--proof-green)"
+                      : run.passPct < 90
+                        ? "var(--proof-red)"
+                        : "var(--proof-text)",
+                  fontWeight: 700,
+                }}
+              >
+                {run.passPct}%
+              </span>
+              {" · "}
+              <span
+                style={{
+                  color: run.failures > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)",
+                }}
+              >
+                {run.failures > 0 ? `${run.failures}✗` : "0 fail"}
+              </span>
             </span>
-            {" · "}
-            <span
-              style={{
-                color: run.failures > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)",
-              }}
-            >
-              {run.failures > 0 ? `${run.failures}✗` : "0 fail"}
-            </span>
-          </span>
-        </div>
-      ); },
+          </div>
+        );
+      },
     },
     {
       key: "duration",
       header: "Duration",
       sortable: true,
       width: 120,
-      render: (row) => { const run = row as unknown as Run; return (
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            color: "var(--proof-text-secondary)",
-          }}
-        >
-          {run.duration}
-        </span>
-      ); },
+      render: (row) => {
+        const run = row as unknown as Run;
+        return (
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              color: "var(--proof-text-secondary)",
+            }}
+          >
+            {run.duration}
+          </span>
+        );
+      },
     },
     {
       key: "started",
       header: "Date",
       sortable: true,
       width: 140,
-      render: (row) => { const run = row as unknown as Run; return (
-        <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
-          {new Date(run.started).toLocaleString(undefined, {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </span>
-      ); },
+      render: (row) => {
+        const run = row as unknown as Run;
+        return (
+          <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
+            {new Date(run.started).toLocaleString(undefined, {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
+        );
+      },
     },
     {
       key: "actions",
       header: "Actions",
       sortable: false,
       width: 160,
-      render: (row) => { const run = row as unknown as Run; return (
-        <div style={{ display: "flex", gap: 5 }}>
-          <button
-            onClick={(e) => { e.stopPropagation(); navigate(`/runs/${run.id}`); }}
-            className="proof-button"
-            style={{ fontSize: 11, padding: "3px 8px", whiteSpace: "nowrap" }}
-          >
-            Detail
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/compare?baseline=${RUNS[RUNS.length - 1]?.id}&candidate=${run.id}`);
-            }}
-            className="proof-button"
-            style={{
-              fontSize: 11,
-              padding: "3px 8px",
-              display: "flex",
-              alignItems: "center",
-              gap: 3,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <GitCompare size={11} /> Compare
-          </button>
-        </div>
-      ); },
+      render: (row) => {
+        const run = row as unknown as Run;
+        return (
+          <div style={{ display: "flex", gap: 5 }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/runs/${run.id}`);
+              }}
+              className="proof-button"
+              style={{ fontSize: 11, padding: "3px 8px", whiteSpace: "nowrap" }}
+            >
+              Detail
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/compare?baseline=${RUNS[RUNS.length - 1]?.id}&candidate=${run.id}`);
+              }}
+              className="proof-button"
+              style={{
+                fontSize: 11,
+                padding: "3px 8px",
+                display: "flex",
+                alignItems: "center",
+                gap: 3,
+                whiteSpace: "nowrap",
+              }}
+            >
+              <GitCompare size={11} /> Compare
+            </button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -269,7 +295,8 @@ export default function Runs() {
             Regression Runs
           </h1>
           <p className="proof-page-subtitle">
-            {RUNS.length} runs &nbsp;·&nbsp; GitHub Actions across QA / UAT / PROD
+            {envFilteredRuns.length} runs{envSnap.envIds.length > 0 ? ` (filtered)` : ""}{" "}
+            &nbsp;·&nbsp; GitHub Actions across QA / UAT / PROD
           </p>
         </div>
         <button onClick={() => navigate("/start")} className="proof-button-primary">
@@ -289,7 +316,7 @@ export default function Runs() {
           >
             <ConsoleStat
               label="Total Runs"
-              value={RUNS.length}
+              value={envFilteredRuns.length}
               icon={<BarChart3 size={16} />}
               color="var(--proof-blue)"
               onClick={() => {
@@ -301,14 +328,14 @@ export default function Runs() {
             />
             <ConsoleStat
               label="Passing"
-              value={RUNS.filter((r) => r.status === "PASS").length}
+              value={envFilteredRuns.filter((r) => r.status === "PASS").length}
               icon={<CheckCircle2 size={16} />}
               color="var(--proof-green)"
               onClick={() => setStatusFilter("PASS")}
             />
             <ConsoleStat
               label="Failing"
-              value={RUNS.filter((r) => r.status === "FAIL").length}
+              value={envFilteredRuns.filter((r) => r.status === "FAIL").length}
               icon={<XCircle size={16} />}
               color="var(--proof-red)"
               onClick={() => setStatusFilter("FAIL")}
@@ -316,7 +343,10 @@ export default function Runs() {
             <ConsoleStat
               label="Avg Duration"
               value={(() => {
-                const avgMs = RUNS.reduce((s, r) => s + r.durationMs, 0) / RUNS.length;
+                const avgMs =
+                  envFilteredRuns.length > 0
+                    ? envFilteredRuns.reduce((s, r) => s + r.durationMs, 0) / envFilteredRuns.length
+                    : 0;
                 if (avgMs < 60000) return `${(avgMs / 1000).toFixed(1)}s`;
                 return `${Math.round(avgMs / 60000)}m`;
               })()}
@@ -425,7 +455,7 @@ export default function Runs() {
                 whiteSpace: "nowrap",
               }}
             >
-              {filtered.length} of {RUNS.length}
+              {filtered.length} of {envFilteredRuns.length}
             </span>
           </div>
         </ConsoleCard>
@@ -484,7 +514,9 @@ export default function Runs() {
             pageSize={table.pageSize}
             pageSizeOptions={[10, 25, 50, 100]}
             onPageSizeChange={table.setPageSize}
-            emptyMessage="No runs match your filters"
+            emptyMessage={
+              noRunsForEnv ? "No runs for the selected environment" : "No runs match your filters"
+            }
           />
         </ConsoleCard>
       </PanelErrorBoundary>

@@ -79,24 +79,21 @@ export function useDataTable<T extends Record<string, unknown>>(
     setPage(1);
   }, []);
 
-  const setSort = useCallback(
-    (key: string) => {
-      setPage(1);
-      setSortKey((prevKey) => {
-        if (prevKey !== key) {
-          setSortDirection("asc");
-          return key;
-        }
-        setSortDirection((prevDir) => {
-          if (prevDir === null) return "asc";
-          if (prevDir === "asc") return "desc";
-          return null;
-        });
+  const setSort = useCallback((key: string) => {
+    setPage(1);
+    setSortKey((prevKey) => {
+      if (prevKey !== key) {
+        setSortDirection("asc");
         return key;
+      }
+      setSortDirection((prevDir) => {
+        if (prevDir === null) return "asc";
+        if (prevDir === "asc") return "desc";
+        return null;
       });
-    },
-    [],
-  );
+      return key;
+    });
+  }, []);
 
   const filtered = useMemo(() => {
     let result = data;
@@ -126,16 +123,14 @@ export function useDataTable<T extends Record<string, unknown>>(
       if (aVal == null) return 1;
       if (bVal == null) return -1;
 
-      let cmp = 0;
-      if (typeof aVal === "number" && typeof bVal === "number") {
-        cmp = aVal - bVal;
-      } else if (typeof aVal === "string" && typeof bVal === "string") {
-        cmp = aVal.localeCompare(bVal);
-      } else if (aVal instanceof Date && bVal instanceof Date) {
-        cmp = aVal.getTime() - bVal.getTime();
-      } else {
-        cmp = String(aVal).localeCompare(String(bVal));
-      }
+      const cmp =
+        typeof aVal === "number" && typeof bVal === "number"
+          ? aVal - bVal
+          : typeof aVal === "string" && typeof bVal === "string"
+            ? aVal.localeCompare(bVal)
+            : aVal instanceof Date && bVal instanceof Date
+              ? aVal.getTime() - bVal.getTime()
+              : String(aVal).localeCompare(String(bVal));
 
       return sortDirection === "desc" ? -cmp : cmp;
     });

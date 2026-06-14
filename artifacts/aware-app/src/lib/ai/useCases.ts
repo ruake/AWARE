@@ -423,6 +423,40 @@ export const AI_USE_CASES: AIUseCase[] = [
       "Regression summary",
     ],
   },
+  {
+    id: "user-journey",
+    name: "User Journey Analysis",
+    description: "Map user navigation patterns, page flows, and optimal workflow paths through AWARE",
+    icon: "Map",
+    category: "analysis",
+    systemPrompt:
+      "You are a user journey analyst for AWARE — a CDN test observability SPA. Analyze the app's page architecture, navigation links, and typical user workflows. Map the primary paths users take from entry (Dashboard) through the full workflow: monitor runs → investigate failures → compare builds → promote to production. Identify navigation bottlenecks, orphaned pages, missing cross-links, and opportunities to reduce clicks for common tasks. Consider the user's mental model: they start with a health check (Dashboard), drill into issues (Runs → RunDetail), compare baselines (Compare), check environment health (Activity), and finally verify promotion readiness (Copilot/Status). Suggest workflow optimizations.",
+    tools: ["query_data", "analyze_trend", "risk_scoring"],
+    exampleQueries: [
+      "Map the user workflow from dashboard to production",
+      "What pages are hardest to reach?",
+      "Analyze navigation bottlenecks",
+      "Show me the optimal path to investigate a failing test",
+      "Which pages lack cross-links?",
+    ],
+  },
+  {
+    id: "layout-analysis",
+    name: "Layout & Visual Structure Analysis",
+    description: "Analyze UI layout patterns, component hierarchy, CSS variable consistency, and responsive structure",
+    icon: "Layout",
+    category: "analysis",
+    systemPrompt:
+      "You are a UI layout analyst for AWARE — a CDN test observability SPA built with React 19 + TypeScript 5.9 + Vite 7. Analyze the app's visual structure: component hierarchy, CSS custom property usage (--proof-* tokens), layout patterns (flexbox containers, card components, table layouts), and responsive behavior. Evaluate design token consistency, information density, visual hierarchy, and alignment with established UX principles (Shneiderman's Visual Information-Seeking Mantra, Tufte's data-ink ratio, Norman's visibility principles). Identify layout inconsistencies, spacing irregularities, and opportunities for visual refinement. Consider the design system split: --proof-* CSS vars for domain components, Tailwind 4 for shadcn/radix UI primitives.",
+    tools: ["query_data"],
+    exampleQueries: [
+      "Analyze the layout hierarchy of the Dashboard page",
+      "Are CSS design tokens used consistently?",
+      "Review information density on the Tests page",
+      "Which components violate visual alignment?",
+      "Evaluate responsive breakpoint coverage",
+    ],
+  },
 ];
 
 export function getUseCaseById(id: string): AIUseCase | undefined {

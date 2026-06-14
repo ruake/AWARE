@@ -37,6 +37,7 @@ import {
   Filter,
   Play,
   FlaskConical,
+  X,
 } from "lucide-react";
 
 interface Action {
@@ -279,16 +280,14 @@ const GROUPS: ActionGroup[] = [
         label: "Gate History",
         description: "All promote & block decisions",
         icon: <History size={13} />,
-        message:
-          "Show the full promotion gate history — all promote and block decisions.",
+        message: "Show the full promotion gate history — all promote and block decisions.",
       },
       {
         id: "block-rate",
         label: "Block Rate",
         description: "% of promotions blocked",
         icon: <XCircle size={13} />,
-        message:
-          "What is the promotion gate block rate? What percentage were blocked?",
+        message: "What is the promotion gate block rate? What percentage were blocked?",
       },
       {
         id: "uat-gate-check",
@@ -302,24 +301,21 @@ const GROUPS: ActionGroup[] = [
         label: "Last Block",
         description: "Why was gate last blocked?",
         icon: <Lock size={13} />,
-        message:
-          "Why was the promotion gate last blocked? Show the most recent block decision.",
+        message: "Why was the promotion gate last blocked? Show the most recent block decision.",
       },
       {
         id: "promotions-won",
         label: "Promotions Won",
         description: "Successful PROD promotions",
         icon: <CheckCircle2 size={13} />,
-        message:
-          "How many successful promotions to PROD have been completed?",
+        message: "How many successful promotions to PROD have been completed?",
       },
       {
         id: "gate-trend",
         label: "Gate Trend",
         description: "Is blocking more frequent?",
         icon: <TrendingUp size={13} />,
-        message:
-          "Is the promotion gate blocking more often lately? Show gate trend.",
+        message: "Is the promotion gate blocking more often lately? Show gate trend.",
       },
     ],
   },
@@ -334,24 +330,21 @@ const GROUPS: ActionGroup[] = [
         label: "Failure Breakdown",
         description: "Categories failing in latest run",
         icon: <Bug size={13} />,
-        message:
-          "Break down test failures by category for the latest run. What's failing most?",
+        message: "Break down test failures by category for the latest run. What's failing most?",
       },
       {
         id: "top-categories",
         label: "Top Categories",
         description: "Most-failing test categories",
         icon: <Target size={13} />,
-        message:
-          "Which test categories have the most failures? Rank all categories.",
+        message: "Which test categories have the most failures? Rank all categories.",
       },
       {
         id: "zero-pass-cats",
         label: "Zero-Pass Cats",
         description: "Categories with 0% pass rate",
         icon: <XCircle size={13} />,
-        message:
-          "Show test categories with zero pass rate — completely failing.",
+        message: "Show test categories with zero pass rate — completely failing.",
       },
       {
         id: "security-failures",
@@ -386,16 +379,14 @@ const GROUPS: ActionGroup[] = [
         label: "Performance Fails",
         description: "Timing & performance failures",
         icon: <Clock size={13} />,
-        message:
-          "Show performance and timing test failures in the latest run.",
+        message: "Show performance and timing test failures in the latest run.",
       },
       {
         id: "regression-alert",
         label: "Regression Alert",
         description: "Tests that newly broke",
         icon: <AlertTriangle size={13} />,
-        message:
-          "Regression alert — which tests newly failed in the latest run?",
+        message: "Regression alert — which tests newly failed in the latest run?",
       },
     ],
   },
@@ -410,8 +401,7 @@ const GROUPS: ActionGroup[] = [
         label: "Playwright Status",
         description: "Browser test pass rate",
         icon: <Monitor size={13} />,
-        message:
-          "What is the Playwright browser test pass rate in the latest run?",
+        message: "What is the Playwright browser test pass rate in the latest run?",
       },
       {
         id: "pytest-status",
@@ -425,16 +415,14 @@ const GROUPS: ActionGroup[] = [
         label: "Web vs API",
         description: "Playwright vs pytest results",
         icon: <Code2 size={13} />,
-        message:
-          "Compare Playwright browser tests vs pytest API test results.",
+        message: "Compare Playwright browser tests vs pytest API test results.",
       },
       {
         id: "suite-overview",
         label: "Suite Overview",
         description: "All test suites & pass rates",
         icon: <Layers size={13} />,
-        message:
-          "Show all test suites with their pass rates and run counts.",
+        message: "Show all test suites with their pass rates and run counts.",
       },
       {
         id: "suite-failures",
@@ -448,16 +436,14 @@ const GROUPS: ActionGroup[] = [
         label: "Category Heatmap",
         description: "All categories by pass rate",
         icon: <BarChart2 size={13} />,
-        message:
-          "Show all test categories ranked by pass rate as a heatmap.",
+        message: "Show all test categories ranked by pass rate as a heatmap.",
       },
       {
         id: "test-count",
         label: "Test Count",
         description: "Total tests in latest run",
         icon: <Filter size={13} />,
-        message:
-          "How many tests were run in the latest test run? Show test volume.",
+        message: "How many tests were run in the latest test run? Show test volume.",
       },
     ],
   },
@@ -486,48 +472,42 @@ const GROUPS: ActionGroup[] = [
         label: "CDN Health",
         description: "Overall Akamai CDN summary",
         icon: <Cloud size={13} />,
-        message:
-          "Give me an overall CDN health summary across all Akamai environments.",
+        message: "Give me an overall CDN health summary across all Akamai environments.",
       },
       {
         id: "staging-network",
         label: "Staging Network",
         description: "QA & UAT staging status",
         icon: <Wifi size={13} />,
-        message:
-          "How is the staging network performing? QA and UAT status.",
+        message: "How is the staging network performing? QA and UAT status.",
       },
       {
         id: "prod-network",
         label: "PROD Network",
         description: "Production network health",
         icon: <Globe size={13} />,
-        message:
-          "How is the production network performing? PROD environment status.",
+        message: "How is the production network performing? PROD environment status.",
       },
       {
         id: "api-failures",
         label: "API Failures",
         description: "HTTP & API endpoint failures",
         icon: <FileText size={13} />,
-        message:
-          "Show HTTP and API endpoint test failures by category.",
+        message: "Show HTTP and API endpoint test failures by category.",
       },
       {
         id: "property-health",
         label: "Property Health",
         description: "Akamai property health",
         icon: <Shield size={13} />,
-        message:
-          "What is the overall Akamai property health across environments?",
+        message: "What is the overall Akamai property health across environments?",
       },
       {
         id: "full-cdn-report",
         label: "Full CDN Report",
         description: "All envs, suites, & recent runs",
         icon: <FileText size={13} />,
-        message:
-          "Generate a full CDN test report covering all environments and recent runs.",
+        message: "Generate a full CDN test report covering all environments and recent runs.",
       },
     ],
   },
@@ -612,6 +592,7 @@ export default function QuickActions({ onAction, busy }: Props) {
           {search && (
             <button
               onClick={() => setSearch("")}
+              aria-label="Close"
               style={{
                 border: "none",
                 background: "none",
@@ -622,7 +603,7 @@ export default function QuickActions({ onAction, busy }: Props) {
                 flexShrink: 0,
               }}
             >
-              ×
+              <X size={14} />
             </button>
           )}
         </div>

@@ -226,34 +226,34 @@ function parseMarkdownTable(raw: string): { headers: string[]; rows: string[][] 
 // ─── Color coding ─────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<string, string> = {
-  pass: "#22c55e",
-  passed: "#22c55e",
-  success: "#22c55e",
-  ok: "#22c55e",
-  healthy: "#22c55e",
-  stable: "#22c55e",
-  good: "#22c55e",
-  fail: "#ef4444",
-  failed: "#ef4444",
-  error: "#ef4444",
-  critical: "#ef4444",
-  broken: "#ef4444",
-  down: "#ef4444",
-  warning: "#f59e0b",
-  warn: "#f59e0b",
-  flaky: "#f59e0b",
-  unstable: "#f59e0b",
-  degraded: "#f59e0b",
-  slow: "#f59e0b",
-  high: "#f59e0b",
+  pass: "var(--proof-green)",
+  passed: "var(--proof-green)",
+  success: "var(--proof-green)",
+  ok: "var(--proof-green)",
+  healthy: "var(--proof-green)",
+  stable: "var(--proof-green)",
+  good: "var(--proof-green)",
+  fail: "var(--proof-red)",
+  failed: "var(--proof-red)",
+  error: "var(--proof-red)",
+  critical: "var(--proof-red)",
+  broken: "var(--proof-red)",
+  down: "var(--proof-red)",
+  warning: "var(--proof-yellow)",
+  warn: "var(--proof-yellow)",
+  flaky: "var(--proof-yellow)",
+  unstable: "var(--proof-yellow)",
+  degraded: "var(--proof-yellow)",
+  slow: "var(--proof-yellow)",
+  high: "var(--proof-yellow)",
   skip: "#9ca3af",
   skipped: "#9ca3af",
   pending: "#9ca3af",
   disabled: "#9ca3af",
   "n/a": "#9ca3af",
   none: "#9ca3af",
-  low: "#22c55e",
-  medium: "#f59e0b",
+  low: "var(--proof-green)",
+  medium: "var(--proof-yellow)",
 };
 
 /** Convert bare status words in text into backtick-wrapped inline code.
@@ -281,11 +281,12 @@ function colorCellHtml(value: string): string {
   const v = value.toLowerCase().trim();
   if (STATUS_COLORS[v]) {
     const c = STATUS_COLORS[v];
-    return `<span style="display:inline-flex;align-items:center;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:0.35px;background:${c}18;color:${c};border:1px solid ${c}35">${value}</span>`;
+    return `<span style="display:inline-flex;align-items:center;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:0.35px;background:color-mix(in srgb,${c} 10%,transparent);color:${c};border:1px solid color-mix(in srgb,${c} 20%,transparent)">${value}</span>`;
   }
   if (/^[\d.]+%$/.test(value)) {
     const pct = parseFloat(value);
-    const c = pct >= 90 ? "#22c55e" : pct >= 70 ? "#f59e0b" : "#ef4444";
+    const c =
+      pct >= 90 ? "var(--proof-green)" : pct >= 70 ? "var(--proof-yellow)" : "var(--proof-red)";
     return `<span style="font-weight:700;color:${c}">${value}</span>`;
   }
   return value;
@@ -510,9 +511,9 @@ const components = {
               fontSize: 11,
               fontWeight: 700,
               letterSpacing: "0.35px",
-              background: `${statusColor}18`,
+              background: `color-mix(in srgb, ${statusColor} 10%, transparent)`,
               color: statusColor,
-              border: `1px solid ${statusColor}35`,
+              border: `1px solid color-mix(in srgb, ${statusColor} 20%, transparent)`,
               lineHeight: 1.5,
             }}
           >

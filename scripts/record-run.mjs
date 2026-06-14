@@ -36,11 +36,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "..", "artifacts", "aware-app", "data");
 const RUNS_FILE = join(DATA_DIR, "runs.json");
 
+function makeEnvId(tier, network) {
+  return `${(tier || "QA").toLowerCase()}_${network || "staging"}`;
+}
+
 function main() {
   const suite = process.env.AWARE_SUITE || "";
   const envLabel = process.env.AWARE_ENV || "";
   const target = process.env.AWARE_TARGET || "";
   const network = process.env.AWARE_NETWORK || "";
+  const envId = makeEnvId(target, network);
   const passPct = parseInt(process.env.PASS_PCT || "100", 10);
   const durationMs = parseInt(process.env.DURATION_MS || "0", 10);
   const failures = parseInt(process.env.FAILURES || "0", 10);
@@ -56,11 +61,12 @@ function main() {
   const runs = readRuns(RUNS_FILE);
   const passed = passPct >= 100 && failures === 0;
 
-  // Try to find an existing RUNNING entry for this suite+target
+  // Try to find an existing RUNNING entry for this suite+env
   let targetRun = null;
   for (const run of runs) {
-    if (run.status === "RUNNING" && run.suite === suite) {
-      if (target && run.target === target) {
+    if (run.status === "RUNNING" && (run.suiteId || run.suite) === suite) {
+      const runEnv = run.envId || run.target || "";
+      if (target && (runEnv === envId || runEnv === target)) {
         targetRun = run;
         break;
       }
@@ -78,13 +84,12 @@ function main() {
     if (workflowRunId) targetRun.workflowRunId = workflowRunId;
     console.log(`Updated run ${targetRun.id} → ${targetRun.status}`);
   } else {
-    // Create new run entry
     const runId = `ci_${Date.now().toString(36)}`;
     const newRun = {
       id: runId,
       label: `${suite} — ${envLabel || target}`,
-      suite,
-      target,
+      suiteId: suite,
+      envId,
       network,
       status: passed ? "PASS" : "FAIL",
       conditions: completeRunConditions(passed),

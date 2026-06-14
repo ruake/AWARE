@@ -39,6 +39,7 @@ export {
   ENV_PASS_RATE_CHART,
   PER_ENV_PASS_RATE,
   getTestResultsForRun,
+  getRunsByEnv,
   computeRunFrequency,
   recomputeAll,
   loadRuns,
@@ -115,3 +116,11 @@ export {
 export { loadAllData, getDataInitState, subscribeToDataInit } from "./initData";
 
 export { getImageSource, preloadImage, revokeAllImages, isExternalImage } from "./images";
+
+export {
+  getSelectedEnvIds,
+  getSelectedEnvSnapshot,
+  setSelectedEnvIds,
+  toggleSelectedEnvId,
+  subscribeToSelectedEnv,
+} from "./selectedEnv";

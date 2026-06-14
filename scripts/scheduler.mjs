@@ -6,7 +6,7 @@
  * On every reconciliation tick:
  *   1. **Poll phase**: reconcile RUNNING runs against GitHub workflow state
  *   2. **Cron evaluation**: check which suites are due
- *   3. **Dispatch phase**: dispatch run-tests.yml for due suites × environments
+ *   3. **Dispatch phase**: dispatch controller.yml for due suites × environments
  *   4. **Status commit**: push updated runs.json + scheduler-status.json to `data` branch
  *
  * Controller pattern (like k8s):
@@ -46,7 +46,7 @@ const DATA_DIR = join(ROOT, "artifacts", "aware-app", "data");
 const RUNS_FILE = join(DATA_DIR, "runs.json");
 const STATUS_FILE = join(DATA_DIR, "scheduler-status.json");
 const CONFIG_FILE = join(ROOT, "config", "test-suites.yml");
-const WORKFLOW_FILE = "run-tests.yml";
+const WORKFLOW_FILE = "controller.yml";
 const DATA_BRANCH = "data";
 
 // ── Utilities ────────────────────────────────────────────────────────────────
@@ -120,12 +120,12 @@ function describeSchedule(cron) {
 // ── Env map ──────────────────────────────────────────────────────────────────
 
 const ENV_MAP = {
-  "QA / Staging":     { target: "QA",   network: "staging" },
-  "QA / Production":  { target: "QA",   network: "production" },
-  "UAT / Staging":    { target: "UAT",  network: "staging" },
-  "UAT / Production": { target: "UAT",  network: "production" },
-  "PROD / Staging":   { target: "PROD", network: "staging" },
-  "PROD / Production":{ target: "PROD", network: "production" },
+  "QA / Staging":     { id: "qa_staging", target: "QA",   network: "staging" },
+  "QA / Production":  { id: "qa_prod",    target: "QA",   network: "production" },
+  "UAT / Staging":    { id: "uat_staging",target: "UAT",  network: "staging" },
+  "UAT / Production": { id: "uat_prod",   target: "UAT",  network: "production" },
+  "PROD / Staging":   { id: "prod_staging",target: "PROD",network: "staging" },
+  "PROD / Production":{ id: "prod_prod",  target: "PROD", network: "production" },
 };
 
 function makeRunId(suiteId, envLabel) {
@@ -260,13 +260,12 @@ async function main() {
         let errors = [];
         for (const env of envs) {
           const ok = dispatchWorkflow(WORKFLOW_FILE, process.env.GITHUB_REF_NAME || "main", {
-            suite: suite.id,
-            environment: env,
-            parallelism: String(parallelism),
+            force_suite: suite.id,
+            force_env: env,
           });
           if (ok) {
             const runId = makeRunId(suite.id, env);
-            const envInfo = ENV_MAP[env] || { target: "QA", network: "staging" };
+            const envInfo = ENV_MAP[env] || { id: "qa_staging", target: "QA", network: "staging" };
 
             // Wait for GH to index, then find workflowRunId
             await sleep(2000);
@@ -276,7 +275,7 @@ async function main() {
               id: runId,
               label: `${suite.name} — ${env}`,
               suiteId: suite.id,
-              envId: envInfo.target,
+              envId: envInfo.id,
               status: "RUNNING",
               conditions: initialRunConditions(),
               passPct: 0,

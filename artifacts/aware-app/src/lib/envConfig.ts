@@ -1,6 +1,20 @@
 import type { EnvironmentConfig } from "./types";
 import type { AkamaiEnvId, AkamaiTier, AkamaiNetwork } from "./types";
 
+// ═══════════════════════════════════════════════════════════════════════════
+// SOURCE OF TRUTH: config/environments.yml
+//
+// The environment definitions below are DUPLICATED from the YAML config for
+// build-time efficiency (the YAML is only available server-side / in CI).
+//
+// If you add, remove, or rename an environment, you MUST update BOTH:
+//   1. config/environments.yml  ← source of truth
+//   2. this ENV_CONFIGS array     ← TypeScript mirror
+//
+// The validate-config.mjs script cross-references both files and will fail
+// the build if they diverge.  Run: node scripts/validate-config.mjs
+// ═══════════════════════════════════════════════════════════════════════════
+//
 // Akamai uses two networks per environment tier:
 //   - staging   → Akamai staging network (validate before activating)
 //   - production → Akamai production (live) edge network

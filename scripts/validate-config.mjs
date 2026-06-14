@@ -365,6 +365,76 @@ function validateCrossRefs(akamaiCfg, suiteIds) {
   }
 }
 
+// ── Cross-validate environments.yml against TypeScript envConfig.ts ─────
+async function validateAgainstTypeScript(envCfg) {
+  if (!envCfg) return;
+  const file = "envConfig.ts (TypeScript)";
+  const tsPath = join(ROOT, "artifacts", "aware-app", "src", "lib", "envConfig.ts");
+
+  if (!existsSync(tsPath)) {
+    warn(file, `Cannot find envConfig.ts at ${tsPath} — skipping cross-validation`);
+    return;
+  }
+
+  const tsSource = readFileSync(tsPath, "utf-8");
+
+  // Extract all id/label pairs from the ENV_CONFIGS array using regex.
+  // The TS file has a consistent format: each env entry has `id: "xxx"` and `label: "xxx"`
+  const idPattern = /id:\s*"([^"]+)"/g;
+  const labelPattern = /label:\s*"([^"]+)"/g;
+
+  const tsIds = [];
+  const tsLabels = [];
+  let m;
+  while ((m = idPattern.exec(tsSource)) !== null) tsIds.push(m[1]);
+  while ((m = labelPattern.exec(tsSource)) !== null) tsLabels.push(m[1]);
+
+  // Filter to only the 6 environment entries (skip type imports etc.)
+  const expectedIds = ["qa_staging", "qa_prod", "uat_staging", "uat_prod", "prod_staging", "prod_prod"];
+  const envIds = tsIds.filter(id => expectedIds.includes(id));
+  const envLabels = tsLabels.slice(0, 6);
+
+  if (envIds.length !== 6) {
+    err(file, `Expected 6 environment IDs in ENV_CONFIGS, found ${envIds.length} — cannot cross-validate`);
+    return;
+  }
+
+  // Build YAML lookup
+  const yamlById = {};
+  const yamlByLabel = {};
+  for (const e of envCfg.environments) {
+    yamlById[e.id] = e;
+    yamlByLabel[e.label] = e;
+  }
+
+  // Check each TS env ID exists in YAML
+  for (let i = 0; i < envIds.length; i++) {
+    const tsId = envIds[i];
+    const tsLabel = envLabels[i];
+
+    if (!yamlById[tsId]) {
+      err("environments.yml", `Environment id "${tsId}" is defined in envConfig.ts but missing from environments.yml`);
+    } else if (yamlById[tsId].label !== tsLabel) {
+      err("environments.yml", `Label mismatch for "${tsId}": environments.yml says "${yamlById[tsId].label}" but envConfig.ts says "${tsLabel}"`);
+    }
+
+    if (!yamlByLabel[tsLabel]) {
+      err("environments.yml", `Environment label "${tsLabel}" is defined in envConfig.ts but missing from environments.yml`);
+    } else if (yamlByLabel[tsLabel].id !== tsId) {
+      err("environments.yml", `ID mismatch for label "${tsLabel}": environments.yml says "${yamlByLabel[tsLabel].id}" but envConfig.ts says "${tsId}"`);
+    }
+  }
+
+  // Check each YAML env exists in TS
+  for (const e of envCfg.environments) {
+    if (!envIds.includes(e.id)) {
+      err(file, `Environment "${e.id}" (label: "${e.label}") is defined in environments.yml but missing from ENV_CONFIGS in envConfig.ts`);
+    }
+  }
+
+  info(`envConfig.ts matches environments.yml: ${envIds.length}/${envCfg.environments.length} environments cross-validated`);
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   if (!JSON_OUTPUT) {
@@ -378,6 +448,9 @@ async function main() {
   const suitesResult = await validateTestSuites(envsResult?.envLabels);
 
   validateCrossRefs(akamaiCfg, suitesResult?.suiteIds);
+
+  // Cross-validate environments.yml against TypeScript envConfig.ts
+  await validateAgainstTypeScript(envsResult?.cfg);
 
   if (JSON_OUTPUT) {
     console.log(JSON.stringify({ errors, warnings, infos, valid: errors.length === 0 }, null, 2));

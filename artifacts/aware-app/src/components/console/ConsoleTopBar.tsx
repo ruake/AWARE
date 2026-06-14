@@ -1,14 +1,24 @@
-import React from "react";
+import React, { useSyncExternalStore } from "react";
 import { Search, Bell, Sun, Moon, ExternalLink, Menu } from "lucide-react";
 import { ProofLogo } from "../aware/ProofLogo";
 import { EnvSelector } from "./EnvSelector";
+import {
+  getSelectedEnvSnapshot,
+  setSelectedEnvIds,
+  subscribeToSelectedEnv,
+} from "@/lib/selectedEnv";
 
 interface ConsoleTopBarProps {
   onToggleSidebar?: () => void;
   sidebarCollapsed?: boolean;
+  onSearchOpen?: () => void;
 }
 
-export function ConsoleTopBar({ onToggleSidebar, sidebarCollapsed: _sidebarCollapsed }: ConsoleTopBarProps) {
+export function ConsoleTopBar({
+  onToggleSidebar,
+  sidebarCollapsed: _sidebarCollapsed,
+  onSearchOpen,
+}: ConsoleTopBarProps) {
   const [isDark, setIsDark] = React.useState<boolean>(() => {
     try {
       const saved = localStorage.getItem("proof-theme");
@@ -17,6 +27,12 @@ export function ConsoleTopBar({ onToggleSidebar, sidebarCollapsed: _sidebarColla
       return true;
     }
   });
+
+  const selectedEnvSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
+
+  const handleEnvChange = (envIds: string[]) => {
+    setSelectedEnvIds(envIds);
+  };
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -55,6 +71,7 @@ export function ConsoleTopBar({ onToggleSidebar, sidebarCollapsed: _sidebarColla
       {onToggleSidebar && (
         <button
           onClick={onToggleSidebar}
+          aria-label="Toggle menu"
           style={{
             display: "flex",
             alignItems: "center",
@@ -104,8 +121,14 @@ export function ConsoleTopBar({ onToggleSidebar, sidebarCollapsed: _sidebarColla
         </div>
       </div>
 
-      {/* Search bar */}
+      {/* Search bar — clickable to open CommandPalette */}
       <div
+        onClick={onSearchOpen}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && onSearchOpen) onSearchOpen();
+        }}
         style={{
           flex: 1,
           maxWidth: 480,
@@ -118,22 +141,29 @@ export function ConsoleTopBar({ onToggleSidebar, sidebarCollapsed: _sidebarColla
           height: 30,
           background: "rgba(255,255,255,0.03)",
           margin: "0 auto",
+          cursor: "pointer",
+          transition: "border-color 0.15s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = "var(--proof-blue)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = "var(--proof-border-strong)";
         }}
       >
         <Search size={14} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
-        <input
-          placeholder="Search services, features, docs..."
+        <span
+          className="proof-console-search-text"
           style={{
-            border: "none",
-            outline: "none",
-            background: "transparent",
             flex: 1,
-            minWidth: 0,
             fontSize: 12,
-            color: "var(--proof-text)",
+            color: "var(--proof-text-muted)",
+            textAlign: "left",
             fontFamily: "var(--font-sans)",
           }}
-        />
+        >
+          Search services, features, docs...
+        </span>
         <kbd
           style={{
             fontSize: 9,
@@ -161,10 +191,15 @@ export function ConsoleTopBar({ onToggleSidebar, sidebarCollapsed: _sidebarColla
         }}
       >
         {/* Environment selector */}
-        <EnvSelector variant="topbar" />
+        <EnvSelector
+          variant="topbar"
+          currentEnvIds={selectedEnvSnap.envIds}
+          onEnvChange={handleEnvChange}
+        />
 
         {/* Notification bell */}
         <button
+          aria-label="Notifications"
           style={{
             position: "relative",
             padding: 6,

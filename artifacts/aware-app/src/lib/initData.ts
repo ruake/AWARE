@@ -8,10 +8,19 @@ import { loadAutoDiscoveredTests } from "./testDiscovery";
 let _loading = false;
 let _loaded = false;
 let _error: unknown = null;
+let _snapshot: { loaded: boolean; loading: boolean; error: unknown } = {
+  loaded: false,
+  loading: false,
+  error: null,
+};
 const _listeners = new Set<() => void>();
 
 export function getDataInitState(): { loaded: boolean; loading: boolean; error: unknown } {
-  return { loaded: _loaded, loading: _loading, error: _error };
+  return _snapshot;
+}
+
+function updateSnapshot(): void {
+  _snapshot = { loaded: _loaded, loading: _loading, error: _error };
 }
 
 export function subscribeToDataInit(cb: () => void): () => void {
@@ -26,23 +35,32 @@ function notify(): void {
 export async function loadAllData(): Promise<void> {
   if (_loaded || _loading) return;
   _loading = true;
+  updateSnapshot();
   notify();
-  try {
-    await Promise.all([
-      loadRuns(),
-      loadAllResults(),
-      loadTestSuites(),
-      loadPromotions(),
-      loadSchedulerStatus(),
-      loadAutoDiscoveredTests(),
-    ]);
-    recomputeAll();
-    _loaded = true;
-  } catch (err) {
-    _error = err;
-    throw err;
-  } finally {
-    _loading = false;
-    notify();
+  const errors: unknown[] = [];
+  async function safeLoad<T>(loader: () => Promise<T>, name: string): Promise<T | undefined> {
+    try {
+      return await loader();
+    } catch (err) {
+      errors.push(`${name}: ${err}`);
+      return undefined;
+    }
   }
+  await Promise.all([
+    safeLoad(loadRuns, "runs"),
+    safeLoad(loadAllResults, "results"),
+    safeLoad(loadTestSuites, "suites"),
+    safeLoad(loadPromotions, "promotions"),
+    safeLoad(loadSchedulerStatus, "scheduler"),
+    safeLoad(loadAutoDiscoveredTests, "discovery"),
+  ]);
+  recomputeAll();
+  _loaded = true;
+  if (errors.length > 0) {
+    _error = errors.join("; ");
+    console.error("Data load errors:", errors);
+  }
+  _loading = false;
+  updateSnapshot();
+  notify();
 }

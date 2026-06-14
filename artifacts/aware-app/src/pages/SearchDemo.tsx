@@ -2,7 +2,6 @@ import React from "react";
 import { useLocation } from "wouter";
 import { RUNS, DIFF_ROWS } from "@/lib/data";
 import { useTestData } from "@/hooks/useTestData";
-import "../_group.css";
 import {
   Search,
   X,
@@ -184,391 +183,386 @@ export default function SearchDemo() {
 
   return (
     <div
-        style={{
-          height: "calc(100vh - 100px)",
-          display: "flex",
-          flexDirection: "column",
-          maxWidth: 960,
-          margin: "0 auto",
-        }}
-      >
-        <div className="proof-card" style={{ flexShrink: 0, marginBottom: 16 }}>
+      style={{
+        height: "calc(100vh - 100px)",
+        display: "flex",
+        flexDirection: "column",
+        maxWidth: 960,
+        margin: "0 auto",
+      }}
+    >
+      <div className="proof-card" style={{ flexShrink: 0, marginBottom: 16 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "12px 16px",
+            borderBottom: "1px solid var(--proof-grey)",
+          }}
+        >
+          <Search size={18} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
+          <input
+            autoFocus
+            className="proof-input"
+            style={{
+              flex: 1,
+              border: "none",
+              outline: "none",
+              fontSize: 15,
+              background: "transparent",
+              padding: 0,
+            }}
+            placeholder="Search tests, runs, comparisons…"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setActiveIdx(0);
+            }}
+            onKeyDown={handleKey}
+          />
+          {query && (
+            <button
+              onClick={() => {
+                setQuery("");
+                setActiveFilter("all");
+              }}
+              style={{
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                color: "var(--proof-text-secondary)",
+              }}
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+
+        {showResults && rawResults.length > 0 && (
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 12,
-              padding: "12px 16px",
+              gap: 8,
+              padding: "8px 16px",
               borderBottom: "1px solid var(--proof-grey)",
+              background: "var(--proof-grey-bg)",
             }}
           >
-            <Search size={18} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
-            <input
-              autoFocus
-              className="proof-input"
+            {(["all", "tests", "runs", "compare"] as const).map((f) => {
+              const count =
+                f === "all" ? rawResults.length : kindCounts[f as keyof typeof kindCounts];
+              const isActive = activeFilter === f;
+              return (
+                <button
+                  key={f}
+                  onClick={() => setActiveFilter(f)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "4px 10px",
+                    borderRadius: 4,
+                    fontSize: 12,
+                    fontWeight: 500,
+                    border: isActive ? "none" : "1px solid var(--proof-grey)",
+                    background: isActive ? "var(--proof-blue)" : "var(--proof-surface)",
+                    color: isActive ? "white" : "var(--proof-text-secondary)",
+                    cursor: "pointer",
+                  }}
+                >
+                  {f.charAt(0).toUpperCase() + f.slice(1)}
+                  <span style={{ fontSize: 10, opacity: 0.8 }}>{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            padding: "8px 16px",
+            background: "var(--proof-grey-bg)",
+            flexWrap: "wrap",
+          }}
+        >
+          {[
+            { icon: <ArrowUp size={10} />, label: "up" },
+            { icon: <ArrowDown size={10} />, label: "down" },
+            { icon: <CornerDownLeft size={10} />, label: "open" },
+            { icon: <span style={{ fontSize: 10 }}>esc</span>, label: "clear" },
+          ].map((k, i) => (
+            <div
+              key={i}
               style={{
-                flex: 1,
-                border: "none",
-                outline: "none",
-                fontSize: 15,
-                background: "transparent",
-                padding: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                fontSize: 11,
+                color: "var(--proof-text-secondary)",
               }}
-              placeholder="Search tests, runs, comparisons…"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setActiveIdx(0);
-              }}
-              onKeyDown={handleKey}
-            />
-            {query && (
-              <button
-                onClick={() => {
-                  setQuery("");
-                  setActiveFilter("all");
-                }}
+            >
+              <kbd
                 style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  color: "var(--proof-text-secondary)",
+                  fontFamily: "var(--font-mono)",
+                  background: "var(--proof-surface)",
+                  border: "1px solid var(--proof-grey)",
+                  borderRadius: 4,
+                  padding: "2px 6px",
+                  display: "flex",
+                  alignItems: "center",
                 }}
               >
-                <X size={15} />
-              </button>
-            )}
-          </div>
+                {k.icon}
+              </kbd>
+              {k.label}
+            </div>
+          ))}
+          <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--proof-text-secondary)" }}>
+            {hasResults
+              ? `${filteredActive.length} result${filteredActive.length !== 1 ? "s" : ""}`
+              : "Type to search"}
+          </span>
+        </div>
+      </div>
 
-          {showResults && rawResults.length > 0 && (
+      <div style={{ flex: 1, overflow: "auto" }}>
+        {hasResults && (
+          <div className="proof-card" style={{ overflow: "hidden" }}>
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
-                padding: "8px 16px",
+                justifyContent: "space-between",
+                padding: "12px 16px",
                 borderBottom: "1px solid var(--proof-grey)",
                 background: "var(--proof-grey-bg)",
               }}
             >
-              {(["all", "tests", "runs", "compare"] as const).map((f) => {
-                const count =
-                  f === "all" ? rawResults.length : kindCounts[f as keyof typeof kindCounts];
-                const isActive = activeFilter === f;
-                return (
-                  <button
-                    key={f}
-                    onClick={() => setActiveFilter(f)}
+              <h2 style={{ fontSize: 13, fontWeight: 500 }}>
+                Results for{" "}
+                <span style={{ fontFamily: "var(--font-mono)", color: "var(--proof-blue)" }}>
+                  "{query}"
+                </span>
+              </h2>
+              <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>
+                {filteredActive.length} results
+              </span>
+            </div>
+            {filteredActive.map((r, i) => (
+              <div
+                key={`${r.kind}-${i}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 16px",
+                  cursor: "pointer",
+                  borderBottom:
+                    i < filteredActive.length - 1 ? "1px solid var(--proof-grey)" : undefined,
+                  background: i === activeIdx ? "var(--proof-blue-bg)" : undefined,
+                  transition: "background 0.15s",
+                }}
+                onMouseEnter={() => setActiveIdx(i)}
+                onClick={() => navigateToResult(r)}
+              >
+                <KindIcon kind={r.kind} />
+                <StatusDot status={r.status} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      padding: "4px 10px",
-                      borderRadius: 4,
-                      fontSize: 12,
-                      fontWeight: 500,
-                      border: isActive ? "none" : "1px solid var(--proof-grey)",
-                      background: isActive ? "var(--proof-blue)" : "var(--proof-surface)",
-                      color: isActive ? "white" : "var(--proof-text-secondary)",
-                      cursor: "pointer",
+                      fontSize: 13,
+                      fontFamily: "var(--font-mono)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    {f.charAt(0).toUpperCase() + f.slice(1)}
-                    <span style={{ fontSize: 10, opacity: 0.8 }}>{count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-              padding: "8px 16px",
-              background: "var(--proof-grey-bg)",
-              flexWrap: "wrap",
-            }}
-          >
-            {[
-              { icon: <ArrowUp size={10} />, label: "up" },
-              { icon: <ArrowDown size={10} />, label: "down" },
-              { icon: <CornerDownLeft size={10} />, label: "open" },
-              { icon: <span style={{ fontSize: 10 }}>esc</span>, label: "clear" },
-            ].map((k, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                  fontSize: 11,
-                  color: "var(--proof-text-secondary)",
-                }}
-              >
-                <kbd
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    background: "var(--proof-surface)",
-                    border: "1px solid var(--proof-grey)",
-                    borderRadius: 4,
-                    padding: "2px 6px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  {k.icon}
-                </kbd>
-                {k.label}
-              </div>
-            ))}
-            <span
-              style={{ marginLeft: "auto", fontSize: 11, color: "var(--proof-text-secondary)" }}
-            >
-              {hasResults
-                ? `${filteredActive.length} result${filteredActive.length !== 1 ? "s" : ""}`
-                : "Type to search"}
-            </span>
-          </div>
-        </div>
-
-        <div style={{ flex: 1, overflow: "auto" }}>
-          {hasResults && (
-            <div className="proof-card" style={{ overflow: "hidden" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "12px 16px",
-                  borderBottom: "1px solid var(--proof-grey)",
-                  background: "var(--proof-grey-bg)",
-                }}
-              >
-                <h2 style={{ fontSize: 13, fontWeight: 500 }}>
-                  Results for{" "}
-                  <span style={{ fontFamily: "var(--font-mono)", color: "var(--proof-blue)" }}>
-                    "{query}"
-                  </span>
-                </h2>
-                <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>
-                  {filteredActive.length} results
-                </span>
-              </div>
-              {filteredActive.map((r, i) => (
-                <div
-                  key={`${r.kind}-${i}`}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "12px 16px",
-                    cursor: "pointer",
-                    borderBottom:
-                      i < filteredActive.length - 1 ? "1px solid var(--proof-grey)" : undefined,
-                    background: i === activeIdx ? "var(--proof-blue-bg)" : undefined,
-                    transition: "background 0.15s",
-                  }}
-                  onMouseEnter={() => setActiveIdx(i)}
-                  onClick={() => navigateToResult(r)}
-                >
-                  <KindIcon kind={r.kind} />
-                  <StatusDot status={r.status} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        fontFamily: "var(--font-mono)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {r.label}
-                    </div>
-                    <div
+                    {r.label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "var(--proof-text-secondary)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {r.sub}
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                  {r.meta && (
+                    <span
                       style={{
                         fontSize: 11,
                         color: "var(--proof-text-secondary)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
+                        fontFamily: "var(--font-mono)",
                       }}
                     >
-                      {r.sub}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-                    {r.meta && (
+                      {r.meta}
+                    </span>
+                  )}
+                  {i === activeIdx && (
+                    <ChevronRight size={14} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {hasNoResults && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
+              padding: "80px 0",
+              color: "var(--proof-text-secondary)",
+            }}
+          >
+            <AlertTriangle size={28} style={{ color: "var(--proof-yellow)" }} />
+            <p style={{ fontSize: 14 }}>
+              No results for <span style={{ fontFamily: "var(--font-mono)" }}>"{query}"</span>
+            </p>
+            <p style={{ fontSize: 12 }}>Try a test name, run ID, or version number.</p>
+          </div>
+        )}
+
+        {!showResults && (
+          <div className="proof-card" style={{ overflow: "hidden" }}>
+            <div style={{ padding: 16 }}>
+              <div style={{ marginBottom: 20 }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "var(--proof-text-secondary)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    marginBottom: 8,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <PlayCircle size={11} /> Recent Runs
+                </div>
+                {RUNS.slice(-5)
+                  .reverse()
+                  .map((r, i) => (
+                    <div
+                      key={i}
+                      onClick={() => navigate(`/runs/${encodeURIComponent(r.id)}`)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "6px 8px",
+                        borderRadius: 4,
+                        cursor: "pointer",
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "var(--proof-surface-hover)")
+                      }
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <StatusDot
+                        status={
+                          r.status === "PASS" ? "pass" : r.status === "FAIL" ? "fail" : "flaky"
+                        }
+                      />
                       <span
                         style={{
-                          fontSize: 11,
-                          color: "var(--proof-text-secondary)",
+                          fontSize: 13,
                           fontFamily: "var(--font-mono)",
+                          flex: 1,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
                         }}
                       >
-                        {r.meta}
+                        {r.id}
                       </span>
-                    )}
-                    {i === activeIdx && (
-                      <ChevronRight
-                        size={14}
-                        style={{ color: "var(--proof-blue)", flexShrink: 0 }}
-                      />
-                    )}
-                  </div>
+                      <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+                        {r.env} · {r.status}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+              <div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "var(--proof-text-secondary)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    marginBottom: 8,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <Zap size={11} /> Quick Actions
                 </div>
-              ))}
-            </div>
-          )}
-
-          {hasNoResults && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 12,
-                padding: "80px 0",
-                color: "var(--proof-text-secondary)",
-              }}
-            >
-              <AlertTriangle size={28} style={{ color: "var(--proof-yellow)" }} />
-              <p style={{ fontSize: 14 }}>
-                No results for <span style={{ fontFamily: "var(--font-mono)" }}>"{query}"</span>
-              </p>
-              <p style={{ fontSize: 12 }}>Try a test name, run ID, or version number.</p>
-            </div>
-          )}
-
-          {!showResults && (
-            <div className="proof-card" style={{ overflow: "hidden" }}>
-              <div style={{ padding: 16 }}>
-                <div style={{ marginBottom: 20 }}>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 500,
-                      color: "var(--proof-text-secondary)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                      marginBottom: 8,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <PlayCircle size={11} /> Recent Runs
-                  </div>
-                  {RUNS.slice(-5)
-                    .reverse()
-                    .map((r, i) => (
-                      <div
-                        key={i}
-                        onClick={() => navigate(`/runs/${encodeURIComponent(r.id)}`)}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                  {QUICK_ACTIONS.map((a, i) => (
+                    <div
+                      key={i}
+                      onClick={() => {
+                        if (i === 0) navigate("/start");
+                        else if (i === 1) navigate("/compare");
+                        else if (i === 2) navigate("/testdoc");
+                        else navigate("/");
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "8px 12px",
+                        borderRadius: 4,
+                        border: "1px solid var(--proof-grey)",
+                        cursor: "pointer",
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "var(--proof-surface-hover)")
+                      }
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <a.icon size={14} style={{ color: a.color }} />
+                      <span style={{ fontSize: 12, flex: 1 }}>{a.label}</span>
+                      <kbd
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          padding: "6px 8px",
-                          borderRadius: 4,
-                          cursor: "pointer",
-                          transition: "background 0.15s",
-                        }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.background = "var(--proof-surface-hover)")
-                        }
-                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                      >
-                        <StatusDot
-                          status={
-                            r.status === "PASS" ? "pass" : r.status === "FAIL" ? "fail" : "flaky"
-                          }
-                        />
-                        <span
-                          style={{
-                            fontSize: 13,
-                            fontFamily: "var(--font-mono)",
-                            flex: 1,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {r.id}
-                        </span>
-                        <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-                          {r.env} · {r.status}
-                        </span>
-                      </div>
-                    ))}
-                </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 500,
-                      color: "var(--proof-text-secondary)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                      marginBottom: 8,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <Zap size={11} /> Quick Actions
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-                    {QUICK_ACTIONS.map((a, i) => (
-                      <div
-                        key={i}
-                        onClick={() => {
-                          if (i === 0) navigate("/start");
-                          else if (i === 1) navigate("/compare");
-                          else if (i === 2) navigate("/testdoc");
-                          else navigate("/");
-                        }}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          padding: "8px 12px",
-                          borderRadius: 4,
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 10,
+                          background: "var(--proof-grey-bg)",
                           border: "1px solid var(--proof-grey)",
-                          cursor: "pointer",
-                          transition: "background 0.15s",
+                          borderRadius: 4,
+                          padding: "1px 4px",
+                          color: "var(--proof-text-secondary)",
                         }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.background = "var(--proof-surface-hover)")
-                        }
-                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                       >
-                        <a.icon size={14} style={{ color: a.color }} />
-                        <span style={{ fontSize: 12, flex: 1 }}>{a.label}</span>
-                        <kbd
-                          style={{
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 10,
-                            background: "var(--proof-grey-bg)",
-                            border: "1px solid var(--proof-grey)",
-                            borderRadius: 4,
-                            padding: "1px 4px",
-                            color: "var(--proof-text-secondary)",
-                          }}
-                        >
-                          ⌘{a.shortcut}
-                        </kbd>
-                      </div>
-                    ))}
-                  </div>
+                        ⌘{a.shortcut}
+                      </kbd>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+    </div>
   );
 }

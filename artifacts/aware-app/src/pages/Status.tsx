@@ -26,12 +26,7 @@ import { getSchedulerStatus } from "@/lib/data";
 import { generateCiConfigYaml, downloadCiConfig } from "@/lib/ciConfig";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { HeatmapCalendar } from "@/components/aware/HeatmapCalendar";
-import {
-  ConsoleCard,
-  ConsoleStat,
-  DataTable,
-  type ColumnDef,
-} from "@/components/console";
+import { ConsoleCard, ConsoleStat, DataTable, type ColumnDef } from "@/components/console";
 import { useDataTable } from "@/hooks/useDataTable";
 
 interface RunRow extends Record<string, unknown> {
@@ -220,9 +215,7 @@ export default function Status() {
       header: "Env",
       width: 100,
       render: (row) => (
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>
-          {row.env}
-        </span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{row.env}</span>
       ),
     },
     {
@@ -255,9 +248,7 @@ export default function Status() {
       align: "right",
       render: (row) =>
         row.failures > 0 ? (
-          <span style={{ color: "var(--proof-red)", fontWeight: 600 }}>
-            {row.failures}f
-          </span>
+          <span style={{ color: "var(--proof-red)", fontWeight: 600 }}>{row.failures}f</span>
         ) : null,
     },
     {
@@ -352,9 +343,9 @@ export default function Status() {
                   lineHeight: 1.5,
                 }}
               >
-                Composite actions + K8s-inspired operators &middot; controller.yml &rarr; test-runner pods &rarr;
-                promotion gate &middot; {sorted.length} runs, {sched.summary.total} suites,{" "}
-                {sched.summary.scheduled} scheduled
+                Composite actions + K8s-inspired operators &middot; controller.yml &rarr;
+                test-runner pods &rarr; promotion gate &middot; {sorted.length} runs,{" "}
+                {sched.summary.total} suites, {sched.summary.scheduled} scheduled
               </p>
             </div>
           </div>
@@ -410,8 +401,8 @@ export default function Status() {
                   animation: "fade-in 0.3s ease-out 0.1s both",
                 }}
               >
-                <BarChart3 size={11} style={{ color: "#10b981" }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981" }}>
+                <BarChart3 size={11} style={{ color: "var(--proof-green)" }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-green)" }}>
                   {lastRun.passPct}%
                 </span>
                 <span style={{ fontSize: 9, color: "var(--proof-text-muted)" }}>latest run</span>
@@ -430,8 +421,8 @@ export default function Status() {
                 animation: "fade-in 0.3s ease-out 0.2s both",
               }}
             >
-              <Activity size={11} style={{ color: "#2563eb" }} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#2563eb" }}>
+              <Activity size={11} style={{ color: "var(--proof-blue)" }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-blue)" }}>
                 {today.length}
               </span>
               <span style={{ fontSize: 9, color: "var(--proof-text-muted)" }}>runs today</span>
@@ -449,8 +440,8 @@ export default function Status() {
                 animation: "fade-in 0.3s ease-out 0.3s both",
               }}
             >
-              <Zap size={11} style={{ color: "#8b5cf6" }} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6" }}>
+              <Zap size={11} style={{ color: "var(--proof-purple)" }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-purple)" }}>
                 {sched.summary.dispatched}
               </span>
               <span style={{ fontSize: 9, color: "var(--proof-text-muted)" }}>dispatches</span>
@@ -686,21 +677,21 @@ export default function Status() {
                 label="Suites"
                 value={sched.summary.total}
                 icon={<Calendar size={14} />}
-                color="#2563eb"
+                color="var(--proof-blue)"
                 size="lg"
               />
               <ConsoleStat
                 label="Dispatches"
                 value={sched.summary.dispatched}
                 icon={<Play size={14} />}
-                color="#10b981"
+                color="var(--proof-green)"
                 size="lg"
               />
               <ConsoleStat
                 label="Runs"
                 value={sorted.length}
                 icon={<Activity size={14} />}
-                color="#f59e0b"
+                color="var(--proof-yellow)"
                 size="lg"
               />
               <ConsoleStat
@@ -711,7 +702,7 @@ export default function Status() {
                     : "\u2014"
                 }
                 icon={<Clock size={14} />}
-                color="#8b5cf6"
+                color="var(--proof-purple)"
                 size="lg"
               />
             </div>
@@ -739,9 +730,9 @@ export default function Status() {
               {sched.suites.map((suite) => {
                 const ok = suite.lastConclusion === "success";
                 const statusColor = ok
-                  ? "#10b981"
+                  ? "var(--proof-green)"
                   : suite.lastConclusion === "failure"
-                    ? "#ef4444"
+                    ? "var(--proof-red)"
                     : "var(--proof-text-muted)";
                 return (
                   <div
@@ -855,7 +846,7 @@ export default function Status() {
                               padding: "1px 5px",
                               borderRadius: 3,
                               background: "rgba(245,158,11,0.08)",
-                              color: "#f59e0b",
+                              color: "var(--proof-yellow)",
                             }}
                           >
                             {r}
@@ -906,7 +897,7 @@ export default function Status() {
                           flexShrink: 0,
                         }}
                       >
-                        <Zap size={10} style={{ color: "#2563eb" }} />
+                        <Zap size={10} style={{ color: "var(--proof-blue)" }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div
@@ -1013,7 +1004,11 @@ export default function Status() {
                       height: 10,
                       borderRadius: "50%",
                       background:
-                        c === "red" ? "#ef4444" : c === "yellow" ? "#f59e0b" : "#10b981",
+                        c === "red"
+                          ? "var(--proof-red)"
+                          : c === "yellow"
+                            ? "var(--proof-yellow)"
+                            : "var(--proof-green)",
                     }}
                   />
                 ))}
@@ -1083,8 +1078,8 @@ export default function Status() {
               }}
             >
               <div style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
-                {freq.totalRuns} runs &middot; avg {freq.runsPerDay}/day &middot; ~{freq.avgIntervalHours}h
-                between
+                {freq.totalRuns} runs &middot; avg {freq.runsPerDay}/day &middot; ~
+                {freq.avgIntervalHours}h between
               </div>
               {freq.gaps.length > 0 && (
                 <div

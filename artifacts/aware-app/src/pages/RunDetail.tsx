@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useSyncExternalStore } from "react";
 import { useParams, useLocation, useSearch } from "wouter";
 import { GoogleBarChart } from "@/components/aware/GoogleCharts";
 import {
@@ -8,6 +8,8 @@ import {
   loadResultsForRun,
   getImageSource,
   preloadImage,
+  getDataInitState,
+  subscribeToDataInit,
 } from "@/lib/data";
 import type { TestResult, TestAssertionResult, FilmstripFrame } from "@/lib/types";
 import {
@@ -23,6 +25,7 @@ import {
   BarChart3,
   FileText,
   Maximize2,
+  X,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
@@ -157,6 +160,7 @@ export default function RunDetail() {
   const runId = params.runId ?? "";
   const { show, Toast } = useSimpleToast();
 
+  const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const run = getRunById(runId) ?? null;
   const results = run ? getTestResultsForRun(run.id) : [];
   const [search, setSearch] = React.useState("");
@@ -187,6 +191,23 @@ export default function RunDetail() {
   });
 
   if (!run) {
+    if (initState.loading) {
+      return (
+        <div style={{ textAlign: "center", padding: 64 }}>
+          <div
+            className="proof-skeleton"
+            style={{ width: 48, height: 48, borderRadius: "50%", margin: "0 auto 16px" }}
+          />
+          <div
+            className="proof-skeleton"
+            style={{ width: 200, height: 16, borderRadius: 4, margin: "0 auto 8px" }}
+          />
+          <div style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 12 }}>
+            Loading run data...
+          </div>
+        </div>
+      );
+    }
     return (
       <div style={{ textAlign: "center", padding: 64 }}>
         <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>
@@ -242,586 +263,548 @@ export default function RunDetail() {
   };
 
   return (
+    <div
+      className="proof-page"
+      style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}
+    >
+      {/* Top bar: breadcrumb + meta + actions */}
       <div
-        className="proof-page"
-        style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          flexWrap: "wrap",
+          padding: "8px 12px",
+          background: "var(--proof-surface)",
+          border: "1px solid var(--proof-border)",
+          borderRadius: "var(--proof-radius)",
+        }}
       >
-        {/* Top bar: breadcrumb + meta + actions */}
-        <div
+        <button onClick={() => navigate("/runs")} className="proof-button proof-button-xs">
+          <ArrowLeft size={11} /> Runs
+        </button>
+        <span style={{ color: "var(--proof-border-strong)", fontSize: 14 }}>/</span>
+        <span
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            flexWrap: "wrap",
-            padding: "8px 12px",
-            background: "var(--proof-surface)",
-            border: "1px solid var(--proof-border)",
-            borderRadius: "var(--proof-radius)",
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--proof-text)",
           }}
         >
-          <button onClick={() => navigate("/runs")} className="proof-button proof-button-xs">
-            <ArrowLeft size={11} /> Runs
-          </button>
-          <span style={{ color: "var(--proof-border-strong)", fontSize: 14 }}>/</span>
+          {run.id}
+        </span>
+        <span
+          className={`proof-badge ${run.status === "PASS" ? "proof-badge-pass" : run.status === "FAIL" ? "proof-badge-fail" : "proof-badge-partial"}`}
+          style={{ fontSize: 10 }}
+        >
+          {run.status}
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: 4 }}>
+          <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+            <span
+              style={{
+                fontWeight: 700,
+                fontFamily: "var(--font-mono)",
+                color:
+                  passRate === 100
+                    ? "var(--proof-green)"
+                    : passRate < 90
+                      ? "var(--proof-red)"
+                      : "var(--proof-text)",
+              }}
+            >
+              {passRate}%
+            </span>{" "}
+            pass
+          </span>
           <span
             style={{
-              fontFamily: "var(--font-mono)",
               fontSize: 11,
-              fontWeight: 600,
-              color: "var(--proof-text)",
+              color: "var(--proof-text-secondary)",
+              fontFamily: "var(--font-mono)",
             }}
           >
-            {run.id}
+            <span style={{ color: "var(--proof-green)" }}>+{passCount}</span>
+            {" / "}
+            <span style={{ color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-muted)" }}>
+              -{failCount}
+            </span>
           </span>
           <span
-            className={`proof-badge ${run.status === "PASS" ? "proof-badge-pass" : run.status === "FAIL" ? "proof-badge-fail" : "proof-badge-partial"}`}
-            style={{ fontSize: 10 }}
+            style={{
+              fontSize: 11,
+              fontFamily: "var(--font-mono)",
+              color: "var(--proof-text-muted)",
+            }}
           >
-            {run.status}
+            {run.duration}
           </span>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: 4 }}>
-            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-              <span
-                style={{
-                  fontWeight: 700,
-                  fontFamily: "var(--font-mono)",
-                  color:
-                    passRate === 100
-                      ? "var(--proof-green)"
-                      : passRate < 90
-                        ? "var(--proof-red)"
-                        : "var(--proof-text)",
-                }}
-              >
-                {passRate}%
-              </span>{" "}
-              pass
-            </span>
-            <span
-              style={{
-                fontSize: 11,
-                color: "var(--proof-text-secondary)",
-                fontFamily: "var(--font-mono)",
-              }}
-            >
-              <span style={{ color: "var(--proof-green)" }}>+{passCount}</span>
-              {" / "}
-              <span
-                style={{ color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-muted)" }}
-              >
-                -{failCount}
-              </span>
-            </span>
-            <span
-              style={{
-                fontSize: 11,
-                fontFamily: "var(--font-mono)",
-                color: "var(--proof-text-muted)",
-              }}
-            >
-              {run.duration}
-            </span>
-            <span
-              style={{
-                fontSize: 10,
-                fontFamily: "var(--font-mono)",
-                color: "var(--proof-text-muted)",
-                padding: "1px 6px",
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid var(--proof-border)",
-                borderRadius: "var(--proof-radius-xs)",
-              }}
-            >
-              {run.env} · {run.envId} · build {run.build}
-            </span>
-          </div>
-          <div style={{ marginLeft: "auto", display: "flex", gap: 5, alignItems: "center" }}>
-            <button
-              onClick={() => {
-                navigator.clipboard
-                  .writeText(window.location.href)
-                  .then(() => show("Permalink copied"));
-              }}
-              className="proof-button proof-button-xs"
-              title="Copy permalink"
-            >
-              <Share2 size={11} />
-            </button>
-            <button
-              onClick={() =>
-                navigate(`/compare?candidate=${run.id}&baseline=${RUNS[RUNS.length - 1]?.id}`)
-              }
-              className="proof-button proof-button-xs"
-            >
-              <GitCompare size={11} /> Compare
-            </button>
-            <a
-              href={`https://github.com/ruake/AWARE/actions/runs/${run.id}`}
-              target="_blank"
-              rel="noopener"
-              className="proof-button proof-button-xs"
-              style={{ textDecoration: "none" }}
-            >
-              <Github size={11} />
-            </a>
-          </div>
+          <span
+            style={{
+              fontSize: 10,
+              fontFamily: "var(--font-mono)",
+              color: "var(--proof-text-muted)",
+              padding: "1px 6px",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid var(--proof-border)",
+              borderRadius: "var(--proof-radius-xs)",
+            }}
+          >
+            {run.env} · {run.envId} · build {run.build}
+          </span>
         </div>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 5, alignItems: "center" }}>
+          <button
+            onClick={() => {
+              navigator.clipboard
+                .writeText(window.location.href)
+                .then(() => show("Permalink copied"));
+            }}
+            className="proof-button proof-button-xs"
+            title="Copy permalink"
+          >
+            <Share2 size={11} />
+          </button>
+          <button
+            onClick={() =>
+              navigate(`/compare?candidate=${run.id}&baseline=${RUNS[RUNS.length - 1]?.id}`)
+            }
+            className="proof-button proof-button-xs"
+          >
+            <GitCompare size={11} /> Compare
+          </button>
+          <a
+            href={`https://github.com/ruake/AWARE/actions/runs/${run.id}`}
+            target="_blank"
+            rel="noopener"
+            className="proof-button proof-button-xs"
+            style={{ textDecoration: "none" }}
+          >
+            <Github size={11} />
+          </a>
+        </div>
+      </div>
 
-        {/* Chart + results table */}
-        <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
-          <PanelErrorBoundary label="By category chart">
-            <div className="proof-card" style={{ padding: 16, width: 260, flexShrink: 0 }}>
-              <h3
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "var(--proof-text-secondary)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                  marginBottom: 12,
-                }}
+      {/* Chart + results table */}
+      <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
+        <PanelErrorBoundary label="By category chart">
+          <div className="proof-card" style={{ padding: 16, width: 260, flexShrink: 0 }}>
+            <h3
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "var(--proof-text-secondary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                marginBottom: 12,
+              }}
+            >
+              By Category
+            </h3>
+            <GoogleBarChart
+              title=""
+              columns={["Category", "Pass", "Fail"]}
+              data={catData}
+              xKey="category"
+              yKeys={["pass", "fail"]}
+              colors={["#22c55e", "#ef4444"]}
+              height="220px"
+              showTimeFrame={false}
+              isHorizontal
+              barType="grouped"
+            />
+          </div>
+        </PanelErrorBoundary>
+
+        <PanelErrorBoundary label="Test results">
+          <div
+            className="proof-card"
+            style={{
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
+            <div
+              style={{
+                padding: "10px 14px",
+                borderBottom: "1px solid var(--proof-grey)",
+                background: "var(--proof-grey-bg)",
+                display: "flex",
+                gap: 10,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 160 }}
               >
-                By Category
-              </h3>
-              <GoogleBarChart
-                title=""
-                columns={["Category", "Pass", "Fail"]}
-                data={catData}
-                xKey="category"
-                yKeys={["pass", "fail"]}
-                colors={["#22c55e", "#ef4444"]}
-                height="220px"
-                showTimeFrame={false}
-                isHorizontal
-                barType="grouped"
-              />
+                <Search size={13} style={{ color: "var(--proof-text-secondary)" }} />
+                <input
+                  className="proof-input"
+                  placeholder="Search tests…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  style={{ flex: 1, minWidth: 0 }}
+                />
+              </div>
+              <select
+                className="proof-input"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">All statuses</option>
+                <option value="PASS">PASS</option>
+                <option value="FAIL">FAIL</option>
+              </select>
+              <select
+                className="proof-input"
+                value={catFilter}
+                onChange={(e) => setCatFilter(e.target.value)}
+              >
+                <option value="all">All categories</option>
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+                {filtered.length} / {results.length}
+              </span>
             </div>
-          </PanelErrorBoundary>
+            <div style={{ flex: 1, overflowY: "auto" }}>
+              <table className="proof-table">
+                <thead>
+                  <tr>
+                    <th>Test Name</th>
+                    <th>Status</th>
+                    <th>Category</th>
+                    <th style={{ textAlign: "right" }}>Duration</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((r) => (
+                    <tr
+                      key={r.id}
+                      onClick={() =>
+                        setSelectedResultSyncUrl(selectedResult?.id === r.id ? null : r)
+                      }
+                      style={{
+                        cursor: "pointer",
+                        background:
+                          selectedResult?.id === r.id
+                            ? "var(--proof-blue-bg)"
+                            : r.status === "FAIL"
+                              ? "rgba(217,48,37,0.03)"
+                              : undefined,
+                        outline:
+                          selectedResult?.id === r.id
+                            ? "2px solid var(--proof-blue) inset"
+                            : undefined,
+                      }}
+                    >
+                      <td
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 11,
+                        }}
+                      >
+                        {r.name}
+                      </td>
+                      <td>
+                        <span
+                          className={`proof-badge ${r.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
+                        >
+                          {r.status}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            background: "var(--proof-grey-bg)",
+                            padding: "2px 7px",
+                            borderRadius: 4,
+                            border: "1px solid var(--proof-grey)",
+                          }}
+                        >
+                          {r.category}
+                        </span>
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "right",
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 11,
+                          color: "var(--proof-text-secondary)",
+                        }}
+                      >
+                        {r.duration}ms
+                      </td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => navigate(`/analytics?testId=${r.id}`)}
+                          className="proof-button proof-button-xs"
+                          style={{ padding: "2px 7px" }}
+                        >
+                          Analytics
+                        </button>
+                        <button
+                          onClick={() => navigate(`/testdoc?testId=${r.id}`)}
+                          className="proof-button proof-button-xs"
+                          style={{ padding: "2px 7px", marginLeft: 4 }}
+                        >
+                          <FileText size={10} /> Def
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </PanelErrorBoundary>
 
-          <PanelErrorBoundary label="Test results">
+        {/* Test Detail Panel */}
+        {selectedResult && (
+          <PanelErrorBoundary label="Evidence panel">
             <div
               className="proof-card"
               style={{
-                overflow: "hidden",
+                width: 380,
+                flexShrink: 0,
                 display: "flex",
                 flexDirection: "column",
-                flex: 1,
-                minWidth: 0,
+                overflow: "hidden",
+                borderLeft: `3px solid ${selectedResult.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
               }}
             >
+              {/* Panel header */}
               <div
                 style={{
                   padding: "10px 14px",
                   borderBottom: "1px solid var(--proof-grey)",
-                  background: "var(--proof-grey-bg)",
                   display: "flex",
-                  gap: 10,
                   alignItems: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 160 }}
-                >
-                  <Search size={13} style={{ color: "var(--proof-text-secondary)" }} />
-                  <input
-                    className="proof-input"
-                    placeholder="Search tests…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    style={{ flex: 1, minWidth: 0 }}
-                  />
-                </div>
-                <select
-                  className="proof-input"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="all">All statuses</option>
-                  <option value="PASS">PASS</option>
-                  <option value="FAIL">FAIL</option>
-                </select>
-                <select
-                  className="proof-input"
-                  value={catFilter}
-                  onChange={(e) => setCatFilter(e.target.value)}
-                >
-                  <option value="all">All categories</option>
-                  {categories.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-                <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-                  {filtered.length} / {results.length}
-                </span>
-              </div>
-              <div style={{ flex: 1, overflowY: "auto" }}>
-                <table className="proof-table">
-                  <thead>
-                    <tr>
-                      <th>Test Name</th>
-                      <th>Status</th>
-                      <th>Category</th>
-                      <th style={{ textAlign: "right" }}>Duration</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((r) => (
-                      <tr
-                        key={r.id}
-                        onClick={() =>
-                          setSelectedResultSyncUrl(selectedResult?.id === r.id ? null : r)
-                        }
-                        style={{
-                          cursor: "pointer",
-                          background:
-                            selectedResult?.id === r.id
-                              ? "var(--proof-blue-bg)"
-                              : r.status === "FAIL"
-                                ? "rgba(217,48,37,0.03)"
-                                : undefined,
-                          outline:
-                            selectedResult?.id === r.id
-                              ? "2px solid var(--proof-blue) inset"
-                              : undefined,
-                        }}
-                      >
-                        <td
-                          style={{
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 11,
-                          }}
-                        >
-                          {r.name}
-                        </td>
-                        <td>
-                          <span
-                            className={`proof-badge ${r.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                          >
-                            {r.status}
-                          </span>
-                        </td>
-                        <td>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              background: "var(--proof-grey-bg)",
-                              padding: "2px 7px",
-                              borderRadius: 4,
-                              border: "1px solid var(--proof-grey)",
-                            }}
-                          >
-                            {r.category}
-                          </span>
-                        </td>
-                        <td
-                          style={{
-                            textAlign: "right",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 11,
-                            color: "var(--proof-text-secondary)",
-                          }}
-                        >
-                          {r.duration}ms
-                        </td>
-                        <td onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => navigate(`/analytics?testId=${r.id}`)}
-                            className="proof-button proof-button-xs"
-                            style={{ padding: "2px 7px" }}
-                          >
-                            Analytics
-                          </button>
-                          <button
-                            onClick={() => navigate(`/testdoc?testId=${r.id}`)}
-                            className="proof-button proof-button-xs"
-                            style={{ padding: "2px 7px", marginLeft: 4 }}
-                          >
-                            <FileText size={10} /> Def
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </PanelErrorBoundary>
-
-          {/* Test Detail Panel */}
-          {selectedResult && (
-            <PanelErrorBoundary label="Evidence panel">
-              <div
-                className="proof-card"
-                style={{
-                  width: 380,
+                  gap: 8,
+                  background: "var(--proof-blue-bg)",
                   flexShrink: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden",
-                  borderLeft: `3px solid ${selectedResult.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
                 }}
               >
-                {/* Panel header */}
                 <div
                   style={{
-                    padding: "10px 14px",
-                    borderBottom: "1px solid var(--proof-grey)",
                     display: "flex",
                     alignItems: "center",
-                    gap: 8,
-                    background: "var(--proof-blue-bg)",
-                    flexShrink: 0,
+                    gap: 1,
+                    border: "1px solid var(--proof-grey)",
+                    borderRadius: 4,
+                    background: "var(--proof-surface)",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      border: "1px solid var(--proof-grey)",
-                      borderRadius: 4,
-                      background: "var(--proof-surface)",
-                    }}
-                  >
-                    <button
-                      disabled={selIdx <= 0}
-                      onClick={() => navigateDetail(-1)}
-                      style={{
-                        padding: "4px 7px",
-                        border: "none",
-                        background: "transparent",
-                        cursor: selIdx > 0 ? "pointer" : "not-allowed",
-                        color: selIdx > 0 ? "var(--proof-blue)" : "var(--proof-grey)",
-                      }}
-                    >
-                      <ChevronLeft size={13} />
-                    </button>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        color: "var(--proof-text-secondary)",
-                        padding: "0 4px",
-                      }}
-                    >
-                      {selIdx + 1}/{filtered.length}
-                    </span>
-                    <button
-                      disabled={selIdx >= filtered.length - 1}
-                      onClick={() => navigateDetail(1)}
-                      style={{
-                        padding: "4px 7px",
-                        border: "none",
-                        background: "transparent",
-                        cursor: selIdx < filtered.length - 1 ? "pointer" : "not-allowed",
-                        color:
-                          selIdx < filtered.length - 1 ? "var(--proof-blue)" : "var(--proof-grey)",
-                      }}
-                    >
-                      <ChevronRight size={13} />
-                    </button>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color:
-                        selectedResult.status === "PASS"
-                          ? "var(--proof-green)"
-                          : "var(--proof-red)",
-                      flex: 1,
-                    }}
-                  >
-                    {selectedResult.status}
-                  </span>
                   <button
-                    onClick={() => setSelectedResultSyncUrl(null)}
+                    disabled={selIdx <= 0}
+                    onClick={() => navigateDetail(-1)}
                     style={{
+                      padding: "4px 7px",
                       border: "none",
                       background: "transparent",
-                      cursor: "pointer",
-                      color: "var(--proof-text-secondary)",
-                      fontSize: 18,
-                      lineHeight: 1,
+                      cursor: selIdx > 0 ? "pointer" : "not-allowed",
+                      color: selIdx > 0 ? "var(--proof-blue)" : "var(--proof-grey)",
                     }}
                   >
-                    ×
+                    <ChevronLeft size={13} />
+                  </button>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: "var(--proof-text-secondary)",
+                      padding: "0 4px",
+                    }}
+                  >
+                    {selIdx + 1}/{filtered.length}
+                  </span>
+                  <button
+                    disabled={selIdx >= filtered.length - 1}
+                    onClick={() => navigateDetail(1)}
+                    style={{
+                      padding: "4px 7px",
+                      border: "none",
+                      background: "transparent",
+                      cursor: selIdx < filtered.length - 1 ? "pointer" : "not-allowed",
+                      color:
+                        selIdx < filtered.length - 1 ? "var(--proof-blue)" : "var(--proof-grey)",
+                    }}
+                  >
+                    <ChevronRight size={13} />
                   </button>
                 </div>
-
-                <div
+                <span
                   style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color:
+                      selectedResult.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
                     flex: 1,
-                    overflowY: "auto",
-                    padding: 14,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 12,
                   }}
                 >
-                  {/* Test name */}
+                  {selectedResult.status}
+                </span>
+                <button
+                  onClick={() => setSelectedResultSyncUrl(null)}
+                  aria-label="Close"
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    color: "var(--proof-text-secondary)",
+                    fontSize: 18,
+                    lineHeight: 1,
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: 14,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
+                {/* Test name */}
+                <div>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      lineHeight: 1.5,
+                      wordBreak: "break-all",
+                    }}
+                  >
+                    {selectedResult.name}
+                  </div>
+                  <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        background: "var(--proof-grey-bg)",
+                        padding: "2px 8px",
+                        borderRadius: 4,
+                        border: "1px solid var(--proof-grey)",
+                      }}
+                    >
+                      {selectedResult.category}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: "var(--proof-text-secondary)",
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    >
+                      {selectedResult.duration}ms
+                    </span>
+                  </div>
+                </div>
+
+                {/* Filmstrip */}
+                {selectedResult.filmstrip && selectedResult.filmstrip.length > 0 && (
                   <div>
                     <div
                       style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: 600,
-                        lineHeight: 1.5,
-                        wordBreak: "break-all",
+                        color: "var(--proof-text-secondary)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        marginBottom: 6,
                       }}
                     >
-                      {selectedResult.name}
+                      Filmstrip ({selectedResult.filmstrip.length})
                     </div>
-                    <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          background: "var(--proof-grey-bg)",
-                          padding: "2px 8px",
-                          borderRadius: 4,
-                          border: "1px solid var(--proof-grey)",
-                        }}
-                      >
-                        {selectedResult.category}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          color: "var(--proof-text-secondary)",
-                          fontFamily: "var(--font-mono)",
-                        }}
-                      >
-                        {selectedResult.duration}ms
-                      </span>
+                    <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
+                      {selectedResult.filmstrip.map((f) => (
+                        <FilmstripThumbnail
+                          key={f.id}
+                          frame={f}
+                          onExpand={() => setExpandScreenshot(f)}
+                        />
+                      ))}
                     </div>
                   </div>
+                )}
 
-                  {/* Filmstrip */}
-                  {selectedResult.filmstrip && selectedResult.filmstrip.length > 0 && (
-                    <div>
-                      <div
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          color: "var(--proof-text-secondary)",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          marginBottom: 6,
-                        }}
-                      >
-                        Filmstrip ({selectedResult.filmstrip.length})
-                      </div>
-                      <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
-                        {selectedResult.filmstrip.map((f) => (
-                          <FilmstripThumbnail
-                            key={f.id}
-                            frame={f}
-                            onExpand={() => setExpandScreenshot(f)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Screenshot lightbox */}
-                  <Dialog
-                    open={!!expandScreenshot}
-                    onOpenChange={(open) => {
-                      if (!open) setExpandScreenshot(null);
+                {/* Screenshot lightbox */}
+                <Dialog
+                  open={!!expandScreenshot}
+                  onOpenChange={(open) => {
+                    if (!open) setExpandScreenshot(null);
+                  }}
+                >
+                  <DialogContent
+                    style={{
+                      maxWidth: "90vw",
+                      width: "auto",
+                      background: "var(--proof-surface)",
+                      border: "1px solid var(--proof-grey)",
+                      padding: 0,
                     }}
                   >
-                    <DialogContent
+                    <DialogTitle
                       style={{
-                        maxWidth: "90vw",
-                        width: "auto",
-                        background: "var(--proof-surface)",
-                        border: "1px solid var(--proof-grey)",
-                        padding: 0,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        padding: "8px 12px",
+                        borderBottom: "1px solid var(--proof-grey)",
+                        color: "var(--proof-text-secondary)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
                       }}
                     >
-                      <DialogTitle
+                      {expandScreenshot?.label ?? "Screenshot"}
+                    </DialogTitle>
+                    {expandScreenshot && (
+                      <div
                         style={{
-                          fontSize: 11,
-                          fontWeight: 600,
-                          padding: "8px 12px",
-                          borderBottom: "1px solid var(--proof-grey)",
-                          color: "var(--proof-text-secondary)",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
+                          padding: 12,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          maxHeight: "80vh",
+                          overflow: "auto",
                         }}
                       >
-                        {expandScreenshot?.label ?? "Screenshot"}
-                      </DialogTitle>
-                      {expandScreenshot && (
-                        <div
-                          style={{
-                            padding: 12,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            maxHeight: "80vh",
-                            overflow: "auto",
-                          }}
-                        >
-                          {lightboxSrc && (
-                            <img
-                              src={lightboxSrc}
-                              alt={expandScreenshot?.label ?? "Screenshot"}
-                              style={{
-                                maxWidth: "100%",
-                                maxHeight: "70vh",
-                                borderRadius: 4,
-                                display: "block",
-                              }}
-                            />
-                          )}
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
+                        {lightboxSrc && (
+                          <img
+                            src={lightboxSrc}
+                            alt={expandScreenshot?.label ?? "Screenshot"}
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: "70vh",
+                              borderRadius: 4,
+                              display: "block",
+                            }}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
 
-                  {/* HTTP Exchange — always visible */}
-                  {(() => {
-                    const e = selectedResult.evidence;
-                    if (!e)
-                      return (
-                        <div>
-                          <div
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 600,
-                              color: "var(--proof-text-secondary)",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.5px",
-                              marginBottom: 6,
-                            }}
-                          >
-                            HTTP Exchange
-                          </div>
-                          <div
-                            style={{
-                              fontSize: 11,
-                              color: "var(--proof-text-secondary)",
-                              fontStyle: "italic",
-                            }}
-                          >
-                            No HTTP data captured
-                          </div>
-                        </div>
-                      );
-                    const rows: { label: string; val: string }[] = [];
-                    rows.push({ label: "Method", val: e.request.method });
-                    rows.push({ label: "URL", val: e.request.url });
-                    rows.push({ label: "Status", val: String(e.response.status) });
-                    const ct = e.response.headers?.["Content-Type"] ?? "";
-                    if (ct) rows.push({ label: "Content-Type", val: ct });
-                    const cl = e.response.headers?.["Content-Length"] ?? "";
-                    if (cl) rows.push({ label: "Size", val: cl + " bytes" });
-                    const cache = e.response.headers?.["Cache-Control"] ?? "";
-                    if (cache) rows.push({ label: "Cache", val: cache });
+                {/* HTTP Exchange — always visible */}
+                {(() => {
+                  const e = selectedResult.evidence;
+                  if (!e)
                     return (
                       <div>
                         <div
@@ -838,193 +821,26 @@ export default function RunDetail() {
                         </div>
                         <div
                           style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 3,
                             fontSize: 11,
-                            fontFamily: "var(--font-mono)",
+                            color: "var(--proof-text-secondary)",
+                            fontStyle: "italic",
                           }}
                         >
-                          {rows.map((r) => (
-                            <div key={r.label} style={{ display: "flex", gap: 6 }}>
-                              <span
-                                style={{
-                                  color: "var(--proof-text-secondary)",
-                                  width: 80,
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {r.label}
-                              </span>
-                              <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>
-                                {r.val}
-                              </span>
-                            </div>
-                          ))}
+                          No HTTP data captured
                         </div>
-                        {/* Response headers */}
-                        {e.response.headers && Object.keys(e.response.headers).length > 0 && (
-                          <details open style={{ marginTop: 8, fontSize: 11 }}>
-                            <summary
-                              style={{
-                                cursor: "pointer",
-                                color: "var(--proof-text-secondary)",
-                                fontWeight: 600,
-                                fontSize: 10,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.5px",
-                              }}
-                            >
-                              Response Headers ({Object.keys(e.response.headers).length})
-                            </summary>
-                            <div
-                              style={{
-                                marginTop: 4,
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: 2,
-                              }}
-                            >
-                              {Object.entries(e.response.headers).map(([k, v]) => (
-                                <div
-                                  key={k}
-                                  style={{
-                                    display: "flex",
-                                    gap: 6,
-                                    fontFamily: "var(--font-mono)",
-                                    fontSize: 10,
-                                  }}
-                                >
-                                  <span style={{ color: "var(--proof-blue)", minWidth: 140 }}>
-                                    {k}
-                                  </span>
-                                  <span
-                                    style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                                  >
-                                    {v}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </details>
-                        )}
-                        {/* Request headers */}
-                        {e.request.headers && Object.keys(e.request.headers).length > 0 && (
-                          <details open style={{ marginTop: 6, fontSize: 11 }}>
-                            <summary
-                              style={{
-                                cursor: "pointer",
-                                color: "var(--proof-text-secondary)",
-                                fontWeight: 600,
-                                fontSize: 10,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.5px",
-                              }}
-                            >
-                              Request Headers ({Object.keys(e.request.headers).length})
-                            </summary>
-                            <div
-                              style={{
-                                marginTop: 4,
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: 2,
-                              }}
-                            >
-                              {Object.entries(e.request.headers).map(([k, v]) => (
-                                <div
-                                  key={k}
-                                  style={{
-                                    display: "flex",
-                                    gap: 6,
-                                    fontFamily: "var(--font-mono)",
-                                    fontSize: 10,
-                                  }}
-                                >
-                                  <span style={{ color: "var(--proof-purple)", minWidth: 140 }}>
-                                    {k}
-                                  </span>
-                                  <span
-                                    style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                                  >
-                                    {v}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </details>
-                        )}
-                        {/* Cookies */}
-                        {e.response.cookies && e.response.cookies.length > 0 && (
-                          <details open style={{ marginTop: 6, fontSize: 11 }}>
-                            <summary
-                              style={{
-                                cursor: "pointer",
-                                color: "var(--proof-text-secondary)",
-                                fontWeight: 600,
-                                fontSize: 10,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.5px",
-                              }}
-                            >
-                              Cookies ({e.response.cookies.length})
-                            </summary>
-                            <div
-                              style={{
-                                marginTop: 4,
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: 2,
-                              }}
-                            >
-                              {e.response.cookies.map((c, i) => (
-                                <div
-                                  key={i}
-                                  style={{
-                                    display: "flex",
-                                    gap: 6,
-                                    fontFamily: "var(--font-mono)",
-                                    fontSize: 10,
-                                    padding: "4px 6px",
-                                    background: "var(--proof-grey-bg)",
-                                    borderRadius: 4,
-                                  }}
-                                >
-                                  <span style={{ color: "var(--proof-orange)", fontWeight: 600 }}>
-                                    {c.name}
-                                  </span>
-                                  <span
-                                    style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                                  >
-                                    = {c.value}
-                                  </span>
-                                  {c.domain && (
-                                    <span style={{ color: "var(--proof-text-secondary)" }}>
-                                      domain={c.domain}
-                                    </span>
-                                  )}
-                                  {c.path && (
-                                    <span style={{ color: "var(--proof-text-secondary)" }}>
-                                      path={c.path}
-                                    </span>
-                                  )}
-                                  {c.httpOnly && (
-                                    <span style={{ color: "var(--proof-green)" }}>HttpOnly</span>
-                                  )}
-                                  {c.secure && (
-                                    <span style={{ color: "var(--proof-green)" }}>Secure</span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </details>
-                        )}
                       </div>
                     );
-                  })()}
-
-                  {/* Assertions */}
-                  {selectedResult.assertions && selectedResult.assertions.length > 0 && (
+                  const rows: { label: string; val: string }[] = [];
+                  rows.push({ label: "Method", val: e.request.method });
+                  rows.push({ label: "URL", val: e.request.url });
+                  rows.push({ label: "Status", val: String(e.response.status) });
+                  const ct = e.response.headers?.["Content-Type"] ?? "";
+                  if (ct) rows.push({ label: "Content-Type", val: ct });
+                  const cl = e.response.headers?.["Content-Length"] ?? "";
+                  if (cl) rows.push({ label: "Size", val: cl + " bytes" });
+                  const cache = e.response.headers?.["Cache-Control"] ?? "";
+                  if (cache) rows.push({ label: "Cache", val: cache });
+                  return (
                     <div>
                       <div
                         style={{
@@ -1036,82 +852,284 @@ export default function RunDetail() {
                           marginBottom: 6,
                         }}
                       >
-                        Assertions
+                        HTTP Exchange
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                        {selectedResult.assertions.map((a, i) => (
-                          <AssertionRow key={i} a={a} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Error message */}
-                  {selectedResult.error && (
-                    <div>
                       <div
                         style={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          color: "var(--proof-text-secondary)",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          marginBottom: 6,
-                        }}
-                      >
-                        Error
-                      </div>
-                      <pre
-                        style={{
-                          fontSize: 10,
-                          lineHeight: 1.5,
-                          whiteSpace: "pre-wrap",
-                          wordBreak: "break-all",
-                          background: "var(--proof-red-bg)",
-                          border: "1px solid var(--proof-red)",
-                          borderRadius: 4,
-                          padding: 10,
-                          margin: 0,
-                          color: "var(--proof-red)",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 3,
+                          fontSize: 11,
                           fontFamily: "var(--font-mono)",
                         }}
                       >
-                        {selectedResult.error}
-                      </pre>
+                        {rows.map((r) => (
+                          <div key={r.label} style={{ display: "flex", gap: 6 }}>
+                            <span
+                              style={{
+                                color: "var(--proof-text-secondary)",
+                                width: 80,
+                                flexShrink: 0,
+                              }}
+                            >
+                              {r.label}
+                            </span>
+                            <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>
+                              {r.val}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Response headers */}
+                      {e.response.headers && Object.keys(e.response.headers).length > 0 && (
+                        <details open style={{ marginTop: 8, fontSize: 11 }}>
+                          <summary
+                            style={{
+                              cursor: "pointer",
+                              color: "var(--proof-text-secondary)",
+                              fontWeight: 600,
+                              fontSize: 10,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                            }}
+                          >
+                            Response Headers ({Object.keys(e.response.headers).length})
+                          </summary>
+                          <div
+                            style={{
+                              marginTop: 4,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 2,
+                            }}
+                          >
+                            {Object.entries(e.response.headers).map(([k, v]) => (
+                              <div
+                                key={k}
+                                style={{
+                                  display: "flex",
+                                  gap: 6,
+                                  fontFamily: "var(--font-mono)",
+                                  fontSize: 10,
+                                }}
+                              >
+                                <span style={{ color: "var(--proof-blue)", minWidth: 140 }}>
+                                  {k}
+                                </span>
+                                <span
+                                  style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
+                                >
+                                  {v}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )}
+                      {/* Request headers */}
+                      {e.request.headers && Object.keys(e.request.headers).length > 0 && (
+                        <details open style={{ marginTop: 6, fontSize: 11 }}>
+                          <summary
+                            style={{
+                              cursor: "pointer",
+                              color: "var(--proof-text-secondary)",
+                              fontWeight: 600,
+                              fontSize: 10,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                            }}
+                          >
+                            Request Headers ({Object.keys(e.request.headers).length})
+                          </summary>
+                          <div
+                            style={{
+                              marginTop: 4,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 2,
+                            }}
+                          >
+                            {Object.entries(e.request.headers).map(([k, v]) => (
+                              <div
+                                key={k}
+                                style={{
+                                  display: "flex",
+                                  gap: 6,
+                                  fontFamily: "var(--font-mono)",
+                                  fontSize: 10,
+                                }}
+                              >
+                                <span style={{ color: "var(--proof-purple)", minWidth: 140 }}>
+                                  {k}
+                                </span>
+                                <span
+                                  style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
+                                >
+                                  {v}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )}
+                      {/* Cookies */}
+                      {e.response.cookies && e.response.cookies.length > 0 && (
+                        <details open style={{ marginTop: 6, fontSize: 11 }}>
+                          <summary
+                            style={{
+                              cursor: "pointer",
+                              color: "var(--proof-text-secondary)",
+                              fontWeight: 600,
+                              fontSize: 10,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                            }}
+                          >
+                            Cookies ({e.response.cookies.length})
+                          </summary>
+                          <div
+                            style={{
+                              marginTop: 4,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 2,
+                            }}
+                          >
+                            {e.response.cookies.map((c, i) => (
+                              <div
+                                key={i}
+                                style={{
+                                  display: "flex",
+                                  gap: 6,
+                                  fontFamily: "var(--font-mono)",
+                                  fontSize: 10,
+                                  padding: "4px 6px",
+                                  background: "var(--proof-grey-bg)",
+                                  borderRadius: 4,
+                                }}
+                              >
+                                <span style={{ color: "var(--proof-orange)", fontWeight: 600 }}>
+                                  {c.name}
+                                </span>
+                                <span
+                                  style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
+                                >
+                                  = {c.value}
+                                </span>
+                                {c.domain && (
+                                  <span style={{ color: "var(--proof-text-secondary)" }}>
+                                    domain={c.domain}
+                                  </span>
+                                )}
+                                {c.path && (
+                                  <span style={{ color: "var(--proof-text-secondary)" }}>
+                                    path={c.path}
+                                  </span>
+                                )}
+                                {c.httpOnly && (
+                                  <span style={{ color: "var(--proof-green)" }}>HttpOnly</span>
+                                )}
+                                {c.secure && (
+                                  <span style={{ color: "var(--proof-green)" }}>Secure</span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )}
                     </div>
-                  )}
-                </div>
+                  );
+                })()}
 
-                {/* Footer actions */}
-                <div
-                  style={{
-                    padding: "8px 14px",
-                    borderTop: "1px solid var(--proof-grey)",
-                    display: "flex",
-                    gap: 6,
-                    flexShrink: 0,
-                  }}
-                >
-                  <button
-                    onClick={() => navigate(`/analytics?testId=${selectedResult.id}`)}
-                    className="proof-button proof-button-xs"
-                    style={{ flex: 1 }}
-                  >
-                    <BarChart3 size={11} /> Analytics
-                  </button>
-                  <button
-                    onClick={() => navigate(`/testdoc?testId=${selectedResult.id}`)}
-                    className="proof-button proof-button-xs"
-                    style={{ flex: 1 }}
-                  >
-                    <FileText size={11} /> Definition
-                  </button>
-                </div>
+                {/* Assertions */}
+                {selectedResult.assertions && selectedResult.assertions.length > 0 && (
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: "var(--proof-text-secondary)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        marginBottom: 6,
+                      }}
+                    >
+                      Assertions
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {selectedResult.assertions.map((a, i) => (
+                        <AssertionRow key={i} a={a} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Error message */}
+                {selectedResult.error && (
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: "var(--proof-text-secondary)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        marginBottom: 6,
+                      }}
+                    >
+                      Error
+                    </div>
+                    <pre
+                      style={{
+                        fontSize: 10,
+                        lineHeight: 1.5,
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-all",
+                        background: "var(--proof-red-bg)",
+                        border: "1px solid var(--proof-red)",
+                        borderRadius: 4,
+                        padding: 10,
+                        margin: 0,
+                        color: "var(--proof-red)",
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    >
+                      {selectedResult.error}
+                    </pre>
+                  </div>
+                )}
               </div>
-            </PanelErrorBoundary>
-          )}
-        </div>
-        {Toast}
+
+              {/* Footer actions */}
+              <div
+                style={{
+                  padding: "8px 14px",
+                  borderTop: "1px solid var(--proof-grey)",
+                  display: "flex",
+                  gap: 6,
+                  flexShrink: 0,
+                }}
+              >
+                <button
+                  onClick={() => navigate(`/analytics?testId=${selectedResult.id}`)}
+                  className="proof-button proof-button-xs"
+                  style={{ flex: 1 }}
+                >
+                  <BarChart3 size={11} /> Analytics
+                </button>
+                <button
+                  onClick={() => navigate(`/testdoc?testId=${selectedResult.id}`)}
+                  className="proof-button proof-button-xs"
+                  style={{ flex: 1 }}
+                >
+                  <FileText size={11} /> Definition
+                </button>
+              </div>
+            </div>
+          </PanelErrorBoundary>
+        )}
       </div>
+      {Toast}
+    </div>
   );
 }

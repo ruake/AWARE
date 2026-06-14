@@ -30,11 +30,11 @@ interface Props {
 }
 
 const CAT_COLORS: Record<string, string> = {
-  analysis: "#5b8af5",
-  alert: "#ef4444",
-  recommendation: "#22c55e",
-  report: "#a855f7",
-  setup: "#f59e0b",
+  analysis: "var(--proof-blue)",
+  alert: "var(--proof-red)",
+  recommendation: "var(--proof-green)",
+  report: "var(--proof-purple)",
+  setup: "var(--proof-yellow)",
 };
 
 function relTime(ts: number): string {

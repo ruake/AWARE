@@ -11,5 +11,11 @@ export default defineConfig({
     environment: "happy-dom",
     globals: true,
     include: ["tests/**/*.test.ts", "tests/**/*.test.tsx", "src/**/*.test.ts", "src/**/*.test.tsx"],
+    coverage: {
+      enabled: true,
+      provider: "v8",
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.*", "src/**/*.d.ts", "src/data/**"],
+    },
   },
 });

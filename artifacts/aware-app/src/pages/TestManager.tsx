@@ -1,7 +1,6 @@
 import React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useLocation } from "wouter";
-import { CiConfigBanner } from "@/components/aware/CiConfigBanner";
 import { ColumnFilter, type ColumnFilterState } from "@/components/aware/ColumnFilter";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
@@ -13,7 +12,6 @@ import {
   TestCaseStatusBadge,
   priorityColor,
 } from "@/components/aware/TestCard";
-import { StatsDashboard } from "@/components/aware/StatsDashboard";
 import { TestManagerSidePanel } from "@/components/aware/TestManagerSidePanel";
 import { RepoStatusBadge } from "@/components/aware/RepoStatusBadge";
 import { CATEGORIES, CATEGORY_COLORS, PRIORITIES, STATUSES } from "@/lib/constants";
@@ -26,7 +24,6 @@ import {
   Trash2,
   RotateCcw,
   Upload,
-  Download,
   FileJson,
   FileSpreadsheet,
   FileCode,
@@ -34,8 +31,267 @@ import {
   Beaker,
   FolderTree,
   History,
+  MoreHorizontal,
+  ChevronDown,
 } from "lucide-react";
+import { CiConfigBanner } from "@/components/aware/CiConfigBanner";
 
+// ── Dropdown Item ─────────────────────────────────────────────────────────────
+function DropdownItem({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "6px 10px",
+        borderRadius: 6,
+        border: "none",
+        background: "none",
+        cursor: "pointer",
+        fontSize: 12,
+        color: "var(--proof-text)",
+        textAlign: "left",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--proof-grey-bg)")}
+      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+    >
+      <span style={{ color: "var(--proof-text-secondary)", flexShrink: 0, display: "flex" }}>{icon}</span>
+      {label}
+    </button>
+  );
+}
+
+// ── Actions Dropdown (progressive disclosure: Import/Export/Changes consolidated) ──
+function ActionsDropdown({
+  onImport,
+  onExport,
+  onChanges,
+  onReset,
+}: {
+  onImport: () => void;
+  onExport: (format: "json" | "csv" | "junit_xml") => void;
+  onChanges: () => void;
+  onReset: () => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className="proof-button proof-button-sm"
+        style={{ display: "flex", alignItems: "center", gap: 4 }}
+      >
+        <MoreHorizontal size={12} /> Actions <ChevronDown size={10} />
+      </button>
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "100%",
+            right: 0,
+            marginTop: 4,
+            background: "var(--proof-surface)",
+            border: "1px solid var(--proof-grey)",
+            borderRadius: 8,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+            zIndex: 100,
+            minWidth: 180,
+            padding: 4,
+          }}
+        >
+          <DropdownItem icon={<Upload size={14} />} label="Import" onClick={() => { onImport(); setOpen(false); }} />
+          <div
+            style={{
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+              padding: "4px 10px 2px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Export
+          </div>
+          <DropdownItem icon={<FileJson size={14} />} label="JSON" onClick={() => { onExport("json"); setOpen(false); }} />
+          <DropdownItem icon={<FileSpreadsheet size={14} />} label="CSV" onClick={() => { onExport("csv"); setOpen(false); }} />
+          <DropdownItem icon={<FileCode size={14} />} label="JUnit XML" onClick={() => { onExport("junit_xml"); setOpen(false); }} />
+          <div style={{ height: 1, background: "var(--proof-grey)", margin: "4px 0" }} />
+          <DropdownItem icon={<History size={14} />} label="Changelog" onClick={() => { onChanges(); setOpen(false); }} />
+          <DropdownItem icon={<RotateCcw size={14} />} label="Reset to defaults" onClick={() => { onReset(); setOpen(false); }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Compact Overview Bar (Tufte data-ink: numbers only, no charts) ────────────
+function OverviewBar({
+  stats,
+  autoTotal,
+  onToggleFilter,
+  onClearFilters,
+}: {
+  stats: ReturnType<typeof computeTestStats>;
+  autoTotal: number;
+  onToggleFilter: (field: string, value: string) => void;
+  onClearFilters: () => void;
+}) {
+  return (
+    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+      <StatCard value={stats.total} label="Total tests" color="var(--proof-blue)" onClick={onClearFilters} />
+      <StatCard value={stats.automated} label="Automated" color="var(--proof-green)" onClick={() => onToggleFilter("automated", "true")} />
+      <StatCard value={autoTotal} label="Auto-discovered" color="var(--proof-blue)" />
+      <StatCard value={`${stats.coverage}%`} label="Coverage" color="var(--proof-text)" />
+    </div>
+  );
+}
+
+function StatCard({
+  value,
+  label,
+  color,
+  onClick,
+}: {
+  value: string | number;
+  label: string;
+  color: string;
+  onClick?: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "6px 12px",
+        borderRadius: 6,
+        background: "var(--proof-surface)",
+        border: "1px solid var(--proof-border)",
+        cursor: onClick ? "pointer" : "default",
+        transition: "background 0.1s",
+      }}
+      onMouseEnter={(e) => {
+        if (onClick) e.currentTarget.style.background = "var(--proof-grey-bg)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "var(--proof-surface)";
+      }}
+    >
+      <span style={{ fontSize: 16, fontWeight: 800, color, lineHeight: 1 }}>{value}</span>
+      <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", lineHeight: 1.2 }}>{label}</span>
+    </div>
+  );
+}
+
+// ── Active Filter Chips (Pirolli & Card information scent) ────────────────────
+const FIELD_LABELS: Record<string, string> = {
+  name: "Name",
+  status: "Status",
+  priority: "Priority",
+  category: "Category",
+  automated: "Automated",
+};
+
+function FilterChips({
+  colFilters,
+  onRemoveValue,
+  onClearText,
+  onClearAll,
+}: {
+  colFilters: Record<string, ColumnFilterState>;
+  onRemoveValue: (field: string, value: string) => void;
+  onClearText: (field: string) => void;
+  onClearAll: () => void;
+}) {
+  const chips: { field: string; label: string; type: "text" | "value"; value?: string }[] = [];
+  for (const [field, f] of Object.entries(colFilters)) {
+    const fieldLabel = FIELD_LABELS[field] ?? field;
+    if (f.text) chips.push({ field, label: `${fieldLabel} contains "${f.text}"`, type: "text" });
+    for (const v of f.selected) {
+      chips.push({ field, label: `${fieldLabel}: ${v}`, type: "value", value: v });
+    }
+  }
+  if (chips.length === 0) return null;
+
+  return (
+    <div style={{ display: "flex", gap: 4, flexWrap: "wrap", flexShrink: 0, alignItems: "center" }}>
+      {chips.map((c, i) => (
+        <span
+          key={`${c.field}-${c.value ?? c.label}-${i}`}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            padding: "2px 8px",
+            fontSize: 11,
+            background: "var(--proof-blue-bg)",
+            border: "1px solid var(--proof-blue)",
+            borderRadius: 12,
+            color: "var(--proof-blue)",
+            fontWeight: 500,
+          }}
+        >
+          {c.label}
+          <button
+            onClick={() => {
+              if (c.type === "text") onClearText(c.field);
+              else if (c.value) onRemoveValue(c.field, c.value);
+            }}
+            style={{
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              padding: 0,
+              color: "var(--proof-blue)",
+              display: "inline-flex",
+              lineHeight: 1,
+            }}
+          >
+            <X size={10} />
+          </button>
+        </span>
+      ))}
+      <button
+        onClick={onClearAll}
+        style={{
+          fontSize: 10,
+          color: "var(--proof-red)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "2px 6px",
+          fontWeight: 600,
+        }}
+      >
+        Clear all
+      </button>
+    </div>
+  );
+}
+
+// ── Import Modal ──────────────────────────────────────────────────────────────
 function ImportModal({ onClose, toast }: { onClose: () => void; toast: (m: string) => void }) {
   const [text, setText] = React.useState("");
   const [result, setResult] = React.useState<{
@@ -161,6 +417,7 @@ function ImportModal({ onClose, toast }: { onClose: () => void; toast: (m: strin
   );
 }
 
+// ── Bulk Actions Bar (Norman visibility: appears prominently on selection) ──
 function BulkActionsBar({
   selected,
   onClear,
@@ -188,7 +445,7 @@ function BulkActionsBar({
         display: "flex",
         alignItems: "center",
         gap: 8,
-        padding: "10px 14px",
+        padding: "8px 14px",
         background: "var(--proof-blue-bg)",
         border: "1px solid var(--proof-blue)",
         borderRadius: 6,
@@ -366,6 +623,7 @@ function BulkActionsBar({
   );
 }
 
+// ── Filter Logic ──────────────────────────────────────────────────────────────
 function applyFilters(
   tcs: TestCase[],
   colFilters: Record<string, ColumnFilterState>,
@@ -391,6 +649,210 @@ function applyFilters(
   });
 }
 
+// ── Changes Panel ─────────────────────────────────────────────────────────────
+function ChangesPanel({
+  changes,
+  testCount,
+  suiteCount,
+  onExport,
+  onClose,
+}: {
+  changes: {
+    testId: string;
+    testName: string;
+    version: number;
+    timestamp: string;
+    author: string;
+    summary: string;
+    changes: string[];
+  }[];
+  testCount: number;
+  suiteCount: number;
+  onExport: (format: "json" | "csv" | "junit_xml") => void;
+  onClose: () => void;
+}) {
+  const authors = [...new Set(changes.map((c) => c.author))].length;
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.4)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 200,
+      }}
+    >
+      <div
+        className="proof-card"
+        style={{
+          width: 640,
+          maxHeight: "80vh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            padding: "14px 18px",
+            borderBottom: "1px solid var(--proof-grey)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexShrink: 0,
+          }}
+        >
+          <div>
+            <h2 style={{ fontSize: 16, fontWeight: 700 }}>Changes & Export</h2>
+            <p style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>
+              {testCount} tests · {suiteCount} suites · {changes.length} changes · {authors}{" "}
+              contributors
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              fontSize: 18,
+              color: "var(--proof-text-secondary)",
+            }}
+          >
+            <X size={14} />
+          </button>
+        </div>
+        <div
+          style={{
+            padding: "12px 18px",
+            borderBottom: "1px solid var(--proof-grey)",
+            display: "flex",
+            gap: 8,
+            flexShrink: 0,
+          }}
+        >
+          <button onClick={() => onExport("json")} className="proof-button proof-button-xs">
+            <FileJson size={12} /> JSON
+          </button>
+          <button onClick={() => onExport("csv")} className="proof-button proof-button-xs">
+            <FileSpreadsheet size={12} /> CSV
+          </button>
+          <button onClick={() => onExport("junit_xml")} className="proof-button proof-button-xs">
+            <FileCode size={12} /> JUnit XML
+          </button>
+          <span style={{ flex: 1 }} />
+          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", alignSelf: "center" }}>
+            Download full test registry
+          </span>
+        </div>
+        <div style={{ flex: 1, overflow: "auto", padding: "8px 18px" }}>
+          {changes.length === 0 ? (
+            <div
+              style={{
+                padding: "32px 0",
+                textAlign: "center",
+                fontSize: 13,
+                color: "var(--proof-text-secondary)",
+              }}
+            >
+              No changes recorded yet
+            </div>
+          ) : (
+            changes.slice(0, 100).map((entry, i) => (
+              <div
+                key={`${entry.testId}-${entry.version}`}
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  padding: "8px 0",
+                  borderBottom:
+                    i < Math.min(changes.length, 100) - 1 ? "1px solid var(--proof-grey)" : "none",
+                }}
+              >
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: "var(--proof-blue-bg)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    color: "var(--proof-blue)",
+                    fontSize: 11,
+                    fontWeight: 700,
+                  }}
+                >
+                  {entry.author[0]?.toUpperCase()}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>{entry.summary}</span>
+                    <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
+                      {new Date(entry.timestamp).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 10,
+                        color: "var(--proof-blue)",
+                      }}
+                    >
+                      {entry.testId}
+                    </span>
+                    {" · "}
+                    {entry.testName}
+                    {" · by "}
+                    {entry.author}
+                  </div>
+                  {entry.changes.length > 0 && (
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color: "var(--proof-text-secondary)",
+                        marginTop: 4,
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 4,
+                      }}
+                    >
+                      {entry.changes.map((c, j) => (
+                        <span
+                          key={j}
+                          style={{
+                            background: "var(--proof-grey-bg)",
+                            padding: "1px 6px",
+                            borderRadius: 3,
+                          }}
+                        >
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default function TestManager() {
   const [, navigate] = useLocation();
   const { tcs, suites } = useTestData();
@@ -433,6 +895,28 @@ export default function TestManager() {
         return next;
       }
       return { ...prev, [field]: { text: "", selected: [...(cur?.selected ?? []), value] } };
+    });
+  };
+
+  const handleRemoveFilterValue = (field: string, value: string) => {
+    setColFilters((prev) => {
+      const cur = prev[field];
+      if (!cur) return prev;
+      return {
+        ...prev,
+        [field]: {
+          ...cur,
+          selected: cur.selected.filter((v) => v !== value),
+        },
+      };
+    });
+  };
+
+  const handleClearFilterText = (field: string) => {
+    setColFilters((prev) => {
+      const cur = prev[field];
+      if (!cur) return prev;
+      return { ...prev, [field]: { ...cur, text: "" } };
     });
   };
 
@@ -504,6 +988,15 @@ export default function TestManager() {
     automated: ["true", "false"],
   };
 
+  const autoSummary = React.useMemo(() => getAutoDiscoverySummary(), []);
+
+  const hasActiveFilters = React.useMemo(
+    () =>
+      Object.values(colFilters).some((f) => f.text || f.selected.length > 0) ||
+      searchText.length > 0,
+    [colFilters, searchText],
+  );
+
   return (
     <>
       {Toast}
@@ -511,12 +1004,13 @@ export default function TestManager() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 8,
+          gap: 6,
           height: "calc(100vh - 100px)",
           maxWidth: 1600,
           margin: "0 auto",
         }}
       >
+        {/* Header — Shneiderman: starts with title + action affordances */}
         <div
           style={{
             display: "flex",
@@ -527,62 +1021,57 @@ export default function TestManager() {
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <h1 style={{ fontSize: 18, fontWeight: 800, color: "var(--proof-text)" }}>
-              Test Manager
+              Tests
             </h1>
             <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-              {tcs.length} tests · {suites.length} suites
+              {tcs.length} cases · {suites.length} suites
             </span>
           </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={() => setShowImport(true)} className="proof-button proof-button-sm">
-              <Upload size={12} /> Import
-            </button>
-            <button onClick={() => handleExport("json")} className="proof-button proof-button-sm">
-              <Download size={12} /> Export
-            </button>
-            <button onClick={() => setShowChanges(true)} className="proof-button proof-button-sm">
-              <History size={12} /> Changes
-            </button>
-            <button
-              onClick={() => {
-                if (confirm("Reset all test data to defaults?")) {
-                  toast("Store reset");
-                }
-              }}
-              className="proof-button proof-button-sm"
-            >
-              <RotateCcw size={12} /> Reset
-            </button>
-          </div>
+          <ActionsDropdown
+            onImport={() => setShowImport(true)}
+            onExport={handleExport}
+            onChanges={() => setShowChanges(true)}
+            onReset={() => {
+              toast("Store reset");
+            }}
+          />
         </div>
-        <PanelErrorBoundary label="Stats dashboard">
-          <StatsDashboard stats={stats} colFilters={colFilters} onToggleFilter={handleStatFilter} />
-        </PanelErrorBoundary>
-        {(() => {
-          const s = getAutoDiscoverySummary();
-          if (s.total === 0) return null;
-          return (
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                fontSize: 11,
-                color: "var(--proof-text-secondary)",
-                flexShrink: 0,
-              }}
-            >
-              <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                <Beaker size={12} style={{ color: "var(--proof-blue)" }} />
-                <strong style={{ color: "var(--proof-blue)" }}>{s.total}</strong> auto-discovered
-              </span>
-              <span>·</span>
-              <span>{s.sourceFiles} pytest files</span>
-              <span>·</span>
-              <span>{Object.entries(s.byCategory).length} categories</span>
-            </div>
-          );
-        })()}
+
+        {/* Overview bar — Tufte: compact numbers, no charts */}
+        <OverviewBar
+          stats={stats}
+          autoTotal={autoSummary.total}
+          onToggleFilter={handleStatFilter}
+          onClearFilters={() => {
+            setColFilters({});
+            setSearchText("");
+          }}
+        />
+
+        {/* Auto-discovery summary — Shneiderman: secondary detail */}
+        {autoSummary.total > 0 && (
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              fontSize: 11,
+              color: "var(--proof-text-secondary)",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
+              <Beaker size={12} style={{ color: "var(--proof-blue)" }} />
+              <strong style={{ color: "var(--proof-blue)" }}>{autoSummary.total}</strong> discovered
+            </span>
+            <span>·</span>
+            <span>{autoSummary.sourceFiles} files</span>
+            <span>·</span>
+            <span>{Object.entries(autoSummary.byCategory).length} categories</span>
+          </div>
+        )}
+
         <CiConfigBanner show={configChanged} onDismiss={() => setConfigChanged(false)} />
+
         <BulkActionsBar
           selected={selectedIds}
           onClear={() => setSelectedIds(new Set())}
@@ -599,6 +1088,8 @@ export default function TestManager() {
             toast(`Added tests to suite`);
           }}
         />
+
+        {/* Search + Filter Row */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
           <div style={{ position: "relative", flex: 1 }}>
             <Search
@@ -623,11 +1114,14 @@ export default function TestManager() {
           <span
             style={{ fontSize: 12, color: "var(--proof-text-secondary)", whiteSpace: "nowrap" }}
           >
-            {filtered.length} / {tcs.length} shown
+            {filtered.length} / {tcs.length}
           </span>
-          {Object.values(colFilters).some((f) => f.text || f.selected.length > 0) && (
+          {hasActiveFilters && (
             <button
-              onClick={() => setColFilters({})}
+              onClick={() => {
+                setColFilters({});
+                setSearchText("");
+              }}
               style={{
                 fontSize: 12,
                 color: "var(--proof-red)",
@@ -637,10 +1131,23 @@ export default function TestManager() {
                 whiteSpace: "nowrap",
               }}
             >
-              Clear filters
+              Clear
             </button>
           )}
         </div>
+
+        {/* Filter Chips — Pirolli & Card: active filter state visible at a glance */}
+        <FilterChips
+          colFilters={colFilters}
+          onRemoveValue={handleRemoveFilterValue}
+          onClearText={handleClearFilterText}
+          onClearAll={() => {
+            setColFilters({});
+            setSearchText("");
+          }}
+        />
+
+        {/* Main: Table + Side Panel */}
         <div style={{ flex: 1, display: "flex", gap: 14, overflow: "hidden" }}>
           <PanelErrorBoundary label="Test list">
             <div
@@ -878,40 +1385,22 @@ export default function TestManager() {
                   </tbody>
                 </table>
               </div>
+              {/* Footer: count only (Tufte: removed redundant export buttons) */}
               <div
                 style={{
-                  padding: "8px 14px",
+                  padding: "6px 14px",
                   borderTop: "1px solid var(--proof-grey)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
                   fontSize: 11,
                   color: "var(--proof-text-secondary)",
                   flexShrink: 0,
                 }}
               >
-                <span>
-                  {filtered.length} of {tcs.length} test cases
-                </span>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button
-                    onClick={() => handleExport("csv")}
-                    className="proof-button proof-button-xs"
-                    style={{ color: "var(--proof-blue)", background: "none", border: "none" }}
-                  >
-                    Export CSV
-                  </button>
-                  <button
-                    onClick={() => handleExport("junit_xml")}
-                    className="proof-button proof-button-xs"
-                    style={{ color: "var(--proof-blue)", background: "none", border: "none" }}
-                  >
-                    Export JUnit XML
-                  </button>
-                </div>
+                {filtered.length} of {tcs.length} test cases
               </div>
             </div>
           </PanelErrorBoundary>
+
+          {/* Detail side panel — Shneiderman: detail-on-demand */}
           {selectedPanel && (
             <TestManagerSidePanel
               tc={selectedPanel}
@@ -933,206 +1422,5 @@ export default function TestManager() {
         />
       )}
     </>
-  );
-}
-
-function ChangesPanel({
-  changes,
-  testCount,
-  suiteCount,
-  onExport,
-  onClose,
-}: {
-  changes: {
-    testId: string;
-    testName: string;
-    version: number;
-    timestamp: string;
-    author: string;
-    summary: string;
-    changes: string[];
-  }[];
-  testCount: number;
-  suiteCount: number;
-  onExport: (format: "json" | "csv" | "junit_xml") => void;
-  onClose: () => void;
-}) {
-  const authors = [...new Set(changes.map((c) => c.author))].length;
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 200,
-      }}
-    >
-      <div
-        className="proof-card"
-        style={{
-          width: 640,
-          maxHeight: "80vh",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            padding: "14px 18px",
-            borderBottom: "1px solid var(--proof-grey)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexShrink: 0,
-          }}
-        >
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 700 }}>Changes & Export</h2>
-            <p style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>
-              {testCount} tests · {suiteCount} suites · {changes.length} changes · {authors}{" "}
-              contributors
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            style={{
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-              fontSize: 18,
-              color: "var(--proof-text-secondary)",
-            }}
-          >
-            ×
-          </button>
-        </div>
-        <div
-          style={{
-            padding: "12px 18px",
-            borderBottom: "1px solid var(--proof-grey)",
-            display: "flex",
-            gap: 8,
-            flexShrink: 0,
-          }}
-        >
-          <button onClick={() => onExport("json")} className="proof-button proof-button-xs">
-            <FileJson size={12} /> JSON
-          </button>
-          <button onClick={() => onExport("csv")} className="proof-button proof-button-xs">
-            <FileSpreadsheet size={12} /> CSV
-          </button>
-          <button onClick={() => onExport("junit_xml")} className="proof-button proof-button-xs">
-            <FileCode size={12} /> JUnit XML
-          </button>
-          <span style={{ flex: 1 }} />
-          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", alignSelf: "center" }}>
-            Download full test registry
-          </span>
-        </div>
-        <div style={{ flex: 1, overflow: "auto", padding: "8px 18px" }}>
-          {changes.length === 0 ? (
-            <div
-              style={{
-                padding: "32px 0",
-                textAlign: "center",
-                fontSize: 13,
-                color: "var(--proof-text-secondary)",
-              }}
-            >
-              No changes recorded yet
-            </div>
-          ) : (
-            changes.slice(0, 100).map((entry, i) => (
-              <div
-                key={`${entry.testId}-${entry.version}`}
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  padding: "8px 0",
-                  borderBottom:
-                    i < Math.min(changes.length, 100) - 1 ? "1px solid var(--proof-grey)" : "none",
-                }}
-              >
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: "50%",
-                    background: "var(--proof-blue-bg)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    color: "var(--proof-blue)",
-                    fontSize: 11,
-                    fontWeight: 700,
-                  }}
-                >
-                  {entry.author[0]?.toUpperCase()}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span style={{ fontSize: 12, fontWeight: 600 }}>{entry.summary}</span>
-                    <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
-                      {new Date(entry.timestamp).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 10,
-                        color: "var(--proof-blue)",
-                      }}
-                    >
-                      {entry.testId}
-                    </span>
-                    {" · "}
-                    {entry.testName}
-                    {" · by "}
-                    {entry.author}
-                  </div>
-                  {entry.changes.length > 0 && (
-                    <div
-                      style={{
-                        fontSize: 10,
-                        color: "var(--proof-text-secondary)",
-                        marginTop: 4,
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 4,
-                      }}
-                    >
-                      {entry.changes.map((c, j) => (
-                        <span
-                          key={j}
-                          style={{
-                            background: "var(--proof-grey-bg)",
-                            padding: "1px 6px",
-                            borderRadius: 3,
-                          }}
-                        >
-                          {c}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
   );
 }

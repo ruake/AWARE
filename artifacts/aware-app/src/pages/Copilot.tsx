@@ -12,11 +12,18 @@ import {
   loadOpenAIConfig,
   saveOpenAIConfig,
 } from "@/lib/copilot/storage";
-import type { Message, ProviderType, ProviderStatus, AgentEvent, SubAgentStep } from "@/lib/copilot/types";
+import type {
+  Message,
+  ProviderType,
+  ProviderStatus,
+  AgentEvent,
+  SubAgentStep,
+} from "@/lib/copilot/types";
 import MessageFeed from "@/components/copilot/MessageFeed";
 import QuickActions from "@/components/copilot/QuickActions";
 import InputBar from "@/components/copilot/InputBar";
 import ProviderSelector from "@/components/copilot/ProviderSelector";
+import ContextPanel from "@/components/copilot/ContextPanel";
 import DebugPanel from "@/components/copilot/DebugPanel";
 import { getLogs, subscribeLogs, clearLogs } from "@/lib/ai/debugLogger";
 import type { DebugLogEntry } from "@/lib/ai/langGraphTypes";
@@ -189,7 +196,7 @@ export default function CopilotPage() {
   const [providerStatus, setProviderStatus] = React.useState<Record<ProviderType, ProviderStatus>>({
     webllm: "unavailable",
     openai: "available",
-    chrome: "unavailable", // updated after async availability check
+    chrome: "unavailable",
   });
   const [downloadProgress, setDownloadProgress] = React.useState<{
     progress: number;
@@ -324,7 +331,7 @@ export default function CopilotPage() {
       if (!content || busy) return;
       if (!text) setInput("");
 
-      const history = messages; // capture before state update
+      const history = messages;
       const userMsg: Message = { id: uid(), role: "user", content, timestamp: Date.now() };
       const assistantMsg: Message = {
         id: uid(),
@@ -359,6 +366,52 @@ export default function CopilotPage() {
       }
     },
     [busy, input, messages, providers, providerType, handleEvent],
+  );
+
+  // ── Retry (Amershi G9: support efficient correction) ─────────────────────
+  const handleRetry = React.useCallback(
+    (messageId: string) => {
+      const idx = messages.findIndex((m) => m.id === messageId);
+      if (idx < 0) return;
+      let userIdx = idx - 1;
+      while (userIdx >= 0 && messages[userIdx].role !== "user") userIdx--;
+      if (userIdx < 0) return;
+      const userContent = messages[userIdx].content;
+      const slicedHistory = messages.slice(0, userIdx);
+      if (!userContent.trim() || busy) return;
+
+      const userMsg: Message = { id: uid(), role: "user", content: userContent, timestamp: Date.now() };
+      const assistantMsg: Message = {
+        id: uid(),
+        role: "assistant",
+        content: "",
+        timestamp: Date.now(),
+        streaming: true,
+      };
+
+      setMessages([...slicedHistory, userMsg, assistantMsg]);
+      setBusy(true);
+
+      const abort = new AbortController();
+      abortRef.current = abort;
+
+      runAgent({
+        userContent,
+        history: slicedHistory,
+        provider: providers[providerType],
+        tools: TOOLS,
+        signal: abort.signal,
+        onEvent: handleEvent,
+      }).catch((err: unknown) => {
+        if (!abort.signal.aborted) {
+          handleEvent({
+            type: "error",
+            error: err instanceof Error ? err.message : "Unknown error",
+          });
+        }
+      });
+    },
+    [messages, busy, providers, providerType, handleEvent],
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -407,6 +460,7 @@ export default function CopilotPage() {
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes spin  { to{transform:rotate(360deg)} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
       `}</style>
 
       <div
@@ -417,7 +471,7 @@ export default function CopilotPage() {
           minHeight: 0,
         }}
       >
-        {/* Quick actions sidebar */}
+        {/* Quick actions sidebar — Amershi G1: make capabilities visible */}
         <QuickActions onAction={handleSend} busy={busy} />
 
         {/* Main chat area */}
@@ -474,7 +528,11 @@ export default function CopilotPage() {
             {busy && (
               <button
                 onClick={handleStop}
-                style={{ ...topBtnStyle, color: "#ef4444", borderColor: "#ef444440" }}
+                style={{
+                  ...topBtnStyle,
+                  color: "var(--proof-red)",
+                  borderColor: "color-mix(in srgb, var(--proof-red) 25%, transparent)",
+                }}
               >
                 <Square size={11} fill="currentColor" /> Stop
               </button>
@@ -490,10 +548,10 @@ export default function CopilotPage() {
             />
           )}
 
-          {/* Message feed (virtualized) */}
-          <MessageFeed messages={messages} />
+          {/* Message feed (virtualized) — Amershi G9: retry support */}
+          <MessageFeed messages={messages} onRetry={handleRetry} />
 
-          {/* Sub-agent steps indicator (LangGraph-style progress) */}
+          {/* Sub-agent steps indicator (LangGraph-style progress) — Norman: conceptual model visibility */}
           {agentSteps.length > 0 && (
             <div
               style={{
@@ -536,16 +594,24 @@ export default function CopilotPage() {
             </div>
           )}
 
-          {/* Input bar */}
+          {/* Input bar — Amershi G4/G7: streaming indicator + prominent stop */}
           <InputBar
             input={input}
             busy={busy}
             textareaRef={textareaRef}
             onSend={handleSend}
+            onStop={handleStop}
             onKeyDown={handleKeyDown}
             onInput={setInput}
           />
         </div>
+
+        {/* Context panel — Amershi G2: show contextually relevant info, G18: make limitations clear */}
+        <ContextPanel
+          providerType={providerType}
+          providerStatus={providerStatus}
+          messages={messages}
+        />
       </div>
     </>
   );

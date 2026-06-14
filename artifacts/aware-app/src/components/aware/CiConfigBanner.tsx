@@ -1,5 +1,5 @@
 import React from "react";
-import { Download, FileText, GitCompare, ChevronDown, TerminalSquare } from "lucide-react";
+import { Download, FileText, GitCompare, ChevronDown, TerminalSquare, X } from "lucide-react";
 import { downloadCiConfig } from "@/lib/ciConfig";
 
 export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: () => void }) {
@@ -65,6 +65,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
         </button>
         <button
           onClick={onDismiss}
+          aria-label="Close"
           style={{
             border: "none",
             background: "transparent",
@@ -75,7 +76,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
             lineHeight: 1,
           }}
         >
-          ×
+          <X size={14} />
         </button>
       </div>
 
@@ -159,7 +160,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
                   color: "#e2e8f0",
                 }}
               >
-                <div style={{ color: "#f59e0b" }}>.github/workflows/run-tests.yml</div>
+                <div style={{ color: "#f59e0b" }}>.github/workflows/controller.yml</div>
                 <div style={{ color: "#6b7280" }}> └─ workflow_dispatch inputs</div>
                 <div style={{ color: "#6b7280" }}> ├─ suite (reads from config)</div>
                 <div style={{ color: "#6b7280" }}> ├─ target (Prod | UAT)</div>

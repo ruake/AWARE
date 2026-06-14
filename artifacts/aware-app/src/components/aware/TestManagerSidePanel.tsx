@@ -6,7 +6,7 @@ import { TagBadge, TestCaseStatusBadge, priorityColor } from "@/components/aware
 import { RepoStatusBadge } from "./RepoStatusBadge";
 import { TestFlowDiagram } from "./TestFlowDiagram";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
-import { Beaker, Clock, BarChart3, FileText, Github, ExternalLink, Network } from "lucide-react";
+import { Beaker, Clock, BarChart3, FileText, Github, ExternalLink, Network, X } from "lucide-react";
 
 export function TestManagerSidePanel({
   tc,
@@ -67,6 +67,7 @@ export function TestManagerSidePanel({
         </span>
         <button
           onClick={onClose}
+          aria-label="Close"
           style={{
             border: "none",
             background: "none",
@@ -76,7 +77,7 @@ export function TestManagerSidePanel({
             lineHeight: 1,
           }}
         >
-          ×
+          <X size={14} />
         </button>
       </div>
       <div
