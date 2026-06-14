@@ -189,6 +189,22 @@ const SKILL_DEFINITIONS: SkillDefinition[] = AI_USE_CASES.map((uc: AIUseCase) =>
       "Explain config file formats",
       "Show common validation errors",
     ],
+    "user-journey": [
+      "Fetch app page structure from data queries",
+      "Group pages by nav group (Monitor/Investigate/Configure/Assist)",
+      "Map inter-page link relationships",
+      "Identify primary workflow paths (Dashboard → Runs → RunDetail → Compare → Copilot)",
+      "Find navigation gaps and orphaned pages",
+      "Generate user journey map and optimization recommendations",
+    ],
+    "layout-analysis": [
+      "Fetch app page structure and component hierarchy",
+      "Analyze CSS design token usage patterns by page",
+      "Evaluate visual hierarchy and information density",
+      "Check layout consistency across pages (containers, card spacing, table density)",
+      "Identify responsive structure and flexbox/grid patterns",
+      "Generate layout analysis report with improvement recommendations",
+    ],
   };
 
   const dataDeps: Record<string, string[]> = {
@@ -220,6 +236,8 @@ const SKILL_DEFINITIONS: SkillDefinition[] = AI_USE_CASES.map((uc: AIUseCase) =>
     "env-health-summary": ["runs"],
     "regression-report": ["runs", "testResults"],
     "setup-guide": [],
+    "user-journey": ["pageStructure"],
+    "layout-analysis": ["pageStructure"],
   };
 
   return {

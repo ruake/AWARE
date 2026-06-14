@@ -5,9 +5,10 @@ import { UserBubble, AssistantBubble } from "./Bubble";
 
 interface Props {
   messages: Message[];
+  onRetry?: (messageId: string) => void;
 }
 
-export default function MessageFeed({ messages }: Props) {
+export default function MessageFeed({ messages, onRetry }: Props) {
   const parentRef = React.useRef<HTMLDivElement | null>(null);
   const atBottomRef = React.useRef(true);
 
@@ -41,7 +42,6 @@ export default function MessageFeed({ messages }: Props) {
     if (!atBottomRef.current) return;
     const el = parentRef.current;
     if (el) {
-      // Use requestAnimationFrame to let the virtualizer re-measure first
       requestAnimationFrame(() => {
         el.scrollTop = el.scrollHeight;
       });
@@ -107,7 +107,7 @@ export default function MessageFeed({ messages }: Props) {
                 {msg.role === "user" ? (
                   <UserBubble message={msg} />
                 ) : (
-                  <AssistantBubble message={msg} />
+                  <AssistantBubble message={msg} onRetry={onRetry} />
                 )}
               </div>
             );

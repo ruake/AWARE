@@ -1,4 +1,3 @@
-import React from "react";
 import { getNotifications } from "./notifications";
 
 export interface LiveUpdate {
@@ -9,14 +8,21 @@ export interface LiveUpdate {
   timestamp: number;
 }
 
-export function useLiveStatus() {
-  const notifs = React.useMemo(() => getNotifications(), []);
-  const [updates] = React.useState<LiveUpdate[]>(notifs);
-  const [pendingCount] = React.useState(notifs.length);
-  const [currentToast] = React.useState<LiveUpdate | null>(null);
+export interface ToastInfo {
+  type: "success" | "warning" | "info";
+  message: string;
+}
 
-  const dismissToast = React.useCallback(() => {}, []);
-  const clearCount = React.useCallback(() => [], []);
+export function useLiveStatus(): {
+  updates: LiveUpdate[];
+  pendingCount: number;
+  currentToast: ToastInfo | null;
+  dismissToast: () => void;
+  clearCount: () => void;
+} {
+  const updates = getNotifications() as LiveUpdate[];
+  const dismissToast = () => {};
+  const clearCount = () => {};
 
-  return { updates, pendingCount, currentToast, dismissToast, clearCount };
+  return { updates, pendingCount: 0, currentToast: null, dismissToast, clearCount };
 }

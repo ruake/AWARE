@@ -167,420 +167,421 @@ export default function TestSuiteManager() {
 
   return (
     <div
-        className="proof-page"
-        style={{
-          height: "calc(100vh - 100px)",
-          maxWidth: 1600,
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: 14,
-          padding: "0 20px",
-        }}
+      className="proof-page"
+      style={{
+        height: "calc(100vh - 100px)",
+        maxWidth: 1600,
+        margin: "0 auto",
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+        padding: "0 20px",
+      }}
+    >
+      <div
+        className="proof-page-header"
+        style={{ alignItems: "center", flexShrink: 0, paddingTop: 2 }}
+      >
+        <div>
+          <h1
+            className="proof-page-title"
+            style={{ fontSize: 20, display: "flex", alignItems: "center", gap: 8 }}
+          >
+            <FolderTree size={18} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
+            Test Suites
+          </h1>
+          <p className="proof-page-subtitle">
+            {suites.length} suites &nbsp;·&nbsp; {tcs.length} test cases
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 6 }}>
+          <button onClick={() => handleExport("json")} className="proof-button proof-button-xs">
+            <Download size={11} /> Export
+          </button>
+          <div
+            className="proof-button proof-button-xs"
+            style={{ position: "relative", cursor: "pointer", padding: "4px 8px" }}
+          >
+            <Download size={11} />
+            <select
+              onChange={(e) => {
+                if (e.target.value) {
+                  handleExport(e.target.value as "json" | "csv" | "junit_xml");
+                  e.target.value = "";
+                }
+              }}
+              style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}
+            >
+              <option value="">Format...</option>
+              <option value="json">JSON</option>
+              <option value="csv">CSV</option>
+              <option value="junit_xml">JUnit XML</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="proof-stagger"
+        style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, flexShrink: 0 }}
+      >
+        {kpis.map((kpi) => (
+          <div
+            key={kpi.label}
+            className="proof-card"
+            style={{ padding: "12px", textAlign: "center" }}
+          >
+            <div style={{ fontSize: 22, fontWeight: 700, color: kpi.color }}>{kpi.value}</div>
+            <div
+              style={{
+                fontSize: 10,
+                color: "var(--proof-text-secondary)",
+                marginTop: 1,
+                textTransform: "uppercase",
+                letterSpacing: "0.3px",
+              }}
+            >
+              {kpi.label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, flexWrap: "wrap" }}
       >
         <div
-          className="proof-page-header"
-          style={{ alignItems: "center", flexShrink: 0, paddingTop: 2 }}
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            border: "1px solid var(--proof-grey)",
+            borderRadius: 6,
+            padding: "6px 10px",
+            background: "var(--proof-grey-bg)",
+            maxWidth: 280,
+          }}
         >
-          <div>
-            <h1
-              className="proof-page-title"
-              style={{ fontSize: 20, display: "flex", alignItems: "center", gap: 8 }}
-            >
-              <FolderTree size={18} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
-              Test Suites
-            </h1>
-            <p className="proof-page-subtitle">
-              {suites.length} suites &nbsp;·&nbsp; {tcs.length} test cases
-            </p>
-          </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={() => handleExport("json")} className="proof-button proof-button-xs">
-              <Download size={11} /> Export
-            </button>
-            <div
-              className="proof-button proof-button-xs"
-              style={{ position: "relative", cursor: "pointer", padding: "4px 8px" }}
-            >
-              <Download size={11} />
-              <select
-                onChange={(e) => {
-                  if (e.target.value) {
-                    handleExport(e.target.value as "json" | "csv" | "junit_xml");
-                    e.target.value = "";
-                  }
-                }}
-                style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}
-              >
-                <option value="">Format...</option>
-                <option value="json">JSON</option>
-                <option value="csv">CSV</option>
-                <option value="junit_xml">JUnit XML</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="proof-stagger"
-          style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, flexShrink: 0 }}
-        >
-          {kpis.map((kpi) => (
-            <div
-              key={kpi.label}
-              className="proof-card"
-              style={{ padding: "12px", textAlign: "center" }}
-            >
-              <div style={{ fontSize: 22, fontWeight: 700, color: kpi.color }}>{kpi.value}</div>
-              <div
-                style={{
-                  fontSize: 10,
-                  color: "var(--proof-text-secondary)",
-                  marginTop: 1,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.3px",
-                }}
-              >
-                {kpi.label}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, flexWrap: "wrap" }}
-        >
-          <div
+          <Search size={14} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search suites..."
             style={{
+              border: "none",
+              outline: "none",
+              fontSize: 12,
+              background: "transparent",
               flex: 1,
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              border: "1px solid var(--proof-grey)",
-              borderRadius: 6,
-              padding: "6px 10px",
-              background: "var(--proof-grey-bg)",
-              maxWidth: 280,
+              minWidth: 0,
+              color: "var(--proof-text)",
             }}
-          >
-            <Search size={14} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search suites..."
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              aria-label="Close"
               style={{
                 border: "none",
-                outline: "none",
-                fontSize: 12,
-                background: "transparent",
-                flex: 1,
-                minWidth: 0,
-                color: "var(--proof-text)",
-              }}
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                style={{
-                  border: "none",
-                  background: "none",
-                  cursor: "pointer",
-                  color: "var(--proof-text-secondary)",
-                  fontSize: 14,
-                  padding: 0,
-                  lineHeight: 1,
-                }}
-              >
-                ×
-              </button>
-            )}
-          </div>
-          <select
-            value={targetFilter}
-            onChange={(e) => setTargetFilter(e.target.value)}
-            style={{
-              fontSize: 12,
-              padding: "6px 8px",
-              borderRadius: 6,
-              border: "1px solid var(--proof-grey)",
-              background: "var(--proof-grey-bg)",
-              color: "var(--proof-text)",
-            }}
-          >
-            <option value="">All Targets</option>
-            {targets.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          <select
-            value={scheduleFilter}
-            onChange={(e) => setScheduleFilter(e.target.value)}
-            style={{
-              fontSize: 12,
-              padding: "6px 8px",
-              borderRadius: 6,
-              border: "1px solid var(--proof-grey)",
-              background: "var(--proof-grey-bg)",
-              color: "var(--proof-text)",
-            }}
-          >
-            <option value="">All Schedules</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="manual">Manual</option>
-          </select>
-          <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-            {filtered.length} of {suites.length} suites
-          </span>
-          {discovery.total > 0 && (
-            <span
-              style={{
-                fontSize: 11,
+                background: "none",
+                cursor: "pointer",
                 color: "var(--proof-text-secondary)",
-                display: "flex",
-                alignItems: "center",
-                gap: 3,
+                fontSize: 14,
+                padding: 0,
+                lineHeight: 1,
               }}
             >
-              <Beaker size={12} style={{ color: "var(--proof-blue)" }} />
-              <strong style={{ color: "var(--proof-blue)" }}>{discovery.total}</strong>{" "}
-              auto-discovered · {discovery.sourceFiles} files
-            </span>
+              <X size={14} />
+            </button>
           )}
         </div>
+        <select
+          value={targetFilter}
+          onChange={(e) => setTargetFilter(e.target.value)}
+          style={{
+            fontSize: 12,
+            padding: "6px 8px",
+            borderRadius: 6,
+            border: "1px solid var(--proof-grey)",
+            background: "var(--proof-grey-bg)",
+            color: "var(--proof-text)",
+          }}
+        >
+          <option value="">All Targets</option>
+          {targets.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+        <select
+          value={scheduleFilter}
+          onChange={(e) => setScheduleFilter(e.target.value)}
+          style={{
+            fontSize: 12,
+            padding: "6px 8px",
+            borderRadius: 6,
+            border: "1px solid var(--proof-grey)",
+            background: "var(--proof-grey-bg)",
+            color: "var(--proof-text)",
+          }}
+        >
+          <option value="">All Schedules</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="manual">Manual</option>
+        </select>
+        <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
+          {filtered.length} of {suites.length} suites
+        </span>
+        {discovery.total > 0 && (
+          <span
+            style={{
+              fontSize: 11,
+              color: "var(--proof-text-secondary)",
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+            }}
+          >
+            <Beaker size={12} style={{ color: "var(--proof-blue)" }} />
+            <strong style={{ color: "var(--proof-blue)" }}>{discovery.total}</strong>{" "}
+            auto-discovered · {discovery.sourceFiles} files
+          </span>
+        )}
+      </div>
 
-        <div style={{ flex: 1, display: "flex", gap: 14, minHeight: 0 }}>
-          <PanelErrorBoundary label="Suite table" height="100%">
-            <div
-              className="proof-card"
-              style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}
-            >
-              <div style={{ overflow: "auto", flex: 1 }}>
-                <table className="proof-table" style={{ width: "100%" }}>
-                  <colgroup>
-                    <col />
-                    <col />
-                    <col />
-                    <col />
-                    <col />
-                    <col />
-                    <col />
-                  </colgroup>
-                  <thead
-                    style={{
-                      position: "sticky",
-                      top: 0,
-                      background: "var(--proof-surface)",
-                      zIndex: 1,
-                    }}
-                  >
+      <div style={{ flex: 1, display: "flex", gap: 14, minHeight: 0 }}>
+        <PanelErrorBoundary label="Suite table" height="100%">
+          <div
+            className="proof-card"
+            style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}
+          >
+            <div style={{ overflow: "auto", flex: 1 }}>
+              <table className="proof-table" style={{ width: "100%" }}>
+                <colgroup>
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                </colgroup>
+                <thead
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    background: "var(--proof-surface)",
+                    zIndex: 1,
+                  }}
+                >
+                  <tr>
+                    <th>Suite</th>
+                    <th style={{ textAlign: "center" }}>Tests</th>
+                    <th>Schedule</th>
+                    <th>Env IDs</th>
+                    <th>Runners</th>
+                    <th>Categories</th>
+                    <th style={{ textAlign: "center" }}>Active</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {flatSuites.length === 0 && (
                     <tr>
-                      <th>Suite</th>
-                      <th style={{ textAlign: "center" }}>Tests</th>
-                      <th>Schedule</th>
-                      <th>Env IDs</th>
-                      <th>Runners</th>
-                      <th>Categories</th>
-                      <th style={{ textAlign: "center" }}>Active</th>
+                      <td
+                        colSpan={7}
+                        style={{
+                          textAlign: "center",
+                          padding: "48px 16px",
+                          color: "var(--proof-text-secondary)",
+                          fontSize: 13,
+                        }}
+                      >
+                        {search || targetFilter || scheduleFilter
+                          ? "No suites match your filters"
+                          : "No suites configured"}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {flatSuites.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={7}
-                          style={{
-                            textAlign: "center",
-                            padding: "48px 16px",
-                            color: "var(--proof-text-secondary)",
-                            fontSize: 13,
-                          }}
-                        >
-                          {search || targetFilter || scheduleFilter
-                            ? "No suites match your filters"
-                            : "No suites configured"}
-                        </td>
-                      </tr>
-                    )}
-                    {flatSuites.map((s) => {
-                      const depth = getSuiteDepth(s, suites);
-                      const suiteTests = tcs.filter((tc) => s.testIds.includes(tc.id));
-                      const cats = [...new Set(suiteTests.map((tc) => tc.category))];
-                      const activeCount = suiteTests.filter((tc) => tc.status === "active").length;
-                      const isSelected = activeSuite?.id === s.id;
-                      return (
-                        <tr
-                          key={s.id}
-                          style={{
-                            cursor: "pointer",
-                            background: isSelected ? "var(--proof-blue-bg)" : undefined,
-                          }}
-                          onClick={() => {
-                            setSelId(s.id);
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isSelected)
-                              e.currentTarget.style.background = "rgba(255,255,255,0.025)";
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isSelected) e.currentTarget.style.background = "";
-                          }}
-                        >
-                          <td style={{ verticalAlign: "middle" }}>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 6,
-                                paddingLeft: `${depth * 16}px`,
-                              }}
-                            >
-                              {depth > 0 && (
-                                <span
-                                  style={{
-                                    fontSize: 10,
-                                    color: "var(--proof-text-muted)",
-                                    fontFamily: "var(--font-mono)",
-                                  }}
-                                >
-                                  └{" "}
-                                </span>
-                              )}
-                              <FolderTree
-                                size={13}
-                                style={{ color: "var(--proof-blue)", flexShrink: 0 }}
-                              />
-                              <div style={{ minWidth: 0 }}>
-                                <div
-                                  style={{
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                  }}
-                                >
-                                  {s.name}
-                                </div>
-                                <div
-                                  style={{
-                                    fontSize: 10,
-                                    color: "var(--proof-text-secondary)",
-                                    fontFamily: "var(--font-mono)",
-                                  }}
-                                >
-                                  {s.id}
-                                </div>
+                  )}
+                  {flatSuites.map((s) => {
+                    const depth = getSuiteDepth(s, suites);
+                    const suiteTests = tcs.filter((tc) => s.testIds.includes(tc.id));
+                    const cats = [...new Set(suiteTests.map((tc) => tc.category))];
+                    const activeCount = suiteTests.filter((tc) => tc.status === "active").length;
+                    const isSelected = activeSuite?.id === s.id;
+                    return (
+                      <tr
+                        key={s.id}
+                        style={{
+                          cursor: "pointer",
+                          background: isSelected ? "var(--proof-blue-bg)" : undefined,
+                        }}
+                        onClick={() => {
+                          setSelId(s.id);
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected)
+                            e.currentTarget.style.background = "rgba(255,255,255,0.025)";
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) e.currentTarget.style.background = "";
+                        }}
+                      >
+                        <td style={{ verticalAlign: "middle" }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                              paddingLeft: `${depth * 16}px`,
+                            }}
+                          >
+                            {depth > 0 && (
+                              <span
+                                style={{
+                                  fontSize: 10,
+                                  color: "var(--proof-text-muted)",
+                                  fontFamily: "var(--font-mono)",
+                                }}
+                              >
+                                └{" "}
+                              </span>
+                            )}
+                            <FolderTree
+                              size={13}
+                              style={{ color: "var(--proof-blue)", flexShrink: 0 }}
+                            />
+                            <div style={{ minWidth: 0 }}>
+                              <div
+                                style={{
+                                  fontSize: 13,
+                                  fontWeight: 600,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {s.name}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: 10,
+                                  color: "var(--proof-text-secondary)",
+                                  fontFamily: "var(--font-mono)",
+                                }}
+                              >
+                                {s.id}
                               </div>
                             </div>
-                          </td>
-                          <td
-                            style={{
-                              textAlign: "center",
-                              fontWeight: 700,
-                              color: "var(--proof-blue)",
-                              verticalAlign: "middle",
-                              fontSize: 14,
-                            }}
-                          >
-                            {s.testIds.length}
-                          </td>
-                          <td
-                            style={{
-                              fontSize: 11,
-                              color: s.schedule ? "var(--proof-text)" : "var(--proof-text-muted)",
-                              verticalAlign: "middle",
-                              fontFamily: s.schedule ? "var(--font-mono)" : undefined,
-                            }}
-                          >
-                            {s.schedule ? (
-                              <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                                <Clock size={11} style={{ color: "var(--proof-text-secondary)" }} />
-                                {formatSchedule(s.schedule)}
-                              </span>
-                            ) : (
-                              "Manual"
-                            )}
-                          </td>
-                          <td style={{ verticalAlign: "middle" }}>
-                            <span className="proof-badge proof-badge-pass" style={{ fontSize: 10 }}>
-                              {s.envIds.join(", ")}
+                          </div>
+                        </td>
+                        <td
+                          style={{
+                            textAlign: "center",
+                            fontWeight: 700,
+                            color: "var(--proof-blue)",
+                            verticalAlign: "middle",
+                            fontSize: 14,
+                          }}
+                        >
+                          {s.testIds.length}
+                        </td>
+                        <td
+                          style={{
+                            fontSize: 11,
+                            color: s.schedule ? "var(--proof-text)" : "var(--proof-text-muted)",
+                            verticalAlign: "middle",
+                            fontFamily: s.schedule ? "var(--font-mono)" : undefined,
+                          }}
+                        >
+                          {s.schedule ? (
+                            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                              <Clock size={11} style={{ color: "var(--proof-text-secondary)" }} />
+                              {formatSchedule(s.schedule)}
                             </span>
-                          </td>
-                          <td
-                            style={{
-                              fontSize: 11,
-                              color: "var(--proof-text-secondary)",
-                              verticalAlign: "middle",
-                              textTransform: "capitalize",
-                            }}
+                          ) : (
+                            "Manual"
+                          )}
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                          <span className="proof-badge proof-badge-pass" style={{ fontSize: 10 }}>
+                            {s.envIds.join(", ")}
+                          </span>
+                        </td>
+                        <td
+                          style={{
+                            fontSize: 11,
+                            color: "var(--proof-text-secondary)",
+                            verticalAlign: "middle",
+                            textTransform: "capitalize",
+                          }}
+                        >
+                          {s.runners.join(", ")}
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                            {cats.map((cat) => {
+                              const ci = CATEGORIES.indexOf(cat) % CATEGORY_COLORS.length;
+                              return (
+                                <span
+                                  key={cat}
+                                  style={{
+                                    fontSize: 9,
+                                    padding: "1px 5px",
+                                    borderRadius: 3,
+                                    textTransform: "capitalize",
+                                    background: CATEGORY_COLORS[ci] + "18",
+                                    border: `1px solid ${CATEGORY_COLORS[ci]}30`,
+                                    color: CATEGORY_COLORS[ci],
+                                  }}
+                                >
+                                  {cat}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </td>
+                        <td style={{ textAlign: "center", verticalAlign: "middle" }}>
+                          <span
+                            className={`proof-badge ${activeCount === s.testIds.length ? "proof-badge-pass" : activeCount > 0 ? "proof-badge-flaky" : "proof-badge-fail"}`}
+                            style={{ fontSize: 10 }}
                           >
-                            {s.runners.join(", ")}
-                          </td>
-                          <td style={{ verticalAlign: "middle" }}>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-                              {cats.map((cat) => {
-                                const ci = CATEGORIES.indexOf(cat) % CATEGORY_COLORS.length;
-                                return (
-                                  <span
-                                    key={cat}
-                                    style={{
-                                      fontSize: 9,
-                                      padding: "1px 5px",
-                                      borderRadius: 3,
-                                      textTransform: "capitalize",
-                                      background: CATEGORY_COLORS[ci] + "18",
-                                      border: `1px solid ${CATEGORY_COLORS[ci]}30`,
-                                      color: CATEGORY_COLORS[ci],
-                                    }}
-                                  >
-                                    {cat}
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          </td>
-                          <td style={{ textAlign: "center", verticalAlign: "middle" }}>
-                            <span
-                              className={`proof-badge ${activeCount === s.testIds.length ? "proof-badge-pass" : activeCount > 0 ? "proof-badge-flaky" : "proof-badge-fail"}`}
-                              style={{ fontSize: 10 }}
-                            >
-                              {activeCount}/{s.testIds.length}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                            {activeCount}/{s.testIds.length}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
+          </div>
+        </PanelErrorBoundary>
+
+        {activeSuite && !isTestSelected && (
+          <PanelErrorBoundary label="Suite detail" height="100%">
+            <SuiteDetailPanel
+              suite={activeSuite}
+              tests={tcs.filter((t) => activeSuite.testIds.includes(t.id))}
+              onClose={() => setSelId(null)}
+              onTestSelect={(testId) => setSelId(testId)}
+            />
           </PanelErrorBoundary>
+        )}
 
-          {activeSuite && !isTestSelected && (
-            <PanelErrorBoundary label="Suite detail" height="100%">
-              <SuiteDetailPanel
-                suite={activeSuite}
-                tests={tcs.filter((t) => activeSuite.testIds.includes(t.id))}
-                onClose={() => setSelId(null)}
-                onTestSelect={(testId) => setSelId(testId)}
-              />
-            </PanelErrorBoundary>
-          )}
-
-          {isTestSelected && selectedTest && (
-            <PanelErrorBoundary label="Test detail" height="100%">
-              <TestDetailPanel
-                test={selectedTest}
-                parentSuite={activeSuite}
-                onClose={() => setSelId(null)}
-              />
-            </PanelErrorBoundary>
-          )}
-        </div>
-        {Toast}
+        {isTestSelected && selectedTest && (
+          <PanelErrorBoundary label="Test detail" height="100%">
+            <TestDetailPanel
+              test={selectedTest}
+              parentSuite={activeSuite}
+              onClose={() => setSelId(null)}
+            />
+          </PanelErrorBoundary>
+        )}
       </div>
+      {Toast}
+    </div>
   );
 }
 

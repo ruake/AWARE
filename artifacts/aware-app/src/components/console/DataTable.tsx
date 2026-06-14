@@ -194,9 +194,7 @@ export function DataTable<T extends Record<string, unknown>>({
         const next = new Set(prev);
 
         if (shiftKey && lastClickedRef.current !== null) {
-          const lastIdx = data.findIndex(
-            (d) => keyExtractor(d) === lastClickedRef.current,
-          );
+          const lastIdx = data.findIndex((d) => keyExtractor(d) === lastClickedRef.current);
           if (lastIdx !== -1) {
             const start = Math.min(lastIdx, index);
             const end = Math.max(lastIdx, index);
@@ -240,9 +238,7 @@ export function DataTable<T extends Record<string, unknown>>({
   );
 
   const pageStart = page ? (page - 1) * (pageSize ?? 25) + 1 : 0;
-  const pageEnd = page
-    ? Math.min(page * (pageSize ?? 25), totalFiltered ?? 0)
-    : 0;
+  const pageEnd = page ? Math.min(page * (pageSize ?? 25), totalFiltered ?? 0) : 0;
 
   const arrowButtonStyle: React.CSSProperties = {
     background: "none",
@@ -342,8 +338,7 @@ export function DataTable<T extends Record<string, unknown>>({
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = "var(--proof-blue)";
-                e.currentTarget.style.boxShadow =
-                  "0 0 0 3px rgba(91, 138, 245, 0.12)";
+                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(91, 138, 245, 0.12)";
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = "var(--proof-border)";
@@ -368,7 +363,8 @@ export function DataTable<T extends Record<string, unknown>>({
           <thead>
             <tr style={{ background: "var(--proof-surface)" }}>
               {displayColumns.map((col) => {
-                const isSortable = sortable && col.sortable !== false && col.key !== "__selection__";
+                const isSortable =
+                  sortable && col.sortable !== false && col.key !== "__selection__";
                 const align = col.align ?? "left";
                 const width = col.width;
 
@@ -411,9 +407,7 @@ export function DataTable<T extends Record<string, unknown>>({
                           {col.header}
                           {isSortable && (
                             <SortIcon
-                              direction={
-                                sortKey === col.key ? (sortDirection ?? null) : null
-                              }
+                              direction={sortKey === col.key ? (sortDirection ?? null) : null}
                             />
                           )}
                         </>
@@ -476,22 +470,15 @@ export function DataTable<T extends Record<string, unknown>>({
           {/* Body */}
           <tbody>
             {loading ? (
-              Array.from({ length: Math.min(pageSize ?? 25, 10) }).map(
-                (_, rowIdx) => (
-                  <tr key={`skeleton-${rowIdx}`}>
-                    {displayColumns.map((col, colIdx) => (
-                      <td
-                        key={`skeleton-cell-${rowIdx}-${colIdx}`}
-                        style={dataCellStyle}
-                      >
-                        {col.key === "__selection__" ? null : (
-                          <SkeletonBox width="80%" height={14} />
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ),
-              )
+              Array.from({ length: Math.min(pageSize ?? 25, 10) }).map((_, rowIdx) => (
+                <tr key={`skeleton-${rowIdx}`}>
+                  {displayColumns.map((col, colIdx) => (
+                    <td key={`skeleton-cell-${rowIdx}-${colIdx}`} style={dataCellStyle}>
+                      {col.key === "__selection__" ? null : <SkeletonBox width="80%" height={14} />}
+                    </td>
+                  ))}
+                </tr>
+              ))
             ) : data.length === 0 ? (
               <tr>
                 <td
@@ -553,8 +540,7 @@ export function DataTable<T extends Record<string, unknown>>({
                     }}
                     onMouseEnter={(e) => {
                       if (!isSelected) {
-                        e.currentTarget.style.background =
-                          "var(--proof-surface-hover)";
+                        e.currentTarget.style.background = "var(--proof-surface-hover)";
                       }
                     }}
                     onMouseLeave={(e) => {
@@ -585,9 +571,7 @@ export function DataTable<T extends Record<string, unknown>>({
                         );
                       }
 
-                      const cellValue = col.render
-                        ? col.render(item)
-                        : String(item[col.key] ?? "");
+                      const cellValue = col.render ? col.render(item) : String(item[col.key] ?? "");
 
                       return (
                         <td
@@ -598,9 +582,7 @@ export function DataTable<T extends Record<string, unknown>>({
                             ...col.cellStyle,
                           }}
                           title={
-                            typeof cellValue === "string"
-                              ? cellValue
-                              : String(item[col.key] ?? "")
+                            typeof cellValue === "string" ? cellValue : String(item[col.key] ?? "")
                           }
                         >
                           {cellValue}
@@ -718,8 +700,7 @@ export function DataTable<T extends Record<string, unknown>>({
               style={{
                 ...arrowButtonStyle,
                 opacity: page && page < (totalPages ?? 1) ? 1 : 0.4,
-                cursor:
-                  page && page < (totalPages ?? 1) ? "pointer" : "not-allowed",
+                cursor: page && page < (totalPages ?? 1) ? "pointer" : "not-allowed",
               }}
               title="Next page"
             >
@@ -731,8 +712,7 @@ export function DataTable<T extends Record<string, unknown>>({
               style={{
                 ...arrowButtonStyle,
                 opacity: page && page < (totalPages ?? 1) ? 1 : 0.4,
-                cursor:
-                  page && page < (totalPages ?? 1) ? "pointer" : "not-allowed",
+                cursor: page && page < (totalPages ?? 1) ? "pointer" : "not-allowed",
               }}
               title="Last page"
             >

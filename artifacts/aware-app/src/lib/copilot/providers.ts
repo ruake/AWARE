@@ -98,7 +98,12 @@ export class WebLLMProvider implements IProvider {
       const reason = choice.finish_reason;
       if (reason === "tool_calls") {
         for (const a of Object.values(accum)) {
-          onDelta({ toolCallId: a.id, toolCallName: a.name, toolCallArgsChunk: a.args, done: false });
+          onDelta({
+            toolCallId: a.id,
+            toolCallName: a.name,
+            toolCallArgsChunk: a.args,
+            done: false,
+          });
         }
         onDelta({ done: true });
       } else if (reason && reason !== "null") {
@@ -175,7 +180,10 @@ export class OpenAIProvider implements IProvider {
       for (const line of decoder.decode(value, { stream: true }).split("\n")) {
         if (!line.startsWith("data: ")) continue;
         const json = line.slice(6).trim();
-        if (json === "[DONE]") { onDelta({ done: true }); return; }
+        if (json === "[DONE]") {
+          onDelta({ done: true });
+          return;
+        }
         try {
           const chunk = JSON.parse(json);
           const choice = chunk.choices?.[0];
@@ -193,13 +201,20 @@ export class OpenAIProvider implements IProvider {
           const reason = choice?.finish_reason;
           if (reason === "tool_calls") {
             for (const a of Object.values(accum)) {
-              onDelta({ toolCallId: a.id, toolCallName: a.name, toolCallArgsChunk: a.args, done: false });
+              onDelta({
+                toolCallId: a.id,
+                toolCallName: a.name,
+                toolCallArgsChunk: a.args,
+                done: false,
+              });
             }
             onDelta({ done: true });
           } else if (reason === "stop" || (reason && reason !== "null")) {
             onDelta({ done: true });
           }
-        } catch { /* skip malformed SSE */ }
+        } catch {
+          /* skip malformed SSE */
+        }
       }
     }
   }
@@ -284,11 +299,11 @@ const KEYWORD_ROUTES: Array<{
       /unstable/i,
       /\bflip\b/i,
       /PASS.*FAIL|FAIL.*PASS/i,
-      /reliab/i,          // "most stable and reliable" → stable tests
+      /reliab/i, // "most stable and reliable" → stable tests
       /inconsist/i,
-      /never.*fail/i,     // "tests that never fail"
+      /never.*fail/i, // "tests that never fail"
       /high.risk.*test/i, // "high-risk flaky tests"
-      /\bstable\b/i,      // "which are most stable envs / tests"
+      /\bstable\b/i, // "which are most stable envs / tests"
     ],
   },
 
@@ -304,11 +319,11 @@ const KEYWORD_ROUTES: Array<{
       /can we.*(deploy|ship|release)/i,
       /prod.*(ready|block|gate)/i,
       /\bgate\b/i,
-      /block.*rate|percent.*block/i,     // "block rate / % blocked"
-      /uat.*threshold|above.*95/i,        // "UAT above 95%"
-      /last.*block/i,                     // "last block decision"
-      /successful.*promot/i,              // "successful promotions"
-      /gate.*trend|block.*often/i,        // "gate trend"
+      /block.*rate|percent.*block/i, // "block rate / % blocked"
+      /uat.*threshold|above.*95/i, // "UAT above 95%"
+      /last.*block/i, // "last block decision"
+      /successful.*promot/i, // "successful promotions"
+      /gate.*trend|block.*often/i, // "gate trend"
     ],
   },
 
@@ -319,23 +334,23 @@ const KEYWORD_ROUTES: Array<{
     args: {},
     patterns: [
       /breakdown/i,
-      /\bcategor/i,       // "categories" → category heatmap, top categories, etc.
+      /\bcategor/i, // "categories" → category heatmap, top categories, etc.
       /why.*fail/i,
       /what.*failing/i,
       /root.cause/i,
       /failing most/i,
-      /\bwaf\b/i,                           // "WAF tests"
-      /security.*fail|security.*test/i,      // "security failures"
-      /bot.*manager|bot.*protect/i,          // "bot manager"
-      /\btls\b|certificate.*valid/i,         // "TLS / certificate"
-      /performance.*fail|timing.*fail/i,     // "performance failures"
-      /api.*fail|http.*fail/i,               // "API / HTTP failures"
-      /regression.*alert|newly.*fail/i,      // "regression alert"
-      /zero.*pass.*rate|zero.*pass\b/i,      // "zero pass rate"
-      /\bedgeworker\b|edge.*worker/i,        // "EdgeWorker tests"
-      /cache.*behav|cdn.*cache.*test/i,      // "cache behavior tests"
-      /suite.*fail|fail.*suite/i,            // "suite failures"
-      /\bheatmap\b/i,                        // "category heatmap"
+      /\bwaf\b/i, // "WAF tests"
+      /security.*fail|security.*test/i, // "security failures"
+      /bot.*manager|bot.*protect/i, // "bot manager"
+      /\btls\b|certificate.*valid/i, // "TLS / certificate"
+      /performance.*fail|timing.*fail/i, // "performance failures"
+      /api.*fail|http.*fail/i, // "API / HTTP failures"
+      /regression.*alert|newly.*fail/i, // "regression alert"
+      /zero.*pass.*rate|zero.*pass\b/i, // "zero pass rate"
+      /\bedgeworker\b|edge.*worker/i, // "EdgeWorker tests"
+      /cache.*behav|cdn.*cache.*test/i, // "cache behavior tests"
+      /suite.*fail|fail.*suite/i, // "suite failures"
+      /\bheatmap\b/i, // "category heatmap"
     ],
   },
 
@@ -350,18 +365,18 @@ const KEYWORD_ROUTES: Array<{
       /qa.*uat|uat.*prod/i,
       /all.*(env|environment)/i,
       /across.*(env|environment)/i,
-      /qa.*health|qa.*deep.dive/i,          // "QA deep dive / health"
-      /uat.*status|uat.*health/i,            // "UAT status / health"
-      /prod.*status|prod.*health/i,          // "PROD status / health" (before prod.*run)
-      /qa.*vs.*prod|quality.*gap/i,          // "QA vs PROD gap"
-      /worst.*env|env.*worst/i,              // "worst env / env worst pass rate"
-      /\bdegrading\b|env.*trend/i,           // "degrading / env trend"
-      /staging.*network/i,                   // "staging network"
-      /production.*network/i,                // "production network"
-      /cdn.*health|cdn.*summar/i,            // "CDN health summary"
-      /cdn.*report|full.*cdn.*report/i,      // "full CDN report"
+      /qa.*health|qa.*deep.dive/i, // "QA deep dive / health"
+      /uat.*status|uat.*health/i, // "UAT status / health"
+      /prod.*status|prod.*health/i, // "PROD status / health" (before prod.*run)
+      /qa.*vs.*prod|quality.*gap/i, // "QA vs PROD gap"
+      /worst.*env|env.*worst/i, // "worst env / env worst pass rate"
+      /\bdegrading\b|env.*trend/i, // "degrading / env trend"
+      /staging.*network/i, // "staging network"
+      /production.*network/i, // "production network"
+      /cdn.*health|cdn.*summar/i, // "CDN health summary"
+      /cdn.*report|full.*cdn.*report/i, // "full CDN report"
       /playwright.*vs.*pytest|web.*vs.*api/i, // "Web vs API"
-      /akamai.*health|akamai.*property/i,    // "Akamai property health"
+      /akamai.*health|akamai.*property/i, // "Akamai property health"
     ],
   },
 
@@ -400,9 +415,9 @@ const KEYWORD_ROUTES: Array<{
       /failure.count/i,
       /test.result/i,
       /recent.*(run|test)/i,
-      /playwright.*pass|playwright.*rate/i,  // "Playwright pass rate"
+      /playwright.*pass|playwright.*rate/i, // "Playwright pass rate"
       /pytest.*pass|pytest.*rate|pytest.*result/i, // "pytest pass rate"
-      /\bsuite\b/i,                          // "suite overview / all suites"
+      /\bsuite\b/i, // "suite overview / all suites"
       /test.*volume|test.*count|how.many.*test/i, // "test count / volume"
     ],
   },
@@ -429,7 +444,11 @@ export function routeByKeyword(
 // results even with compact prompts. Instead, we build the response directly
 // from the structured tool data — fast, accurate, zero hallucination.
 
-function buildTemplateSynthesis(toolName: string, toolDataJson: string, _userQuery: string): string {
+function buildTemplateSynthesis(
+  toolName: string,
+  toolDataJson: string,
+  _userQuery: string,
+): string {
   try {
     const data = JSON.parse(toolDataJson);
 
@@ -581,18 +600,25 @@ async function streamFromChromeAI(
       return;
     }
   } catch (err: unknown) {
-    if ((signal as AbortSignal).aborted) { onDelta({ done: true }); return; }
+    if ((signal as AbortSignal).aborted) {
+      onDelta({ done: true });
+      return;
+    }
     const msg = err instanceof Error ? err.message : String(err);
     onDelta({ content: `⚠️ Chrome AI error: ${msg}`, done: true });
     return;
   }
 
-  if (signal.aborted) { session.destroy(); onDelta({ done: true }); return; }
+  if (signal.aborted) {
+    session.destroy();
+    onDelta({ done: true });
+    return;
+  }
 
   // Stream — Chrome AI yields cumulative text, compute true deltas
   const stream = session.promptStreaming(userPrompt);
   const reader = stream.getReader();
-  let fullText = "";
+  let fullText: string;
   let lastLen = 0;
 
   try {
@@ -639,7 +665,9 @@ export class ChromeProvider implements IProvider {
         return "unavailable";
       }
       return "unavailable";
-    } catch { return "unavailable"; }
+    } catch {
+      return "unavailable";
+    }
   }
 
   // stream() is called by the graph for synthesis (after tools have run)
@@ -724,8 +752,11 @@ function mergeSystemIntoUser(messages: ApiMessage[]): ApiMessage[] {
 // ── Provider Registry ─────────────────────────────────────────────────────────
 export function createProvider(type: ProviderType): IProvider {
   switch (type) {
-    case "webllm": return new WebLLMProvider();
-    case "openai": return new OpenAIProvider();
-    case "chrome": return new ChromeProvider();
+    case "webllm":
+      return new WebLLMProvider();
+    case "openai":
+      return new OpenAIProvider();
+    case "chrome":
+      return new ChromeProvider();
   }
 }

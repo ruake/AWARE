@@ -19,6 +19,7 @@ import {
   FolderTree,
   Cpu,
   Radio,
+  X,
 } from "lucide-react";
 import { CommandPalette } from "./CommandPalette";
 import { ProofLogo } from "./ProofLogo";
@@ -69,6 +70,7 @@ export function AppLayout({
   const [paletteOpen, setPaletteOpen] = React.useState(false);
   const [showNotifs, setShowNotifs] = React.useState(false);
   const [navSearch, setNavSearch] = React.useState("");
+  const [searchHovered, setSearchHovered] = React.useState(false);
   const notifRef = React.useRef<HTMLDivElement>(null);
   const { updates, currentToast, dismissToast, pendingCount, clearCount } = useLiveStatus();
 
@@ -275,6 +277,8 @@ export function AppLayout({
           {/* ⌘K search button */}
           <button
             onClick={() => setPaletteOpen(true)}
+            onMouseEnter={() => setSearchHovered(true)}
+            onMouseLeave={() => setSearchHovered(false)}
             style={{
               display: "flex",
               alignItems: "center",
@@ -284,18 +288,10 @@ export function AppLayout({
               cursor: "pointer",
               border: "1px solid var(--proof-border-strong)",
               borderRadius: 7,
-              background: "rgba(255,255,255,0.04)",
-              color: "var(--proof-text-secondary)",
+              background: searchHovered ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.04)",
+              color: searchHovered ? "var(--proof-text)" : "var(--proof-text-secondary)",
               whiteSpace: "nowrap",
               transition: "all 0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.07)";
-              e.currentTarget.style.color = "var(--proof-text)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-              e.currentTarget.style.color = "var(--proof-text-secondary)";
             }}
           >
             <Search size={13} />
@@ -322,6 +318,7 @@ export function AppLayout({
                 setShowNotifs((p) => !p);
                 clearCount();
               }}
+              aria-label="Notifications"
               title={`${pendingCount} live updates`}
               style={{
                 position: "relative",
@@ -545,6 +542,7 @@ export function AppLayout({
           >
             <button
               onClick={() => setSidebarExpanded((e) => !e)}
+              aria-label="Toggle menu"
               style={{
                 width: "100%",
                 display: "flex",
@@ -760,6 +758,7 @@ export function AppLayout({
               e.stopPropagation();
               dismissToast();
             }}
+            aria-label="Close"
             style={{
               marginLeft: 6,
               background: "none",
@@ -771,7 +770,7 @@ export function AppLayout({
               color: "inherit",
             }}
           >
-            ×
+            <X size={14} />
           </button>
         </div>
       )}

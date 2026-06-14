@@ -69,9 +69,7 @@ export function ConsoleCard({
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
             {icon && (
-              <div style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }}>
-                {icon}
-              </div>
+              <div style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }}>{icon}</div>
             )}
             <div style={{ minWidth: 0 }}>
               {title && (

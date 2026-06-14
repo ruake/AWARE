@@ -14,7 +14,16 @@
   "definitions": {
     "TestResult": {
       "type": "object",
-      "required": ["id", "name", "status", "duration", "category", "suite", "evidence"],
+      "required": [
+        "id",
+        "name",
+        "status",
+        "duration",
+        "category",
+        "suite",
+        "evidence",
+        "filmstrip"
+      ],
       "properties": {
         "id": { "type": "string", "description": "Unique result ID" },
         "name": { "type": "string", "description": "Human-readable test name" },
@@ -34,7 +43,8 @@
         },
         "filmstrip": {
           "type": "array",
-          "description": "Screenshot filmstrip frames (OPTIONAL)",
+          "description": "Screenshot filmstrip frames (REQUIRED — at least 1 frame)",
+          "minItems": 1,
           "items": { "$ref": "#/definitions/FilmstripFrame" }
         }
       }
@@ -77,7 +87,7 @@
     },
     "HttpResponse": {
       "type": "object",
-      "required": ["status", "headers"],
+      "required": ["status", "headers", "timings"],
       "properties": {
         "status": { "type": "integer", "description": "HTTP status code" },
         "headers": {
@@ -90,7 +100,23 @@
           "type": "array",
           "description": "Response cookies (OPTIONAL)",
           "items": { "$ref": "#/definitions/TestCookie" }
+        },
+        "timings": {
+          "$ref": "#/definitions/HttpTimings"
         }
+      }
+    },
+    "HttpTimings": {
+      "type": "object",
+      "required": ["dnsLookup", "tcpConnect", "tlsHandshake", "ttfb", "download", "total"],
+      "description": "HTTP waterfall timing breakdown in milliseconds",
+      "properties": {
+        "dnsLookup": { "type": "number", "description": "DNS resolution time (ms)" },
+        "tcpConnect": { "type": "number", "description": "TCP connection time (ms)" },
+        "tlsHandshake": { "type": "number", "description": "TLS handshake time (ms)" },
+        "ttfb": { "type": "number", "description": "Time to first byte (ms)" },
+        "download": { "type": "number", "description": "Content download time (ms)" },
+        "total": { "type": "number", "description": "Total request time (ms)" }
       }
     },
     "TestCookie": {

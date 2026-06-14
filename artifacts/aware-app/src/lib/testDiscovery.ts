@@ -1,5 +1,6 @@
 import type { TestCase } from "./types";
 import { fetchJson } from "./dataFetcher";
+import { _notifyTC } from "./store";
 
 let _autoTests: TestCase[] = [];
 let _testsLoaded = false;
@@ -7,7 +8,12 @@ let _testsLoaded = false;
 export async function loadAutoDiscoveredTests(): Promise<void> {
   if (_testsLoaded) return;
   _testsLoaded = true;
-  _autoTests = await fetchJson<TestCase[]>("auto-tests.json");
+  try {
+    _autoTests = await fetchJson<TestCase[]>("auto-tests.json");
+    _notifyTC();
+  } catch {
+    /* fetch failed, keep defaults */
+  }
 }
 
 export function getAutoDiscoveredTests(): TestCase[] {

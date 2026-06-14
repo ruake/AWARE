@@ -314,6 +314,11 @@ export function computeRunFrequency(): RunFrequency {
   };
 }
 
+export function getRunsByEnv(envIds?: string[]): Run[] {
+  if (!envIds || envIds.length === 0) return RUNS;
+  return RUNS.filter((r) => envIds.includes(r.envId));
+}
+
 export function getTestResultsForRun(runId: string): TestResult[] {
   return getCachedResults(runId);
 }

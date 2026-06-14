@@ -1,10 +1,58 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useSyncExternalStore } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ErrorBoundary } from "@/components/aware/ErrorBoundary";
 import { ConsoleShell } from "@/components/console";
 import NotFound from "@/pages/not-found";
-import { loadAllData } from "@/lib/data";
+import { loadAllData, getDataInitState, subscribeToDataInit } from "@/lib/data";
+import { AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
+
+/*
+ * ── Navigation Architecture ─────────────────────────────────────────────
+ *
+ * Based on:
+ *   Shneiderman (1996) "The Eyes Have It" — Visual Information-Seeking Mantra:
+ *     Overview first, zoom and filter, then details-on-demand.
+ *     Plus "relate" (cross-link entities) and "history" (show trends).
+ *
+ *   Pirolli & Card (1999) "Information Foraging Theory" — Information Scent:
+ *     Navigation labels must signal what the user will find. Avoid brand names
+ *     ("Pulse") in favor of task-descriptive labels ("Activity").
+ *
+ *   Stephen Few (2006) "Information Dashboard Design" — Monitor pages should
+ *     communicate signal (what needs attention NOW), not noise. Tables and
+ *     deep-dive charts belong on Investigate pages, not the Dashboard.
+ *
+ *   Nielsen (1994) 10 Usability Heuristics — especially:
+ *     #4 Consistency: route === page title, terminology doesn't vary
+ *     #6 Recognition > Recall: cross-link entities so users don't re-navigate
+ *     #8 Aesthetic & Minimalist: remove thin/overlapping pages
+ *
+ *   Lidwell "Universal Principles of Design" — Progressive Disclosure:
+ *     Nav has 4 groups (down from 6). Thin pages (StartRun, Search) become
+ *     contextual modals triggered from primary pages, not standalone routes.
+ *
+ * ── Navigation Groups ────────────────────────────────────────────────────
+ *
+ *   MONITOR    (Overview — Shneiderman's "overview first")
+ *     Dashboard   /     Signal: KPIs, anomalies, sparklines. No tables.
+ *     Activity    /activity  Chronological feed of all events.
+ *
+ *   INVESTIGATE (Zoom/Filter → Detail — Shneiderman's "zoom, filter, details")
+ *     Runs        /runs       Filterable list → RunDetail at /runs/:id
+ *     Compare     /compare    Side-by-side baseline vs candidate diff
+ *     Trends      /trends     Charts, flakiness, heatmaps (was "Analytics")
+ *
+ *   CONFIGURE   (System setup — progressive disclosure)
+ *     Tests       /tests      Test case CRUD → TestDetail at /tests/:id
+ *     Test Suites /suites     Suite hierarchy + YAML
+ *     CI/CD       /ci         Pipeline status + config
+ *     Environments /environments  Env configs + promotion gate
+ *
+ *   ASSIST      (Cross-cutting tools)
+ *     Copilot     /copilot    AI assistant
+ *     About       /about      Project info + sharing
+ */
 
 interface NavItem {
   label: string;
@@ -20,89 +68,76 @@ interface NavGroup {
 
 const SIDEBAR_NAV: NavGroup[] = [
   {
-    title: "Overview",
+    title: "Monitor",
     items: [
       { label: "Dashboard", href: "/", icon: "LayoutDashboard" },
-      { label: "Pulse", href: "/pulse", icon: "Activity" },
+      { label: "Activity", href: "/activity", icon: "Activity" },
     ],
   },
   {
-    title: "Testing",
+    title: "Investigate",
     items: [
       { label: "Runs", href: "/runs", icon: "History" },
       { label: "Compare", href: "/compare", icon: "GitCompare" },
-      { label: "Start Run", href: "/start", icon: "PlayCircle" },
+      { label: "Trends", href: "/trends", icon: "BarChart3" },
     ],
   },
   {
-    title: "Analytics",
+    title: "Configure",
     items: [
-      { label: "Test Analytics", href: "/analytics", icon: "BarChart3" },
-      { label: "Suites", href: "/suites", icon: "FolderTree" },
+      { label: "Tests", href: "/tests", icon: "Beaker" },
+      { label: "Test Suites", href: "/suites", icon: "FolderTree" },
+      { label: "CI/CD", href: "/ci", icon: "Container" },
+      { label: "Environments", href: "/environments", icon: "Globe" },
     ],
   },
   {
-    title: "CI/CD",
-    items: [
-      { label: "CI Pipeline", href: "/ci-pipeline", icon: "Container" },
-      { label: "Status", href: "/status", icon: "CheckCircle2" },
-    ],
-  },
-  {
-    title: "Tools",
+    title: "Assist",
     items: [
       { label: "Copilot", href: "/copilot", icon: "Bot" },
-      { label: "Test Doc", href: "/testdoc", icon: "FileText" },
-      { label: "Search", href: "/search", icon: "Search" },
-      { label: "Sharing", href: "/share", icon: "Share2" },
-    ],
-  },
-  {
-    title: "Info",
-    items: [
       { label: "About", href: "/about", icon: "Info" },
     ],
   },
 ];
 
+// Strong information scent: labels describe content, not brand names
 const BREADCRUMB_MAP: Record<string, { label: string; parent?: { label: string; href: string } }> = {
   "/": { label: "Dashboard" },
-  "/pulse": { label: "Pulse", parent: { label: "Overview", href: "/" } },
-  "/runs": { label: "Runs", parent: { label: "Testing", href: "/" } },
+  "/activity": { label: "Activity", parent: { label: "Monitor", href: "/" } },
+  "/runs": { label: "Runs", parent: { label: "Investigate", href: "/" } },
   "/runs/:runId": { label: "Run Detail", parent: { label: "Runs", href: "/runs" } },
-  "/compare": { label: "Compare", parent: { label: "Testing", href: "/" } },
-  "/start": { label: "Start Run", parent: { label: "Testing", href: "/" } },
-  "/analytics": { label: "Test Analytics", parent: { label: "Analytics", href: "/" } },
-  "/suites": { label: "Suites", parent: { label: "Analytics", href: "/" } },
-  "/ci-pipeline": { label: "CI Pipeline", parent: { label: "CI/CD", href: "/" } },
-  "/status": { label: "Status", parent: { label: "CI/CD", href: "/" } },
-  "/copilot": { label: "Copilot", parent: { label: "Tools", href: "/" } },
-  "/testdoc": { label: "Test Doc", parent: { label: "Tools", href: "/" } },
-  "/search": { label: "Search", parent: { label: "Tools", href: "/" } },
-  "/share": { label: "Sharing", parent: { label: "Tools", href: "/" } },
-  "/about": { label: "About", parent: { label: "Info", href: "/" } },
-  "/home": { label: "Home" },
+  "/compare": { label: "Compare", parent: { label: "Investigate", href: "/" } },
+  "/trends": { label: "Trends", parent: { label: "Investigate", href: "/" } },
+  "/tests": { label: "Tests", parent: { label: "Configure", href: "/" } },
+  "/tests/:testId": { label: "Test Detail", parent: { label: "Tests", href: "/tests" } },
+  "/suites": { label: "Test Suites", parent: { label: "Configure", href: "/" } },
+  "/ci": { label: "CI/CD", parent: { label: "Configure", href: "/" } },
+  "/environments": { label: "Environments", parent: { label: "Configure", href: "/" } },
+  "/copilot": { label: "Copilot", parent: { label: "Assist", href: "/" } },
+  "/about": { label: "About", parent: { label: "Assist", href: "/" } },
+  "/start": { label: "Start Run" },
+  "/share": { label: "Sharing" },
 };
 
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const Runs = React.lazy(() => import("@/pages/Runs"));
 const RunDetail = React.lazy(() => import("@/pages/RunDetail"));
 const Compare = React.lazy(() => import("@/pages/Compare"));
-const TestSuiteManager = React.lazy(() => import("@/pages/TestSuiteManager"));
-const TestAnalytics = React.lazy(() => import("@/pages/TestAnalytics"));
-const TestDoc = React.lazy(() => import("@/pages/TestDoc"));
-const SearchDemo = React.lazy(() => import("@/pages/SearchDemo"));
-const StartRun = React.lazy(() => import("@/pages/StartRun"));
-const Sharing = React.lazy(() => import("@/pages/Sharing"));
-const Status = React.lazy(() => import("@/pages/Status"));
+const TestSuites = React.lazy(() => import("@/pages/TestSuiteManager"));
+const Trends = React.lazy(() => import("@/pages/TestAnalytics"));
+const Tests = React.lazy(() => import("@/pages/TestManager"));
+const TestDetail = React.lazy(() => import("@/pages/TestDoc"));
+const CI = React.lazy(() => import("@/pages/Status"));
 const About = React.lazy(() => import("@/pages/About"));
 const Copilot = React.lazy(() => import("@/pages/Copilot"));
-const Pulse = React.lazy(() => import("@/pages/Pulse"));
-const Home = React.lazy(() => import("@/pages/Home"));
+const Activity = React.lazy(() => import("@/pages/Pulse"));
+const Environments = React.lazy(() => import("@/pages/Environments"));
+const StartRun = React.lazy(() => import("@/pages/StartRun"));
+const Sharing = React.lazy(() => import("@/pages/Sharing"));
 
 const queryClient = new QueryClient();
 
-function PageLoader() {
+function PageLoader({ text }: { text?: string }) {
   return (
     <div
       style={{
@@ -124,23 +159,24 @@ function PageLoader() {
       >
         <div className="proof-skeleton" style={{ width: 48, height: 48, borderRadius: "50%" }} />
         <div className="proof-skeleton" style={{ width: 200, height: 16, borderRadius: 4 }} />
-        <div className="proof-skeleton" style={{ width: 140, height: 12, borderRadius: 4 }} />
+        {text && <div style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>{text}</div>}
       </div>
     </div>
   );
 }
 
 function DataGate({ children }: { children: React.ReactNode }) {
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState<unknown>(null);
+  const state = useSyncExternalStore(subscribeToDataInit, getDataInitState);
+  const triggeredRef = React.useRef(false);
 
   useEffect(() => {
-    loadAllData()
-      .then(() => setReady(true))
-      .catch(setError);
-  }, []);
+    if (!triggeredRef.current && !state.loaded && !state.loading) {
+      triggeredRef.current = true;
+      loadAllData().catch(() => {});
+    }
+  }, [state.loaded, state.loading]);
 
-  if (error) {
+  if (state.error && !state.loading && !state.loaded) {
     return (
       <div
         style={{
@@ -149,21 +185,82 @@ function DataGate({ children }: { children: React.ReactNode }) {
           justifyContent: "center",
           minHeight: "100vh",
           background: "var(--proof-grey-bg)",
-          color: "var(--proof-red, #ef4444)",
-          fontSize: 18,
           flexDirection: "column",
-          gap: 12,
+          gap: 16,
+          padding: 40,
         }}
       >
-        <span>Failed to load application data</span>
-        <pre style={{ fontSize: 13, color: "var(--proof-muted, #6b7280)" }}>{String(error)}</pre>
+        <AlertTriangle size={32} style={{ color: "var(--proof-red)" }} />
+        <span style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text)" }}>
+          Failed to load application data
+        </span>
+        <pre
+          style={{
+            fontSize: 13,
+            color: "var(--proof-text-secondary)",
+            maxWidth: 500,
+            textAlign: "center",
+            margin: 0,
+            fontFamily: "var(--font-mono)",
+          }}
+        >
+          {String(state.error)}
+        </pre>
+        <button
+          onClick={() => {
+            triggeredRef.current = false;
+          }}
+          style={{
+            padding: "8px 18px",
+            fontSize: 13,
+            fontWeight: 600,
+            background: "var(--proof-blue)",
+            color: "#fff",
+            border: "none",
+            borderRadius: 6,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <RefreshCw size={14} /> Retry
+        </button>
       </div>
     );
   }
 
-  if (!ready) return <PageLoader />;
-
-  return <>{children}</>;
+  return (
+    <>
+      {!state.loaded && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "6px 16px",
+            fontSize: 12,
+            fontWeight: 500,
+            color: "var(--proof-blue)",
+            background: "var(--proof-blue-bg)",
+            borderBottom: "1px solid var(--proof-blue)",
+            pointerEvents: "none",
+          }}
+        >
+          <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
+          <span>
+            Loading data: runs, results, suites, promotions, scheduler status, test discovery...
+          </span>
+        </div>
+      )}
+      {children}
+    </>
+  );
 }
 
 function Router() {
@@ -179,14 +276,18 @@ function Router() {
       items.push({ label: direct.label });
       return items;
     }
-    if (/^\/runs\//.test(location) && location.split("/").length === 3) {
-      const run = BREADCRUMB_MAP["/runs/:runId"];
-      if (run) {
+    // Dynamic routes: /runs/:runId and /tests/:testId
+    if (/^\/(runs|tests)\//.test(location)) {
+      const segments = location.split("/");
+      const type = segments[1]; // "runs" or "tests"
+      const key = `/${type}/:${type === "runs" ? "runId" : "testId"}`;
+      const entry = BREADCRUMB_MAP[key];
+      if (entry && segments.length === 3) {
         const items: { label: string; href?: string }[] = [];
-        if (run.parent) {
-          items.push({ label: run.parent.label, href: run.parent.href });
+        if (entry.parent) {
+          items.push({ label: entry.parent.label, href: entry.parent.href });
         }
-        items.push({ label: run.label });
+        items.push({ label: entry.label });
         return items;
       }
     }
@@ -196,19 +297,14 @@ function Router() {
   return (
     <ConsoleShell sidebarNav={SIDEBAR_NAV} breadcrumbs={breadcrumbs} activePath={location}>
       <Switch>
-        <Route path="/home">
-          <React.Suspense fallback={<PageLoader />}>
-            <Home />
-          </React.Suspense>
-        </Route>
         <Route path="/">
           <React.Suspense fallback={<PageLoader />}>
             <Dashboard />
           </React.Suspense>
         </Route>
-        <Route path="/start">
+        <Route path="/activity">
           <React.Suspense fallback={<PageLoader />}>
-            <StartRun />
+            <Activity />
           </React.Suspense>
         </Route>
         <Route path="/runs">
@@ -226,14 +322,34 @@ function Router() {
             <Compare />
           </React.Suspense>
         </Route>
-        <Route path="/analytics">
+        <Route path="/trends">
           <React.Suspense fallback={<PageLoader />}>
-            <TestAnalytics />
+            <Trends />
+          </React.Suspense>
+        </Route>
+        <Route path="/tests/:testId">
+          <React.Suspense fallback={<PageLoader />}>
+            <TestDetail />
+          </React.Suspense>
+        </Route>
+        <Route path="/tests">
+          <React.Suspense fallback={<PageLoader />}>
+            <Tests />
           </React.Suspense>
         </Route>
         <Route path="/suites">
           <React.Suspense fallback={<PageLoader />}>
-            <TestSuiteManager />
+            <TestSuites />
+          </React.Suspense>
+        </Route>
+        <Route path="/ci">
+          <React.Suspense fallback={<PageLoader />}>
+            <CI />
+          </React.Suspense>
+        </Route>
+        <Route path="/environments">
+          <React.Suspense fallback={<PageLoader />}>
+            <Environments />
           </React.Suspense>
         </Route>
         <Route path="/copilot">
@@ -241,29 +357,28 @@ function Router() {
             <Copilot />
           </React.Suspense>
         </Route>
-        <Route path="/pulse">
-          <React.Suspense fallback={<PageLoader />}>
-            <Pulse />
-          </React.Suspense>
-        </Route>
-        <Route path="/ci-pipeline">
-          <React.Suspense fallback={<PageLoader />}>
-            <Status />
-          </React.Suspense>
-        </Route>
         <Route path="/about">
           <React.Suspense fallback={<PageLoader />}>
             <About />
           </React.Suspense>
         </Route>
-        <Route path="/testdoc">
-          <React.Suspense fallback={<PageLoader />}>
-            <TestDoc />
-          </React.Suspense>
+        {/* Redirects from old route names (Nielsen #4: don't break bookmarks) */}
+        <Route path="/pulse">
+          {() => {
+            window.history.replaceState(null, "", window.location.pathname.replace("/pulse", "/activity"));
+            return <React.Suspense fallback={<PageLoader />}><Activity /></React.Suspense>;
+          }}
         </Route>
-        <Route path="/search">
+        <Route path="/analytics">
+          {() => {
+            window.history.replaceState(null, "", window.location.pathname.replace("/analytics", "/trends"));
+            return <React.Suspense fallback={<PageLoader />}><Trends /></React.Suspense>;
+          }}
+        </Route>
+        {/* Thin pages kept for deep-link compat but not in nav (progressive disclosure) */}
+        <Route path="/start">
           <React.Suspense fallback={<PageLoader />}>
-            <SearchDemo />
+            <StartRun />
           </React.Suspense>
         </Route>
         <Route path="/share">

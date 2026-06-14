@@ -5,18 +5,45 @@ import { getEnvConfigs } from "@/lib/envConfig";
 import type { EnvironmentConfig } from "@/lib/types";
 
 const TIER_META: Record<string, { accent: string; stagingBg: string; prodBg: string }> = {
-  QA: { accent: "#a855f7", stagingBg: "rgba(168,85,247,0.07)", prodBg: "rgba(192,132,252,0.10)" },
-  UAT: { accent: "#f59e0b", stagingBg: "rgba(245,158,11,0.07)", prodBg: "rgba(251,191,36,0.10)" },
-  PROD: { accent: "#22c55e", stagingBg: "rgba(34,197,94,0.07)", prodBg: "rgba(74,222,128,0.10)" },
+  QA: {
+    accent: "var(--proof-purple)",
+    stagingBg: "rgba(168,85,247,0.07)",
+    prodBg: "rgba(192,132,252,0.10)",
+  },
+  UAT: {
+    accent: "var(--proof-yellow)",
+    stagingBg: "rgba(245,158,11,0.07)",
+    prodBg: "rgba(251,191,36,0.10)",
+  },
+  PROD: {
+    accent: "var(--proof-green)",
+    stagingBg: "rgba(34,197,94,0.07)",
+    prodBg: "rgba(74,222,128,0.10)",
+  },
 };
 
 function StatusPill({ status }: { status: EnvironmentConfig["propertyStatus"] }) {
   const cfg =
     status === "active"
-      ? { color: "#22c55e", bg: "rgba(34,197,94,0.13)", icon: CheckCircle2, label: "active" }
+      ? {
+          color: "var(--proof-green)",
+          bg: "rgba(34,197,94,0.13)",
+          icon: CheckCircle2,
+          label: "active",
+        }
       : status === "pending"
-        ? { color: "#f59e0b", bg: "rgba(245,158,11,0.13)", icon: Clock, label: "pending" }
-        : { color: "#ef4444", bg: "rgba(239,68,68,0.13)", icon: AlertCircle, label: "inactive" };
+        ? {
+            color: "var(--proof-yellow)",
+            bg: "rgba(245,158,11,0.13)",
+            icon: Clock,
+            label: "pending",
+          }
+        : {
+            color: "var(--proof-red)",
+            bg: "rgba(239,68,68,0.13)",
+            icon: AlertCircle,
+            label: "inactive",
+          };
   const Icon = cfg.icon;
   return (
     <span

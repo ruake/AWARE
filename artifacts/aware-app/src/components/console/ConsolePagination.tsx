@@ -1,10 +1,5 @@
 import React, { useMemo } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 export interface ConsolePaginationProps {
   currentPage: number;
@@ -162,8 +157,7 @@ export function ConsolePagination({
           style={pageBtnStyle(currentPage <= 1)}
           title="First page"
           onMouseEnter={(e) => {
-            if (currentPage > 1)
-              e.currentTarget.style.background = "var(--proof-surface-hover)";
+            if (currentPage > 1) e.currentTarget.style.background = "var(--proof-surface-hover)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = "transparent";
@@ -178,8 +172,7 @@ export function ConsolePagination({
           style={pageBtnStyle(currentPage <= 1)}
           title="Previous page"
           onMouseEnter={(e) => {
-            if (currentPage > 1)
-              e.currentTarget.style.background = "var(--proof-surface-hover)";
+            if (currentPage > 1) e.currentTarget.style.background = "var(--proof-surface-hover)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = "transparent";
@@ -215,8 +208,7 @@ export function ConsolePagination({
                   e.currentTarget.style.background = "var(--proof-surface-hover)";
               }}
               onMouseLeave={(e) => {
-                if (p !== currentPage)
-                  e.currentTarget.style.background = "transparent";
+                if (p !== currentPage) e.currentTarget.style.background = "transparent";
               }}
             >
               {p}

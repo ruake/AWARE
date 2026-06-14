@@ -1,6 +1,26 @@
 import React from "react";
 import { Link } from "wouter";
-import { icons, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Beaker,
+  Bot,
+  CheckCircle2,
+  Container,
+  FileText,
+  FolderTree,
+  GitCompare,
+  Globe,
+  History,
+  Info,
+  LayoutDashboard,
+  List,
+  PlayCircle,
+  Search,
+  Share2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface NavItem {
   label: string;
@@ -21,9 +41,30 @@ interface ConsoleSidebarProps {
   onToggleCollapse: () => void;
 }
 
+const ICON_MAP: Record<
+  string,
+  React.ComponentType<{ size?: number; style?: React.CSSProperties }>
+> = {
+  Activity,
+  BarChart3,
+  Beaker,
+  Bot,
+  CheckCircle2,
+  Container,
+  FileText,
+  FolderTree,
+  GitCompare,
+  Globe,
+  History,
+  Info,
+  LayoutDashboard,
+  PlayCircle,
+  Search,
+  Share2,
+};
+
 function resolveIcon(name: string) {
-  const IconComp = (icons as Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>>)[name];
-  return IconComp;
+  return ICON_MAP[name];
 }
 
 export function ConsoleSidebar({
@@ -166,9 +207,7 @@ export function ConsoleSidebar({
                         fontFamily: "var(--font-mono)",
                         padding: "1px 5px",
                         borderRadius: 4,
-                        background: active
-                          ? "rgba(37,99,235,0.15)"
-                          : "rgba(255,255,255,0.06)",
+                        background: active ? "rgba(37,99,235,0.15)" : "rgba(255,255,255,0.06)",
                         color: active ? "var(--proof-blue)" : "var(--proof-text-muted)",
                         opacity: collapsed && !hovered ? 0 : 1,
                         transition: "opacity 0.2s ease",

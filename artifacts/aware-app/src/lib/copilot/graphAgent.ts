@@ -171,7 +171,10 @@ function planAndRouteNode(): AgentNode {
 
         if (route) {
           const callId = `kw-${uid()}`;
-          logInfo("plan_and_route", `Keyword routed → ${route.tool} (query: "${ctx.query.slice(0, 60)}")`);
+          logInfo(
+            "plan_and_route",
+            `Keyword routed → ${route.tool} (query: "${ctx.query.slice(0, 60)}")`,
+          );
 
           // Push as pending tool call for execute_tools node
           ctx.pendingToolCalls.push({ id: callId, name: route.tool, args: route.args });
@@ -265,7 +268,11 @@ function planAndRouteNode(): AgentNode {
 
         for (const tc of localPendingCalls) {
           let args: Record<string, unknown> = {};
-          try { args = JSON.parse(tc.argsJson); } catch { /* use empty */ }
+          try {
+            args = JSON.parse(tc.argsJson);
+          } catch {
+            /* use empty */
+          }
           ctx.pendingToolCalls.push({ id: tc.id, name: tc.name, args });
         }
 
@@ -466,9 +473,7 @@ function synthesizeNode(): AgentNode {
       });
 
       steps[0].status = "completed";
-      steps[0].detail = ctx.finalContent
-        ? `${ctx.finalContent.length} chars`
-        : "Empty response";
+      steps[0].detail = ctx.finalContent ? `${ctx.finalContent.length} chars` : "Empty response";
 
       return { status: "completed", steps };
     },
@@ -516,7 +521,12 @@ export async function runGraphAgent(opts: GraphAgentOptions): Promise<void> {
 
   // ── Register nodes ────────────────────────────────────────────────────────
   const nodes = new Map<string, AgentNode>();
-  for (const node of [planAndRouteNode(), executeToolsNode(), synthesizeNode(), sessionCarveNode()]) {
+  for (const node of [
+    planAndRouteNode(),
+    executeToolsNode(),
+    synthesizeNode(),
+    sessionCarveNode(),
+  ]) {
     nodes.set(node.id, node);
   }
 
@@ -526,13 +536,16 @@ export async function runGraphAgent(opts: GraphAgentOptions): Promise<void> {
     ctx.onEvent({ type: "step", step });
   };
 
-  logInfo("graph", `Starting graph agent (${ctx.apiMessages.length} messages, ${tools.length} tools)`);
+  logInfo(
+    "graph",
+    `Starting graph agent (${ctx.apiMessages.length} messages, ${tools.length} tools)`,
+  );
 
   // ── Execute graph ─────────────────────────────────────────────────────────
   // Phase 1: Plan & Route
   logInfo("graph", "Phase 1: plan_and_route");
   const planNode = nodes.get("plan_and_route")!;
-  let planResult = await planNode.execute(ctx);
+  const planResult = await planNode.execute(ctx);
   if (planResult.error || signal.aborted) {
     onEvent({ type: "done" });
     return;

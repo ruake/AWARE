@@ -1,5 +1,5 @@
 import type { TestSuite, SuiteNode } from "./types";
-import { subscribeToTestSuites } from "./store";
+import { subscribeToTestSuites, _notifyTS } from "./store";
 import { fetchJson } from "./dataFetcher";
 
 export { subscribeToTestSuites };
@@ -13,6 +13,7 @@ export async function loadTestSuites(): Promise<void> {
   _suitesLoaded = true;
   _testSuitesStore = await fetchJson<TestSuite[]>("test-suites.json");
   _tsSnapshot = [..._testSuitesStore];
+  _notifyTS();
 }
 
 export function getTestSuitesStore(): TestSuite[] {

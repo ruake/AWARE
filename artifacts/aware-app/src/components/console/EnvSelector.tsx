@@ -1,10 +1,11 @@
 import React from "react";
 import { ChevronDown, Check, Search, Globe } from "lucide-react";
-import { ENV_CONFIGS, getEnvConfigById } from "../../lib/envConfig";
+import { ENV_CONFIGS } from "../../lib/envConfig";
+import { getSelectedEnvIds, toggleSelectedEnvId } from "@/lib/selectedEnv";
 
 interface EnvSelectorProps {
-  currentEnvId?: string;
-  onEnvChange?: (envId: string) => void;
+  currentEnvIds: string[];
+  onEnvChange: (envIds: string[]) => void;
   variant?: "topbar" | "full";
 }
 
@@ -37,22 +38,33 @@ function getGroupedEnvs(filtered: typeof ENV_CONFIGS) {
   return groups;
 }
 
-export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: EnvSelectorProps) {
+function triggerLabel(selectedIds: string[]): string {
+  if (selectedIds.length === 0) return "All environments";
+  const selected = ENV_CONFIGS.filter((e) => selectedIds.includes(e.id));
+  if (selected.length === 0) return "All environments";
+  if (selected.length === 1) return selected[0].label;
+  return `${selected[0].label} +${selected.length - 1}`;
+}
+
+export function EnvSelector({ currentEnvIds, onEnvChange, variant = "topbar" }: EnvSelectorProps) {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(-1);
+  const [triggerHovered, setTriggerHovered] = React.useState(false);
   const panelRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
 
-  const current = currentEnvId ? getEnvConfigById(currentEnvId) : undefined;
-
   const filtered = filterEnvs(query);
   const grouped = getGroupedEnvs(filtered);
 
+  const allEnvIds = ENV_CONFIGS.map((e) => e.id);
+  const allSelected = allEnvIds.every((id) => currentEnvIds.includes(id));
+
   const flatItems = React.useMemo(() => {
     const items: { envId: string; label: string }[] = [];
+    items.push({ envId: "__all__", label: "All environments" });
     for (const tier of TIER_ORDER) {
       const group = grouped[tier];
       if (!group) continue;
@@ -62,18 +74,6 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
     }
     return items;
   }, [query, grouped]);
-
-  React.useEffect(() => {
-    setActiveIdx(-1);
-  }, [query]);
-
-  React.useEffect(() => {
-    if (open) {
-      setQuery("");
-      setActiveIdx(-1);
-      setTimeout(() => inputRef.current?.focus(), 10);
-    }
-  }, [open]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -90,6 +90,21 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
+
+  function handleItemClick(envId: string): void {
+    if (envId === "__all__") {
+      onEnvChange([]);
+      return;
+    }
+    toggleSelectedEnvId(envId);
+    const updated = getSelectedEnvIds();
+    onEnvChange(updated);
+  }
+
+  function isSelected(envId: string): boolean {
+    if (envId === "__all__") return allSelected || currentEnvIds.length === 0;
+    return currentEnvIds.includes(envId);
+  }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
@@ -110,8 +125,7 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
     if (e.key === "Enter" && activeIdx >= 0 && activeIdx < flatItems.length) {
       e.preventDefault();
       const item = flatItems[activeIdx];
-      onEnvChange?.(item.envId);
-      setOpen(false);
+      handleItemClick(item.envId);
     }
   }
 
@@ -123,18 +137,31 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
     }
   }, [activeIdx]);
 
+  function handleToggle() {
+    if (open) {
+      setOpen(false);
+    } else {
+      setQuery("");
+      setActiveIdx(-1);
+      setOpen(true);
+      setTimeout(() => inputRef.current?.focus(), 10);
+    }
+  }
+
   const trigger = (
     <button
       ref={triggerRef}
-      onClick={() => setOpen((o) => !o)}
+      onClick={handleToggle}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          setOpen((o) => !o);
+          handleToggle();
         }
       }}
       aria-haspopup="listbox"
       aria-expanded={open}
+      onMouseEnter={() => setTriggerHovered(true)}
+      onMouseLeave={() => setTriggerHovered(false)}
       style={{
         display: "flex",
         alignItems: "center",
@@ -145,26 +172,26 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
         cursor: "pointer",
         border: "1px solid var(--proof-border-strong)",
         borderRadius: 5,
-        background: variant === "full" ? "var(--proof-surface-2)" : "rgba(255,255,255,0.03)",
-        color: "var(--proof-text-secondary)",
+        background: triggerHovered
+          ? "rgba(255,255,255,0.06)"
+          : variant === "full"
+            ? "var(--proof-surface-2)"
+            : "rgba(255,255,255,0.03)",
+        color: triggerHovered ? "var(--proof-text)" : "var(--proof-text-secondary)",
         fontFamily: "var(--font-mono)",
         whiteSpace: "nowrap",
         transition: "all 0.15s",
         width: variant === "full" ? "100%" : undefined,
         justifyContent: variant === "full" ? "space-between" : undefined,
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-        e.currentTarget.style.color = "var(--proof-text)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background =
-          variant === "full" ? "var(--proof-surface-2)" : "rgba(255,255,255,0.03)";
-        e.currentTarget.style.color = "var(--proof-text-secondary)";
+        maxWidth: variant === "full" ? undefined : 200,
       }}
     >
-      {variant === "full" && <Globe size={14} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />}
-      <span style={{ flex: 1, textAlign: "left" }}>{current?.label ?? "Select environment"}</span>
+      {variant === "full" && (
+        <Globe size={14} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
+      )}
+      <span style={{ flex: 1, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {triggerLabel(currentEnvIds)}
+      </span>
       <ChevronDown
         size={12}
         style={{
@@ -212,7 +239,10 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
         <input
           ref={inputRef}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setActiveIdx(-1);
+          }}
           placeholder="Find environments"
           role="searchbox"
           aria-label="Find environments"
@@ -251,6 +281,47 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
           </div>
         )}
 
+        {/* All environments option */}
+        {(!query || "all environments".includes(query.toLowerCase())) && (
+          <div
+            data-env-item
+            role="option"
+            aria-selected={currentEnvIds.length === 0}
+            onClick={() => handleItemClick("__all__")}
+            onMouseEnter={() => setActiveIdx(0)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "7px 10px",
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: 600,
+              color: activeIdx === 0 ? "var(--proof-text)" : "var(--proof-text-secondary)",
+              background: activeIdx === 0 ? "var(--proof-surface-hover)" : "transparent",
+              transition: "background 0.1s",
+              borderBottom: "1px solid var(--proof-border)",
+            }}
+          >
+            <div
+              style={{
+                width: 16,
+                height: 16,
+                borderRadius: 3,
+                border: `2px solid ${currentEnvIds.length === 0 ? "var(--proof-blue)" : "var(--proof-border-strong)"}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                background: currentEnvIds.length === 0 ? "var(--proof-blue)" : "transparent",
+              }}
+            >
+              {currentEnvIds.length === 0 && <Check size={11} style={{ color: "#fff" }} />}
+            </div>
+            <span>All environments</span>
+          </div>
+        )}
+
         {TIER_ORDER.map((tier) => {
           const group = grouped[tier];
           if (!group || group.length === 0) return null;
@@ -286,7 +357,7 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
                 {GROUP_LABELS[tier]}
               </div>
               {group.map((env) => {
-                const isSelected = env.id === currentEnvId;
+                const sel = isSelected(env.id);
                 const flatIdx = flatItems.findIndex((f) => f.envId === env.id);
                 const isActive = flatIdx === activeIdx;
 
@@ -295,11 +366,8 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
                     key={env.id}
                     data-env-item
                     role="option"
-                    aria-selected={isSelected}
-                    onClick={() => {
-                      onEnvChange?.(env.id);
-                      setOpen(false);
-                    }}
+                    aria-selected={sel}
+                    onClick={() => handleItemClick(env.id)}
                     onMouseEnter={() => setActiveIdx(flatIdx)}
                     style={{
                       display: "flex",
@@ -309,12 +377,25 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
                       cursor: "pointer",
                       fontSize: 12,
                       color: isActive ? "var(--proof-text)" : "var(--proof-text-secondary)",
-                      background: isActive
-                        ? "var(--proof-surface-hover)"
-                        : "transparent",
+                      background: isActive ? "var(--proof-surface-hover)" : "transparent",
                       transition: "background 0.1s",
                     }}
                   >
+                    <div
+                      style={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: 3,
+                        border: `2px solid ${sel ? "var(--proof-blue)" : "var(--proof-border-strong)"}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        background: sel ? "var(--proof-blue)" : "transparent",
+                      }}
+                    >
+                      {sel && <Check size={11} style={{ color: "#fff" }} />}
+                    </div>
                     <span style={{ flex: 1, minWidth: 0 }}>{env.label}</span>
                     <span
                       style={{
@@ -330,9 +411,7 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
                             ? "rgba(245,158,11,0.12)"
                             : "rgba(37,99,235,0.12)",
                         color:
-                          env.network === "staging"
-                            ? "var(--proof-yellow)"
-                            : "var(--proof-blue)",
+                          env.network === "staging" ? "var(--proof-yellow)" : "var(--proof-blue)",
                         border:
                           env.network === "staging"
                             ? "1px solid rgba(245,158,11,0.25)"
@@ -341,9 +420,6 @@ export function EnvSelector({ currentEnvId, onEnvChange, variant = "topbar" }: E
                     >
                       {env.network}
                     </span>
-                    {isSelected && (
-                      <Check size={13} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
-                    )}
                   </div>
                 );
               })}

@@ -1,13 +1,14 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { Bot, User } from "lucide-react";
-import type { Message, ProviderType } from "@/lib/copilot/types";
+import { Bot, User, RefreshCw } from "lucide-react";
+import type { Message } from "@/lib/copilot/types";
 import ToolCallCard from "./ToolCallCard";
 import AgentTrace from "./AgentTrace";
 import { loadProviderType } from "@/lib/copilot/storage";
 
 interface BubbleProps {
   message: Message;
+  onRetry?: (messageId: string) => void;
 }
 
 // ── UserBubble ───────────────────────────────────────────────────────────────
@@ -57,10 +58,11 @@ export function UserBubble({ message }: BubbleProps) {
 }
 
 // ── AssistantBubble ──────────────────────────────────────────────────────────
-export function AssistantBubble({ message }: BubbleProps) {
+export function AssistantBubble({ message, onRetry }: BubbleProps) {
   const hasContent = message.content.length > 0;
   const hasToolCalls = (message.toolCalls?.length ?? 0) > 0;
   const isStreaming = !!message.streaming;
+  const hasError = !!message.error;
 
   return (
     <div
@@ -110,8 +112,8 @@ export function AssistantBubble({ message }: BubbleProps) {
         {(hasContent || isStreaming) && (
           <div
             style={{
-              background: "var(--proof-surface-2)",
-              border: "1px solid var(--proof-border)",
+              background: hasError ? "#ef444408" : "var(--proof-surface-2)",
+              border: `1px solid ${hasError ? "#ef444440" : "var(--proof-border)"}`,
               borderRadius: "4px 14px 14px 14px",
               padding: "8px 12px",
               fontSize: 13,
@@ -210,7 +212,7 @@ export function AssistantBubble({ message }: BubbleProps) {
         )}
 
         {/* Error state */}
-        {message.error && (
+        {hasError && (
           <div
             style={{
               background: "#ef444420",
@@ -224,6 +226,29 @@ export function AssistantBubble({ message }: BubbleProps) {
           >
             {message.error}
           </div>
+        )}
+
+        {/* Retry button — Amershi G9: support efficient correction */}
+        {!isStreaming && hasError && onRetry && (
+          <button
+            onClick={() => onRetry(message.id)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              padding: "3px 8px",
+              marginTop: 4,
+              borderRadius: 6,
+              border: "1px solid var(--proof-border)",
+              background: "var(--proof-surface)",
+              cursor: "pointer",
+              fontSize: 11,
+              color: "var(--proof-text-secondary)",
+              fontWeight: 600,
+            }}
+          >
+            <RefreshCw size={11} /> Retry
+          </button>
         )}
 
         {/* Timestamp */}

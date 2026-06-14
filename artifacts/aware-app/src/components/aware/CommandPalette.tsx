@@ -296,10 +296,10 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
   });
 
   const typeColor = (type: string) => {
-    if (type === "test") return { bg: "rgba(168,85,247,0.15)", color: "#a855f7" };
-    if (type === "suite") return { bg: "rgba(245,158,11,0.15)", color: "#f59e0b" };
-    if (type === "run") return { bg: "rgba(91,138,245,0.15)", color: "#5b8af5" };
-    return { bg: "rgba(34,197,94,0.15)", color: "#22c55e" };
+    if (type === "test") return { bg: "rgba(168,85,247,0.15)", color: "var(--proof-purple)" };
+    if (type === "suite") return { bg: "rgba(245,158,11,0.15)", color: "var(--proof-yellow)" };
+    if (type === "run") return { bg: "rgba(91,138,245,0.15)", color: "var(--proof-blue)" };
+    return { bg: "rgba(34,197,94,0.15)", color: "var(--proof-green)" };
   };
 
   return (
