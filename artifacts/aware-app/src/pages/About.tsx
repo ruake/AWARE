@@ -1,5 +1,4 @@
 import React from "react";
-import { AppLayout } from "@/components/aware/AppLayout";
 import { useLocation } from "wouter";
 import {
   Zap,
@@ -132,8 +131,7 @@ export default function About() {
   const cRate = useCountUp(passRate);
 
   return (
-    <AppLayout>
-      <div className="proof-page" style={{ overflow: "hidden" }}>
+    <div className="proof-page" style={{ overflow: "hidden" }}>
         {/* ════════════════ HERO — full bleed splash ════════════════ */}
         <section
           style={{
@@ -1403,6 +1401,5 @@ export default function About() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }

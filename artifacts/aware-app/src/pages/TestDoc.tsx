@@ -1,6 +1,5 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { AppLayout } from "@/components/aware/AppLayout";
 import {
   DIFF_ROWS,
   getTestCaseById,
@@ -408,8 +407,7 @@ export default function TestDoc() {
               : "var(--proof-text-secondary)";
 
   return (
-    <AppLayout activeHref="/suites">
-      <div
+    <div
         style={{
           display: "flex",
           flexDirection: "column",
@@ -1593,6 +1591,5 @@ export default function TestDoc() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }

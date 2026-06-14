@@ -1,5 +1,4 @@
 import React from "react";
-import { AppLayout } from "@/components/aware/AppLayout";
 import { Bot, Settings, Plus, Square, X, Loader2 } from "lucide-react";
 import { TOOLS } from "@/lib/copilot/tools";
 import { runAgent } from "@/lib/copilot/agent";
@@ -403,7 +402,7 @@ export default function CopilotPage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <AppLayout fullBleed>
+    <>
       {/* Keyframe for blink cursor + spinner */}
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
@@ -548,6 +547,6 @@ export default function CopilotPage() {
           />
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }

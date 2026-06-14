@@ -1,6 +1,5 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { AppLayout } from "@/components/aware/AppLayout";
 import { RUNS, DIFF_ROWS } from "@/lib/data";
 import { useTestData } from "@/hooks/useTestData";
 import "../_group.css";
@@ -184,8 +183,7 @@ export default function SearchDemo() {
   };
 
   return (
-    <AppLayout activeHref="/search">
-      <div
+    <div
         style={{
           height: "calc(100vh - 100px)",
           display: "flex",
@@ -572,6 +570,5 @@ export default function SearchDemo() {
           )}
         </div>
       </div>
-    </AppLayout>
   );
 }

@@ -1,6 +1,5 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { AppLayout } from "@/components/aware/AppLayout";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
@@ -1280,23 +1279,21 @@ export default function Compare() {
 
   if (!baselineRun || !candidateRun) {
     return (
-      <AppLayout activeHref="/compare">
-        <div style={{ textAlign: "center", padding: 64 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text)" }}>
-            No runs to compare
-          </h2>
-          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
-            At least two runs are required for comparison.
-          </p>
-          <button
-            onClick={() => navigate("/runs")}
-            className="proof-button"
-            style={{ fontSize: 13, marginTop: 16 }}
-          >
-            View Runs
-          </button>
-        </div>
-      </AppLayout>
+      <div style={{ textAlign: "center", padding: 64 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text)" }}>
+          No runs to compare
+        </h2>
+        <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
+          At least two runs are required for comparison.
+        </p>
+        <button
+          onClick={() => navigate("/runs")}
+          className="proof-button"
+          style={{ fontSize: 13, marginTop: 16 }}
+        >
+          View Runs
+        </button>
+      </div>
     );
   }
 
@@ -1310,7 +1307,6 @@ export default function Compare() {
   const hasActiveFilters = Object.values(colFilters).some((v) => v);
 
   return (
-    <AppLayout activeHref="/compare">
       <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {/* Run selectors */}
         <PanelErrorBoundary label="Run selectors">
@@ -1864,8 +1860,7 @@ export default function Compare() {
             )}
           </div>
         </PanelErrorBoundary>
+        {Toast}
       </div>
-      {Toast}
-    </AppLayout>
   );
 }

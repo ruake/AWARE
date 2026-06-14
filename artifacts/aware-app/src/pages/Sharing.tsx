@@ -1,5 +1,4 @@
 import React from "react";
-import { AppLayout } from "@/components/aware/AppLayout";
 import { copyToClipboard } from "@/lib/nav";
 import "../_group.css";
 import { Link2, Copy, Check, Github, Shield, Share2 } from "lucide-react";
@@ -14,8 +13,7 @@ export default function Sharing() {
   const currentUrl = typeof window !== "undefined" ? window.location.origin : "";
 
   return (
-    <AppLayout activeHref="/share">
-      <div
+    <div
         style={{
           maxWidth: 1400,
           margin: "0 auto",
@@ -224,6 +222,5 @@ export default function Sharing() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }

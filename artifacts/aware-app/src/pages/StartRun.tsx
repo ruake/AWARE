@@ -1,10 +1,8 @@
-import { AppLayout } from "@/components/aware/AppLayout";
 import { Play, Github, GitCompare, ExternalLink } from "lucide-react";
 
 export default function StartRun() {
   return (
-    <AppLayout activeHref="/runs">
-      <div style={{ maxWidth: 600, margin: "60px auto" }}>
+    <div style={{ maxWidth: 600, margin: "60px auto" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
             style={{
@@ -92,6 +90,5 @@ export default function StartRun() {
           </div>
         </div>
       </div>
-    </AppLayout>
   );
 }

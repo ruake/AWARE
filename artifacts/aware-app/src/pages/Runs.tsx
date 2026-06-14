@@ -1,7 +1,8 @@
 import React from "react";
-import { useLocation } from "wouter";
-import { AppLayout } from "@/components/aware/AppLayout";
-import { CTAStatCard } from "@/components/aware/CTAStatCard";
+import { Link, useLocation } from "wouter";
+
+import { ConsoleCard, ConsoleStat } from "@/components/console";
+import { DataTable, type ColumnDef } from "@/components/console/DataTable";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { RUNS } from "@/lib/data";
 import { useSyncedUrlState } from "@/lib/urlState";
@@ -20,6 +21,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
+import { useDataTable } from "@/hooks/useDataTable";
 
 function statusBadge(status: Run["status"]) {
   const map: Record<string, { cls: string; label: string }> = {
@@ -59,45 +61,61 @@ function NetworkBadge({ network }: { network?: string }) {
   );
 }
 
-function RunRow({
-  run,
-  isSelected,
-  onNavigate,
-}: {
-  run: Run;
-  isSelected: boolean;
-  onNavigate: (path: string) => void;
-}) {
-  const [hovered, setHovered] = React.useState(false);
-  return (
-    <tr
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: isSelected
-          ? "var(--proof-blue-bg)"
-          : hovered
-            ? "rgba(255,255,255,0.025)"
-            : undefined,
-        borderLeft: isSelected ? "3px solid var(--proof-blue)" : "3px solid transparent",
-        cursor: "pointer",
-        transition: "background 0.12s ease",
-      }}
-      onClick={() => onNavigate(`/runs/${run.id}`)}
-    >
-      {/* Run: ID + build on two lines */}
-      <td style={{ verticalAlign: "middle" }}>
+export default function Runs() {
+  const [, navigate] = useLocation();
+  const { Toast } = useSimpleToast();
+  const [search, setSearch] = useSyncedUrlState("q", "");
+  const [statusFilter, setStatusFilter] = useSyncedUrlState("status", "all");
+  const [suiteFilter, setSuiteFilter] = useSyncedUrlState("suite", "all");
+  const [envFilter, setEnvFilter] = useSyncedUrlState("env", "all");
+
+  const envs = [...new Set(RUNS.map((r) => r.env))].sort();
+  const suites = [...new Set(RUNS.map((r) => r.suiteId))].sort();
+
+  const filtered = RUNS.filter((r) => {
+    if (statusFilter !== "all" && r.status !== statusFilter) return false;
+    if (suiteFilter !== "all" && r.suiteId !== suiteFilter) return false;
+    if (envFilter !== "all" && r.env !== envFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      if (
+        !r.id.toLowerCase().includes(q) &&
+        !r.env.toLowerCase().includes(q) &&
+        !r.suiteId.toLowerCase().includes(q)
+      )
+        return false;
+    }
+    return true;
+  });
+
+  const hasActiveFilters =
+    statusFilter !== "all" || suiteFilter !== "all" || envFilter !== "all" || search !== "";
+
+  const table = useDataTable(
+    filtered as unknown as Record<string, unknown>[],
+    { defaultPageSize: 25, defaultSort: { key: "started", direction: "desc" } },
+  );
+
+  const columns: ColumnDef<Record<string, unknown>>[] = [
+    {
+      key: "id",
+      header: "Run",
+      sortable: true,
+      width: 200,
+      render: (row) => { const run = row as unknown as Run; return (
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <span
+          <Link
+            href={`/runs/${run.id}`}
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 11,
               color: "var(--proof-blue)",
               fontWeight: 600,
+              textDecoration: "none",
             }}
           >
             {run.id}
-          </span>
+          </Link>
           <span
             style={{
               fontFamily: "var(--font-mono)",
@@ -108,10 +126,14 @@ function RunRow({
             {run.build} · {run.rev?.slice(0, 7)}
           </span>
         </div>
-      </td>
-
-      {/* Suite / Env */}
-      <td style={{ verticalAlign: "middle" }}>
+      ); },
+    },
+    {
+      key: "suiteId",
+      header: "Suite / Env",
+      sortable: true,
+      width: 180,
+      render: (row) => { const run = row as unknown as Run; return (
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <span
             style={{
@@ -127,10 +149,14 @@ function RunRow({
             <NetworkBadge network={run.network} />
           </div>
         </div>
-      </td>
-
-      {/* Result */}
-      <td style={{ verticalAlign: "middle" }}>
+      ); },
+    },
+    {
+      key: "status",
+      header: "Result",
+      sortable: true,
+      width: 140,
+      render: (row) => { const run = row as unknown as Run; return (
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
           {statusBadge(run.status)}
           <span
@@ -163,45 +189,60 @@ function RunRow({
             </span>
           </span>
         </div>
-      </td>
-
-      {/* When */}
-      <td style={{ verticalAlign: "middle" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              color: "var(--proof-text-secondary)",
-            }}
-          >
-            {run.duration}
-          </span>
-          <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
-            {new Date(run.started).toLocaleString(undefined, {
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </span>
-        </div>
-      </td>
-
-      {/* Actions */}
-      <td style={{ verticalAlign: "middle" }} onClick={(e) => e.stopPropagation()}>
+      ); },
+    },
+    {
+      key: "duration",
+      header: "Duration",
+      sortable: true,
+      width: 120,
+      render: (row) => { const run = row as unknown as Run; return (
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            color: "var(--proof-text-secondary)",
+          }}
+        >
+          {run.duration}
+        </span>
+      ); },
+    },
+    {
+      key: "started",
+      header: "Date",
+      sortable: true,
+      width: 140,
+      render: (row) => { const run = row as unknown as Run; return (
+        <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
+          {new Date(run.started).toLocaleString(undefined, {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
+      ); },
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      sortable: false,
+      width: 160,
+      render: (row) => { const run = row as unknown as Run; return (
         <div style={{ display: "flex", gap: 5 }}>
           <button
-            onClick={() => onNavigate(`/runs/${run.id}`)}
+            onClick={(e) => { e.stopPropagation(); navigate(`/runs/${run.id}`); }}
             className="proof-button"
             style={{ fontSize: 11, padding: "3px 8px", whiteSpace: "nowrap" }}
           >
             Detail
           </button>
           <button
-            onClick={() =>
-              onNavigate(`/compare?baseline=${RUNS[RUNS.length - 1]?.id}&candidate=${run.id}`)
-            }
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/compare?baseline=${RUNS[RUNS.length - 1]?.id}&candidate=${run.id}`);
+            }}
             className="proof-button"
             style={{
               fontSize: 11,
@@ -215,152 +256,82 @@ function RunRow({
             <GitCompare size={11} /> Compare
           </button>
         </div>
-      </td>
-    </tr>
-  );
-}
-
-export default function Runs() {
-  const [, navigate] = useLocation();
-  const { Toast } = useSimpleToast();
-  const [search, setSearch] = useSyncedUrlState("q", "");
-  const [statusFilter, setStatusFilter] = useSyncedUrlState("status", "all");
-  const [suiteFilter, setSuiteFilter] = useSyncedUrlState("suite", "all");
-  const [envFilter, setEnvFilter] = useSyncedUrlState("env", "all");
-  const [selectedIdx, setSelectedIdx] = React.useState(-1);
-  const selectedRunIdRef = React.useRef<string | null>(null);
-
-  const envs = [...new Set(RUNS.map((r) => r.env))].sort();
-  const suites = [...new Set(RUNS.map((r) => r.suiteId))].sort();
-
-  const filtered = RUNS.filter((r) => {
-    if (statusFilter !== "all" && r.status !== statusFilter) return false;
-    if (suiteFilter !== "all" && r.suiteId !== suiteFilter) return false;
-    if (envFilter !== "all" && r.env !== envFilter) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      if (
-        !r.id.toLowerCase().includes(q) &&
-        !r.env.toLowerCase().includes(q) &&
-        !r.suiteId.toLowerCase().includes(q)
-      )
-        return false;
-    }
-    return true;
-  });
-
-  const hasActiveFilters =
-    statusFilter !== "all" || suiteFilter !== "all" || envFilter !== "all" || search !== "";
-
-  // Keyboard nav (j/k/Enter)
-  React.useEffect(() => {
-    if (selectedIdx >= 0 && selectedIdx < filtered.length) {
-      selectedRunIdRef.current = filtered[selectedIdx].id;
-    } else {
-      selectedRunIdRef.current = null;
-    }
-  }, [selectedIdx, filtered]);
-
-  React.useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.target instanceof HTMLSelectElement) return;
-      if (e.key === "j" || e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIdx((i) => Math.min(i + 1, filtered.length - 1));
-      } else if (e.key === "k" || e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIdx((i) => Math.max(i - 1, 0));
-      } else if (e.key === "Enter") {
-        const id = selectedRunIdRef.current;
-        if (id) navigate(`/runs/${id}`);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [filtered.length, navigate]);
+      ); },
+    },
+  ];
 
   return (
-    <AppLayout activeHref="/runs">
-      <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {/* Header */}
-        <div className="proof-page-header" style={{ alignItems: "center" }}>
-          <div>
-            <h1 className="proof-page-title" style={{ fontSize: 20 }}>
-              Regression Runs
-            </h1>
-            <p className="proof-page-subtitle">
-              {RUNS.length} runs &nbsp;·&nbsp; GitHub Actions across QA / UAT / PROD
-            </p>
-          </div>
-          <button onClick={() => navigate("/start")} className="proof-button-primary">
-            <Play size={14} /> Start New Run
-          </button>
+    <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Header */}
+      <div className="proof-page-header" style={{ alignItems: "center" }}>
+        <div>
+          <h1 className="proof-page-title" style={{ fontSize: 20 }}>
+            Regression Runs
+          </h1>
+          <p className="proof-page-subtitle">
+            {RUNS.length} runs &nbsp;·&nbsp; GitHub Actions across QA / UAT / PROD
+          </p>
         </div>
+        <button onClick={() => navigate("/start")} className="proof-button-primary">
+          <Play size={14} /> Start New Run
+        </button>
+      </div>
 
-        {/* Stat cards — clickable CTA filters */}
-        <PanelErrorBoundary label="Stats cards">
+      {/* Stat cards */}
+      <PanelErrorBoundary label="Stats cards">
+        <ConsoleCard>
           <div
-            className="proof-stagger"
-            style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: 4,
+            }}
           >
-            <CTAStatCard
+            <ConsoleStat
               label="Total Runs"
               value={RUNS.length}
-              subtitle="all environments"
-              accentColor="var(--proof-blue)"
               icon={<BarChart3 size={16} />}
+              color="var(--proof-blue)"
               onClick={() => {
                 setStatusFilter("all");
                 setEnvFilter("all");
                 setSuiteFilter("all");
                 setSearch("");
               }}
-              active={
-                statusFilter === "all" &&
-                envFilter === "all" &&
-                suiteFilter === "all" &&
-                search === ""
-              }
             />
-            <CTAStatCard
+            <ConsoleStat
               label="Passing"
               value={RUNS.filter((r) => r.status === "PASS").length}
-              subtitle="successful runs"
-              accentColor="var(--proof-green)"
               icon={<CheckCircle2 size={16} />}
+              color="var(--proof-green)"
               onClick={() => setStatusFilter("PASS")}
-              active={statusFilter === "PASS"}
             />
-            <CTAStatCard
+            <ConsoleStat
               label="Failing"
               value={RUNS.filter((r) => r.status === "FAIL").length}
-              subtitle="need attention"
-              accentColor="var(--proof-red)"
               icon={<XCircle size={16} />}
+              color="var(--proof-red)"
               onClick={() => setStatusFilter("FAIL")}
-              active={statusFilter === "FAIL"}
             />
-            <CTAStatCard
+            <ConsoleStat
               label="Avg Duration"
               value={(() => {
                 const avgMs = RUNS.reduce((s, r) => s + r.durationMs, 0) / RUNS.length;
                 if (avgMs < 60000) return `${(avgMs / 1000).toFixed(1)}s`;
                 return `${Math.round(avgMs / 60000)}m`;
               })()}
-              subtitle="per run"
-              accentColor="var(--proof-text-secondary)"
               icon={<Clock size={16} />}
+              color="var(--proof-text-secondary)"
             />
           </div>
-        </PanelErrorBoundary>
+        </ConsoleCard>
+      </PanelErrorBoundary>
 
-        {/* Filter bar */}
-        <PanelErrorBoundary label="Filters">
+      {/* Filter bar */}
+      <PanelErrorBoundary label="Filters">
+        <ConsoleCard>
           <div
-            className="proof-card"
             style={{
-              padding: "10px 14px",
               display: "flex",
               alignItems: "center",
               gap: 10,
@@ -457,105 +428,71 @@ export default function Runs() {
               {filtered.length} of {RUNS.length}
             </span>
           </div>
-        </PanelErrorBoundary>
+        </ConsoleCard>
+      </PanelErrorBoundary>
 
-        {/* Active filter badges */}
-        {hasActiveFilters && (
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>Filters:</span>
-            {statusFilter !== "all" && (
-              <span
-                className="proof-badge proof-badge-skip"
-                style={{ fontSize: 10, cursor: "pointer" }}
-                onClick={() => setStatusFilter("all")}
-              >
-                status={statusFilter} <X size={10} style={{ marginLeft: 3 }} />
-              </span>
-            )}
-            {suiteFilter !== "all" && (
-              <span
-                className="proof-badge proof-badge-skip"
-                style={{ fontSize: 10, cursor: "pointer" }}
-                onClick={() => setSuiteFilter("all")}
-              >
-                suite={suiteFilter} <X size={10} style={{ marginLeft: 3 }} />
-              </span>
-            )}
-            {envFilter !== "all" && (
-              <span
-                className="proof-badge proof-badge-skip"
-                style={{ fontSize: 10, cursor: "pointer" }}
-                onClick={() => setEnvFilter("all")}
-              >
-                env={envFilter} <X size={10} style={{ marginLeft: 3 }} />
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Table — normal flow (no virtualizer), table-layout: fixed for consistent column widths */}
-        <PanelErrorBoundary label="Runs table">
-          <div className="proof-card" style={{ overflow: "hidden" }}>
-            <div style={{ overflowX: "auto" }}>
-              <table className="proof-table" style={{ width: "100%" }}>
-                <colgroup>
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                </colgroup>
-                <thead
-                  style={{
-                    position: "sticky",
-                    top: 0,
-                    background: "var(--proof-surface)",
-                    zIndex: 10,
-                  }}
-                >
-                  <tr>
-                    <th>Run</th>
-                    <th>Suite / Env</th>
-                    <th>Result</th>
-                    <th>When</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((run, idx) => (
-                    <RunRow
-                      key={run.id}
-                      run={run}
-                      isSelected={selectedIdx === idx}
-                      onNavigate={navigate}
-                    />
-                  ))}
-                  {filtered.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        style={{
-                          textAlign: "center",
-                          padding: "40px 32px",
-                          color: "var(--proof-text-secondary)",
-                          fontSize: 13,
-                        }}
-                      >
-                        No runs match your filters
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </PanelErrorBoundary>
-
-        <div style={{ fontSize: 11, color: "var(--proof-text-muted)", textAlign: "right" }}>
-          ↑↓ / j·k to navigate · Enter to open
+      {/* Active filter badges */}
+      {hasActiveFilters && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+          <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>Filters:</span>
+          {statusFilter !== "all" && (
+            <span
+              className="proof-badge proof-badge-skip"
+              style={{ fontSize: 10, cursor: "pointer" }}
+              onClick={() => setStatusFilter("all")}
+            >
+              status={statusFilter} <X size={10} style={{ marginLeft: 3 }} />
+            </span>
+          )}
+          {suiteFilter !== "all" && (
+            <span
+              className="proof-badge proof-badge-skip"
+              style={{ fontSize: 10, cursor: "pointer" }}
+              onClick={() => setSuiteFilter("all")}
+            >
+              suite={suiteFilter} <X size={10} style={{ marginLeft: 3 }} />
+            </span>
+          )}
+          {envFilter !== "all" && (
+            <span
+              className="proof-badge proof-badge-skip"
+              style={{ fontSize: 10, cursor: "pointer" }}
+              onClick={() => setEnvFilter("all")}
+            >
+              env={envFilter} <X size={10} style={{ marginLeft: 3 }} />
+            </span>
+          )}
         </div>
+      )}
+
+      {/* DataTable */}
+      <PanelErrorBoundary label="Runs table">
+        <ConsoleCard title="Runs">
+          <DataTable
+            columns={columns}
+            data={table.paginatedData}
+            keyExtractor={(r) => (r as unknown as Run).id}
+            sortable
+            sortKey={table.sortKey}
+            sortDirection={table.sortDirection}
+            onSort={table.setSort}
+            onRowClick={(r) => navigate(`/runs/${(r as unknown as Run).id}`)}
+            page={table.page}
+            totalPages={table.totalPages}
+            totalFiltered={table.totalFiltered}
+            onPageChange={table.setPage}
+            pageSize={table.pageSize}
+            pageSizeOptions={[10, 25, 50, 100]}
+            onPageSizeChange={table.setPageSize}
+            emptyMessage="No runs match your filters"
+          />
+        </ConsoleCard>
+      </PanelErrorBoundary>
+
+      <div style={{ fontSize: 11, color: "var(--proof-text-muted)", textAlign: "right" }}>
+        ↑↓ / j·k to navigate · Enter to open
       </div>
       {Toast}
-    </AppLayout>
+    </div>
   );
 }

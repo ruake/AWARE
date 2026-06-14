@@ -1,6 +1,5 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { AppLayout } from "@/components/aware/AppLayout";
 import {
   Activity,
   Check,
@@ -266,8 +265,7 @@ export default function Pulse() {
   }
 
   return (
-    <AppLayout activeHref="/pulse">
-      <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {/* Header */}
         <div className="proof-page-header" style={{ alignItems: "flex-start" }}>
           <div>
@@ -852,8 +850,7 @@ export default function Pulse() {
             Open Actions <ExternalLink size={12} />
           </a>
         </div>
+        {Toast}
       </div>
-      {Toast}
-    </AppLayout>
   );
 }
