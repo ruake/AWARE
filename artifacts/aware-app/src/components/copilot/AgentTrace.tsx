@@ -1,5 +1,5 @@
 import React from "react";
-import { Cpu, ChevronDown, ChevronRight, Zap, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Cpu, ChevronDown, ChevronRight, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import type { ToolCall, ProviderType } from "@/lib/copilot/types";
 
 interface Props {
@@ -9,9 +9,9 @@ interface Props {
 }
 
 const PROVIDER_LABEL: Record<ProviderType, { label: string; color: string }> = {
-  webllm: { label: "WebLLM · Llama-3.2-3B", color: "#a78bfa" },
-  openai: { label: "OpenAI", color: "#34d399" },
-  chrome: { label: "Chrome AI · Gemini Nano", color: "#fbbf24" },
+  webllm:  { label: "WebLLM · Llama-3.2-3B", color: "#a78bfa" },
+  openai:  { label: "OpenAI", color: "#34d399" },
+  chrome:  { label: "Chrome AI · Gemini Nano", color: "#fbbf24" },
 };
 
 export default function AgentTrace({ toolCalls, providerType, streaming }: Props) {

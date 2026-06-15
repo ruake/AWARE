@@ -1,5 +1,5 @@
 // ============================================================================
-// Copilot Type System
+// Copilot Type System — State-of-the-Art LangGraph Edition
 // ============================================================================
 
 export type ProviderType = "webllm" | "openai" | "chrome";
@@ -13,6 +13,7 @@ export interface Message {
   timestamp: number;
   streaming?: boolean;
   toolCalls?: ToolCall[];
+  graphNodes?: GraphNodeState[];
   error?: string;
 }
 
@@ -30,9 +31,10 @@ export interface ToolCall {
 export interface ToolResult {
   data: unknown;
   chartData?: ChartData;
+  tableData?: TableData;
 }
 
-// ── Chart Data (structured, NOT LLM-generated JSON strings) ─────────────────
+// ── Chart Data ───────────────────────────────────────────────────────────────
 export interface ChartData {
   type: "line" | "bar" | "column" | "pie";
   title: string;
@@ -42,10 +44,50 @@ export interface ChartData {
   colors?: string[];
 }
 
+// ── Table Data (AI-built structured tables rendered in chat) ─────────────────
+export type TableColumnType = "text" | "number" | "percent" | "badge" | "duration" | "mono";
+export type TableHighlight = "max" | "min" | "none";
+
+export interface TableColumn {
+  key: string;
+  label: string;
+  align?: "left" | "right" | "center";
+  type?: TableColumnType;
+  highlight?: TableHighlight;
+  width?: number;
+}
+
+export interface TableData {
+  title?: string;
+  subtitle?: string;
+  columns: TableColumn[];
+  rows: Array<Record<string, string | number | null>>;
+  sortBy?: string;
+  sortDir?: "asc" | "desc";
+  maxHighlight?: string;
+  minHighlight?: string;
+}
+
+// ── LangGraph Node State (for live graph visualization) ──────────────────────
+export type GraphNodeId = "classify" | "plan" | "execute" | "synthesize" | "done";
+export type GraphNodeStatus = "pending" | "running" | "completed" | "error" | "skipped";
+
+export interface GraphNodeState {
+  id: GraphNodeId;
+  label: string;
+  status: GraphNodeStatus;
+  detail?: string;
+  startedAt?: number;
+  completedAt?: number;
+  toolNames?: string[];
+}
+
 // ── Tool Definition ──────────────────────────────────────────────────────────
 export interface ToolDefinition {
   name: string;
   description: string;
+  icon: string;
+  color: string;
   parameters: {
     type: "object";
     properties: Record<string, { type: string; description: string; enum?: string[] }>;
@@ -54,7 +96,7 @@ export interface ToolDefinition {
   execute(args: Record<string, unknown>): Promise<ToolResult>;
 }
 
-// ── Streaming Delta (emitted by providers token by token) ───────────────────
+// ── Streaming Delta ──────────────────────────────────────────────────────────
 export interface StreamDelta {
   content?: string;
   toolCallId?: string;
@@ -63,7 +105,7 @@ export interface StreamDelta {
   done: boolean;
 }
 
-// ── API Message format (OpenAI-compatible, sent to all providers) ────────────
+// ── API Message format (OpenAI-compatible) ───────────────────────────────────
 export interface ApiMessage {
   role: "system" | "user" | "assistant" | "tool";
   content: string | null;
@@ -79,15 +121,6 @@ export interface ApiMessage {
 // ── Provider Interface ───────────────────────────────────────────────────────
 export interface IProvider {
   readonly type: ProviderType;
-  /**
-   * When false, the graph agent uses keyword routing for tool selection instead
-   * of prompting the model with JSON tool-calling instructions. The provider's
-   * stream() is then only called for synthesis (after tools run) and for direct
-   * answers to non-data questions.
-   *
-   * Chrome AI (Gemini Nano) sets this to false — its tiny context window cannot
-   * handle full tool descriptions + system prompt + history simultaneously.
-   */
   readonly supportsToolCalling?: boolean;
   onLoadProgress?: (progress: number, text: string) => void;
   checkAvailability(): Promise<ProviderStatus>;
@@ -99,7 +132,7 @@ export interface IProvider {
   ): Promise<void>;
 }
 
-// ── Sub-Agent Step (for UI progress display in LangGraph-style execution) ──
+// ── Sub-Agent Step (for UI progress display) ─────────────────────────────────
 export interface SubAgentStep {
   id: string;
   label: string;
@@ -108,11 +141,12 @@ export interface SubAgentStep {
   duration?: number;
 }
 
-// ── Agent Events (emitted by agent.ts during a run) ─────────────────────────
+// ── Agent Events (emitted during a run) ──────────────────────────────────────
 export type AgentEvent =
   | { type: "delta"; content: string }
   | { type: "tool_start"; toolCall: ToolCall }
   | { type: "tool_done"; toolCall: ToolCall }
   | { type: "step"; step: SubAgentStep }
+  | { type: "graph_node"; node: GraphNodeState }
   | { type: "error"; error: string }
   | { type: "done" };

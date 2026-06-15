@@ -1,7 +1,8 @@
 import type {
   AgentEvent,
   ApiMessage,
-  ChartData,
+  GraphNodeId,
+  GraphNodeState,
   IProvider,
   Message,
   SubAgentStep,
@@ -24,8 +25,11 @@ export interface GraphAgentOptions {
 }
 
 const MAX_ITERATIONS = 5;
+const STREAM_TIMEOUT_MS = 20_000;
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+function uid(): string {
+  return Math.random().toString(36).slice(2, 10);
+}
 
 function messagesToApi(history: Message[]): ApiMessage[] {
   const out: ApiMessage[] = [];
@@ -37,7 +41,7 @@ function messagesToApi(history: Message[]): ApiMessage[] {
         out.push({
           role: "assistant",
           content: m.content || null,
-          tool_calls: m.toolCalls.map((tc) => ({
+          tool_calls: m.toolCalls.map(tc => ({
             id: tc.id,
             type: "function" as const,
             function: { name: tc.name, arguments: JSON.stringify(tc.args) },
@@ -60,175 +64,122 @@ function messagesToApi(history: Message[]): ApiMessage[] {
   return out;
 }
 
-function uid(): string {
-  return Math.random().toString(36).slice(2, 10);
+// ── Graph node event helpers ──────────────────────────────────────────────────
+function emitNode(ctx: AgentGraphContext, node: GraphNodeState) {
+  ctx.graphNodes.push(node);
+  ctx.onEvent({ type: "graph_node", node });
 }
 
-// ── Node: session_carve (context optimization) ──────────────────────────────
-// Smart truncation: keep system prompt + newest messages.
-// Drops old tool results first, then old chat history.
-function sessionCarveNode(): AgentNode {
+function updateNode(ctx: AgentGraphContext, id: GraphNodeId, patch: Partial<GraphNodeState>) {
+  const existing = ctx.graphNodes.find(n => n.id === id);
+  if (existing) {
+    Object.assign(existing, patch);
+    ctx.onEvent({ type: "graph_node", node: { ...existing } });
+  }
+}
+
+// ── Node: classify ────────────────────────────────────────────────────────────
+// Fast intent classification — emits immediately to give visual feedback.
+function classifyNode(): AgentNode {
   return {
-    id: "session_carve",
-    label: "Context Optimize",
-    description: "Optimizing context window for next turn",
+    id: "classify",
+    label: "Classify",
+    description: "Classifying intent and query type",
     async execute(ctx: AgentGraphContext): Promise<AgentNodeResult> {
-      const providerType = ctx.provider.type;
-      const MAX_CHARS = providerType === "webllm" ? 8000 : 40000;
-      const steps: SubAgentStep[] = [];
+      const t0 = Date.now();
+      emitNode(ctx, {
+        id: "classify",
+        label: "Classify Intent",
+        status: "running",
+        detail: `${ctx.provider.type} · ${ctx.tools.length} tools available`,
+        startedAt: t0,
+      });
 
-      const sys = ctx.apiMessages.find((m) => m.role === "system");
-      const rest = ctx.apiMessages.filter((m) => m.role !== "system");
+      // Fast classification — no LLM needed
+      const q = ctx.query.toLowerCase();
+      const isDataQuery = /run|test|fail|pass|flak|suite|env|uat|qa|prod|promot|deploy|akamai|edgeworker|duration|trend|category|heatmap/.test(q);
+      const isQuestion = q.includes("?") || /^(what|which|how|why|when|show|list|give|tell|find|analyze|compare|check|get)/.test(q);
+      const intent = isDataQuery ? "data-query" : isQuestion ? "question" : "conversation";
 
-      let total = sys ? JSON.stringify(sys).length : 0;
-      const kept: ApiMessage[] = [];
+      const steps: SubAgentStep[] = [{
+        id: uid(),
+        label: "Intent classified",
+        status: "completed",
+        detail: `${intent} · ${isDataQuery ? "routing to tools" : "direct synthesis"}`,
+      }];
 
-      // Walk from newest to oldest — always keep current exchange
-      for (let i = rest.length - 1; i >= 0; i--) {
-        const size = JSON.stringify(rest[i]).length;
-        if (total + size > MAX_CHARS) {
-          const dropped = rest.length - kept.length - i;
-          if (dropped > 0) {
-            steps.push({
-              id: uid(),
-              label: "Carved context",
-              status: "completed",
-              detail: `Dropped ${dropped} old message(s) to fit ${MAX_CHARS} budget`,
-            });
-          }
-          break;
-        }
-        total += size;
-        kept.unshift(rest[i]);
-      }
+      updateNode(ctx, "classify", {
+        status: "completed",
+        detail: intent,
+        completedAt: Date.now(),
+      });
 
-      ctx.apiMessages = sys ? [sys, ...kept] : kept;
-
-      const saved = rest.length - kept.length;
-      if (saved > 0) {
-        logInfo("session_carve", `Carved ${saved} messages from context (${total} chars used)`);
-        steps.push({
-          id: uid(),
-          label: "Tokens used",
-          status: "completed",
-          detail: `~${Math.round(total / 4)}t / ${providerType === "webllm" ? "4096" : "32768"}t`,
-        });
-      } else {
-        steps.push({
-          id: uid(),
-          label: "Context OK",
-          status: "completed",
-          detail: `~${Math.round(total / 4)}t (no carving needed)`,
-        });
-      }
-
+      ctx.plan = intent;
       return { status: "completed", steps };
     },
   };
 }
 
-// Stream timeout — providers that hang without emitting done will resolve after
-// this many milliseconds. 20s is enough for Chrome AI synthesis; WebLLM/OpenAI
-// are faster and also benefit from the shorter cap.
-const STREAM_TIMEOUT_MS = 20_000;
-
-// ── Node: plan_and_route ────────────────────────────────────────────────────
-// Two paths:
-//
-//   supportsToolCalling === false (Chrome AI / Gemini Nano):
-//     • Keyword-route the user query deterministically — zero LLM cost.
-//     • If a tool matches, push to pendingToolCalls; the execute_tools node
-//       runs it, then synthesize calls the provider with a compact prompt.
-//     • If no tool matches, let synthesize call the provider directly.
-//
-//   supportsToolCalling !== false (WebLLM, OpenAI):
-//     • Stream from provider; parse JSON tool-call deltas.
-//     • Route to execute_tools if tool calls emitted, otherwise finalContent.
-//
-function planAndRouteNode(): AgentNode {
+// ── Node: plan ────────────────────────────────────────────────────────────────
+// Tool selection — keyword routing for Chrome AI, LLM for others.
+function planNode(): AgentNode {
   return {
-    id: "plan_and_route",
-    label: "Planning",
-    description: "Analyzing query and deciding action",
+    id: "plan",
+    label: "Plan",
+    description: "Selecting tools and planning execution",
     async execute(ctx: AgentGraphContext): Promise<AgentNodeResult> {
-      const steps: SubAgentStep[] = [];
-
-      // Emit an immediate "Thinking" step so the progress indicator appears
-      // right away — gives the user visual feedback that the agent is running.
-      ctx.onEvent({
-        type: "step",
-        step: {
-          id: uid(),
-          label: "Thinking…",
-          status: "running",
-          detail: `${ctx.provider.type} · ${ctx.tools.length} tools`,
-        },
+      const t0 = Date.now();
+      emitNode(ctx, {
+        id: "plan",
+        label: "Plan Tools",
+        status: "running",
+        detail: "Selecting tools…",
+        startedAt: t0,
       });
 
-      // ── Keyword routing for providers that can't do tool calling ──────────
+      const steps: SubAgentStep[] = [];
+
+      // ── Keyword routing (Chrome AI / Gemini Nano) ─────────────────────────
       if (ctx.provider.supportsToolCalling === false) {
         const route = routeByKeyword(ctx.query);
-
         if (route) {
           const callId = `kw-${uid()}`;
-          logInfo(
-            "plan_and_route",
-            `Keyword routed → ${route.tool} (query: "${ctx.query.slice(0, 60)}")`,
-          );
-
-          // Push as pending tool call for execute_tools node
           ctx.pendingToolCalls.push({ id: callId, name: route.tool, args: route.args });
-
-          // Record assistant tool-call message so execute_tools can push result
           ctx.apiMessages.push({
             role: "assistant",
             content: null,
-            tool_calls: [
-              {
-                id: callId,
-                type: "function" as const,
-                function: { name: route.tool, arguments: JSON.stringify(route.args) },
-              },
-            ],
+            tool_calls: [{
+              id: callId,
+              type: "function" as const,
+              function: { name: route.tool, arguments: JSON.stringify(route.args) },
+            }],
           });
-
-          steps.push({
-            id: uid(),
-            label: "Keyword routed",
+          steps.push({ id: uid(), label: "Keyword route", status: "completed", detail: route.tool });
+          updateNode(ctx, "plan", {
             status: "completed",
             detail: route.tool,
+            completedAt: Date.now(),
+            toolNames: [route.tool],
           });
         } else {
-          // No tool needed — synthesize will answer directly via Chrome AI
-          logInfo("plan_and_route", `Keyword: no tool matched — will answer directly`);
-          steps.push({
-            id: uid(),
-            label: "Direct answer",
-            status: "completed",
-            detail: "No data tool needed",
-          });
+          steps.push({ id: uid(), label: "Direct answer", status: "completed", detail: "No tool needed" });
+          updateNode(ctx, "plan", { status: "completed", detail: "direct synthesis", completedAt: Date.now() });
         }
-
         return { status: "completed", steps };
       }
 
-      // ── LLM tool-calling path (WebLLM, OpenAI) ───────────────────────────
+      // ── LLM tool-calling path (WebLLM, OpenAI) ────────────────────────────
       let collectedContent = "";
       const localPendingCalls: Array<{ id: string; name: string; argsJson: string }> = [];
       let streamDone = false;
-      const stepId = uid();
 
       await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => {
-          if (!streamDone) {
-            logError("plan_and_route", `Stream timeout after ${STREAM_TIMEOUT_MS}ms`);
-            streamDone = true;
-            resolve();
-          }
+          if (!streamDone) { streamDone = true; resolve(); }
         }, STREAM_TIMEOUT_MS);
 
         ctx.provider
-          .stream(ctx.apiMessages, ctx.tools, ctx.signal, (delta) => {
+          .stream(ctx.apiMessages, ctx.tools, ctx.signal, delta => {
             if (delta.content) {
               collectedContent += delta.content;
               ctx.onEvent({ type: "delta", content: delta.content });
@@ -240,59 +191,44 @@ function planAndRouteNode(): AgentNode {
                 argsJson: delta.toolCallArgsChunk ?? "{}",
               });
             }
-            if (delta.done) {
-              streamDone = true;
-              clearTimeout(timeout);
-              resolve();
-            }
+            if (delta.done) { streamDone = true; clearTimeout(timeout); resolve(); }
           })
-          .then(() => {
-            clearTimeout(timeout);
-            if (!streamDone) resolve();
-          })
-          .catch((err) => {
-            clearTimeout(timeout);
-            reject(err);
-          });
+          .then(() => { clearTimeout(timeout); if (!streamDone) resolve(); })
+          .catch(err => { clearTimeout(timeout); reject(err); });
       });
 
       if (ctx.signal.aborted) return { status: "completed" };
 
       if (localPendingCalls.length > 0) {
-        steps.push({
-          id: stepId,
-          label: "Planned tool calls",
-          status: "completed",
-          detail: localPendingCalls.map((t) => t.name).join(", "),
-        });
+        const toolNames = localPendingCalls.map(t => t.name);
+        steps.push({ id: uid(), label: "Tools planned", status: "completed", detail: toolNames.join(", ") });
 
         for (const tc of localPendingCalls) {
           let args: Record<string, unknown> = {};
-          try {
-            args = JSON.parse(tc.argsJson);
-          } catch {
-            /* use empty */
-          }
+          try { args = JSON.parse(tc.argsJson); } catch { /* empty args */ }
           ctx.pendingToolCalls.push({ id: tc.id, name: tc.name, args });
         }
 
         ctx.apiMessages.push({
           role: "assistant",
           content: collectedContent || null,
-          tool_calls: localPendingCalls.map((tc) => ({
+          tool_calls: localPendingCalls.map(tc => ({
             id: tc.id,
             type: "function" as const,
             function: { name: tc.name, arguments: tc.argsJson },
           })),
         });
-      } else {
-        steps.push({
-          id: stepId,
-          label: "Answered directly",
+
+        updateNode(ctx, "plan", {
           status: "completed",
-          detail: "No tools needed",
+          detail: toolNames.join(", "),
+          completedAt: Date.now(),
+          toolNames,
         });
+      } else {
+        steps.push({ id: uid(), label: "Direct answer", status: "completed", detail: "No tools needed" });
         ctx.finalContent = collectedContent;
+        updateNode(ctx, "plan", { status: "completed", detail: "direct synthesis", completedAt: Date.now() });
       }
 
       return { status: "completed", steps };
@@ -300,28 +236,35 @@ function planAndRouteNode(): AgentNode {
   };
 }
 
-// ── Node: execute_tools ─────────────────────────────────────────────────────
-// Run each tool call, push results into apiMessages for the next LLM round.
-function executeToolsNode(): AgentNode {
+// ── Node: execute ─────────────────────────────────────────────────────────────
+// Run each tool call — emits real-time tool_start / tool_done events.
+function executeNode(): AgentNode {
   return {
     id: "execute_tools",
-    label: "Executing",
+    label: "Execute",
     description: "Running data queries and computations",
     async execute(ctx: AgentGraphContext): Promise<AgentNodeResult> {
+      const t0 = Date.now();
+      const toolNames = ctx.pendingToolCalls.map(tc => tc.name);
+
+      emitNode(ctx, {
+        id: "execute",
+        label: "Execute Tools",
+        status: "running",
+        detail: toolNames.join(", "),
+        startedAt: t0,
+        toolNames,
+      });
+
       const steps: SubAgentStep[] = [];
 
       for (const tc of ctx.pendingToolCalls) {
-        if (ctx.signal.aborted) return { status: "completed" };
+        if (ctx.signal.aborted) break;
 
         const stepId = uid();
-        const step: SubAgentStep = {
-          id: stepId,
-          label: tc.name,
-          status: "running",
-          detail: "Querying...",
-        };
+        const step: SubAgentStep = { id: stepId, label: tc.name, status: "running", detail: "Querying…" };
         steps.push(step);
-        // Emit tool_start for UI
+
         const toolCall: ToolCall = {
           id: tc.id,
           name: tc.name,
@@ -331,18 +274,10 @@ function executeToolsNode(): AgentNode {
         };
         ctx.onEvent({ type: "tool_start", toolCall });
 
-        const toolDef = ctx.tools.find((t) => t.name === tc.name);
+        const toolDef = ctx.tools.find(t => t.name === tc.name);
         if (!toolDef) {
-          logError("execute_tools", `Unknown tool: ${tc.name}`);
-          ctx.onEvent({
-            type: "tool_done",
-            toolCall: { ...toolCall, status: "error", completedAt: Date.now() },
-          });
-          ctx.apiMessages.push({
-            role: "tool",
-            content: `Error: unknown tool '${tc.name}'`,
-            tool_call_id: tc.id,
-          });
+          ctx.onEvent({ type: "tool_done", toolCall: { ...toolCall, status: "error", completedAt: Date.now() } });
+          ctx.apiMessages.push({ role: "tool", content: `Error: unknown tool '${tc.name}'`, tool_call_id: tc.id });
           step.status = "error";
           step.detail = "Unknown tool";
           continue;
@@ -350,147 +285,160 @@ function executeToolsNode(): AgentNode {
 
         try {
           const start = performance.now();
-          const result = await toolDef.execute(tc.args);
+          const result: ToolResult = await toolDef.execute(tc.args);
           const duration = Math.round(performance.now() - start);
-          logInfo("execute_tools", `Tool ${tc.name} completed in ${duration}ms`);
-          ctx.onEvent({
-            type: "tool_done",
-            toolCall: { ...toolCall, status: "done", result, completedAt: Date.now() },
-          });
 
-          // Store result for synthesis
+          ctx.onEvent({ type: "tool_done", toolCall: { ...toolCall, status: "done", result, completedAt: Date.now() } });
           ctx.toolResults.set(tc.name, result);
           if (result.chartData) ctx.charts.push(result.chartData);
+          if (result.tableData) ctx.tables.push(result.tableData);
 
-          // Push tool result into message history
           const resultJson = JSON.stringify(result.data);
           ctx.apiMessages.push({
             role: "tool",
-            content: resultJson.length > 4000 ? resultJson.slice(0, 4000) + "\u2026" : resultJson,
+            content: resultJson.length > 4000 ? resultJson.slice(0, 4000) + "…" : resultJson,
             tool_call_id: tc.id,
           });
 
           step.status = "completed";
           step.detail = `${duration}ms`;
-        } catch (err: any) {
-          logError("execute_tools", `Tool ${tc.name} failed: ${err?.message}`);
-          ctx.onEvent({
-            type: "tool_done",
-            toolCall: { ...toolCall, status: "error", completedAt: Date.now() },
-          });
-          ctx.apiMessages.push({
-            role: "tool",
-            content: `Error executing ${tc.name}: ${err?.message ?? "unknown error"}`,
-            tool_call_id: tc.id,
-          });
+          logInfo("execute", `Tool ${tc.name} done in ${duration}ms`);
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          ctx.onEvent({ type: "tool_done", toolCall: { ...toolCall, status: "error", completedAt: Date.now() } });
+          ctx.apiMessages.push({ role: "tool", content: `Error: ${msg}`, tool_call_id: tc.id });
           step.status = "error";
-          step.detail = err?.message?.slice(0, 60) ?? "Error";
+          step.detail = msg.slice(0, 60);
+          logError("execute", `Tool ${tc.name} failed: ${msg}`);
         }
       }
 
       ctx.pendingToolCalls = [];
+
+      updateNode(ctx, "execute", {
+        status: "completed",
+        detail: `${steps.filter(s => s.status === "completed").length}/${steps.length} succeeded`,
+        completedAt: Date.now(),
+      });
+
       return { status: "completed", steps };
     },
   };
 }
 
-// ── Node: synthesize ────────────────────────────────────────────────────────
-// If there's a final answer already (no tools were called), just emit done.
-// Otherwise, stream from provider with tool results to generate the response.
+// ── Node: synthesize ──────────────────────────────────────────────────────────
+// Generate final markdown response from tool results.
 function synthesizeNode(): AgentNode {
   return {
     id: "synthesize",
-    label: "Synthesizing",
+    label: "Synthesize",
     description: "Generating final response from analysis",
     async execute(ctx: AgentGraphContext): Promise<AgentNodeResult> {
+      const t0 = Date.now();
+      emitNode(ctx, {
+        id: "synthesize",
+        label: "Synthesize Response",
+        status: "running",
+        detail: "Generating…",
+        startedAt: t0,
+      });
+
       const steps: SubAgentStep[] = [];
 
-      // If we already have a direct answer from plan_and_route, no synthesis needed
       if (ctx.finalContent) {
-        steps.push({
-          id: uid(),
-          label: "Pass-through",
-          status: "completed",
-          detail: "Direct response",
-        });
+        steps.push({ id: uid(), label: "Pass-through", status: "completed", detail: "Direct response" });
+        updateNode(ctx, "synthesize", { status: "completed", detail: "direct", completedAt: Date.now() });
         return { status: "completed", steps };
       }
 
-      // Stream the synthesis from the provider with tool results
-      const stepId = uid();
-      steps.push({
-        id: stepId,
-        label: "Streaming response",
-        status: "running",
-        detail: "Generating...",
-      });
-
       let streamDone = false;
+      const synthStep: SubAgentStep = { id: uid(), label: "Streaming response", status: "running", detail: "Generating…" };
+      steps.push(synthStep);
+
       await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => {
-          if (!streamDone) {
-            logError("synthesize", `Stream timeout after ${STREAM_TIMEOUT_MS}ms`);
-            streamDone = true;
-            resolve();
-          }
+          if (!streamDone) { streamDone = true; resolve(); }
         }, STREAM_TIMEOUT_MS);
 
         ctx.provider
-          .stream(ctx.apiMessages, ctx.tools, ctx.signal, (delta) => {
+          .stream(ctx.apiMessages, ctx.tools, ctx.signal, delta => {
             if (delta.content) {
               ctx.finalContent += delta.content;
               ctx.onEvent({ type: "delta", content: delta.content });
             }
             if (delta.toolCallId) {
-              // Edge case: the model wants to call more tools mid-synthesis
-              // Push back to pending for the next graph iteration
+              let args: Record<string, unknown> = {};
+              try { args = JSON.parse(delta.toolCallArgsChunk ?? "{}"); } catch { /* empty */ }
               ctx.pendingToolCalls.push({
                 id: delta.toolCallId,
                 name: delta.toolCallName ?? "",
-                args: (() => {
-                  try {
-                    return JSON.parse(delta.toolCallArgsChunk ?? "{}");
-                  } catch {
-                    return {};
-                  }
-                })(),
+                args,
               });
             }
-            if (delta.done) {
-              streamDone = true;
-              clearTimeout(timeout);
-              resolve();
-            }
+            if (delta.done) { streamDone = true; clearTimeout(timeout); resolve(); }
           })
-          .then(() => {
-            clearTimeout(timeout);
-            if (!streamDone) resolve();
-          })
-          .catch((err) => {
-            clearTimeout(timeout);
-            reject(err);
-          });
+          .then(() => { clearTimeout(timeout); if (!streamDone) resolve(); })
+          .catch(err => { clearTimeout(timeout); reject(err); });
       });
 
-      steps[0].status = "completed";
-      steps[0].detail = ctx.finalContent ? `${ctx.finalContent.length} chars` : "Empty response";
+      synthStep.status = "completed";
+      synthStep.detail = ctx.finalContent ? `${ctx.finalContent.length} chars` : "Empty";
+
+      updateNode(ctx, "synthesize", {
+        status: "completed",
+        detail: `${ctx.finalContent.length} chars`,
+        completedAt: Date.now(),
+      });
 
       return { status: "completed", steps };
     },
   };
 }
 
-// ── Graph Engine ─────────────────────────────────────────────────────────────
-// Runs the agent through a LangGraph-style node pipeline.
-//   plan_and_route → [tools called?] → execute_tools → synthesize → session_carve → done
-//                                        ↓ (no tools)
-//                                    synthesize (direct) → session_carve → done
-//
-// If synthesize itself produces tool calls, the graph loops: synthesize → execute_tools → synthesize
+// ── Node: session_carve ───────────────────────────────────────────────────────
+function sessionCarveNode(): AgentNode {
+  return {
+    id: "session_carve",
+    label: "Optimize",
+    description: "Optimizing context window for next turn",
+    async execute(ctx: AgentGraphContext): Promise<AgentNodeResult> {
+      const providerType = ctx.provider.type;
+      const MAX_CHARS = providerType === "webllm" ? 8000 : 40000;
+      const steps: SubAgentStep[] = [];
+
+      const sys = ctx.apiMessages.find(m => m.role === "system");
+      const rest = ctx.apiMessages.filter(m => m.role !== "system");
+
+      let total = sys ? JSON.stringify(sys).length : 0;
+      const kept: ApiMessage[] = [];
+
+      for (let i = rest.length - 1; i >= 0; i--) {
+        const size = JSON.stringify(rest[i]).length;
+        if (total + size > MAX_CHARS) break;
+        total += size;
+        kept.unshift(rest[i]);
+      }
+
+      ctx.apiMessages = sys ? [sys, ...kept] : kept;
+
+      const saved = rest.length - kept.length;
+      steps.push({
+        id: uid(),
+        label: saved > 0 ? "Context carved" : "Context OK",
+        status: "completed",
+        detail: saved > 0 ? `Dropped ${saved} old msgs · ~${Math.round(total / 4)}t` : `~${Math.round(total / 4)}t (no trim)`,
+      });
+
+      return { status: "completed", steps };
+    },
+  };
+}
+
+// ── Graph Engine ──────────────────────────────────────────────────────────────
+// Topology: classify → plan → [execute → (loop)] → synthesize → session_carve → done
 export async function runGraphAgent(opts: GraphAgentOptions): Promise<void> {
   const { userContent, history, provider, tools, signal, onEvent } = opts;
 
-  // Build initial message list
   const apiMessages: ApiMessage[] = [
     { role: "system", content: buildSystemPrompt() },
     ...messagesToApi(history),
@@ -498,11 +446,8 @@ export async function runGraphAgent(opts: GraphAgentOptions): Promise<void> {
   ];
 
   const trimmed = truncateMessages(apiMessages, provider.type);
-  if (trimmed.length < apiMessages.length) {
-    logInfo("graph", `Truncated ${apiMessages.length - trimmed.length} messages to fit context`);
-  }
+  logInfo("graph", `Starting (${trimmed.length} msgs, ${tools.length} tools, ${provider.type})`);
 
-  // ── Graph context ────────────────────────────────────────────────────────
   const ctx: AgentGraphContext = {
     query: userContent,
     history,
@@ -515,88 +460,54 @@ export async function runGraphAgent(opts: GraphAgentOptions): Promise<void> {
     pendingToolCalls: [],
     toolResults: new Map(),
     charts: [],
+    tables: [],
     finalContent: "",
     steps: [],
+    graphNodes: [],
   };
 
-  // ── Register nodes ────────────────────────────────────────────────────────
-  const nodes = new Map<string, AgentNode>();
-  for (const node of [
-    planAndRouteNode(),
-    executeToolsNode(),
-    synthesizeNode(),
-    sessionCarveNode(),
-  ]) {
-    nodes.set(node.id, node);
-  }
+  const emitStep = (step: SubAgentStep) => { ctx.steps.push(step); onEvent({ type: "step", step }); };
 
-  // ── Emit step to UI ───────────────────────────────────────────────────────
-  const emitStep = (step: SubAgentStep) => {
-    ctx.steps.push(step);
-    ctx.onEvent({ type: "step", step });
-  };
+  // ── Phase 1: Classify ─────────────────────────────────────────────────────
+  const classifyResult = await classifyNode().execute(ctx);
+  if (classifyResult.error || signal.aborted) { onEvent({ type: "done" }); return; }
+  for (const s of classifyResult.steps ?? []) emitStep(s);
 
-  logInfo(
-    "graph",
-    `Starting graph agent (${ctx.apiMessages.length} messages, ${tools.length} tools)`,
-  );
-
-  // ── Execute graph ─────────────────────────────────────────────────────────
-  // Phase 1: Plan & Route
-  logInfo("graph", "Phase 1: plan_and_route");
-  const planNode = nodes.get("plan_and_route")!;
-  const planResult = await planNode.execute(ctx);
-  if (planResult.error || signal.aborted) {
-    onEvent({ type: "done" });
-    return;
-  }
+  // ── Phase 2: Plan ─────────────────────────────────────────────────────────
+  const planResult = await planNode().execute(ctx);
+  if (planResult.error || signal.aborted) { onEvent({ type: "done" }); return; }
   for (const s of planResult.steps ?? []) emitStep(s);
 
-  // Phase 2: Execute tools (loop until no pending calls or max iterations)
+  // ── Phase 3: Execute (loop until no pending calls or max iterations) ───────
   let iterations = 0;
   while (ctx.pendingToolCalls.length > 0 && iterations < MAX_ITERATIONS && !signal.aborted) {
     iterations++;
-    logInfo("graph", `Phase 2: execute_tools (iteration ${iterations})`);
-
-    const execNode = nodes.get("execute_tools")!;
-    const execResult = await execNode.execute(ctx);
-    if (execResult.error || signal.aborted) {
-      onEvent({ type: "done" });
-      return;
-    }
+    const execResult = await executeNode().execute(ctx);
+    if (execResult.error || signal.aborted) { onEvent({ type: "done" }); return; }
     for (const s of execResult.steps ?? []) emitStep(s);
   }
 
-  // Phase 3: Synthesize — always runs after tool loop.
-  // synthesizeNode short-circuits immediately when ctx.finalContent is already set
-  // (direct LLM answer), so it's safe to always call it.
-  // This also covers the case where no tools matched (direct/casual query) and
-  // finalContent was never set — the provider handles a direct response.
+  // ── Phase 4: Synthesize ───────────────────────────────────────────────────
   if (!signal.aborted) {
-    logInfo("graph", "Phase 3: synthesize");
-    const synthNode = nodes.get("synthesize")!;
-    const synthResult = await synthNode.execute(ctx);
-    if (synthResult.error || signal.aborted) {
-      onEvent({ type: "done" });
-      return;
-    }
+    const synthResult = await synthesizeNode().execute(ctx);
+    if (synthResult.error || signal.aborted) { onEvent({ type: "done" }); return; }
     for (const s of synthResult.steps ?? []) emitStep(s);
   }
 
-  if (iterations >= MAX_ITERATIONS) {
-    logError("graph", `Exceeded max iterations (${MAX_ITERATIONS}) — forcing done`);
-  }
-
-  // Phase 4: Session carve (context optimization for next turn)
-  logInfo("graph", "Phase 4: session_carve");
-  const carveNode = nodes.get("session_carve")!;
-  const carveResult = await carveNode.execute(ctx);
+  // ── Phase 5: Session carve ────────────────────────────────────────────────
+  const carveResult = await sessionCarveNode().execute(ctx);
   for (const s of carveResult.steps ?? []) emitStep(s);
 
-  logInfo(
-    "graph",
-    `Graph complete: ${ctx.steps.length} steps, ${iterations} tool iterations, ${ctx.finalContent.length} chars`,
-  );
+  // ── Emit done node ────────────────────────────────────────────────────────
+  emitNode(ctx, {
+    id: "done",
+    label: "Done",
+    status: "completed",
+    detail: `${iterations} tool call${iterations !== 1 ? "s" : ""} · ${ctx.finalContent.length} chars`,
+    startedAt: Date.now(),
+    completedAt: Date.now(),
+  });
 
+  logInfo("graph", `Complete: ${ctx.steps.length} steps, ${iterations} iterations, ${ctx.finalContent.length} chars`);
   onEvent({ type: "done" });
 }
