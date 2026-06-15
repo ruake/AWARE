@@ -97,7 +97,7 @@ function classifyNode(): AgentNode {
 
       // Fast classification — no LLM needed
       const q = ctx.query.toLowerCase();
-      const isDataQuery = /run|test|fail|pass|flak|suite|env|uat|qa|prod|promot|deploy|akamai|edgeworker|duration|trend|category|heatmap/.test(q);
+      const isDataQuery = /run|test|fail|pass|flak|suite|env|uat|qa|prod|promot|deploy|akamai|edgeworker|duration|trend|category|heatmap|how.much.data|how.many|what.data|data.do.you|coverage|available.data|scope/.test(q);
       const isQuestion = q.includes("?") || /^(what|which|how|why|when|show|list|give|tell|find|analyze|compare|check|get)/.test(q);
       const intent = isDataQuery ? "data-query" : isQuestion ? "question" : "conversation";
 
