@@ -141,7 +141,12 @@ function planNode(): AgentNode {
 
       // ── Keyword routing (Chrome AI / Gemini Nano) ─────────────────────────
       if (ctx.provider.supportsToolCalling === false) {
-        const route = routeByKeyword(ctx.query);
+        // When intent is "data-query" but no keyword matched, default to query_runs
+        // so natural-language phrasings ("tell me about last test", "how are things?")
+        // always get real data instead of falling through to the generic fallback.
+        const route = routeByKeyword(ctx.query)
+          ?? (ctx.plan === "data-query" ? { tool: "query_runs", args: { limit: 10 } } : null);
+
         if (route) {
           const callId = `kw-${uid()}`;
           ctx.pendingToolCalls.push({ id: callId, name: route.tool, args: route.args });
@@ -154,10 +159,11 @@ function planNode(): AgentNode {
               function: { name: route.tool, arguments: JSON.stringify(route.args) },
             }],
           });
-          steps.push({ id: uid(), label: "Keyword route", status: "completed", detail: route.tool });
+          const routeLabel = route === null ? "query_runs (default)" : route.tool;
+          steps.push({ id: uid(), label: "Keyword route", status: "completed", detail: routeLabel });
           updateNode(ctx, "plan", {
             status: "completed",
-            detail: route.tool,
+            detail: routeLabel,
             completedAt: Date.now(),
             toolNames: [route.tool],
           });
