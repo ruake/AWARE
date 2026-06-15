@@ -34,7 +34,7 @@ export default function AgentTrace({ toolCalls, providerType, streaming }: Props
       style={{
         margin: "0 0 6px",
         borderRadius: 8,
-        background: "rgba(10,22,40,0.6)",
+        background: "var(--proof-overlay)",
         border: "1px solid var(--proof-border)",
         overflow: "hidden",
         fontSize: 11,

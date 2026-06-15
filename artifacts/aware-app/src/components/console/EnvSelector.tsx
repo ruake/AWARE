@@ -173,10 +173,10 @@ export function EnvSelector({ currentEnvIds, onEnvChange, variant = "topbar" }: 
         border: "1px solid var(--proof-border-strong)",
         borderRadius: 5,
         background: triggerHovered
-          ? "rgba(255,255,255,0.06)"
+          ? "var(--proof-hover)"
           : variant === "full"
             ? "var(--proof-surface-2)"
-            : "rgba(255,255,255,0.03)",
+            : "var(--proof-hover-light)",
         color: triggerHovered ? "var(--proof-text)" : "var(--proof-text-secondary)",
         fontFamily: "var(--font-mono)",
         whiteSpace: "nowrap",

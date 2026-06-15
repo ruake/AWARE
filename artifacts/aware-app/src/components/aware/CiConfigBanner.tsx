@@ -108,13 +108,13 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
               </div>
               <div
                 style={{
-                  background: "#1e293b",
+                  background: "var(--proof-surface)",
                   borderRadius: 4,
                   padding: "8px 12px",
                   fontFamily: "var(--font-mono)",
                   fontSize: 10,
                   lineHeight: 1.8,
-                  color: "#e2e8f0",
+                  color: "var(--proof-text)",
                 }}
               >
                 <div>
@@ -151,13 +151,13 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
               </div>
               <div
                 style={{
-                  background: "#1e293b",
+                  background: "var(--proof-surface)",
                   borderRadius: 4,
                   padding: "8px 12px",
                   fontFamily: "var(--font-mono)",
                   fontSize: 10,
                   lineHeight: 1.8,
-                  color: "#e2e8f0",
+                  color: "var(--proof-text)",
                 }}
               >
                 <div style={{ color: "#f59e0b" }}>.github/workflows/controller.yml</div>

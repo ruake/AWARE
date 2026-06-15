@@ -48,8 +48,8 @@ export function YamlPreview({ yaml }: { yaml: string }) {
     <div
       style={{
         borderBottom: "1px solid var(--proof-grey)",
-        background: "#1e1e1e",
-        color: "#c9d1d9",
+        background: "var(--proof-surface)",
+        color: "var(--proof-text)",
         padding: 16,
       }}
     >

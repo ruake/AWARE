@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
+@variant dark (&:where(.dark, .dark *));
 
 *,
 *::before,
@@ -1285,7 +1286,7 @@ select.proof-input {
   flex-shrink: 0;
   box-shadow:
     0 1px 0 var(--proof-border),
-    0 4px 20px rgba(0, 0, 0, 0.25);
+    var(--proof-shadow);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1301,13 +1302,36 @@ select.proof-input {
 /* ═══════════════════════════════════════════════════════════════════
    COMPAT ALIASES
    ═══════════════════════════════════════════════════════════════════ */
---proof-subtle-bg015: rgba(255, 255, 255, 0.012);
---proof-cta-bg: linear-gradient(
-  135deg,
-  rgba(59, 130, 246, 0.1),
-  rgba(139, 92, 246, 0.07),
-  var(--proof-surface)
-);
---proof-flow-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.03), transparent);
---proof-env-card: linear-gradient(180deg, var(--proof-subtle-bg2), var(--proof-subtle-bg));
---proof-tab-bar: var(--proof-subtle-bg2);
+:root {
+  --proof-subtle-bg015: rgba(255, 255, 255, 0.012);
+  --proof-cta-bg: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(139, 92, 246, 0.07),
+    var(--proof-surface)
+  );
+  --proof-flow-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.03), transparent);
+  --proof-env-card: linear-gradient(180deg, var(--proof-subtle-bg2), var(--proof-subtle-bg));
+  --proof-tab-bar: var(--proof-subtle-bg2);
+  /* Theme-adaptive surface aliases for inline styles */
+  --proof-hover: rgba(255, 255, 255, 0.06);
+  --proof-hover-light: rgba(255, 255, 255, 0.03);
+  --proof-overlay: rgba(10, 22, 40, 0.7);
+  --proof-overlay-strong: rgba(10, 22, 40, 0.95);
+  --proof-overlay-dark: rgba(0, 0, 0, 0.5);
+  --proof-topbar-bg-fallback: rgba(10, 22, 40, 0.95);
+  --proof-sidebar-bg-fallback: rgba(10, 22, 40, 0.7);
+  --proof-notif-bg: rgba(10, 22, 40, 0.98);
+}
+
+.light {
+  --proof-subtle-bg015: rgba(15, 23, 42, 0.012);
+  --proof-hover: rgba(59, 130, 246, 0.08);
+  --proof-hover-light: rgba(59, 130, 246, 0.04);
+  --proof-overlay: rgba(248, 250, 252, 0.95);
+  --proof-overlay-strong: rgba(255, 255, 255, 0.98);
+  --proof-overlay-dark: rgba(0, 0, 0, 0.1);
+  --proof-topbar-bg-fallback: var(--proof-topbar-bg);
+  --proof-sidebar-bg-fallback: var(--proof-sidebar-bg);
+  --proof-notif-bg: var(--proof-glass);
+}

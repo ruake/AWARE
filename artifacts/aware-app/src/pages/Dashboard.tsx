@@ -609,7 +609,7 @@ export default function Dashboard() {
                 <div
                   style={{
                     height: 3,
-                    background: "rgba(255,255,255,0.05)",
+                    background: "var(--proof-hover-light)",
                     borderRadius: 99,
                     overflow: "hidden",
                   }}
@@ -725,11 +725,11 @@ export default function Dashboard() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "rgba(10,22,40,0.95)",
+                    background: "var(--proof-overlay-strong)",
                     border: "1px solid var(--proof-border-accent)",
                     borderRadius: 8,
                     fontSize: 11,
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                    boxShadow: "var(--proof-shadow-lg)",
                   }}
                   formatter={(value: number) => [`${value}%`, "Pass Rate"]}
                 />

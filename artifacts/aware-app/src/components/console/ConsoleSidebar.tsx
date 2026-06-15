@@ -89,7 +89,7 @@ export function ConsoleSidebar({
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
-        background: "rgba(10, 22, 40, 0.7)",
+        background: "var(--proof-sidebar-bg)",
         backdropFilter: "blur(10px)",
         borderRight: "1px solid var(--proof-border)",
         overflow: "hidden",
@@ -214,7 +214,7 @@ export function ConsoleSidebar({
                         fontWeight: 700,
                         padding: "1px 5px",
                         borderRadius: 999,
-                        background: active ? "rgba(59,130,246,0.15)" : "rgba(255,255,255,0.06)",
+                        background: active ? "rgba(59,130,246,0.15)" : "var(--proof-hover)",
                         color: active ? "var(--proof-blue-bright)" : "var(--proof-text-muted)",
                         border: `1px solid ${active ? "rgba(59,130,246,0.25)" : "var(--proof-border)"}`,
                         flexShrink: 0,
@@ -253,7 +253,7 @@ export function ConsoleSidebar({
             fontFamily: "var(--font-sans)",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
+            (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
             (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
           }}
           onMouseLeave={(e) => {

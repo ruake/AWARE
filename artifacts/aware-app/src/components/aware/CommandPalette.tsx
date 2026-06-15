@@ -304,7 +304,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         alignItems: "flex-start",
         justifyContent: "center",
         paddingTop: "12vh",
-        background: "rgba(0,0,0,0.5)",
+        background: "var(--proof-overlay-dark)",
       }}
       onClick={onClose}
     >
@@ -314,7 +314,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
           width: "min(640px, 92vw)",
           background: "var(--proof-surface)",
           borderRadius: 12,
-          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          boxShadow: "var(--proof-shadow-xl)",
           border: "1px solid var(--proof-grey)",
           overflow: "hidden",
         }}
