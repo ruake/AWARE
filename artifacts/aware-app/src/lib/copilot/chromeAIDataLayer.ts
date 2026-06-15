@@ -102,12 +102,22 @@ function emitAsStream(text: string, onDelta: (delta: StreamDelta) => void): void
   onDelta({ done: true });
 }
 
+const ALL_TOPICS = `
+- ⚡ **Flaky tests** — tests that flip between pass/fail (ask: "show flaky tests")
+- 🔀 **Environment comparison** — QA vs UAT vs PROD health grid (ask: "compare environments")
+- 🛡️ **Promotion gate** — UAT→PROD deployment decisions & block rate (ask: "promotion status")
+- 🔍 **Failure breakdown** — root causes by category: WAF, TLS, API, EdgeWorker, cache (ask: "failure breakdown")
+- 🧪 **Suite health** — per-suite pass rates across all environments (ask: "suite health")
+- ⏱️ **Duration trends** — execution timing regressions (ask: "duration trends")
+- 🌐 **Akamai property** — CDN property versions, EdgeWorker status, PoP coverage (ask: "Akamai status")
+- 📊 **Run history** — pass rates, failure counts, trend over time (ask: "show runs")`.trim();
+
 // ── Canned responses for casual queries ─────────────────────────────────────
 const CASUAL_PATTERNS: Array<{ pattern: RegExp; response: string }> = [
   {
     pattern: /^\s*(hi|hello|hey|howdy|sup|yo)\s*[!?.]*\s*$/i,
     response:
-      "Hi! I'm the **A.W.A.R.E. Copilot** — your CDN test observability AI.\n\nI can:\n- 📊 Analyze test runs and pass rate trends\n- ⚡ Find flaky tests ranked by instability score\n- 🔀 Compare QA → UAT → PROD environments\n- 🛡️ Check promotion gate readiness\n- 🔍 Break down failures by category (WAF, TLS, API, EdgeWorker)\n- 🧪 Show per-suite health metrics\n- ⏱️ Detect duration regressions\n- 🌐 Show Akamai property and EdgeWorker status\n\nTry a **Quick Action** above, or just ask!",
+      `Hi! I'm the **A.W.A.R.E. Copilot** — your CDN test observability AI.\n\nI can analyze:\n${ALL_TOPICS}\n\nTry a **Quick Action** above, or just ask!`,
   },
   {
     pattern: /how are you|how.*doing|how.*going/i,
@@ -116,7 +126,19 @@ const CASUAL_PATTERNS: Array<{ pattern: RegExp; response: string }> = [
   {
     pattern: /what.*(can|do) you|what you (can|do)|your (capabilities|features)|who are you/i,
     response:
-      "**A.W.A.R.E. Copilot** — 8 analysis tools:\n\n| Tool | What it does |\n|---|---|\n| `query_runs` | Pass rates & failure trends |\n| `get_flaky_tests` | Flakiness ranking |\n| `compare_environments` | QA/UAT/PROD health grid |\n| `get_promotion_status` | Gate decisions & block rate |\n| `get_failure_breakdown` | Root cause by category |\n| `get_suite_health` | Per-suite pass rates |\n| `get_duration_trends` | Timing regressions |\n| `get_akamai_property` | CDN property status |\n\nAll results include **interactive charts** and **sortable tables**.",
+      `**A.W.A.R.E. Copilot** — I can analyze:\n\n${ALL_TOPICS}\n\nAll results include **interactive charts** and **sortable tables**.`,
+  },
+  {
+    // Follow-up conversational queries — "apart from this?", "what else?", "do you know anything else?"
+    pattern: /apart from|besides that|what else|anything else|other than that|tell me more|what more|in addition|beyond (that|this)|what other/i,
+    response:
+      `Here are all the other topics I can analyze:\n\n${ALL_TOPICS}\n\nJust ask about any of these — or try a **Quick Action** above!`,
+  },
+  {
+    // "what do you know?" — treat as capability overview, not a data query
+    pattern: /what.*do you know|what.*information.*do you|what.*data.*do you|what.*can you tell me/i,
+    response:
+      `I have access to your full CDN test dataset. Here's what I can show you:\n\n${ALL_TOPICS}\n\nAsk me about any of these topics!`,
   },
   {
     pattern: /thank|thanks|great|awesome|nice|cool|perfect/i,
@@ -374,6 +396,7 @@ export interface SynthesisInput {
 
 export interface DirectInput {
   userQuery: string;
+  priorResponses?: string[];
   signal: AbortSignal;
   onDelta: (delta: StreamDelta) => void;
 }
@@ -405,21 +428,29 @@ export async function synthesizeWithChromeAI(input: SynthesisInput): Promise<voi
 }
 
 export async function answerDirectWithChromeAI(input: DirectInput): Promise<void> {
-  const { userQuery, signal, onDelta } = input;
+  const { userQuery, priorResponses = [], signal, onDelta } = input;
 
+  // Always check canned responses first — these handle follow-up / capability questions
+  // deterministically, without burning a Gemini Nano session on a conversational query.
   const canned = getCannedResponse(userQuery);
   if (canned) { emitAsStream(canned, onDelta); return; }
 
+  // Build a context-aware prompt so the model doesn't repeat prior answers
+  const contextBlock = priorResponses.length > 0
+    ? `Previous answers in this conversation:\n${priorResponses.map((r, i) => `[${i + 1}] ${r.slice(0, 300)}`).join("\n")}\n\n`
+    : "";
+
   const llmResult = await callChromeAI(
-    "You are AWARE Copilot, a CDN test observability assistant. Answer briefly and helpfully. Keep responses under 3 sentences.",
-    `Question: ${userQuery}`,
+    "You are AWARE Copilot, a CDN test observability assistant. Answer briefly and helpfully. Do NOT repeat information already given in previous answers. Keep responses under 3 sentences.",
+    `${contextBlock}Question: ${userQuery}`,
     signal,
   );
 
   if (llmResult) { emitAsStream(llmResult, onDelta); return; }
 
+  // Final fallback — list available topics so the user always has something useful
   emitAsStream(
-    "I'm the **A.W.A.R.E. Copilot**. I can analyze CDN test runs, flakiness, environment health, promotion gate status, suite metrics, duration trends, and Akamai property config. Try a Quick Action or ask me anything!",
+    `I can help with: **run history**, **flaky tests**, **environment comparison** (QA/UAT/PROD), **promotion gate status**, **failure breakdown**, **suite health**, **duration trends**, and **Akamai property status**.\n\nTry asking about one of these, or use a **Quick Action** above!`,
     onDelta,
   );
 }
