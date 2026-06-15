@@ -407,7 +407,13 @@ const KEYWORD_ROUTES: Array<{
   {
     tool: "query_runs",
     args: { limit: 10 },
-    patterns: [/\bsummary\b/i, /\bhealth\b/i, /\boverview\b/i, /\btrend\b/i, /overall.*(status|health|pass)/i],
+    patterns: [
+      /\bsummary\b/i,
+      /\bhealth\b/i,
+      /\boverview\b/i,
+      /\btrend\b/i,
+      /overall.*(status|health|pass)/i,
+    ],
   },
 
   // ── General runs (catch-all) ───────────────────────────────────────────────

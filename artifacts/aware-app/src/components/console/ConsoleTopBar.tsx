@@ -87,8 +87,14 @@ export function ConsoleTopBar({
           onClick={onToggleSidebar}
           aria-label="Toggle menu"
           style={iconBtnStyle}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)"; }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+            (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "transparent";
+            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
+          }}
         >
           <Menu size={18} />
         </button>
@@ -96,28 +102,42 @@ export function ConsoleTopBar({
 
       {/* Logo + branding */}
       <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0, marginRight: 8 }}>
-        <div style={{
-          width: 28, height: 28, borderRadius: 8,
-          background: "linear-gradient(135deg, #2563eb, #3b82f6)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 2px 8px rgba(59,130,246,0.4)",
-          flexShrink: 0,
-        }}>
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            background: "linear-gradient(135deg, #2563eb, #3b82f6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 8px rgba(59,130,246,0.4)",
+            flexShrink: 0,
+          }}
+        >
           <Zap size={14} style={{ color: "white" }} fill="white" />
         </div>
         <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
-          <span style={{
-            fontWeight: 800, fontSize: 13,
-            color: "var(--proof-text)",
-            letterSpacing: "1.5px",
-            fontFamily: "var(--font-mono)",
-          }}>
+          <span
+            style={{
+              fontWeight: 800,
+              fontSize: 13,
+              color: "var(--proof-text)",
+              letterSpacing: "1.5px",
+              fontFamily: "var(--font-mono)",
+            }}
+          >
             A.W.A.R.E.
           </span>
-          <span style={{
-            fontSize: 7.5, color: "var(--proof-blue-bright)",
-            textTransform: "uppercase", letterSpacing: "1.5px", fontWeight: 600,
-          }}>
+          <span
+            style={{
+              fontSize: 7.5,
+              color: "var(--proof-blue-bright)",
+              textTransform: "uppercase",
+              letterSpacing: "1.5px",
+              fontWeight: 600,
+            }}
+          >
             CDN Observability
           </span>
         </div>
@@ -128,30 +148,66 @@ export function ConsoleTopBar({
         onClick={onSearchOpen}
         role="button"
         tabIndex={0}
-        onKeyDown={e => { if (e.key === "Enter" && onSearchOpen) onSearchOpen(); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && onSearchOpen) onSearchOpen();
+        }}
         style={{
-          flex: 1, maxWidth: 460,
-          display: "flex", alignItems: "center", gap: 7,
+          flex: 1,
+          maxWidth: 460,
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
           border: "1px solid var(--proof-border)",
-          borderRadius: 9, padding: "0 11px", height: 32,
+          borderRadius: 9,
+          padding: "0 11px",
+          height: 32,
           background: "rgba(255,255,255,0.025)",
-          margin: "0 auto", cursor: "pointer",
+          margin: "0 auto",
+          cursor: "pointer",
           transition: "border-color 0.15s, background 0.15s",
         }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.35)"; (e.currentTarget as HTMLElement).style.background = "rgba(59,130,246,0.04)"; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)"; (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.025)"; }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.35)";
+          (e.currentTarget as HTMLElement).style.background = "rgba(59,130,246,0.04)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)";
+          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.025)";
+        }}
       >
         <Search size={13} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
-        <span style={{ flex: 1, fontSize: 12, color: "var(--proof-text-muted)", fontFamily: "var(--font-sans)" }}>
+        <span
+          style={{
+            flex: 1,
+            fontSize: 12,
+            color: "var(--proof-text-muted)",
+            fontFamily: "var(--font-sans)",
+          }}
+        >
           Search runs, tests, environments…
         </span>
         <div style={{ display: "flex", gap: 3 }}>
-          <kbd style={{ fontSize: 9, border: "1px solid var(--proof-border)", borderRadius: 4, padding: "1px 5px", fontFamily: "var(--font-mono)", color: "var(--proof-text-muted)", background: "rgba(255,255,255,0.03)", lineHeight: "14px" }}>⌘K</kbd>
+          <kbd
+            style={{
+              fontSize: 9,
+              border: "1px solid var(--proof-border)",
+              borderRadius: 4,
+              padding: "1px 5px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--proof-text-muted)",
+              background: "rgba(255,255,255,0.03)",
+              lineHeight: "14px",
+            }}
+          >
+            ⌘K
+          </kbd>
         </div>
       </div>
 
       {/* Right actions */}
-      <div style={{ display: "flex", alignItems: "center", gap: 2, marginLeft: "auto", flexShrink: 0 }}>
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 2, marginLeft: "auto", flexShrink: 0 }}
+      >
         <EnvSelector
           variant="topbar"
           currentEnvIds={selectedEnvSnap.envIds}
@@ -161,8 +217,14 @@ export function ConsoleTopBar({
         <button
           aria-label="Notifications"
           style={iconBtnStyle}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)"; }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+            (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "transparent";
+            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
+          }}
         >
           <Bell size={16} />
         </button>
@@ -171,8 +233,14 @@ export function ConsoleTopBar({
           onClick={toggleTheme}
           title={isDark ? "Switch to light mode" : "Switch to dark mode"}
           style={iconBtnStyle}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)"; }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+            (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "transparent";
+            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
+          }}
         >
           {isDark ? <Sun size={16} /> : <Moon size={16} />}
         </button>
@@ -182,13 +250,23 @@ export function ConsoleTopBar({
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            display: "flex", alignItems: "center", gap: 3,
-            fontSize: 11.5, fontWeight: 500, color: "var(--proof-blue-bright)",
-            textDecoration: "none", padding: "5px 8px", borderRadius: 8,
+            display: "flex",
+            alignItems: "center",
+            gap: 3,
+            fontSize: 11.5,
+            fontWeight: 500,
+            color: "var(--proof-blue-bright)",
+            textDecoration: "none",
+            padding: "5px 8px",
+            borderRadius: 8,
             transition: "background 0.15s",
           }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(59,130,246,0.08)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "rgba(59,130,246,0.08)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "transparent";
+          }}
         >
           GitHub <ExternalLink size={11} />
         </a>
