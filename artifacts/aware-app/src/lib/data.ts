@@ -29,15 +29,23 @@ export { loadFromStorage } from "./store";
 
 export {
   RUNS,
+  getRuns,
+  subscribeToRuns,
   getRunIndex,
   getRunById,
   DIFF_ROWS,
+  getDiffRows,
+  subscribeToDiffRows,
   computeDiffRows,
   computeTestDetailForName,
   ENV_SUMMARY,
+  getEnvSummary,
   PASS_RATE_CHART,
+  getPassRateChart,
   ENV_PASS_RATE_CHART,
+  getEnvPassRateChart,
   PER_ENV_PASS_RATE,
+  getPerEnvPassRate,
   getTestResultsForRun,
   getRunsByEnv,
   computeRunFrequency,
@@ -69,7 +77,12 @@ export {
   loadTestSuites,
 } from "./testSuites";
 
-export { getPromotionDecision, getAllPromotionDecisions, loadPromotions } from "./promotions";
+export {
+  getPromotionDecision,
+  getAllPromotionDecisions,
+  loadPromotions,
+  subscribeToPromotions,
+} from "./promotions";
 
 export { getTestCasesBySuiteId } from "./operations";
 

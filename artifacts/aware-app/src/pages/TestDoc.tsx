@@ -412,21 +412,21 @@ export default function TestDoc() {
         display: "flex",
         flexDirection: "column",
         minHeight: "calc(100vh - 80px)",
-        maxWidth: 1800,
+        maxWidth: 2000,
         margin: "0 auto",
         gap: 0,
       }}
     >
-      {/* ── Glassmorphism Hero Banner ── */}
+      {/* Modern Hero Banner with Gradient */}
       <div
         style={{
           position: "relative",
           overflow: "hidden",
-          padding: "20px 24px",
-          borderRadius: "var(--proof-radius-lg) var(--proof-radius-lg) 0 0",
-          background: "linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%)",
+          padding: "32px 40px",
+          background:
+            "linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(30,41,59,0.96) 50%, rgba(15,23,42,0.98) 100%)",
           borderBottom: "1px solid var(--proof-border)",
-          backdropFilter: "blur(20px)",
+          backdropFilter: "blur(16px)",
         }}
       >
         <div

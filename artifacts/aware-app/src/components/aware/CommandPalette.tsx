@@ -175,14 +175,6 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         icon: "🤖",
       },
       {
-        id: "nav_ci",
-        label: "CI Pipeline",
-        description: "Architecture and CI/CD reference",
-        type: "run" as const,
-        href: "/ci-pipeline",
-        icon: "⚙️",
-      },
-      {
         id: "nav_about",
         label: "About A.W.A.R.E.",
         description: "Platform information and tech stack",

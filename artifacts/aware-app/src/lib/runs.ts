@@ -2,14 +2,64 @@ import type { Run, TestResult, TestDetail, TestRunPoint, DiffRow } from "./types
 import { fetchJson } from "./dataFetcher";
 import { getCachedResults } from "./runsLoader";
 
-export let RUNS: Run[] = [];
-export const DIFF_ROWS: DiffRow[] = [];
+// ── Runs store (pub/sub) ─────────────────────────────────────────────
+const _runs: Run[] = [];
+let _runsSnapshot: Run[] = [];
+const _runsListeners = new Set<() => void>();
+
+function notifyRuns(): void {
+  _runsListeners.forEach((cb) => cb());
+}
+
+function updateRunsSnapshot(): void {
+  _runsSnapshot = [..._runs];
+}
+
+export function getRuns(): Run[] {
+  return _runsSnapshot;
+}
+
+export function subscribeToRuns(cb: () => void): () => void {
+  _runsListeners.add(cb);
+  return () => _runsListeners.delete(cb);
+}
+
+// Backward-compat: direct access to the raw array (consumers that don't need reactivity)
+export const RUNS: Run[] = _runs;
+
+// ── DIFF_ROWS store ──────────────────────────────────────────────────
+const _diffRows: DiffRow[] = [];
+let _diffRowsSnapshot: DiffRow[] = [];
+const _diffRowsListeners = new Set<() => void>();
+
+function notifyDiffRows(): void {
+  _diffRowsListeners.forEach((cb) => cb());
+}
+
+function updateDiffRowsSnapshot(): void {
+  _diffRowsSnapshot = [..._diffRows];
+}
+
+export function getDiffRows(): DiffRow[] {
+  return _diffRowsSnapshot;
+}
+
+export function subscribeToDiffRows(cb: () => void): () => void {
+  _diffRowsListeners.add(cb);
+  return () => _diffRowsListeners.delete(cb);
+}
+
+// Backward-compat
+export const DIFF_ROWS: DiffRow[] = _diffRows;
 
 let _runsLoaded = false;
 export async function loadRuns(): Promise<void> {
   if (_runsLoaded) return;
   _runsLoaded = true;
-  RUNS = await fetchJson<Run[]>("runs.json");
+  const data = await fetchJson<Run[]>("runs.json");
+  _runs.length = 0;
+  _runs.push(...data);
+  updateRunsSnapshot();
 }
 
 export function getRunIndex(runId: string): number {
@@ -98,19 +148,29 @@ export function computeTestDetailForName(name: string): TestDetail {
 }
 
 // ── ENV_SUMMARY ──────────────────────────────────────────────────────
-export const ENV_SUMMARY: {
+export interface EnvSummaryEntry {
   label: string;
   passRate: number;
   trend: number;
   failures: number;
   color: string;
   alert: string | null;
-}[] = [];
+}
+
+const _envSummary: EnvSummaryEntry[] = [];
+let _envSummarySnapshot: EnvSummaryEntry[] = [];
+
+export function getEnvSummary(): EnvSummaryEntry[] {
+  return _envSummarySnapshot;
+}
+
+// Backward-compat
+export const ENV_SUMMARY: EnvSummaryEntry[] = _envSummary;
 
 export function computeEnvSummary(): void {
-  ENV_SUMMARY.length = 0;
+  _envSummary.length = 0;
   const groups = new Map<string, Run[]>();
-  for (const run of RUNS) {
+  for (const run of _runs) {
     const key = run.env;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(run);
@@ -128,7 +188,7 @@ export function computeEnvSummary(): void {
       latest.failures > 0
         ? `${latest.failures} failure${latest.failures !== 1 ? "s" : ""} in last run`
         : null;
-    ENV_SUMMARY.push({
+    _envSummary.push({
       label,
       passRate: avgPassRate,
       trend,
@@ -137,28 +197,48 @@ export function computeEnvSummary(): void {
       alert,
     });
   }
-  ENV_SUMMARY.sort((a, b) => a.label.localeCompare(b.label));
+  _envSummary.sort((a, b) => a.label.localeCompare(b.label));
+  _envSummarySnapshot = [..._envSummary];
 }
 
 // ── PASS_RATE_CHART ──────────────────────────────────────────────────
-export const PASS_RATE_CHART: { label: string; passRate: number; runId: string }[] = [];
+const _passRateChart: { label: string; passRate: number; runId: string }[] = [];
+let _passRateChartSnapshot: { label: string; passRate: number; runId: string }[] = [];
+
+export function getPassRateChart(): { label: string; passRate: number; runId: string }[] {
+  return _passRateChartSnapshot;
+}
+
+// Backward-compat
+export const PASS_RATE_CHART: { label: string; passRate: number; runId: string }[] = _passRateChart;
 
 export function computePassRateChart(): void {
-  PASS_RATE_CHART.length = 0;
-  const sorted = [...RUNS].sort(
+  _passRateChart.length = 0;
+  const sorted = [..._runs].sort(
     (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
   );
   for (const r of sorted) {
-    PASS_RATE_CHART.push({ label: r.started.slice(0, 10), passRate: r.passPct, runId: r.id });
+    _passRateChart.push({ label: r.started.slice(0, 10), passRate: r.passPct, runId: r.id });
   }
+  _passRateChartSnapshot = [..._passRateChart];
 }
 
 // ── PER_ENV_PASS_RATE ────────────────────────────────────────────────
-export const PER_ENV_PASS_RATE: {
+interface PerEnvPassRateEntry {
   env: string;
   color: string;
   data: { runId: string; label: string; passRate: number }[];
-}[] = [];
+}
+
+const _perEnvPassRate: PerEnvPassRateEntry[] = [];
+let _perEnvPassRateSnapshot: PerEnvPassRateEntry[] = [];
+
+export function getPerEnvPassRate(): PerEnvPassRateEntry[] {
+  return _perEnvPassRateSnapshot;
+}
+
+// Backward-compat
+export const PER_ENV_PASS_RATE: PerEnvPassRateEntry[] = _perEnvPassRate;
 
 const ENV_COLOR_MAP: Record<string, string> = {
   QA: "#a855f7",
@@ -176,9 +256,9 @@ function envColor(label: string): string {
 }
 
 export function computePerEnvPassRate(): void {
-  PER_ENV_PASS_RATE.length = 0;
+  _perEnvPassRate.length = 0;
   const groups = new Map<string, { runId: string; label: string; passRate: number }[]>();
-  const sorted = [...RUNS].sort(
+  const sorted = [..._runs].sort(
     (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
   );
   for (const run of sorted) {
@@ -191,17 +271,26 @@ export function computePerEnvPassRate(): void {
   const entries = [...groups.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([env, data]) => ({ env, color: envColor(env), data }));
-  PER_ENV_PASS_RATE.push(...entries);
+  _perEnvPassRate.push(...entries);
+  _perEnvPassRateSnapshot = [..._perEnvPassRate];
 }
 
 // ── ENV_PASS_RATE_CHART ──────────────────────────────────────────────
-export const ENV_PASS_RATE_CHART: Record<string, unknown>[] = [];
+const _envPassRateChart: Record<string, unknown>[] = [];
+let _envPassRateChartSnapshot: Record<string, unknown>[] = [];
+
+export function getEnvPassRateChart(): Record<string, unknown>[] {
+  return _envPassRateChartSnapshot;
+}
+
+// Backward-compat
+export const ENV_PASS_RATE_CHART: Record<string, unknown>[] = _envPassRateChart;
 
 export function computeEnvPassRateChart(): void {
-  ENV_PASS_RATE_CHART.length = 0;
-  const envLabels = [...new Set(RUNS.map((r) => r.env))].sort();
+  _envPassRateChart.length = 0;
+  const envLabels = [...new Set(_runs.map((r) => r.env))].sort();
   const dayMap = new Map<string, Record<string, unknown>>();
-  const sorted = [...RUNS].sort(
+  const sorted = [..._runs].sort(
     (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
   );
   for (const run of sorted) {
@@ -217,7 +306,8 @@ export function computeEnvPassRateChart(): void {
     entry.runId = run.id;
   }
   const entries = [...dayMap.values()].sort((a, b) => String(a.day).localeCompare(String(b.day)));
-  ENV_PASS_RATE_CHART.push(...entries);
+  _envPassRateChart.push(...entries);
+  _envPassRateChartSnapshot = [..._envPassRateChart];
 }
 
 export function recomputeAll(): void {
@@ -227,22 +317,25 @@ export function recomputeAll(): void {
   computeEnvPassRateChart();
   // Compute default DIFF_ROWS from the two most recent runs in the same env
   const byEnv = new Map<string, Run[]>();
-  for (const run of RUNS) {
+  for (const run of _runs) {
     const k = run.envId;
     if (!byEnv.has(k)) byEnv.set(k, []);
     byEnv.get(k)!.push(run);
   }
-  DIFF_ROWS.length = 0;
+  _diffRows.length = 0;
   for (const runs of byEnv.values()) {
     const sorted = [...runs].sort(
       (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
     );
     if (sorted.length >= 2) {
       const rows = computeDiffRows(sorted[1].id, sorted[0].id);
-      rows.forEach((r) => DIFF_ROWS.push(r));
+      rows.forEach((r) => _diffRows.push(r));
       break;
     }
   }
+  updateDiffRowsSnapshot();
+  notifyRuns();
+  notifyDiffRows();
 }
 
 export interface RunFrequency {

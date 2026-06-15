@@ -426,11 +426,12 @@ export const AI_USE_CASES: AIUseCase[] = [
   {
     id: "user-journey",
     name: "User Journey Analysis",
-    description: "Map user navigation patterns, page flows, and optimal workflow paths through AWARE",
+    description:
+      "Map user navigation patterns, page flows, and optimal workflow paths through AWARE",
     icon: "Map",
     category: "analysis",
     systemPrompt:
-      "You are a user journey analyst for AWARE — a CDN test observability SPA. Analyze the app's page architecture, navigation links, and typical user workflows. Map the primary paths users take from entry (Dashboard) through the full workflow: monitor runs → investigate failures → compare builds → promote to production. Identify navigation bottlenecks, orphaned pages, missing cross-links, and opportunities to reduce clicks for common tasks. Consider the user's mental model: they start with a health check (Dashboard), drill into issues (Runs → RunDetail), compare baselines (Compare), check environment health (Activity), and finally verify promotion readiness (Copilot/Status). Suggest workflow optimizations.",
+      "You are a user journey analyst for AWARE — a CDN test observability SPA. Analyze the app's page architecture, navigation links, and typical user workflows. Map the primary paths users take from entry (Dashboard) through the full workflow: monitor runs → investigate failures → compare builds → promote to production. Identify navigation bottlenecks, orphaned pages, missing cross-links, and opportunities to reduce clicks for common tasks. Consider the user's mental model: they start with a health check (Dashboard), drill into issues (Runs → RunDetail), compare baselines (Compare), check environment health (Activity), and finally verify promotion readiness (Copilot/Activity). Suggest workflow optimizations.",
     tools: ["query_data", "analyze_trend", "risk_scoring"],
     exampleQueries: [
       "Map the user workflow from dashboard to production",
@@ -443,7 +444,8 @@ export const AI_USE_CASES: AIUseCase[] = [
   {
     id: "layout-analysis",
     name: "Layout & Visual Structure Analysis",
-    description: "Analyze UI layout patterns, component hierarchy, CSS variable consistency, and responsive structure",
+    description:
+      "Analyze UI layout patterns, component hierarchy, CSS variable consistency, and responsive structure",
     icon: "Layout",
     category: "analysis",
     systemPrompt:

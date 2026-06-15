@@ -167,24 +167,18 @@ A.W.A.R.E. (Akamai Web Analytics Regression Engine, also branded "PROOF") is a s
 ## Pages
 | Page | URL | What it shows |
 |------|-----|---------------|
-| Dashboard | / | KPIs (pass rate, failures, runs), PropertyStatusBar, area chart, anomaly banner, heatmap calendar |
+| Dashboard | / | KPIs (pass rate, failures, runs), area chart, anomaly banner, heatmap calendar |
 | Runs | /runs | Filterable run history table with env/build/status columns |
 | Run Detail | /runs/{id} | Per-run test results, filterable by status (PASS/FAIL/ERROR/SKIP), HTTP evidence viewer |
 | Compare | /compare | Baseline vs candidate diff with added/removed/flaky/changed test states |
-| Test Analytics | /analytics | Trends line chart, flakiness leaderboard, category heatmaps, test-level Z-score anomaly |
-| Test Manager | /tests | CRUD test case management with stats dashboard |
+| Test Analytics | /trends | Trends line chart, flakiness leaderboard, category heatmaps, test-level Z-score anomaly |
 | Test Suite Manager | /suites | Hierarchical suite tree with YAML preview |
 | Copilot | /copilot | AI chat interface — THIS page. Shows quick-action buttons, debug panel, conversation |
-| Pulse | /pulse | Live status feed of runs and promotions |
-| Status | /status | CI pipeline status + YAML config download |
-| Test Doc | /test-doc | Per-test documentation viewer |
-| Search | /search | Fuse.js full-text search across tests |
-| Start Run | /start-run | Trigger a new test run |
-| Sharing | /sharing | Export/share configurations |
+| Activity | /activity | Live status feed of runs and promotions |
+| Test Doc | /testdoc | Per-test documentation viewer |
 | About | /about | App version, build info |
 
 ## Key UI Components
-- **PropertyStatusBar**: Always-visible top bar showing CDN property status across all 6 envs
 - **FilterBar**: Filters for env, category, status, date range
 - **CommandPalette**: Ctrl+K quick command search
 - **Markdown renderer**: Renders \`\`\`chart blocks as Google Charts inline
