@@ -153,10 +153,11 @@ function getCannedResponse(query: string): string | null {
   return null;
 }
 
-// ── Rich template synthesis — distinct per tool ──────────────────────────────
+// ── Query-aware template synthesis ───────────────────────────────────────────
+// Each tool has multiple response angles selected by what the user actually asked.
+// The table/chart are already rendered by the UI — the text adds insight, not repetition.
 function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: string): string {
   const q = userQuery.toLowerCase();
-  const wantSummary = /summary|overview|health|trend|overall|how.*doing/.test(q);
 
   try {
     switch (toolName) {
@@ -165,52 +166,95 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         if (!runs.length) return "No test runs found in the dataset.";
 
         const passRates = runs.map((r: any) => Number(r.passRate ?? r.passPct ?? 0));
-        const avgPass = passRates.length > 0 ? Math.round(passRates.reduce((a, b) => a + b, 0) / passRates.length) : 0;
+        const avgPass = Math.round(passRates.reduce((a, b) => a + b, 0) / passRates.length);
         const totalFails = runs.reduce((s: number, r: any) => s + Number(r.failures ?? 0), 0);
-        const envs = [...new Set(runs.map((r: any) => r.env).filter(Boolean))];
         const latest = runs[0];
         const oldest = runs[runs.length - 1];
         const trend = passRates.length >= 2 ? passRates[0] - passRates[passRates.length - 1] : 0;
-        const trendArrow = trend > 2 ? "↑ improving" : trend < -2 ? "↓ declining" : "→ stable";
+        const trendWord = trend > 2 ? "improving" : trend < -2 ? "declining" : "stable";
+        const failedRuns = runs.filter((r: any) => Number(r.failures ?? 0) > 0);
+        const envCounts = runs.reduce((acc: any, r: any) => { acc[r.env] = (acc[r.env] || 0) + 1; return acc; }, {});
+        const envSummary = Object.entries(envCounts).map(([e, c]) => `${c}× ${e}`).join(", ");
+        const gateStatus = avgPass >= 95 ? "✅ Above the 95% promotion gate." : "⚠️ Below the 95% promotion gate.";
 
-        if (wantSummary) {
+        // "last test / latest / most recent"
+        if (/latest|last test|most recent|just ran|newest|single/.test(q)) {
+          const f = Number(latest?.failures ?? 0);
+          return `Latest run: **${latest?.run}** on **${latest?.env}** (${latest?.date ?? "—"}) — **${latest?.passRate}%** pass, **${f}** failure${f !== 1 ? "s" : ""}. ${f === 0 ? "✅ Clean." : "⚠️ Review the failure before promoting."}`;
+        }
+
+        // "fail / broke / error / problem"
+        if (/fail|broke|broken|error|problem|issue|wrong/.test(q)) {
+          if (totalFails === 0) return `✅ Zero failures across all ${runs.length} runs (${envSummary}). Every run is above the 95% gate.`;
+          const failLines = failedRuns.slice(0, 4).map((r: any) =>
+            `- **${r.run}** (${r.env}, ${r.date}) — ${r.failures} failure${Number(r.failures) !== 1 ? "s" : ""}, **${r.passRate}%** pass`
+          ).join("\n");
+          return `**${totalFails} failure${totalFails !== 1 ? "s" : ""}** found across ${runs.length} runs:\n\n${failLines}\n\n${gateStatus}`;
+        }
+
+        // "trend / over time / direction / improving / declining"
+        if (/trend|over time|direction|improv|declin|getting|progress/.test(q)) {
+          const pp = Math.abs(trend).toFixed(0);
+          const move = trend > 2 ? `up ${pp}pp` : trend < -2 ? `down ${pp}pp` : "flat";
+          return `Pass rates are **${trendWord}** — ${move} from **${oldest?.run}** (${oldest?.passRate}%) to **${latest?.run}** (${latest?.passRate}%). Avg across ${runs.length} runs: **${avgPass}%** with ${totalFails} total failure${totalFails !== 1 ? "s" : ""}. ${gateStatus}`;
+        }
+
+        // "pass rate / percent / %"
+        if (/pass.?rate|passing|percent|%/.test(q)) {
+          const min = Math.min(...passRates);
+          const max = Math.max(...passRates);
+          return `Pass rates over ${runs.length} runs — avg **${avgPass}%**, high **${max}%**, low **${min}%**. Trend is **${trendWord}**. ${totalFails === 0 ? "No failures — all runs green." : `${totalFails} failure${totalFails !== 1 ? "s" : ""} across ${failedRuns.length} run${failedRuns.length !== 1 ? "s" : ""}.`}`;
+        }
+
+        // "history / all / timeline / full"
+        if (/history|all run|timeline|full|complete|entire/.test(q)) {
+          return `**${runs.length} runs** (${envSummary}) — avg **${avgPass}%** pass, **${totalFails}** failure${totalFails !== 1 ? "s" : ""}, trend **${trendWord}**. ${gateStatus} Full timeline in the chart and table above.`;
+        }
+
+        // "summary / overview / health"
+        if (/summary|overview|health|how.*doing|status/.test(q)) {
           return (
-            `## Run History Summary\n\n` +
-            `**${runs.length} runs** analyzed across **${envs.join(", ")}**.\n\n` +
+            `**${runs.length} runs** across ${envSummary}.\n\n` +
             `| Metric | Value |\n|---|---|\n` +
             `| Avg Pass Rate | **${avgPass}%** |\n` +
             `| Total Failures | **${totalFails}** |\n` +
-            `| Trend | **${trendArrow}** (${Math.abs(trend).toFixed(0)}pp) |\n` +
-            `| Latest Run | **${latest?.run}** — ${latest?.passRate}% |\n\n` +
-            `The **Pass Rate Trend** chart and table above show the full timeline. ` +
-            `${avgPass >= 95 ? "✅ All runs are above the 95% promotion threshold." : avgPass >= 80 ? "⚠️ Some runs are below the 95% threshold." : "🔴 Pass rates are critically low — investigate failures."}`
+            `| Trend | **${trendWord}** (${trend > 0 ? "+" : ""}${trend.toFixed(0)}pp) |\n` +
+            `| Latest | **${latest?.run}** — ${latest?.passRate}% |\n\n` +
+            gateStatus
           );
         }
 
-        const rows = runs.slice(0, 8).map((r: any) =>
-          `- **${r.run}** (${r.env}) — **${r.passRate ?? "?"}%** pass · ${r.failures ?? 0} fail${(r.failures ?? 0) !== 1 ? "s" : ""} · ${r.date ?? ""}`
-        ).join("\n");
-
-        return `**Last ${runs.length} Test Runs** — avg **${avgPass}%** pass, **${totalFails}** total failures:\n\n${rows}\n\nSee the table above for the full breakdown.`;
+        // Default — lead with the headline insight, not a repeated list
+        const headline = totalFails === 0
+          ? `✅ All ${runs.length} runs passed`
+          : `**${totalFails}** failure${totalFails !== 1 ? "s" : ""} across ${runs.length} runs`;
+        return `${headline} — avg **${avgPass}%**, trend **${trendWord}**. Latest: **${latest?.run}** (${latest?.env}) at **${latest?.passRate}%**. See chart and table above for the full picture.`;
       }
 
       case "get_flaky_tests": {
         const tests: any[] = Array.isArray(rawData) ? rawData : [];
-        if (!tests.length) return "✅ **No flaky tests detected** — all tests are stable across recent runs.";
+        if (!tests.length) return "✅ No flaky tests detected — all tests are stable across recent runs.";
 
         const worst = tests[0];
         const avgScore = Math.round(tests.reduce((s: number, t: any) => s + Number(t.score ?? 0), 0) / tests.length);
         const highRisk = tests.filter((t: any) => Number(t.score ?? 0) >= 50).length;
+        const stable = tests.filter((t: any) => Number(t.flips ?? 0) === 1).length;
+
+        if (/worst|top|most|highest|biggest/.test(q)) {
+          return `Most unstable: **\`${worst.test}\`** — flakiness score **${worst.score}%** with **${worst.flips}** flips (pattern: \`${worst.sequence ?? "?"}\`). ${highRisk} test${highRisk !== 1 ? "s" : ""} are high-risk (≥50% score). Quarantine these to cut CI noise.`;
+        }
+
+        if (/stable|reliable|consistent|trust/.test(q)) {
+          return `${stable} test${stable !== 1 ? "s" : ""} flipped only once (borderline). ${tests.length - highRisk} tests are below the 50% risk threshold. The **${highRisk}** high-risk test${highRisk !== 1 ? "s" : ""} account for most CI instability — ranked in the table above.`;
+        }
 
         return (
-          `## Flakiness Analysis\n\n` +
-          `**${tests.length} flaky tests** detected · avg flakiness score **${avgScore}%** · **${highRisk}** high-risk (≥50%)\n\n` +
-          `### 🔴 Top Offenders\n` +
-          tests.slice(0, 5).map((t: any) =>
-            `- **\`${t.test}\`** — score **${t.score}%** · ${t.flips} flip${t.flips !== 1 ? "s" : ""} · pattern: \`${t.sequence ?? "?"}\``
+          `**${tests.length}** flaky tests — avg score **${avgScore}%**, **${highRisk}** high-risk (≥50%).\n\n` +
+          `🔴 Top offenders:\n` +
+          tests.slice(0, 4).map((t: any) =>
+            `- \`${t.test}\` — **${t.score}%** · ${t.flips} flip${t.flips !== 1 ? "s" : ""} · \`${t.sequence ?? "?"}\``
           ).join("\n") +
-          `\n\n> **Recommendation:** Quarantine the top ${Math.min(3, tests.length)} tests to prevent CI noise. ` +
-          `\`${worst.test}\` is the most unstable with a **${worst.score}%** flakiness score.`
+          `\n\nQuarantine \`${worst.test}\` (${worst.score}% score) to reduce CI noise.`
         );
       }
 
@@ -218,35 +262,47 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         const rows: any[] = Array.isArray(rawData) ? rawData : [];
         if (!rows.length) return "No environment data available.";
 
-        const best = [...rows].sort((a: any, b: any) => b.avgPassRate - a.avgPassRate)[0];
-        const worst = [...rows].sort((a: any, b: any) => a.avgPassRate - b.avgPassRate)[0];
+        const sorted = [...rows].sort((a: any, b: any) => b.avgPassRate - a.avgPassRate);
+        const best = sorted[0];
+        const worst = sorted[sorted.length - 1];
+        const allHealthy = rows.every((r: any) => r.avgPassRate >= 95);
+        const gapPP = best.avgPassRate - worst.avgPassRate;
+
+        if (/worst|problem|low|struggling|bad/.test(q)) {
+          return `Lowest performing: **${worst.env}** at **${worst.avgPassRate}%** avg pass with **${worst.totalFailures}** total failures across ${worst.runs} runs. ${worst.avgPassRate < 95 ? "⚠️ Below the 95% promotion gate." : "✅ Still above the gate."}`;
+        }
+
+        if (/best|top|highest|cleanest/.test(q)) {
+          return `Best performing: **${best.env}** at **${best.avgPassRate}%** avg pass across ${best.runs} runs — **${best.totalFailures}** total failures. Gap between best and worst: **${gapPP}pp**.`;
+        }
 
         return (
-          `## Environment Health Comparison\n\n` +
           rows.map((r: any) => {
             const icon = r.avgPassRate >= 95 ? "🟢" : r.avgPassRate >= 80 ? "🟡" : "🔴";
-            return `${icon} **${r.env}** — **${r.avgPassRate}%** avg pass · ${r.totalFailures} total failures · ${r.runs} runs`;
+            return `${icon} **${r.env}** — **${r.avgPassRate}%** avg · ${r.totalFailures} failures · ${r.runs} runs`;
           }).join("\n") +
-          `\n\n**Best:** ${best.env} (${best.avgPassRate}%) · **Worst:** ${worst.env} (${worst.avgPassRate}%)\n\n` +
-          `${best.avgPassRate >= 95 ? "✅ All environments are above the 95% promotion threshold." : "⚠️ Some environments may not meet the promotion gate."}`
+          `\n\n**${gapPP}pp** spread between ${best.env} (${best.avgPassRate}%) and ${worst.env} (${worst.avgPassRate}%). ${allHealthy ? "✅ All above the 95% promotion gate." : "⚠️ Some environments are below the gate."}`
         );
       }
 
       case "get_promotion_status": {
         const d = (rawData as any) || {};
         const { total = 0, promoted = 0, blocked = 0, pending = 0, promoteRate = 0 } = d;
+        const blockRate = total > 0 ? Math.round((blocked / total) * 100) : 0;
+
+        if (/block|prevent|stop|reject/.test(q)) {
+          return `**${blocked}** of ${total} UAT→PROD promotions were **blocked** (${blockRate}% block rate) — runs fell below the 95% pass threshold. ${promoted} succeeded. ${pending > 0 ? `${pending} still pending.` : ""}`;
+        }
+
+        if (/ready|can we|should we|go to prod/.test(q)) {
+          return promoteRate >= 80
+            ? `✅ **${promoteRate}%** of evaluations resulted in promotion — UAT quality is consistently above the 95% gate. You can promote.`
+            : `⚠️ Only **${promoteRate}%** promote rate — ${blockRate}% of runs were blocked. Investigate failures before promoting to PROD.`;
+        }
 
         return (
-          `## Promotion Gate Status\n\n` +
-          `**${total} decisions** evaluated for UAT → PROD promotion:\n\n` +
-          `| Outcome | Count | Rate |\n|---|---|---|\n` +
-          `| ✅ Promoted | **${promoted}** | ${promoteRate}% |\n` +
-          `| ❌ Blocked | **${blocked}** | ${total > 0 ? Math.round((blocked / total) * 100) : 0}% |\n` +
-          `| ⏳ Pending | **${pending}** | ${total > 0 ? Math.round((pending / total) * 100) : 0}% |\n\n` +
-          `${promoted > blocked
-            ? `✅ More promotions than blocks — UAT quality is generally **above the 95% threshold**.`
-            : `⚠️ High block rate — UAT is frequently **below the 95% pass threshold**.`
-          }\n\nSee the decision history table for individual run outcomes.`
+          `**${total}** gate decisions — **${promoted}** promoted (${promoteRate}%), **${blocked}** blocked (${blockRate}%), **${pending}** pending.\n\n` +
+          `${promoted > blocked ? "✅ Promotion rate is healthy — UAT quality is generally above the 95% threshold." : "⚠️ High block rate — UAT frequently falls below 95%."}`
         );
       }
 
@@ -256,19 +312,25 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         const totalFailed = rows.reduce((s: number, r: any) => s + Number(r.failed ?? 0), 0);
         const totalTests = rows.reduce((s: number, r: any) => s + Number(r.total ?? 0), 0);
 
-        if (!rows.length) return `**${label || "Latest Run"}** — **${passPct}%** pass rate · No failures detected ✅`;
+        if (!rows.length) return `**${label || "Latest Run"}** (${env}) — **${passPct}%** pass · No failures ✅`;
 
         const topCat = rows[0];
+        const cleanCats = rows.filter((r: any) => r.failed === 0).length;
+
+        if (/category|type|kind|which|what kind/.test(q)) {
+          return (
+            `Failures by category in **${label || "latest run"}** (${env}):\n\n` +
+            rows.slice(0, 5).map((r: any) => {
+              const icon = r.failed === 0 ? "✅" : r.passRate >= 80 ? "⚠️" : "🔴";
+              return `${icon} **${r.category}** — ${r.failed}/${r.total} failed`;
+            }).join("\n") +
+            `\n\n**${topCat.category}** is the worst offender at ${topCat.failed}/${topCat.total} failures.`
+          );
+        }
+
         return (
-          `## Failure Breakdown — ${label || "Latest Run"}\n\n` +
-          `**${env || "—"}** environment · **${passPct}%** pass · **${totalFailed}/${totalTests}** tests failed\n\n` +
-          `### By Category\n` +
-          rows.slice(0, 6).map((r: any) => {
-            const icon = r.failed === 0 ? "✅" : r.passRate >= 80 ? "⚠️" : "🔴";
-            return `${icon} **${r.category}** — ${r.failed}/${r.total} failed · **${r.passRate}%** pass`;
-          }).join("\n") +
-          `\n\n> **Root cause:** \`${topCat.category}\` has the most failures (${topCat.failed}/${topCat.total}). ` +
-          `Investigate ${topCat.category.toLowerCase()} test configuration.`
+          `**${label || "Latest run"}** (${env}) — **${passPct}%** pass, **${totalFailed}/${totalTests}** failed.\n\n` +
+          `Root cause: **${topCat.category}** leads with ${topCat.failed}/${topCat.total} failures. ${cleanCats} categor${cleanCats !== 1 ? "ies" : "y"} fully clean. See category breakdown in the chart above.`
         );
       }
 
@@ -277,16 +339,27 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         if (!rows.length) return "No suite data available.";
 
         const failing = rows.filter((r: any) => r.avgPassRate < 95);
+        const best = rows[0];
+        const worst = rows[rows.length - 1];
+
+        if (/worst|low|struggling|problem/.test(q)) {
+          return failing.length === 0
+            ? `✅ All ${rows.length} suites are above the 95% threshold. Lowest: **${worst.suite}** at **${worst.avgPassRate}%**.`
+            : `Struggling suite${failing.length !== 1 ? "s" : ""}: ${failing.map((r: any) => `**${r.suite}** (${r.avgPassRate}%)`).join(", ")}. These are below the 95% promotion gate — investigate before releasing.`;
+        }
+
+        if (/best|top|clean|healthy/.test(q)) {
+          return `Top suite: **${best.suite}** at **${best.avgPassRate}%** avg pass across ${best.runs} runs with ${best.totalFailures} total failures.`;
+        }
+
         return (
-          `## Suite Health Report\n\n` +
-          `**${rows.length} suites** analyzed:\n\n` +
-          rows.slice(0, 6).map((r: any) => {
+          rows.slice(0, 5).map((r: any) => {
             const icon = r.avgPassRate >= 95 ? "🟢" : r.avgPassRate >= 80 ? "🟡" : "🔴";
-            return `${icon} **${r.suite}** — **${r.avgPassRate}%** avg · ${r.totalFailures} failures · ${r.runs} runs`;
+            return `${icon} **${r.suite}** — **${r.avgPassRate}%** avg · ${r.totalFailures} failures`;
           }).join("\n") +
           (failing.length > 0
-            ? `\n\n⚠️ **${failing.length} suite${failing.length !== 1 ? "s" : ""}** below 95% threshold: ${failing.map((r: any) => `\`${r.suite}\``).join(", ")}`
-            : `\n\n✅ All suites are above the 95% promotion threshold.`)
+            ? `\n\n⚠️ ${failing.length} suite${failing.length !== 1 ? "s" : ""} below 95%: ${failing.map((r: any) => `\`${r.suite}\``).join(", ")}.`
+            : `\n\n✅ All ${rows.length} suites above the 95% gate.`)
         );
       }
 
@@ -297,18 +370,21 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         const durations = rows.map((r: any) => Number(r.durationSec ?? 0));
         const avg = Math.round(durations.reduce((a, b) => a + b, 0) / durations.length);
         const max = Math.max(...durations);
-        const slowRuns = rows.filter((r: any) => r.durationSec > avg * 1.2).length;
+        const min = Math.min(...durations);
+        const slowRuns = rows.filter((r: any) => r.durationSec > avg * 1.2);
+        const slowest = rows.reduce((a: any, b: any) => (b.durationSec > a.durationSec ? b : a), rows[0]);
+
+        if (/slow|longest|worst|spike|timeout/.test(q)) {
+          return slowRuns.length === 0
+            ? `No significantly slow runs detected. All durations within 20% of the ${avg}s average.`
+            : `**${slowRuns.length} slow run${slowRuns.length !== 1 ? "s" : ""}** exceeded 120% of avg (${avg}s). Slowest: **${slowest.run}** at **${slowest.durationSec}s** — check for parallelization issues or network timeouts.`;
+        }
 
         return (
-          `## Execution Duration Trends\n\n` +
-          `| Metric | Value |\n|---|---|\n` +
-          `| Avg Duration | **${avg}s** |\n` +
-          `| Max Duration | **${max}s** |\n` +
-          `| Slow Runs (>120% avg) | **${slowRuns}** |\n\n` +
-          `${slowRuns > 0
-            ? `⚠️ **${slowRuns} run${slowRuns !== 1 ? "s" : ""}** significantly exceeded the average duration. Check for test parallelization issues or network timeouts.`
-            : `✅ Duration is consistent — no significant timing regressions detected.`
-          }\n\nThe chart above shows duration over time. Upward spikes may correlate with test failures.`
+          `Avg **${avg}s** · min **${min}s** · max **${max}s** across ${rows.length} runs. ` +
+          (slowRuns.length > 0
+            ? `⚠️ **${slowRuns.length} run${slowRuns.length !== 1 ? "s" : ""}** exceeded 120% of average. Slowest: **${slowest.run}** (${slowest.durationSec}s).`
+            : `✅ Duration is consistent — no significant timing regressions.`)
         );
       }
 
@@ -317,13 +393,22 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         if (!rows.length) return "No Akamai property data available.";
 
         const active = rows.filter((r: any) => r.status?.includes("Active")).length;
+        const pending = rows.filter((r: any) => r.status?.includes("Pending")).length;
+        const prodRow = rows.find((r: any) => r.env === "PROD" && r.network === "Production");
+        const ewVersions = [...new Set(rows.map((r: any) => r.edgeWorkerVersion))];
+
+        if (/edgeworker|ew|worker/.test(q)) {
+          return `EdgeWorker versions: ${ewVersions.join(", ")} across 3 tiers. PROD is on **${prodRow?.edgeWorkerVersion ?? "—"}**. ${ewVersions.length > 1 ? "⚠️ Multiple versions deployed — check for drift." : "✅ Consistent version across all tiers."}`;
+        }
+
+        if (/prod|production|live/.test(q)) {
+          return `PROD/Production — Property v**${prodRow?.propertyVersion ?? "—"}** · EW **${prodRow?.edgeWorkerVersion ?? "—"}** · **${prodRow?.pops ?? "—"}** PoPs · ${prodRow?.status ?? "—"}.`;
+        }
+
         return (
-          `## Akamai Property Status\n\n` +
-          `**${rows.length} slots** (3 tiers × 2 networks) · **${active} active**\n\n` +
-          rows.map((r: any) =>
-            `- **${r.env}/${r.network}** — Property v${r.propertyVersion} · EW \`${r.edgeWorkerVersion}\` · ${r.pops} PoPs · ${r.status}`
-          ).join("\n") +
-          `\n\nSee the table above for full cpCode and PoP coverage details.`
+          `**${active}** of ${rows.length} slots active, **${pending}** pending. ` +
+          `PROD on property v${prodRow?.propertyVersion ?? "?"}, EW \`${prodRow?.edgeWorkerVersion ?? "?"}\` with ${prodRow?.pops ?? "?"} PoPs. ` +
+          `Full version matrix in the table above.`
         );
       }
 
@@ -404,25 +489,32 @@ export interface DirectInput {
 export async function synthesizeWithChromeAI(input: SynthesisInput): Promise<void> {
   const { toolName, rawData, userQuery, signal, onDelta } = input;
 
-  // Try Gemini Nano with compact prompt
+  // Build a query-aware prompt so Gemini Nano generates a response tailored to
+  // what was actually asked — not a generic summary of everything.
   const formatted = formatToolDataForNano(toolName, rawData);
   if (formatted) {
-    const prompt = `Data: ${formatted}\n\nUser asked: "${userQuery}"\n\nAnswer in 2-3 sentences using only the data above:`;
+    const prompt =
+      `Tool: ${toolName}\n` +
+      `Data: ${formatted}\n` +
+      `User asked: "${userQuery}"\n\n` +
+      `Write 1-2 sentences directly answering what the user asked. ` +
+      `Use the specific numbers from the data. Be direct — no preamble, no "Based on the data".`;
+
     const llmResult = await callChromeAI(
-      "You are AWARE Copilot, a CDN test analytics assistant. Answer very briefly from the data provided. No JSON, no markdown, plain text only.",
+      "You are a CDN test analytics assistant. Answer directly using only the numbers provided. No JSON. No markdown. Plain sentences only.",
       prompt,
       signal,
     );
 
     if (llmResult) {
-      // Wrap Chrome AI's plain-text answer in context-aware markdown
-      const template = buildTemplateSynthesis(toolName, rawData, userQuery);
-      emitAsStream(template, onDelta);
+      // Use Chrome AI's original answer — this is what the model actually generated
+      // for this specific question. Do NOT fall back to the template here.
+      emitAsStream(llmResult, onDelta);
       return;
     }
   }
 
-  // Fallback: rich template synthesis (always distinct per tool)
+  // Fallback: query-aware template synthesis (used only when Chrome AI fails/gibberish)
   const template = buildTemplateSynthesis(toolName, rawData, userQuery);
   emitAsStream(template, onDelta);
 }
