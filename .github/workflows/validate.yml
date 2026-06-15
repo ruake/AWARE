@@ -87,7 +87,7 @@ jobs:
           FILE="config/environments.yml"
           echo "Validating $FILE …"
           ERRORS=0
-          TIERS=$(yq '.environments[].tier' "$FILE" | sort -u)
+          TIERS=$(yq '.environments[].target' "$FILE" | sort -u)
           for required in QA UAT PROD; do
             echo "$TIERS" | grep -q "^$required$" || {
               echo "::error file=$FILE::Missing required tier: $required"
@@ -109,7 +109,7 @@ jobs:
           echo "Found $SUITE_COUNT suites"
           # Each suite must have id, name, cron, environments
           for i in $(seq 0 $((SUITE_COUNT - 1))); do
-            for field in id name cron; do
+            for field in id name schedule; do
               VAL=$(yq ".suites[$i].$field" "$FILE")
               if [ -z "$VAL" ] || [ "$VAL" = "null" ]; then
                 ID=$(yq ".suites[$i].id // \"suite[$i]\"" "$FILE")
