@@ -1,0 +1,1736 @@
+[
+  {
+    "id": "geo_01",
+    "testCaseId": "geo_01",
+    "runId": "amber",
+    "name": "US East resolves to IAD PoP",
+    "status": "PASS",
+    "duration": 246,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_01",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        },
+        "timings": {
+          "dnsLookup": 19,
+          "tcpConnect": 24,
+          "tlsHandshake": 72,
+          "ttfb": 57,
+          "download": 374,
+          "total": 546
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_geo_01",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_01%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_geo_01_assert",
+        "label": "US East resolves to IAD PoP",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EUS%20East%20resolves%20to%20IAD%20PoP%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_01_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_geo_01_result",
+        "label": "PASS — Geo-match",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Geo-match%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_01_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      }
+    ]
+  },
+  {
+    "id": "geo_02",
+    "testCaseId": "geo_02",
+    "runId": "amber",
+    "name": "EU West resolves to DUB PoP",
+    "status": "PASS",
+    "duration": 858,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_02",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        },
+        "timings": {
+          "dnsLookup": 11,
+          "tcpConnect": 6,
+          "tlsHandshake": 41,
+          "ttfb": 99,
+          "download": 93,
+          "total": 250
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_geo_02",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_02%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_geo_02_assert",
+        "label": "EU West resolves to DUB PoP",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EEU%20West%20resolves%20to%20DUB%20PoP%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_02_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_geo_02_result",
+        "label": "PASS — Geo-match",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Geo-match%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_02_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      }
+    ]
+  },
+  {
+    "id": "geo_03",
+    "testCaseId": "geo_03",
+    "runId": "amber",
+    "name": "AP Southeast resolves to SIN PoP",
+    "status": "PASS",
+    "duration": 1069,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_03",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://techdocs.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000",
+          "X-Frame-Options": "Deny",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        },
+        "timings": {
+          "dnsLookup": 19,
+          "tcpConnect": 12,
+          "tlsHandshake": 45,
+          "ttfb": 98,
+          "download": 475,
+          "total": 649
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_geo_03",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_03%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_geo_03_assert",
+        "label": "AP Southeast resolves to SIN PoP",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EAP%20Southeast%20resolves%20to%20SIN%20PoP%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_03_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_geo_03_result",
+        "label": "PASS — Geo-match",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Geo-match%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_03_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      }
+    ]
+  },
+  {
+    "id": "geo_04",
+    "testCaseId": "geo_04",
+    "runId": "amber",
+    "name": "Primary PoP failover within 2s",
+    "status": "PASS",
+    "duration": 389,
+    "category": "Geo-match",
+    "suite": "tests/geo_match_suite.py::test_geo_04",
+    "assertions": [
+      {
+        "assertion": "Resolved PoP is IAD (US-East)",
+        "expected": "IAD",
+        "actual": "IAD",
+        "passed": true
+      },
+      {
+        "assertion": "HTTP status is 200",
+        "expected": "200",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "DFW",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        },
+        "timings": {
+          "dnsLookup": 11,
+          "tcpConnect": 17,
+          "tlsHandshake": 40,
+          "ttfb": 35,
+          "download": 364,
+          "total": 467
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Resolved PoP is IAD (US-East)",
+          "expected": "IAD",
+          "actual": "IAD",
+          "passed": true
+        },
+        {
+          "assertion": "HTTP status is 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_geo_04",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_04%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_geo_04_assert",
+        "label": "Primary PoP failover within 2s",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPrimary%20PoP%20failover%20within%202s%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_04_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_geo_04_result",
+        "label": "PASS — Geo-match",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Geo-match%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20geo_04_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      }
+    ]
+  },
+  {
+    "id": "cache_01",
+    "testCaseId": "cache_01",
+    "runId": "amber",
+    "name": "Cache hit ratio exceeds 80% for static",
+    "status": "PASS",
+    "duration": 1183,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_01",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/content/dam/site/en/images/backgrounds/homepage.jpg",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, private, max-age=86400"
+        },
+        "timings": {
+          "dnsLookup": 16,
+          "tcpConnect": 18,
+          "tlsHandshake": 70,
+          "ttfb": 71,
+          "download": 429,
+          "total": 604
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_cache_01",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_01%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_cache_01_assert",
+        "label": "Cache hit ratio exceeds 80% for static",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3ECache%20hit%20ratio%20exceeds%2080%25%20for%20static%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_01_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_cache_01_result",
+        "label": "PASS — Caching",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Caching%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_01_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      }
+    ]
+  },
+  {
+    "id": "cache_02",
+    "testCaseId": "cache_02",
+    "runId": "amber",
+    "name": "Cache-Control max-age on CSS assets",
+    "status": "PASS",
+    "duration": 107,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_02",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/css/main.css",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=0"
+        },
+        "timings": {
+          "dnsLookup": 21,
+          "tcpConnect": 21,
+          "tlsHandshake": 64,
+          "ttfb": 68,
+          "download": 530,
+          "total": 704
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_cache_02",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_02%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_cache_02_assert",
+        "label": "Cache-Control max-age on CSS assets",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3ECache-Control%20max-age%20on%20CSS%20assets%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_02_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      },
+      {
+        "id": "frame_cache_02_result",
+        "label": "PASS — Caching",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Caching%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_02_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273214
+      }
+    ]
+  },
+  {
+    "id": "cache_03",
+    "testCaseId": "cache_03",
+    "runId": "amber",
+    "name": "Stale-while-revalidate honored on API",
+    "status": "PASS",
+    "duration": 1327,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_03",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/content/dam/site/en/images/backgrounds/homepage.jpg",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, private, max-age=86400"
+        },
+        "timings": {
+          "dnsLookup": 6,
+          "tcpConnect": 19,
+          "tlsHandshake": 60,
+          "ttfb": 62,
+          "download": 248,
+          "total": 395
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_cache_03",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_03%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_cache_03_assert",
+        "label": "Stale-while-revalidate honored on API",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EStale-while-revalidate%20honored%20on%20API%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_03_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_cache_03_result",
+        "label": "PASS — Caching",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Caching%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_03_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "cache_04",
+    "testCaseId": "cache_04",
+    "runId": "amber",
+    "name": "Surrogate-Control overrides Cache-Control",
+    "status": "PASS",
+    "duration": 119,
+    "category": "Caching",
+    "suite": "tests/caching_suite.py::test_cache_04",
+    "assertions": [
+      {
+        "assertion": "X-Cache header is HIT",
+        "expected": "HIT",
+        "actual": "HIT",
+        "passed": true
+      },
+      {
+        "assertion": "Cache-Control contains max-age",
+        "expected": "max-age present",
+        "actual": "max-age=31536000",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/css/main.css",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "text/html",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=0"
+        },
+        "timings": {
+          "dnsLookup": 17,
+          "tcpConnect": 18,
+          "tlsHandshake": 42,
+          "ttfb": 39,
+          "download": 366,
+          "total": 482
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "X-Cache header is HIT",
+          "expected": "HIT",
+          "actual": "HIT",
+          "passed": true
+        },
+        {
+          "assertion": "Cache-Control contains max-age",
+          "expected": "max-age present",
+          "actual": "max-age=31536000",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_cache_04",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_04%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_cache_04_assert",
+        "label": "Surrogate-Control overrides Cache-Control",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3ESurrogate-Control%20overrides%20Cache-Control%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_04_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_cache_04_result",
+        "label": "PASS — Caching",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Caching%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20cache_04_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "sec_01",
+    "testCaseId": "sec_01",
+    "runId": "amber",
+    "name": "HSTS header present on all responses",
+    "status": "PASS",
+    "duration": 211,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_01",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "nosniff",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        },
+        "timings": {
+          "dnsLookup": 21,
+          "tcpConnect": 7,
+          "tlsHandshake": 58,
+          "ttfb": 60,
+          "download": 515,
+          "total": 661
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "nosniff",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_sec_01",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_01%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_sec_01_assert",
+        "label": "HSTS header present on all responses",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EHSTS%20header%20present%20on%20all%20responses%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_01_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_sec_01_result",
+        "label": "PASS — Security",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Security%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_01_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "sec_02",
+    "testCaseId": "sec_02",
+    "runId": "amber",
+    "name": "CSP blocks inline scripts",
+    "status": "PASS",
+    "duration": 529,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_02",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "missing",
+        "passed": false
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        },
+        "timings": {
+          "dnsLookup": 6,
+          "tcpConnect": 12,
+          "tlsHandshake": 19,
+          "ttfb": 99,
+          "download": 474,
+          "total": 610
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "missing",
+          "passed": false
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_sec_02",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_02%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_sec_02_assert",
+        "label": "CSP blocks inline scripts",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3ECSP%20blocks%20inline%20scripts%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_02_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_sec_02_result",
+        "label": "PASS — Security",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Security%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_02_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "sec_03",
+    "testCaseId": "sec_03",
+    "runId": "amber",
+    "name": "WAF blocks SQLi in query params",
+    "status": "PASS",
+    "duration": 250,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_03",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "nosniff",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=604800"
+        },
+        "timings": {
+          "dnsLookup": 11,
+          "tcpConnect": 18,
+          "tlsHandshake": 42,
+          "ttfb": 27,
+          "download": 549,
+          "total": 647
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "nosniff",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_sec_03",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_03%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_sec_03_assert",
+        "label": "WAF blocks SQLi in query params",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EWAF%20blocks%20SQLi%20in%20query%20params%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_03_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_sec_03_result",
+        "label": "PASS — Security",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Security%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_03_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "sec_04",
+    "testCaseId": "sec_04",
+    "runId": "amber",
+    "name": "X-Frame-Options DENY on auth pages",
+    "status": "PASS",
+    "duration": 645,
+    "category": "Security",
+    "suite": "tests/security_suite.py::test_sec_04",
+    "assertions": [
+      {
+        "assertion": "Strict-Transport-Security header present",
+        "expected": "present",
+        "actual": "present",
+        "passed": true
+      },
+      {
+        "assertion": "X-Content-Type-Options is nosniff",
+        "expected": "nosniff",
+        "actual": "missing",
+        "passed": false
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        },
+        "timings": {
+          "dnsLookup": 9,
+          "tcpConnect": 12,
+          "tlsHandshake": 25,
+          "ttfb": 54,
+          "download": 525,
+          "total": 625
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "Strict-Transport-Security header present",
+          "expected": "present",
+          "actual": "present",
+          "passed": true
+        },
+        {
+          "assertion": "X-Content-Type-Options is nosniff",
+          "expected": "nosniff",
+          "actual": "missing",
+          "passed": false
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_sec_04",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_04%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_sec_04_assert",
+        "label": "X-Frame-Options DENY on auth pages",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EX-Frame-Options%20DENY%20on%20auth%20pages%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_04_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_sec_04_result",
+        "label": "PASS — Security",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Security%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20sec_04_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "edge_01",
+    "testCaseId": "edge_01",
+    "runId": "amber",
+    "name": "EdgeWorker activates on /api/* routes",
+    "status": "PASS",
+    "duration": 152,
+    "category": "Edge-Routing",
+    "suite": "tests/edge_routing_suite.py::test_edge_01",
+    "assertions": [
+      {
+        "assertion": "EdgeWorker activation confirmed",
+        "expected": "active",
+        "actual": "active",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/robots.txt",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/plain;charset=iso-8859-1",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, max-age=2265713"
+        },
+        "timings": {
+          "dnsLookup": 3,
+          "tcpConnect": 7,
+          "tlsHandshake": 29,
+          "ttfb": 42,
+          "download": 225,
+          "total": 306
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "EdgeWorker activation confirmed",
+          "expected": "active",
+          "actual": "active",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_edge_01",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20edge_01%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_edge_01_assert",
+        "label": "EdgeWorker activates on /api/* routes",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EEdgeWorker%20activates%20on%20%2Fapi%2F*%20routes%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20edge_01_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_edge_01_result",
+        "label": "PASS — Edge-Routing",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Edge-Routing%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20edge_01_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "edge_02",
+    "testCaseId": "edge_02",
+    "runId": "amber",
+    "name": "EdgeWorker injects X-Akamai-RUM header",
+    "status": "PASS",
+    "duration": 210,
+    "category": "Edge-Routing",
+    "suite": "tests/edge_routing_suite.py::test_edge_02",
+    "assertions": [
+      {
+        "assertion": "EdgeWorker activation confirmed",
+        "expected": "active",
+        "actual": "active",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/robots.txt",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/plain;charset=iso-8859-1",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, max-age=2265713"
+        },
+        "timings": {
+          "dnsLookup": 18,
+          "tcpConnect": 14,
+          "tlsHandshake": 18,
+          "ttfb": 67,
+          "download": 423,
+          "total": 540
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "EdgeWorker activation confirmed",
+          "expected": "active",
+          "actual": "active",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_edge_02",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20edge_02%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_edge_02_assert",
+        "label": "EdgeWorker injects X-Akamai-RUM header",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EEdgeWorker%20injects%20X-Akamai-RUM%20header%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20edge_02_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_edge_02_result",
+        "label": "PASS — Edge-Routing",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Edge-Routing%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20edge_02_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "edge_03",
+    "testCaseId": "edge_03",
+    "runId": "amber",
+    "name": "Property version matches activation",
+    "status": "PASS",
+    "duration": 119,
+    "category": "Edge-Routing",
+    "suite": "tests/edge_routing_suite.py::test_edge_03",
+    "assertions": [
+      {
+        "assertion": "EdgeWorker activation confirmed",
+        "expected": "active",
+        "actual": "active",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/robots.txt",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/plain;charset=iso-8859-1",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "LAX",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "public, max-age=2265713"
+        },
+        "timings": {
+          "dnsLookup": 4,
+          "tcpConnect": 9,
+          "tlsHandshake": 58,
+          "ttfb": 51,
+          "download": 174,
+          "total": 296
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "EdgeWorker activation confirmed",
+          "expected": "active",
+          "actual": "active",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_edge_03",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20edge_03%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_edge_03_assert",
+        "label": "Property version matches activation",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EProperty%20version%20matches%20activation%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20edge_03_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_edge_03_result",
+        "label": "PASS — Edge-Routing",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Edge-Routing%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20edge_03_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "http_01",
+    "testCaseId": "http_01",
+    "runId": "amber",
+    "name": "HTTP/2 negotiated via ALPN",
+    "status": "PASS",
+    "duration": 507,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_01",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/xml;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "DFW",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=640800"
+        },
+        "timings": {
+          "dnsLookup": 23,
+          "tcpConnect": 6,
+          "tlsHandshake": 57,
+          "ttfb": 43,
+          "download": 547,
+          "total": 676
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_http_01",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_01%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_http_01_assert",
+        "label": "HTTP/2 negotiated via ALPN",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EHTTP%2F2%20negotiated%20via%20ALPN%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_01_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_http_01_result",
+        "label": "PASS — Http-Protocol",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Http-Protocol%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_01_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "http_02",
+    "testCaseId": "http_02",
+    "runId": "amber",
+    "name": "TLS 1.3 enforced, TLS 1.0 rejected",
+    "status": "PASS",
+    "duration": 675,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_02",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "IAD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        },
+        "timings": {
+          "dnsLookup": 29,
+          "tcpConnect": 25,
+          "tlsHandshake": 16,
+          "ttfb": 56,
+          "download": 125,
+          "total": 251
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_http_02",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_02%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_http_02_assert",
+        "label": "TLS 1.3 enforced, TLS 1.0 rejected",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3ETLS%201.3%20enforced%2C%20TLS%201.0%20rejected%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_02_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_http_02_result",
+        "label": "PASS — Http-Protocol",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Http-Protocol%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_02_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "http_03",
+    "testCaseId": "http_03",
+    "runId": "amber",
+    "name": "Brotli encoding returned when accepted",
+    "status": "PASS",
+    "duration": 485,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_03",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/xml;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "SEA",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=640800"
+        },
+        "timings": {
+          "dnsLookup": 13,
+          "tcpConnect": 23,
+          "tlsHandshake": 56,
+          "ttfb": 74,
+          "download": 327,
+          "total": 493
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_http_03",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_03%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_http_03_assert",
+        "label": "Brotli encoding returned when accepted",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EBrotli%20encoding%20returned%20when%20accepted%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_03_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_http_03_result",
+        "label": "PASS — Http-Protocol",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Http-Protocol%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_03_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "http_04",
+    "testCaseId": "http_04",
+    "runId": "amber",
+    "name": "TTFB under 200ms from US-East",
+    "status": "PASS",
+    "duration": 578,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_04",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://www.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/xml;charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "DFW",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=31536000 ; includeSubDomains ; preload",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "max-age=640800"
+        },
+        "timings": {
+          "dnsLookup": 7,
+          "tcpConnect": 6,
+          "tlsHandshake": 64,
+          "ttfb": 55,
+          "download": 539,
+          "total": 671
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_http_04",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_04%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_http_04_assert",
+        "label": "TTFB under 200ms from US-East",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3ETTFB%20under%20200ms%20from%20US-East%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_04_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_http_04_result",
+        "label": "PASS — Http-Protocol",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Http-Protocol%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_04_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  },
+  {
+    "id": "http_05",
+    "testCaseId": "http_05",
+    "runId": "amber",
+    "name": "Redirect chain ≤ 2 hops to canonical URL",
+    "status": "PASS",
+    "duration": 649,
+    "category": "Http-Protocol",
+    "suite": "tests/http_protocol_suite.py::test_http_05",
+    "assertions": [
+      {
+        "assertion": "HTTP status 2xx",
+        "expected": "2xx",
+        "actual": "200",
+        "passed": true
+      }
+    ],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://developer.akamai.com/sitemap.xml",
+        "headers": {
+          "Accept": "text/html,*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "AWARE-CDN-Monitor/2.0",
+          "Cache-Control": "no-cache"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/html; charset=utf-8",
+          "Server": "AkamaiGHost",
+          "X-Cache": "UNKNOWN",
+          "X-PoP": "ORD",
+          "X-Check-Cacheable": "NO",
+          "Strict-Transport-Security": "max-age=86400 ; includeSubDomains",
+          "Cache-Control": "max-age=0, no-cache, no-store"
+        },
+        "timings": {
+          "dnsLookup": 31,
+          "tcpConnect": 5,
+          "tlsHandshake": 55,
+          "ttfb": 44,
+          "download": 92,
+          "total": 227
+        }
+      },
+      "assertions": [
+        {
+          "assertion": "HTTP status 2xx",
+          "expected": "2xx",
+          "actual": "200",
+          "passed": true
+        }
+      ]
+    },
+    "filmstrip": [
+      {
+        "id": "frame_http_05",
+        "label": "Page Load",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPage%20Load%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_05%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_http_05_assert",
+        "label": "Redirect chain ≤ 2 hops to canonical URL",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3ERedirect%20chain%20%E2%89%A4%202%20hops%20to%20canonical%20URL%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_05_assert%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      },
+      {
+        "id": "frame_http_05_result",
+        "label": "PASS — Http-Protocol",
+        "dataUri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22120%22%3E%3Crect%20width%3D%22240%22%20height%3D%22120%22%20fill%3D%22%231a1d24%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2220%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%229%22%3EPASS%20%E2%80%94%20Http-Protocol%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2240%22%20fill%3D%22%233b82f6%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3Eid%3A%20http_05_result%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2250%22%20width%3D%22216%22%20height%3D%222%22%20fill%3D%22%23334155%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2270%22%20fill%3D%22%2322c55e%22%20font-family%3D%22monospace%22%20font-size%3D%228%22%3EHTTP%20200%20OK%3C%2Ftext%3E%3Ctext%20x%3D%2212%22%20y%3D%2285%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22monospace%22%20font-size%3D%227%22%3ETTFB%3A%2042ms%20%7C%20Total%3A%20187ms%3C%2Ftext%3E%3Crect%20x%3D%2212%22%20y%3D%2295%22%20width%3D%22216%22%20height%3D%224%22%20fill%3D%22%233b82f6%22%20opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E",
+        "timestamp": 1781455273215
+      }
+    ]
+  }
+]
