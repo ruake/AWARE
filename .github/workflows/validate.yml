@@ -107,9 +107,9 @@ jobs:
           ERRORS=0
           SUITE_COUNT=$(yq '.suites | length' "$FILE")
           echo "Found $SUITE_COUNT suites"
-          # Each suite must have id, name, cron, environments
+          # Each suite must have id, name; schedule is optional (null = event-triggered)
           for i in $(seq 0 $((SUITE_COUNT - 1))); do
-            for field in id name schedule; do
+            for field in id name; do
               VAL=$(yq ".suites[$i].$field" "$FILE")
               if [ -z "$VAL" ] || [ "$VAL" = "null" ]; then
                 ID=$(yq ".suites[$i].id // \"suite[$i]\"" "$FILE")
