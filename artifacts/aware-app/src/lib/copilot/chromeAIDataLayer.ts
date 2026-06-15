@@ -1,4 +1,5 @@
 import type { StreamDelta } from "./types";
+import { RUNS } from "@/lib/runs";
 
 // ── Chrome AI Session types ──────────────────────────────────────────────────
 interface ChromeAISession {
@@ -133,12 +134,6 @@ const CASUAL_PATTERNS: Array<{ pattern: RegExp; response: string }> = [
     pattern: /apart from|besides that|what else|anything else|other than that|tell me more|what more|in addition|beyond (that|this)|what other/i,
     response:
       `Here are all the other topics I can analyze:\n\n${ALL_TOPICS}\n\nJust ask about any of these — or try a **Quick Action** above!`,
-  },
-  {
-    // "what do you know?" — treat as capability overview, not a data query
-    pattern: /what.*do you know|what.*information.*do you|what.*data.*do you|what.*can you tell me/i,
-    response:
-      `I have access to your full CDN test dataset. Here's what I can show you:\n\n${ALL_TOPICS}\n\nAsk me about any of these topics!`,
   },
   {
     pattern: /thank|thanks|great|awesome|nice|cool|perfect/i,
@@ -530,8 +525,39 @@ export async function synthesizeWithChromeAI(input: SynthesisInput): Promise<voi
   emitAsStream(template, onDelta);
 }
 
+// ── Build a data-scope answer directly from RUNS (no tool call needed) ────────
+function buildDataScopeAnswer(q: string): string | null {
+  const lower = q.toLowerCase();
+  if (!/how.much.data|how.many|what.data|what.do.you.have|what.do.you.know|data.*available|scope|coverage/.test(lower)) return null;
+
+  const runs = RUNS as any[];
+  if (!runs.length) return "No run data is loaded yet.";
+
+  const passRates = runs.map(r => Number(r.passRate ?? r.passPct ?? 0));
+  const avg = Math.round(passRates.reduce((a, b) => a + b, 0) / passRates.length);
+  const fails = runs.reduce((s, r) => s + Number(r.failures ?? 0), 0);
+  const envCounts = runs.reduce((acc: Record<string, number>, r) => {
+    acc[r.env] = (acc[r.env] || 0) + 1;
+    return acc;
+  }, {});
+  const envSummary = Object.entries(envCounts).map(([e, c]) => `**${c}× ${e}**`).join(", ");
+  const dates = runs.map(r => r.date).filter(Boolean).sort();
+  const dateRange = dates.length >= 2 ? ` from **${dates[0]}** to **${dates[dates.length - 1]}**` : "";
+
+  return (
+    `I have data for **${runs.length} test runs**${dateRange} across ${envSummary}.\n\n` +
+    `Avg pass rate: **${avg}%** · **${fails}** total failure${fails !== 1 ? "s" : ""}.\n\n` +
+    `You can ask about: **run history**, **flaky tests**, **environment comparison**, **promotion gate**, **failure breakdown**, **suite health**, **duration trends**, or **Akamai property status**.`
+  );
+}
+
 export async function answerDirectWithChromeAI(input: DirectInput): Promise<void> {
   const { userQuery, priorResponses = [], signal, onDelta } = input;
+
+  // Data-scope queries ("how much data do you have", "what do you know", etc.)
+  // Answer directly from RUNS — no tool call or Chrome AI session needed.
+  const scopeAnswer = buildDataScopeAnswer(userQuery);
+  if (scopeAnswer) { emitAsStream(scopeAnswer, onDelta); return; }
 
   // Always check canned responses first — these handle follow-up / capability questions
   // deterministically, without burning a Gemini Nano session on a conversational query.
