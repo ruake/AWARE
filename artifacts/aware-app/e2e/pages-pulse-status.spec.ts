@@ -4,7 +4,9 @@ test.describe("Pulse Page", () => {
   test("Pulse page loads with status feed", async ({ page }) => {
     await page.goto("/pulse");
     await expect(page.getByRole("heading", { name: /Pulse/ })).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText(/status|running|passed|failed/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/status|running|passed|failed/i).first()).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test("Pulse page shows environment badges", async ({ page }) => {
@@ -26,8 +28,12 @@ test.describe("Pulse Page", () => {
 test.describe("CI Pipeline Page", () => {
   test("CI Pipeline page loads", async ({ page }) => {
     await page.goto("/ci-pipeline");
-    await expect(page.getByRole("heading", { name: /CI Pipeline/ })).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText(/test-runner|promotion-gate|controller/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("heading", { name: /CI Pipeline/ })).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText(/test-runner|promotion-gate|controller/i).first()).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test("CI Pipeline shows pipeline stages", async ({ page }) => {
@@ -45,6 +51,8 @@ test.describe("CI Pipeline Page", () => {
 
   test("CI Pipeline shows run frequency heatmap", async ({ page }) => {
     await page.goto("/ci-pipeline");
-    await expect(page.getByText(/run frequency|heatmap|calendar/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/run frequency|heatmap|calendar/i).first()).toBeVisible({
+      timeout: 5000,
+    });
   });
 });

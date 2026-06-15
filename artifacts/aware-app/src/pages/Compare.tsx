@@ -2,6 +2,8 @@ import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
+import { CompareRunSelector } from "@/components/aware/CompareRunSelector";
+import { CompareSidePanel } from "@/components/aware/CompareSidePanel";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useSyncedUrlState } from "@/lib/urlState";
 import {
@@ -20,14 +22,8 @@ import {
   Link2,
   Github,
   Share2,
-  BarChart3,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
   Zap,
-  ArrowUpRight,
   Search,
-  X,
   XCircle,
   CheckCircle2,
   Clock,
@@ -37,521 +33,6 @@ import type { Run } from "@/lib/types";
 
 function copy(text: string) {
   navigator.clipboard.writeText(text).catch(() => {});
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  PASS: "var(--proof-green)",
-  FAIL: "var(--proof-red)",
-  PARTIAL: "var(--proof-yellow)",
-  FLAKY: "var(--proof-yellow)",
-  RUNNING: "var(--proof-blue)",
-};
-
-function RunPicker({
-  label,
-  labelColor,
-  value,
-  onChange,
-  accentColor = "var(--proof-blue)",
-  runs,
-}: {
-  label: string;
-  labelColor: string;
-  value: string;
-  onChange: (id: string) => void;
-  accentColor?: string;
-  runs: Run[];
-}) {
-  const [open, setOpen] = React.useState(false);
-  const [search, setSearch] = React.useState("");
-  const [envFilter, setEnvFilter] = React.useState("");
-  const [targetFilter, setTargetFilter] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState("");
-  const [suiteFilter, setSuiteFilter] = React.useState("");
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const selectedRun = runs.find((r) => r.id === value) as Run | undefined;
-
-  React.useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  React.useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 0);
-  }, [open]);
-
-  const envs = [...new Set(runs.map((r) => r.env))];
-  const targets = [...new Set(runs.map((r) => r.env))];
-  const statuses = [...new Set(runs.map((r) => r.status))] as Run["status"][];
-  const suites = [...new Set(runs.map((r) => r.suiteId))];
-
-  const filtered = runs.filter((r) => {
-    if (envFilter && r.env !== envFilter) return false;
-    if (targetFilter && r.envId !== targetFilter) return false;
-    if (statusFilter && r.status !== statusFilter) return false;
-    if (suiteFilter && r.suiteId !== suiteFilter) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      if (
-        !r.id.toLowerCase().includes(q) &&
-        !r.env.toLowerCase().includes(q) &&
-        !r.suiteId.toLowerCase().includes(q) &&
-        !r.envId.toLowerCase().includes(q) &&
-        !r.build.toLowerCase().includes(q) &&
-        !r.rev.toLowerCase().includes(q)
-      )
-        return false;
-    }
-    return true;
-  });
-
-  const hasFilters = envFilter || targetFilter || statusFilter || suiteFilter || search;
-  const clearAll = () => {
-    setSearch("");
-    setEnvFilter("");
-    setTargetFilter("");
-    setStatusFilter("");
-    setSuiteFilter("");
-  };
-
-  return (
-    <div ref={ref} style={{ flex: "1 1 240px", minWidth: 200, position: "relative" }}>
-      <label
-        style={{
-          display: "block",
-          fontSize: 10,
-          fontWeight: 700,
-          color: labelColor,
-          textTransform: "uppercase",
-          letterSpacing: "0.5px",
-          marginBottom: 4,
-        }}
-      >
-        {label}
-      </label>
-      <button
-        onClick={() => setOpen((p) => !p)}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "7px 10px",
-          borderRadius: 6,
-          border: `1px solid ${open ? accentColor : "var(--proof-grey)"}`,
-          background: "var(--proof-surface)",
-          color: "var(--proof-text)",
-          cursor: "pointer",
-          fontSize: 11,
-          fontFamily: "var(--font-mono)",
-          textAlign: "left",
-          boxShadow: open ? `0 0 0 2px ${accentColor}22` : "none",
-          transition: "border-color 0.12s, box-shadow 0.12s",
-        }}
-      >
-        {selectedRun ? (
-          <>
-            <span
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                background: STATUS_COLORS[selectedRun.status] ?? "var(--proof-text-secondary)",
-                flexShrink: 0,
-              }}
-            />
-            <span
-              style={{
-                flex: 1,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {selectedRun.id}
-            </span>
-            <span
-              style={{
-                fontSize: 10,
-                color: "var(--proof-text-secondary)",
-                fontFamily: "var(--font-sans)",
-                flexShrink: 0,
-              }}
-            >
-              {selectedRun.env} · {selectedRun.envId}
-            </span>
-          </>
-        ) : (
-          <span style={{ color: "var(--proof-text-secondary)" }}>Select a run…</span>
-        )}
-        <ChevronDown
-          size={12}
-          style={{
-            color: "var(--proof-text-secondary)",
-            flexShrink: 0,
-            transform: open ? "rotate(180deg)" : "none",
-            transition: "transform 0.12s",
-          }}
-        />
-      </button>
-
-      {selectedRun && (
-        <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
-          <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
-            {selectedRun.envId}
-          </span>
-          <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
-            {selectedRun.env}
-          </span>
-          <span
-            className={`proof-badge ${selectedRun.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}
-            style={{ fontSize: 9 }}
-          >
-            {selectedRun.network}
-          </span>
-          <span
-            style={{
-              fontSize: 9,
-              fontFamily: "var(--font-mono)",
-              color: "var(--proof-text-secondary)",
-              background: "var(--proof-grey-bg)",
-              padding: "1px 5px",
-              borderRadius: 3,
-              border: "1px solid var(--proof-grey)",
-            }}
-          >
-            Build {selectedRun.build}
-          </span>
-          <span
-            style={{
-              fontSize: 9,
-              fontFamily: "var(--font-mono)",
-              color: "var(--proof-text-secondary)",
-              background: "var(--proof-grey-bg)",
-              padding: "1px 5px",
-              borderRadius: 3,
-              border: "1px solid var(--proof-grey)",
-            }}
-          >
-            Rev {selectedRun.rev}
-          </span>
-          <span
-            style={{
-              fontSize: 9,
-              fontFamily: "var(--font-mono)",
-              fontWeight: 700,
-              color:
-                selectedRun.passPct === 100
-                  ? "var(--proof-green)"
-                  : selectedRun.passPct < 90
-                    ? "var(--proof-red)"
-                    : "var(--proof-text-secondary)",
-              background: "var(--proof-grey-bg)",
-              padding: "1px 5px",
-              borderRadius: 3,
-              border: "1px solid var(--proof-grey)",
-            }}
-          >
-            {selectedRun.passPct}% pass
-          </span>
-        </div>
-      )}
-
-      {open && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
-            left: 0,
-            zIndex: 300,
-            background: "var(--proof-surface)",
-            border: `1px solid ${accentColor}`,
-            borderRadius: 8,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
-            display: "flex",
-            flexDirection: "column",
-            width: "max(100%, 480px)",
-            maxHeight: 440,
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              padding: "10px 12px",
-              borderBottom: "1px solid var(--proof-grey)",
-              flexShrink: 0,
-            }}
-          >
-            <div style={{ position: "relative" }}>
-              <Search
-                size={13}
-                style={{
-                  position: "absolute",
-                  left: 8,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "var(--proof-text-secondary)",
-                  pointerEvents: "none",
-                }}
-              />
-              <input
-                ref={inputRef}
-                className="proof-input"
-                style={{ width: "100%", paddingLeft: 28, fontSize: 12 }}
-                placeholder="Search by ID, env, suite, build, rev…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  style={{
-                    position: "absolute",
-                    right: 6,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    border: "none",
-                    background: "none",
-                    cursor: "pointer",
-                    color: "var(--proof-text-secondary)",
-                    padding: 2,
-                    display: "flex",
-                  }}
-                >
-                  <X size={12} />
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div
-            style={{
-              padding: "6px 12px",
-              borderBottom: "1px solid var(--proof-grey)",
-              flexShrink: 0,
-              display: "flex",
-              gap: 6,
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            <span
-              style={{
-                fontSize: 10,
-                color: "var(--proof-text-secondary)",
-                fontWeight: 600,
-                flexShrink: 0,
-              }}
-            >
-              Filter:
-            </span>
-            <select
-              className="proof-input"
-              style={{ fontSize: 10, padding: "2px 6px", height: "auto" }}
-              value={envFilter}
-              onChange={(e) => setEnvFilter(e.target.value)}
-            >
-              <option value="">All Envs</option>
-              {envs.map((e) => (
-                <option key={e} value={e}>
-                  {e}
-                </option>
-              ))}
-            </select>
-            <select
-              className="proof-input"
-              style={{ fontSize: 10, padding: "2px 6px", height: "auto" }}
-              value={targetFilter}
-              onChange={(e) => setTargetFilter(e.target.value)}
-            >
-              <option value="">All Targets</option>
-              {targets.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <select
-              className="proof-input"
-              style={{ fontSize: 10, padding: "2px 6px", height: "auto" }}
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">All Statuses</option>
-              {statuses.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <select
-              className="proof-input"
-              style={{ fontSize: 10, padding: "2px 6px", height: "auto" }}
-              value={suiteFilter}
-              onChange={(e) => setSuiteFilter(e.target.value)}
-            >
-              <option value="">All Suites</option>
-              {suites.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            {hasFilters && (
-              <button
-                onClick={clearAll}
-                style={{
-                  fontSize: 10,
-                  color: "var(--proof-red)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  padding: 0,
-                }}
-              >
-                <X size={10} /> Clear
-              </button>
-            )}
-            <span
-              style={{
-                marginLeft: "auto",
-                fontSize: 10,
-                color: "var(--proof-text-secondary)",
-                flexShrink: 0,
-              }}
-            >
-              {filtered.length} / {runs.length}
-            </span>
-          </div>
-
-          <div style={{ overflowY: "auto", flex: 1 }}>
-            {filtered.length === 0 ? (
-              <div
-                style={{
-                  padding: "20px 12px",
-                  textAlign: "center",
-                  color: "var(--proof-text-secondary)",
-                  fontSize: 12,
-                }}
-              >
-                No runs match your filters
-              </div>
-            ) : (
-              filtered.map((r) => {
-                const isSel = r.id === value;
-                return (
-                  <button
-                    key={r.id}
-                    onClick={() => {
-                      onChange(r.id);
-                      setOpen(false);
-                      setSearch("");
-                    }}
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      padding: "8px 12px",
-                      border: "none",
-                      borderBottom: "1px solid var(--proof-grey)",
-                      background: isSel ? `${accentColor}15` : "transparent",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      outline: isSel ? `2px solid ${accentColor}` : "none",
-                      outlineOffset: -2,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSel) e.currentTarget.style.background = "var(--proof-grey-bg)";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSel) e.currentTarget.style.background = "transparent";
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 7,
-                        height: 7,
-                        borderRadius: "50%",
-                        background: STATUS_COLORS[r.status] ?? "var(--proof-text-secondary)",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 11,
-                        color: isSel ? accentColor : "var(--proof-blue)",
-                        fontWeight: 600,
-                        flexShrink: 0,
-                        width: 170,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {r.id}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: "var(--proof-text-secondary)",
-                        flex: 1,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {r.env} · {r.envId} · {r.suiteId}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        color:
-                          r.passPct === 100
-                            ? "var(--proof-green)"
-                            : r.passPct < 90
-                              ? "var(--proof-red)"
-                              : "var(--proof-text)",
-                        flexShrink: 0,
-                        width: 40,
-                        textAlign: "right",
-                      }}
-                    >
-                      {r.passPct}%
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        color: "var(--proof-text-secondary)",
-                        flexShrink: 0,
-                        width: 68,
-                        textAlign: "right",
-                      }}
-                    >
-                      {new Date(r.started).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </button>
-                );
-              })
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }
 
 function stateBadge(state: DiffRow["state"]) {
@@ -564,635 +45,6 @@ function stateBadge(state: DiffRow["state"]) {
   };
   const s = map[state] ?? { color: "var(--proof-text-secondary)", label: state };
   return <span style={{ fontSize: 11, fontWeight: 600, color: s.color }}>{s.label}</span>;
-}
-
-// ── Filmstrip: HTTP waterfall trace for a single test result ─────────────
-const WATERFALL_PHASES = [
-  { name: "DNS", pct: 0.06, color: "#a78bfa" },
-  { name: "TCP", pct: 0.04, color: "#60a5fa" },
-  { name: "TLS", pct: 0.1, color: "#38bdf8" },
-  { name: "Request", pct: 0.02, color: "#94a3b8" },
-  { name: "TTFB", pct: 0.66, color: "#fbbf24" },
-  { name: "Download", pct: 0.12, color: "#34d399" },
-];
-
-function WaterfallSide({ result, label }: { result: TestResult | null; label: string }) {
-  if (!result) {
-    return (
-      <div
-        style={{
-          padding: "8px 10px",
-          background: "var(--proof-grey-bg)",
-          borderRadius: 4,
-          border: "1px solid var(--proof-grey)",
-          minHeight: 80,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>No data</span>
-      </div>
-    );
-  }
-
-  const phases = WATERFALL_PHASES.map((p) => ({
-    ...p,
-    ms: Math.max(1, Math.round(result.duration * p.pct)),
-  }));
-  const maxMs = Math.max(...phases.map((p) => p.ms));
-  const statusColor = result.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)";
-
-  return (
-    <div
-      style={{
-        padding: "8px 10px",
-        background: "var(--proof-grey-bg)",
-        borderRadius: 4,
-        border: `1px solid ${result.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 8,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 9,
-            fontWeight: 700,
-            color: "var(--proof-text-secondary)",
-            textTransform: "uppercase",
-          }}
-        >
-          {label}
-        </span>
-        <span
-          style={{
-            fontSize: 9,
-            fontWeight: 700,
-            color: statusColor,
-            fontFamily: "var(--font-mono)",
-          }}
-        >
-          {result.status} · {result.duration}ms
-        </span>
-      </div>
-
-      {phases.map((ph) => (
-        <div
-          key={ph.name}
-          style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 3 }}
-        >
-          <span
-            style={{
-              fontSize: 8,
-              width: 46,
-              flexShrink: 0,
-              color: "var(--proof-text-secondary)",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            {ph.name}
-          </span>
-          <div
-            style={{
-              flex: 1,
-              background: "var(--proof-grey)",
-              borderRadius: 2,
-              height: 5,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                width: `${Math.round((ph.ms / maxMs) * 100)}%`,
-                height: "100%",
-                background: ph.color,
-                borderRadius: 2,
-                minWidth: 3,
-                transition: "width 0.3s",
-              }}
-            />
-          </div>
-          <span
-            style={{
-              fontSize: 8,
-              width: 32,
-              textAlign: "right",
-              color: "var(--proof-text-secondary)",
-              fontFamily: "var(--font-mono)",
-              flexShrink: 0,
-            }}
-          >
-            {ph.ms}ms
-          </span>
-        </div>
-      ))}
-
-      {result.evidence?.response?.headers && (
-        <div style={{ marginTop: 7, paddingTop: 6, borderTop: "1px solid var(--proof-grey)" }}>
-          {Object.entries(result.evidence.response.headers)
-            .slice(0, 3)
-            .map(([k, v]) => (
-              <div key={k} style={{ display: "flex", gap: 4, marginBottom: 2 }}>
-                <span
-                  style={{
-                    fontSize: 8,
-                    color: "var(--proof-text-secondary)",
-                    fontFamily: "var(--font-mono)",
-                    flexShrink: 0,
-                  }}
-                >
-                  {k}:
-                </span>
-                <span
-                  style={{
-                    fontSize: 8,
-                    color: "var(--proof-text)",
-                    fontFamily: "var(--font-mono)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {String(v)}
-                </span>
-              </div>
-            ))}
-        </div>
-      )}
-
-      {result.assertions && result.assertions.length > 0 && (
-        <div style={{ marginTop: 7, paddingTop: 6, borderTop: "1px solid var(--proof-grey)" }}>
-          {result.assertions.map((a, i) => (
-            <div
-              key={i}
-              style={{ display: "flex", alignItems: "flex-start", gap: 4, marginBottom: 3 }}
-            >
-              <span
-                style={{
-                  fontSize: 10,
-                  color: a.passed ? "var(--proof-green)" : "var(--proof-red)",
-                  flexShrink: 0,
-                  lineHeight: 1.2,
-                }}
-              >
-                {a.passed ? "✓" : "✗"}
-              </span>
-              <div
-                style={{
-                  fontSize: 8,
-                  color: "var(--proof-text)",
-                  lineHeight: 1.4,
-                  overflow: "hidden",
-                }}
-              >
-                <span
-                  style={{
-                    display: "block",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {a.assertion}
-                </span>
-                {!a.passed && (
-                  <span
-                    style={{
-                      display: "block",
-                      color: "var(--proof-red)",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
-                    exp {a.expected} · got {a.actual}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {result.filmstrip && result.filmstrip.length > 0 && (
-        <div
-          style={{
-            marginTop: 7,
-            paddingTop: 6,
-            borderTop: "1px solid var(--proof-grey)",
-            display: "flex",
-            gap: 4,
-            overflowX: "auto",
-          }}
-        >
-          {result.filmstrip.map((frame) => (
-            <div key={frame.id} style={{ flexShrink: 0, textAlign: "center" }}>
-              <img
-                src={frame.dataUri || frame.imageUrl}
-                alt={frame.label}
-                style={{
-                  width: 56,
-                  height: 40,
-                  objectFit: "cover",
-                  borderRadius: 3,
-                  border: "1px solid var(--proof-grey)",
-                  display: "block",
-                }}
-              />
-              <span
-                style={{
-                  fontSize: 7,
-                  color: "var(--proof-text-secondary)",
-                  display: "block",
-                  marginTop: 2,
-                }}
-              >
-                {frame.label}
-              </span>
-              {frame.timestamp !== undefined && (
-                <span
-                  style={{
-                    fontSize: 7,
-                    color: "var(--proof-text-secondary)",
-                    fontFamily: "var(--font-mono)",
-                  }}
-                >
-                  {frame.timestamp}ms
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function FilmstripTrace({
-  baseResult,
-  candResult,
-}: {
-  baseResult: TestResult | null;
-  candResult: TestResult | null;
-}) {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-      <WaterfallSide result={baseResult} label="Baseline" />
-      <WaterfallSide result={candResult} label="Candidate" />
-    </div>
-  );
-}
-
-function SidePanel({
-  diff,
-  diffs,
-  selectedId,
-  onSelect,
-  navigate,
-  baseResult,
-  candResult,
-}: {
-  diff: DiffRow;
-  diffs: DiffRow[];
-  selectedId: string;
-  onSelect: (id: string | null) => void;
-  navigate: (href: string) => void;
-  baseResult: TestResult | null;
-  candResult: TestResult | null;
-}) {
-  const { show, Toast } = useSimpleToast();
-  const idx = diffs.findIndex((d) => d.id === selectedId);
-  const deltaMs = diff.durCand - diff.durBase;
-
-  return (
-    <div
-      className="proof-card"
-      style={{
-        width: 340,
-        flexShrink: 0,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        borderLeft: `3px solid ${diff.state === "regression" ? "var(--proof-red)" : diff.state === "fixed" ? "var(--proof-green)" : "var(--proof-blue)"}`,
-      }}
-    >
-      <div
-        style={{
-          padding: "10px 14px",
-          borderBottom: "1px solid var(--proof-grey)",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          background: "var(--proof-blue-bg)",
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            border: "1px solid var(--proof-grey)",
-            borderRadius: 4,
-            background: "var(--proof-surface)",
-          }}
-        >
-          <button
-            disabled={idx <= 0}
-            onClick={() => onSelect(diffs[idx - 1]?.id)}
-            style={{
-              padding: "4px 7px",
-              border: "none",
-              background: "transparent",
-              cursor: idx > 0 ? "pointer" : "not-allowed",
-              color: idx > 0 ? "var(--proof-blue)" : "var(--proof-grey)",
-            }}
-          >
-            <ChevronLeft size={13} />
-          </button>
-          <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", padding: "0 4px" }}>
-            {idx + 1}/{diffs.length}
-          </span>
-          <button
-            disabled={idx >= diffs.length - 1}
-            onClick={() => onSelect(diffs[idx + 1]?.id)}
-            style={{
-              padding: "4px 7px",
-              border: "none",
-              background: "transparent",
-              cursor: idx < diffs.length - 1 ? "pointer" : "not-allowed",
-              color: idx < diffs.length - 1 ? "var(--proof-blue)" : "var(--proof-grey)",
-            }}
-          >
-            <ChevronRight size={13} />
-          </button>
-        </div>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-blue)", flex: 1 }}>
-          Comparison Detail
-        </span>
-        <button
-          onClick={() => onSelect(null)}
-          aria-label="Close"
-          style={{
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-            color: "var(--proof-text-secondary)",
-            fontSize: 18,
-            lineHeight: 1,
-          }}
-        >
-          <X size={14} />
-        </button>
-      </div>
-      <div
-        style={{
-          flex: 1,
-          overflow: "auto",
-          padding: 14,
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-        }}
-      >
-        <div>
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              color: "var(--proof-text)",
-              lineHeight: 1.5,
-              wordBreak: "break-all",
-            }}
-          >
-            {diff.name}
-          </div>
-          <div style={{ display: "flex", gap: 4, marginTop: 8, flexWrap: "wrap" }}>
-            <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>
-              {diff.category}
-            </span>
-            {stateBadge(diff.state)}
-          </div>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          <div
-            style={{
-              padding: 10,
-              background: `var(--${diff.baseStatus === "PASS" ? "gcp-green-bg" : "gcp-red-bg"})`,
-              borderRadius: 6,
-              border: `1px solid ${diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 9,
-                fontWeight: 700,
-                color: diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
-                textTransform: "uppercase",
-                letterSpacing: "0.3px",
-                marginBottom: 4,
-              }}
-            >
-              Baseline
-            </div>
-            <span
-              className={`proof-badge ${diff.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-              style={{ fontSize: 10 }}
-            >
-              {diff.baseStatus}
-            </span>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--proof-text)",
-                marginTop: 6,
-                fontWeight: 600,
-              }}
-            >
-              {diff.durBase}ms
-            </div>
-          </div>
-          <div
-            style={{
-              padding: 10,
-              background: `var(--${diff.candStatus === "PASS" ? "gcp-green-bg" : "gcp-red-bg"})`,
-              borderRadius: 6,
-              border: `1px solid ${diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 9,
-                fontWeight: 700,
-                color: diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
-                textTransform: "uppercase",
-                letterSpacing: "0.3px",
-                marginBottom: 4,
-              }}
-            >
-              Candidate
-            </div>
-            <span
-              className={`proof-badge ${diff.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-              style={{ fontSize: 10 }}
-            >
-              {diff.candStatus}
-            </span>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--proof-text)",
-                marginTop: 6,
-                fontWeight: 600,
-              }}
-            >
-              {diff.durCand}ms
-            </div>
-          </div>
-        </div>
-        <div
-          style={{
-            padding: 10,
-            borderRadius: 6,
-            border: "1px solid var(--proof-grey)",
-            background:
-              deltaMs > 20
-                ? "var(--proof-red-bg)"
-                : deltaMs < -20
-                  ? "var(--proof-green-bg)"
-                  : "var(--proof-grey-bg)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color:
-                deltaMs > 20
-                  ? "var(--proof-red)"
-                  : deltaMs < -20
-                    ? "var(--proof-green)"
-                    : "var(--proof-text-secondary)",
-              textTransform: "uppercase",
-              letterSpacing: "0.3px",
-              marginBottom: 4,
-            }}
-          >
-            Delta
-          </div>
-          <div style={{ display: "flex", gap: 16 }}>
-            <div>
-              <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>Status: </span>
-              {diff.baseStatus === diff.candStatus ? (
-                <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>—</span>
-              ) : (
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: diff.state === "regression" ? "var(--proof-red)" : "var(--proof-green)",
-                  }}
-                >
-                  {diff.baseStatus} → {diff.candStatus}
-                </span>
-              )}
-            </div>
-            <div>
-              <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>Duration: </span>
-              {Math.abs(deltaMs) > 20 ? (
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: deltaMs > 0 ? "var(--proof-red)" : "var(--proof-green)",
-                  }}
-                >
-                  {deltaMs > 0 ? "+" : ""}
-                  {deltaMs}ms
-                </span>
-              ) : (
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 11,
-                    color: "var(--proof-text-secondary)",
-                  }}
-                >
-                  ~0ms
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="proof-card" style={{ padding: 10 }}>
-          <div
-            style={{
-              fontSize: 10,
-              fontWeight: 700,
-              color: "var(--proof-text-secondary)",
-              textTransform: "uppercase",
-              marginBottom: 8,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <span>HTTP Waterfall</span>
-            <span
-              style={{
-                fontSize: 8,
-                fontWeight: 400,
-                color: "var(--proof-text-secondary)",
-                textTransform: "none",
-              }}
-            >
-              DNS · TCP · TLS · TTFB · Download
-            </span>
-          </div>
-          <FilmstripTrace baseResult={baseResult} candResult={candResult} />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <button
-            onClick={() => navigate(`/analytics?testId=${diff.id}`)}
-            className="proof-button proof-button-xs"
-            style={{ justifyContent: "center" }}
-          >
-            <BarChart3 size={12} /> View Analytics <ArrowUpRight size={10} />
-          </button>
-          <button
-            onClick={() => {
-              copy(`${window.location.origin}/analytics?diffId=${diff.id}`);
-              show("Test permalink copied");
-            }}
-            className="proof-button proof-button-xs"
-            style={{ justifyContent: "center" }}
-          >
-            <Link2 size={12} /> Copy Test Permalink
-          </button>
-          <button
-            onClick={() => {
-              copy(
-                `GitHub issue: Regression in ${diff.name}\nBaseline: ${diff.baseStatus} (${diff.durBase}ms)\nCandidate: ${diff.candStatus} (${diff.durCand}ms)`,
-              );
-              show("GitHub issue template copied");
-            }}
-            className="proof-button proof-button-xs"
-            style={{ justifyContent: "center" }}
-          >
-            <Github size={12} /> File GitHub Issue
-          </button>
-        </div>
-      </div>
-      {Toast}
-    </div>
-  );
 }
 
 export default function Compare() {
@@ -1273,16 +125,12 @@ export default function Compare() {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.target instanceof HTMLSelectElement) return;
-
       if (e.key === "j" || e.key === "ArrowDown") {
         e.preventDefault();
         setSelectedIdx((i) => Math.min(i + 1, filtered.length - 1));
       } else if (e.key === "k" || e.key === "ArrowUp") {
         e.preventDefault();
         setSelectedIdx((i) => Math.max(i - 1, 0));
-      } else if (e.key === "Enter") {
-        const d = selectedIdx >= 0 && selectedIdx < filtered.length ? filtered[selectedIdx] : null;
-        if (d) navigate(`/runs/${d.id}`);
       } else if (e.key === "r") {
         setRegressionsOnly((p) => !p);
         setActiveFilter(null);
@@ -1388,7 +236,6 @@ export default function Compare() {
 
   return (
     <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      {/* Run selectors */}
       <PanelErrorBoundary label="Run selectors">
         <div
           className="proof-card"
@@ -1403,7 +250,7 @@ export default function Compare() {
             zIndex: 20,
           }}
         >
-          <RunPicker
+          <CompareRunSelector
             label="Baseline Run"
             labelColor="var(--proof-text-secondary)"
             value={baseline}
@@ -1426,7 +273,7 @@ export default function Compare() {
           >
             ⇄ Swap
           </button>
-          <RunPicker
+          <CompareRunSelector
             label="Candidate Run"
             labelColor="var(--proof-blue)"
             value={candidate}
@@ -1441,7 +288,7 @@ export default function Compare() {
             <button
               onClick={() => {
                 copy(window.location.href);
-                show("Permalink copied — URL always reflects current comparison");
+                show("Permalink copied");
               }}
               className="proof-button proof-button-sm"
             >
@@ -1473,7 +320,6 @@ export default function Compare() {
         </div>
       </PanelErrorBoundary>
 
-      {/* Summary tiles — clickable filters */}
       <PanelErrorBoundary label="Stat cards">
         <div
           className="proof-stagger"
@@ -1520,9 +366,8 @@ export default function Compare() {
                 icon={iconMap[tile.key]}
                 active={activeFilter === tile.key}
                 onClick={() => {
-                  if (activeFilter === tile.key) {
-                    setActiveFilter(null);
-                  } else {
+                  if (activeFilter === tile.key) setActiveFilter(null);
+                  else {
                     setActiveFilter(tile.key);
                     setRegressionsOnly(false);
                   }
@@ -1533,7 +378,6 @@ export default function Compare() {
         </div>
       </PanelErrorBoundary>
 
-      {/* Run context ribbon */}
       <div
         style={{
           background: "var(--proof-grey-bg)",
@@ -1559,13 +403,13 @@ export default function Compare() {
           Comparison
         </span>
         <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
-          {baselineRun?.envId} / {baselineRun?.env}
+          {baselineRun.envId} / {baselineRun.env}
         </span>
         <span
-          className={`proof-badge ${baselineRun?.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}
+          className={`proof-badge ${baselineRun.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}
           style={{ fontSize: 9 }}
         >
-          {baselineRun?.network}
+          {baselineRun.network}
         </span>
         <span
           style={{
@@ -1574,7 +418,7 @@ export default function Compare() {
             color: "var(--proof-text-secondary)",
           }}
         >
-          Build {baselineRun?.build}
+          Build {baselineRun.build}
         </span>
         <span
           style={{
@@ -1583,17 +427,17 @@ export default function Compare() {
             color: "var(--proof-text-secondary)",
           }}
         >
-          Rev {baselineRun?.rev}
+          Rev {baselineRun.rev}
         </span>
         <span style={{ color: "var(--proof-grey)", fontSize: 12 }}>|</span>
         <span className="proof-badge proof-badge-skip" style={{ fontSize: 9 }}>
-          {candidateRun?.envId} / {candidateRun?.env}
+          {candidateRun.envId} / {candidateRun.env}
         </span>
         <span
-          className={`proof-badge ${candidateRun?.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}
+          className={`proof-badge ${candidateRun.network === "production" ? "proof-badge-pass" : "proof-badge-flaky"}`}
           style={{ fontSize: 9 }}
         >
-          {candidateRun?.network}
+          {candidateRun.network}
         </span>
         <span
           style={{
@@ -1602,7 +446,7 @@ export default function Compare() {
             color: "var(--proof-text-secondary)",
           }}
         >
-          Build {candidateRun?.build}
+          Build {candidateRun.build}
         </span>
         <span
           style={{
@@ -1611,7 +455,7 @@ export default function Compare() {
             color: "var(--proof-text-secondary)",
           }}
         >
-          Rev {candidateRun?.rev}
+          Rev {candidateRun.rev}
         </span>
         {regressions.length > 0 ? (
           <span
@@ -1631,7 +475,7 @@ export default function Compare() {
               style={{ fontSize: 8, padding: "0 4px" }}
             >
               {regressions.length}
-            </span>
+            </span>{" "}
             Blocked
           </span>
         ) : (
@@ -1653,7 +497,6 @@ export default function Compare() {
         </span>
       </div>
 
-      {/* Table + side panel */}
       <PanelErrorBoundary label="Diff area">
         <div style={{ display: "flex", gap: 14 }}>
           <div
@@ -1936,7 +779,7 @@ export default function Compare() {
             </div>
           </div>
           {selectedDiff && selectedId && (
-            <SidePanel
+            <CompareSidePanel
               diff={selectedDiff}
               diffs={filtered}
               selectedId={selectedId}

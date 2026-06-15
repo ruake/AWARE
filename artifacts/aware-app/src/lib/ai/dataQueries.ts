@@ -242,7 +242,8 @@ export const DATA_QUERIES: DataQuery[] = [
   {
     id: "get_app_page_structure",
     name: "Get App Page Structure",
-    description: "Returns the app's page hierarchy, routes, navigation links, and inter-page relationships",
+    description:
+      "Returns the app's page hierarchy, routes, navigation links, and inter-page relationships",
     query: async () => [
       {
         id: "dashboard",
@@ -250,7 +251,7 @@ export const DATA_QUERIES: DataQuery[] = [
         route: "/",
         description: "Home page with KPIs, environment health, area chart, anomaly banner, heatmap",
         group: "Monitor",
-        linksTo: ["runs", "activity", "trends", "environments"],
+        linksTo: ["runs", "activity", "trends"],
       },
       {
         id: "runs",
@@ -266,7 +267,7 @@ export const DATA_QUERIES: DataQuery[] = [
         route: "/runs/:id",
         description: "Per-run test results with HTTP evidence viewer",
         group: "Monitor",
-        linksTo: ["compare", "tests"],
+        linksTo: ["compare"],
       },
       {
         id: "compare",
@@ -290,23 +291,7 @@ export const DATA_QUERIES: DataQuery[] = [
         route: "/activity",
         description: "Live status feed of runs and promotions",
         group: "Monitor",
-        linksTo: ["runs", "status"],
-      },
-      {
-        id: "environments",
-        name: "Environments",
-        route: "/environments",
-        description: "Environment configuration and health per env tier",
-        group: "Configure",
-        linksTo: ["dashboard"],
-      },
-      {
-        id: "tests",
-        name: "Tests",
-        route: "/tests",
-        description: "Test case CRUD management with filterable table and side panel",
-        group: "Configure",
-        linksTo: ["suites"],
+        linksTo: ["runs"],
       },
       {
         id: "suites",
@@ -314,15 +299,7 @@ export const DATA_QUERIES: DataQuery[] = [
         route: "/suites",
         description: "Hierarchical suite tree with YAML preview",
         group: "Configure",
-        linksTo: ["tests", "ci"],
-      },
-      {
-        id: "ci",
-        name: "CI Pipeline",
-        route: "/ci",
-        description: "CI pipeline status with YAML config download",
-        group: "Configure",
-        linksTo: ["activity", "suites"],
+        linksTo: [],
       },
       {
         id: "copilot",

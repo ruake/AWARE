@@ -1,5 +1,20 @@
 import React from "react";
-import { Bot, Settings, Plus, Square, X, Loader2 } from "lucide-react";
+import {
+  Bot,
+  Settings,
+  Plus,
+  Square,
+  X,
+  Loader2,
+  Activity,
+  RefreshCw,
+  TrendingUp,
+  AlertTriangle,
+  Shield,
+  Flame,
+  GitCompare,
+  MessageSquare,
+} from "lucide-react";
 import { TOOLS } from "@/lib/copilot/tools";
 import { runAgent } from "@/lib/copilot/agent";
 import { createProvider, WebLLMProvider } from "@/lib/copilot/providers";
@@ -20,173 +35,94 @@ import type {
   SubAgentStep,
 } from "@/lib/copilot/types";
 import MessageFeed from "@/components/copilot/MessageFeed";
-import QuickActions from "@/components/copilot/QuickActions";
 import InputBar from "@/components/copilot/InputBar";
 import ProviderSelector from "@/components/copilot/ProviderSelector";
-import ContextPanel from "@/components/copilot/ContextPanel";
-import DebugPanel from "@/components/copilot/DebugPanel";
 import { getLogs, subscribeLogs, clearLogs } from "@/lib/ai/debugLogger";
 import type { DebugLogEntry } from "@/lib/ai/langGraphTypes";
 
-// ── uid helper ───────────────────────────────────────────────────────────────
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
-// ── button style helper ───────────────────────────────────────────────────────
-const topBtnStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 4,
-  padding: "4px 8px",
-  borderRadius: 6,
-  fontSize: 11,
-  fontWeight: 600,
-  cursor: "pointer",
-  border: "1px solid var(--proof-border)",
-  background: "var(--proof-surface-2)",
-  color: "var(--proof-text-secondary)",
-};
+const QUICK_ACTIONS = [
+  {
+    id: "latest-runs",
+    label: "Latest Runs",
+    icon: <Activity size={12} />,
+    color: "var(--proof-blue)",
+    message: "Show me the last 10 test runs with pass rates and failure counts.",
+  },
+  {
+    id: "flaky-tests",
+    label: "Flaky Tests",
+    icon: <RefreshCw size={12} />,
+    color: "var(--proof-yellow)",
+    message: "Which tests are flaky? Rank by flakiness score.",
+  },
+  {
+    id: "trend-20",
+    label: "20-Run Trend",
+    icon: <TrendingUp size={12} />,
+    color: "var(--proof-green)",
+    message: "Show pass rate trend over the last 20 test runs.",
+  },
+  {
+    id: "failure-analysis",
+    label: "Analyze Failures",
+    icon: <AlertTriangle size={12} />,
+    color: "var(--proof-red)",
+    message: "Analyze recent test failures and suggest root causes.",
+  },
+  {
+    id: "promotion-status",
+    label: "Promotion Readiness",
+    icon: <Shield size={12} />,
+    color: "var(--proof-purple)",
+    message: "Is the UAT environment ready for promotion to PROD?",
+  },
+  {
+    id: "top-flaky",
+    label: "Top 15 Flaky",
+    icon: <Flame size={12} />,
+    color: "var(--proof-orange)",
+    message: "Show the top 15 flakiest tests ranked by flakiness score.",
+  },
+  {
+    id: "compare",
+    label: "Compare Builds",
+    icon: <GitCompare size={12} />,
+    color: "var(--proof-cyan)",
+    message: "Compare the two most recent test runs.",
+  },
+  {
+    id: "anomalies",
+    label: "Anomalies",
+    icon: <Activity size={12} />,
+    color: "var(--proof-pink)",
+    message: "Detect anomalies in recent test runs.",
+  },
+];
 
-// ── inline settings panel ─────────────────────────────────────────────────────
-interface SettingsPanelProps {
-  config: { apiKey: string; apiUrl: string; model: string };
-  onSave: (cfg: { apiKey: string; apiUrl: string; model: string }) => void;
-  onClose: () => void;
-}
+const STARTER_PROMPTS = [
+  { label: "What's failing?", message: "Show me all tests that failed in the latest run." },
+  { label: "Trend analysis", message: "Analyze the pass rate trend over the last 20 runs." },
+  { label: "Flakiness report", message: "Which tests are the flakiest? Rank them." },
+  { label: "Promotion check", message: "Is UAT ready to promote to PROD?" },
+  { label: "Compare runs", message: "Compare the two most recent test runs." },
+  { label: "Health summary", message: "Summarize the current health of all environments." },
+];
 
-function SettingsPanel({ config, onSave, onClose }: SettingsPanelProps) {
-  const [apiKey, setApiKey] = React.useState(config.apiKey);
-  const [apiUrl, setApiUrl] = React.useState(config.apiUrl);
-  const [model, setModel] = React.useState(config.model);
-
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "6px 8px",
-    borderRadius: 6,
-    border: "1px solid var(--proof-border)",
-    background: "var(--proof-surface)",
-    color: "var(--proof-text)",
-    fontSize: 12,
-    outline: "none",
-    boxSizing: "border-box",
-  };
-
-  return (
-    <div
-      style={{
-        borderBottom: "1px solid var(--proof-border)",
-        padding: "12px 16px",
-        background: "var(--proof-surface-2)",
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)" }}>
-          OpenAI Settings
-        </span>
-        <button onClick={onClose} style={{ ...topBtnStyle, padding: "2px 6px" }}>
-          <X size={12} /> Close
-        </button>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-        <div>
-          <label
-            style={{
-              fontSize: 10,
-              color: "var(--proof-text-secondary)",
-              display: "block",
-              marginBottom: 3,
-            }}
-          >
-            API Key
-          </label>
-          <input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-..."
-            style={inputStyle}
-          />
-        </div>
-        <div>
-          <label
-            style={{
-              fontSize: 10,
-              color: "var(--proof-text-secondary)",
-              display: "block",
-              marginBottom: 3,
-            }}
-          >
-            API URL (optional)
-          </label>
-          <input
-            value={apiUrl}
-            onChange={(e) => setApiUrl(e.target.value)}
-            placeholder="https://api.openai.com/v1"
-            style={inputStyle}
-          />
-        </div>
-        <div>
-          <label
-            style={{
-              fontSize: 10,
-              color: "var(--proof-text-secondary)",
-              display: "block",
-              marginBottom: 3,
-            }}
-          >
-            Model
-          </label>
-          <input
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            placeholder="gpt-4o-mini"
-            style={inputStyle}
-          />
-        </div>
-      </div>
-
-      <div style={{ display: "flex", gap: 8 }}>
-        <button
-          onClick={() => onSave({ apiKey, apiUrl, model })}
-          style={{
-            padding: "5px 14px",
-            borderRadius: 6,
-            border: "none",
-            background: "var(--proof-blue)",
-            color: "#fff",
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          Save
-        </button>
-        <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", alignSelf: "center" }}>
-          Settings are saved locally to your browser only.
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// ── Page ──────────────────────────────────────────────────────────────────────
 export default function CopilotPage() {
   const [messages, setMessages] = React.useState<Message[]>(() => {
     const session = loadSession();
-    return session?.messages?.length
-      ? session.messages
-      : [
-          {
-            id: uid(),
-            role: "assistant",
-            content:
-              "Hi! I'm the **AWARE Copilot**. I call live data tools to answer questions about your test runs, failures, flakiness, and Akamai environment health.\n\nTry a Quick Action on the left, or just ask me anything.",
-            timestamp: Date.now(),
-          },
-        ];
+    if (session?.messages?.length) return session.messages;
+    return [
+      {
+        id: uid(),
+        role: "assistant",
+        content:
+          "Hi! I'm the **AWARE Copilot**. I analyze test runs, detect failures, track flakiness, and check promotion readiness across your Akamai environments.\n\nChoose a starter question below, pick a quick action, or just ask me anything.",
+        timestamp: Date.now(),
+      },
+    ];
   });
   const [busy, setBusy] = React.useState(false);
   const [providerType, setProviderType] = React.useState<ProviderType>(() => {
@@ -203,14 +139,13 @@ export default function CopilotPage() {
     text: string;
   } | null>(null);
   const [showSettings, setShowSettings] = React.useState(false);
-  const [showDebug, setShowDebug] = React.useState(false);
   const [openaiConfig, setOpenaiConfig] = React.useState(loadOpenAIConfig);
   const [input, setInput] = React.useState("");
   const [debugLogs, setDebugLogs] = React.useState<DebugLogEntry[]>(() => getLogs());
   const [agentSteps, setAgentSteps] = React.useState<SubAgentStep[]>([]);
+  const [showActions, setShowActions] = React.useState(false);
   const logEndRef = React.useRef<HTMLDivElement | null>(null);
 
-  // Subscribe to debug logger updates
   React.useEffect(() => {
     const unsub = subscribeLogs(() => setDebugLogs([...getLogs()]));
     return unsub;
@@ -225,11 +160,7 @@ export default function CopilotPage() {
       setDownloadProgress({ progress, text });
       if (progress >= 1) setTimeout(() => setDownloadProgress(null), 2000);
     };
-    return {
-      webllm: wllm,
-      openai: createProvider("openai"),
-      chrome: createProvider("chrome"),
-    };
+    return { webllm: wllm, openai: createProvider("openai"), chrome: createProvider("chrome") };
   }, []);
 
   React.useEffect(() => {
@@ -242,12 +173,10 @@ export default function CopilotPage() {
     })();
   }, [providers]);
 
-  // Persist session whenever messages change
   React.useEffect(() => {
     if (messages.length > 0) saveSession(messages, providerType);
   }, [messages, providerType]);
 
-  // ── Event handler (memoized — no deps change) ─────────────────────────────
   const handleEvent = React.useCallback((event: AgentEvent) => {
     switch (event.type) {
       case "delta":
@@ -258,7 +187,6 @@ export default function CopilotPage() {
           return prev;
         });
         break;
-
       case "tool_start":
         setMessages((prev) => {
           const last = prev[prev.length - 1];
@@ -270,7 +198,6 @@ export default function CopilotPage() {
           return prev;
         });
         break;
-
       case "tool_done":
         setMessages((prev) => {
           const last = prev[prev.length - 1];
@@ -287,11 +214,9 @@ export default function CopilotPage() {
           return prev;
         });
         break;
-
       case "step":
         setAgentSteps((prev) => [...prev.filter((s) => s.status !== "running"), event.step]);
         break;
-
       case "done":
         setMessages((prev) => {
           const last = prev[prev.length - 1];
@@ -302,7 +227,6 @@ export default function CopilotPage() {
         setAgentSteps([]);
         abortRef.current = null;
         break;
-
       case "error":
         setMessages((prev) => {
           const last = prev[prev.length - 1];
@@ -324,7 +248,6 @@ export default function CopilotPage() {
     }
   }, []);
 
-  // ── Send ──────────────────────────────────────────────────────────────────
   const handleSend = React.useCallback(
     async (text?: string) => {
       const content = (text ?? input).trim();
@@ -368,7 +291,6 @@ export default function CopilotPage() {
     [busy, input, messages, providers, providerType, handleEvent],
   );
 
-  // ── Retry (Amershi G9: support efficient correction) ─────────────────────
   const handleRetry = React.useCallback(
     (messageId: string) => {
       const idx = messages.findIndex((m) => m.id === messageId);
@@ -380,7 +302,12 @@ export default function CopilotPage() {
       const slicedHistory = messages.slice(0, userIdx);
       if (!userContent.trim() || busy) return;
 
-      const userMsg: Message = { id: uid(), role: "user", content: userContent, timestamp: Date.now() };
+      const userMsg: Message = {
+        id: uid(),
+        role: "user",
+        content: userContent,
+        timestamp: Date.now(),
+      };
       const assistantMsg: Message = {
         id: uid(),
         role: "assistant",
@@ -388,7 +315,6 @@ export default function CopilotPage() {
         timestamp: Date.now(),
         streaming: true,
       };
-
       setMessages([...slicedHistory, userMsg, assistantMsg]);
       setBusy(true);
 
@@ -414,13 +340,6 @@ export default function CopilotPage() {
     [messages, busy, providers, providerType, handleEvent],
   );
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
   const handleStop = () => {
     abortRef.current?.abort();
     handleEvent({ type: "done" });
@@ -429,12 +348,6 @@ export default function CopilotPage() {
   const handleProviderSwitch = (type: ProviderType) => {
     setProviderType(type);
     saveProviderType(type);
-    setShowSettings(false);
-  };
-
-  const handleSaveSettings = (cfg: { apiKey: string; apiUrl: string; model: string }) => {
-    setOpenaiConfig(cfg);
-    saveOpenAIConfig(cfg);
     setShowSettings(false);
   };
 
@@ -453,53 +366,71 @@ export default function CopilotPage() {
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  const handleSaveSettings = (cfg: { apiKey: string; apiUrl: string; model: string }) => {
+    setOpenaiConfig(cfg);
+    saveOpenAIConfig(cfg);
+    setShowSettings(false);
+  };
+
+  const isEmpty =
+    messages.length === 1 && messages[0].role === "assistant" && !messages[0].streaming;
+
   return (
     <>
-      {/* Keyframe for blink cursor + spinner */}
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes spin  { to{transform:rotate(360deg)} }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
       `}</style>
 
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          overflow: "hidden",
-          minHeight: 0,
-        }}
-      >
-        {/* Quick actions sidebar — Amershi G1: make capabilities visible */}
-        <QuickActions onAction={handleSend} busy={busy} />
-
-        {/* Main chat area */}
+      <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0 }}>
+        {/* ── Main area ── */}
         <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            minWidth: 0,
-            minHeight: 0,
-            borderLeft: "1px solid var(--proof-border)",
-          }}
+          style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}
         >
-          {/* Top bar — always visible */}
+          {/* ── Header ── */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 8,
-              padding: "8px 14px",
+              gap: 10,
+              padding: "12px 18px",
               borderBottom: "1px solid var(--proof-border)",
               flexShrink: 0,
               background: "var(--proof-surface)",
               zIndex: 10,
             }}
           >
-            <Bot size={15} style={{ color: "var(--proof-blue)" }} />
-            <span style={{ fontSize: 13, fontWeight: 700 }}>AWARE Copilot</span>
+            <div
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 7,
+                background: "var(--proof-blue-bg)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--proof-blue)",
+              }}
+            >
+              <Bot size={15} />
+            </div>
+            <div>
+              <div
+                role="heading"
+                aria-level={1}
+                style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.3 }}
+              >
+                AWARE Copilot
+              </div>
+              <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", lineHeight: 1.3 }}>
+                {providerType === "openai"
+                  ? openaiConfig.model || "gpt-4o-mini"
+                  : providerType === "webllm"
+                    ? "WebLLM"
+                    : "Chrome AI"}
+              </div>
+            </div>
             <div style={{ flex: 1 }} />
 
             <ProviderSelector
@@ -509,49 +440,222 @@ export default function CopilotPage() {
               onSwitch={handleProviderSwitch}
             />
 
-            <button onClick={() => setShowSettings((p) => !p)} style={topBtnStyle}>
-              <Settings size={12} /> Settings
+            <button
+              onClick={() => setShowActions((p) => !p)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "5px 10px",
+                borderRadius: 6,
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                border: "1px solid var(--proof-border)",
+                background: showActions ? "var(--proof-blue-bg)" : "var(--proof-surface-2)",
+                color: showActions ? "var(--proof-blue)" : "var(--proof-text-secondary)",
+              }}
+            >
+              <MessageSquare size={12} /> Actions
             </button>
 
-            <button onClick={handleNewChat} style={topBtnStyle}>
-              <Plus size={12} /> New Chat
+            <button
+              onClick={handleNewChat}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "5px 10px",
+                borderRadius: 6,
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                border: "1px solid var(--proof-border)",
+                background: "var(--proof-surface-2)",
+                color: "var(--proof-text-secondary)",
+              }}
+            >
+              <Plus size={12} /> New
             </button>
 
-            <DebugPanel
-              show={showDebug}
-              logs={debugLogs}
-              logEndRef={logEndRef}
-              onToggle={() => setShowDebug((p) => !p)}
-              onClear={() => clearLogs()}
-            />
+            <button
+              onClick={() => setShowSettings((p) => !p)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "5px 10px",
+                borderRadius: 6,
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                border: "1px solid var(--proof-border)",
+                background: showSettings ? "var(--proof-blue-bg)" : "var(--proof-surface-2)",
+                color: showSettings ? "var(--proof-blue)" : "var(--proof-text-secondary)",
+              }}
+            >
+              <Settings size={12} />
+            </button>
 
             {busy && (
               <button
                 onClick={handleStop}
                 style={{
-                  ...topBtnStyle,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "5px 10px",
+                  borderRadius: 6,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  border: "1px solid color-mix(in srgb, var(--proof-red) 25%, transparent)",
+                  background: "var(--proof-surface-2)",
                   color: "var(--proof-red)",
-                  borderColor: "color-mix(in srgb, var(--proof-red) 25%, transparent)",
                 }}
               >
-                <Square size={11} fill="currentColor" /> Stop
+                <Square size={10} fill="currentColor" /> Stop
               </button>
             )}
           </div>
 
-          {/* Settings panel (inline collapsible) */}
+          {/* ── Settings inline panel ── */}
           {showSettings && (
-            <SettingsPanel
-              config={openaiConfig}
-              onSave={handleSaveSettings}
-              onClose={() => setShowSettings(false)}
-            />
+            <div
+              style={{
+                borderBottom: "1px solid var(--proof-border)",
+                padding: "12px 18px",
+                background: "var(--proof-surface-2)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+              >
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)" }}>
+                  OpenAI Settings
+                </span>
+                <button
+                  onClick={() => setShowSettings(false)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "2px 8px",
+                    borderRadius: 6,
+                    fontSize: 11,
+                    cursor: "pointer",
+                    border: "1px solid var(--proof-border)",
+                    background: "var(--proof-surface-2)",
+                    color: "var(--proof-text-secondary)",
+                  }}
+                >
+                  <X size={12} /> Close
+                </button>
+              </div>
+              <SettingsForm config={openaiConfig} onSave={handleSaveSettings} />
+            </div>
           )}
 
-          {/* Message feed (virtualized) — Amershi G9: retry support */}
+          {/* ── Quick actions bar (collapsible) ── */}
+          {showActions && (
+            <div
+              style={{
+                borderBottom: "1px solid var(--proof-border)",
+                padding: "8px 16px",
+                background: "var(--proof-surface-2)",
+                flexShrink: 0,
+                display: "flex",
+                gap: 6,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 10,
+                  color: "var(--proof-text-secondary)",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.3px",
+                  marginRight: 4,
+                }}
+              >
+                Quick
+              </span>
+              {QUICK_ACTIONS.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => {
+                    setShowActions(false);
+                    handleSend(a.message);
+                  }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "4px 10px",
+                    borderRadius: 20,
+                    fontSize: 11,
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    border: `1px solid color-mix(in srgb, ${a.color} 30%, transparent)`,
+                    background: `color-mix(in srgb, ${a.color} 8%, transparent)`,
+                    color: a.color,
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {a.icon} {a.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* ── Message area ── */}
           <MessageFeed messages={messages} onRetry={handleRetry} />
 
-          {/* Sub-agent steps indicator (LangGraph-style progress) — Norman: conceptual model visibility */}
+          {/* ── Empty state / Starter prompts ── */}
+          {isEmpty && !busy && (
+            <div style={{ padding: "0 16px 12px", flexShrink: 0 }}>
+              <div
+                style={{
+                  fontSize: 10,
+                  color: "var(--proof-text-secondary)",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.3px",
+                  marginBottom: 6,
+                }}
+              >
+                Try asking
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {STARTER_PROMPTS.map((s) => (
+                  <button
+                    key={s.label}
+                    onClick={() => handleSend(s.message)}
+                    style={{
+                      padding: "6px 14px",
+                      borderRadius: 20,
+                      fontSize: 12,
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      border: "1px solid var(--proof-border)",
+                      background: "var(--proof-surface-2)",
+                      color: "var(--proof-text)",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Agent steps indicator ── */}
           {agentSteps.length > 0 && (
             <div
               style={{
@@ -594,25 +698,219 @@ export default function CopilotPage() {
             </div>
           )}
 
-          {/* Input bar — Amershi G4/G7: streaming indicator + prominent stop */}
+          {/* ── Input bar ── */}
           <InputBar
             input={input}
             busy={busy}
             textareaRef={textareaRef}
             onSend={handleSend}
             onStop={handleStop}
-            onKeyDown={handleKeyDown}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
             onInput={setInput}
           />
         </div>
 
-        {/* Context panel — Amershi G2: show contextually relevant info, G18: make limitations clear */}
-        <ContextPanel
-          providerType={providerType}
-          providerStatus={providerStatus}
-          messages={messages}
-        />
+        {/* ── Debug slide-over ── */}
+        {debugLogs.length > 0 && (
+          <div
+            style={{
+              width: 320,
+              borderLeft: "1px solid var(--proof-border)",
+              display: "flex",
+              flexDirection: "column",
+              flexShrink: 0,
+              background: "var(--proof-surface)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "8px 12px",
+                borderBottom: "1px solid var(--proof-border)",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "var(--proof-text-secondary)",
+              }}
+            >
+              <span>Debug Log ({debugLogs.length})</span>
+              <button
+                onClick={() => clearLogs()}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "var(--proof-red)",
+                  fontSize: 10,
+                }}
+              >
+                Clear
+              </button>
+            </div>
+            <div
+              ref={logEndRef}
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "6px 10px",
+                fontSize: 10,
+                fontFamily: "var(--font-mono)",
+                lineHeight: 1.6,
+              }}
+            >
+              {debugLogs.map((log, i) => (
+                <div
+                  key={i}
+                  style={{
+                    color:
+                      log.level === "error"
+                        ? "var(--proof-red)"
+                        : log.level === "warn"
+                          ? "var(--proof-yellow)"
+                          : "var(--proof-text-secondary)",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  <span style={{ opacity: 0.5 }}>{log.timestamp?.slice(11, 19) ?? ""}</span>{" "}
+                  {log.event}
+                  {log.details ? `: ${log.details}` : ""}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </>
+  );
+}
+
+function SettingsForm({
+  config,
+  onSave,
+}: {
+  config: { apiKey: string; apiUrl: string; model: string };
+  onSave: (cfg: { apiKey: string; apiUrl: string; model: string }) => void;
+}) {
+  const [apiKey, setApiKey] = React.useState(config.apiKey);
+  const [apiUrl, setApiUrl] = React.useState(config.apiUrl);
+  const [model, setModel] = React.useState(config.model);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+        <div>
+          <label
+            style={{
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+              display: "block",
+              marginBottom: 3,
+            }}
+          >
+            API Key
+          </label>
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="sk-..."
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              borderRadius: 6,
+              border: "1px solid var(--proof-border)",
+              background: "var(--proof-surface)",
+              color: "var(--proof-text)",
+              fontSize: 12,
+              outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
+        <div>
+          <label
+            style={{
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+              display: "block",
+              marginBottom: 3,
+            }}
+          >
+            API URL
+          </label>
+          <input
+            value={apiUrl}
+            onChange={(e) => setApiUrl(e.target.value)}
+            placeholder="https://api.openai.com/v1"
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              borderRadius: 6,
+              border: "1px solid var(--proof-border)",
+              background: "var(--proof-surface)",
+              color: "var(--proof-text)",
+              fontSize: 12,
+              outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
+        <div>
+          <label
+            style={{
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+              display: "block",
+              marginBottom: 3,
+            }}
+          >
+            Model
+          </label>
+          <input
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            placeholder="gpt-4o-mini"
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              borderRadius: 6,
+              border: "1px solid var(--proof-border)",
+              background: "var(--proof-surface)",
+              color: "var(--proof-text)",
+              fontSize: 12,
+              outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <button
+          onClick={() => onSave({ apiKey, apiUrl, model })}
+          style={{
+            padding: "5px 14px",
+            borderRadius: 6,
+            border: "none",
+            background: "var(--proof-blue)",
+            color: "#fff",
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Save
+        </button>
+        <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
+          Settings saved locally.
+        </span>
+      </div>
+    </div>
   );
 }

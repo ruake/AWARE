@@ -28,7 +28,15 @@ import {
   AlertTriangle,
   GitCompare,
 } from "lucide-react";
-import { AreaChart, Area, Tooltip, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
+import {
+  AreaChart,
+  Area,
+  Tooltip,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
 
 /* ── Per Few (2006): Dashboard shows SIGNAL, not noise ───────────────────
  *   - Removed: greeting banner (personality ≠ signal)
@@ -175,7 +183,6 @@ export default function Dashboard() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
       {/* ── Needs Attention (progressive disclosure: only when issues exist) ── */}
       {hasAlerts && (
         <div
@@ -194,14 +201,20 @@ export default function Dashboard() {
           <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "var(--proof-red)" }}>
             {regressions > 0 && `${regressions} regression${regressions > 1 ? "s" : ""}`}
             {regressions > 0 && failingEnvs.length > 0 && " · "}
-            {failingEnvs.length > 0 && `${failingEnvs.map((e) => e.label).join(", ")} below 80% pass rate`}
+            {failingEnvs.length > 0 &&
+              `${failingEnvs.map((e) => e.label).join(", ")} below 80% pass rate`}
           </span>
           <button
             onClick={() => navigate("/runs")}
             style={{
-              fontSize: 12, fontWeight: 500, color: "var(--proof-red)",
-              background: "rgba(239,68,68,0.12)", border: "none", borderRadius: 5,
-              padding: "4px 10px", cursor: "pointer",
+              fontSize: 12,
+              fontWeight: 500,
+              color: "var(--proof-red)",
+              background: "rgba(239,68,68,0.12)",
+              border: "none",
+              borderRadius: 5,
+              padding: "4px 10px",
+              cursor: "pointer",
             }}
           >
             View Runs
@@ -212,25 +225,42 @@ export default function Dashboard() {
       {/* ── Action Bar (compact, no greeting per Nielsen #8) ── */}
       <div
         style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "12px 16px", borderRadius: 8,
-          background: "var(--proof-surface)", border: "1px solid var(--proof-border)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "12px 16px",
+          borderRadius: 8,
+          background: "var(--proof-surface)",
+          border: "1px solid var(--proof-border)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <Beaker size={18} style={{ color: "var(--proof-blue)", opacity: 0.7 }} />
           <span style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>
-            {effectiveRuns.length} runs across {envHealth.filter((e) => e.runCount > 0).length} environments
+            {effectiveRuns.length} runs across {envHealth.filter((e) => e.runCount > 0).length}{" "}
+            environments
           </span>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
-          <button onClick={() => navigate("/start")} className="proof-button-primary" style={{ padding: "6px 14px", fontSize: 12 }}>
+          <button
+            onClick={() => navigate("/start")}
+            className="proof-button-primary"
+            style={{ padding: "6px 14px", fontSize: 12 }}
+          >
             <Play size={12} /> Start Run
           </button>
-          <button onClick={() => navigate("/runs")} className="proof-button" style={{ padding: "6px 14px", fontSize: 12 }}>
+          <button
+            onClick={() => navigate("/runs")}
+            className="proof-button"
+            style={{ padding: "6px 14px", fontSize: 12 }}
+          >
             <List size={12} /> Runs
           </button>
-          <button onClick={() => navigate("/copilot")} className="proof-button" style={{ padding: "6px 14px", fontSize: 12 }}>
+          <button
+            onClick={() => navigate("/copilot")}
+            className="proof-button"
+            style={{ padding: "6px 14px", fontSize: 12 }}
+          >
             <Bot size={12} /> Copilot
           </button>
         </div>
@@ -248,41 +278,93 @@ export default function Dashboard() {
                 key={env.id}
                 onClick={() => navigate(`/runs?env=${encodeURIComponent(env.label)}`)}
                 style={{
-                  display: "flex", flexDirection: "column", gap: 4,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
                   padding: "12px 14px",
                   borderRight: i % 3 < 2 ? "1px solid var(--proof-border)" : "none",
                   borderBottom: i < envHealth.length - 3 ? "1px solid var(--proof-border)" : "none",
-                  cursor: "pointer", transition: "background 0.12s",
+                  cursor: "pointer",
+                  transition: "background 0.12s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--proof-surface-hover)")}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "var(--proof-surface-hover)")
+                }
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                >
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: dot.color, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text)" }}>{env.label}</span>
+                    <div
+                      style={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: "50%",
+                        background: dot.color,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text)" }}>
+                      {env.label}
+                    </span>
                   </div>
-                  <span style={{
-                    fontSize: 16, fontWeight: 800, fontFamily: "var(--font-mono)",
-                    letterSpacing: "-0.5px",
-                    color: env.passRate >= 90 ? "var(--proof-green)" : env.passRate >= 70 ? "var(--proof-yellow)" : "var(--proof-red)",
-                  }}>
+                  <span
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 800,
+                      fontFamily: "var(--font-mono)",
+                      letterSpacing: "-0.5px",
+                      color:
+                        env.passRate >= 90
+                          ? "var(--proof-green)"
+                          : env.passRate >= 70
+                            ? "var(--proof-yellow)"
+                            : "var(--proof-red)",
+                    }}
+                  >
                     {env.passRate}%
                   </span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 11, color: trendColor, fontWeight: 600 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      fontSize: 11,
+                      color: trendColor,
+                      fontWeight: 600,
+                    }}
+                  >
                     <TrendIcon size={12} />
-                    {env.trend > 0 ? "+" : ""}{env.trend}%
+                    {env.trend > 0 ? "+" : ""}
+                    {env.trend}%
                   </div>
                   {env.failures > 0 && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 11, color: "var(--proof-text-secondary)" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 2,
+                        fontSize: 11,
+                        color: "var(--proof-text-secondary)",
+                      }}
+                    >
                       <XCircle size={10} style={{ color: "var(--proof-red)" }} />
                       {env.failures}
                     </div>
                   )}
                   {env.runCount === 0 && (
-                    <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontStyle: "italic" }}>No runs</span>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        color: "var(--proof-text-muted)",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      No runs
+                    </span>
                   )}
                 </div>
               </div>
@@ -294,12 +376,38 @@ export default function Dashboard() {
       {/* ── Key Metrics (3 essential stats per Few) ── */}
       <ConsoleCard padding="0">
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
-          <ConsoleStat label="Total Tests" value={totalTests} icon={<Beaker size={14} />} color="var(--proof-blue)" size="lg" />
-          <ConsoleStat label="Pass Rate" value={`${overallPassRate}%`} icon={<Activity size={14} />}
-            color={overallPassRate >= 90 ? "var(--proof-green)" : overallPassRate >= 70 ? "var(--proof-yellow)" : "var(--proof-red)"} size="lg" />
-          <ConsoleStat label="Regressions" value={regressions} icon={<AlertTriangle size={14} />}
-            color={regressions > 0 ? "var(--proof-red)" : "var(--proof-green)"} size="lg"
-            trend={regressions > 0 ? { value: regressions, direction: "down" as const, label: "needs attention" } : undefined} />
+          <ConsoleStat
+            label="Total Tests"
+            value={totalTests}
+            icon={<Beaker size={14} />}
+            color="var(--proof-blue)"
+            size="lg"
+          />
+          <ConsoleStat
+            label="Pass Rate"
+            value={`${overallPassRate}%`}
+            icon={<Activity size={14} />}
+            color={
+              overallPassRate >= 90
+                ? "var(--proof-green)"
+                : overallPassRate >= 70
+                  ? "var(--proof-yellow)"
+                  : "var(--proof-red)"
+            }
+            size="lg"
+          />
+          <ConsoleStat
+            label="Regressions"
+            value={regressions}
+            icon={<AlertTriangle size={14} />}
+            color={regressions > 0 ? "var(--proof-red)" : "var(--proof-green)"}
+            size="lg"
+            trend={
+              regressions > 0
+                ? { value: regressions, direction: "down" as const, label: "needs attention" }
+                : undefined
+            }
+          />
         </div>
       </ConsoleCard>
 
@@ -308,7 +416,21 @@ export default function Dashboard() {
         title="Pass Rate"
         subtitle="Last 14 days"
         actions={
-          <button onClick={() => navigate("/trends")} style={{ fontSize: 12, fontWeight: 500, color: "var(--proof-blue)", background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4, padding: 0 }}>
+          <button
+            onClick={() => navigate("/trends")}
+            style={{
+              fontSize: 12,
+              fontWeight: 500,
+              color: "var(--proof-blue)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              padding: 0,
+            }}
+          >
             Full Trends <ArrowUpRight size={12} />
           </button>
         }
@@ -317,23 +439,67 @@ export default function Dashboard() {
         <div style={{ height: 100 }}>
           {effectivePassRateChart.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={effectivePassRateChart} margin={{ top: 4, right: 4, bottom: 0, left: -16 }}>
+              <AreaChart
+                data={effectivePassRateChart}
+                margin={{ top: 4, right: 4, bottom: 0, left: -16 }}
+              >
                 <defs>
                   <linearGradient id="db-sparkline" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--proof-blue)" stopOpacity={0.15} />
                     <stop offset="95%" stopColor="var(--proof-blue)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 9, fill: "var(--proof-text-muted)" }} axisLine={{ stroke: "var(--proof-border)" }} tickLine={false} minTickGap={50} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: "var(--proof-text-muted)" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={32} />
-                <Tooltip contentStyle={{ background: "var(--proof-surface)", border: "1px solid var(--proof-border)", borderRadius: 6, fontSize: 11, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
-                  formatter={(value: number) => [`${value}%`, "Pass Rate"]} />
-                <Area type="monotone" dataKey="passRate" stroke="var(--proof-blue)" strokeWidth={1.5} fill="url(#db-sparkline)" dot={false} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--proof-border)"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 9, fill: "var(--proof-text-muted)" }}
+                  axisLine={{ stroke: "var(--proof-border)" }}
+                  tickLine={false}
+                  minTickGap={50}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  tick={{ fontSize: 9, fill: "var(--proof-text-muted)" }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v: number) => `${v}%`}
+                  width={32}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--proof-surface)",
+                    border: "1px solid var(--proof-border)",
+                    borderRadius: 6,
+                    fontSize: 11,
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  }}
+                  formatter={(value: number) => [`${value}%`, "Pass Rate"]}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="passRate"
+                  stroke="var(--proof-blue)"
+                  strokeWidth={1.5}
+                  fill="url(#db-sparkline)"
+                  dot={false}
+                />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 12, color: "var(--proof-text-muted)" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+                fontSize: 12,
+                color: "var(--proof-text-muted)",
+              }}
+            >
               No trend data yet
             </div>
           )}

@@ -304,14 +304,29 @@ export default function TestAnalytics() {
   const errorCount = enriched.filter((r) => r.error).length;
 
   return (
-    <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Header with searchable selector */}
-      <div className="proof-page-header" style={{ alignItems: "center", gap: 10 }}>
-        <Link href={isTcMode ? "/suites" : "/compare"} className="proof-button proof-button-sm">
-          <ArrowLeft size={13} /> {isTcMode ? "Tests" : "Compare"}
-        </Link>
-        <ChevronRight size={14} style={{ color: "var(--proof-text-secondary)" }} />
-        <div ref={selRef} style={{ position: "relative", flex: 1, maxWidth: 420 }}>
+    <div
+      className="proof-page"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 20,
+        padding: "24px 32px",
+        maxWidth: "2000px",
+        margin: "0 auto",
+      }}
+    >
+      {/* Modern Navigation & Header */}
+      <div style={{ paddingBottom: 16, borderBottom: "1px solid var(--proof-border)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+          <Link href={isTcMode ? "/suites" : "/compare"} className="proof-button proof-button-sm">
+            <ArrowLeft size={13} /> Back
+          </Link>
+          <ChevronRight size={14} style={{ color: "var(--proof-text-secondary)" }} />
+          <span style={{ fontSize: 13, color: "var(--proof-text-secondary)", fontWeight: 500 }}>
+            Analytics
+          </span>
+        </div>
+        <div ref={selRef} style={{ position: "relative" }}>
           <div
             style={{
               display: "flex",

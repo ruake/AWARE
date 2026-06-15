@@ -357,27 +357,6 @@ export default function Pulse() {
             GitHub Actions
             <ExternalLink size={10} style={{ opacity: 0.6 }} />
           </a>
-          <Link href="/ci-pipeline">
-            <button
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                padding: "6px 12px",
-                borderRadius: 7,
-                border: "1px solid var(--proof-border-strong)",
-                background: "var(--proof-surface-2)",
-                color: "var(--proof-text-secondary)",
-                cursor: "pointer",
-                fontSize: 11,
-                fontWeight: 500,
-              }}
-            >
-              <BarChart3 size={13} />
-              CI Pipeline
-              <ExternalLink size={10} style={{ opacity: 0.6 }} />
-            </button>
-          </Link>
         </div>
       </div>
 

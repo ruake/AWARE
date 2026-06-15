@@ -44,10 +44,7 @@ import { AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
  *     Trends      /trends     Charts, flakiness, heatmaps (was "Analytics")
  *
  *   CONFIGURE   (System setup — progressive disclosure)
- *     Tests       /tests      Test case CRUD → TestDetail at /tests/:id
  *     Test Suites /suites     Suite hierarchy + YAML
- *     CI/CD       /ci         Pipeline status + config
- *     Environments /environments  Env configs + promotion gate
  *
  *   ASSIST      (Cross-cutting tools)
  *     Copilot     /copilot    AI assistant
@@ -84,12 +81,7 @@ const SIDEBAR_NAV: NavGroup[] = [
   },
   {
     title: "Configure",
-    items: [
-      { label: "Tests", href: "/tests", icon: "Beaker" },
-      { label: "Test Suites", href: "/suites", icon: "FolderTree" },
-      { label: "CI/CD", href: "/ci", icon: "Container" },
-      { label: "Environments", href: "/environments", icon: "Globe" },
-    ],
+    items: [{ label: "Test Suites", href: "/suites", icon: "FolderTree" }],
   },
   {
     title: "Assist",
@@ -101,23 +93,21 @@ const SIDEBAR_NAV: NavGroup[] = [
 ];
 
 // Strong information scent: labels describe content, not brand names
-const BREADCRUMB_MAP: Record<string, { label: string; parent?: { label: string; href: string } }> = {
-  "/": { label: "Dashboard" },
-  "/activity": { label: "Activity", parent: { label: "Monitor", href: "/" } },
-  "/runs": { label: "Runs", parent: { label: "Investigate", href: "/" } },
-  "/runs/:runId": { label: "Run Detail", parent: { label: "Runs", href: "/runs" } },
-  "/compare": { label: "Compare", parent: { label: "Investigate", href: "/" } },
-  "/trends": { label: "Trends", parent: { label: "Investigate", href: "/" } },
-  "/tests": { label: "Tests", parent: { label: "Configure", href: "/" } },
-  "/tests/:testId": { label: "Test Detail", parent: { label: "Tests", href: "/tests" } },
-  "/suites": { label: "Test Suites", parent: { label: "Configure", href: "/" } },
-  "/ci": { label: "CI/CD", parent: { label: "Configure", href: "/" } },
-  "/environments": { label: "Environments", parent: { label: "Configure", href: "/" } },
-  "/copilot": { label: "Copilot", parent: { label: "Assist", href: "/" } },
-  "/about": { label: "About", parent: { label: "Assist", href: "/" } },
-  "/start": { label: "Start Run" },
-  "/share": { label: "Sharing" },
-};
+const BREADCRUMB_MAP: Record<string, { label: string; parent?: { label: string; href: string } }> =
+  {
+    "/": { label: "Dashboard" },
+    "/activity": { label: "Activity", parent: { label: "Monitor", href: "/" } },
+    "/runs": { label: "Runs", parent: { label: "Investigate", href: "/" } },
+    "/runs/:runId": { label: "Run Detail", parent: { label: "Runs", href: "/runs" } },
+    "/compare": { label: "Compare", parent: { label: "Investigate", href: "/" } },
+    "/trends": { label: "Trends", parent: { label: "Investigate", href: "/" } },
+    "/suites": { label: "Test Suites", parent: { label: "Configure", href: "/" } },
+    "/copilot": { label: "Copilot", parent: { label: "Assist", href: "/" } },
+    "/about": { label: "About", parent: { label: "Assist", href: "/" } },
+    "/testdoc": { label: "Test Documentation" },
+    "/start": { label: "Start Run" },
+    "/share": { label: "Sharing" },
+  };
 
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const Runs = React.lazy(() => import("@/pages/Runs"));
@@ -125,13 +115,10 @@ const RunDetail = React.lazy(() => import("@/pages/RunDetail"));
 const Compare = React.lazy(() => import("@/pages/Compare"));
 const TestSuites = React.lazy(() => import("@/pages/TestSuiteManager"));
 const Trends = React.lazy(() => import("@/pages/TestAnalytics"));
-const Tests = React.lazy(() => import("@/pages/TestManager"));
-const TestDetail = React.lazy(() => import("@/pages/TestDoc"));
-const CI = React.lazy(() => import("@/pages/Status"));
 const About = React.lazy(() => import("@/pages/About"));
 const Copilot = React.lazy(() => import("@/pages/Copilot"));
 const Activity = React.lazy(() => import("@/pages/Pulse"));
-const Environments = React.lazy(() => import("@/pages/Environments"));
+const TestDoc = React.lazy(() => import("@/pages/TestDoc"));
 const StartRun = React.lazy(() => import("@/pages/StartRun"));
 const Sharing = React.lazy(() => import("@/pages/Sharing"));
 
@@ -276,11 +263,10 @@ function Router() {
       items.push({ label: direct.label });
       return items;
     }
-    // Dynamic routes: /runs/:runId and /tests/:testId
-    if (/^\/(runs|tests)\//.test(location)) {
+    // Dynamic route: /runs/:runId
+    if (/^\/runs\//.test(location)) {
       const segments = location.split("/");
-      const type = segments[1]; // "runs" or "tests"
-      const key = `/${type}/:${type === "runs" ? "runId" : "testId"}`;
+      const key = `/runs/:runId`;
       const entry = BREADCRUMB_MAP[key];
       if (entry && segments.length === 3) {
         const items: { label: string; href?: string }[] = [];
@@ -327,34 +313,19 @@ function Router() {
             <Trends />
           </React.Suspense>
         </Route>
-        <Route path="/tests/:testId">
-          <React.Suspense fallback={<PageLoader />}>
-            <TestDetail />
-          </React.Suspense>
-        </Route>
-        <Route path="/tests">
-          <React.Suspense fallback={<PageLoader />}>
-            <Tests />
-          </React.Suspense>
-        </Route>
         <Route path="/suites">
           <React.Suspense fallback={<PageLoader />}>
             <TestSuites />
           </React.Suspense>
         </Route>
-        <Route path="/ci">
-          <React.Suspense fallback={<PageLoader />}>
-            <CI />
-          </React.Suspense>
-        </Route>
-        <Route path="/environments">
-          <React.Suspense fallback={<PageLoader />}>
-            <Environments />
-          </React.Suspense>
-        </Route>
         <Route path="/copilot">
           <React.Suspense fallback={<PageLoader />}>
             <Copilot />
+          </React.Suspense>
+        </Route>
+        <Route path="/testdoc">
+          <React.Suspense fallback={<PageLoader />}>
+            <TestDoc />
           </React.Suspense>
         </Route>
         <Route path="/about">
@@ -365,14 +336,30 @@ function Router() {
         {/* Redirects from old route names (Nielsen #4: don't break bookmarks) */}
         <Route path="/pulse">
           {() => {
-            window.history.replaceState(null, "", window.location.pathname.replace("/pulse", "/activity"));
-            return <React.Suspense fallback={<PageLoader />}><Activity /></React.Suspense>;
+            window.history.replaceState(
+              null,
+              "",
+              window.location.pathname.replace("/pulse", "/activity"),
+            );
+            return (
+              <React.Suspense fallback={<PageLoader />}>
+                <Activity />
+              </React.Suspense>
+            );
           }}
         </Route>
         <Route path="/analytics">
           {() => {
-            window.history.replaceState(null, "", window.location.pathname.replace("/analytics", "/trends"));
-            return <React.Suspense fallback={<PageLoader />}><Trends /></React.Suspense>;
+            window.history.replaceState(
+              null,
+              "",
+              window.location.pathname.replace("/analytics", "/trends"),
+            );
+            return (
+              <React.Suspense fallback={<PageLoader />}>
+                <Trends />
+              </React.Suspense>
+            );
           }}
         </Route>
         {/* Thin pages kept for deep-link compat but not in nav (progressive disclosure) */}

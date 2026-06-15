@@ -11,7 +11,15 @@ interface Props {
   onInput: (val: string) => void;
 }
 
-export default function InputBar({ input, busy, textareaRef, onSend, onStop, onKeyDown, onInput }: Props) {
+export default function InputBar({
+  input,
+  busy,
+  textareaRef,
+  onSend,
+  onStop,
+  onKeyDown,
+  onInput,
+}: Props) {
   const canSend = input.trim().length > 0 && !busy;
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -91,7 +99,11 @@ export default function InputBar({ input, busy, textareaRef, onSend, onStop, onK
           value={input}
           onChange={handleChange}
           onKeyDown={onKeyDown}
-          placeholder={busy ? "Waiting for response…" : "Ask about test runs, failures, flakiness, promotion status…"}
+          placeholder={
+            busy
+              ? "Waiting for response…"
+              : "Ask about test runs, failures, flakiness, promotion status…"
+          }
           rows={1}
           disabled={busy}
           style={{

@@ -17,7 +17,6 @@ import {
   Bot,
   BarChart3,
   FolderTree,
-  Cpu,
   Radio,
   X,
 } from "lucide-react";
@@ -42,10 +41,7 @@ const PRIMARY_NAV: NavItem[] = [
   { href: "/copilot", label: "Copilot", icon: Bot },
 ];
 
-const SECONDARY_NAV: NavItem[] = [
-  { href: "/ci-pipeline", label: "CI Pipeline", icon: Cpu },
-  { href: "/about", label: "About", icon: Info },
-];
+const SECONDARY_NAV: NavItem[] = [{ href: "/about", label: "About", icon: Info }];
 
 export function AppLayout({
   children,
