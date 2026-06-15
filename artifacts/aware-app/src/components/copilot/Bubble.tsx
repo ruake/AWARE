@@ -30,7 +30,7 @@ function CopyButton({ text }: { text: string }) {
         padding: "3px 7px",
         borderRadius: 6,
         border: "1px solid var(--proof-border)",
-        background: "rgba(255,255,255,0.04)",
+        background: "var(--proof-hover-light)",
         cursor: "pointer",
         color: copied ? "#34d399" : "var(--proof-text-muted)",
         display: "inline-flex",
@@ -224,7 +224,7 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
                     return isBlock ? (
                       <pre
                         style={{
-                          background: "rgba(0,0,0,0.35)",
+                          background: "var(--proof-surface)",
                           border: "1px solid var(--proof-border)",
                           borderRadius: 8,
                           padding: "10px 12px",
@@ -234,14 +234,14 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
                           fontFamily: "var(--font-mono)",
                         }}
                       >
-                        <code style={{ fontFamily: "var(--font-mono)", color: "#a5f3fc" }}>
+                        <code style={{ fontFamily: "var(--font-mono)", color: "var(--proof-text)" }}>
                           {children}
                         </code>
                       </pre>
                     ) : (
                       <code
                         style={{
-                          background: "rgba(0,0,0,0.3)",
+                          background: "var(--proof-hover-light)",
                           border: "1px solid var(--proof-border)",
                           borderRadius: 4,
                           padding: "1px 5px",
@@ -428,7 +428,7 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
                 padding: "3px 8px",
                 borderRadius: 6,
                 border: "1px solid var(--proof-border)",
-                background: "rgba(255,255,255,0.04)",
+                background: "var(--proof-hover-light)",
                 cursor: "pointer",
                 fontSize: 11,
                 color: "var(--proof-text-secondary)",

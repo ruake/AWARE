@@ -209,7 +209,7 @@ export default function LangGraphPanel({ nodes, streaming, providerType }: Props
       style={{
         marginBottom: 8,
         borderRadius: 10,
-        background: "rgba(10,22,40,0.7)",
+        background: "var(--proof-overlay)",
         backdropFilter: "blur(8px)",
         border: "1px solid var(--proof-border)",
         overflow: "hidden",
@@ -223,7 +223,7 @@ export default function LangGraphPanel({ nodes, streaming, providerType }: Props
           alignItems: "center",
           gap: 8,
           padding: "7px 12px",
-          borderBottom: nodes.length > 0 ? "1px solid rgba(255,255,255,0.04)" : "none",
+          borderBottom: nodes.length > 0 ? "1px solid var(--proof-border)" : "none",
         }}
       >
         {/* Provider badge */}

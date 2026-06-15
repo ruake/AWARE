@@ -69,7 +69,7 @@ function formatCell(
       );
     case "badge": {
       const str = String(value);
-      const bg = ENV_COLORS[str] ?? "rgba(255,255,255,0.06)";
+      const bg = ENV_COLORS[str] ?? "var(--proof-hover)";
       const tc = ENV_TEXT[str] ?? "var(--proof-text-secondary)";
       return (
         <span
@@ -144,7 +144,7 @@ export default function DataTable({ table }: Props) {
         border: "1px solid var(--proof-border)",
         overflow: "hidden",
         margin: "10px 0",
-        background: "rgba(10,22,40,0.5)",
+        background: "var(--proof-hover-light)",
       }}
     >
       {/* Header */}
@@ -190,7 +190,7 @@ export default function DataTable({ table }: Props) {
                     letterSpacing: "0.5px",
                     cursor: "pointer",
                     whiteSpace: "nowrap",
-                    background: "rgba(255,255,255,0.02)",
+                    background: "var(--proof-subtle-bg015)",
                     userSelect: "none",
                     width: col.width ? `${col.width}px` : undefined,
                   }}
@@ -210,16 +210,16 @@ export default function DataTable({ table }: Props) {
               <tr
                 key={ri}
                 style={{
-                  borderBottom: ri < rows.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
-                  background: ri % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
+                  borderBottom: ri < rows.length - 1 ? "1px solid var(--proof-border)" : "none",
+                  background: ri % 2 === 0 ? "transparent" : "var(--proof-subtle-bg)",
                   transition: "background 0.1s",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "rgba(59,130,246,0.05)";
+                  (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
-                    ri % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)";
+                    ri % 2 === 0 ? "transparent" : "var(--proof-subtle-bg)";
                 }}
               >
                 {table.columns.map((col) => {
@@ -253,7 +253,7 @@ export default function DataTable({ table }: Props) {
       <div
         style={{
           padding: "5px 12px",
-          borderTop: "1px solid rgba(255,255,255,0.04)",
+          borderTop: "1px solid var(--proof-border)",
           display: "flex",
           alignItems: "center",
           gap: 8,

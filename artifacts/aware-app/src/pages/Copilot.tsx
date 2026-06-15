@@ -642,7 +642,7 @@ export default function CopilotPage() {
             gap: 8,
             padding: "10px 16px",
             borderBottom: "1px solid var(--proof-border)",
-            background: "rgba(10, 22, 40, 0.8)",
+            background: "var(--proof-overlay)",
             backdropFilter: "blur(20px)",
             flexShrink: 0,
             zIndex: 10,
@@ -800,7 +800,7 @@ export default function CopilotPage() {
             style={{
               borderBottom: "1px solid var(--proof-border)",
               padding: "14px 18px",
-              background: "rgba(10,22,40,0.6)",
+              background: "var(--proof-overlay)",
               backdropFilter: "blur(10px)",
               flexShrink: 0,
               animation: "slide-down 0.15s ease-out",
@@ -841,7 +841,7 @@ export default function CopilotPage() {
             style={{
               borderBottom: "1px solid var(--proof-border)",
               padding: "10px 16px",
-              background: "rgba(10,22,40,0.5)",
+              background: "var(--proof-hover-light)",
               flexShrink: 0,
               display: "flex",
               gap: 6,

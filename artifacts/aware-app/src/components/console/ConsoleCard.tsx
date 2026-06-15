@@ -43,7 +43,7 @@ export function ConsoleCard({
         background: variant === "inset" ? "var(--proof-grey-bg)" : "var(--proof-surface)",
         overflow: "hidden",
         position: "relative",
-        boxShadow: "0 1px 0 rgba(255,255,255,0.03) inset, 0 4px 12px rgba(0,0,0,0.4)",
+        boxShadow: "var(--proof-shadow-card)",
         transition: "border-color 0.15s",
       }}
     >

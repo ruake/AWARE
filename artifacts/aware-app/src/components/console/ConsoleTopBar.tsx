@@ -43,8 +43,10 @@ export function ConsoleTopBar({
     }
     if (next) {
       document.documentElement.classList.remove("light");
+      document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.add("light");
+      document.documentElement.classList.remove("dark");
     }
   };
 
@@ -64,7 +66,7 @@ export function ConsoleTopBar({
     <header
       style={{
         height: 52,
-        background: "rgba(10, 22, 40, 0.95)",
+        background: "var(--proof-topbar-bg)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
         borderBottom: "1px solid var(--proof-border)",
@@ -78,7 +80,7 @@ export function ConsoleTopBar({
         right: 0,
         zIndex: 100,
         flexShrink: 0,
-        boxShadow: "0 1px 0 rgba(59,130,246,0.08), 0 4px 16px rgba(0,0,0,0.4)",
+        boxShadow: "var(--proof-shadow)",
       }}
     >
       {/* Hamburger */}
@@ -88,7 +90,7 @@ export function ConsoleTopBar({
           aria-label="Toggle menu"
           style={iconBtnStyle}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+            (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
             (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
           }}
           onMouseLeave={(e) => {
@@ -161,18 +163,18 @@ export function ConsoleTopBar({
           borderRadius: 9,
           padding: "0 11px",
           height: 32,
-          background: "rgba(255,255,255,0.025)",
+          background: "var(--proof-hover-light)",
           margin: "0 auto",
           cursor: "pointer",
           transition: "border-color 0.15s, background 0.15s",
         }}
         onMouseEnter={(e) => {
           (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.35)";
-          (e.currentTarget as HTMLElement).style.background = "rgba(59,130,246,0.04)";
+          (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
         }}
         onMouseLeave={(e) => {
           (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)";
-          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.025)";
+          (e.currentTarget as HTMLElement).style.background = "var(--proof-hover-light)";
         }}
       >
         <Search size={13} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
@@ -195,7 +197,7 @@ export function ConsoleTopBar({
               padding: "1px 5px",
               fontFamily: "var(--font-mono)",
               color: "var(--proof-text-muted)",
-              background: "rgba(255,255,255,0.03)",
+              background: "var(--proof-hover-light)",
               lineHeight: "14px",
             }}
           >

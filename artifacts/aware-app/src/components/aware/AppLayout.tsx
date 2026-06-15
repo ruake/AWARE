@@ -110,8 +110,13 @@ export function AppLayout({
   }, []);
 
   React.useEffect(() => {
-    if (isDark) document.documentElement.classList.remove("light");
-    else document.documentElement.classList.add("light");
+    if (isDark) {
+      document.documentElement.classList.remove("light");
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.add("light");
+      document.documentElement.classList.remove("dark");
+    }
   }, [isDark]);
 
   const current = activeHref ?? location;
@@ -201,7 +206,7 @@ export function AppLayout({
       <header
         style={{
           height: 52,
-          background: "rgba(10, 22, 40, 0.95)",
+          background: "var(--proof-topbar-bg)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
           borderBottom: "1px solid var(--proof-border)",
@@ -213,7 +218,7 @@ export function AppLayout({
           top: 0,
           zIndex: 100,
           flexShrink: 0,
-          boxShadow: "0 1px 0 rgba(59,130,246,0.08), 0 4px 16px rgba(0,0,0,0.4)",
+          boxShadow: "var(--proof-shadow)",
         }}
       >
         {/* Logo */}
@@ -343,17 +348,17 @@ export function AppLayout({
               cursor: "pointer",
               border: "1px solid var(--proof-border)",
               borderRadius: 8,
-              background: "rgba(255,255,255,0.03)",
+              background: "var(--proof-hover-light)",
               color: "var(--proof-text-secondary)",
               transition: "all 0.15s",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(59,130,246,0.08)";
+              (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
               (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.25)";
               (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
+              (e.currentTarget as HTMLElement).style.background = "var(--proof-hover-light)";
               (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)";
               (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
             }}
@@ -367,7 +372,7 @@ export function AppLayout({
                 borderRadius: 4,
                 padding: "1px 4px",
                 fontFamily: "var(--font-mono)",
-                background: "rgba(255,255,255,0.03)",
+                background: "var(--proof-hover-light)",
                 lineHeight: "14px",
               }}
             >
@@ -396,7 +401,7 @@ export function AppLayout({
                 transition: "background 0.15s",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+                (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -436,11 +441,11 @@ export function AppLayout({
                   width: 340,
                   maxHeight: 380,
                   overflow: "auto",
-                  background: "rgba(10, 22, 40, 0.98)",
+                  background: "var(--proof-notif-bg)",
                   backdropFilter: "blur(20px)",
                   border: "1px solid var(--proof-border-accent)",
                   borderRadius: 12,
-                  boxShadow: "0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.1)",
+                  boxShadow: "var(--proof-shadow-xl), 0 0 0 1px rgba(59,130,246,0.1)",
                   zIndex: 200,
                   animation: "slide-up 0.15s ease-out",
                 }}
@@ -585,7 +590,7 @@ export function AppLayout({
               transition: "all 0.15s",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+              (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -630,7 +635,7 @@ export function AppLayout({
             display: "flex",
             flexDirection: "column",
             borderRight: "1px solid var(--proof-border)",
-            background: "rgba(10, 22, 40, 0.7)",
+            background: "var(--proof-sidebar-bg)",
             backdropFilter: "blur(10px)",
             width: sidebarExpanded ? 200 : 52,
             transition: "width 0.2s cubic-bezier(0.4,0,0.2,1)",
