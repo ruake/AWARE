@@ -2,14 +2,16 @@ import type {
   AgentEvent,
   ApiMessage,
   ChartData,
+  GraphNodeState,
   IProvider,
   Message,
   SubAgentStep,
+  TableData,
   ToolDefinition,
   ToolResult,
 } from "./types";
 
-// ── Graph Node ──────────────────────────────────────────────────────────────
+// ── Graph Node ───────────────────────────────────────────────────────────────
 export interface AgentNode {
   id: string;
   label: string;
@@ -17,7 +19,7 @@ export interface AgentNode {
   execute(ctx: AgentGraphContext): Promise<AgentNodeResult>;
 }
 
-// ── Graph Context (passed through all nodes) ────────────────────────────────
+// ── Graph Context (passed through all nodes) ─────────────────────────────────
 export interface AgentGraphContext {
   query: string;
   history: Message[];
@@ -32,8 +34,10 @@ export interface AgentGraphContext {
   pendingToolCalls: Array<{ id: string; name: string; args: Record<string, unknown> }>;
   toolResults: Map<string, ToolResult>;
   charts: ChartData[];
+  tables: TableData[];
   finalContent: string;
   steps: SubAgentStep[];
+  graphNodes: GraphNodeState[];
 }
 
 export interface AgentNodeResult {

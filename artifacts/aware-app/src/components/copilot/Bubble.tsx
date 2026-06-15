@@ -5,6 +5,8 @@ import { Bot, User, RefreshCw, Copy, Check } from "lucide-react";
 import type { Message } from "@/lib/copilot/types";
 import ToolCallCard from "./ToolCallCard";
 import AgentTrace from "./AgentTrace";
+import LangGraphPanel from "./LangGraphPanel";
+import DataTable from "./DataTable";
 import { loadProviderType } from "@/lib/copilot/storage";
 
 interface BubbleProps {
@@ -57,7 +59,12 @@ export function UserBubble({ message }: BubbleProps) {
 
 function ThinkingDots() {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "12px 16px", background: "rgba(15,31,56,0.5)", borderRadius: "4px 18px 18px 18px", border: "1px solid var(--proof-border)", maxWidth: 80 }}>
+    <div style={{
+      display: "flex", alignItems: "center", gap: 4,
+      padding: "12px 16px",
+      background: "rgba(15,31,56,0.5)", borderRadius: "4px 18px 18px 18px",
+      border: "1px solid var(--proof-border)", maxWidth: 80,
+    }}>
       <span className="copilot-thinking-dot" />
       <span className="copilot-thinking-dot" />
       <span className="copilot-thinking-dot" />
@@ -71,6 +78,15 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
   const isStreaming = !!message.streaming;
   const hasError = !!message.error;
   const isEmptyStreaming = isStreaming && !hasContent && !hasToolCalls;
+  const providerType = loadProviderType();
+
+  // Collect all tableData from completed tool calls
+  const tables = (message.toolCalls ?? [])
+    .filter(tc => tc.status === "done" && tc.result?.tableData)
+    .map(tc => tc.result!.tableData!);
+
+  const graphNodes = message.graphNodes ?? [];
+  const hasGraph = graphNodes.length > 0 || (isStreaming && hasToolCalls);
 
   return (
     <div className="copilot-assistant-bubble" style={{ display: "flex", gap: 10, padding: "4px 0", alignItems: "flex-start" }}>
@@ -89,15 +105,39 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
 
       <div style={{ flex: 1, minWidth: 0, maxWidth: "88%" }}>
         {/* Thinking dots when no content yet */}
-        {isEmptyStreaming && <ThinkingDots />}
+        {isEmptyStreaming && !hasGraph && <ThinkingDots />}
 
-        {/* Agent trace */}
-        <AgentTrace toolCalls={message.toolCalls ?? []} providerType={loadProviderType()} streaming={isStreaming} />
+        {/* LangGraph live panel — shows 5-node pipeline progress */}
+        {hasGraph && (
+          <LangGraphPanel
+            nodes={graphNodes}
+            streaming={isStreaming}
+            providerType={providerType}
+          />
+        )}
+
+        {/* Legacy agent trace (collapsible tool call list) — shown when no graph nodes */}
+        {!hasGraph && (
+          <AgentTrace
+            toolCalls={message.toolCalls ?? []}
+            providerType={providerType}
+            streaming={isStreaming}
+          />
+        )}
 
         {/* Tool call cards */}
         {hasToolCalls && (
-          <div style={{ marginBottom: hasContent ? 8 : 0, display: "flex", flexDirection: "column", gap: 4 }}>
+          <div style={{ marginBottom: hasContent || tables.length > 0 ? 8 : 0, display: "flex", flexDirection: "column", gap: 4 }}>
             {message.toolCalls!.map(tc => <ToolCallCard key={tc.id} toolCall={tc} />)}
+          </div>
+        )}
+
+        {/* Dynamic data tables rendered from tool results */}
+        {tables.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: hasContent ? 8 : 0 }}>
+            {tables.map((table, i) => (
+              <DataTable key={i} table={table} />
+            ))}
           </div>
         )}
 
@@ -153,7 +193,10 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
                       borderLeft: "3px solid var(--proof-blue)",
                       paddingLeft: 12, margin: "8px 0",
                       color: "var(--proof-text-secondary)",
-                      fontSize: 13, background: "rgba(59,130,246,0.05)", borderRadius: "0 6px 6px 0", padding: "8px 12px",
+                      fontSize: 13,
+                      background: "rgba(59,130,246,0.05)",
+                      borderRadius: "0 6px 6px 0",
+                      padding: "8px 12px",
                     }}>{children}</blockquote>
                   ),
                   table: ({ children }) => (
@@ -161,9 +204,21 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
                       <table style={{ borderCollapse: "collapse", fontSize: 12, width: "100%" }}>{children}</table>
                     </div>
                   ),
-                  th: ({ children }) => <th style={{ padding: "6px 10px", borderBottom: "2px solid var(--proof-border)", textAlign: "left", fontWeight: 600, fontSize: 11, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{children}</th>,
-                  td: ({ children }) => <td style={{ padding: "6px 10px", borderBottom: "1px solid var(--proof-border)", fontSize: 12 }}>{children}</td>,
-                  a: ({ children, href }) => <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: "var(--proof-blue-bright)", textDecoration: "underline", textDecorationColor: "rgba(59,130,246,0.4)" }}>{children}</a>,
+                  th: ({ children }) => (
+                    <th style={{
+                      padding: "6px 10px",
+                      borderBottom: "2px solid var(--proof-border)",
+                      textAlign: "left", fontWeight: 600,
+                      fontSize: 11, color: "var(--proof-text-secondary)",
+                      textTransform: "uppercase", letterSpacing: "0.5px",
+                    }}>{children}</th>
+                  ),
+                  td: ({ children }) => (
+                    <td style={{ padding: "6px 10px", borderBottom: "1px solid var(--proof-border)", fontSize: 12 }}>{children}</td>
+                  ),
+                  a: ({ children, href }) => (
+                    <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: "var(--proof-blue-bright)", textDecoration: "underline", textDecorationColor: "rgba(59,130,246,0.4)" }}>{children}</a>
+                  ),
                   hr: () => <hr style={{ border: "none", borderTop: "1px solid var(--proof-border)", margin: "12px 0" }} />,
                 }}
               >

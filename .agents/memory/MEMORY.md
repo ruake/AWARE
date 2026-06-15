@@ -4,7 +4,7 @@
 - [AWARE Akamai environment model](aware-akamai-envs.md) — three tiers QA/UAT/PROD × two networks = 6 envs; promotion gate ≥95%; PropertyStatusBar always visible on Dashboard.
 - [AWARE project overview](aware-project-overview.md) — full project map: stack, pages, scripts, monorepo layout, all route paths, key constraints.
 - [AWARE data layer](aware-data-layer.md) — static-first; seed JSON in data/; monolithic test-results.json keyed by runId; DIFF_ROWS computed dynamically (no static diff-rows.json).
-- [AWARE AI copilot](aware-ai-copilot.md) — rearchitected: lib/copilot/ (types/tools/providers/agent/context/storage); streaming tool-calling agent; TanStack Virtual feed; WebLLM primary.
+- [AWARE AI copilot](aware-ai-copilot.md) — LangGraph 5-node pipeline (classify→plan→execute→synthesize→done); 8 tools each with TableData+ChartData; LangGraphPanel live viz; DataTable in chat; graph_node AgentEvent merges into Message.graphNodes.
 - [Chrome AI streaming quirk](chrome-ai-streaming.md) — promptStreaming yields CUMULATIVE text on each chunk (full response so far), not deltas. Use `fullText = text`, never `fullText += text`.
 - [AWARE AppLayout fullBleed prop](aware-app-layout.md) — AppLayout has a `fullBleed` prop that removes 20px/24px padding and switches overflow to hidden; use for full-viewport pages like Copilot.
 - [AWARE navTo SPA fix](aware-nav-spa.md) — navTo() now uses History API + popstate dispatch instead of window.location.href; wouter picks up the popstate event without a full reload.

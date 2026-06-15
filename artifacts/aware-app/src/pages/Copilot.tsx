@@ -11,10 +11,10 @@ import {
   TrendingUp,
   AlertTriangle,
   Shield,
-  Flame,
+  Layers,
+  Timer,
+  Globe,
   GitCompare,
-  MessageSquare,
-  Sparkles,
   Zap,
   ChevronDown,
 } from "lucide-react";
@@ -39,17 +39,75 @@ import type { DebugLogEntry } from "@/lib/ai/langGraphTypes";
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
+// ── 8 Distinct Quick Actions — one per tool ──────────────────────────────────
 const QUICK_ACTIONS = [
-  { id: "latest-runs",       label: "Latest Runs",         icon: Activity,     color: "#3b82f6",  message: "Show me the last 10 test runs with pass rates and failure counts." },
-  { id: "flaky-tests",       label: "Flaky Tests",         icon: RefreshCw,    color: "#f59e0b",  message: "Which tests are flaky? Rank by flakiness score." },
-  { id: "trend-20",          label: "Trend Analysis",      icon: TrendingUp,   color: "#10b981",  message: "Show pass rate trend over the last 20 test runs." },
-  { id: "failure-analysis",  label: "Analyze Failures",    icon: AlertTriangle,color: "#ef4444",  message: "Analyze recent test failures and suggest root causes." },
-  { id: "promotion-status",  label: "Promotion Readiness", icon: Shield,       color: "#8b5cf6",  message: "Is the UAT environment ready for promotion to PROD?" },
-  { id: "top-flaky",         label: "Top 15 Flaky",        icon: Flame,        color: "#f97316",  message: "Show the top 15 flakiest tests ranked by flakiness score." },
-  { id: "compare",           label: "Compare Builds",      icon: GitCompare,   color: "#06b6d4",  message: "Compare the two most recent test runs." },
-  { id: "anomalies",         label: "Detect Anomalies",    icon: Activity,     color: "#ec4899",  message: "Detect anomalies in recent test runs." },
+  {
+    id: "latest-runs",
+    label: "Latest Runs",
+    icon: Activity,
+    color: "#3b82f6",
+    badge: "query_runs",
+    message: "Show me the last 15 test runs with pass rates, failure counts, and environments as a table.",
+  },
+  {
+    id: "flaky-tests",
+    label: "Flaky Tests",
+    icon: RefreshCw,
+    color: "#f59e0b",
+    badge: "get_flaky_tests",
+    message: "Which tests are flaky? Rank them by flakiness score and show the PASS/FAIL flip sequence.",
+  },
+  {
+    id: "env-compare",
+    label: "Env Compare",
+    icon: GitCompare,
+    color: "#8b5cf6",
+    badge: "compare_environments",
+    message: "Compare QA, UAT, and PROD environments — show avg pass rates, total failures, and health status.",
+  },
+  {
+    id: "promotion-gate",
+    label: "Promo Gate",
+    icon: Shield,
+    color: "#10b981",
+    badge: "get_promotion_status",
+    message: "Show UAT→PROD promotion gate status — how many decisions promoted, blocked, or pending?",
+  },
+  {
+    id: "failure-breakdown",
+    label: "Failure Root Cause",
+    icon: AlertTriangle,
+    color: "#ef4444",
+    badge: "get_failure_breakdown",
+    message: "Break down failures in the latest run by category (WAF, TLS, API, EdgeWorker). Show which area has the most failures.",
+  },
+  {
+    id: "suite-health",
+    label: "Suite Health",
+    icon: Layers,
+    color: "#06b6d4",
+    badge: "get_suite_health",
+    message: "Show pass rates and failure counts for all test suites. Which suite is struggling?",
+  },
+  {
+    id: "duration-trends",
+    label: "Duration Trends",
+    icon: Timer,
+    color: "#ec4899",
+    badge: "get_duration_trends",
+    message: "Show execution duration trends across the last 10 runs. Are there any timing regressions?",
+  },
+  {
+    id: "akamai-property",
+    label: "Akamai Status",
+    icon: Globe,
+    color: "#f97316",
+    badge: "get_akamai_property",
+    message: "Show Akamai property versions, EdgeWorker versions, PoP counts, and activation status for all environments.",
+  },
 ];
 
+// ── Settings form ─────────────────────────────────────────────────────────────
 function SettingsForm({ config, onSave }: { config: { apiKey: string; apiUrl: string; model: string }; onSave: (cfg: { apiKey: string; apiUrl: string; model: string }) => void }) {
   const [apiKey, setApiKey] = React.useState(config.apiKey);
   const [apiUrl, setApiUrl] = React.useState(config.apiUrl);
@@ -75,6 +133,7 @@ function SettingsForm({ config, onSave }: { config: { apiKey: string; apiUrl: st
   );
 }
 
+// ── Empty state ───────────────────────────────────────────────────────────────
 function EmptyState({ onSend }: { onSend: (msg: string) => void }) {
   return (
     <div style={{
@@ -96,52 +155,63 @@ function EmptyState({ onSend }: { onSend: (msg: string) => void }) {
         </div>
         <div style={{ textAlign: "center" }}>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: "var(--proof-text)", margin: "0 0 6px", letterSpacing: "-0.5px" }}>
-            AWARE Copilot
+            A.W.A.R.E. Copilot
           </h2>
-          <p style={{ fontSize: 13.5, color: "var(--proof-text-secondary)", margin: 0, lineHeight: 1.6, maxWidth: 380, textAlign: "center" }}>
-            Analyze test runs, track flakiness, compare environments, and check promotion readiness — just ask.
+          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", margin: 0, lineHeight: 1.6, maxWidth: 420, textAlign: "center" }}>
+            LangGraph-powered AI · 8 analytics tools · live tables &amp; charts · Chrome AI / WebLLM / OpenAI
           </p>
         </div>
       </div>
 
-      {/* Feature cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, maxWidth: 440, width: "100%" }}>
+      {/* Feature cards — one per tool category */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, maxWidth: 560, width: "100%" }}>
         {[
-          { icon: Activity, color: "#3b82f6", label: "Run Analysis", desc: "Query and analyze CI test results" },
-          { icon: AlertTriangle, color: "#f59e0b", label: "Failure Triage", desc: "Identify and explain failures" },
-          { icon: TrendingUp, color: "#10b981", label: "Trend Reports", desc: "Pass rate trends & anomalies" },
-          { icon: Shield, color: "#8b5cf6", label: "Promotion Gate", desc: "Check QA → UAT → PROD readiness" },
+          { icon: Activity,      color: "#3b82f6", label: "Run History",    desc: "Trends & pass rates" },
+          { icon: RefreshCw,     color: "#f59e0b", label: "Flakiness",      desc: "PASS↔FAIL instability" },
+          { icon: Shield,        color: "#10b981", label: "Promo Gate",     desc: "UAT→PROD decisions" },
+          { icon: AlertTriangle, color: "#ef4444", label: "Root Cause",     desc: "Failure by category" },
+          { icon: GitCompare,    color: "#8b5cf6", label: "Env Comparison", desc: "QA / UAT / PROD" },
+          { icon: Layers,        color: "#06b6d4", label: "Suite Health",   desc: "Per-suite metrics" },
+          { icon: Timer,         color: "#ec4899", label: "Duration",       desc: "Timing regressions" },
+          { icon: Globe,         color: "#f97316", label: "Akamai CDN",     desc: "Property & EW status" },
         ].map(({ icon: Icon, color, label, desc }) => (
           <div key={label} style={{
-            padding: "12px 14px",
+            padding: "10px 12px",
             background: "var(--proof-surface)",
             border: "1px solid var(--proof-border)",
-            borderRadius: 10,
-            display: "flex", flexDirection: "column", gap: 6,
+            borderRadius: 9,
+            display: "flex", flexDirection: "column", gap: 5,
+            transition: "border-color 0.15s",
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <div style={{ width: 24, height: 24, borderRadius: 6, background: `color-mix(in srgb, ${color} 15%, transparent)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Icon size={12} style={{ color }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{
+                width: 22, height: 22, borderRadius: 5,
+                background: `color-mix(in srgb, ${color} 15%, transparent)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <Icon size={11} style={{ color }} />
               </div>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)" }}>{label}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-text)" }}>{label}</span>
             </div>
-            <p style={{ fontSize: 11, color: "var(--proof-text-secondary)", margin: 0, lineHeight: 1.5 }}>{desc}</p>
+            <p style={{ fontSize: 10.5, color: "var(--proof-text-muted)", margin: 0, lineHeight: 1.45 }}>{desc}</p>
           </div>
         ))}
       </div>
 
       {/* Starter prompts */}
-      <div style={{ maxWidth: 520, width: "100%" }}>
+      <div style={{ maxWidth: 580, width: "100%" }}>
         <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--proof-text-muted)", textTransform: "uppercase", letterSpacing: "0.7px", marginBottom: 10, textAlign: "center" }}>
           Try asking
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 7, justifyContent: "center" }}>
           {[
             "What's failing in the latest run?",
-            "Show pass rate trend over 20 runs",
-            "Which tests are the flakiest?",
+            "Show pass rate trend over 15 runs",
+            "Which tests are flakiest?",
             "Is UAT ready to promote to PROD?",
-            "Compare the two most recent runs",
+            "Compare suite health across environments",
+            "Are there any duration regressions?",
+            "What's the Akamai property version in PROD?",
             "Summarize all environment health",
           ].map(prompt => (
             <button
@@ -158,6 +228,7 @@ function EmptyState({ onSend }: { onSend: (msg: string) => void }) {
   );
 }
 
+// ── Main page ─────────────────────────────────────────────────────────────────
 export default function CopilotPage() {
   const [messages, setMessages] = React.useState<Message[]>(() => {
     const session = loadSession();
@@ -213,6 +284,7 @@ export default function CopilotPage() {
     if (messages.length > 0) saveSession(messages, providerType);
   }, [messages, providerType]);
 
+  // ── Event handler (handles all 7 AgentEvent types incl. graph_node) ─────────
   const handleEvent = React.useCallback((event: AgentEvent) => {
     switch (event.type) {
       case "delta":
@@ -222,6 +294,7 @@ export default function CopilotPage() {
           return prev;
         });
         break;
+
       case "tool_start":
         setMessages(prev => {
           const last = prev[prev.length - 1];
@@ -229,6 +302,7 @@ export default function CopilotPage() {
           return prev;
         });
         break;
+
       case "tool_done":
         setMessages(prev => {
           const last = prev[prev.length - 1];
@@ -237,9 +311,28 @@ export default function CopilotPage() {
           return prev;
         });
         break;
-      case "step":
-        setAgentSteps(prev => [...prev.filter(s => s.status !== "running"), event.step]);
+
+      case "graph_node":
+        // Merge updated node state into the last assistant message
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (!last?.streaming) return prev;
+          const existingNodes = last.graphNodes ?? [];
+          const idx = existingNodes.findIndex(n => n.id === event.node.id);
+          const updatedNodes = idx >= 0
+            ? existingNodes.map((n, i) => i === idx ? event.node : n)
+            : [...existingNodes, event.node];
+          return [...prev.slice(0, -1), { ...last, graphNodes: updatedNodes }];
+        });
         break;
+
+      case "step":
+        setAgentSteps(prev => {
+          const filtered = prev.filter(s => s.id !== event.step.id);
+          return [...filtered, event.step];
+        });
+        break;
+
       case "done":
         setMessages(prev => {
           const last = prev[prev.length - 1];
@@ -250,6 +343,7 @@ export default function CopilotPage() {
         setAgentSteps([]);
         abortRef.current = null;
         break;
+
       case "error":
         setMessages(prev => {
           const last = prev[prev.length - 1];
@@ -270,7 +364,11 @@ export default function CopilotPage() {
 
     const history = messages;
     const userMsg: Message = { id: uid(), role: "user", content, timestamp: Date.now() };
-    const assistantMsg: Message = { id: uid(), role: "assistant", content: "", timestamp: Date.now(), streaming: true };
+    const assistantMsg: Message = {
+      id: uid(), role: "assistant", content: "",
+      timestamp: Date.now(), streaming: true,
+      graphNodes: [],
+    };
 
     setMessages(prev => [...prev, userMsg, assistantMsg]);
     setBusy(true);
@@ -279,7 +377,14 @@ export default function CopilotPage() {
     abortRef.current = abort;
 
     try {
-      await runAgent({ userContent: content, history, provider: providers[providerType], tools: TOOLS, signal: abort.signal, onEvent: handleEvent });
+      await runAgent({
+        userContent: content,
+        history,
+        provider: providers[providerType],
+        tools: TOOLS,
+        signal: abort.signal,
+        onEvent: handleEvent,
+      });
     } catch (err: unknown) {
       if (!abort.signal.aborted) handleEvent({ type: "error", error: err instanceof Error ? err.message : "Unknown error" });
     }
@@ -296,7 +401,7 @@ export default function CopilotPage() {
     if (!userContent.trim() || busy) return;
 
     const userMsg: Message = { id: uid(), role: "user", content: userContent, timestamp: Date.now() };
-    const assistantMsg: Message = { id: uid(), role: "assistant", content: "", timestamp: Date.now(), streaming: true };
+    const assistantMsg: Message = { id: uid(), role: "assistant", content: "", timestamp: Date.now(), streaming: true, graphNodes: [] };
     setMessages([...slicedHistory, userMsg, assistantMsg]);
     setBusy(true);
 
@@ -308,7 +413,6 @@ export default function CopilotPage() {
 
   const handleStop = () => { abortRef.current?.abort(); handleEvent({ type: "done" }); };
   const handleProviderSwitch = (type: ProviderType) => { setProviderType(type); saveProviderType(type); setShowSettings(false); };
-
   const handleNewChat = () => {
     abortRef.current?.abort();
     setMessages([]);
@@ -318,7 +422,6 @@ export default function CopilotPage() {
     setShowActions(false);
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
-
   const handleSaveSettings = (cfg: { apiKey: string; apiUrl: string; model: string }) => {
     setOpenaiConfig(cfg);
     saveOpenAIConfig(cfg);
@@ -327,12 +430,15 @@ export default function CopilotPage() {
 
   const isEmpty = messages.length === 0;
 
+  // Suppress unused variable warning
+  void debugLogs;
+
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0, height: "100%" }}>
-      {/* ── Main column ── */}
+      {/* ── Main column ─────────────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0, position: "relative" }}>
 
-        {/* ── Topbar ── */}
+        {/* ── Topbar ─────────────────────────────────────────────────────────── */}
         <div style={{
           display: "flex", alignItems: "center", gap: 8,
           padding: "10px 16px",
@@ -341,7 +447,6 @@ export default function CopilotPage() {
           backdropFilter: "blur(20px)",
           flexShrink: 0, zIndex: 10,
         }}>
-          {/* Avatar + title */}
           <div style={{
             width: 32, height: 32, borderRadius: 9,
             background: "linear-gradient(135deg, rgba(59,130,246,0.2), rgba(59,130,246,0.1))",
@@ -352,8 +457,9 @@ export default function CopilotPage() {
             <Bot size={16} style={{ color: "#60a5fa" }} />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "-0.2px", color: "var(--proof-text)" }}>AWARE Copilot</div>
+            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "-0.2px", color: "var(--proof-text)" }}>A.W.A.R.E. Copilot</div>
             <div style={{ fontSize: 10, color: "var(--proof-text-muted)", lineHeight: 1.2 }}>
+              LangGraph · 8 tools ·{" "}
               {providerType === "openai" ? (openaiConfig.model || "gpt-4o-mini") : providerType === "webllm" ? "WebLLM · Llama-3.2" : "Chrome AI · Gemini Nano"}
             </div>
           </div>
@@ -436,7 +542,7 @@ export default function CopilotPage() {
           )}
         </div>
 
-        {/* ── Settings panel ── */}
+        {/* ── Settings panel ─────────────────────────────────────────────────── */}
         {showSettings && (
           <div style={{
             borderBottom: "1px solid var(--proof-border)",
@@ -454,7 +560,7 @@ export default function CopilotPage() {
           </div>
         )}
 
-        {/* ── Quick actions strip ── */}
+        {/* ── Quick actions strip — 8 distinct tool actions ─────────────────── */}
         {showActions && (
           <div style={{
             borderBottom: "1px solid var(--proof-border)",
@@ -470,48 +576,73 @@ export default function CopilotPage() {
                 <button
                   key={a.id}
                   onClick={() => { setShowActions(false); handleSend(a.message); }}
-                  className="copilot-quick-chip"
-                  style={{ borderColor: `color-mix(in srgb, ${a.color} 25%, transparent)`, background: `color-mix(in srgb, ${a.color} 7%, transparent)`, color: a.color }}
+                  title={a.message}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 5,
+                    padding: "5px 11px", borderRadius: 18,
+                    fontSize: 11.5, fontWeight: 600, cursor: "pointer",
+                    border: `1px solid color-mix(in srgb, ${a.color} 28%, transparent)`,
+                    background: `color-mix(in srgb, ${a.color} 9%, transparent)`,
+                    color: a.color,
+                    transition: "all 0.15s",
+                    whiteSpace: "nowrap",
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `color-mix(in srgb, ${a.color} 16%, transparent)`; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = `color-mix(in srgb, ${a.color} 9%, transparent)`; }}
                 >
-                  <Icon size={11} /> {a.label}
+                  <Icon size={11} />
+                  {a.label}
+                  <span style={{
+                    fontSize: 8.5, fontFamily: "var(--font-mono)",
+                    color: `color-mix(in srgb, ${a.color} 60%, transparent)`,
+                    marginLeft: 2,
+                  }}>
+                    {a.badge}
+                  </span>
                 </button>
               );
             })}
           </div>
         )}
 
-        {/* ── Agent step status strip ── */}
-        {agentSteps.length > 0 && (
+        {/* ── Running step strip (shows classify/plan/execute/synthesize) ──── */}
+        {agentSteps.length > 0 && busy && (
           <div style={{
             display: "flex", alignItems: "center", gap: 8,
-            padding: "6px 16px",
+            padding: "5px 16px",
             borderBottom: "1px solid var(--proof-border)",
-            background: "rgba(59,130,246,0.05)",
-            fontSize: 11, color: "var(--proof-text-secondary)", flexShrink: 0,
+            background: "rgba(59,130,246,0.04)",
+            fontSize: 10.5, color: "var(--proof-text-muted)", flexShrink: 0,
           }}>
-            <Loader2 size={10} style={{ animation: "spin 1s linear infinite", color: "#60a5fa", flexShrink: 0 }} />
-            {agentSteps.filter(s => s.status === "running" || s.status === "completed").slice(-3).map((s, i) => (
+            <Loader2 size={9} style={{ animation: "spin 0.8s linear infinite", color: "#60a5fa", flexShrink: 0 }} />
+            {agentSteps.slice(-4).map((s, i) => (
               <React.Fragment key={s.id}>
-                {i > 0 && <span style={{ color: "var(--proof-text-muted)" }}>→</span>}
-                <span style={{ color: s.status === "completed" ? "#34d399" : "#60a5fa", fontWeight: 500 }}>{s.label}</span>
+                {i > 0 && <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>}
+                <span style={{
+                  color: s.status === "completed" ? "#34d399" : s.status === "running" ? "#60a5fa" : "var(--proof-text-muted)",
+                  fontWeight: s.status === "running" ? 600 : 400,
+                  fontFamily: "var(--font-mono)",
+                }}>
+                  {s.label}
+                  {s.detail ? ` (${s.detail})` : ""}
+                </span>
               </React.Fragment>
             ))}
           </div>
         )}
 
-        {/* ── Messages / Empty state ── */}
+        {/* ── Messages / Empty state ─────────────────────────────────────────── */}
         {isEmpty && !busy ? (
           <EmptyState onSend={handleSend} />
         ) : (
           <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0, flexDirection: "column" }}>
-            {/* Centered message feed */}
             <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
               <MessageFeed messages={messages} onRetry={handleRetry} />
             </div>
           </div>
         )}
 
-        {/* ── Download progress ── */}
+        {/* ── Download progress ─────────────────────────────────────────────── */}
         {downloadProgress && (
           <div style={{
             padding: "8px 18px", borderTop: "1px solid var(--proof-border)",
@@ -529,7 +660,7 @@ export default function CopilotPage() {
           </div>
         )}
 
-        {/* ── Input bar ── */}
+        {/* ── Input bar ─────────────────────────────────────────────────────── */}
         <div style={{ maxWidth: 860, width: "100%", alignSelf: "center", flexShrink: 0, paddingBottom: 4 }}>
           <InputBar
             input={input}
