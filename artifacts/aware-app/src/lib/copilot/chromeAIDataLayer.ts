@@ -177,6 +177,17 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         const envSummary = Object.entries(envCounts).map(([e, c]) => `${c}× ${e}`).join(", ");
         const gateStatus = avgPass >= 95 ? "✅ Above the 95% promotion gate." : "⚠️ Below the 95% promotion gate.";
 
+        // "how much data / what data / how many runs / scope"
+        if (/how.much.data|what.data|how.many|what.do.you.have|what.do.you.know|scope|coverage|available/.test(q)) {
+          const dateRange = oldest?.date && latest?.date ? ` from **${oldest.date}** to **${latest.date}**` : "";
+          return (
+            `I have data for **${runs.length} test runs**${dateRange} across **${Object.keys(envCounts).join(", ")}** — ${envSummary}.\n\n` +
+            `Each run includes pass rate, failure count, suite breakdown, and environment. ` +
+            `Avg pass rate across all runs: **${avgPass}%** · **${totalFails}** total failure${totalFails !== 1 ? "s" : ""}.\n\n` +
+            `You can ask about: run history, flaky tests, environment comparison, promotion gate, failure breakdown, suite health, or Akamai property status.`
+          );
+        }
+
         // "last test / latest / most recent"
         if (/latest|last test|most recent|just ran|newest|single/.test(q)) {
           const f = Number(latest?.failures ?? 0);

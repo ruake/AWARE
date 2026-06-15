@@ -440,6 +440,14 @@ const KEYWORD_ROUTES: Array<{
       /\blatest\b/i,
       /\brecent\b/i,
       /\bci\b/i,
+      // Scope / data availability questions
+      /how.much.data/i,
+      /what.data.do.you/i,
+      /how.many.run|how.many.test/i,
+      /what.do.you.have|what.do.you.know/i,
+      /data.*available|available.*data/i,
+      /data.*coverage|coverage.*data/i,
+      /\bscope\b/i,
     ],
   },
 
