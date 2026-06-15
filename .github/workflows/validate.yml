@@ -63,7 +63,7 @@ jobs:
           echo "Validating $FILE …"
           ERRORS=0
           # Required fields
-          for field in property.name property.contractId property.groupId; do
+          for field in properties[0].name properties[0].contractId properties[0].groupId; do
             VAL=$(yq ".$field" "$FILE" 2>/dev/null)
             if [ -z "$VAL" ] || [ "$VAL" = "null" ]; then
               echo "::error file=$FILE::Missing required field: $field"
@@ -71,14 +71,14 @@ jobs:
             fi
           done
           # Promotion gate threshold
-          THRESHOLD=$(yq ".promotionGate.minPassRate // 95" "$FILE")
+          THRESHOLD=$(yq ".properties[0].promotionGate.minPassRate // 95" "$FILE")
           if ! awk "BEGIN { exit ($THRESHOLD >= 0 && $THRESHOLD <= 100) ? 0 : 1 }"; then
             echo "::error file=$FILE::promotionGate.minPassRate must be 0-100, got $THRESHOLD"
             ERRORS=$((ERRORS + 1))
           fi
           echo "errors=$ERRORS" >> "$GITHUB_OUTPUT"
           [ "$ERRORS" -eq 0 ] && echo "✅ akamai-config.yml valid" || echo "❌ $ERRORS error(s)"
-        working-directory: ${{ env.WORKING_DIR }}
+        working-directory: .
 
       - name: Validate environments.yml
         id: envs
@@ -96,7 +96,7 @@ jobs:
           done
           echo "errors=$ERRORS" >> "$GITHUB_OUTPUT"
           [ "$ERRORS" -eq 0 ] && echo "✅ environments.yml valid" || echo "❌ $ERRORS error(s)"
-        working-directory: ${{ env.WORKING_DIR }}
+        working-directory: .
 
       - name: Validate test-suites.yml
         id: suites
@@ -120,7 +120,7 @@ jobs:
           done
           echo "errors=$ERRORS" >> "$GITHUB_OUTPUT"
           [ "$ERRORS" -eq 0 ] && echo "✅ test-suites.yml valid" || echo "❌ $ERRORS error(s)"
-        working-directory: ${{ env.WORKING_DIR }}
+        working-directory: .
 
       - name: Validate data/runs.json schema
         id: runs

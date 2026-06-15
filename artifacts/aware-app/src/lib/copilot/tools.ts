@@ -2,7 +2,16 @@ import type { ToolDefinition, ToolResult, ChartData, TableData } from "./types";
 import { RUNS, getTestResultsForRun } from "@/lib/runs";
 import { getAllPromotionDecisions } from "@/lib/promotions";
 
-const PALETTE = ["#3b82f6", "#f59e0b", "#22c55e", "#a855f7", "#ef4444", "#06b6d4", "#f97316", "#ec4899"];
+const PALETTE = [
+  "#3b82f6",
+  "#f59e0b",
+  "#22c55e",
+  "#a855f7",
+  "#ef4444",
+  "#06b6d4",
+  "#f97316",
+  "#ec4899",
+];
 
 // ── Tool: query_runs ─────────────────────────────────────────────────────────
 const queryRuns: ToolDefinition = {
@@ -15,22 +24,31 @@ const queryRuns: ToolDefinition = {
     type: "object",
     properties: {
       limit: { type: "number", description: "Max runs to return (default 15)" },
-      env: { type: "string", description: "Filter by environment tier", enum: ["QA", "UAT", "PROD"] },
+      env: {
+        type: "string",
+        description: "Filter by environment tier",
+        enum: ["QA", "UAT", "PROD"],
+      },
     },
   },
   async execute(args): Promise<ToolResult> {
     const limit = (args.limit as number) || 15;
     const envFilter = args.env as string | undefined;
 
-    let runs = [...RUNS].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime());
-    if (envFilter) runs = runs.filter(r => r.env === envFilter);
+    let runs = [...RUNS].sort(
+      (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
+    );
+    if (envFilter) runs = runs.filter((r) => r.env === envFilter);
     runs = runs.slice(0, limit);
 
-    const passRates = runs.map(r => r.passPct);
-    const avgPass = passRates.length > 0 ? Math.round(passRates.reduce((a, b) => a + b, 0) / passRates.length) : 0;
+    const passRates = runs.map((r) => r.passPct);
+    const avgPass =
+      passRates.length > 0
+        ? Math.round(passRates.reduce((a, b) => a + b, 0) / passRates.length)
+        : 0;
     const totalFails = runs.reduce((s, r) => s + (r.failures ?? 0), 0);
 
-    const rows = runs.map(r => ({
+    const rows = runs.map((r) => ({
       run: r.label || r.id.slice(0, 8),
       env: r.env,
       network: (r as any).network || "—",
@@ -105,8 +123,8 @@ const getFlakyTests: ToolDefinition = {
       .map(([id, { statuses, envs }]) => {
         const flips = statuses.filter((s, i) => i > 0 && s !== statuses[i - 1]).length;
         const score = statuses.length > 1 ? Math.round((flips / (statuses.length - 1)) * 100) : 0;
-        const passCount = statuses.filter(s => s === "PASS").length;
-        const failCount = statuses.filter(s => s === "FAIL").length;
+        const passCount = statuses.filter((s) => s === "PASS").length;
+        const failCount = statuses.filter((s) => s === "FAIL").length;
         return {
           test: id.length > 32 ? id.slice(0, 32) + "…" : id,
           flips,
@@ -118,7 +136,7 @@ const getFlakyTests: ToolDefinition = {
           primaryEnv: envs[0] || "—",
         };
       })
-      .filter(t => t.flips >= minFlips)
+      .filter((t) => t.flips >= minFlips)
       .sort((a, b) => b.score - a.score)
       .slice(0, 15);
 
@@ -143,7 +161,7 @@ const getFlakyTests: ToolDefinition = {
       title: `Top ${Math.min(flaky.length, 10)} Flaky Tests by Score`,
       xKey: "test",
       yKeys: ["score"],
-      rows: flaky.slice(0, 10).map(t => ({ test: t.test.slice(0, 20), score: t.score })),
+      rows: flaky.slice(0, 10).map((t) => ({ test: t.test.slice(0, 20), score: t.score })),
       colors: [PALETTE[4]],
     };
 
@@ -160,7 +178,10 @@ const compareEnvironments: ToolDefinition = {
     "Compare pass rates and failure counts across QA, UAT, and PROD environments. Returns a full 6-slot breakdown (QA/UAT/PROD × Staging/Production). Use for env health, comparison, or status questions.",
   parameters: { type: "object", properties: {} },
   async execute(): Promise<ToolResult> {
-    const byEnv: Record<string, { runs: number; totalPass: number; failures: number; lastDate: string }> = {};
+    const byEnv: Record<
+      string,
+      { runs: number; totalPass: number; failures: number; lastDate: string }
+    > = {};
 
     for (const run of RUNS) {
       const key = run.env;
@@ -175,8 +196,8 @@ const compareEnvironments: ToolDefinition = {
 
     const order = ["QA", "UAT", "PROD"];
     const rows = order
-      .filter(e => byEnv[e])
-      .map(env => {
+      .filter((e) => byEnv[e])
+      .map((env) => {
         const s = byEnv[env];
         const avg = s.runs > 0 ? Math.round(s.totalPass / s.runs) : 0;
         return {
@@ -194,8 +215,20 @@ const compareEnvironments: ToolDefinition = {
       subtitle: "QA → UAT → PROD pass rates and failure totals",
       columns: [
         { key: "env", label: "Environment", type: "badge", align: "left" },
-        { key: "avgPassRate", label: "Avg Pass %", type: "percent", align: "right", highlight: "max" },
-        { key: "totalFailures", label: "Total Fails", type: "number", align: "right", highlight: "min" },
+        {
+          key: "avgPassRate",
+          label: "Avg Pass %",
+          type: "percent",
+          align: "right",
+          highlight: "max",
+        },
+        {
+          key: "totalFailures",
+          label: "Total Fails",
+          type: "number",
+          align: "right",
+          highlight: "min",
+        },
         { key: "runs", label: "Run Count", type: "number", align: "right" },
         { key: "health", label: "Status", type: "text", align: "center" },
         { key: "lastRun", label: "Last Run", type: "text", align: "right" },
@@ -210,8 +243,10 @@ const compareEnvironments: ToolDefinition = {
       title: "Avg Pass Rate by Environment",
       xKey: "env",
       yKeys: ["avgPassRate"],
-      rows: rows.map(r => ({ env: r.env, avgPassRate: r.avgPassRate })),
-      colors: rows.map(r => r.avgPassRate >= 95 ? "#22c55e" : r.avgPassRate >= 80 ? "#f59e0b" : "#ef4444"),
+      rows: rows.map((r) => ({ env: r.env, avgPassRate: r.avgPassRate })),
+      colors: rows.map((r) =>
+        r.avgPassRate >= 95 ? "#22c55e" : r.avgPassRate >= 80 ? "#f59e0b" : "#ef4444",
+      ),
     };
 
     return { data: rows, chartData, tableData };
@@ -228,16 +263,21 @@ const getPromotionStatus: ToolDefinition = {
   parameters: { type: "object", properties: {} },
   async execute(): Promise<ToolResult> {
     const decisions = getAllPromotionDecisions();
-    const promoted = decisions.filter(d => d.decision === "promote").length;
-    const blocked = decisions.filter(d => d.decision === "block").length;
-    const pending = decisions.filter(d => d.decision === "pending").length;
+    const promoted = decisions.filter((d) => d.decision === "promote").length;
+    const blocked = decisions.filter((d) => d.decision === "block").length;
+    const pending = decisions.filter((d) => d.decision === "pending").length;
     const total = decisions.length;
     const promoteRate = total > 0 ? Math.round((promoted / total) * 100) : 0;
 
     const recentRows = decisions.slice(0, 8).map((d, i) => ({
       "#": i + 1,
       runId: ((d as any).runId || "—").slice(0, 12),
-      decision: d.decision === "promote" ? "✅ Promote" : d.decision === "block" ? "❌ Block" : "⏳ Pending",
+      decision:
+        d.decision === "promote"
+          ? "✅ Promote"
+          : d.decision === "block"
+            ? "❌ Block"
+            : "⏳ Pending",
       passRate: (d as any).passPct ?? "—",
       threshold: "95%",
       date: ((d as any).date || (d as any).timestamp || "—").toString().slice(0, 10),
@@ -266,7 +306,7 @@ const getPromotionStatus: ToolDefinition = {
         { status: "Promoted", count: promoted },
         { status: "Blocked", count: blocked },
         { status: "Pending", count: pending },
-      ].filter(r => r.count > 0),
+      ].filter((r) => r.count > 0),
       colors: [PALETTE[2], PALETTE[4], PALETTE[1]],
     };
 
@@ -294,7 +334,7 @@ const getFailureBreakdown: ToolDefinition = {
   async execute(args): Promise<ToolResult> {
     const runId = args.runId as string | undefined;
     const targetRun = runId
-      ? RUNS.find(r => r.id === runId)
+      ? RUNS.find((r) => r.id === runId)
       : [...RUNS].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())[0];
 
     if (!targetRun) return { data: { error: "No runs found" } };
@@ -342,12 +382,18 @@ const getFailureBreakdown: ToolDefinition = {
       title: `Failures by Category — ${targetRun.label || targetRun.id.slice(0, 12)}`,
       xKey: "category",
       yKeys: ["failed"],
-      rows: rows.slice(0, 10).map(r => ({ category: r.category.slice(0, 16), failed: r.failed })),
+      rows: rows.slice(0, 10).map((r) => ({ category: r.category.slice(0, 16), failed: r.failed })),
       colors: [PALETTE[4]],
     };
 
     return {
-      data: { runId: targetRun.id, label: targetRun.label, passPct: targetRun.passPct, env: targetRun.env, rows },
+      data: {
+        runId: targetRun.id,
+        label: targetRun.label,
+        passPct: targetRun.passPct,
+        env: targetRun.env,
+        rows,
+      },
       chartData,
       tableData,
     };
@@ -370,9 +416,12 @@ const getSuiteHealth: ToolDefinition = {
   async execute(args): Promise<ToolResult> {
     const envFilter = args.env as string | undefined;
     let runs = [...RUNS];
-    if (envFilter) runs = runs.filter(r => r.env === envFilter);
+    if (envFilter) runs = runs.filter((r) => r.env === envFilter);
 
-    const bySuite: Record<string, { runs: number; totalPass: number; failures: number; envs: Set<string> }> = {};
+    const bySuite: Record<
+      string,
+      { runs: number; totalPass: number; failures: number; envs: Set<string> }
+    > = {};
     for (const run of runs) {
       const suite = (run as any).suite || "default";
       if (!bySuite[suite]) bySuite[suite] = { runs: 0, totalPass: 0, failures: 0, envs: new Set() };
@@ -389,7 +438,12 @@ const getSuiteHealth: ToolDefinition = {
         totalFailures: s.failures,
         runs: s.runs,
         envs: [...s.envs].join(", "),
-        status: (s.runs > 0 && s.totalPass / s.runs >= 95) ? "🟢" : (s.runs > 0 && s.totalPass / s.runs >= 80) ? "🟡" : "🔴",
+        status:
+          s.runs > 0 && s.totalPass / s.runs >= 95
+            ? "🟢"
+            : s.runs > 0 && s.totalPass / s.runs >= 80
+              ? "🟡"
+              : "🔴",
       }))
       .sort((a, b) => b.avgPassRate - a.avgPassRate);
 
@@ -398,8 +452,20 @@ const getSuiteHealth: ToolDefinition = {
       subtitle: `${rows.length} suites · ${runs.length} total runs analyzed`,
       columns: [
         { key: "suite", label: "Suite", type: "mono", align: "left" },
-        { key: "avgPassRate", label: "Avg Pass %", type: "percent", align: "right", highlight: "max" },
-        { key: "totalFailures", label: "Total Fails", type: "number", align: "right", highlight: "min" },
+        {
+          key: "avgPassRate",
+          label: "Avg Pass %",
+          type: "percent",
+          align: "right",
+          highlight: "max",
+        },
+        {
+          key: "totalFailures",
+          label: "Total Fails",
+          type: "number",
+          align: "right",
+          highlight: "min",
+        },
         { key: "runs", label: "Runs", type: "number", align: "right" },
         { key: "envs", label: "Environments", type: "text", align: "left" },
         { key: "status", label: "Health", type: "text", align: "center" },
@@ -414,8 +480,14 @@ const getSuiteHealth: ToolDefinition = {
       title: "Avg Pass Rate by Suite",
       xKey: "suite",
       yKeys: ["avgPassRate"],
-      rows: rows.slice(0, 8).map(r => ({ suite: r.suite.slice(0, 18), avgPassRate: r.avgPassRate })),
-      colors: rows.slice(0, 8).map(r => r.avgPassRate >= 95 ? "#22c55e" : r.avgPassRate >= 80 ? "#f59e0b" : "#ef4444"),
+      rows: rows
+        .slice(0, 8)
+        .map((r) => ({ suite: r.suite.slice(0, 18), avgPassRate: r.avgPassRate })),
+      colors: rows
+        .slice(0, 8)
+        .map((r) =>
+          r.avgPassRate >= 95 ? "#22c55e" : r.avgPassRate >= 80 ? "#f59e0b" : "#ef4444",
+        ),
     };
 
     return { data: rows, chartData, tableData };
@@ -442,9 +514,12 @@ const getDurationTrends: ToolDefinition = {
       .slice(0, limit);
 
     const rows = recent.map((r, i) => {
-      const durationSec = (r as any).durationMs ? Math.round((r as any).durationMs / 1000) : 15 + Math.floor(Math.random() * 30);
+      const durationSec = (r as any).durationMs
+        ? Math.round((r as any).durationMs / 1000)
+        : 15 + Math.floor(Math.random() * 30);
       const prev = i < recent.length - 1 ? recent[i + 1] : null;
-      const prevDuration = prev && (prev as any).durationMs ? Math.round((prev as any).durationMs / 1000) : null;
+      const prevDuration =
+        prev && (prev as any).durationMs ? Math.round((prev as any).durationMs / 1000) : null;
       const delta = prevDuration ? durationSec - prevDuration : 0;
       return {
         run: r.label || r.id.slice(0, 8),
@@ -458,9 +533,10 @@ const getDurationTrends: ToolDefinition = {
       };
     });
 
-    const avgDuration = rows.length > 0 ? Math.round(rows.reduce((s, r) => s + r.durationSec, 0) / rows.length) : 0;
-    const maxDur = Math.max(...rows.map(r => r.durationSec));
-    const minDur = Math.min(...rows.map(r => r.durationSec));
+    const avgDuration =
+      rows.length > 0 ? Math.round(rows.reduce((s, r) => s + r.durationSec, 0) / rows.length) : 0;
+    const maxDur = Math.max(...rows.map((r) => r.durationSec));
+    const minDur = Math.min(...rows.map((r) => r.durationSec));
 
     const tableData: TableData = {
       title: `Execution Duration Trends — Last ${rows.length} Runs`,
@@ -468,7 +544,13 @@ const getDurationTrends: ToolDefinition = {
       columns: [
         { key: "run", label: "Run", type: "mono", align: "left" },
         { key: "env", label: "Env", type: "badge", align: "center" },
-        { key: "durationSec", label: "Duration (s)", type: "duration", align: "right", highlight: "min" },
+        {
+          key: "durationSec",
+          label: "Duration (s)",
+          type: "duration",
+          align: "right",
+          highlight: "min",
+        },
         { key: "deltaS", label: "Δ vs Prev", type: "number", align: "right" },
         { key: "passRate", label: "Pass %", type: "percent", align: "right" },
         { key: "trend", label: "Trend", type: "text", align: "center" },
@@ -503,17 +585,22 @@ const getAkamaiProperty: ToolDefinition = {
     const envs = ["QA", "UAT", "PROD"];
     const networks = ["Staging", "Production"];
 
-    const rows = envs.flatMap(env =>
-      networks.map(network => ({
+    const rows = envs.flatMap((env) =>
+      networks.map((network) => ({
         env,
         network,
         property: `aware-cdn-v${env === "PROD" ? "3" : env === "UAT" ? "2" : "1"}.akamai.net`,
         propertyVersion: env === "PROD" ? 42 : env === "UAT" ? 38 : 35,
         edgeWorkerVersion: env === "PROD" ? "ew-v3.2.1" : env === "UAT" ? "ew-v3.1.0" : "ew-v3.0.9",
-        status: (env === "PROD" && network === "Production") ? "🟢 Active" : (env === "QA" && network === "Staging") ? "🟢 Active" : "🟡 Pending",
+        status:
+          env === "PROD" && network === "Production"
+            ? "🟢 Active"
+            : env === "QA" && network === "Staging"
+              ? "🟢 Active"
+              : "🟡 Pending",
         cpCode: 123400 + (env === "QA" ? 0 : env === "UAT" ? 1 : 2),
         pops: env === "PROD" ? 42 : env === "UAT" ? 18 : 6,
-      }))
+      })),
     );
 
     const tableData: TableData = {
@@ -532,8 +619,10 @@ const getAkamaiProperty: ToolDefinition = {
     };
 
     // Most recent runs per env for chart
-    const envPassRates = envs.map(env => {
-      const envRuns = RUNS.filter(r => r.env === env).sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()).slice(0, 1);
+    const envPassRates = envs.map((env) => {
+      const envRuns = RUNS.filter((r) => r.env === env)
+        .sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())
+        .slice(0, 1);
       return { env, passRate: envRuns[0]?.passPct ?? 0 };
     });
 
@@ -543,7 +632,9 @@ const getAkamaiProperty: ToolDefinition = {
       xKey: "env",
       yKeys: ["passRate"],
       rows: envPassRates,
-      colors: envPassRates.map(r => r.passRate >= 95 ? "#22c55e" : r.passRate >= 80 ? "#f59e0b" : "#ef4444"),
+      colors: envPassRates.map((r) =>
+        r.passRate >= 95 ? "#22c55e" : r.passRate >= 80 ? "#f59e0b" : "#ef4444",
+      ),
     };
 
     return { data: rows, chartData, tableData };
@@ -562,5 +653,5 @@ export const TOOLS: ToolDefinition[] = [
 ];
 
 export function getToolByName(name: string): ToolDefinition | undefined {
-  return TOOLS.find(t => t.name === name);
+  return TOOLS.find((t) => t.name === name);
 }

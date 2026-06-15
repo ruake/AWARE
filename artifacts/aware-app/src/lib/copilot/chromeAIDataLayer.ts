@@ -11,8 +11,12 @@ interface OldChromeAISession {
   destroy(): void;
 }
 
-function hasNewAPI(): boolean { return typeof (window as any).LanguageModel?.create === "function"; }
-function hasOldAPI(): boolean { return typeof (window as any).ai?.languageModel?.create === "function"; }
+function hasNewAPI(): boolean {
+  return typeof (window as any).LanguageModel?.create === "function";
+}
+function hasOldAPI(): boolean {
+  return typeof (window as any).ai?.languageModel?.create === "function";
+}
 
 // ── Streaming helper ─────────────────────────────────────────────────────────
 async function streamFromChromeAI(
@@ -33,13 +37,20 @@ async function streamFromChromeAI(
       return;
     }
   } catch (err: unknown) {
-    if (signal.aborted) { onDelta({ done: true }); return; }
+    if (signal.aborted) {
+      onDelta({ done: true });
+      return;
+    }
     const msg = err instanceof Error ? err.message : String(err);
     onDelta({ content: `Chrome AI error: ${msg}`, done: true });
     return;
   }
 
-  if (signal.aborted) { session.destroy(); onDelta({ done: true }); return; }
+  if (signal.aborted) {
+    session.destroy();
+    onDelta({ done: true });
+    return;
+  }
 
   const stream = session.promptStreaming(userPrompt);
   const reader = stream.getReader();
@@ -65,11 +76,15 @@ async function streamFromChromeAI(
   onDelta({ done: true });
 }
 
-async function callChromeAI(systemPrompt: string, userPrompt: string, signal: AbortSignal): Promise<string | null> {
+async function callChromeAI(
+  systemPrompt: string,
+  userPrompt: string,
+  signal: AbortSignal,
+): Promise<string | null> {
   try {
     return await new Promise<string | null>((resolve) => {
       const chunks: string[] = [];
-      streamFromChromeAI(systemPrompt, userPrompt, signal, delta => {
+      streamFromChromeAI(systemPrompt, userPrompt, signal, (delta) => {
         if (delta.content) chunks.push(delta.content);
         if (delta.done) {
           const text = chunks.join("").trim();
@@ -89,7 +104,7 @@ function isGibberish(text: string): boolean {
   if (!/\s/.test(t)) return true;
   const words = t.split(/\s+/).filter(Boolean);
   if (words.length < 3) return true;
-  if (/^[.,!?;\s\-_#*+=\[\](){}<>'"`~@#$%^&|\\\/]+$/.test(t)) return true;
+  if (/^[.,!?;\s\-_#*+=[\](){}<>'"`~@#$%^&|\\/]+$/.test(t)) return true;
   if (!/[aeiouAEIOU]/.test(t)) return true;
   return false;
 }
@@ -117,23 +132,22 @@ const ALL_TOPICS = `
 const CASUAL_PATTERNS: Array<{ pattern: RegExp; response: string }> = [
   {
     pattern: /^\s*(hi|hello|hey|howdy|sup|yo)\s*[!?.]*\s*$/i,
-    response:
-      `Hi! I'm the **A.W.A.R.E. Copilot** — your CDN test observability AI.\n\nI can analyze:\n${ALL_TOPICS}\n\nTry a **Quick Action** above, or just ask!`,
+    response: `Hi! I'm the **A.W.A.R.E. Copilot** — your CDN test observability AI.\n\nI can analyze:\n${ALL_TOPICS}\n\nTry a **Quick Action** above, or just ask!`,
   },
   {
     pattern: /how are you|how.*doing|how.*going/i,
-    response: "All systems nominal! I'm monitoring your CDN test data across QA, UAT, and PROD. Ask me about pass rates, flakiness, environment health, or promotion gate status.",
+    response:
+      "All systems nominal! I'm monitoring your CDN test data across QA, UAT, and PROD. Ask me about pass rates, flakiness, environment health, or promotion gate status.",
   },
   {
     pattern: /what.*(can|do) you|what you (can|do)|your (capabilities|features)|who are you/i,
-    response:
-      `**A.W.A.R.E. Copilot** — I can analyze:\n\n${ALL_TOPICS}\n\nAll results include **interactive charts** and **sortable tables**.`,
+    response: `**A.W.A.R.E. Copilot** — I can analyze:\n\n${ALL_TOPICS}\n\nAll results include **interactive charts** and **sortable tables**.`,
   },
   {
     // Follow-up conversational queries — "apart from this?", "what else?", "do you know anything else?"
-    pattern: /apart from|besides that|what else|anything else|other than that|tell me more|what more|in addition|beyond (that|this)|what other/i,
-    response:
-      `Here are all the other topics I can analyze:\n\n${ALL_TOPICS}\n\nJust ask about any of these — or try a **Quick Action** above!`,
+    pattern:
+      /apart from|besides that|what else|anything else|other than that|tell me more|what more|in addition|beyond (that|this)|what other/i,
+    response: `Here are all the other topics I can analyze:\n\n${ALL_TOPICS}\n\nJust ask about any of these — or try a **Quick Action** above!`,
   },
   {
     pattern: /thank|thanks|great|awesome|nice|cool|perfect/i,
@@ -168,13 +182,24 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         const trend = passRates.length >= 2 ? passRates[0] - passRates[passRates.length - 1] : 0;
         const trendWord = trend > 2 ? "improving" : trend < -2 ? "declining" : "stable";
         const failedRuns = runs.filter((r: any) => Number(r.failures ?? 0) > 0);
-        const envCounts = runs.reduce((acc: any, r: any) => { acc[r.env] = (acc[r.env] || 0) + 1; return acc; }, {});
-        const envSummary = Object.entries(envCounts).map(([e, c]) => `${c}× ${e}`).join(", ");
-        const gateStatus = avgPass >= 95 ? "✅ Above the 95% promotion gate." : "⚠️ Below the 95% promotion gate.";
+        const envCounts = runs.reduce((acc: any, r: any) => {
+          acc[r.env] = (acc[r.env] || 0) + 1;
+          return acc;
+        }, {});
+        const envSummary = Object.entries(envCounts)
+          .map(([e, c]) => `${c}× ${e}`)
+          .join(", ");
+        const gateStatus =
+          avgPass >= 95 ? "✅ Above the 95% promotion gate." : "⚠️ Below the 95% promotion gate.";
 
         // "how much data / what data / how many runs / scope"
-        if (/how.much.data|what.data|how.many|what.do.you.have|what.do.you.know|scope|coverage|available/.test(q)) {
-          const dateRange = oldest?.date && latest?.date ? ` from **${oldest.date}** to **${latest.date}**` : "";
+        if (
+          /how.much.data|what.data|how.many|what.do.you.have|what.do.you.know|scope|coverage|available/.test(
+            q,
+          )
+        ) {
+          const dateRange =
+            oldest?.date && latest?.date ? ` from **${oldest.date}** to **${latest.date}**` : "";
           return (
             `I have data for **${runs.length} test runs**${dateRange} across **${Object.keys(envCounts).join(", ")}** — ${envSummary}.\n\n` +
             `Each run includes pass rate, failure count, suite breakdown, and environment. ` +
@@ -191,10 +216,15 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
 
         // "fail / broke / error / problem"
         if (/fail|broke|broken|error|problem|issue|wrong/.test(q)) {
-          if (totalFails === 0) return `✅ Zero failures across all ${runs.length} runs (${envSummary}). Every run is above the 95% gate.`;
-          const failLines = failedRuns.slice(0, 4).map((r: any) =>
-            `- **${r.run}** (${r.env}, ${r.date}) — ${r.failures} failure${Number(r.failures) !== 1 ? "s" : ""}, **${r.passRate}%** pass`
-          ).join("\n");
+          if (totalFails === 0)
+            return `✅ Zero failures across all ${runs.length} runs (${envSummary}). Every run is above the 95% gate.`;
+          const failLines = failedRuns
+            .slice(0, 4)
+            .map(
+              (r: any) =>
+                `- **${r.run}** (${r.env}, ${r.date}) — ${r.failures} failure${Number(r.failures) !== 1 ? "s" : ""}, **${r.passRate}%** pass`,
+            )
+            .join("\n");
           return `**${totalFails} failure${totalFails !== 1 ? "s" : ""}** found across ${runs.length} runs:\n\n${failLines}\n\n${gateStatus}`;
         }
 
@@ -231,18 +261,22 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         }
 
         // Default — lead with the headline insight, not a repeated list
-        const headline = totalFails === 0
-          ? `✅ All ${runs.length} runs passed`
-          : `**${totalFails}** failure${totalFails !== 1 ? "s" : ""} across ${runs.length} runs`;
+        const headline =
+          totalFails === 0
+            ? `✅ All ${runs.length} runs passed`
+            : `**${totalFails}** failure${totalFails !== 1 ? "s" : ""} across ${runs.length} runs`;
         return `${headline} — avg **${avgPass}%**, trend **${trendWord}**. Latest: **${latest?.run}** (${latest?.env}) at **${latest?.passRate}%**. See chart and table above for the full picture.`;
       }
 
       case "get_flaky_tests": {
         const tests: any[] = Array.isArray(rawData) ? rawData : [];
-        if (!tests.length) return "✅ No flaky tests detected — all tests are stable across recent runs.";
+        if (!tests.length)
+          return "✅ No flaky tests detected — all tests are stable across recent runs.";
 
         const worst = tests[0];
-        const avgScore = Math.round(tests.reduce((s: number, t: any) => s + Number(t.score ?? 0), 0) / tests.length);
+        const avgScore = Math.round(
+          tests.reduce((s: number, t: any) => s + Number(t.score ?? 0), 0) / tests.length,
+        );
         const highRisk = tests.filter((t: any) => Number(t.score ?? 0) >= 50).length;
         const stable = tests.filter((t: any) => Number(t.flips ?? 0) === 1).length;
 
@@ -257,9 +291,13 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         return (
           `**${tests.length}** flaky tests — avg score **${avgScore}%**, **${highRisk}** high-risk (≥50%).\n\n` +
           `🔴 Top offenders:\n` +
-          tests.slice(0, 4).map((t: any) =>
-            `- \`${t.test}\` — **${t.score}%** · ${t.flips} flip${t.flips !== 1 ? "s" : ""} · \`${t.sequence ?? "?"}\``
-          ).join("\n") +
+          tests
+            .slice(0, 4)
+            .map(
+              (t: any) =>
+                `- \`${t.test}\` — **${t.score}%** · ${t.flips} flip${t.flips !== 1 ? "s" : ""} · \`${t.sequence ?? "?"}\``,
+            )
+            .join("\n") +
           `\n\nQuarantine \`${worst.test}\` (${worst.score}% score) to reduce CI noise.`
         );
       }
@@ -283,10 +321,12 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         }
 
         return (
-          rows.map((r: any) => {
-            const icon = r.avgPassRate >= 95 ? "🟢" : r.avgPassRate >= 80 ? "🟡" : "🔴";
-            return `${icon} **${r.env}** — **${r.avgPassRate}%** avg · ${r.totalFailures} failures · ${r.runs} runs`;
-          }).join("\n") +
+          rows
+            .map((r: any) => {
+              const icon = r.avgPassRate >= 95 ? "🟢" : r.avgPassRate >= 80 ? "🟡" : "🔴";
+              return `${icon} **${r.env}** — **${r.avgPassRate}%** avg · ${r.totalFailures} failures · ${r.runs} runs`;
+            })
+            .join("\n") +
           `\n\n**${gapPP}pp** spread between ${best.env} (${best.avgPassRate}%) and ${worst.env} (${worst.avgPassRate}%). ${allHealthy ? "✅ All above the 95% promotion gate." : "⚠️ Some environments are below the gate."}`
         );
       }
@@ -318,7 +358,8 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         const totalFailed = rows.reduce((s: number, r: any) => s + Number(r.failed ?? 0), 0);
         const totalTests = rows.reduce((s: number, r: any) => s + Number(r.total ?? 0), 0);
 
-        if (!rows.length) return `**${label || "Latest Run"}** (${env}) — **${passPct}%** pass · No failures ✅`;
+        if (!rows.length)
+          return `**${label || "Latest Run"}** (${env}) — **${passPct}%** pass · No failures ✅`;
 
         const topCat = rows[0];
         const cleanCats = rows.filter((r: any) => r.failed === 0).length;
@@ -326,10 +367,13 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         if (/category|type|kind|which|what kind/.test(q)) {
           return (
             `Failures by category in **${label || "latest run"}** (${env}):\n\n` +
-            rows.slice(0, 5).map((r: any) => {
-              const icon = r.failed === 0 ? "✅" : r.passRate >= 80 ? "⚠️" : "🔴";
-              return `${icon} **${r.category}** — ${r.failed}/${r.total} failed`;
-            }).join("\n") +
+            rows
+              .slice(0, 5)
+              .map((r: any) => {
+                const icon = r.failed === 0 ? "✅" : r.passRate >= 80 ? "⚠️" : "🔴";
+                return `${icon} **${r.category}** — ${r.failed}/${r.total} failed`;
+              })
+              .join("\n") +
             `\n\n**${topCat.category}** is the worst offender at ${topCat.failed}/${topCat.total} failures.`
           );
         }
@@ -359,10 +403,13 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         }
 
         return (
-          rows.slice(0, 5).map((r: any) => {
-            const icon = r.avgPassRate >= 95 ? "🟢" : r.avgPassRate >= 80 ? "🟡" : "🔴";
-            return `${icon} **${r.suite}** — **${r.avgPassRate}%** avg · ${r.totalFailures} failures`;
-          }).join("\n") +
+          rows
+            .slice(0, 5)
+            .map((r: any) => {
+              const icon = r.avgPassRate >= 95 ? "🟢" : r.avgPassRate >= 80 ? "🟡" : "🔴";
+              return `${icon} **${r.suite}** — **${r.avgPassRate}%** avg · ${r.totalFailures} failures`;
+            })
+            .join("\n") +
           (failing.length > 0
             ? `\n\n⚠️ ${failing.length} suite${failing.length !== 1 ? "s" : ""} below 95%: ${failing.map((r: any) => `\`${r.suite}\``).join(", ")}.`
             : `\n\n✅ All ${rows.length} suites above the 95% gate.`)
@@ -378,7 +425,10 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         const max = Math.max(...durations);
         const min = Math.min(...durations);
         const slowRuns = rows.filter((r: any) => r.durationSec > avg * 1.2);
-        const slowest = rows.reduce((a: any, b: any) => (b.durationSec > a.durationSec ? b : a), rows[0]);
+        const slowest = rows.reduce(
+          (a: any, b: any) => (b.durationSec > a.durationSec ? b : a),
+          rows[0],
+        );
 
         if (/slow|longest|worst|spike|timeout/.test(q)) {
           return slowRuns.length === 0
@@ -457,11 +507,17 @@ function formatToolDataForNano(toolName: string, rawData: unknown): string | nul
       }
       case "get_suite_health": {
         const rows: any[] = Array.isArray(rawData) ? rawData : [];
-        return rows.slice(0, 4).map((r: any) => `${r.suite}: ${r.avgPassRate}%`).join(", ");
+        return rows
+          .slice(0, 4)
+          .map((r: any) => `${r.suite}: ${r.avgPassRate}%`)
+          .join(", ");
       }
       case "get_duration_trends": {
         const rows: any[] = Array.isArray(rawData) ? rawData : [];
-        const avg = rows.length > 0 ? Math.round(rows.reduce((s, r) => s + Number(r.durationSec ?? 0), 0) / rows.length) : 0;
+        const avg =
+          rows.length > 0
+            ? Math.round(rows.reduce((s, r) => s + Number(r.durationSec ?? 0), 0) / rows.length)
+            : 0;
         return `Avg duration ${avg}s across ${rows.length} runs`;
       }
       case "get_akamai_property": {
@@ -528,21 +584,32 @@ export async function synthesizeWithChromeAI(input: SynthesisInput): Promise<voi
 // ── Build a data-scope answer directly from RUNS (no tool call needed) ────────
 function buildDataScopeAnswer(q: string): string | null {
   const lower = q.toLowerCase();
-  if (!/how.much.data|how.many|what.data|what.do.you.have|what.do.you.know|data.*available|scope|coverage/.test(lower)) return null;
+  if (
+    !/how.much.data|how.many|what.data|what.do.you.have|what.do.you.know|data.*available|scope|coverage/.test(
+      lower,
+    )
+  )
+    return null;
 
   const runs = RUNS as any[];
   if (!runs.length) return "No run data is loaded yet.";
 
-  const passRates = runs.map(r => Number(r.passRate ?? r.passPct ?? 0));
+  const passRates = runs.map((r) => Number(r.passRate ?? r.passPct ?? 0));
   const avg = Math.round(passRates.reduce((a, b) => a + b, 0) / passRates.length);
   const fails = runs.reduce((s, r) => s + Number(r.failures ?? 0), 0);
   const envCounts = runs.reduce((acc: Record<string, number>, r) => {
     acc[r.env] = (acc[r.env] || 0) + 1;
     return acc;
   }, {});
-  const envSummary = Object.entries(envCounts).map(([e, c]) => `**${c}× ${e}**`).join(", ");
-  const dates = runs.map(r => r.date).filter(Boolean).sort();
-  const dateRange = dates.length >= 2 ? ` from **${dates[0]}** to **${dates[dates.length - 1]}**` : "";
+  const envSummary = Object.entries(envCounts)
+    .map(([e, c]) => `**${c}× ${e}**`)
+    .join(", ");
+  const dates = runs
+    .map((r) => r.date)
+    .filter(Boolean)
+    .sort();
+  const dateRange =
+    dates.length >= 2 ? ` from **${dates[0]}** to **${dates[dates.length - 1]}**` : "";
 
   return (
     `I have data for **${runs.length} test runs**${dateRange} across ${envSummary}.\n\n` +
@@ -557,17 +624,24 @@ export async function answerDirectWithChromeAI(input: DirectInput): Promise<void
   // Data-scope queries ("how much data do you have", "what do you know", etc.)
   // Answer directly from RUNS — no tool call or Chrome AI session needed.
   const scopeAnswer = buildDataScopeAnswer(userQuery);
-  if (scopeAnswer) { emitAsStream(scopeAnswer, onDelta); return; }
+  if (scopeAnswer) {
+    emitAsStream(scopeAnswer, onDelta);
+    return;
+  }
 
   // Always check canned responses first — these handle follow-up / capability questions
   // deterministically, without burning a Gemini Nano session on a conversational query.
   const canned = getCannedResponse(userQuery);
-  if (canned) { emitAsStream(canned, onDelta); return; }
+  if (canned) {
+    emitAsStream(canned, onDelta);
+    return;
+  }
 
   // Build a context-aware prompt so the model doesn't repeat prior answers
-  const contextBlock = priorResponses.length > 0
-    ? `Previous answers in this conversation:\n${priorResponses.map((r, i) => `[${i + 1}] ${r.slice(0, 300)}`).join("\n")}\n\n`
-    : "";
+  const contextBlock =
+    priorResponses.length > 0
+      ? `Previous answers in this conversation:\n${priorResponses.map((r, i) => `[${i + 1}] ${r.slice(0, 300)}`).join("\n")}\n\n`
+      : "";
 
   const llmResult = await callChromeAI(
     "You are AWARE Copilot, a CDN test observability assistant. Answer briefly and helpfully. Do NOT repeat information already given in previous answers. Keep responses under 3 sentences.",
@@ -575,7 +649,10 @@ export async function answerDirectWithChromeAI(input: DirectInput): Promise<void
     signal,
   );
 
-  if (llmResult) { emitAsStream(llmResult, onDelta); return; }
+  if (llmResult) {
+    emitAsStream(llmResult, onDelta);
+    return;
+  }
 
   // Final fallback — list available topics so the user always has something useful
   emitAsStream(
@@ -583,4 +660,3 @@ export async function answerDirectWithChromeAI(input: DirectInput): Promise<void
     onDelta,
   );
 }
-
