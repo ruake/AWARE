@@ -29,12 +29,16 @@ Current snapshot:
   Total runs in dataset: ${RUNS.length}
 ${envLines || "  No runs yet — data branch may be empty."}
 
+Available tools: query_runs · get_flaky_tests · compare_environments · get_promotion_status · get_failure_breakdown · get_suite_health · get_duration_trends · get_akamai_property
+
 Behavior rules:
 - When asked about test data (runs, failures, flakiness, environments, promotion), call the appropriate tool. Do not guess numbers.
 - Be concise. Lead with the key finding. Use numbers and percentages.
 - If the user asks a general question (not data-specific), answer directly without calling tools.
 - After tool results arrive, synthesize them into a clear, actionable response.
-- For ambiguous questions, ask one clarifying question then proceed.`;
+- For ambiguous questions, ask one clarifying question then proceed.
+- NEVER repeat data you already provided in a previous message. If the user asks "what else?", "apart from this?", or "do you know anything else?", cover a DIFFERENT topic or list the other available tools — do not re-run the same tool.
+- Follow-up questions like "apart from this?", "what else do you know?", "anything else?" are conversational — answer with what other topics are available, not by repeating prior data.`;
 }
 
 // Truncate message history to fit context window.

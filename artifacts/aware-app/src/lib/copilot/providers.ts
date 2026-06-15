@@ -483,10 +483,24 @@ export class ChromeProvider implements IProvider {
   ): Promise<void> {
     const userQuery = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
     const query = typeof userQuery === "string" ? userQuery : JSON.stringify(userQuery);
-    const toolMessages = messages.filter((m) => m.role === "tool");
+
+    // Only look for tool results from the CURRENT turn (after the last user message).
+    // Without this guard, the synthesizer picks up tool results from *previous* turns
+    // and re-renders the same data for every follow-up conversational question.
+    const lastUserIdx = messages.reduce((idx, m, i) => (m.role === "user" ? i : idx), -1);
+    const currentTurnMessages = lastUserIdx >= 0 ? messages.slice(lastUserIdx) : [];
+    const toolMessages = currentTurnMessages.filter((m) => m.role === "tool");
+
+    // Collect prior assistant text responses (not tool-call messages) for context
+    const priorResponses = messages
+      .slice(0, lastUserIdx)
+      .filter((m) => m.role === "assistant" && typeof m.content === "string" && m.content)
+      .map((m) => (typeof m.content === "string" ? m.content : ""))
+      .filter(Boolean)
+      .slice(-2);
 
     if (toolMessages.length > 0) {
-      const assistantMsg = [...messages]
+      const assistantMsg = [...currentTurnMessages]
         .reverse()
         .find((m) => m.role === "assistant" && m.tool_calls);
       const toolName = assistantMsg?.tool_calls?.[0]?.function?.name ?? "tool";
@@ -503,7 +517,7 @@ export class ChromeProvider implements IProvider {
       return;
     }
 
-    await answerDirectWithChromeAI({ userQuery: query, signal, onDelta });
+    await answerDirectWithChromeAI({ userQuery: query, priorResponses, signal, onDelta });
   }
 }
 

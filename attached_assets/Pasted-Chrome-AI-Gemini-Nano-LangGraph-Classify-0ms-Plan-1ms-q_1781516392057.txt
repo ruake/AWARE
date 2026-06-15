@@ -1,0 +1,146 @@
+Chrome AI · Gemini Nano
+LangGraph
+Classify
+0ms
+Plan
+1ms
+[query_runs]
+Execute
+16ms
+[query_runs]
+Synthesize
+5.1s
+Done
+0ms
+✓ done
+
+📊
+Run History
+16ms
+Pass Rate Trend — Last 10 Runs
+CI — Jun
+CI — Jun
+CI — Jun
+CI — Jun
+CI — Jun
+CI — Jun
+CI — Jun
+CI — Jun
+CI — Jun
+CI — Jun
+0%
+25%
+50%
+75%
+100%
+Last 10 Test Runs
+Avg pass rate: 99% · 2 total failures
+CI — Jun 13, 2026	PROD	—	100%	0	2026-06-13
+CI — Jun 12, 2026	UAT	—	95%	1	2026-06-12
+CI — Jun 11, 2026	QA	—	100%	0	2026-06-11
+CI — Jun 10, 2026	PROD	—	100%	0	2026-06-10
+CI — Jun 9, 2026	UAT	—	100%	0	2026-06-09
+CI — Jun 8, 2026	QA	—	100%	0	2026-06-08
+CI — Jun 7, 2026	PROD	—	100%	0	2026-06-07
+CI — Jun 6, 2026	UAT	—	100%	0	2026-06-06
+CI — Jun 5, 2026	QA	—	95%	1	2026-06-05
+CI — Jun 4, 2026	PROD	—	100%	0	2026-06-04
+10 rows
+·
+Click header to sort
+Run History Summary
+10 runs analyzed across PROD, UAT, QA.
+
+Metric	Value
+Avg Pass Rate	99%
+Total Failures	2
+Trend	→ stable (0pp)
+Latest Run	CI — Jun 13, 2026 — 100%
+The Pass Rate Trend chart and table above show the full timeline. ✅ All runs are above the 95% promotion threshold.
+
+03:01 PM
+Copy
+what do you know
+Chrome AI · Gemini Nano
+LangGraph
+Classify
+0ms
+Plan
+0ms
+Execute
+Synthesize
+3.0s
+Done
+0ms
+✓ done
+Last 10 Test Runs — avg 99% pass, 2 total failures:
+
+CI — Jun 13, 2026 (PROD) — 100% pass · 0 fails · 2026-06-13
+CI — Jun 12, 2026 (UAT) — 95% pass · 1 fail · 2026-06-12
+CI — Jun 11, 2026 (QA) — 100% pass · 0 fails · 2026-06-11
+CI — Jun 10, 2026 (PROD) — 100% pass · 0 fails · 2026-06-10
+CI — Jun 9, 2026 (UAT) — 100% pass · 0 fails · 2026-06-09
+CI — Jun 8, 2026 (QA) — 100% pass · 0 fails · 2026-06-08
+CI — Jun 7, 2026 (PROD) — 100% pass · 0 fails · 2026-06-07
+CI — Jun 6, 2026 (UAT) — 100% pass · 0 fails · 2026-06-06
+See the table above for the full breakdown.
+
+03:01 PM
+Copy
+apart from this ?
+Chrome AI · Gemini Nano
+LangGraph
+Classify
+0ms
+Plan
+0ms
+Execute
+Synthesize
+3.7s
+Done
+0ms
+✓ done
+Last 10 Test Runs — avg 99% pass, 2 total failures:
+
+CI — Jun 13, 2026 (PROD) — 100% pass · 0 fails · 2026-06-13
+CI — Jun 12, 2026 (UAT) — 95% pass · 1 fail · 2026-06-12
+CI — Jun 11, 2026 (QA) — 100% pass · 0 fails · 2026-06-11
+CI — Jun 10, 2026 (PROD) — 100% pass · 0 fails · 2026-06-10
+CI — Jun 9, 2026 (UAT) — 100% pass · 0 fails · 2026-06-09
+CI — Jun 8, 2026 (QA) — 100% pass · 0 fails · 2026-06-08
+CI — Jun 7, 2026 (PROD) — 100% pass · 0 fails · 2026-06-07
+CI — Jun 6, 2026 (UAT) — 100% pass · 0 fails · 2026-06-06
+See the table above for the full breakdown.
+
+03:01 PM
+Copy
+do you know anything else
+Chrome AI · Gemini Nano
+LangGraph
+Classify
+0ms
+Plan
+0ms
+Execute
+Synthesize
+2.9s
+Done
+0ms
+✓ done
+Last 10 Test Runs — avg 99% pass, 2 total failures:
+
+CI — Jun 13, 2026 (PROD) — 100% pass · 0 fails · 2026-06-13
+CI — Jun 12, 2026 (UAT) — 95% pass · 1 fail · 2026-06-12
+CI — Jun 11, 2026 (QA) — 100% pass · 0 fails · 2026-06-11
+CI — Jun 10, 2026 (PROD) — 100% pass · 0 fails · 2026-06-10
+CI — Jun 9, 2026 (UAT) — 100% pass · 0 fails · 2026-06-09
+CI — Jun 8, 2026 (QA) — 100% pass · 0 fails · 2026-06-08
+CI — Jun 7, 2026 (PROD) — 100% pass · 0 fails · 2026-06-07
+CI — Jun 6, 2026 (UAT) — 100% pass · 0 fails · 2026-06-06
+See the table above for the full breakdown.
+
+03:02 PM
+Copy
+Ask about tests, failures, flakiness, promotion status…
+
+Enter to send · ⇧Enter for new line
