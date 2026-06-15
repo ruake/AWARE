@@ -41,7 +41,7 @@ permissions:
 
 env:
   WORKING_DIR: artifacts/aware-app
-  SITE_BRANCH: site
+  SITE_BRANCH: gh-pages
   NODE_VERSION: "22"
   PNPM_VERSION: "10"
 
