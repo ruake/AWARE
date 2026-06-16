@@ -33,6 +33,7 @@ export function CompareRunSelector({
   const [suiteFilter, setSuiteFilter] = React.useState("");
   const ref = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const [dropPos, setDropPos] = React.useState({ top: 0, left: 0 });
   const selectedRun = runs.find((r) => r.id === value) as Run | undefined;
 
   React.useEffect(() => {
@@ -44,11 +45,23 @@ export function CompareRunSelector({
   }, []);
 
   React.useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 0);
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 0);
+      const btn = ref.current?.querySelector("button");
+      if (btn) {
+        const r = btn.getBoundingClientRect();
+        const dw = 420;
+        const dh = Math.min(440, window.innerHeight - r.bottom - 16);
+        let left = r.left;
+        if (left + dw > window.innerWidth - 8) left = window.innerWidth - dw - 8;
+        if (left < 8) left = 8;
+        setDropPos({ top: r.bottom + 4, left });
+      }
+    }
   }, [open]);
 
   const envs = [...new Set(runs.map((r) => r.env))];
-  const targets = [...new Set(runs.map((r) => r.env))];
+  const targets = [...new Set(runs.map((r) => r.envId))];
   const statuses = [...new Set(runs.map((r) => r.status))] as Run["status"][];
   const suites = [...new Set(runs.map((r) => r.suiteId))];
 
@@ -227,9 +240,9 @@ export function CompareRunSelector({
       {open && (
         <div
           style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
-            left: 0,
+            position: "fixed",
+            top: dropPos.top,
+            left: dropPos.left,
             zIndex: 300,
             background: "var(--proof-surface)",
             border: `1px solid ${accentColor}`,
@@ -237,7 +250,7 @@ export function CompareRunSelector({
             boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
             display: "flex",
             flexDirection: "column",
-            width: "max(100%, 480px)",
+            width: 420,
             maxHeight: 440,
             overflow: "hidden",
           }}

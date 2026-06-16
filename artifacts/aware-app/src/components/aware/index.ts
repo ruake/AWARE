@@ -18,3 +18,5 @@ export { TestFlowDiagram } from "./TestFlowDiagram";
 export { TestManagerSidePanel } from "./TestManagerSidePanel";
 export { YamlPreview, generateGitHubActionsYaml } from "./YamlPreview";
 export { SkeletonBox, SkeletonText, SkeletonCard, SkeletonTable, SkeletonChart } from "./Skeleton";
+export { Pagination } from "./Pagination";
+export { RunHistoryDots } from "./RunHistoryDots";

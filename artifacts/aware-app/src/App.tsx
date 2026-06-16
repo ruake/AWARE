@@ -68,7 +68,7 @@ const SIDEBAR_NAV: NavGroup[] = [
     title: "Monitor",
     items: [
       { label: "Dashboard", href: "/", icon: "LayoutDashboard" },
-      { label: "Activity", href: "/activity", icon: "Activity" },
+      { label: "Activity", href: "/runs", icon: "Activity" },
     ],
   },
   {
@@ -96,8 +96,7 @@ const SIDEBAR_NAV: NavGroup[] = [
 const BREADCRUMB_MAP: Record<string, { label: string; parent?: { label: string; href: string } }> =
   {
     "/": { label: "Dashboard" },
-    "/activity": { label: "Activity", parent: { label: "Monitor", href: "/" } },
-    "/runs": { label: "Runs", parent: { label: "Investigate", href: "/" } },
+    "/runs": { label: "Activity & Runs", parent: { label: "Monitor", href: "/" } },
     "/runs/:runId": { label: "Run Detail", parent: { label: "Runs", href: "/runs" } },
     "/compare": { label: "Compare", parent: { label: "Investigate", href: "/" } },
     "/trends": { label: "Trends", parent: { label: "Investigate", href: "/" } },
@@ -117,7 +116,6 @@ const TestSuites = React.lazy(() => import("@/pages/TestSuiteManager"));
 const Trends = React.lazy(() => import("@/pages/TestAnalytics"));
 const About = React.lazy(() => import("@/pages/About"));
 const Copilot = React.lazy(() => import("@/pages/Copilot"));
-const Activity = React.lazy(() => import("@/pages/Pulse"));
 const TestDoc = React.lazy(() => import("@/pages/TestDoc"));
 const StartRun = React.lazy(() => import("@/pages/StartRun"));
 const Sharing = React.lazy(() => import("@/pages/Sharing"));
@@ -288,11 +286,6 @@ function Router() {
             <Dashboard />
           </React.Suspense>
         </Route>
-        <Route path="/activity">
-          <React.Suspense fallback={<PageLoader />}>
-            <Activity />
-          </React.Suspense>
-        </Route>
         <Route path="/runs">
           <React.Suspense fallback={<PageLoader />}>
             <Runs />
@@ -334,18 +327,16 @@ function Router() {
           </React.Suspense>
         </Route>
         {/* Redirects from old route names (Nielsen #4: don't break bookmarks) */}
+        <Route path="/activity">
+          {() => {
+            window.history.replaceState(null, "", window.location.pathname.replace("/activity", "/runs"));
+            return <React.Suspense fallback={<PageLoader />}><Runs /></React.Suspense>;
+          }}
+        </Route>
         <Route path="/pulse">
           {() => {
-            window.history.replaceState(
-              null,
-              "",
-              window.location.pathname.replace("/pulse", "/activity"),
-            );
-            return (
-              <React.Suspense fallback={<PageLoader />}>
-                <Activity />
-              </React.Suspense>
-            );
+            window.history.replaceState(null, "", window.location.pathname.replace("/pulse", "/runs"));
+            return <React.Suspense fallback={<PageLoader />}><Runs /></React.Suspense>;
           }}
         </Route>
         <Route path="/analytics">

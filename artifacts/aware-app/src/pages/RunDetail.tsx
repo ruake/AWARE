@@ -1,6 +1,5 @@
 import React, { useSyncExternalStore } from "react";
 import { useParams, useLocation, useSearch } from "wouter";
-import { GoogleBarChart } from "@/components/aware/GoogleCharts";
 import {
   getRunById,
   getTestResultsForRun,
@@ -26,9 +25,11 @@ import {
   FileText,
   Maximize2,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
+import { RunHistoryDots } from "@/components/aware/RunHistoryDots";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 function AssertionRow({ a }: { a: TestAssertionResult }) {
@@ -73,11 +74,217 @@ function AssertionRow({ a }: { a: TestAssertionResult }) {
   );
 }
 
-function FilmstripThumbnail({ frame, onExpand }: { frame: FilmstripFrame; onExpand: () => void }) {
+function FilmstripViewer({
+  frames,
+  onClose,
+}: {
+  frames: FilmstripFrame[];
+  onClose: () => void;
+}) {
+  const [activeIdx, setActiveIdx] = React.useState<number | null>(null);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const dragStart = React.useRef({ x: 0, scrollLeft: 0 });
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    dragStart.current = { x: e.clientX, scrollLeft: scrollRef.current.scrollLeft };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const dx = e.clientX - dragStart.current.x;
+    scrollRef.current.scrollLeft = dragStart.current.scrollLeft - dx;
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  const scrollTo = (dir: -1 | 1) => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollBy({ left: dir * 160, behavior: "smooth" });
+  };
+
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") { el.scrollBy({ left: -160, behavior: "smooth" }); e.preventDefault(); }
+      if (e.key === "ArrowRight") { el.scrollBy({ left: 160, behavior: "smooth" }); e.preventDefault(); }
+    };
+    el.addEventListener("keydown", handler);
+    return () => el.removeEventListener("keydown", handler);
+  }, []);
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", flex: 1 }}>
+          Filmstrip ({frames.length})
+        </span>
+        <button
+          onClick={() => scrollTo(-1)}
+          style={{ border: "none", background: "var(--proof-surface-hover)", cursor: "pointer", padding: "2px 6px", borderRadius: 3, color: "var(--proof-text-secondary)", display: "flex", alignItems: "center" }}
+        >
+          <ChevronLeft size={11} />
+        </button>
+        <button
+          onClick={() => scrollTo(1)}
+          style={{ border: "none", background: "var(--proof-surface-hover)", cursor: "pointer", padding: "2px 6px", borderRadius: 3, color: "var(--proof-text-secondary)", display: "flex", alignItems: "center" }}
+        >
+          <ChevronRight size={11} />
+        </button>
+      </div>
+      <div
+        ref={scrollRef}
+        tabIndex={0}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        style={{
+          display: "flex",
+          gap: 6,
+          overflowX: "auto",
+          paddingBottom: 4,
+          cursor: isDragging ? "grabbing" : "grab",
+          userSelect: "none",
+          scrollBehavior: "smooth",
+          outline: "none",
+        }}
+      >
+        {frames.map((f, i) => (
+          <FilmstripThumbnail
+            key={f.id}
+            frame={f}
+            isActive={activeIdx === i}
+            onExpand={() => setActiveIdx(i)}
+          />
+        ))}
+      </div>
+
+      {/* Lightbox gallery */}
+      <Dialog
+        open={activeIdx !== null}
+        onOpenChange={(open) => { if (!open) setActiveIdx(null); }}
+      >
+        <DialogContent
+          style={{
+            maxWidth: "95vw",
+            width: "auto",
+            background: "var(--proof-surface)",
+            border: "1px solid var(--proof-grey)",
+            padding: 0,
+            overflow: "hidden",
+          }}
+        >
+          {activeIdx !== null && (
+            <>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 12px",
+                borderBottom: "1px solid var(--proof-grey)",
+              }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)", flex: 1 }}>
+                  {frames[activeIdx].label}
+                </span>
+                <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
+                  {activeIdx + 1} / {frames.length}
+                </span>
+                <button
+                  onClick={onClose}
+                  style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--proof-text-secondary)", display: "flex" }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <GalleryImage
+                frame={frames[activeIdx]}
+                onPrev={activeIdx > 0 ? () => setActiveIdx(activeIdx - 1) : null}
+                onNext={activeIdx < frames.length - 1 ? () => setActiveIdx(activeIdx + 1) : null}
+              />
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function LazyGalleryImage({ source }: { source: string }) {
+  const [url, setUrl] = React.useState("");
+  React.useEffect(() => {
+    preloadImage(source).then(setUrl);
+  }, [source]);
+  if (!url) {
+    return <div style={{ width: 400, height: 300, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "var(--proof-text-secondary)" }}>Loading…</div>;
+  }
+  return <img src={url} alt="" style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 4, display: "block" }} />;
+}
+
+function GalleryImage({
+  frame, onPrev, onNext,
+}: {
+  frame: FilmstripFrame;
+  onPrev: (() => void) | null;
+  onNext: (() => void) | null;
+}) {
+  const source = getImageSource(frame);
+
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" && onPrev) { onPrev(); e.preventDefault(); }
+      if (e.key === "ArrowRight" && onNext) { onNext(); e.preventDefault(); }
+      if (e.key === "Escape") { /* handled by Dialog */ }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onPrev, onNext]);
+
+  return (
+    <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", padding: 12, maxHeight: "80vh" }}>
+      {onPrev && (
+        <button
+          onClick={onPrev}
+          style={{
+            position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)",
+            border: "none", background: "rgba(0,0,0,0.5)", color: "#fff", cursor: "pointer",
+            borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 10, backdropFilter: "blur(4px)",
+          }}
+        >
+          <ChevronLeft size={18} />
+        </button>
+      )}
+      {source.startsWith("data:") ? (
+        <img src={source} alt={frame.label} style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 4, display: "block" }} />
+      ) : (
+        <LazyGalleryImage source={source} />
+      )}
+      {onNext && (
+        <button
+          onClick={onNext}
+          style={{
+            position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+            border: "none", background: "rgba(0,0,0,0.5)", color: "#fff", cursor: "pointer",
+            borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 10, backdropFilter: "blur(4px)",
+          }}
+        >
+          <ChevronRight size={18} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function FilmstripThumbnail({ frame, isActive, onExpand }: { frame: FilmstripFrame; isActive: boolean; onExpand: () => void }) {
   const isDataUri = React.useMemo(() => getImageSource(frame).startsWith("data:"), [frame]);
   const [src, setSrc] = React.useState<string>(() => getImageSource(frame));
   const [loaded, setLoaded] = React.useState(isDataUri);
-  const imgRef = React.useRef<HTMLImageElement>(null);
 
   React.useEffect(() => {
     const source = getImageSource(frame);
@@ -104,15 +311,15 @@ function FilmstripThumbnail({ frame, onExpand }: { frame: FilmstripFrame; onExpa
       >
         {loaded ? (
           <img
-            ref={imgRef}
             src={src}
             alt={frame.label}
             loading="lazy"
             style={{
               width: "100%",
               borderRadius: 4,
-              border: "1px solid var(--proof-grey)",
+              border: isActive ? "2px solid var(--proof-blue)" : "1px solid var(--proof-grey)",
               display: "block",
+              boxShadow: isActive ? "0 0 0 2px var(--proof-blue-bg)" : undefined,
             }}
           />
         ) : (
@@ -137,17 +344,18 @@ function FilmstripThumbnail({ frame, onExpand }: { frame: FilmstripFrame; onExpa
       <div
         style={{
           fontSize: 9,
-          color: "var(--proof-text-secondary)",
+          color: isActive ? "var(--proof-blue)" : "var(--proof-text-secondary)",
           marginTop: 2,
           textAlign: "center",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           gap: 2,
+          fontWeight: isActive ? 600 : 400,
         }}
       >
         {frame.label}
-        <Maximize2 size={9} style={{ color: "var(--proof-text-secondary)" }} />
+        <Maximize2 size={9} />
       </div>
     </div>
   );
@@ -166,24 +374,17 @@ export default function RunDetail() {
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [catFilter, setCatFilter] = React.useState<string>("all");
-  const [expandScreenshot, setExpandScreenshot] = React.useState<FilmstripFrame | null>(null);
-  const [preloadedUrl, setPreloadedUrl] = React.useState<string | null>(null);
+  const [page, setPage] = React.useState(0);
+  const [detailPanelCollapsed, setDetailPanelCollapsed] = React.useState(false);
+  const [categoryCollapsed, setCategoryCollapsed] = React.useState(false);
+  const PAGE_SIZE = 20;
 
-  const lightboxSrc = React.useMemo(() => {
-    if (!expandScreenshot) return "";
-    const source = getImageSource(expandScreenshot);
-    if (source.startsWith("data:")) return source;
-    return preloadedUrl || "";
-  }, [expandScreenshot, preloadedUrl]);
-
-  React.useEffect(() => {
-    if (expandScreenshot) {
-      const source = getImageSource(expandScreenshot);
-      if (!source.startsWith("data:")) {
-        preloadImage(source).then(setPreloadedUrl);
-      }
-    }
-  }, [expandScreenshot]);
+  const [prevFilterKey, setPrevFilterKey] = React.useState("");
+  const filterKey = `${search}|${statusFilter}|${catFilter}`;
+  if (prevFilterKey !== filterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(0);
+  }
   const urlTestId = React.useMemo(() => new URLSearchParams(urlSearch).get("testId"), [urlSearch]);
   const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(() => {
     if (urlTestId && run) return null;
@@ -235,18 +436,12 @@ export default function RunDetail() {
     return true;
   });
 
+  const pagedResults = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+
   const passCount = results.filter((r) => r.status === "PASS").length;
   const failCount = results.filter((r) => r.status === "FAIL").length;
   const passRate = results.length > 0 ? Math.round((passCount / results.length) * 100) : 0;
-
-  const catData = categories.map((cat) => {
-    const catResults = results.filter((r) => r.category === cat);
-    return {
-      category: cat.slice(0, 8),
-      pass: catResults.filter((r) => r.status === "PASS").length,
-      fail: catResults.filter((r) => r.status === "FAIL").length,
-    };
-  });
 
   const selIdx = selectedResult ? filtered.findIndex((r) => r.id === selectedResult.id) : -1;
 
@@ -388,32 +583,78 @@ export default function RunDetail() {
 
       {/* Chart + results table */}
       <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
-        <PanelErrorBoundary label="By category chart">
-          <div className="proof-card" style={{ padding: 16, width: 260, flexShrink: 0 }}>
-            <h3
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--proof-text-secondary)",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                marginBottom: 12,
-              }}
-            >
-              By Category
-            </h3>
-            <GoogleBarChart
-              title=""
-              columns={["Category", "Pass", "Fail"]}
-              data={catData}
-              xKey="category"
-              yKeys={["pass", "fail"]}
-              colors={["#22c55e", "#ef4444"]}
-              height="220px"
-              showTimeFrame={false}
-              isHorizontal
-              barType="grouped"
-            />
+        <PanelErrorBoundary label="Run KPIs">
+          <div className="proof-card" style={{ padding: 14, width: categoryCollapsed ? 48 : 220, flexShrink: 0, transition: "width 0.15s", overflow: "hidden" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: categoryCollapsed ? 0 : 10 }}>
+              {!categoryCollapsed && (
+                <h3
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "var(--proof-text-secondary)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  Run KPIs
+                </h3>
+              )}
+              <button
+                onClick={() => setCategoryCollapsed((c) => !c)}
+                aria-label={categoryCollapsed ? "Expand" : "Collapse"}
+                style={{
+                  border: "none", background: "transparent", cursor: "pointer",
+                  color: "var(--proof-text-secondary)", display: "flex", alignItems: "center", padding: 4,
+                  marginTop: categoryCollapsed ? 8 : 0,
+                }}
+              >
+                <ChevronDown size={14} style={{ transform: categoryCollapsed ? "rotate(-90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
+              </button>
+            </div>
+            {!categoryCollapsed && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ padding: "8px 10px", borderRadius: 6, background: passRate === 100 ? "rgba(34,197,94,0.08)" : passRate < 90 ? "rgba(239,68,68,0.08)" : "rgba(234,179,8,0.08)", border: `1px solid ${passRate === 100 ? "rgba(34,197,94,0.2)" : passRate < 90 ? "rgba(239,68,68,0.2)" : "rgba(234,179,8,0.2)"}` }}>
+                  <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Pass Rate</div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 700, color: passRate === 100 ? "var(--proof-green)" : passRate < 90 ? "var(--proof-red)" : "var(--proof-yellow)" }}>{passRate}%</div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                  <div style={{ padding: "6px 8px", borderRadius: 4, background: "var(--proof-grey-bg)", border: "1px solid var(--proof-grey)" }}>
+                    <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Total</div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, color: "var(--proof-text)" }}>{results.length}</div>
+                  </div>
+                  <div style={{ padding: "6px 8px", borderRadius: 4, background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
+                    <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Failed</div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)" }}>{failCount}</div>
+                  </div>
+                  <div style={{ padding: "6px 8px", borderRadius: 4, background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.15)" }}>
+                    <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Passed</div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, color: "var(--proof-green)" }}>{passCount}</div>
+                  </div>
+                  <div style={{ padding: "6px 8px", borderRadius: 4, background: "var(--proof-grey-bg)", border: "1px solid var(--proof-grey)" }}>
+                    <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Avg Dur</div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: "var(--proof-text)" }}>
+                      {results.length > 0 ? `${Math.round(results.reduce((s, r) => s + r.duration, 0) / results.length)}ms` : "—"}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ padding: "6px 8px", borderRadius: 4, border: "1px solid var(--proof-grey)", background: "var(--proof-grey-bg)" }}>
+                  <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>Tests by Category</div>
+                  {categories.map((cat) => {
+                    const catResults = results.filter((r) => r.category === cat);
+                    const pct = Math.round((catResults.filter((r) => r.status === "PASS").length / catResults.length) * 100);
+                    return (
+                      <div key={cat} style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                        <span style={{ fontSize: 9, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cat.slice(0, 10)}</span>
+                        <div style={{ width: 60, height: 6, borderRadius: 3, background: "var(--proof-grey)" }}>
+                          <div style={{ width: `${pct}%`, height: "100%", borderRadius: 3, background: pct === 100 ? "var(--proof-green)" : pct < 80 ? "var(--proof-red)" : "var(--proof-yellow)" }} />
+                        </div>
+                        <span style={{ fontSize: 8, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", minWidth: 20, textAlign: "right" }}>{pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </PanelErrorBoundary>
 
@@ -483,12 +724,13 @@ export default function RunDetail() {
                     <th>Test Name</th>
                     <th>Status</th>
                     <th>Category</th>
+                    <th style={{ width: 200, whiteSpace: "nowrap" }}>History</th>
                     <th style={{ textAlign: "right" }}>Duration</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((r) => (
+                  {pagedResults.map((r) => (
                     <tr
                       key={r.id}
                       onClick={() =>
@@ -536,6 +778,9 @@ export default function RunDetail() {
                           {r.category}
                         </span>
                       </td>
+                      <td style={{ width: 200, whiteSpace: "nowrap" }}>
+                        <RunHistoryDots testName={r.name} />
+                      </td>
                       <td
                         style={{
                           textAlign: "right",
@@ -548,7 +793,7 @@ export default function RunDetail() {
                       </td>
                       <td onClick={(e) => e.stopPropagation()}>
                         <button
-                          onClick={() => navigate(`/analytics?testId=${r.id}`)}
+                          onClick={() => navigate(`/trends?testId=${r.id}`)}
                           className="proof-button proof-button-xs"
                           style={{ padding: "2px 7px" }}
                         >
@@ -566,6 +811,37 @@ export default function RunDetail() {
                   ))}
                 </tbody>
               </table>
+              {totalPages > 1 && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 12,
+                    padding: "8px 14px",
+                    borderTop: "1px solid var(--proof-border)",
+                    fontSize: 12,
+                  }}
+                >
+                  <button
+                    disabled={page === 0}
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                    className="proof-button proof-button-xs"
+                  >
+                    Prev
+                  </button>
+                  <span style={{ color: "var(--proof-text-secondary)" }}>
+                    Page {page + 1} of {totalPages}
+                  </span>
+                  <button
+                    disabled={page >= totalPages - 1}
+                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                    className="proof-button proof-button-xs"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </PanelErrorBoundary>
@@ -655,6 +931,23 @@ export default function RunDetail() {
                   {selectedResult.status}
                 </span>
                 <button
+                  onClick={() => setDetailPanelCollapsed((c) => !c)}
+                  aria-label={detailPanelCollapsed ? "Expand" : "Collapse"}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    color: "var(--proof-text-secondary)",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: 4,
+                    transform: detailPanelCollapsed ? "rotate(-90deg)" : "rotate(0deg)",
+                    transition: "transform 0.15s",
+                  }}
+                >
+                  <ChevronDown size={14} />
+                </button>
+                <button
                   onClick={() => setSelectedResultSyncUrl(null)}
                   aria-label="Close"
                   style={{
@@ -670,142 +963,307 @@ export default function RunDetail() {
                 </button>
               </div>
 
-              <div
-                style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  padding: 14,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                }}
-              >
-                {/* Test name */}
-                <div>
+              {!detailPanelCollapsed && (
+                <>
                   <div
                     style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      lineHeight: 1.5,
-                      wordBreak: "break-all",
+                      flex: 1,
+                      overflowY: "auto",
+                      padding: 14,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 12,
                     }}
                   >
-                    {selectedResult.name}
-                  </div>
-                  <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        background: "var(--proof-grey-bg)",
-                        padding: "2px 8px",
-                        borderRadius: 4,
-                        border: "1px solid var(--proof-grey)",
-                      }}
-                    >
-                      {selectedResult.category}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: "var(--proof-text-secondary)",
-                        fontFamily: "var(--font-mono)",
-                      }}
-                    >
-                      {selectedResult.duration}ms
-                    </span>
-                  </div>
-                </div>
-
-                {/* Filmstrip */}
-                {selectedResult.filmstrip && selectedResult.filmstrip.length > 0 && (
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 600,
-                        color: "var(--proof-text-secondary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        marginBottom: 6,
-                      }}
-                    >
-                      Filmstrip ({selectedResult.filmstrip.length})
-                    </div>
-                    <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
-                      {selectedResult.filmstrip.map((f) => (
-                        <FilmstripThumbnail
-                          key={f.id}
-                          frame={f}
-                          onExpand={() => setExpandScreenshot(f)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Screenshot lightbox */}
-                <Dialog
-                  open={!!expandScreenshot}
-                  onOpenChange={(open) => {
-                    if (!open) setExpandScreenshot(null);
-                  }}
-                >
-                  <DialogContent
-                    style={{
-                      maxWidth: "90vw",
-                      width: "auto",
-                      background: "var(--proof-surface)",
-                      border: "1px solid var(--proof-grey)",
-                      padding: 0,
-                    }}
-                  >
-                    <DialogTitle
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        padding: "8px 12px",
-                        borderBottom: "1px solid var(--proof-grey)",
-                        color: "var(--proof-text-secondary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                      }}
-                    >
-                      {expandScreenshot?.label ?? "Screenshot"}
-                    </DialogTitle>
-                    {expandScreenshot && (
+                    {/* Test name */}
+                    <div>
                       <div
                         style={{
-                          padding: 12,
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          maxHeight: "80vh",
-                          overflow: "auto",
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 11,
+                          fontWeight: 600,
+                          lineHeight: 1.5,
+                          wordBreak: "break-all",
                         }}
                       >
-                        {lightboxSrc && (
-                          <img
-                            src={lightboxSrc}
-                            alt={expandScreenshot?.label ?? "Screenshot"}
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "70vh",
-                              borderRadius: 4,
-                              display: "block",
-                            }}
-                          />
-                        )}
+                        {selectedResult.name}
                       </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                      <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            background: "var(--proof-grey-bg)",
+                            padding: "2px 8px",
+                            borderRadius: 4,
+                            border: "1px solid var(--proof-grey)",
+                          }}
+                        >
+                          {selectedResult.category}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            color: "var(--proof-text-secondary)",
+                            fontFamily: "var(--font-mono)",
+                          }}
+                        >
+                          {selectedResult.duration}ms
+                        </span>
+                      </div>
+                    </div>
 
-                {/* HTTP Exchange — always visible */}
-                {(() => {
-                  const e = selectedResult.evidence;
-                  if (!e)
-                    return (
+                    {/* Filmstrip */}
+                    {selectedResult.filmstrip && selectedResult.filmstrip.length > 0 && (
+                      <FilmstripViewer
+                        frames={selectedResult.filmstrip}
+                        onClose={() => {}}
+                      />
+                    )}
+
+                    {/* HTTP Exchange — always visible */}
+                    {(() => {
+                      const e = selectedResult.evidence;
+                      if (!e)
+                        return (
+                          <div>
+                            <div
+                              style={{
+                                fontSize: 10,
+                                fontWeight: 600,
+                                color: "var(--proof-text-secondary)",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.5px",
+                                marginBottom: 6,
+                              }}
+                            >
+                              HTTP Exchange
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 11,
+                                color: "var(--proof-text-secondary)",
+                                fontStyle: "italic",
+                              }}
+                            >
+                              No HTTP data captured
+                            </div>
+                          </div>
+                        );
+                      const rows: { label: string; val: string }[] = [];
+                      rows.push({ label: "Method", val: e.request.method });
+                      rows.push({ label: "URL", val: e.request.url });
+                      rows.push({ label: "Status", val: String(e.response.status) });
+                      const ct = e.response.headers?.["Content-Type"] ?? "";
+                      if (ct) rows.push({ label: "Content-Type", val: ct });
+                      const cl = e.response.headers?.["Content-Length"] ?? "";
+                      if (cl) rows.push({ label: "Size", val: cl + " bytes" });
+                      const cache = e.response.headers?.["Cache-Control"] ?? "";
+                      if (cache) rows.push({ label: "Cache", val: cache });
+                      return (
+                        <div>
+                          <div
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 600,
+                              color: "var(--proof-text-secondary)",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              marginBottom: 6,
+                            }}
+                          >
+                            HTTP Exchange
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 3,
+                              fontSize: 11,
+                              fontFamily: "var(--font-mono)",
+                            }}
+                          >
+                            {rows.map((r) => (
+                              <div key={r.label} style={{ display: "flex", gap: 6 }}>
+                                <span
+                                  style={{
+                                    color: "var(--proof-text-secondary)",
+                                    width: 80,
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  {r.label}
+                                </span>
+                                <span
+                                  style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
+                                >
+                                  {r.val}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          {/* Response headers */}
+                          {e.response.headers && Object.keys(e.response.headers).length > 0 && (
+                            <details open style={{ marginTop: 8, fontSize: 11 }}>
+                              <summary
+                                style={{
+                                  cursor: "pointer",
+                                  color: "var(--proof-text-secondary)",
+                                  fontWeight: 600,
+                                  fontSize: 10,
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.5px",
+                                }}
+                              >
+                                Response Headers ({Object.keys(e.response.headers).length})
+                              </summary>
+                              <div
+                                style={{
+                                  marginTop: 4,
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: 2,
+                                }}
+                              >
+                                {Object.entries(e.response.headers).map(([k, v]) => (
+                                  <div
+                                    key={k}
+                                    style={{
+                                      display: "flex",
+                                      gap: 6,
+                                      fontFamily: "var(--font-mono)",
+                                      fontSize: 10,
+                                    }}
+                                  >
+                                    <span style={{ color: "var(--proof-blue)", minWidth: 140 }}>
+                                      {k}
+                                    </span>
+                                    <span
+                                      style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
+                                    >
+                                      {v}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          )}
+                          {/* Request headers */}
+                          {e.request.headers && Object.keys(e.request.headers).length > 0 && (
+                            <details open style={{ marginTop: 6, fontSize: 11 }}>
+                              <summary
+                                style={{
+                                  cursor: "pointer",
+                                  color: "var(--proof-text-secondary)",
+                                  fontWeight: 600,
+                                  fontSize: 10,
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.5px",
+                                }}
+                              >
+                                Request Headers ({Object.keys(e.request.headers).length})
+                              </summary>
+                              <div
+                                style={{
+                                  marginTop: 4,
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: 2,
+                                }}
+                              >
+                                {Object.entries(e.request.headers).map(([k, v]) => (
+                                  <div
+                                    key={k}
+                                    style={{
+                                      display: "flex",
+                                      gap: 6,
+                                      fontFamily: "var(--font-mono)",
+                                      fontSize: 10,
+                                    }}
+                                  >
+                                    <span style={{ color: "var(--proof-purple)", minWidth: 140 }}>
+                                      {k}
+                                    </span>
+                                    <span
+                                      style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
+                                    >
+                                      {v}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          )}
+                          {/* Cookies */}
+                          {e.response.cookies && e.response.cookies.length > 0 && (
+                            <details open style={{ marginTop: 6, fontSize: 11 }}>
+                              <summary
+                                style={{
+                                  cursor: "pointer",
+                                  color: "var(--proof-text-secondary)",
+                                  fontWeight: 600,
+                                  fontSize: 10,
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.5px",
+                                }}
+                              >
+                                Cookies ({e.response.cookies.length})
+                              </summary>
+                              <div
+                                style={{
+                                  marginTop: 4,
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: 2,
+                                }}
+                              >
+                                {e.response.cookies.map((c, i) => (
+                                  <div
+                                    key={i}
+                                    style={{
+                                      display: "flex",
+                                      gap: 6,
+                                      fontFamily: "var(--font-mono)",
+                                      fontSize: 10,
+                                      padding: "4px 6px",
+                                      background: "var(--proof-grey-bg)",
+                                      borderRadius: 4,
+                                    }}
+                                  >
+                                    <span style={{ color: "var(--proof-orange)", fontWeight: 600 }}>
+                                      {c.name}
+                                    </span>
+                                    <span
+                                      style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
+                                    >
+                                      = {c.value}
+                                    </span>
+                                    {c.domain && (
+                                      <span style={{ color: "var(--proof-text-secondary)" }}>
+                                        domain={c.domain}
+                                      </span>
+                                    )}
+                                    {c.path && (
+                                      <span style={{ color: "var(--proof-text-secondary)" }}>
+                                        path={c.path}
+                                      </span>
+                                    )}
+                                    {c.httpOnly && (
+                                      <span style={{ color: "var(--proof-green)" }}>HttpOnly</span>
+                                    )}
+                                    {c.secure && (
+                                      <span style={{ color: "var(--proof-green)" }}>Secure</span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Assertions */}
+                    {selectedResult.assertions && selectedResult.assertions.length > 0 && (
                       <div>
                         <div
                           style={{
@@ -817,314 +1275,79 @@ export default function RunDetail() {
                             marginBottom: 6,
                           }}
                         >
-                          HTTP Exchange
+                          Assertions
                         </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                          {selectedResult.assertions.map((a, i) => (
+                            <AssertionRow key={i} a={a} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Error message */}
+                    {selectedResult.error && (
+                      <div>
                         <div
                           style={{
-                            fontSize: 11,
+                            fontSize: 10,
+                            fontWeight: 600,
                             color: "var(--proof-text-secondary)",
-                            fontStyle: "italic",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            marginBottom: 6,
                           }}
                         >
-                          No HTTP data captured
+                          Error
                         </div>
+                        <pre
+                          style={{
+                            fontSize: 10,
+                            lineHeight: 1.5,
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-all",
+                            background: "var(--proof-red-bg)",
+                            border: "1px solid var(--proof-red)",
+                            borderRadius: 4,
+                            padding: 10,
+                            margin: 0,
+                            color: "var(--proof-red)",
+                            fontFamily: "var(--font-mono)",
+                          }}
+                        >
+                          {selectedResult.error}
+                        </pre>
                       </div>
-                    );
-                  const rows: { label: string; val: string }[] = [];
-                  rows.push({ label: "Method", val: e.request.method });
-                  rows.push({ label: "URL", val: e.request.url });
-                  rows.push({ label: "Status", val: String(e.response.status) });
-                  const ct = e.response.headers?.["Content-Type"] ?? "";
-                  if (ct) rows.push({ label: "Content-Type", val: ct });
-                  const cl = e.response.headers?.["Content-Length"] ?? "";
-                  if (cl) rows.push({ label: "Size", val: cl + " bytes" });
-                  const cache = e.response.headers?.["Cache-Control"] ?? "";
-                  if (cache) rows.push({ label: "Cache", val: cache });
-                  return (
-                    <div>
-                      <div
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          color: "var(--proof-text-secondary)",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          marginBottom: 6,
-                        }}
-                      >
-                        HTTP Exchange
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 3,
-                          fontSize: 11,
-                          fontFamily: "var(--font-mono)",
-                        }}
-                      >
-                        {rows.map((r) => (
-                          <div key={r.label} style={{ display: "flex", gap: 6 }}>
-                            <span
-                              style={{
-                                color: "var(--proof-text-secondary)",
-                                width: 80,
-                                flexShrink: 0,
-                              }}
-                            >
-                              {r.label}
-                            </span>
-                            <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>
-                              {r.val}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      {/* Response headers */}
-                      {e.response.headers && Object.keys(e.response.headers).length > 0 && (
-                        <details open style={{ marginTop: 8, fontSize: 11 }}>
-                          <summary
-                            style={{
-                              cursor: "pointer",
-                              color: "var(--proof-text-secondary)",
-                              fontWeight: 600,
-                              fontSize: 10,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.5px",
-                            }}
-                          >
-                            Response Headers ({Object.keys(e.response.headers).length})
-                          </summary>
-                          <div
-                            style={{
-                              marginTop: 4,
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: 2,
-                            }}
-                          >
-                            {Object.entries(e.response.headers).map(([k, v]) => (
-                              <div
-                                key={k}
-                                style={{
-                                  display: "flex",
-                                  gap: 6,
-                                  fontFamily: "var(--font-mono)",
-                                  fontSize: 10,
-                                }}
-                              >
-                                <span style={{ color: "var(--proof-blue)", minWidth: 140 }}>
-                                  {k}
-                                </span>
-                                <span
-                                  style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                                >
-                                  {v}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </details>
-                      )}
-                      {/* Request headers */}
-                      {e.request.headers && Object.keys(e.request.headers).length > 0 && (
-                        <details open style={{ marginTop: 6, fontSize: 11 }}>
-                          <summary
-                            style={{
-                              cursor: "pointer",
-                              color: "var(--proof-text-secondary)",
-                              fontWeight: 600,
-                              fontSize: 10,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.5px",
-                            }}
-                          >
-                            Request Headers ({Object.keys(e.request.headers).length})
-                          </summary>
-                          <div
-                            style={{
-                              marginTop: 4,
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: 2,
-                            }}
-                          >
-                            {Object.entries(e.request.headers).map(([k, v]) => (
-                              <div
-                                key={k}
-                                style={{
-                                  display: "flex",
-                                  gap: 6,
-                                  fontFamily: "var(--font-mono)",
-                                  fontSize: 10,
-                                }}
-                              >
-                                <span style={{ color: "var(--proof-purple)", minWidth: 140 }}>
-                                  {k}
-                                </span>
-                                <span
-                                  style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                                >
-                                  {v}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </details>
-                      )}
-                      {/* Cookies */}
-                      {e.response.cookies && e.response.cookies.length > 0 && (
-                        <details open style={{ marginTop: 6, fontSize: 11 }}>
-                          <summary
-                            style={{
-                              cursor: "pointer",
-                              color: "var(--proof-text-secondary)",
-                              fontWeight: 600,
-                              fontSize: 10,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.5px",
-                            }}
-                          >
-                            Cookies ({e.response.cookies.length})
-                          </summary>
-                          <div
-                            style={{
-                              marginTop: 4,
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: 2,
-                            }}
-                          >
-                            {e.response.cookies.map((c, i) => (
-                              <div
-                                key={i}
-                                style={{
-                                  display: "flex",
-                                  gap: 6,
-                                  fontFamily: "var(--font-mono)",
-                                  fontSize: 10,
-                                  padding: "4px 6px",
-                                  background: "var(--proof-grey-bg)",
-                                  borderRadius: 4,
-                                }}
-                              >
-                                <span style={{ color: "var(--proof-orange)", fontWeight: 600 }}>
-                                  {c.name}
-                                </span>
-                                <span
-                                  style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                                >
-                                  = {c.value}
-                                </span>
-                                {c.domain && (
-                                  <span style={{ color: "var(--proof-text-secondary)" }}>
-                                    domain={c.domain}
-                                  </span>
-                                )}
-                                {c.path && (
-                                  <span style={{ color: "var(--proof-text-secondary)" }}>
-                                    path={c.path}
-                                  </span>
-                                )}
-                                {c.httpOnly && (
-                                  <span style={{ color: "var(--proof-green)" }}>HttpOnly</span>
-                                )}
-                                {c.secure && (
-                                  <span style={{ color: "var(--proof-green)" }}>Secure</span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </details>
-                      )}
-                    </div>
-                  );
-                })()}
-
-                {/* Assertions */}
-                {selectedResult.assertions && selectedResult.assertions.length > 0 && (
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 600,
-                        color: "var(--proof-text-secondary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        marginBottom: 6,
-                      }}
-                    >
-                      Assertions
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      {selectedResult.assertions.map((a, i) => (
-                        <AssertionRow key={i} a={a} />
-                      ))}
-                    </div>
+                    )}
                   </div>
-                )}
 
-                {/* Error message */}
-                {selectedResult.error && (
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 600,
-                        color: "var(--proof-text-secondary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        marginBottom: 6,
-                      }}
+                  {/* Footer actions */}
+                  <div
+                    style={{
+                      padding: "8px 14px",
+                      borderTop: "1px solid var(--proof-grey)",
+                      display: "flex",
+                      gap: 6,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <button
+                      onClick={() => navigate(`/analytics?testId=${selectedResult.id}`)}
+                      className="proof-button proof-button-xs"
+                      style={{ flex: 1 }}
                     >
-                      Error
-                    </div>
-                    <pre
-                      style={{
-                        fontSize: 10,
-                        lineHeight: 1.5,
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-all",
-                        background: "var(--proof-red-bg)",
-                        border: "1px solid var(--proof-red)",
-                        borderRadius: 4,
-                        padding: 10,
-                        margin: 0,
-                        color: "var(--proof-red)",
-                        fontFamily: "var(--font-mono)",
-                      }}
+                      <BarChart3 size={11} /> Analytics
+                    </button>
+                    <button
+                      onClick={() => navigate(`/testdoc?testId=${selectedResult.id}`)}
+                      className="proof-button proof-button-xs"
+                      style={{ flex: 1 }}
                     >
-                      {selectedResult.error}
-                    </pre>
+                      <FileText size={11} /> Definition
+                    </button>
                   </div>
-                )}
-              </div>
-
-              {/* Footer actions */}
-              <div
-                style={{
-                  padding: "8px 14px",
-                  borderTop: "1px solid var(--proof-grey)",
-                  display: "flex",
-                  gap: 6,
-                  flexShrink: 0,
-                }}
-              >
-                <button
-                  onClick={() => navigate(`/analytics?testId=${selectedResult.id}`)}
-                  className="proof-button proof-button-xs"
-                  style={{ flex: 1 }}
-                >
-                  <BarChart3 size={11} /> Analytics
-                </button>
-                <button
-                  onClick={() => navigate(`/testdoc?testId=${selectedResult.id}`)}
-                  className="proof-button proof-button-xs"
-                  style={{ flex: 1 }}
-                >
-                  <FileText size={11} /> Definition
-                </button>
-              </div>
+                </>
+              )}
             </div>
           </PanelErrorBoundary>
         )}

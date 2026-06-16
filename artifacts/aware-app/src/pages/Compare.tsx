@@ -785,8 +785,8 @@ export default function Compare() {
               selectedId={selectedId}
               onSelect={setSelectedId}
               navigate={navigate}
-              baseResult={baseResults.find((r) => r.testCaseId === selectedDiff.id) ?? null}
-              candResult={candResults.find((r) => r.testCaseId === selectedDiff.id) ?? null}
+              baseResult={baseResults.find((r) => r.name === selectedDiff.name) ?? null}
+              candResult={candResults.find((r) => r.name === selectedDiff.name) ?? null}
             />
           )}
         </div>
