@@ -459,8 +459,15 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
           label={`${Math.round(testCase.filmstrip.threshold * 100)}%`}
         >
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-            <Pill label="Mode" value={testCase.filmstrip.region || "full"} />
+            <Pill label="Mode" value={testCase.filmstrip.mode} />
             <Pill label="Threshold" value={`${Math.round(testCase.filmstrip.threshold * 100)}%`} />
+            {testCase.filmstrip.captureOnFailure && (
+              <Pill label="Capture" value="On Failure" color="var(--proof-yellow)" />
+            )}
+            <Pill label="Max" value={`${testCase.filmstrip.maxFrames} frames`} />
+            {testCase.filmstrip.region && (
+              <Pill label="Region" value={testCase.filmstrip.region} />
+            )}
             {testCase.filmstrip.ignoreAreas && testCase.filmstrip.ignoreAreas.length > 0 && (
               <Pill label="Ignores" value={`${testCase.filmstrip.ignoreAreas.length} areas`} />
             )}

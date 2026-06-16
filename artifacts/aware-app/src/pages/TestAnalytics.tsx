@@ -590,7 +590,7 @@ export default function TestAnalytics() {
         <div style={{ display: "flex", gap: 10 }}>
           {isTcMode && testCase && (
             <button
-              onClick={() => navigate(`/testdoc?testId=${testCase.id}`)}
+              onClick={() => navigate(`/tests?q=${testCase.id}`)}
               className="proof-button proof-button-sm"
             >
               <FileText size={13} /> Definition

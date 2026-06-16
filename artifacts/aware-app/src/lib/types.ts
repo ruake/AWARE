@@ -199,11 +199,17 @@ export interface Predicate {
   description: string;
 }
 
+export type FilmstripMode = "screenshot" | "dom-snapshot" | "visual-diff";
+
 export interface FilmstripConfig {
   enabled: boolean;
+  mode: FilmstripMode;
   threshold: number;
   region?: string;
   ignoreAreas?: string[];
+  diffBaselineId?: string;
+  captureOnFailure: boolean;
+  maxFrames: number;
 }
 
 export interface TestAssertion {

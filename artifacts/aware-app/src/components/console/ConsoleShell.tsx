@@ -15,7 +15,7 @@ import {
   History,
   GitCompare,
   BarChart3,
-  FolderTree,
+  Beaker,
   Bot,
   Info,
 } from "lucide-react";
@@ -29,7 +29,7 @@ const ACTIVITY_ITEMS = [
   { id: "runs", icon: History, label: "Runs", href: "/runs" },
   { id: "compare", icon: GitCompare, label: "Compare", href: "/compare" },
   { id: "trends", icon: BarChart3, label: "Trends", href: "/trends" },
-  { id: "suites", icon: FolderTree, label: "Test Suites", href: "/suites" },
+  { id: "tests", icon: Beaker, label: "Tests", href: "/tests" },
   { id: "copilot", icon: Bot, label: "Copilot", href: "/copilot" },
   { id: "about", icon: Info, label: "About", href: "/about" },
 ];
@@ -40,7 +40,7 @@ function activityIdFromPath(path: string): string {
   if (seg === "runs" || seg === "activity" || seg === "pulse") return "runs";
   if (seg === "compare") return "compare";
   if (seg === "trends" || seg === "analytics") return "trends";
-  if (seg === "suites") return "suites";
+  if (seg === "tests") return "tests";
   if (seg === "copilot") return "copilot";
   if (seg === "about") return "about";
   return "dashboard";

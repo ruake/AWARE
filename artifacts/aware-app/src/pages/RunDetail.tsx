@@ -29,8 +29,12 @@ import {
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
-import { RunHistoryDots } from "@/components/aware/RunHistoryDots";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  TimeWindowProvider,
+  TimeWindowControls,
+  TestHistoryStrip,
+} from "@/components/aware/HistoryTimeline";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 function AssertionRow({ a }: { a: TestAssertionResult }) {
   return (
@@ -1017,7 +1021,7 @@ export default function RunDetail() {
           >
             <div
               style={{
-                padding: "10px 14px",
+                padding: "8px 14px",
                 borderBottom: "1px solid var(--proof-grey)",
                 background: "var(--proof-grey-bg)",
                 display: "flex",
@@ -1062,7 +1066,12 @@ export default function RunDetail() {
               <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
                 {filtered.length} / {results.length}
               </span>
+              <div style={{ flexBasis: "100%", height: 0 }} />
             </div>
+            <TimeWindowProvider>
+              <div style={{ padding: "6px 14px", borderBottom: "1px solid var(--proof-grey)" }}>
+                <TimeWindowControls />
+              </div>
             <div style={{ flex: 1, overflowY: "auto" }}>
               <table className="proof-table">
                 <thead>
@@ -1125,7 +1134,7 @@ export default function RunDetail() {
                         </span>
                       </td>
                       <td style={{ width: 200, whiteSpace: "nowrap" }}>
-                        <RunHistoryDots testName={r.name} />
+                        <TestHistoryStrip testName={r.name} />
                       </td>
                       <td
                         style={{
@@ -1146,7 +1155,7 @@ export default function RunDetail() {
                           Analytics
                         </button>
                         <button
-                          onClick={() => navigate(`/testdoc?testId=${r.id}`)}
+                          onClick={() => navigate(`/tests?q=${r.id}`)}
                           className="proof-button proof-button-xs"
                           style={{ padding: "2px 7px", marginLeft: 4 }}
                         >
@@ -1189,6 +1198,7 @@ export default function RunDetail() {
                 </div>
               )}
             </div>
+            </TimeWindowProvider>
           </div>
         </PanelErrorBoundary>
 
@@ -1682,7 +1692,7 @@ export default function RunDetail() {
                       <BarChart3 size={11} /> Analytics
                     </button>
                     <button
-                      onClick={() => navigate(`/testdoc?testId=${selectedResult.id}`)}
+                      onClick={() => navigate(`/tests?q=${selectedResult.id}`)}
                       className="proof-button proof-button-xs"
                       style={{ flex: 1 }}
                     >

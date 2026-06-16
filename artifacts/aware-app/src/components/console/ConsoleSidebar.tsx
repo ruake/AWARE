@@ -4,6 +4,7 @@ import { EnvSelector } from "./EnvSelector";
 import { SuiteSelector } from "./SuiteSelector";
 import { RUNS } from "@/lib/runs";
 import { getEnvConfigs } from "@/lib/envConfig";
+import { getTestSuites, subscribeToTestSuites, getTestCases, subscribeToTestCases } from "@/lib/data";
 import {
   getSelectedEnvSnapshot,
   subscribeToSelectedEnv,
@@ -14,6 +15,8 @@ import {
   subscribeToSelectedSuites,
   setSelectedSuiteIds,
 } from "@/lib/filters";
+import { FolderTree, Beaker, Search } from "lucide-react";
+import type { TestSuite } from "@/lib/types";
 
 interface ConsoleSidebarProps {
   activePanel: string;
@@ -27,6 +30,7 @@ const PANEL_LABELS: Record<string, string> = {
   compare: "Compare",
   trends: "Trends",
   suites: "Test Suites",
+  tests: "Tests",
   copilot: "Copilot",
   about: "About",
 };
@@ -37,6 +41,7 @@ const PANEL_ACCENTS: Record<string, string> = {
   compare: "var(--proof-purple)",
   trends: "var(--proof-yellow)",
   suites: "var(--proof-cyan)",
+  tests: "var(--proof-orange)",
   copilot: "var(--proof-orange)",
   about: "var(--proof-text-secondary)",
 };
@@ -331,6 +336,112 @@ function NavFooter() {
   );
 }
 
+function SuiteTreePanel() {
+  const [, navigate] = useLocation();
+  const suites = useSyncExternalStore(subscribeToTestSuites, getTestSuites);
+  const tests = useSyncExternalStore(subscribeToTestCases, getTestCases);
+  const [treeSearch, setTreeSearch] = React.useState("");
+  const currentSuite = new URLSearchParams(window.location.search).get("suite");
+
+  const rootSuites = React.useMemo(() => {
+    let roots = suites.filter((s) => s.parentId === null || !suites.find((p) => p.id === s.parentId));
+    if (treeSearch.trim()) {
+      const q = treeSearch.toLowerCase();
+      roots = roots.filter((s) => {
+        const all = flattenForSearch(s, suites);
+        return all.some((c) => c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q));
+      });
+    }
+    return roots;
+  }, [suites, treeSearch]);
+
+  function flattenForSearch(suite: TestSuite, allSuites: TestSuite[]): TestSuite[] {
+    const result = [suite];
+    for (const c of allSuites.filter((s) => s.parentId === suite.id)) result.push(...flattenForSearch(c, allSuites));
+    return result;
+  }
+
+  function getChildren(suite: TestSuite): TestSuite[] {
+    return suites.filter((s) => s.parentId === suite.id);
+  }
+
+  function getTestCount(suite: TestSuite): number {
+    const ids = [...suite.testIds];
+    for (const child of getChildren(suite)) ids.push(...child.testIds);
+    return ids.length;
+  }
+
+  function renderSuite(suite: TestSuite, depth: number) {
+    const children = getChildren(suite);
+    const count = getTestCount(suite);
+    const isActive = currentSuite === suite.id;
+    const matches = !treeSearch.trim() || flattenForSearch(suite, suites).some((s) => s.name.toLowerCase().includes(treeSearch.toLowerCase()) || s.id.toLowerCase().includes(treeSearch.toLowerCase()));
+    if (!matches) return null;
+    return (
+      <React.Fragment key={suite.id}>
+        <div
+          onClick={() => navigate(`/tests?suite=${suite.id}`)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            padding: "3px 10px 3px",
+            paddingLeft: `${8 + depth * 14}px`,
+            cursor: "pointer",
+            fontSize: 12,
+            color: isActive ? "var(--proof-text)" : "var(--proof-text-secondary)",
+            background: isActive ? "var(--proof-blue-bg)" : "transparent",
+            transition: "background 0.1s",
+            lineHeight: "22px",
+            userSelect: "none",
+          }}
+          onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text)"; }}
+          onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)"; }}
+        >
+          {depth > 0 && <span style={{ fontSize: 8, color: "var(--proof-text-muted)", width: 8, flexShrink: 0 }}>└</span>}
+          <FolderTree size={12} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
+          <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 11 }}>{suite.name}</span>
+          <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--proof-text-muted)", flexShrink: 0 }}>{count}</span>
+        </div>
+        {children.map((c) => renderSuite(c, depth + 1))}
+      </React.Fragment>
+    );
+  }
+
+  return (
+    <>
+      <div style={{ padding: "8px 10px 4px", borderBottom: "1px solid var(--proof-border)" }}>
+        <div
+          onClick={() => navigate("/tests")}
+          style={{
+            display: "flex", alignItems: "center", gap: 6, padding: "4px 6px", borderRadius: 4,
+            cursor: "pointer", fontSize: 12, fontWeight: 600,
+            color: !currentSuite ? "var(--proof-text)" : "var(--proof-text-secondary)",
+            background: !currentSuite ? "var(--proof-blue-bg)" : "transparent",
+            transition: "background 0.1s",
+          }}
+          onMouseEnter={(e) => { if (currentSuite) (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
+          onMouseLeave={(e) => { if (currentSuite) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+        >
+          <Beaker size={13} style={{ color: "var(--proof-orange)" }} />
+          All Tests
+          <span style={{ marginLeft: "auto", fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--proof-text-muted)" }}>{tests.length}</span>
+        </div>
+      </div>
+      <div style={{ padding: "4px 10px", borderBottom: "1px solid var(--proof-border)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, border: "1px solid var(--proof-border)", borderRadius: 3, padding: "3px 6px" }}>
+          <Search size={11} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
+          <input value={treeSearch} onChange={(e) => setTreeSearch(e.target.value)} placeholder="Filter suites..." style={{ border: "none", outline: "none", fontSize: 11, background: "transparent", flex: 1, minWidth: 0, color: "var(--proof-text)" }} />
+        </div>
+      </div>
+      <div style={{ padding: "2px 0" }}>
+        {suites.length === 0 && <div style={{ padding: "12px 10px", fontSize: 11, color: "var(--proof-text-muted)", textAlign: "center" }}>No suites configured</div>}
+        {rootSuites.map((s) => renderSuite(s, 0))}
+      </div>
+    </>
+  );
+}
+
 export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebarProps) {
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
   const suiteSnap = useSyncExternalStore(subscribeToSelectedSuites, getSelectedSuiteSnapshot);
@@ -415,6 +526,9 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
             Manage test suites, view hierarchy, and export YAML configuration.
           </div>
         );
+
+      case "tests":
+        return <SuiteTreePanel />;
 
       case "copilot":
         return (

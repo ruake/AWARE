@@ -23,10 +23,9 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
     if (path.startsWith("/runs")) return path === "/runs" ? "Runs" : "Run Detail";
     if (path.startsWith("/compare")) return "Compare";
     if (path.startsWith("/trends")) return "Trends";
-    if (path.startsWith("/suites")) return "Test Suites";
     if (path.startsWith("/copilot")) return "Copilot";
     if (path.startsWith("/about")) return "About";
-    if (path.startsWith("/testdoc")) return "Test Documentation";
+    if (path.startsWith("/tests")) return "Tests";
     if (path.startsWith("/start")) return "Start Run";
     if (path.startsWith("/share")) return "Sharing";
     return "A.W.A.R.E.";
