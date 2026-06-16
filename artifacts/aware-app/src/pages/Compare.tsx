@@ -789,45 +789,25 @@ export default function Compare() {
               </table>
             </div>
           </div>
-          {/* Detail overlay — centered, not side panel */}
+          {/* Detail side panel */}
           {selectedDiff && selectedId && (
             <div
               style={{
-                position: "fixed",
-                inset: 0,
-                zIndex: 9990,
-                background: "rgba(0,0,0,0.4)",
-                backdropFilter: "blur(4px)",
-                WebkitBackdropFilter: "blur(4px)",
+                width: 440,
+                flexShrink: 0,
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                animation: "fadeIn 0.15s ease",
-              }}
-              onClick={(e) => {
-                if (e.target === e.currentTarget) setSelectedId(null);
+                borderLeft: "1px solid var(--proof-border)",
               }}
             >
-              <div
-                style={{
-                  maxHeight: "85vh",
-                  overflow: "hidden",
-                  display: "flex",
-                  borderRadius: 8,
-                  boxShadow: "0 16px 48px rgba(0,0,0,0.3)",
-                }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <CompareSidePanel
-                  diff={selectedDiff}
-                  diffs={filtered}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                  navigate={navigate}
-                  baseResult={baseResults.find((r) => r.name === selectedDiff.name) ?? null}
-                  candResult={candResults.find((r) => r.name === selectedDiff.name) ?? null}
-                />
-              </div>
+              <CompareSidePanel
+                diff={selectedDiff}
+                diffs={filtered}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                navigate={navigate}
+                baseResult={baseResults.find((r) => r.name === selectedDiff.name) ?? null}
+                candResult={candResults.find((r) => r.name === selectedDiff.name) ?? null}
+              />
             </div>
           )}
         </div>

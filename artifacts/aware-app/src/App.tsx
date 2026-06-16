@@ -55,11 +55,10 @@ const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const Runs = React.lazy(() => import("@/pages/Runs"));
 const RunDetail = React.lazy(() => import("@/pages/RunDetail"));
 const Compare = React.lazy(() => import("@/pages/Compare"));
-const TestSuites = React.lazy(() => import("@/pages/TestSuiteManager"));
+const Tests = React.lazy(() => import("@/pages/Tests"));
 const Trends = React.lazy(() => import("@/pages/TestAnalytics"));
 const About = React.lazy(() => import("@/pages/About"));
 const Copilot = React.lazy(() => import("@/pages/Copilot"));
-const TestDoc = React.lazy(() => import("@/pages/TestDoc"));
 const StartRun = React.lazy(() => import("@/pages/StartRun"));
 const Sharing = React.lazy(() => import("@/pages/Sharing"));
 
@@ -220,19 +219,24 @@ function Router() {
             <Trends />
           </React.Suspense>
         </Route>
-        <Route path="/suites">
+        <Route path="/tests">
           <React.Suspense fallback={<PageLoader />}>
-            <TestSuites />
+            <Tests />
           </React.Suspense>
+        </Route>
+        <Route path="/suites">
+          {() => {
+            window.history.replaceState(null, "", `${import.meta.env.BASE_URL}tests`);
+            return (
+              <React.Suspense fallback={<PageLoader />}>
+                <Tests />
+              </React.Suspense>
+            );
+          }}
         </Route>
         <Route path="/copilot">
           <React.Suspense fallback={<PageLoader />}>
             <Copilot />
-          </React.Suspense>
-        </Route>
-        <Route path="/testdoc">
-          <React.Suspense fallback={<PageLoader />}>
-            <TestDoc />
           </React.Suspense>
         </Route>
         <Route path="/about">

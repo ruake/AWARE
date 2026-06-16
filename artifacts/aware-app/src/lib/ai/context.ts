@@ -172,10 +172,10 @@ A.W.A.R.E. (Akamai Web Analytics Regression Engine, also branded "PROOF") is a s
 | Run Detail | /runs/{id} | Per-run test results, filterable by status (PASS/FAIL/ERROR/SKIP), HTTP evidence viewer |
 | Compare | /compare | Baseline vs candidate diff with added/removed/flaky/changed test states |
 | Test Analytics | /trends | Trends line chart, flakiness leaderboard, category heatmaps, test-level Z-score anomaly |
-| Test Suite Manager | /suites | Hierarchical suite tree with YAML preview |
+| Tests | /tests | Test browser with suite tree and detail panels |
 | Copilot | /copilot | AI chat interface — THIS page. Shows quick-action buttons, debug panel, conversation |
 | Activity | /activity | Live status feed of runs and promotions |
-| Test Doc | /testdoc | Per-test documentation viewer |
+| Tests | /tests | Test browser with filters |
 | About | /about | App version, build info |
 
 ## Key UI Components
