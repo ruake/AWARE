@@ -17,3 +17,4 @@
 - [AWARE branding audit](aware-branding.md) — app was renamed from PROOF to A.W.A.R.E.; all "PROOF" user-visible text updated; CSS class prefix remains `proof-` (intentional design token prefix, not a brand reference).
 - [Recharts tick prop typing](recharts-tick-type.md) — pass tick style as `any` cast; React.CSSProperties conflicts with SVGProps<SVGTextElement> and causes TS2769.
 - [Git-tracked file deletion in main agent](agent-file-deletion.md) — `rm` on git-tracked files is blocked by sandbox hooks; overwrite with inert stub content instead (e.g. YAML with `on: {} jobs: {}`).
+- [AWARE design system v2](aware-design-system-v2.md) — zinc-950 dark, slate-50 light; 56px topbar; 224px/54px sidebar; 14px card radius; pill nav; 3px left accent dot for active; all via CSS vars `--proof-*`; ConsoleShell marginTop uses CSS var not hardcoded 52px.
