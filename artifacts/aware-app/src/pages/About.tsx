@@ -807,25 +807,6 @@ export default function About() {
         </PanelErrorBoundary>
       )}
 
-      {/* Footer */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "14px 20px",
-          borderRadius: 10,
-          background: "var(--proof-subtle-bg)",
-          border: "1px solid var(--proof-border)",
-          fontSize: 11.5,
-          color: "var(--proof-text-muted)",
-        }}
-      >
-        <span>A.W.A.R.E. CDN Observability Dashboard</span>
-        <span style={{ fontFamily: "var(--font-mono)" }}>
-          Built {new Date().toISOString().slice(0, 10)}
-        </span>
-      </div>
     </div>
   );
 }

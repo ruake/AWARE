@@ -8,15 +8,12 @@ import {
   Loader2,
   Activity,
   RefreshCw,
-  TrendingUp,
   AlertTriangle,
   Shield,
   Layers,
   Timer,
   Globe,
   GitCompare,
-  Zap,
-  ChevronDown,
 } from "lucide-react";
 import { TOOLS } from "@/lib/copilot/tools";
 import { runAgent } from "@/lib/copilot/agent";
@@ -42,83 +39,10 @@ import InputBar from "@/components/copilot/InputBar";
 import ProviderSelector from "@/components/copilot/ProviderSelector";
 import { getLogs, subscribeLogs } from "@/lib/ai/debugLogger";
 import type { DebugLogEntry } from "@/lib/ai/langGraphTypes";
+import { useSyncedUrlState } from "@/lib/urlState";
+import { QUICK_ACTIONS } from "@/lib/copilot/quickActions";
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
-
-// ── 8 Distinct Quick Actions — one per tool ──────────────────────────────────
-const QUICK_ACTIONS = [
-  {
-    id: "latest-runs",
-    label: "Latest Runs",
-    icon: Activity,
-    color: "#3b82f6",
-    badge: "query_runs",
-    message:
-      "Show me the last 15 test runs with pass rates, failure counts, and environments as a table.",
-  },
-  {
-    id: "flaky-tests",
-    label: "Flaky Tests",
-    icon: RefreshCw,
-    color: "#f59e0b",
-    badge: "get_flaky_tests",
-    message:
-      "Which tests are flaky? Rank them by flakiness score and show the PASS/FAIL flip sequence.",
-  },
-  {
-    id: "env-compare",
-    label: "Env Compare",
-    icon: GitCompare,
-    color: "#8b5cf6",
-    badge: "compare_environments",
-    message:
-      "Compare QA, UAT, and PROD environments — show avg pass rates, total failures, and health status.",
-  },
-  {
-    id: "promotion-gate",
-    label: "Promo Gate",
-    icon: Shield,
-    color: "#10b981",
-    badge: "get_promotion_status",
-    message:
-      "Show UAT→PROD promotion gate status — how many decisions promoted, blocked, or pending?",
-  },
-  {
-    id: "failure-breakdown",
-    label: "Failure Root Cause",
-    icon: AlertTriangle,
-    color: "#ef4444",
-    badge: "get_failure_breakdown",
-    message:
-      "Break down failures in the latest run by category (WAF, TLS, API, EdgeWorker). Show which area has the most failures.",
-  },
-  {
-    id: "suite-health",
-    label: "Suite Health",
-    icon: Layers,
-    color: "#06b6d4",
-    badge: "get_suite_health",
-    message: "Show pass rates and failure counts for all test suites. Which suite is struggling?",
-  },
-  {
-    id: "duration-trends",
-    label: "Duration Trends",
-    icon: Timer,
-    color: "#ec4899",
-    badge: "get_duration_trends",
-    message:
-      "Show execution duration trends across the last 10 runs. Are there any timing regressions?",
-  },
-  {
-    id: "akamai-property",
-    label: "Akamai Status",
-    icon: Globe,
-    color: "#f97316",
-    badge: "get_akamai_property",
-    message:
-      "Show Akamai property versions, EdgeWorker versions, PoP counts, and activation status for all environments.",
-  },
-];
 
 // ── Settings form ─────────────────────────────────────────────────────────────
 function SettingsForm({
@@ -369,7 +293,6 @@ export default function CopilotPage() {
     text: string;
   } | null>(null);
   const [showSettings, setShowSettings] = React.useState(false);
-  const [showActions, setShowActions] = React.useState(false);
   const [openaiConfig, setOpenaiConfig] = React.useState(loadOpenAIConfig);
   const [input, setInput] = React.useState("");
   const [agentSteps, setAgentSteps] = React.useState<SubAgentStep[]>([]);
@@ -607,7 +530,6 @@ export default function CopilotPage() {
     setBusy(false);
     clearSession();
     setShowSettings(false);
-    setShowActions(false);
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
   const handleSaveSettings = (cfg: { apiKey: string; apiUrl: string; model: string }) => {
@@ -616,10 +538,30 @@ export default function CopilotPage() {
     setShowSettings(false);
   };
 
-  const isEmpty = messages.length === 0;
+  // Watch sidebar for quick action triggers
+  const [copilotAction, setCopilotAction] = useSyncedUrlState<string | null>("copilotAction", null);
+  const [copilotNew, setCopilotNew] = useSyncedUrlState<number | null>("copilotNew", null);
 
-  // Suppress unused variable warning
-  void debugLogs;
+  React.useEffect(() => {
+    if (copilotAction) {
+      handleSend(copilotAction);
+      setCopilotAction(null);
+    }
+  }, [copilotAction, handleSend, setCopilotAction]);
+
+  React.useEffect(() => {
+    if (copilotNew) {
+      abortRef.current?.abort();
+      setMessages([]);
+      setBusy(false);
+      clearSession();
+      setShowSettings(false);
+      setTimeout(() => textareaRef.current?.focus(), 0);
+      setCopilotNew(null);
+    }
+  }, [copilotNew, setCopilotNew]);
+
+  const isEmpty = messages.length === 0;
 
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0, height: "100%" }}>
@@ -691,34 +633,6 @@ export default function CopilotPage() {
             downloadProgress={downloadProgress}
             onSwitch={handleProviderSwitch}
           />
-
-          {/* Quick actions toggle */}
-          <button
-            onClick={() => setShowActions((p) => !p)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              padding: "5px 10px",
-              borderRadius: 7,
-              fontSize: 11.5,
-              fontWeight: 600,
-              cursor: "pointer",
-              border: "1px solid var(--proof-border)",
-              background: showActions ? "rgba(59,130,246,0.1)" : "rgba(255,255,255,0.03)",
-              color: showActions ? "var(--proof-blue-bright)" : "var(--proof-text-secondary)",
-              transition: "all 0.15s",
-            }}
-          >
-            <Zap size={11} /> Quick Actions
-            <ChevronDown
-              size={10}
-              style={{
-                transform: showActions ? "rotate(180deg)" : "none",
-                transition: "transform 0.15s",
-              }}
-            />
-          </button>
 
           {/* New chat */}
           <button
@@ -832,72 +746,6 @@ export default function CopilotPage() {
               </button>
             </div>
             <SettingsForm config={openaiConfig} onSave={handleSaveSettings} />
-          </div>
-        )}
-
-        {/* ── Quick actions strip — 8 distinct tool actions ─────────────────── */}
-        {showActions && (
-          <div
-            style={{
-              borderBottom: "1px solid var(--proof-border)",
-              padding: "10px 16px",
-              background: "var(--proof-hover-light)",
-              flexShrink: 0,
-              display: "flex",
-              gap: 6,
-              flexWrap: "wrap",
-              animation: "slide-down 0.15s ease-out",
-            }}
-          >
-            {QUICK_ACTIONS.map((a) => {
-              const Icon = a.icon;
-              return (
-                <button
-                  key={a.id}
-                  onClick={() => {
-                    setShowActions(false);
-                    handleSend(a.message);
-                  }}
-                  title={a.message}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                    padding: "5px 11px",
-                    borderRadius: 18,
-                    fontSize: 11.5,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    border: `1px solid color-mix(in srgb, ${a.color} 28%, transparent)`,
-                    background: `color-mix(in srgb, ${a.color} 9%, transparent)`,
-                    color: a.color,
-                    transition: "all 0.15s",
-                    whiteSpace: "nowrap",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background =
-                      `color-mix(in srgb, ${a.color} 16%, transparent)`;
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background =
-                      `color-mix(in srgb, ${a.color} 9%, transparent)`;
-                  }}
-                >
-                  <Icon size={11} />
-                  {a.label}
-                  <span
-                    style={{
-                      fontSize: 8.5,
-                      fontFamily: "var(--font-mono)",
-                      color: `color-mix(in srgb, ${a.color} 60%, transparent)`,
-                      marginLeft: 2,
-                    }}
-                  >
-                    {a.badge}
-                  </span>
-                </button>
-              );
-            })}
           </div>
         )}
 

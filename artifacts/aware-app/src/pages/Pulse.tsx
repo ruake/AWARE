@@ -1,10 +1,8 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
 import {
-  Activity,
   Check,
   X,
-  Clock,
   Play,
   GitCompare,
   BarChart3,
@@ -12,9 +10,10 @@ import {
   AlertTriangle,
   Loader2,
   Github,
+  Activity,
+  Clock,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
-import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { RUNS } from "@/lib/data";
 import type { Run } from "@/lib/types";
 const GH_ACTIONS_URL = `https://github.com/your-org/your-repo/actions`;
@@ -245,12 +244,7 @@ export default function Pulse() {
   }, []);
 
   const running = RUNS.filter((r) => r.status === "RUNNING");
-  const passed = RUNS.filter((r) => r.status === "PASS").length;
-  const failed = RUNS.filter((r) => r.status === "FAIL" || r.status === "FLAKY").length;
   const total = RUNS.length;
-  const avgPassRate = total > 0 ? Math.round(RUNS.reduce((s, r) => s + r.passPct, 0) / total) : 0;
-  const avgDuration =
-    total > 0 ? Math.round(RUNS.reduce((s, r) => s + r.durationMs, 0) / total) : 0;
 
   const filtered = activeTab === "all" ? RUNS : RUNS.filter((r) => r.status === activeTab);
 
@@ -358,73 +352,6 @@ export default function Pulse() {
             <ExternalLink size={10} style={{ opacity: 0.6 }} />
           </a>
         </div>
-      </div>
-
-      {/* Summary cards — clickable to filter the workflow table */}
-      <div
-        className="proof-stagger"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(6, 1fr)",
-          gap: 10,
-        }}
-      >
-        <CTAStatCard
-          label="Total"
-          value={total}
-          subtitle="all environments"
-          accentColor="var(--proof-blue)"
-          icon={<Activity size={16} />}
-          onClick={() => setActiveTab("all")}
-          active={activeTab === "all"}
-        />
-        <CTAStatCard
-          label="Running"
-          value={running.length}
-          subtitle="in progress"
-          accentColor="var(--proof-blue-hover)"
-          icon={<Loader2 size={16} />}
-          onClick={() => setActiveTab("RUNNING")}
-          active={activeTab === "RUNNING"}
-        />
-        <CTAStatCard
-          label="Passed"
-          value={passed}
-          subtitle="successful"
-          accentColor="var(--proof-green)"
-          icon={<Check size={16} />}
-          onClick={() => setActiveTab("PASS")}
-          active={activeTab === "PASS"}
-        />
-        <CTAStatCard
-          label="Failed / Flaky"
-          value={failed}
-          subtitle="need attention"
-          accentColor="var(--proof-red)"
-          icon={<X size={16} />}
-          onClick={() => setActiveTab("FAIL")}
-          active={activeTab === "FAIL"}
-        />
-        <CTAStatCard
-          label="Avg Pass Rate"
-          value={`${avgPassRate}%`}
-          subtitle={`${total} workflows`}
-          accentColor={
-            avgPassRate >= 80
-              ? "var(--proof-green)"
-              : avgPassRate >= 50
-                ? "var(--proof-yellow)"
-                : "var(--proof-red)"
-          }
-          icon={<BarChart3 size={16} />}
-        />
-        <CTAStatCard
-          label="Avg Duration"
-          value={avgDuration > 0 ? formatDuration(avgDuration) : "—"}
-          subtitle="per workflow"
-          accentColor="var(--proof-purple)"
-          icon={<Clock size={16} />}
-        />
       </div>
 
       {/* Running workflows banner */}

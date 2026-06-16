@@ -2,10 +2,8 @@ import React from "react";
 import { useLocation } from "wouter";
 import { getAutoDiscoveredTests } from "@/lib/data";
 import { useTestData } from "@/hooks/useTestData";
-import { computeTestStats, getAutoDiscoverySummary } from "@/lib/data";
 import { ConsolePagination, PageShell } from "@/components/console";
-import { Search, Globe, Server, Terminal, TestTube, Unlink, Zap, X, FolderTree, Download, Beaker, Bug, Code, ExternalLink, PlayCircle, Clock, Settings } from "lucide-react";
-import { exportAndDownload, exportAsXML, downloadFile } from "@/lib/testImportExport";
+import { Search, Globe, Server, Terminal, TestTube, Unlink, Zap, X, FolderTree, Bug, Code, ExternalLink, PlayCircle, Clock, Settings, Beaker } from "lucide-react";
 import type { TestCase, TestSuite } from "@/lib/types";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -111,9 +109,6 @@ export default function Tests() {
   const clampedPage = Math.min(page, totalPages);
   const pageItems = filtered.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
 
-  const stats = React.useMemo(() => computeTestStats(), []);
-  const discovery = React.useMemo(() => getAutoDiscoverySummary(), []);
-
   const typeCounts = React.useMemo(() => {
     const c: Record<string, number> = {};
     for (const t of allTests) c[t.testType] = (c[t.testType] || 0) + 1;
@@ -128,20 +123,6 @@ export default function Tests() {
 
   const selectedSuite = suiteFilter ? suites.find((s) => s.id === suiteFilter) ?? null : null;
   const selectedTest = detailId ? tcs.find((t) => t.id === detailId) ?? null : null;
-
-  const kpis = [
-    { label: "Total Suites", value: suites.length, color: "var(--proof-blue)" },
-    { label: "Total Tests", value: tcs.length, color: "var(--proof-blue)" },
-    { label: "Active Tests", value: tcs.filter((t) => t.status === "active").length, color: "var(--proof-green)" },
-    { label: "Scheduled", value: suites.filter((s) => s.schedule).length, color: "var(--proof-orange)" },
-    { label: "Coverage", value: `${stats.coverage}%`, color: "var(--proof-text)" },
-  ];
-
-  const handleExport = (format: "json" | "csv" | "junit_xml") => {
-    if (format === "json") exportAndDownload(tcs, "json");
-    else if (format === "junit_xml") downloadFile(exportAsXML(tcs), "aware-tests.xml", "application/xml");
-    else downloadFile("id,name,category,priority,status,owner\n" + tcs.map((t) => `${t.id},"${t.name}",${t.category},${t.priority},${t.status},${t.owner}`).join("\n"), "aware-tests.csv", "text/csv");
-  };
 
   const getGitHubUrl = (tc: TestCase) => tc.githubUrl || `https://github.com/ruake/AWARE/blob/main/${tc.scriptPath}`;
   const cleanScriptPath = (tc: TestCase) => { if (!tc.scriptPath) return tc.id; return tc.scriptPath.split("/").slice(-2).join("/"); };
@@ -168,23 +149,6 @@ export default function Tests() {
 
   return (
     <PageShell title="Tests" subtitle={`${allTests.length} total tests · ${suites.length} suites`}>
-      {/* KPI row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, padding: "0 16px", flexShrink: 0 }}>
-        {kpis.map((kpi) => (
-          <div key={kpi.label} style={{
-            padding: "14px 16px", background: "var(--proof-surface)", border: "1px solid var(--proof-border)",
-            borderRadius: 10, display: "flex", flexDirection: "column", gap: 6,
-            transition: "border-color 0.15s, transform 0.15s",
-          }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-accent)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)"; (e.currentTarget as HTMLElement).style.transform = "none"; }}
-          >
-            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-muted)", textTransform: "uppercase", letterSpacing: "0.6px" }}>{kpi.label}</span>
-            <div style={{ fontSize: 24, fontWeight: 800, color: kpi.color, fontFamily: "var(--font-mono)", letterSpacing: "-1px", lineHeight: 1 }}>{kpi.value}</div>
-          </div>
-        ))}
-      </div>
-
       {/* Filter + export bar */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", background: "var(--proof-sidebar-bg)", borderBottom: "1px solid var(--proof-border)", flexWrap: "wrap", flexShrink: 0 }}>
         <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
@@ -225,23 +189,6 @@ export default function Tests() {
           <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
             {filtered.length} of {allTests.length} tests
           </span>
-          {discovery.total > 0 && (
-            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", display: "flex", alignItems: "center", gap: 3 }}>
-              <Beaker size={12} /> <strong style={{ color: "var(--proof-blue)" }}>{discovery.total}</strong> auto · {discovery.sourceFiles} files
-            </span>
-          )}
-          <div style={{ position: "relative", cursor: "pointer" }}>
-            <button onClick={() => handleExport("json")} className="proof-button proof-button-xs" style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <Download size={11} /> Export
-            </button>
-            <select onChange={(e) => { if (e.target.value) handleExport(e.target.value as "json" | "csv" | "junit_xml"); (e.target as HTMLSelectElement).blur(); }}
-              style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}>
-              <option value="">Format...</option>
-              <option value="json">JSON</option>
-              <option value="csv">CSV</option>
-              <option value="junit_xml">JUnit XML</option>
-            </select>
-          </div>
         </div>
       </div>
 

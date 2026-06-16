@@ -3,8 +3,6 @@ import { useParams, useLocation, useSearch } from "wouter";
 import {
   getRunById,
   getTestResultsForRun,
-  RUNS,
-  loadResultsForRun,
   getImageSource,
   preloadImage,
   getDataInitState,
@@ -12,14 +10,9 @@ import {
 } from "@/lib/data";
 import type { TestResult, TestAssertionResult, FilmstripFrame } from "@/lib/types";
 import {
-  ArrowLeft,
-  GitCompare,
   XCircle,
-  Github,
-  Share2,
-  Search,
-  ChevronRight,
   ChevronLeft,
+  ChevronRight,
   Check,
   BarChart3,
   FileText,
@@ -27,6 +20,7 @@ import {
   X,
   ChevronDown,
 } from "lucide-react";
+import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import {
@@ -490,17 +484,16 @@ export default function RunDetail() {
   const [, navigate] = useLocation();
   const urlSearch = useSearch();
   const runId = params.runId ?? "";
-  const { show, Toast } = useSimpleToast();
+  const { Toast } = useSimpleToast();
 
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const run = getRunById(runId) ?? null;
   const results = run ? getTestResultsForRun(run.id) : [];
-  const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<string>("all");
-  const [catFilter, setCatFilter] = React.useState<string>("all");
+  const [search, setSearch] = useSyncedUrlState("q", "");
+  const [statusFilter, setStatusFilter] = useSyncedUrlState("status", "all");
+  const [catFilter, setCatFilter] = useSyncedUrlState("cat", "all");
   const [page, setPage] = React.useState(0);
   const [detailPanelCollapsed, setDetailPanelCollapsed] = React.useState(false);
-  const [categoryCollapsed, setCategoryCollapsed] = React.useState(false);
   const PAGE_SIZE = 20;
 
   const [prevFilterKey, setPrevFilterKey] = React.useState("");
@@ -552,7 +545,6 @@ export default function RunDetail() {
     );
   }
 
-  const categories = [...new Set(results.map((r) => r.category))];
   const filtered = results.filter((r) => {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
     if (catFilter !== "all" && r.category !== catFilter) return false;
@@ -562,10 +554,6 @@ export default function RunDetail() {
 
   const pagedResults = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-
-  const passCount = results.filter((r) => r.status === "PASS").length;
-  const failCount = results.filter((r) => r.status === "FAIL").length;
-  const passRate = results.length > 0 ? Math.round((passCount / results.length) * 100) : 0;
 
   const selIdx = selectedResult ? filtered.findIndex((r) => r.id === selectedResult.id) : -1;
 
@@ -586,428 +574,8 @@ export default function RunDetail() {
       className="proof-page"
       style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}
     >
-      {/* Top bar: breadcrumb + meta + actions */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          flexWrap: "wrap",
-          padding: "8px 12px",
-          background: "var(--proof-surface)",
-          border: "1px solid var(--proof-border)",
-          borderRadius: "var(--proof-radius)",
-        }}
-      >
-        <button onClick={() => navigate("/runs")} className="proof-button proof-button-xs">
-          <ArrowLeft size={11} /> Runs
-        </button>
-        <span style={{ color: "var(--proof-border-strong)", fontSize: 14 }}>/</span>
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            fontWeight: 600,
-            color: "var(--proof-text)",
-          }}
-        >
-          {run.id}
-        </span>
-        <span
-          className={`proof-badge ${run.status === "PASS" ? "proof-badge-pass" : run.status === "FAIL" ? "proof-badge-fail" : "proof-badge-partial"}`}
-          style={{ fontSize: 10 }}
-        >
-          {run.status}
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: 4 }}>
-          <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-            <span
-              style={{
-                fontWeight: 700,
-                fontFamily: "var(--font-mono)",
-                color:
-                  passRate === 100
-                    ? "var(--proof-green)"
-                    : passRate < 90
-                      ? "var(--proof-red)"
-                      : "var(--proof-text)",
-              }}
-            >
-              {passRate}%
-            </span>{" "}
-            pass
-          </span>
-          <span
-            style={{
-              fontSize: 11,
-              color: "var(--proof-text-secondary)",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            <span style={{ color: "var(--proof-green)" }}>+{passCount}</span>
-            {" / "}
-            <span style={{ color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-muted)" }}>
-              -{failCount}
-            </span>
-          </span>
-          <span
-            style={{
-              fontSize: 11,
-              fontFamily: "var(--font-mono)",
-              color: "var(--proof-text-muted)",
-            }}
-          >
-            {run.duration}
-          </span>
-          <span
-            style={{
-              fontSize: 10,
-              fontFamily: "var(--font-mono)",
-              color: "var(--proof-text-muted)",
-              padding: "1px 6px",
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid var(--proof-border)",
-              borderRadius: "var(--proof-radius-xs)",
-            }}
-          >
-            {run.env} · {run.envId} · build {run.build}
-          </span>
-        </div>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 5, alignItems: "center" }}>
-          <button
-            onClick={() => {
-              navigator.clipboard
-                .writeText(window.location.href)
-                .then(() => show("Permalink copied"));
-            }}
-            className="proof-button proof-button-xs"
-            title="Copy permalink"
-          >
-            <Share2 size={11} />
-          </button>
-          <button
-            onClick={() =>
-              navigate(`/compare?candidate=${run.id}&baseline=${RUNS[RUNS.length - 1]?.id}`)
-            }
-            className="proof-button proof-button-xs"
-          >
-            <GitCompare size={11} /> Compare
-          </button>
-          <a
-            href={`https://github.com/ruake/AWARE/actions/runs/${run.id}`}
-            target="_blank"
-            rel="noopener"
-            className="proof-button proof-button-xs"
-            style={{ textDecoration: "none" }}
-          >
-            <Github size={11} />
-          </a>
-        </div>
-      </div>
-
       {/* Chart + results table */}
       <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
-        <PanelErrorBoundary label="Run KPIs">
-          <div
-            className="proof-card"
-            style={{
-              padding: 14,
-              width: categoryCollapsed ? 48 : 220,
-              flexShrink: 0,
-              transition: "width 0.15s",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: categoryCollapsed ? 0 : 10,
-              }}
-            >
-              {!categoryCollapsed && (
-                <h3
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: "var(--proof-text-secondary)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                  }}
-                >
-                  Run KPIs
-                </h3>
-              )}
-              <button
-                onClick={() => setCategoryCollapsed((c) => !c)}
-                aria-label={categoryCollapsed ? "Expand" : "Collapse"}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  color: "var(--proof-text-secondary)",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: 4,
-                  marginTop: categoryCollapsed ? 8 : 0,
-                }}
-              >
-                <ChevronDown
-                  size={14}
-                  style={{
-                    transform: categoryCollapsed ? "rotate(-90deg)" : "rotate(0deg)",
-                    transition: "transform 0.15s",
-                  }}
-                />
-              </button>
-            </div>
-            {!categoryCollapsed && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <div
-                  style={{
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    background:
-                      passRate === 100
-                        ? "rgba(34,197,94,0.08)"
-                        : passRate < 90
-                          ? "rgba(239,68,68,0.08)"
-                          : "rgba(234,179,8,0.08)",
-                    border: `1px solid ${passRate === 100 ? "rgba(34,197,94,0.2)" : passRate < 90 ? "rgba(239,68,68,0.2)" : "rgba(234,179,8,0.2)"}`,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 9,
-                      color: "var(--proof-text-secondary)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.3px",
-                    }}
-                  >
-                    Pass Rate
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 22,
-                      fontWeight: 700,
-                      color:
-                        passRate === 100
-                          ? "var(--proof-green)"
-                          : passRate < 90
-                            ? "var(--proof-red)"
-                            : "var(--proof-yellow)",
-                    }}
-                  >
-                    {passRate}%
-                  </div>
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-                  <div
-                    style={{
-                      padding: "6px 8px",
-                      borderRadius: 4,
-                      background: "var(--proof-grey-bg)",
-                      border: "1px solid var(--proof-grey)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 9,
-                        color: "var(--proof-text-secondary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.3px",
-                      }}
-                    >
-                      Total
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: "var(--proof-text)",
-                      }}
-                    >
-                      {results.length}
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      padding: "6px 8px",
-                      borderRadius: 4,
-                      background: "rgba(239,68,68,0.05)",
-                      border: "1px solid rgba(239,68,68,0.15)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 9,
-                        color: "var(--proof-text-secondary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.3px",
-                      }}
-                    >
-                      Failed
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)",
-                      }}
-                    >
-                      {failCount}
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      padding: "6px 8px",
-                      borderRadius: 4,
-                      background: "rgba(34,197,94,0.05)",
-                      border: "1px solid rgba(34,197,94,0.15)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 9,
-                        color: "var(--proof-text-secondary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.3px",
-                      }}
-                    >
-                      Passed
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: "var(--proof-green)",
-                      }}
-                    >
-                      {passCount}
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      padding: "6px 8px",
-                      borderRadius: 4,
-                      background: "var(--proof-grey-bg)",
-                      border: "1px solid var(--proof-grey)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 9,
-                        color: "var(--proof-text-secondary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.3px",
-                      }}
-                    >
-                      Avg Dur
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 14,
-                        fontWeight: 700,
-                        color: "var(--proof-text)",
-                      }}
-                    >
-                      {results.length > 0
-                        ? `${Math.round(results.reduce((s, r) => s + r.duration, 0) / results.length)}ms`
-                        : "—"}
-                    </div>
-                  </div>
-                </div>
-                <div
-                  style={{
-                    padding: "6px 8px",
-                    borderRadius: 4,
-                    border: "1px solid var(--proof-grey)",
-                    background: "var(--proof-grey-bg)",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 9,
-                      color: "var(--proof-text-secondary)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.3px",
-                      marginBottom: 2,
-                    }}
-                  >
-                    Tests by Category
-                  </div>
-                  {categories.map((cat) => {
-                    const catResults = results.filter((r) => r.category === cat);
-                    const pct = Math.round(
-                      (catResults.filter((r) => r.status === "PASS").length / catResults.length) *
-                        100,
-                    );
-                    return (
-                      <div
-                        key={cat}
-                        style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}
-                      >
-                        <span
-                          style={{
-                            fontSize: 9,
-                            color: "var(--proof-text-muted)",
-                            fontFamily: "var(--font-mono)",
-                            flex: 1,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {cat.slice(0, 10)}
-                        </span>
-                        <div
-                          style={{
-                            width: 60,
-                            height: 6,
-                            borderRadius: 3,
-                            background: "var(--proof-grey)",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: `${pct}%`,
-                              height: "100%",
-                              borderRadius: 3,
-                              background:
-                                pct === 100
-                                  ? "var(--proof-green)"
-                                  : pct < 80
-                                    ? "var(--proof-red)"
-                                    : "var(--proof-yellow)",
-                            }}
-                          />
-                        </div>
-                        <span
-                          style={{
-                            fontSize: 8,
-                            color: "var(--proof-text-muted)",
-                            fontFamily: "var(--font-mono)",
-                            minWidth: 20,
-                            textAlign: "right",
-                          }}
-                        >
-                          {pct}%
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </PanelErrorBoundary>
-
         <PanelErrorBoundary label="Test results">
           <div
             className="proof-card"
@@ -1019,55 +587,6 @@ export default function RunDetail() {
               minWidth: 0,
             }}
           >
-            <div
-              style={{
-                padding: "8px 14px",
-                borderBottom: "1px solid var(--proof-grey)",
-                background: "var(--proof-grey-bg)",
-                display: "flex",
-                gap: 10,
-                alignItems: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 160 }}
-              >
-                <Search size={13} style={{ color: "var(--proof-text-secondary)" }} />
-                <input
-                  className="proof-input"
-                  placeholder="Search tests…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  style={{ flex: 1, minWidth: 0 }}
-                />
-              </div>
-              <select
-                className="proof-input"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All statuses</option>
-                <option value="PASS">PASS</option>
-                <option value="FAIL">FAIL</option>
-              </select>
-              <select
-                className="proof-input"
-                value={catFilter}
-                onChange={(e) => setCatFilter(e.target.value)}
-              >
-                <option value="all">All categories</option>
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-                {filtered.length} / {results.length}
-              </span>
-              <div style={{ flexBasis: "100%", height: 0 }} />
-            </div>
             <TimeWindowProvider>
               <div style={{ padding: "6px 14px", borderBottom: "1px solid var(--proof-grey)" }}>
                 <TimeWindowControls />

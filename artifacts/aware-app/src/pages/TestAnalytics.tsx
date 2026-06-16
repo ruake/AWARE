@@ -1,7 +1,7 @@
 import React from "react";
-import { Link, useLocation, useSearch } from "wouter";
-import { CTAStatCard } from "@/components/aware/CTAStatCard";
+import { useLocation, useSearch } from "wouter";
 import { DIFF_ROWS, RUNS, getTestResultsForRun, getTestDetailsAsync } from "@/lib/data";
+import { setTestDetailStat } from "@/lib/sidebarData";
 import { getEnvLabels } from "@/lib/envConfig";
 import { ENVS, CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import { useTestData } from "@/hooks/useTestData";
@@ -20,14 +20,10 @@ import {
 } from "recharts";
 
 import {
-  ArrowLeft,
   BarChart3,
   Clock,
   Activity,
   AlertTriangle,
-  Search,
-  Share2,
-  ChevronRight,
   FileText,
   X,
   ArrowUpDown,
@@ -36,7 +32,6 @@ import {
   Filter,
   Bug,
 } from "lucide-react";
-import { useSimpleToast } from "@/hooks/useSimpleToast";
 
 interface EnrichedHistoryRow {
   runId: string;
@@ -85,28 +80,10 @@ function enrichHistory(
   });
 }
 
-function selectorLabel(item: { id: string; name: string }, query: string): React.ReactNode {
-  if (!query.trim()) return item.name;
-  const lower = query.toLowerCase();
-  const name = item.name;
-  const idx = name.toLowerCase().indexOf(lower);
-  if (idx === -1) return name;
-  return (
-    <>
-      {name.slice(0, idx)}
-      <strong style={{ background: "var(--proof-blue-bg)", color: "var(--proof-blue)" }}>
-        {name.slice(idx, idx + query.length)}
-      </strong>
-      {name.slice(idx + query.length)}
-    </>
-  );
-}
-
 export default function TestAnalytics() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const [, navigate] = useLocation();
-  const { show, Toast } = useSimpleToast();
   const { tcs } = useTestData();
   const [testDetails, setTestDetails] = React.useState<
     {
@@ -144,12 +121,6 @@ export default function TestAnalytics() {
   const tcIdx = isTcMode ? tcs.findIndex((t) => t.id === rawTestId) : -1;
   const diffs = DIFF_ROWS;
 
-  // ── All hooks before any early return ──
-  const [selSearch, setSelSearch] = React.useState("");
-  const [selOpen, setSelOpen] = React.useState(false);
-  const [selActiveIdx, setSelActiveIdx] = React.useState(0);
-  const selRef = React.useRef<HTMLDivElement>(null);
-
   const [hStatus, setHStatus] = useSyncedUrlState<string>("hStatus", "all");
   const [hEnv, setHEnv] = useSyncedUrlState<string>("hEnv", "all");
   const [hErrOnly, setHErrOnly] = useSyncedUrlState<boolean>("hErrOnly", false);
@@ -176,30 +147,8 @@ export default function TestAnalytics() {
           flakinessScore: 0,
           avgDuration: 0,
         });
-  const selectorItems =
-    diffs.length === 0
-      ? []
-      : isTcMode
-        ? tcs.map((t) => ({ id: t.id, name: t.name }))
-        : diffs.map((d) => ({ id: d.id, name: d.name }));
-
-  const filteredSelector = selSearch.trim()
-    ? selectorItems.filter(
-        (s) =>
-          s.id.toLowerCase().includes(selSearch.toLowerCase()) ||
-          s.name.toLowerCase().includes(selSearch.toLowerCase()),
-      )
-    : selectorItems;
-
   const testName =
     isTcMode && testCase ? testCase.name : getTestNameForDetail(tcs, selectedTestId, isTcMode);
-
-  const handleSelectNavigate = (id: string) => {
-    const key = isTcMode ? "testId" : "diffId";
-    navigate(`/trends?${key}=${encodeURIComponent(id)}`, { replace: true });
-    setSelOpen(false);
-    setSelSearch("");
-  };
 
   const enriched = React.useMemo(() => {
     if (diffs.length === 0) return [];
@@ -242,17 +191,6 @@ export default function TestAnalytics() {
     if (clean !== key) return <ArrowUpDown size={11} style={{ opacity: 0.3 }} />;
     return hSort.startsWith("-") ? <ArrowDown size={11} /> : <ArrowUp size={11} />;
   };
-
-  React.useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (selRef.current && !selRef.current.contains(e.target as Node)) {
-        setSelOpen(false);
-        setSelSearch("");
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
 
   if (diffs.length === 0) {
     return (
@@ -318,6 +256,15 @@ export default function TestAnalytics() {
   const failCount = enriched.filter((r) => r.status === "FAIL").length;
   const errorCount = enriched.filter((r) => r.error).length;
 
+  React.useEffect(() => {
+    if (detail.history.length > 0) {
+      setTestDetailStat(
+        { passRate: detail.passRate, flakinessScore: detail.flakinessScore, avgDuration: detail.avgDuration, failCount, errorCount },
+        hStatus,
+      );
+    }
+  }, [detail.passRate, detail.flakinessScore, detail.avgDuration, failCount, errorCount, hStatus]);
+
   return (
     <div
       className="proof-page"
@@ -330,355 +277,7 @@ export default function TestAnalytics() {
         margin: "0 auto",
       }}
     >
-      {/* Modern Navigation & Header */}
-      <div style={{ paddingBottom: 16, borderBottom: "1px solid var(--proof-border)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-          <Link href={isTcMode ? "/suites" : "/compare"} className="proof-button proof-button-sm">
-            <ArrowLeft size={13} /> Back
-          </Link>
-          <ChevronRight size={14} style={{ color: "var(--proof-text-secondary)" }} />
-          <span style={{ fontSize: 13, color: "var(--proof-text-secondary)", fontWeight: 500 }}>
-            Analytics
-          </span>
-        </div>
-        <div ref={selRef} style={{ position: "relative" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              border: "1px solid var(--proof-grey)",
-              borderRadius: 4,
-              padding: "4px 10px",
-              background: selOpen ? "var(--proof-surface)" : "transparent",
-            }}
-          >
-            <Search size={13} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
-            <input
-              className="proof-input"
-              style={{
-                flex: 1,
-                border: "none",
-                outline: "none",
-                fontSize: 12,
-                background: "transparent",
-                padding: 0,
-                fontFamily: "var(--font-mono)",
-              }}
-              placeholder={isTcMode ? "Search tests by name or ID…" : "Search diffs by name or ID…"}
-              value={selSearch}
-              onChange={(e) => {
-                setSelSearch(e.target.value);
-                setSelOpen(true);
-                setSelActiveIdx(0);
-              }}
-              onFocus={() => setSelOpen(true)}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowDown") {
-                  e.preventDefault();
-                  setSelActiveIdx((i) => Math.min(i + 1, filteredSelector.length - 1));
-                } else if (e.key === "ArrowUp") {
-                  e.preventDefault();
-                  setSelActiveIdx((i) => Math.max(i - 1, 0));
-                } else if (e.key === "Enter" && filteredSelector[selActiveIdx]) {
-                  handleSelectNavigate(filteredSelector[selActiveIdx].id);
-                } else if (e.key === "Escape") {
-                  setSelOpen(false);
-                  setSelSearch("");
-                }
-              }}
-            />
-            {selSearch && (
-              <button
-                onClick={() => {
-                  setSelSearch("");
-                  setSelActiveIdx(0);
-                }}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  color: "var(--proof-text-secondary)",
-                  padding: 0,
-                  display: "flex",
-                }}
-              >
-                <X size={13} />
-              </button>
-            )}
-          </div>
-          {selOpen && filteredSelector.length > 0 && (
-            <div
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                right: 0,
-                zIndex: 100,
-                background: "var(--proof-surface)",
-                border: "1px solid var(--proof-grey)",
-                borderRadius: 4,
-                marginTop: 2,
-                maxHeight: 280,
-                overflow: "auto",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-              }}
-            >
-              {filteredSelector.map((item, i) => (
-                <div
-                  key={item.id}
-                  onClick={() => handleSelectNavigate(item.id)}
-                  onMouseEnter={() => setSelActiveIdx(i)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "7px 10px",
-                    cursor: "pointer",
-                    background: i === selActiveIdx ? "var(--proof-blue-bg)" : "transparent",
-                    borderBottom:
-                      i < filteredSelector.length - 1 ? "1px solid var(--proof-grey)" : undefined,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 600,
-                      flexShrink: 0,
-                      color: "var(--proof-text-secondary)",
-                      fontFamily: "var(--font-mono)",
-                      minWidth: 48,
-                    }}
-                  >
-                    {item.id}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {selectorLabel(item, selSearch)}
-                  </span>
-                  {item.id === selectedTestId && (
-                    <span style={{ fontSize: 10, color: "var(--proof-blue)", marginLeft: "auto" }}>
-                      current
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          {selOpen && filteredSelector.length === 0 && (
-            <div
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                right: 0,
-                zIndex: 100,
-                background: "var(--proof-surface)",
-                border: "1px solid var(--proof-grey)",
-                borderRadius: 4,
-                marginTop: 2,
-                padding: "12px 16px",
-                fontSize: 12,
-                color: "var(--proof-text-secondary)",
-                textAlign: "center",
-              }}
-            >
-              No matches for <strong>"{selSearch}"</strong>
-            </div>
-          )}
-        </div>
-      </div>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        <div>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-text)", maxWidth: 700 }}>
-            {isTcMode && testCase ? testCase.name : diff.name}
-            {isTcMode && testCase && (
-              <span
-                style={{
-                  fontSize: 11,
-                  color: "var(--proof-text-secondary)",
-                  fontWeight: 400,
-                  marginLeft: 8,
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                {testCase.id} · v{testCase.version}
-              </span>
-            )}
-          </h1>
-          <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-            <span
-              style={{
-                fontSize: 11,
-                padding: "2px 8px",
-                borderRadius: 4,
-                fontWeight: 600,
-                background:
-                  (CATEGORY_COLORS[
-                    CATEGORIES.indexOf(isTcMode && testCase ? testCase.category : diff.category) %
-                      CATEGORY_COLORS.length
-                  ] ?? "#9aa0a6") + "20",
-                border:
-                  "1px solid " +
-                  (CATEGORY_COLORS[
-                    CATEGORIES.indexOf(isTcMode && testCase ? testCase.category : diff.category) %
-                      CATEGORY_COLORS.length
-                  ] ?? "#9aa0a6") +
-                  "40",
-                color:
-                  CATEGORY_COLORS[
-                    CATEGORIES.indexOf(isTcMode && testCase ? testCase.category : diff.category) %
-                      CATEGORY_COLORS.length
-                  ] ?? "#9aa0a6",
-              }}
-            >
-              {isTcMode && testCase ? testCase.category : diff.category}
-            </span>
-            {isTcMode && testCase && (
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color:
-                    testCase.priority === "P0" ? "var(--proof-red)" : "var(--proof-text-secondary)",
-                }}
-              >
-                {testCase.priority}
-              </span>
-            )}
-            {!isTcMode && (
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: isFlaky ? "var(--proof-yellow)" : "var(--proof-green)",
-                }}
-              >
-                {isFlaky ? "⚠ Flaky" : "✓ Stable"}
-              </span>
-            )}
-            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-              {detail.history.length} runs tracked
-            </span>
-            {failCount > 0 && (
-              <span style={{ fontSize: 11, color: "var(--proof-red)", fontWeight: 600 }}>
-                {failCount} failed
-              </span>
-            )}
-            {errorCount > 0 && (
-              <span style={{ fontSize: 11, color: "var(--proof-yellow)", fontWeight: 600 }}>
-                {errorCount} with errors
-              </span>
-            )}
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          {isTcMode && testCase && (
-            <button
-              onClick={() => navigate(`/tests?q=${testCase.id}`)}
-              className="proof-button proof-button-sm"
-            >
-              <FileText size={13} /> Definition
-            </button>
-          )}
-          <button
-            onClick={() => {
-              navigator.clipboard
-                .writeText(window.location.href)
-                .then(() => show("Permalink copied"));
-            }}
-            className="proof-button proof-button-sm"
-          >
-            <Share2 size={13} /> Share
-          </button>
-        </div>
-      </div>
-
-      {/* Trend alert */}
-      {trend === "degrading" && (
-        <div
-          style={{
-            background: "var(--proof-red-bg)",
-            border: "1px solid var(--proof-red)",
-            borderRadius: 4,
-            padding: "10px 14px",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            fontSize: 12,
-          }}
-        >
-          <AlertTriangle size={14} style={{ color: "var(--proof-red)" }} />
-          <strong>Degrading trend</strong> — last 3 runs all FAIL. Investigate before promoting
-          changes.
-          <button
-            onClick={() => {
-              navigator.clipboard
-                .writeText(
-                  `Test degrading: ${diff.name}\nLast 3 runs: FAIL\nPass Rate: ${detail.passRate}%`,
-                )
-                .then(() => show("Alert copied"));
-            }}
-            className="proof-button proof-button-xs"
-            style={{ marginLeft: "auto" }}
-          >
-            Copy Alert
-          </button>
-        </div>
-      )}
-
-      {/* KPI tiles */}
-      <div
-        className="proof-stagger"
-        style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}
-      >
-        <CTAStatCard
-          label="Pass Rate"
-          value={`${detail.passRate}%`}
-          subtitle={`${detail.history.length} runs`}
-          accentColor="var(--proof-blue)"
-          icon={<BarChart3 size={16} />}
-          onClick={() => setHStatus("all")}
-        />
-        <CTAStatCard
-          label="Flakiness"
-          value={`${detail.flakinessScore}%`}
-          subtitle="status changes"
-          accentColor={isFlaky ? "var(--proof-yellow)" : "var(--proof-green)"}
-          icon={<Activity size={16} />}
-        />
-        <CTAStatCard
-          label="Avg Duration"
-          value={`${detail.avgDuration}ms`}
-          subtitle="across all runs"
-          accentColor="var(--proof-green)"
-          icon={<Clock size={16} />}
-        />
-        <CTAStatCard
-          label="Failures"
-          value={failCount}
-          subtitle={`${errorCount} with errors`}
-          accentColor={failCount > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)"}
-          icon={<AlertTriangle size={16} />}
-          onClick={failCount > 0 ? () => setHStatus("FAIL") : undefined}
-          active={hStatus === "FAIL"}
-        />
-      </div>
 
       {/* Charts */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
@@ -1726,7 +1325,6 @@ export default function TestAnalytics() {
             );
           })()}
       </div>
-      {Toast}
     </div>
   );
 }
