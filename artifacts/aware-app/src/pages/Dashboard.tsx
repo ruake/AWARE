@@ -44,6 +44,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import { ConsolePagination } from "@/components/console/ConsolePagination";
 
 function statusConfig(passPct: number) {
   if (passPct >= 95)
@@ -376,6 +377,15 @@ export default function Dashboard() {
   React.useEffect(() => {
     setLayoutSettings({ envHealthCollapsed: envPanelCollapsed });
   }, [envPanelCollapsed]);
+
+  const [runsPage, setRunsPage] = React.useState(1);
+  const RUNS_PAGE_SIZE = 8;
+  const runsTotalPages = Math.max(1, Math.ceil(effectiveRuns.length / RUNS_PAGE_SIZE));
+  const safeRunsPage = Math.min(runsPage, runsTotalPages);
+  const paginatedRuns = effectiveRuns.slice(
+    (safeRunsPage - 1) * RUNS_PAGE_SIZE,
+    safeRunsPage * RUNS_PAGE_SIZE,
+  );
 
   if (!latestRun) {
     return (
@@ -989,7 +999,7 @@ export default function Dashboard() {
               </button>
             </div>
             <div style={{ flex: 1, overflowY: "auto" }}>
-              {effectiveRuns.slice(0, 8).map((run, i) => {
+              {paginatedRuns.map((run, i) => {
                 const isPass = run.passPct === 100;
                 const isFail = run.passPct < 90;
                 const runColor = isPass
@@ -1006,7 +1016,8 @@ export default function Dashboard() {
                       alignItems: "center",
                       gap: 10,
                       padding: "10px 16px",
-                      borderBottom: i < 7 ? "1px solid var(--proof-border)" : "none",
+                      borderBottom:
+                        i < paginatedRuns.length - 1 ? "1px solid var(--proof-border)" : "none",
                       cursor: "pointer",
                       transition: "background 0.12s",
                     }}
@@ -1059,6 +1070,24 @@ export default function Dashboard() {
                 );
               })}
             </div>
+            {runsTotalPages > 1 && (
+              <div
+                style={{
+                  borderTop: "1px solid var(--proof-border)",
+                  padding: "0 16px",
+                }}
+              >
+                <ConsolePagination
+                  currentPage={safeRunsPage}
+                  totalPages={runsTotalPages}
+                  totalItems={effectiveRuns.length}
+                  pageSize={RUNS_PAGE_SIZE}
+                  onPageChange={setRunsPage}
+                  onPageSizeChange={() => {}}
+                  showTotal={false}
+                />
+              </div>
+            )}
           </div>
         </div>
       </CollapsibleSection>

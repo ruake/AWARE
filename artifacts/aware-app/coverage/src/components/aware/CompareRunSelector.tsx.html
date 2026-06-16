@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/68</span>
+                <span class='fraction'>0/80</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/74</span>
+                <span class='fraction'>0/80</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/54</span>
+                <span class='fraction'>0/65</span>
             </div>
         
             
@@ -528,7 +528,20 @@
 <a name='L463'></a><a href='#L463'>463</a>
 <a name='L464'></a><a href='#L464'>464</a>
 <a name='L465'></a><a href='#L465'>465</a>
-<a name='L466'></a><a href='#L466'>466</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L466'></a><a href='#L466'>466</a>
+<a name='L467'></a><a href='#L467'>467</a>
+<a name='L468'></a><a href='#L468'>468</a>
+<a name='L469'></a><a href='#L469'>469</a>
+<a name='L470'></a><a href='#L470'>470</a>
+<a name='L471'></a><a href='#L471'>471</a>
+<a name='L472'></a><a href='#L472'>472</a>
+<a name='L473'></a><a href='#L473'>473</a>
+<a name='L474'></a><a href='#L474'>474</a>
+<a name='L475'></a><a href='#L475'>475</a>
+<a name='L476'></a><a href='#L476'>476</a>
+<a name='L477'></a><a href='#L477'>477</a>
+<a name='L478'></a><a href='#L478'>478</a>
+<a name='L479'></a><a href='#L479'>479</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -564,17 +577,30 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1028,6 +1054,7 @@ export function <span class="fstat-no" title="function not covered" >CompareRunS
   const [suiteFilter, setSuiteFilter] = <span class="cstat-no" title="statement not covered" >React.useState("");</span>
   const ref = <span class="cstat-no" title="statement not covered" >React.useRef&lt;HTMLDivElement&gt;(null);</span>
   const inputRef = <span class="cstat-no" title="statement not covered" >React.useRef&lt;HTMLInputElement&gt;(null);</span>
+  const [dropPos, setDropPos] = <span class="cstat-no" title="statement not covered" >React.useState({ top: 0, left: 0 });</span>
   const selectedRun = <span class="cstat-no" title="statement not covered" >runs.find(<span class="fstat-no" title="function not covered" >(r</span>) =&gt; <span class="cstat-no" title="statement not covered" >r.id === value)</span> as Run | undefined;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  React.useEffect(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
@@ -1039,11 +1066,23 @@ export function <span class="fstat-no" title="function not covered" >CompareRunS
   }, []);
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  React.useEffect(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
-<span class="cstat-no" title="statement not covered" >    if (open) <span class="cstat-no" title="statement not covered" >setTimeout(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >i</span>nputRef.current?.focus(), 0</span>);</span></span>
+<span class="cstat-no" title="statement not covered" >    if (open) {</span>
+<span class="cstat-no" title="statement not covered" >      setTimeout(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >i</span>nputRef.current?.focus(), 0</span>);</span>
+      const btn = <span class="cstat-no" title="statement not covered" >ref.current?.querySelector("button");</span>
+<span class="cstat-no" title="statement not covered" >      if (btn) {</span>
+        const r = <span class="cstat-no" title="statement not covered" >btn.getBoundingClientRect();</span>
+        const dw = <span class="cstat-no" title="statement not covered" >420;</span>
+        const dh = <span class="cstat-no" title="statement not covered" >Math.min(440, window.innerHeight - r.bottom - 16);</span>
+        let left = <span class="cstat-no" title="statement not covered" >r.left;</span>
+<span class="cstat-no" title="statement not covered" >        if (left + dw &gt; window.innerWidth - 8) <span class="cstat-no" title="statement not covered" >left = window.innerWidth - dw - 8;</span></span>
+<span class="cstat-no" title="statement not covered" >        if (left &lt; 8) <span class="cstat-no" title="statement not covered" >left = 8;</span></span>
+<span class="cstat-no" title="statement not covered" >        setDropPos({ top: r.bottom + 4, left });</span>
+      }
+    }
   }, [open]);
 &nbsp;
   const envs = <span class="cstat-no" title="statement not covered" >[...new Set(runs.map(<span class="fstat-no" title="function not covered" >(r</span>) =&gt; <span class="cstat-no" title="statement not covered" >r.env)</span>)];</span>
-  const targets = <span class="cstat-no" title="statement not covered" >[...new Set(runs.map(<span class="fstat-no" title="function not covered" >(r</span>) =&gt; <span class="cstat-no" title="statement not covered" >r.env)</span>)];</span>
+  const targets = <span class="cstat-no" title="statement not covered" >[...new Set(runs.map(<span class="fstat-no" title="function not covered" >(r</span>) =&gt; <span class="cstat-no" title="statement not covered" >r.envId)</span>)];</span>
   const statuses = <span class="cstat-no" title="statement not covered" >[...new Set(runs.map(<span class="fstat-no" title="function not covered" >(r</span>) =&gt; <span class="cstat-no" title="statement not covered" >r.status)</span>)] as Run["status"][];</span>
   const suites = <span class="cstat-no" title="statement not covered" >[...new Set(runs.map(<span class="fstat-no" title="function not covered" >(r</span>) =&gt; <span class="cstat-no" title="statement not covered" >r.suiteId)</span>)];</span>
 &nbsp;
@@ -1222,9 +1261,9 @@ export function <span class="fstat-no" title="function not covered" >CompareRunS
       {open &amp;&amp; (
         &lt;div
           style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
-            left: 0,
+            position: "fixed",
+            top: dropPos.top,
+            left: dropPos.left,
             zIndex: 300,
             background: "var(--proof-surface)",
             border: `1px solid ${accentColor}`,
@@ -1232,7 +1271,7 @@ export function <span class="fstat-no" title="function not covered" >CompareRunS
             boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
             display: "flex",
             flexDirection: "column",
-            width: "max(100%, 480px)",
+            width: 420,
             maxHeight: 440,
             overflow: "hidden",
           }}
@@ -1465,7 +1504,7 @@ export function <span class="fstat-no" title="function not covered" >CompareRunS
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-16T09:53:44.063Z
+                at 2026-06-16T10:40:21.706Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

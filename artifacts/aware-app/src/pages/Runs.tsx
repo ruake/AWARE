@@ -1,10 +1,10 @@
 import React, { useSyncExternalStore } from "react";
 import { Link, useLocation } from "wouter";
 
-import { ConsoleCard, ConsoleStat } from "@/components/console";
+import { ConsoleCard, ConsolePagination, PageShell } from "@/components/console";
 import { DataTable, type ColumnDef } from "@/components/console/DataTable";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
-import { Pagination, CTAStatCard } from "@/components/aware";
+import { CTAStatCard } from "@/components/aware";
 import { RUNS, getRunsByEnv } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { useSyncedUrlState } from "@/lib/urlState";
@@ -390,14 +390,20 @@ export default function Runs() {
     },
   ];
 
+  const pageTitle = "Activity & Runs";
+  const pageSubtitle = `${total} runs${
+    envSnap.envIds.length > 0 ? " (env filtered)" : ""
+  } · ${running.length > 0 ? "partial data shown" : "all completed"}`;
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 18,
-        animation: "page-enter 0.22s ease-out both",
-      }}
+    <PageShell
+      title={pageTitle}
+      subtitle={pageSubtitle}
+      headerActions={
+        <button onClick={() => navigate("/start")} className="proof-button-primary">
+          <Play size={14} /> Start New Run
+        </button>
+      }
     >
       {/* ── Banner: Running or Idle ── */}
       {running.length > 0 ? (
@@ -518,76 +524,6 @@ export default function Runs() {
           </a>
         </div>
       )}
-
-      {/* ── Header ── */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 800,
-              color: "var(--proof-text)",
-              margin: 0,
-              letterSpacing: "-0.6px",
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <Activity size={20} style={{ color: "var(--proof-blue)" }} />
-            Activity & Runs
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                color: running.length > 0 ? "var(--proof-blue-hover)" : "var(--proof-green)",
-                background: running.length > 0 ? "rgba(59,130,246,0.1)" : "rgba(34,197,94,0.1)",
-                border: `1px solid ${running.length > 0 ? "rgba(59,130,246,0.25)" : "rgba(34,197,94,0.25)"}`,
-                borderRadius: 999,
-                padding: "2px 8px 2px 6px",
-              }}
-            >
-              <span
-                style={{
-                  width: 5,
-                  height: 5,
-                  borderRadius: "50%",
-                  background: running.length > 0 ? "var(--proof-blue-hover)" : "var(--proof-green)",
-                  animation: running.length > 0 ? "pulseDot 1.5s ease-in-out infinite" : "none",
-                  display: "inline-block",
-                }}
-              />
-              {running.length > 0 ? `${running.length} running` : "all idle"}
-            </span>
-          </h1>
-          <p
-            style={{
-              fontSize: 12.5,
-              color: "var(--proof-text-secondary)",
-              margin: "4px 0 0",
-              letterSpacing: "-0.1px",
-            }}
-          >
-            {total} runs{envSnap.envIds.length > 0 ? " (env filtered)" : ""} · GitHub Actions across
-            QA / UAT / PROD ·
-            {running.length > 0 ? " partial data shown for active runs" : " all completed"}
-          </p>
-        </div>
-        <button onClick={() => navigate("/start")} className="proof-button-primary">
-          <Play size={14} /> Start New Run
-        </button>
-      </div>
 
       {/* ── Merged KPI strip ── */}
       <div
@@ -893,15 +829,19 @@ export default function Runs() {
               noRunsForEnv ? "No runs for the selected environment" : "No runs match your filters"
             }
           />
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            totalItems={filtered.length}
-            pageSize={pageSize}
-            onPageChange={setPage}
-          />
         </ConsoleCard>
       </PanelErrorBoundary>
+      {/* ── Page pagination ── */}
+      {totalPages > 1 && (
+        <ConsolePagination
+          currentPage={page}
+          totalPages={totalPages}
+          totalItems={filtered.length}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={() => {}}
+        />
+      )}
 
       {/* ── GitHub Actions info ── */}
       <div
@@ -965,6 +905,6 @@ export default function Runs() {
         ↑↓ / j·k navigate · Enter open
       </div>
       {Toast}
-    </div>
+    </PageShell>
   );
 }

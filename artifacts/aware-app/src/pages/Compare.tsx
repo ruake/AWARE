@@ -4,6 +4,7 @@ import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { CompareRunSelector } from "@/components/aware/CompareRunSelector";
 import { CompareSidePanel } from "@/components/aware/CompareSidePanel";
+import { ConsolePagination } from "@/components/console";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { useSyncedUrlState } from "@/lib/urlState";
 import {
@@ -68,6 +69,8 @@ export default function Compare() {
   const [computedRows, setComputedRows] = React.useState<DiffRow[]>(DIFF_ROWS);
   const [baseResults, setBaseResults] = React.useState<TestResult[]>([]);
   const [candResults, setCandResults] = React.useState<TestResult[]>([]);
+  const [diffPage, setDiffPage] = React.useState(1);
+  const DIFF_PAGE_SIZE = 25;
   const baselineRun = RUNS.find((r) => r.id === baseline);
   const candidateRun = RUNS.find((r) => r.id === candidate);
 
@@ -112,6 +115,13 @@ export default function Compare() {
       return true;
     });
   }, [diffs, searchText, regressionsOnly, activeFilter, colFilters]);
+
+  const diffTotalPages = Math.max(1, Math.ceil(filtered.length / DIFF_PAGE_SIZE));
+  const safeDiffPage = Math.min(diffPage, diffTotalPages);
+  const paginatedDiffs = filtered.slice(
+    (safeDiffPage - 1) * DIFF_PAGE_SIZE,
+    safeDiffPage * DIFF_PAGE_SIZE,
+  );
 
   const clampedIdx = selectedIdx >= filtered.length ? -1 : selectedIdx;
 
@@ -672,7 +682,8 @@ export default function Compare() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((d, i) => {
+                  {paginatedDiffs.map((d, i) => {
+                    const absIdx = (safeDiffPage - 1) * DIFF_PAGE_SIZE + i;
                     const isSelected = selectedId === d.id;
                     const deltams = d.durCand - d.durBase;
                     return (
@@ -680,7 +691,7 @@ export default function Compare() {
                         key={d.id}
                         onClick={() => {
                           setSelectedId(isSelected ? null : d.id);
-                          setSelectedIdx(isSelected ? -1 : i);
+                          setSelectedIdx(isSelected ? -1 : absIdx);
                         }}
                         style={{
                           cursor: "pointer",
@@ -778,16 +789,46 @@ export default function Compare() {
               </table>
             </div>
           </div>
+          {/* Detail overlay — centered, not side panel */}
           {selectedDiff && selectedId && (
-            <CompareSidePanel
-              diff={selectedDiff}
-              diffs={filtered}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              navigate={navigate}
-              baseResult={baseResults.find((r) => r.name === selectedDiff.name) ?? null}
-              candResult={candResults.find((r) => r.name === selectedDiff.name) ?? null}
-            />
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                zIndex: 9990,
+                background: "rgba(0,0,0,0.4)",
+                backdropFilter: "blur(4px)",
+                WebkitBackdropFilter: "blur(4px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                animation: "fadeIn 0.15s ease",
+              }}
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setSelectedId(null);
+              }}
+            >
+              <div
+                style={{
+                  maxHeight: "85vh",
+                  overflow: "hidden",
+                  display: "flex",
+                  borderRadius: 8,
+                  boxShadow: "0 16px 48px rgba(0,0,0,0.3)",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CompareSidePanel
+                  diff={selectedDiff}
+                  diffs={filtered}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  navigate={navigate}
+                  baseResult={baseResults.find((r) => r.name === selectedDiff.name) ?? null}
+                  candResult={candResults.find((r) => r.name === selectedDiff.name) ?? null}
+                />
+              </div>
+            </div>
           )}
         </div>
       </PanelErrorBoundary>
