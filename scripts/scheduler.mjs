@@ -113,6 +113,7 @@ function describeSchedule(cron) {
     "0 6 * * *": "Daily 06:00 UTC",
     "0 4 * * 1": "Monday 04:00 UTC",
     "0 */2 * * *": "Every 2 hours",
+    "*/10 * * * *": "Every 10 minutes",
   };
   return known[cron] || cron;
 }

@@ -1,25 +1,13 @@
-import React, { useSyncExternalStore } from "react";
-import { Search, Bell, Sun, Moon, ExternalLink, Menu, Activity } from "lucide-react";
-import { EnvSelector } from "./EnvSelector";
-import { SuiteSelector } from "./SuiteSelector";
-import {
-  getSelectedEnvSnapshot,
-  setSelectedEnvIds,
-  subscribeToSelectedEnv,
-} from "@/lib/selectedEnv";
-import {
-  getSelectedSuiteSnapshot,
-  setSelectedSuiteIds,
-  subscribeToSelectedSuites,
-} from "@/lib/filters";
+import React from "react";
+import { useLocation } from "wouter";
+import { Search, Sun, Moon } from "lucide-react";
 
 interface ConsoleTopBarProps {
-  onToggleSidebar?: () => void;
-  sidebarCollapsed?: boolean;
-  onSearchOpen?: () => void;
+  onSearchOpen: () => void;
 }
 
-export function ConsoleTopBar({ onToggleSidebar, onSearchOpen }: ConsoleTopBarProps) {
+export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
+  const [location] = useLocation();
   const [isDark, setIsDark] = React.useState<boolean>(() => {
     try {
       const saved = localStorage.getItem("proof-theme");
@@ -29,16 +17,20 @@ export function ConsoleTopBar({ onToggleSidebar, onSearchOpen }: ConsoleTopBarPr
     }
   });
 
-  const selectedEnvSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
-  const selectedSuiteSnap = useSyncExternalStore(
-    subscribeToSelectedSuites,
-    getSelectedSuiteSnapshot,
-  );
-
-  React.useEffect(() => {
-    if (isDark) document.documentElement.classList.remove("light");
-    else document.documentElement.classList.add("light");
-  }, []);
+  const routeLabel = (() => {
+    const path = location;
+    if (path === "/") return "Dashboard";
+    if (path.startsWith("/runs")) return path === "/runs" ? "Runs" : "Run Detail";
+    if (path.startsWith("/compare")) return "Compare";
+    if (path.startsWith("/trends")) return "Trends";
+    if (path.startsWith("/suites")) return "Test Suites";
+    if (path.startsWith("/copilot")) return "Copilot";
+    if (path.startsWith("/about")) return "About";
+    if (path.startsWith("/testdoc")) return "Test Documentation";
+    if (path.startsWith("/start")) return "Start Run";
+    if (path.startsWith("/share")) return "Sharing";
+    return "A.W.A.R.E.";
+  })();
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -46,268 +38,152 @@ export function ConsoleTopBar({ onToggleSidebar, onSearchOpen }: ConsoleTopBarPr
     try {
       localStorage.setItem("proof-theme", next ? "dark" : "light");
     } catch {
-      /* */
+      /* ignore */
     }
     if (next) document.documentElement.classList.remove("light");
     else document.documentElement.classList.add("light");
   };
 
-  const iconBtn: React.CSSProperties = {
-    width: 32,
-    height: 32,
-    padding: 0,
-    border: "none",
-    background: "transparent",
-    cursor: "pointer",
-    color: "var(--proof-text-secondary)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 8,
-    transition: "background 0.13s, color 0.13s",
-    flexShrink: 0,
-  };
-
   return (
     <header
       style={{
-        height: "var(--proof-console-topbar-height)",
-        background: "var(--proof-topbar-bg)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        borderBottom: "1px solid var(--proof-border)",
+        height: "var(--proof-title-bar-height)",
+        minHeight: "var(--proof-title-bar-height)",
+        background: "var(--proof-title-bar-bg)",
         display: "flex",
         alignItems: "center",
-        padding: "0 12px 0 8px",
-        gap: 6,
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
+        padding: "0 12px",
+        gap: 8,
         flexShrink: 0,
+        userSelect: "none",
+        borderBottom: "1px solid var(--proof-border)",
       }}
     >
-      {/* Hamburger */}
-      {onToggleSidebar && (
-        <button
-          onClick={onToggleSidebar}
-          aria-label="Toggle sidebar"
-          style={iconBtn}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "var(--proof-console-nav-hover)";
-            (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "transparent";
-            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
-          }}
-        >
-          <Menu size={17} />
-        </button>
-      )}
-
-      {/* Logo */}
+      {/* App title */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          gap: 6,
           flexShrink: 0,
-          marginRight: 4,
-          padding: "0 4px",
+          fontSize: 12,
+          fontWeight: 600,
+          color: "var(--proof-text-secondary)",
+          letterSpacing: "0.5px",
         }}
       >
-        <div
+        <span
           style={{
-            width: 26,
-            height: 26,
-            borderRadius: 7,
-            background: "linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #06b6d4 100%)",
-            display: "flex",
+            width: 16,
+            height: 16,
+            borderRadius: 3,
+            background: "var(--proof-blue)",
+            display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 2px 8px rgba(59,130,246,0.4)",
             flexShrink: 0,
           }}
         >
-          <Activity size={13} style={{ color: "white" }} />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1, gap: 1 }}>
-          <span
-            style={{
-              fontWeight: 800,
-              fontSize: 12.5,
-              color: "var(--proof-text)",
-              letterSpacing: "1.8px",
-              fontFamily: "var(--font-mono)",
-            }}
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            A.W.A.R.E.
-          </span>
-          <span
-            style={{
-              fontSize: 7,
-              color: "var(--proof-blue-bright)",
-              textTransform: "uppercase",
-              letterSpacing: "1.8px",
-              fontWeight: 600,
-              opacity: 0.8,
-            }}
-          >
-            CDN Observability
-          </span>
-        </div>
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+        </span>
+        <span style={{ color: "var(--proof-text)", fontWeight: 500 }}>A.W.A.R.E.</span>
       </div>
 
       {/* Separator */}
-      <div
-        style={{
-          width: 1,
-          height: 20,
-          background: "var(--proof-border)",
-          flexShrink: 0,
-          margin: "0 4px",
-        }}
-      />
+      <span style={{ color: "var(--proof-text-muted)", fontSize: 11, margin: "0 2px" }}>/</span>
 
-      {/* Search bar */}
-      <div
+      {/* Current route label */}
+      <span style={{ fontSize: 12, color: "var(--proof-text)", fontWeight: 400 }}>
+        {routeLabel}
+      </span>
+
+      {/* Spacer */}
+      <div style={{ flex: 1 }} />
+
+      {/* Search */}
+      <button
         onClick={onSearchOpen}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && onSearchOpen) onSearchOpen();
-        }}
+        title="Search (⌘K)"
+        aria-label="Search"
         style={{
-          flex: 1,
-          maxWidth: 440,
           display: "flex",
           alignItems: "center",
-          gap: 7,
-          border: "1px solid var(--proof-border)",
-          borderRadius: 8,
-          padding: "0 10px",
-          height: 30,
-          background: "var(--proof-subtle-bg)",
-          margin: "0 8px",
+          gap: 4,
+          padding: "2px 8px",
+          fontSize: 12,
           cursor: "pointer",
-          transition: "border-color 0.13s, background 0.13s",
+          border: "1px solid var(--proof-border)",
+          borderRadius: 4,
+          background: "transparent",
+          color: "var(--proof-text-secondary)",
+          transition: "all 0.1s",
+          lineHeight: "18px",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-accent)";
-          (e.currentTarget as HTMLElement).style.background = "var(--proof-blue-bg)";
+          (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-strong)";
+          (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
         }}
         onMouseLeave={(e) => {
           (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)";
-          (e.currentTarget as HTMLElement).style.background = "var(--proof-subtle-bg)";
+          (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
         }}
       >
-        <Search size={12} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
-        <span
-          style={{
-            flex: 1,
-            fontSize: 12,
-            color: "var(--proof-text-muted)",
-            fontFamily: "var(--font-sans)",
-            letterSpacing: "-0.1px",
-          }}
-        >
-          Search runs, tests, environments…
-        </span>
+        <Search size={11} />
+        <span>Search</span>
         <kbd
           style={{
             fontSize: 9,
-            border: "1px solid var(--proof-border-strong)",
-            borderRadius: 4,
-            padding: "1px 5px",
+            border: "1px solid var(--proof-border)",
+            borderRadius: 2,
+            padding: "0 4px",
             fontFamily: "var(--font-mono)",
-            color: "var(--proof-text-muted)",
-            background: "var(--proof-subtle-bg2)",
             lineHeight: "14px",
-            flexShrink: 0,
+            opacity: 0.7,
           }}
         >
           ⌘K
         </kbd>
-      </div>
+      </button>
 
-      {/* Right */}
-      <div
-        style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: "auto", flexShrink: 0 }}
+      {/* Theme toggle */}
+      <button
+        onClick={toggleTheme}
+        title={isDark ? "Light mode" : "Dark mode"}
+        aria-label="Toggle theme"
+        style={{
+          padding: 4,
+          border: "none",
+          background: "transparent",
+          cursor: "pointer",
+          color: "var(--proof-text-secondary)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 4,
+          transition: "all 0.1s",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
+          (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
+          (e.currentTarget as HTMLElement).style.background = "transparent";
+        }}
       >
-        <EnvSelector
-          variant="topbar"
-          currentEnvIds={selectedEnvSnap.envIds}
-          onEnvChange={(ids) => setSelectedEnvIds(ids)}
-        />
-        <SuiteSelector
-          variant="topbar"
-          currentSuiteIds={selectedSuiteSnap.suiteIds}
-          onSuiteChange={(ids) => setSelectedSuiteIds(ids)}
-        />
-
-        <button
-          aria-label="Notifications"
-          style={iconBtn}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "var(--proof-console-nav-hover)";
-            (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "transparent";
-            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
-          }}
-        >
-          <Bell size={15} />
-        </button>
-
-        <button
-          onClick={toggleTheme}
-          title={isDark ? "Light mode" : "Dark mode"}
-          style={iconBtn}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "var(--proof-console-nav-hover)";
-            (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "transparent";
-            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
-          }}
-        >
-          {isDark ? <Sun size={15} /> : <Moon size={15} />}
-        </button>
-
-        <div style={{ width: 1, height: 18, background: "var(--proof-border)", margin: "0 2px" }} />
-
-        <a
-          href="https://github.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            fontSize: 11.5,
-            fontWeight: 500,
-            color: "var(--proof-text-secondary)",
-            textDecoration: "none",
-            padding: "4px 8px",
-            borderRadius: 7,
-            transition: "background 0.13s, color 0.13s",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "var(--proof-console-nav-hover)";
-            (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "transparent";
-            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
-          }}
-        >
-          GitHub <ExternalLink size={10} />
-        </a>
-      </div>
+        {isDark ? <Sun size={14} /> : <Moon size={14} />}
+      </button>
     </header>
   );
 }

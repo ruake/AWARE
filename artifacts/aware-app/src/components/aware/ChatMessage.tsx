@@ -107,8 +107,9 @@ export default function ChatMessage({
           pointerEvents: "none",
           ...(isAssistant
             ? {
-                background: "linear-gradient(135deg, #3d6ff5 0%, #7c6af5 100%)",
-                boxShadow: "0 0 0 2px rgba(91,138,245,0.2), 0 2px 8px rgba(91,138,245,0.3)",
+                background:
+                  "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-purple) 100%)",
+                boxShadow: "0 0 0 2px var(--proof-blue-glow), 0 2px 8px var(--proof-blue-glow)",
               }
             : {
                 background: "var(--proof-surface-3)",
@@ -131,7 +132,7 @@ export default function ChatMessage({
             fontSize: 13,
             lineHeight: 1.7,
             background: isUser
-              ? "linear-gradient(135deg, #5b8af5 0%, #7c6af5 100%)"
+              ? "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-purple) 100%)"
               : isError
                 ? "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.06))"
                 : "var(--proof-surface-2)",
@@ -141,7 +142,7 @@ export default function ChatMessage({
               : isError
                 ? "1px solid rgba(239,68,68,0.3)"
                 : "1px solid var(--proof-border)",
-            boxShadow: isUser ? "0 2px 12px rgba(91,138,245,0.25)" : "0 1px 3px rgba(0,0,0,0.15)",
+            boxShadow: isUser ? "0 2px 12px var(--proof-blue-glow)" : "0 1px 3px rgba(0,0,0,0.15)",
             maxWidth: "100%",
             overflow: "hidden",
           }}

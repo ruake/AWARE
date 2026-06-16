@@ -1,41 +1,59 @@
 import React from "react";
+import { useLocation } from "wouter";
 import { ConsoleTopBar } from "./ConsoleTopBar";
 import { ConsoleSidebar } from "./ConsoleSidebar";
-import { ConsoleBreadcrumbs } from "./ConsoleBreadcrumbs";
+import { ActivityBar } from "./ActivityBar";
+import { StatusBar } from "./StatusBar";
 import { CommandPalette } from "../aware/CommandPalette";
 import { useLiveStatus } from "@/lib/useLiveStatus";
-import { Check, AlertTriangle, Activity, X } from "lucide-react";
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: string;
-  badge?: number | string;
-}
-
-interface NavGroup {
-  title: string;
-  items: NavItem[];
-}
+import {
+  Check,
+  AlertTriangle,
+  Activity,
+  X,
+  LayoutDashboard,
+  History,
+  GitCompare,
+  BarChart3,
+  FolderTree,
+  Bot,
+  Info,
+} from "lucide-react";
 
 interface ConsoleShellProps {
   children: React.ReactNode;
-  breadcrumbs?: { label: string; href?: string }[];
-  sidebarNav?: NavGroup[];
-  activePath?: string;
 }
 
-export function ConsoleShell({
-  children,
-  breadcrumbs,
-  sidebarNav,
-  activePath = "/",
-}: ConsoleShellProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+const ACTIVITY_ITEMS = [
+  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", href: "/" },
+  { id: "runs", icon: History, label: "Runs", href: "/runs" },
+  { id: "compare", icon: GitCompare, label: "Compare", href: "/compare" },
+  { id: "trends", icon: BarChart3, label: "Trends", href: "/trends" },
+  { id: "suites", icon: FolderTree, label: "Test Suites", href: "/suites" },
+  { id: "copilot", icon: Bot, label: "Copilot", href: "/copilot" },
+  { id: "about", icon: Info, label: "About", href: "/about" },
+];
+
+function activityIdFromPath(path: string): string {
+  if (path === "/") return "dashboard";
+  const seg = path.split("/")[1];
+  if (seg === "runs" || seg === "activity" || seg === "pulse") return "runs";
+  if (seg === "compare") return "compare";
+  if (seg === "trends" || seg === "analytics") return "trends";
+  if (seg === "suites") return "suites";
+  if (seg === "copilot") return "copilot";
+  if (seg === "about") return "about";
+  return "dashboard";
+}
+
+export function ConsoleShell({ children }: ConsoleShellProps) {
+  const [location, navigate] = useLocation();
+  const [sidebarVisible, setSidebarVisible] = React.useState(true);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
   const paletteRef = React.useRef(paletteOpen);
-  const pendingG = React.useRef(false);
   const { currentToast, dismissToast } = useLiveStatus();
+
+  const currentActivity = activityIdFromPath(location);
 
   React.useEffect(() => {
     paletteRef.current = paletteOpen;
@@ -47,13 +65,6 @@ export function ConsoleShell({
       if (e.key === "/" && e.shiftKey) {
         e.preventDefault();
         setPaletteOpen((p) => !p);
-        return;
-      }
-      if (e.key === "g" && !e.ctrlKey && !e.metaKey) {
-        pendingG.current = true;
-        setTimeout(() => {
-          pendingG.current = false;
-        }, 500);
         return;
       }
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -77,7 +88,16 @@ export function ConsoleShell({
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const toggleSidebar = () => setSidebarCollapsed((p) => !p);
+  const handleActivityClick = (item: (typeof ACTIVITY_ITEMS)[number]) => {
+    if (item.id === currentActivity && sidebarVisible) {
+      setSidebarVisible(false);
+    } else {
+      setSidebarVisible(true);
+      navigate(item.href);
+    }
+  };
+
+  const toggleSidebar = () => setSidebarVisible((p) => !p);
 
   return (
     <div
@@ -90,59 +110,54 @@ export function ConsoleShell({
         color: "var(--proof-text)",
       }}
     >
-      {/* Top bar — fixed */}
-      <ConsoleTopBar
-        onToggleSidebar={toggleSidebar}
-        sidebarCollapsed={sidebarCollapsed}
-        onSearchOpen={() => setPaletteOpen(true)}
-      />
+      {/* Title bar */}
+      <ConsoleTopBar onSearchOpen={() => setPaletteOpen(true)} />
 
-      {/* Below top bar layout */}
+      {/* Main area: ActivityBar + Sidebar + Content */}
       <div
         style={{
           display: "flex",
           flex: 1,
           overflow: "hidden",
           minHeight: 0,
-          marginTop: "var(--proof-console-topbar-height)",
         }}
       >
+        {/* Activity Bar (always visible, leftmost) */}
+        <ActivityBar
+          items={ACTIVITY_ITEMS.map((item) => ({
+            ...item,
+            onClick: () => handleActivityClick(item),
+          }))}
+          activeId={currentActivity}
+          onSidebarToggle={toggleSidebar}
+          sidebarVisible={sidebarVisible}
+        />
+
         {/* Sidebar */}
-        {sidebarNav && sidebarNav.length > 0 && (
+        {sidebarVisible && (
           <ConsoleSidebar
-            navGroups={sidebarNav}
-            activePath={activePath}
-            collapsed={sidebarCollapsed}
-            onToggleCollapse={toggleSidebar}
+            activePanel={currentActivity}
+            visible={sidebarVisible}
+            onClose={() => setSidebarVisible(false)}
           />
         )}
 
-        {/* Main content area */}
-        <div
+        {/* Main content */}
+        <main
           style={{
             flex: 1,
             minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
+            overflowY: "auto",
+            overflowX: "hidden",
+            background: "var(--proof-editor-bg)",
           }}
         >
-          {/* Breadcrumbs */}
-          {breadcrumbs && breadcrumbs.length > 0 && <ConsoleBreadcrumbs items={breadcrumbs} />}
-
-          {/* Content */}
-          <main
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              overflowX: "hidden",
-              padding: "20px 24px",
-            }}
-          >
-            {children}
-          </main>
-        </div>
+          {children}
+        </main>
       </div>
+
+      {/* Status Bar */}
+      <StatusBar />
 
       {/* Command Palette */}
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
@@ -153,18 +168,24 @@ export function ConsoleShell({
           onClick={dismissToast}
           style={{
             position: "fixed",
-            bottom: 24,
+            bottom: 32,
             left: "50%",
             transform: "translateX(-50%)",
             display: "flex",
             alignItems: "center",
-            gap: 10,
-            padding: "12px 18px",
-            borderRadius: 10,
+            gap: 8,
+            padding: "6px 14px",
+            borderRadius: 4,
             zIndex: 50,
             cursor: "pointer",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-            border: `1px solid ${currentToast.type === "success" ? "var(--proof-green)" : currentToast.type === "warning" ? "var(--proof-yellow)" : "var(--proof-blue)"}`,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+            border: "1px solid",
+            borderColor:
+              currentToast.type === "success"
+                ? "var(--proof-green)"
+                : currentToast.type === "warning"
+                  ? "var(--proof-yellow)"
+                  : "var(--proof-blue)",
             background:
               currentToast.type === "success"
                 ? "var(--proof-green-bg)"
@@ -178,16 +199,16 @@ export function ConsoleShell({
                   ? "var(--proof-yellow)"
                   : "var(--proof-blue)",
             fontSize: 13,
-            fontWeight: 500,
+            fontWeight: 400,
             whiteSpace: "nowrap",
           }}
         >
           {currentToast.type === "success" ? (
-            <Check size={15} />
+            <Check size={14} />
           ) : currentToast.type === "warning" ? (
-            <AlertTriangle size={15} />
+            <AlertTriangle size={14} />
           ) : (
-            <Activity size={15} />
+            <Activity size={14} />
           )}
           {currentToast.message}
           <button
@@ -197,17 +218,17 @@ export function ConsoleShell({
             }}
             aria-label="Close"
             style={{
-              marginLeft: 6,
+              marginLeft: 4,
               background: "none",
               border: "none",
               cursor: "pointer",
-              fontSize: 16,
               opacity: 0.6,
               lineHeight: 1,
               color: "inherit",
+              padding: 2,
             }}
           >
-            <X size={14} />
+            <X size={12} />
           </button>
         </div>
       )}
