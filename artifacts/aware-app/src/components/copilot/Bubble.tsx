@@ -234,7 +234,9 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
                           fontFamily: "var(--font-mono)",
                         }}
                       >
-                        <code style={{ fontFamily: "var(--font-mono)", color: "var(--proof-text)" }}>
+                        <code
+                          style={{ fontFamily: "var(--font-mono)", color: "var(--proof-text)" }}
+                        >
                           {children}
                         </code>
                       </pre>
