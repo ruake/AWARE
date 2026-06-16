@@ -299,7 +299,7 @@ export default function Pulse() {
             >
               <Activity size={16} style={{ color: "var(--proof-blue)" }} />
             </div>
-            Pulse
+            Activity
             <span
               style={{
                 display: "inline-flex",

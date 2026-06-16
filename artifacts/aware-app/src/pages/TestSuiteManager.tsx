@@ -223,26 +223,24 @@ export default function TestSuiteManager() {
 
       <div
         className="proof-stagger"
-        style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, flexShrink: 0 }}
+        style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, flexShrink: 0 }}
       >
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="proof-card"
-            style={{ padding: "12px", textAlign: "center" }}
+            style={{
+              padding: "16px 18px",
+              background: "var(--proof-surface)",
+              border: "1px solid var(--proof-border)",
+              borderRadius: 12,
+              display: "flex", flexDirection: "column", gap: 8,
+              transition: "border-color 0.15s, transform 0.15s",
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-accent)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)"; (e.currentTarget as HTMLElement).style.transform = "none"; }}
           >
-            <div style={{ fontSize: 22, fontWeight: 700, color: kpi.color }}>{kpi.value}</div>
-            <div
-              style={{
-                fontSize: 10,
-                color: "var(--proof-text-secondary)",
-                marginTop: 1,
-                textTransform: "uppercase",
-                letterSpacing: "0.3px",
-              }}
-            >
-              {kpi.label}
-            </div>
+            <span style={{ fontSize: 10.5, fontWeight: 600, color: "var(--proof-text-muted)", textTransform: "uppercase", letterSpacing: "0.8px" }}>{kpi.label}</span>
+            <div style={{ fontSize: 26, fontWeight: 800, color: kpi.color, fontFamily: "var(--font-mono)", letterSpacing: "-1.5px", lineHeight: 1 }}>{kpi.value}</div>
           </div>
         ))}
       </div>

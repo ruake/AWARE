@@ -104,7 +104,7 @@ export function ConsoleShell({
           flex: 1,
           overflow: "hidden",
           minHeight: 0,
-          marginTop: 52,
+          marginTop: "var(--proof-console-topbar-height)",
         }}
       >
         {/* Sidebar */}
