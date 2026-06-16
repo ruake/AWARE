@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/52</span>
+                <span class='fraction'>0/53</span>
             </div>
         
             
@@ -450,16 +450,7 @@
 <a name='L385'></a><a href='#L385'>385</a>
 <a name='L386'></a><a href='#L386'>386</a>
 <a name='L387'></a><a href='#L387'>387</a>
-<a name='L388'></a><a href='#L388'>388</a>
-<a name='L389'></a><a href='#L389'>389</a>
-<a name='L390'></a><a href='#L390'>390</a>
-<a name='L391'></a><a href='#L391'>391</a>
-<a name='L392'></a><a href='#L392'>392</a>
-<a name='L393'></a><a href='#L393'>393</a>
-<a name='L394'></a><a href='#L394'>394</a>
-<a name='L395'></a><a href='#L395'>395</a>
-<a name='L396'></a><a href='#L396'>396</a>
-<a name='L397'></a><a href='#L397'>397</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L388'></a><a href='#L388'>388</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -569,8 +560,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -792,21 +781,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -925,7 +907,7 @@ const SIDEBAR_NAV: NavGroup[] = <span class="cstat-no" title="statement not cove
     title: "Monitor",
     items: [
       { label: "Dashboard", href: "/", icon: "LayoutDashboard" },
-      { label: "Activity", href: "/activity", icon: "Activity" },
+      { label: "Activity", href: "/runs", icon: "Activity" },
     ],
   },
   {
@@ -953,8 +935,7 @@ const SIDEBAR_NAV: NavGroup[] = <span class="cstat-no" title="statement not cove
 const BREADCRUMB_MAP: Record&lt;string, { label: string; parent?: { label: string; href: string } }&gt; =
 <span class="cstat-no" title="statement not covered" >  {</span>
     "/": { label: "Dashboard" },
-    "/activity": { label: "Activity", parent: { label: "Monitor", href: "/" } },
-    "/runs": { label: "Runs", parent: { label: "Investigate", href: "/" } },
+    "/runs": { label: "Activity &amp; Runs", parent: { label: "Monitor", href: "/" } },
     "/runs/:runId": { label: "Run Detail", parent: { label: "Runs", href: "/runs" } },
     "/compare": { label: "Compare", parent: { label: "Investigate", href: "/" } },
     "/trends": { label: "Trends", parent: { label: "Investigate", href: "/" } },
@@ -974,7 +955,6 @@ const TestSuites = <span class="cstat-no" title="statement not covered" >React.l
 const Trends = <span class="cstat-no" title="statement not covered" >React.lazy(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >i</span>mport("@/pages/TestAnalytics"));</span></span>
 const About = <span class="cstat-no" title="statement not covered" >React.lazy(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >i</span>mport("@/pages/About"));</span></span>
 const Copilot = <span class="cstat-no" title="statement not covered" >React.lazy(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >i</span>mport("@/pages/Copilot"));</span></span>
-const Activity = <span class="cstat-no" title="statement not covered" >React.lazy(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >i</span>mport("@/pages/Pulse"));</span></span>
 const TestDoc = <span class="cstat-no" title="statement not covered" >React.lazy(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >i</span>mport("@/pages/TestDoc"));</span></span>
 const StartRun = <span class="cstat-no" title="statement not covered" >React.lazy(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >i</span>mport("@/pages/StartRun"));</span></span>
 const Sharing = <span class="cstat-no" title="statement not covered" >React.lazy(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >i</span>mport("@/pages/Sharing"));</span></span>
@@ -1145,11 +1125,6 @@ function <span class="fstat-no" title="function not covered" >Router() {</span>
             &lt;Dashboard /&gt;
           &lt;/React.Suspense&gt;
         &lt;/Route&gt;
-        &lt;Route path="/activity"&gt;
-          &lt;React.Suspense fallback={&lt;PageLoader /&gt;}&gt;
-            &lt;Activity /&gt;
-          &lt;/React.Suspense&gt;
-        &lt;/Route&gt;
         &lt;Route path="/runs"&gt;
           &lt;React.Suspense fallback={&lt;PageLoader /&gt;}&gt;
             &lt;Runs /&gt;
@@ -1191,18 +1166,16 @@ function <span class="fstat-no" title="function not covered" >Router() {</span>
           &lt;/React.Suspense&gt;
         &lt;/Route&gt;
         {/* Redirects from old route names (Nielsen #4: don't break bookmarks) */}
+        &lt;Route path="/activity"&gt;
+          {<span class="fstat-no" title="function not covered" >() =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            window.history.replaceState(null, "", window.location.pathname.replace("/activity", "/runs"));</span>
+<span class="cstat-no" title="statement not covered" >            return &lt;React.Suspense fallback={&lt;PageLoader /&gt;}&gt;&lt;Runs /&gt;&lt;/React.Suspense&gt;;</span>
+          }}
+        &lt;/Route&gt;
         &lt;Route path="/pulse"&gt;
           {<span class="fstat-no" title="function not covered" >() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >            window.history.replaceState(</span>
-              null,
-              "",
-              window.location.pathname.replace("/pulse", "/activity"),
-            );
-<span class="cstat-no" title="statement not covered" >            return (</span>
-              &lt;React.Suspense fallback={&lt;PageLoader /&gt;}&gt;
-                &lt;Activity /&gt;
-              &lt;/React.Suspense&gt;
-            );
+<span class="cstat-no" title="statement not covered" >            window.history.replaceState(null, "", window.location.pathname.replace("/pulse", "/runs"));</span>
+<span class="cstat-no" title="statement not covered" >            return &lt;React.Suspense fallback={&lt;PageLoader /&gt;}&gt;&lt;Runs /&gt;&lt;/React.Suspense&gt;;</span>
           }}
         &lt;/Route&gt;
         &lt;Route path="/analytics"&gt;
@@ -1258,7 +1231,7 @@ export default App;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-15T15:57:11.129Z
+                at 2026-06-16T09:53:44.063Z
             </div>
         <script src="../prettify.js"></script>
         <script>

@@ -93,6 +93,8 @@ describe("selectedEnv store", () => {
     setSelectedEnvIds(["qa_staging"]);
     const snap = getSelectedEnvSnapshot();
     expect(snap).toEqual({ envIds: ["qa_staging"] });
+    expect("suiteIds" in snap).toBe(false);
+    expect("layout" in snap).toBe(false);
   });
 
   it("getSelectedEnvSnapshot returns updated values after change", () => {

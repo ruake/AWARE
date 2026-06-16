@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "wouter";
 
 interface DayData {
   date: string;
@@ -11,6 +12,7 @@ interface Props {
   startDate?: string;
   endDate?: string;
   onDayClick?: (day: DayData | null) => void;
+  onCellClick?: (date: string) => void;
 }
 
 function getIntensity(count: number, max: number): number {
@@ -47,7 +49,8 @@ const MONTH_LABELS = [
   "Dec",
 ];
 
-export function HeatmapCalendar({ data, startDate, endDate, onDayClick }: Props) {
+export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellClick }: Props) {
+  const [, navigate] = useLocation();
   const today = endDate ? new Date(endDate) : new Date();
   const start = startDate ? new Date(startDate) : new Date(today);
   if (!startDate) start.setDate(start.getDate() - 84);
@@ -137,20 +140,34 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick }: Props)
                 const day = week[di];
                 if (!day || !day.date) return <div key={di} style={{ width: 14, height: 14 }} />;
                 const level = day.data ? getIntensity(day.data.count, maxCount) : 0;
+                const handleClick = () => {
+                  if (onCellClick && day.date) {
+                    onCellClick(day.date);
+                  } else {
+                    onDayClick?.(day.data);
+                  }
+                };
+                const Tag = onCellClick ? "button" : "div";
+                const cellStyle: React.CSSProperties = {
+                  width: 14,
+                  height: 14,
+                  borderRadius: 2,
+                  cursor: onCellClick || day.data ? "pointer" : "default",
+                  backgroundColor: LEVEL_COLORS[level],
+                  transition: "background-color 0.1s",
+                };
+                if (Tag === "button") {
+                  cellStyle.padding = 0;
+                  cellStyle.border = level === 0 ? "1px solid var(--proof-grey)" : "none";
+                } else {
+                  cellStyle.border = level === 0 ? "1px solid var(--proof-grey)" : "none";
+                }
                 return (
-                  <div
+                  <Tag
                     key={di}
                     title={day.data ? `${day.date}: ${day.data.count} runs` : day.date}
-                    onClick={() => onDayClick?.(day.data)}
-                    style={{
-                      width: 14,
-                      height: 14,
-                      borderRadius: 2,
-                      cursor: day.data ? "pointer" : "default",
-                      backgroundColor: LEVEL_COLORS[level],
-                      border: level === 0 ? "1px solid var(--proof-grey)" : "none",
-                      transition: "background-color 0.1s",
-                    }}
+                    onClick={handleClick}
+                    style={cellStyle}
                   />
                 );
               })}

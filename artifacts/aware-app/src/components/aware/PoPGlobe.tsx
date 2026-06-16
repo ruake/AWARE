@@ -7,6 +7,8 @@ interface PoPGlobeProps {
   size?: number;
   interactive?: boolean;
   className?: string;
+  runIds?: string[];
+  onMarkerClick?: (index: number) => void;
 }
 
 const DOT_COUNT = 300;
@@ -65,8 +67,13 @@ function StaticDots() {
   );
 }
 
-function ActiveDots() {
+function ActiveDots({ onMarkerClick }: { onMarkerClick?: (index: number) => void }) {
   const ref = useRef<THREE.Points>(null);
+  const hitRef = useRef(onMarkerClick);
+
+  React.useEffect(() => {
+    hitRef.current = onMarkerClick;
+  });
 
   useFrame((state) => {
     if (!ref.current) return;
@@ -77,17 +84,43 @@ function ActiveDots() {
     mat.size = 0.03 + pulse * 0.025;
   });
 
+  const activePositions: [number, number, number][] = [];
+  for (let i = 0; i < ACTIVE_COUNT; i++) {
+    activePositions.push([
+      ACTIVE_DOT_POSITIONS[i * 3],
+      ACTIVE_DOT_POSITIONS[i * 3 + 1],
+      ACTIVE_DOT_POSITIONS[i * 3 + 2],
+    ]);
+  }
+
   return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute args={[ACTIVE_DOT_POSITIONS, 3]} attach="attributes-position" />
-      </bufferGeometry>
-      <pointsMaterial color="#5b8af5" size={0.04} sizeAttenuation transparent opacity={0.8} />
-    </points>
+    <group>
+      {/* Visual pulsing dots */}
+      <points ref={ref}>
+        <bufferGeometry>
+          <bufferAttribute args={[ACTIVE_DOT_POSITIONS, 3]} attach="attributes-position" />
+        </bufferGeometry>
+        <pointsMaterial color="#5b8af5" size={0.04} sizeAttenuation transparent opacity={0.8} />
+      </points>
+      {/* Invisible clickable spheres over active dots */}
+      {activePositions.map((pos, i) => (
+        <mesh
+          key={i}
+          position={pos}
+          onClick={(e) => {
+            e.stopPropagation();
+            hitRef.current?.(i);
+          }}
+        >
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshBasicMaterial transparent opacity={0} />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
-function GlobeGroup() {
+function GlobeGroup({ onMarkerClick }: { onMarkerClick?: (index: number) => void }) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((_, delta) => {
@@ -109,12 +142,18 @@ function GlobeGroup() {
         />
       </mesh>
       <StaticDots />
-      <ActiveDots />
+      <ActiveDots onMarkerClick={onMarkerClick} />
     </group>
   );
 }
 
-export default function PoPGlobe({ size = 200, interactive = true, className }: PoPGlobeProps) {
+export default function PoPGlobe({
+  size = 200,
+  interactive = true,
+  className,
+  runIds,
+  onMarkerClick,
+}: PoPGlobeProps) {
   const cameraZ = 2.5 * (size / 200);
   return (
     <div className={className} style={{ width: size, height: size }}>
@@ -126,7 +165,7 @@ export default function PoPGlobe({ size = 200, interactive = true, className }: 
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 3, 5]} intensity={0.9} />
         <directionalLight position={[-3, -2, 4]} intensity={0.3} />
-        <GlobeGroup />
+        <GlobeGroup onMarkerClick={onMarkerClick} />
         {interactive && <OrbitControls enableZoom={false} enablePan={false} />}
       </Canvas>
     </div>

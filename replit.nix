@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.lsof
     pkgs.fluxbox
     pkgs.firefox
     pkgs.novnc

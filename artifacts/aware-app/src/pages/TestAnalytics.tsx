@@ -186,7 +186,7 @@ export default function TestAnalytics() {
 
   const handleSelectNavigate = (id: string) => {
     const key = isTcMode ? "testId" : "diffId";
-    navigate(`/analytics?${key}=${encodeURIComponent(id)}`, { replace: true });
+    navigate(`/trends?${key}=${encodeURIComponent(id)}`, { replace: true });
     setSelOpen(false);
     setSelSearch("");
   };
