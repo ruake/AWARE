@@ -128,11 +128,9 @@ export default function Runs() {
   const passed = envFilteredRuns.filter((r) => r.status === "PASS").length;
   const failed = envFilteredRuns.filter((r) => r.status === "FAIL" || r.status === "FLAKY").length;
   const total = envFilteredRuns.length;
-  const avgPassRate = total > 0 ? Math.round(envFilteredRuns.reduce((s, r) => s + r.passPct, 0) / total) : 0;
-  const avgMs =
-    total > 0
-      ? envFilteredRuns.reduce((s, r) => s + r.durationMs, 0) / total
-      : 0;
+  const avgPassRate =
+    total > 0 ? Math.round(envFilteredRuns.reduce((s, r) => s + r.passPct, 0) / total) : 0;
+  const avgMs = total > 0 ? envFilteredRuns.reduce((s, r) => s + r.durationMs, 0) / total : 0;
   const avgDurationStr =
     avgMs < 60000 ? `${(avgMs / 1000).toFixed(1)}s` : `${Math.round(avgMs / 60000)}m`;
 
@@ -274,16 +272,11 @@ export default function Runs() {
               }}
             >
               {run.status === "RUNNING" && (
-                <Loader2
-                  size={11}
-                  style={{ animation: "spin 1s linear infinite" }}
-                />
+                <Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} />
               )}
               {cfg.label}
               {run.status === "RUNNING" && run.passPct > 0 && (
-                <span style={{ opacity: 0.7, marginLeft: 2 }}>
-                  {run.passPct}%
-                </span>
+                <span style={{ opacity: 0.7, marginLeft: 2 }}>{run.passPct}%</span>
               )}
             </span>
             <span
@@ -313,7 +306,8 @@ export default function Runs() {
                   </span>
                   <span
                     style={{
-                      color: run.failures > 0 ? "var(--proof-red-bright)" : "var(--proof-text-muted)",
+                      color:
+                        run.failures > 0 ? "var(--proof-red-bright)" : "var(--proof-text-muted)",
                     }}
                   >
                     {run.failures > 0 ? `${run.failures} fail` : "clean"}
@@ -321,9 +315,7 @@ export default function Runs() {
                 </>
               )}
               {run.status === "RUNNING" && run.passPct === 0 && (
-                <span style={{ color: "var(--proof-text-muted)" }}>
-                  awaiting results…
-                </span>
+                <span style={{ color: "var(--proof-text-muted)" }}>awaiting results…</span>
               )}
             </span>
           </div>
@@ -587,8 +579,8 @@ export default function Runs() {
               letterSpacing: "-0.1px",
             }}
           >
-            {total} runs{envSnap.envIds.length > 0 ? " (env filtered)" : ""} ·
-            GitHub Actions across QA / UAT / PROD ·
+            {total} runs{envSnap.envIds.length > 0 ? " (env filtered)" : ""} · GitHub Actions across
+            QA / UAT / PROD ·
             {running.length > 0 ? " partial data shown for active runs" : " all completed"}
           </p>
         </div>

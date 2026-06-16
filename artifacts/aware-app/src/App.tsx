@@ -329,14 +329,30 @@ function Router() {
         {/* Redirects from old route names (Nielsen #4: don't break bookmarks) */}
         <Route path="/activity">
           {() => {
-            window.history.replaceState(null, "", window.location.pathname.replace("/activity", "/runs"));
-            return <React.Suspense fallback={<PageLoader />}><Runs /></React.Suspense>;
+            window.history.replaceState(
+              null,
+              "",
+              window.location.pathname.replace("/activity", "/runs"),
+            );
+            return (
+              <React.Suspense fallback={<PageLoader />}>
+                <Runs />
+              </React.Suspense>
+            );
           }}
         </Route>
         <Route path="/pulse">
           {() => {
-            window.history.replaceState(null, "", window.location.pathname.replace("/pulse", "/runs"));
-            return <React.Suspense fallback={<PageLoader />}><Runs /></React.Suspense>;
+            window.history.replaceState(
+              null,
+              "",
+              window.location.pathname.replace("/pulse", "/runs"),
+            );
+            return (
+              <React.Suspense fallback={<PageLoader />}>
+                <Runs />
+              </React.Suspense>
+            );
           }}
         </Route>
         <Route path="/analytics">

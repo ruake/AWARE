@@ -1,6 +1,5 @@
 import React from "react";
 import { Link, useLocation, useSearch } from "wouter";
-import { GoogleBarChart, GoogleAreaChart } from "@/components/aware/GoogleCharts";
 import { CTAStatCard } from "@/components/aware/CTAStatCard";
 import { DIFF_ROWS, RUNS, getTestResultsForRun, getTestDetailsAsync } from "@/lib/data";
 import { getEnvLabels } from "@/lib/envConfig";
@@ -8,6 +7,17 @@ import { ENVS, CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import { useTestData } from "@/hooks/useTestData";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { useSyncedUrlState } from "@/lib/urlState";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 import {
   ArrowLeft,
@@ -275,19 +285,24 @@ export default function TestAnalytics() {
     return { env, pass, fail, total: runs.length };
   });
 
-  const handleChartPoint = (pt: Record<string, unknown>) => {
-    const target = pt._realRunId as string;
-    if (target && target.startsWith("run_")) navigate(`/runs/${encodeURIComponent(target)}`);
-  };
-
-  const historyChartData = detail.history.map((h, i) => ({
-    runId: `R${1000 + i}`,
-    _realRunId: h.runId,
-    pass: h.status === "PASS" ? 1 : 0,
-    fail: h.status === "FAIL" ? 1 : 0,
-    duration: h.duration,
-    env: h.env,
-  }));
+  const historyChartData = detail.history
+    .map((h, i) => {
+      const enrichedRow = enriched[i];
+      return {
+        index: i,
+        label: `#${detail.history.length - i}`,
+        runId: h.runId,
+        _realRunId: h.runId,
+        status: h.status,
+        pass: h.status === "PASS" ? 1 : 0,
+        fail: h.status === "FAIL" ? 1 : 0,
+        duration: h.duration,
+        env: h.env,
+        assertionsPassed: enrichedRow?.assertionsPassed ?? 0,
+        assertionsFailed: enrichedRow?.assertionsFailed ?? 0,
+      };
+    })
+    .reverse();
 
   const isFlaky = detail.flakinessScore > 20;
   const recent = detail.history.slice(-3);
@@ -667,6 +682,7 @@ export default function TestAnalytics() {
 
       {/* Charts */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        {/* Pass/Fail + Duration combined */}
         <PanelErrorBoundary label="History chart">
           <div className="proof-card" style={{ padding: 16 }}>
             <h3
@@ -682,22 +698,80 @@ export default function TestAnalytics() {
                 gap: 6,
               }}
             >
-              <Activity size={13} /> Pass/Fail Across Runs
+              <Activity size={13} /> Run History Timeline
             </h3>
-            <GoogleBarChart
-              title=""
-              columns={["Run", "Pass", "Fail"]}
-              data={historyChartData}
-              xKey="runId"
-              yKeys={["pass", "fail"]}
-              colors={["#22c55e", "#ef4444"]}
-              height="180px"
-              showTimeFrame={false}
-              onPointClick={handleChartPoint}
-            />
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart
+                data={historyChartData}
+                margin={{ top: 4, right: 4, bottom: 0, left: 0 }}
+                onClick={(e) => {
+                  if (e?.activePayload?.[0]?.payload?._realRunId) {
+                    navigate(`/runs/${encodeURIComponent(e.activePayload[0].payload._realRunId)}`);
+                  }
+                }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--proof-border)"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="label"
+                  tick={
+                    {
+                      fontSize: 9,
+                      fill: "var(--proof-text-muted)",
+                    } as React.SVGProps<SVGTextElement>
+                  }
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={
+                    {
+                      fontSize: 9,
+                      fill: "var(--proof-text-muted)",
+                    } as React.SVGProps<SVGTextElement>
+                  }
+                  axisLine={false}
+                  tickLine={false}
+                  domain={[0, 1.2]}
+                  ticks={[0, 1]}
+                  tickFormatter={(v: number) => (v === 1 ? "PASS" : "FAIL")}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--proof-surface)",
+                    border: "1px solid var(--proof-border)",
+                    borderRadius: 8,
+                    fontSize: 11,
+                  }}
+                  labelStyle={{ color: "var(--proof-text-muted)" }}
+                  formatter={(_: unknown, name: string) => {
+                    if (name === "duration") return null;
+                    return [name === "pass" ? "PASS" : "FAIL", "Status"];
+                  }}
+                />
+                <Bar
+                  dataKey="pass"
+                  stackId="a"
+                  fill="#22c55e"
+                  radius={[2, 2, 0, 0]}
+                  maxBarSize={20}
+                />
+                <Bar
+                  dataKey="fail"
+                  stackId="a"
+                  fill="#ef4444"
+                  radius={[2, 2, 0, 0]}
+                  maxBarSize={20}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </PanelErrorBoundary>
 
+        {/* Duration trend */}
         <PanelErrorBoundary label="Duration chart">
           <div className="proof-card" style={{ padding: 16 }}>
             <h3
@@ -715,22 +789,82 @@ export default function TestAnalytics() {
             >
               <Clock size={13} /> Duration Trend (ms)
             </h3>
-            <GoogleAreaChart
-              title=""
-              columns={["Run", "Duration"]}
-              data={historyChartData}
-              xKey="runId"
-              yKeys={["duration"]}
-              colors={["#5b8af5"]}
-              height="180px"
-              showTimeFrame={false}
-              onPointClick={handleChartPoint}
-            />
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart
+                data={historyChartData}
+                margin={{ top: 4, right: 4, bottom: 0, left: -18 }}
+                onClick={(e) => {
+                  if (e?.activePayload?.[0]?.payload?._realRunId) {
+                    navigate(`/runs/${encodeURIComponent(e.activePayload[0].payload._realRunId)}`);
+                  }
+                }}
+              >
+                <defs>
+                  <linearGradient id="dur-trend-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--proof-blue)" stopOpacity={0.18} />
+                    <stop offset="100%" stopColor="var(--proof-blue)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--proof-border)"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="label"
+                  tick={
+                    {
+                      fontSize: 9,
+                      fill: "var(--proof-text-muted)",
+                    } as React.SVGProps<SVGTextElement>
+                  }
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={
+                    {
+                      fontSize: 9,
+                      fill: "var(--proof-text-muted)",
+                    } as React.SVGProps<SVGTextElement>
+                  }
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--proof-surface)",
+                    border: "1px solid var(--proof-border)",
+                    borderRadius: 8,
+                    fontSize: 11,
+                  }}
+                  labelStyle={{ color: "var(--proof-text-muted)" }}
+                  formatter={(value: number) => [`${value}ms`, "Duration"]}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="duration"
+                  stroke="var(--proof-blue)"
+                  strokeWidth={2}
+                  fill="url(#dur-trend-fill)"
+                  dot={(props: { cx: number; cy: number; payload: { status: string } }) => (
+                    <circle
+                      key={props.cx}
+                      cx={props.cx}
+                      cy={props.cy}
+                      r={3}
+                      fill={props.payload.status === "PASS" ? "#22c55e" : "#ef4444"}
+                    />
+                  )}
+                  activeDot={{ r: 4, fill: "var(--proof-blue)" }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </PanelErrorBoundary>
 
         {/* Env breakdown */}
-        <div className="proof-card" style={{ padding: 16, gridColumn: "1 / -1" }}>
+        <div className="proof-card" style={{ padding: 16 }}>
           <h3
             style={{
               fontSize: 12,
@@ -746,17 +880,119 @@ export default function TestAnalytics() {
           >
             <BarChart3 size={13} /> Pass/Fail by Environment
           </h3>
-          <GoogleBarChart
-            title=""
-            columns={["Environment", "Pass", "Fail"]}
-            data={envStatus}
-            xKey="env"
-            yKeys={["pass", "fail"]}
-            colors={["#22c55e", "#ef4444"]}
-            height="140px"
-            showTimeFrame={false}
-            isHorizontal={true}
-          />
+          <ResponsiveContainer width="100%" height={140}>
+            <BarChart
+              data={envStatus}
+              layout="vertical"
+              margin={{ top: 4, right: 4, bottom: 0, left: 80 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--proof-border)"
+                horizontal={false}
+              />
+              <XAxis
+                type="number"
+                tick={
+                  { fontSize: 9, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>
+                }
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="env"
+                tick={
+                  { fontSize: 9, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>
+                }
+                axisLine={false}
+                tickLine={false}
+                width={80}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: "var(--proof-surface)",
+                  border: "1px solid var(--proof-border)",
+                  borderRadius: 8,
+                  fontSize: 11,
+                }}
+              />
+              <Bar dataKey="pass" fill="#22c55e" radius={[0, 2, 2, 0]} />
+              <Bar dataKey="fail" fill="#ef4444" radius={[0, 2, 2, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Assertions trend */}
+        <div className="proof-card" style={{ padding: 16 }}>
+          <h3
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: "var(--proof-text-secondary)",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              marginBottom: 12,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <Bug size={13} /> Assertions Trend
+          </h3>
+          <ResponsiveContainer width="100%" height={140}>
+            <BarChart
+              data={historyChartData}
+              margin={{ top: 4, right: 4, bottom: 0, left: -18 }}
+              onClick={(e) => {
+                if (e?.activePayload?.[0]?.payload?._realRunId) {
+                  navigate(`/runs/${encodeURIComponent(e.activePayload[0].payload._realRunId)}`);
+                }
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" vertical={false} />
+              <XAxis
+                dataKey="label"
+                tick={
+                  { fontSize: 9, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>
+                }
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={
+                  { fontSize: 9, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>
+                }
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: "var(--proof-surface)",
+                  border: "1px solid var(--proof-border)",
+                  borderRadius: 8,
+                  fontSize: 11,
+                }}
+                labelStyle={{ color: "var(--proof-text-muted)" }}
+              />
+              <Bar
+                dataKey="assertionsPassed"
+                stackId="a"
+                fill="#22c55e"
+                radius={[2, 2, 0, 0]}
+                maxBarSize={20}
+                name="Passed"
+              />
+              <Bar
+                dataKey="assertionsFailed"
+                stackId="a"
+                fill="#ef4444"
+                radius={[2, 2, 0, 0]}
+                maxBarSize={20}
+                name="Failed"
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
