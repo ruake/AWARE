@@ -7,3 +7,5 @@ export { ConsolePagination } from "./ConsolePagination";
 export { ConsoleCard } from "./ConsoleCard";
 export { ConsoleStat } from "./ConsoleStat";
 export { ConsoleChart } from "./ConsoleChart";
+export { DetailPanel } from "./DetailPanel";
+export { PageShell } from "./PageShell";
