@@ -28,7 +28,6 @@ import {
   ArrowUpRight,
   AlertTriangle,
   GitCompare,
-  Shield,
   CheckCircle2,
   XCircle,
   Zap,
@@ -114,106 +113,6 @@ function computeEnvHealth(runsList: Run[], selectedEnvIds?: string[]): EnvHealth
       lastRun: latest?.started,
     };
   });
-}
-
-function KpiCard({
-  label,
-  value,
-  sub,
-  icon,
-  accentColor,
-  onClick,
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-  icon: React.ReactNode;
-  accentColor: string;
-  onClick?: () => void;
-}) {
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        padding: "20px 22px",
-        background: "var(--proof-surface)",
-        border: "1px solid var(--proof-border)",
-        borderRadius: 14,
-        display: "flex",
-        flexDirection: "column",
-        gap: 14,
-        cursor: onClick ? "pointer" : "default",
-        transition: "border-color 0.15s, transform 0.15s, box-shadow 0.15s",
-        position: "relative",
-        overflow: "hidden",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-accent)";
-        (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "var(--proof-shadow)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)";
-        (e.currentTarget as HTMLElement).style.transform = "none";
-        (e.currentTarget as HTMLElement).style.boxShadow = "none";
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span
-          style={{
-            fontSize: 10.5,
-            fontWeight: 600,
-            color: "var(--proof-text-muted)",
-            textTransform: "uppercase",
-            letterSpacing: "0.8px",
-          }}
-        >
-          {label}
-        </span>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 9,
-            background: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
-            border: `1px solid color-mix(in srgb, ${accentColor} 22%, transparent)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: accentColor,
-          }}
-        >
-          {icon}
-        </div>
-      </div>
-      <div>
-        <div
-          style={{
-            fontSize: 32,
-            fontWeight: 800,
-            color: "var(--proof-text)",
-            letterSpacing: "-2px",
-            fontFamily: "var(--font-mono)",
-            lineHeight: 1,
-          }}
-        >
-          {value}
-        </div>
-        {sub && (
-          <div
-            style={{
-              fontSize: 11,
-              color: "var(--proof-text-muted)",
-              marginTop: 5,
-              letterSpacing: "-0.1px",
-            }}
-          >
-            {sub}
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
 
 function CollapsibleSection({
@@ -589,33 +488,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── KPI cards ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-        <KpiCard
-          label="Total Tests"
-          value={totalTests}
-          icon={<TestTube size={15} />}
-          accentColor="var(--proof-blue)"
-          sub={`across ${getTestSuites().length} suites`}
-        />
-        <KpiCard
-          label="Pass Rate"
-          value={`${overallPassRate}%`}
-          icon={<Activity size={15} />}
-          accentColor={passRateColor}
-          sub="overall average across all envs"
-          onClick={() => navigate("/trends")}
-        />
-        <KpiCard
-          label="Regressions"
-          value={regressions}
-          icon={regressions > 0 ? <AlertTriangle size={15} /> : <Shield size={15} />}
-          accentColor={regressions > 0 ? "var(--proof-red)" : "var(--proof-green)"}
-          sub={regressions > 0 ? "requires immediate attention" : "all clear · ready to promote"}
-          onClick={() => navigate("/compare")}
-        />
-      </div>
-
       {/* ── Environment Health Grid ── */}
       <CollapsibleSection
         title="Environment Health"
@@ -792,39 +664,16 @@ export default function Dashboard() {
           >
             <div
               style={{
-                padding: "16px 20px 14px",
+                padding: "6px 16px",
                 borderBottom: "1px solid var(--proof-border)",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
+                justifyContent: "flex-end",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    width: 3,
-                    height: 18,
-                    borderRadius: 99,
-                    background: "var(--proof-green)",
-                    boxShadow: "0 0 8px rgba(34,197,94,0.4)",
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: 13.5,
-                    fontWeight: 700,
-                    color: "var(--proof-text)",
-                    letterSpacing: "-0.2px",
-                  }}
-                >
-                  Pass Rate Trend
-                </span>
-                <span style={{ fontSize: 11, color: "var(--proof-text-muted)" }}>Last 14 days</span>
-              </div>
               <button
                 onClick={() => navigate("/trends")}
                 style={{
-                  fontSize: 12,
+                  fontSize: 11.5,
                   fontWeight: 500,
                   color: "var(--proof-blue-bright)",
                   background: "none",
@@ -833,8 +682,8 @@ export default function Dashboard() {
                   display: "flex",
                   alignItems: "center",
                   gap: 4,
-                  padding: "4px 8px",
-                  borderRadius: 7,
+                  padding: "3px 8px",
+                  borderRadius: 6,
                   transition: "background 0.13s",
                 }}
                 onMouseEnter={(e) => {
@@ -844,7 +693,7 @@ export default function Dashboard() {
                   (e.currentTarget as HTMLElement).style.background = "none";
                 }}
               >
-                Full Trends <ArrowUpRight size={12} />
+                Full Trends <ArrowUpRight size={11} />
               </button>
             </div>
             <div style={{ padding: "16px 20px 12px", height: 160 }}>

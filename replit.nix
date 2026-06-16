@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.opencode
     pkgs.lsof
     pkgs.fluxbox
     pkgs.firefox

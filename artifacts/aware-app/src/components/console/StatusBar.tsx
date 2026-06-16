@@ -1,6 +1,6 @@
 import React from "react";
 import { useSyncExternalStore } from "react";
-import { RUNS } from "@/lib/runs";
+import { getRuns, subscribeToRuns } from "@/lib/runs";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { getSelectedSuiteSnapshot, subscribeToSelectedSuites } from "@/lib/filters";
 import { getEnvConfigs } from "@/lib/envConfig";
@@ -9,7 +9,8 @@ export function StatusBar() {
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
   const suiteSnap = useSyncExternalStore(subscribeToSelectedSuites, getSelectedSuiteSnapshot);
 
-  const totalRuns = RUNS.length;
+  const runs = useSyncExternalStore(subscribeToRuns, getRuns);
+  const totalRuns = runs.length;
   const envConfigs = getEnvConfigs();
   const activeEnvLabels =
     envSnap.envIds.length > 0
@@ -20,9 +21,9 @@ export function StatusBar() {
       : "All environments";
 
   const passPct =
-    totalRuns > 0 ? Math.round(RUNS.reduce((s, r) => s + (r.passPct ?? 0), 0) / totalRuns) : 0;
+    totalRuns > 0 ? Math.round(runs.reduce((s, r) => s + (r.passPct ?? 0), 0) / totalRuns) : 0;
 
-  const failedRuns = RUNS.filter((r) => (r.passPct ?? 100) < 90).length;
+  const failedRuns = runs.filter((r) => (r.passPct ?? 100) < 90).length;
 
   return (
     <footer
