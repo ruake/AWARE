@@ -50,19 +50,19 @@ export class ErrorBoundary extends React.Component<Props, State> {
               width: 56,
               height: 56,
               borderRadius: "50%",
-              background: "var(--proof-red-bg, rgba(217,48,37,0.1))",
+              background: "var(--proof-red-bg)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <AlertTriangle size={28} style={{ color: "var(--proof-red, #ef4444)" }} />
+            <AlertTriangle size={28} style={{ color: "var(--proof-red)" }} />
           </div>
           <h2
             style={{
               fontSize: 18,
               fontWeight: 600,
-              color: "var(--proof-text, #e8eaed)",
+              color: "var(--proof-text)",
               margin: 0,
             }}
           >
@@ -71,7 +71,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
           <p
             style={{
               fontSize: 13,
-              color: "var(--proof-text-secondary, #9aa0a6)",
+              color: "var(--proof-text-secondary)",
               maxWidth: 400,
               textAlign: "center",
               margin: 0,
@@ -89,7 +89,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 padding: "8px 18px",
                 fontSize: 13,
                 fontWeight: 500,
-                background: "var(--proof-blue, #5b8af5)",
+                background: "var(--proof-blue)",
                 color: "white",
                 border: "none",
                 borderRadius: 6,
@@ -109,8 +109,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 fontSize: 13,
                 fontWeight: 500,
                 background: "transparent",
-                color: "var(--proof-text-secondary, #9aa0a6)",
-                border: "1px solid var(--proof-grey, #2a2d35)",
+                color: "var(--proof-text-secondary)",
+                border: "1px solid var(--proof-border)",
                 borderRadius: 6,
                 cursor: "pointer",
               }}
@@ -123,7 +123,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             <summary
               style={{
                 fontSize: 12,
-                color: "var(--proof-text-secondary, #9aa0a6)",
+                color: "var(--proof-text-secondary)",
                 cursor: "pointer",
               }}
             >
@@ -133,8 +133,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
               style={{
                 marginTop: 8,
                 fontSize: 12,
-                color: "var(--proof-text-secondary, #9aa0a6)",
-                background: "var(--proof-surface, #141720)",
+                color: "var(--proof-text-secondary)",
+                background: "var(--proof-surface)",
                 padding: 12,
                 borderRadius: 6,
                 overflow: "auto",

@@ -10,229 +10,223 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   DESIGN TOKENS  — Dark (default)
+   DESIGN TOKENS — VS Code Dark+ (default)
    ═══════════════════════════════════════════════════════════════════ */
 :root {
-  /* Brand palette */
-  --proof-blue: #3b82f6;
-  --proof-blue-bright: #60a5fa;
-  --proof-blue-hover: #2563eb;
-  --proof-blue-bg: rgba(59, 130, 246, 0.1);
-  --proof-blue-glow: rgba(59, 130, 246, 0.35);
-  --proof-cyan: #06b6d4;
-  --proof-cyan-bg: rgba(6, 182, 212, 0.1);
-  --proof-green: #22c55e;
-  --proof-green-bright: #4ade80;
-  --proof-green-bg: rgba(34, 197, 94, 0.1);
-  --proof-red: #ef4444;
-  --proof-red-bright: #f87171;
-  --proof-red-bg: rgba(239, 68, 68, 0.1);
-  --proof-yellow: #f59e0b;
-  --proof-yellow-bright: #fbbf24;
-  --proof-yellow-bg: rgba(245, 158, 11, 0.1);
-  --proof-orange: #f97316;
-  --proof-orange-bg: rgba(249, 115, 22, 0.1);
-  --proof-purple: #8b5cf6;
-  --proof-purple-bright: #a78bfa;
-  --proof-purple-bg: rgba(139, 92, 246, 0.1);
-  --proof-pink: #ec4899;
-  --proof-pink-bg: rgba(236, 72, 153, 0.1);
+  /* Brand palette — VS Code blue */
+  --proof-blue: #007acc;
+  --proof-blue-bright: #1a8ad4;
+  --proof-blue-hover: #006bb3;
+  --proof-blue-bg: rgba(0, 122, 204, 0.1);
+  --proof-blue-glow: rgba(0, 122, 204, 0.25);
+  --proof-cyan: #4ec9b0;
+  --proof-cyan-bg: rgba(78, 201, 176, 0.1);
+  --proof-green: #4ec9b0;
+  --proof-green-bright: #6bdbbe;
+  --proof-green-bg: rgba(78, 201, 176, 0.1);
+  --proof-red: #f44747;
+  --proof-red-bright: #f66868;
+  --proof-red-bg: rgba(244, 71, 71, 0.1);
+  --proof-yellow: #d7ba7d;
+  --proof-yellow-bright: #e0c990;
+  --proof-yellow-bg: rgba(215, 186, 125, 0.1);
+  --proof-orange: #cc7832;
+  --proof-orange-bright: #d98e4a;
+  --proof-orange-bg: rgba(204, 120, 50, 0.1);
+  --proof-purple: #c586c0;
+  --proof-purple-bright: #d4a0ce;
+  --proof-purple-bg: rgba(197, 134, 192, 0.1);
+  --proof-pink: #d16969;
+  --proof-pink-bg: rgba(209, 105, 105, 0.1);
 
-  /* Surfaces — deep zinc/slate */
-  --proof-bg: #09090b;
-  --proof-grey-bg: #09090b;
-  --proof-surface: #111113;
-  --proof-surface-2: #1c1c1f;
-  --proof-surface-hover: #26262b;
-  --proof-surface-3: #313137;
-  --proof-glass: rgba(17, 17, 19, 0.85);
-  --proof-glass-border: rgba(255, 255, 255, 0.08);
+  /* Surfaces — VS Code Dark+ */
+  --proof-bg: #1e1e1e;
+  --proof-grey-bg: #1e1e1e;
+  --proof-surface: #252526;
+  --proof-surface-2: #2d2d2d;
+  --proof-surface-hover: #2a2d2e;
+  --proof-surface-3: #333333;
+  --proof-editor-bg: #1e1e1e;
+  --proof-sidebar-bg: #252526;
+  --proof-activity-bar-bg: #2c2c2c;
+  --proof-title-bar-bg: #3c3c3c;
+  --proof-status-bar-bg: #007acc;
+  --proof-status-bar-text: #ffffff;
+  --proof-tab-active-bg: #1e1e1e;
+  --proof-tab-inactive-bg: #2d2d2d;
+  --proof-panel-border: #3c3c3c;
 
-  /* Borders */
-  --proof-grey: rgba(255, 255, 255, 0.05);
-  --proof-border: rgba(255, 255, 255, 0.07);
-  --proof-border-strong: rgba(255, 255, 255, 0.13);
-  --proof-border-focus: rgba(59, 130, 246, 0.55);
-  --proof-border-accent: rgba(59, 130, 246, 0.28);
+  --proof-glass: rgba(30, 30, 30, 0.95);
+  --proof-glass-border: rgba(255, 255, 255, 0.06);
 
-  /* Text */
-  --proof-text: #fafafa;
-  --proof-text-primary: #fafafa;
-  --proof-text-secondary: #a1a1aa;
-  --proof-text-muted: #52525b;
-  --proof-text-tertiary: #3f3f46;
+  /* Borders — VS Code */
+  --proof-grey: rgba(255, 255, 255, 0.04);
+  --proof-border: #3c3c3c;
+  --proof-border-strong: #454545;
+  --proof-border-focus: rgba(0, 122, 204, 0.6);
+  --proof-border-accent: rgba(0, 122, 204, 0.35);
 
-  /* Glow effects */
-  --proof-glow-blue: 0 0 24px rgba(59, 130, 246, 0.28), 0 0 48px rgba(59, 130, 246, 0.1);
-  --proof-glow-green: 0 0 24px rgba(34, 197, 94, 0.28);
-  --proof-glow-red: 0 0 24px rgba(239, 68, 68, 0.28);
+  /* Text — VS Code Dark+ */
+  --proof-text: #cccccc;
+  --proof-text-primary: #cccccc;
+  --proof-text-secondary: #969696;
+  --proof-text-muted: #6e6e6e;
+  --proof-text-tertiary: #515151;
+
+  /* Selection */
+  --proof-selection-bg: #264f78;
 
   /* Shadows */
-  --proof-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --proof-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.35);
-  --proof-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
-  --proof-shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.65), 0 8px 24px rgba(0, 0, 0, 0.45);
-  --proof-shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 2px 8px rgba(0, 0, 0, 0.4);
+  --proof-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --proof-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --proof-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --proof-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --proof-shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04);
 
-  /* Radius */
-  --proof-radius-xs: 3px;
-  --proof-radius-sm: 5px;
-  --proof-radius: 8px;
-  --proof-radius-lg: 12px;
-  --proof-radius-xl: 16px;
-  --proof-radius-2xl: 24px;
+  /* Radius — VS Code uses sharp corners */
+  --proof-radius-xs: 2px;
+  --proof-radius-sm: 3px;
+  --proof-radius: 4px;
+  --proof-radius-lg: 6px;
+  --proof-radius-xl: 8px;
+  --proof-radius-2xl: 12px;
 
-  /* Typography */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  /* Typography — VS Code system font stack */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "Cascadia Code", "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
 
   /* Transitions */
-  --proof-transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  --proof-transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --proof-spring: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --proof-transition: 0.1s ease;
+  --proof-transition-slow: 0.2s ease;
 
-  /* Aliases */
-  --proof-muted: var(--proof-text-secondary);
+  /* Layout dimensions */
+  --proof-activity-bar-width: 48px;
+  --proof-sidebar-width: 260px;
+  --proof-sidebar-collapsed: 0px;
+  --proof-title-bar-height: 32px;
+  --proof-status-bar-height: 22px;
 
-  /* Shell-specific surfaces — use vars so light mode overrides them */
-  --proof-topbar-bg: rgba(9, 9, 11, 0.92);
-  --proof-sidebar-bg: rgba(14, 14, 17, 0.8);
-  --proof-breadcrumb-bg: rgba(9, 9, 11, 0.5);
-
-  /* Page-specific */
-  --proof-hero-about: linear-gradient(
-    150deg,
-    #09090b 0%,
-    #111113 40%,
-    rgba(59, 130, 246, 0.05) 70%,
-    #09090b 100%
-  );
-  --proof-hero-status: linear-gradient(
-    150deg,
-    #09090b 0%,
-    #111113 50%,
-    rgba(59, 130, 246, 0.03) 80%,
-    #09090b 100%
-  );
-  --proof-subtle-bg: rgba(255, 255, 255, 0.015);
-  --proof-subtle-bg2: rgba(255, 255, 255, 0.03);
-  --proof-subtle-bg3: rgba(255, 255, 255, 0.022);
-  --proof-code-bg: rgba(0, 0, 0, 0.5);
-  --proof-bar-track: rgba(255, 255, 255, 0.06);
-
-  /* Console layout */
-  --proof-console-topbar-height: 56px;
-  --proof-console-sidebar-width: 224px;
-  --proof-console-sidebar-collapsed: 54px;
-  --proof-console-breadcrumb-height: 36px;
+  /* Console layout aliases (for backward compat) */
+  --proof-console-topbar-height: var(--proof-title-bar-height);
+  --proof-console-sidebar-width: var(--proof-sidebar-width);
+  --proof-console-sidebar-collapsed: 0px;
+  --proof-console-breadcrumb-height: 0px;
 
   /* Nav */
   --proof-console-nav-bg: transparent;
-  --proof-console-nav-hover: rgba(255, 255, 255, 0.05);
-  --proof-console-nav-active: rgba(59, 130, 246, 0.12);
-  --proof-console-nav-active-text: #60a5fa;
-  --proof-console-nav-text: var(--proof-text-secondary);
+  --proof-console-nav-hover: rgba(255, 255, 255, 0.06);
+  --proof-console-nav-active: rgba(0, 122, 204, 0.18);
+  --proof-console-nav-active-text: #ffffff;
+  --proof-console-nav-text: #969696;
 
   /* Table */
-  --proof-console-table-header-bg: rgba(0, 0, 0, 0.25);
-  --proof-console-table-row-hover: rgba(59, 130, 246, 0.04);
-  --proof-console-table-row-selected: rgba(59, 130, 246, 0.08);
+  --proof-console-table-header-bg: rgba(0, 0, 0, 0.2);
+  --proof-console-table-row-hover: rgba(255, 255, 255, 0.03);
+  --proof-console-table-row-selected: rgba(0, 122, 204, 0.08);
   --proof-console-table-border: var(--proof-border);
-  --proof-console-table-stripe: rgba(255, 255, 255, 0.012);
+  --proof-console-table-stripe: rgba(255, 255, 255, 0.008);
 
-  /* Accent colors */
-  --proof-console-accent-orange: #f97316;
-  --proof-console-accent-orange-bg: rgba(249, 115, 22, 0.1);
-  --proof-console-accent-blue: #3b82f6;
-  --proof-console-accent-teal: #06b6d4;
-  --proof-console-accent-green: #22c55e;
+  /* Glow */
+  --proof-glow-blue: none;
+  --proof-glow-green: none;
+  --proof-glow-red: none;
+
+  /* Misc */
+  --proof-hover: rgba(255, 255, 255, 0.06);
+  --proof-hover-light: rgba(255, 255, 255, 0.03);
+  --proof-overlay: rgba(0, 0, 0, 0.6);
+  --proof-overlay-strong: rgba(0, 0, 0, 0.85);
+  --proof-overlay-dark: rgba(0, 0, 0, 0.4);
+  --proof-topbar-bg: var(--proof-title-bar-bg);
+  --proof-topbar-bg-fallback: var(--proof-title-bar-bg);
+  --proof-sidebar-bg-fallback: var(--proof-sidebar-bg);
+  --proof-notif-bg: var(--proof-surface);
+  --proof-subtle-bg: rgba(255, 255, 255, 0.03);
+  --proof-subtle-bg2: rgba(255, 255, 255, 0.06);
+  --proof-subtle-bg3: rgba(255, 255, 255, 0.04);
+  --proof-code-bg: rgba(0, 0, 0, 0.4);
+  --proof-bar-track: rgba(255, 255, 255, 0.08);
+  --proof-muted: var(--proof-text-secondary);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   LIGHT MODE OVERRIDES
+   LIGHT MODE — VS Code Light+
    ═══════════════════════════════════════════════════════════════════ */
 .light {
-  --proof-bg: #f8fafc;
-  --proof-grey-bg: #f8fafc;
-  --proof-surface: #ffffff;
-  --proof-surface-2: #f1f5f9;
-  --proof-surface-hover: #e8eef5;
-  --proof-surface-3: #e2e8f0;
-  --proof-glass: rgba(255, 255, 255, 0.9);
-  --proof-glass-border: rgba(59, 130, 246, 0.18);
+  --proof-bg: #ffffff;
+  --proof-grey-bg: #ffffff;
+  --proof-surface: #f3f3f3;
+  --proof-surface-2: #e8e8e8;
+  --proof-surface-hover: #e8e8e8;
+  --proof-surface-3: #dcdcdc;
+  --proof-editor-bg: #ffffff;
+  --proof-sidebar-bg: #f3f3f3;
+  --proof-activity-bar-bg: #2c2c2c;
+  --proof-title-bar-bg: #dddddd;
+  --proof-status-bar-bg: #007acc;
+  --proof-status-bar-text: #ffffff;
+  --proof-tab-active-bg: #ffffff;
+  --proof-tab-inactive-bg: #ececec;
+  --proof-panel-border: #e0e0e0;
 
-  --proof-grey: rgba(15, 23, 42, 0.05);
-  --proof-border: rgba(15, 23, 42, 0.08);
-  --proof-border-strong: rgba(15, 23, 42, 0.15);
-  --proof-border-focus: rgba(59, 130, 246, 0.55);
-  --proof-border-accent: rgba(59, 130, 246, 0.25);
+  --proof-glass: rgba(255, 255, 255, 0.95);
+  --proof-glass-border: rgba(0, 122, 204, 0.15);
 
-  --proof-text: #0f172a;
-  --proof-text-primary: #0f172a;
-  --proof-text-secondary: #475569;
-  --proof-text-muted: #94a3b8;
-  --proof-text-tertiary: #cbd5e1;
+  --proof-grey: rgba(0, 0, 0, 0.03);
+  --proof-border: #e0e0e0;
+  --proof-border-strong: #d4d4d4;
+  --proof-border-focus: rgba(0, 122, 204, 0.6);
+  --proof-border-accent: rgba(0, 122, 204, 0.25);
 
-  --proof-glow-blue: 0 0 24px rgba(59, 130, 246, 0.18), 0 0 48px rgba(59, 130, 246, 0.07);
-  --proof-glow-green: 0 0 16px rgba(34, 197, 94, 0.2);
-  --proof-glow-red: 0 0 16px rgba(239, 68, 68, 0.2);
+  --proof-text: #333333;
+  --proof-text-primary: #333333;
+  --proof-text-secondary: #717171;
+  --proof-text-muted: #999999;
+  --proof-text-tertiary: #b0b0b0;
 
-  --proof-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
-  --proof-shadow: 0 4px 16px rgba(15, 23, 42, 0.1), 0 1px 4px rgba(15, 23, 42, 0.07);
-  --proof-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.14), 0 4px 12px rgba(15, 23, 42, 0.08);
-  --proof-shadow-xl: 0 24px 64px rgba(15, 23, 42, 0.18), 0 8px 24px rgba(15, 23, 42, 0.1);
-  --proof-shadow-card: 0 0 0 1px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.06);
+  --proof-selection-bg: #add6ff;
 
-  --proof-topbar-bg: rgba(255, 255, 255, 0.94);
-  --proof-sidebar-bg: rgba(248, 250, 252, 0.94);
-  --proof-breadcrumb-bg: rgba(248, 250, 252, 0.8);
+  --proof-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --proof-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --proof-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --proof-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.15);
+  --proof-shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.04);
 
-  --proof-hero-about: linear-gradient(
-    150deg,
-    #f8fafc 0%,
-    #ffffff 40%,
-    rgba(59, 130, 246, 0.03) 70%,
-    #f8fafc 100%
-  );
-  --proof-hero-status: linear-gradient(
-    150deg,
-    #f8fafc 0%,
-    #ffffff 50%,
-    rgba(59, 130, 246, 0.02) 80%,
-    #f8fafc 100%
-  );
-  --proof-subtle-bg: rgba(15, 23, 42, 0.015);
-  --proof-subtle-bg2: rgba(15, 23, 42, 0.03);
-  --proof-subtle-bg3: rgba(15, 23, 42, 0.022);
-  --proof-code-bg: rgba(15, 23, 42, 0.04);
-  --proof-bar-track: rgba(15, 23, 42, 0.07);
+  --proof-blue: #007acc;
+  --proof-blue-bright: #1a8ad4;
+  --proof-blue-hover: #006bb3;
+  --proof-blue-bg: rgba(0, 122, 204, 0.07);
+  --proof-cyan: #4ec9b0;
+  --proof-green: #4ec9b0;
+  --proof-green-bright: #3ab090;
+  --proof-green-bg: rgba(78, 201, 176, 0.07);
+  --proof-red: #f44747;
+  --proof-red-bright: #d73a3a;
+  --proof-red-bg: rgba(244, 71, 71, 0.07);
+  --proof-yellow: #d7ba7d;
+  --proof-yellow-bright: #c0a060;
+  --proof-yellow-bg: rgba(215, 186, 125, 0.07);
+  --proof-purple: #c586c0;
+  --proof-purple-bright: #b072a8;
+  --proof-purple-bg: rgba(197, 134, 192, 0.07);
 
-  --proof-blue: #2563eb;
-  --proof-blue-bright: #3b82f6;
-  --proof-blue-hover: #1d4ed8;
-  --proof-blue-bg: rgba(37, 99, 235, 0.08);
-  --proof-cyan: #0891b2;
-  --proof-green: #16a34a;
-  --proof-green-bright: #22c55e;
-  --proof-green-bg: rgba(22, 163, 74, 0.08);
-  --proof-red: #dc2626;
-  --proof-red-bright: #ef4444;
-  --proof-red-bg: rgba(220, 38, 38, 0.08);
-  --proof-yellow: #d97706;
-  --proof-yellow-bright: #f59e0b;
-  --proof-yellow-bg: rgba(217, 119, 6, 0.08);
-  --proof-purple: #7c3aed;
-  --proof-purple-bright: #8b5cf6;
-  --proof-purple-bg: rgba(124, 58, 237, 0.08);
+  --proof-console-nav-hover: rgba(0, 0, 0, 0.05);
+  --proof-console-nav-active: rgba(0, 122, 204, 0.1);
+  --proof-console-nav-active-text: #007acc;
+  --proof-console-nav-text: #616161;
+  --proof-console-table-header-bg: rgba(0, 0, 0, 0.04);
+  --proof-console-table-row-hover: rgba(0, 0, 0, 0.02);
 
-  --proof-console-nav-hover: rgba(59, 130, 246, 0.07);
-  --proof-console-nav-active: rgba(59, 130, 246, 0.1);
-  --proof-console-nav-active-text: #2563eb;
-  --proof-console-nav-text: #64748b;
-  --proof-console-table-header-bg: rgba(241, 245, 249, 0.9);
-  --proof-console-table-row-hover: rgba(59, 130, 246, 0.04);
-  --proof-subtle-bg015: rgba(15, 23, 42, 0.012);
-  --proof-bar-track: rgba(15, 23, 42, 0.07);
+  --proof-hover: rgba(0, 0, 0, 0.05);
+  --proof-hover-light: rgba(0, 0, 0, 0.02);
+  --proof-overlay: rgba(255, 255, 255, 0.85);
+  --proof-overlay-strong: rgba(255, 255, 255, 0.95);
+  --proof-overlay-dark: rgba(0, 0, 0, 0.05);
+  --proof-subtle-bg: rgba(0, 0, 0, 0.02);
+  --proof-subtle-bg2: rgba(0, 0, 0, 0.04);
+  --proof-subtle-bg3: rgba(0, 0, 0, 0.03);
+  --proof-code-bg: rgba(0, 0, 0, 0.03);
+  --proof-bar-track: rgba(0, 0, 0, 0.06);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -249,121 +243,104 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
-  font-feature-settings: "cv11", "ss01";
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SCROLLBAR
+   SCROLLBAR — VS Code thin style
    ═══════════════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--proof-border-strong);
+  background: rgba(121, 121, 121, 0.4);
+  border: 2px solid transparent;
+  background-clip: content-box;
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--proof-text-muted);
+  background: rgba(100, 100, 100, 0.7);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   BACKGROUND PATTERNS
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-grid-bg {
-  background-image:
-    linear-gradient(var(--proof-border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--proof-border) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   CARDS
+   CARDS — VS Code flat style
    ═══════════════════════════════════════════════════════════════════ */
 .proof-card {
   background: var(--proof-surface);
   border: 1px solid var(--proof-border);
-  border-radius: var(--proof-radius-lg);
-  box-shadow: var(--proof-shadow-card);
-  transition:
-    border-color var(--proof-transition),
-    box-shadow var(--proof-transition),
-    transform var(--proof-transition);
+  border-radius: var(--proof-radius);
   position: relative;
-  overflow: hidden;
+  transition: border-color var(--proof-transition);
 }
 .proof-card:hover {
-  border-color: var(--proof-border-accent);
-  box-shadow:
-    var(--proof-shadow),
-    0 0 0 1px rgba(59, 130, 246, 0.06);
+  border-color: var(--proof-border-strong);
 }
 
 .proof-card-flat {
   background: var(--proof-surface);
   border: 1px solid var(--proof-border);
-  border-radius: var(--proof-radius-lg);
+  border-radius: var(--proof-radius);
 }
 
 .proof-card-glass {
   background: var(--proof-glass);
   border: 1px solid var(--proof-glass-border);
-  border-radius: var(--proof-radius-lg);
+  border-radius: var(--proof-radius);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   BADGES
+   BADGES — VS Code style
    ═══════════════════════════════════════════════════════════════════ */
 .proof-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  padding: 0 6px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 600;
   white-space: nowrap;
   font-family: var(--font-sans);
-  text-transform: uppercase;
-  border: 1px solid;
+  line-height: 18px;
 }
 .proof-badge-pass {
   background: var(--proof-green-bg);
-  color: var(--proof-green-bright);
-  border-color: rgba(74, 222, 128, 0.2);
+  color: var(--proof-green);
 }
 .proof-badge-fail {
   background: var(--proof-red-bg);
-  color: var(--proof-red-bright);
-  border-color: rgba(248, 113, 113, 0.2);
+  color: var(--proof-red);
 }
 .proof-badge-flaky {
   background: var(--proof-yellow-bg);
-  color: var(--proof-yellow-bright);
-  border-color: rgba(251, 191, 36, 0.2);
+  color: var(--proof-yellow);
 }
 .proof-badge-partial {
   background: var(--proof-orange-bg);
-  color: #fb923c;
-  border-color: rgba(251, 146, 60, 0.2);
+  color: var(--proof-orange);
 }
 .proof-badge-skip {
-  background: var(--proof-subtle-bg2);
+  background: var(--proof-subtle-bg);
   color: var(--proof-text-secondary);
-  border-color: var(--proof-border);
 }
 .proof-badge-running {
   background: var(--proof-blue-bg);
-  color: var(--proof-blue-bright);
-  border-color: rgba(96, 165, 250, 0.2);
+  color: var(--proof-blue);
   animation: badge-pulse 1.5s ease-in-out infinite;
 }
+
 @keyframes badge-pulse {
   0%,
   100% {
@@ -375,15 +352,15 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   BUTTONS
+   BUTTONS — VS Code flat, no gradients
    ═══════════════════════════════════════════════════════════════════ */
 .proof-button {
-  background: var(--proof-subtle-bg2);
+  background: transparent;
   border: 1px solid var(--proof-border-strong);
-  color: var(--proof-text-secondary);
-  padding: 6px 14px;
+  color: var(--proof-text);
+  padding: 3px 11px;
   border-radius: var(--proof-radius);
-  font-weight: 500;
+  font-weight: 400;
   font-size: 13px;
   cursor: pointer;
   transition: all var(--proof-transition);
@@ -391,147 +368,136 @@ body {
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  letter-spacing: -0.1px;
+  gap: 4px;
+  line-height: 20px;
 }
 .proof-button:hover {
-  background: var(--proof-surface-hover);
-  border-color: var(--proof-border-accent);
-  color: var(--proof-text);
+  background: var(--proof-hover);
+  border-color: var(--proof-border-strong);
 }
 .proof-button:active {
-  transform: scale(0.97);
+  background: var(--proof-subtle-bg2);
 }
 .proof-button:disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: not-allowed;
   pointer-events: none;
 }
 
 .proof-button-sm {
-  padding: 4px 10px;
+  padding: 1px 8px;
   font-size: 12px;
+  line-height: 18px;
 }
 .proof-button-xs {
-  padding: 3px 8px;
+  padding: 0 6px;
   font-size: 11px;
+  line-height: 16px;
 }
 
 .proof-button-icon {
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 7px;
+  padding: 4px;
   color: var(--proof-text-secondary);
   border-radius: var(--proof-radius);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition:
-    background var(--proof-transition),
-    color var(--proof-transition);
+  transition: all var(--proof-transition);
 }
 .proof-button-icon:hover {
-  background: var(--proof-console-nav-hover);
+  background: var(--proof-hover);
   color: var(--proof-text);
 }
 
 .proof-button-primary {
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  background: var(--proof-blue);
   color: #fff;
   border: none;
-  padding: 7px 18px;
+  padding: 3px 11px;
   border-radius: var(--proof-radius);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 13px;
   cursor: pointer;
   font-family: var(--font-sans);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   transition: all var(--proof-transition);
   white-space: nowrap;
-  box-shadow:
-    0 2px 8px rgba(59, 130, 246, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  letter-spacing: -0.1px;
+  line-height: 20px;
 }
 .proof-button-primary:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 6px 20px rgba(59, 130, 246, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  background: var(--proof-blue-bright);
 }
 .proof-button-primary:active {
-  transform: translateY(0) scale(0.97);
+  opacity: 0.8;
 }
 
 .proof-button-danger {
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  background: var(--proof-red);
   color: #fff;
   border: none;
-  padding: 7px 18px;
+  padding: 3px 11px;
   border-radius: var(--proof-radius);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 13px;
   cursor: pointer;
   font-family: var(--font-sans);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   transition: all var(--proof-transition);
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.32);
+  line-height: 20px;
 }
 .proof-button-danger:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.48);
+  background: var(--proof-red-bright);
 }
 
 .proof-button-success {
-  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  background: var(--proof-green);
   color: #fff;
   border: none;
-  padding: 7px 18px;
+  padding: 3px 11px;
   border-radius: var(--proof-radius);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 13px;
   cursor: pointer;
   font-family: var(--font-sans);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   transition: all var(--proof-transition);
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.32);
+  line-height: 20px;
 }
 .proof-button-success:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.48);
+  background: var(--proof-green-bright);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   INPUTS
+   INPUTS — VS Code style
    ═══════════════════════════════════════════════════════════════════ */
 .proof-input {
-  border: 1px solid var(--proof-border-strong);
+  border: 1px solid var(--proof-border);
   border-radius: var(--proof-radius);
-  padding: 7px 12px;
+  padding: 3px 8px;
   font-size: 13px;
-  background: var(--proof-subtle-bg);
+  background: var(--proof-editor-bg);
   color: var(--proof-text);
   font-family: var(--font-sans);
   outline: none;
   transition: all var(--proof-transition);
+  line-height: 20px;
 }
 .proof-input:hover {
-  border-color: var(--proof-border-accent);
-  background: var(--proof-subtle-bg2);
+  border-color: var(--proof-border-strong);
 }
 .proof-input:focus {
   border-color: var(--proof-border-focus);
-  background: var(--proof-blue-bg);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 .proof-input::placeholder {
   color: var(--proof-text-muted);
@@ -541,7 +507,7 @@ select.proof-input {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   TABLES
+   TABLES — VS Code style
    ═══════════════════════════════════════════════════════════════════ */
 .proof-table {
   width: 100%;
@@ -551,20 +517,21 @@ select.proof-input {
 }
 .proof-table th {
   text-align: left;
-  padding: 9px 14px;
+  padding: 6px 10px;
   border-bottom: 1px solid var(--proof-border);
-  color: var(--proof-text-muted);
+  color: var(--proof-text-secondary);
   font-weight: 600;
-  font-size: 10.5px;
+  font-size: 11px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   background: var(--proof-console-table-header-bg);
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.4px;
+  user-select: none;
 }
 .proof-table td {
-  padding: 10px 14px;
+  padding: 5px 10px;
   border-bottom: 1px solid var(--proof-border);
   font-size: 13px;
   overflow: hidden;
@@ -587,10 +554,10 @@ select.proof-input {
    ═══════════════════════════════════════════════════════════════════ */
 @keyframes skeleton-shimmer {
   0% {
-    background-position: -600px 0;
+    background-position: -400px 0;
   }
   100% {
-    background-position: 600px 0;
+    background-position: 400px 0;
   }
 }
 .proof-skeleton {
@@ -600,8 +567,8 @@ select.proof-input {
     var(--proof-subtle-bg2) 50%,
     var(--proof-subtle-bg) 75%
   );
-  background-size: 1200px 100%;
-  border-radius: var(--proof-radius-sm);
+  background-size: 800px 100%;
+  border-radius: var(--proof-radius);
   animation: skeleton-shimmer 2s ease-in-out infinite;
 }
 
@@ -611,7 +578,7 @@ select.proof-input {
 @keyframes slide-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -621,7 +588,7 @@ select.proof-input {
 @keyframes slide-down {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
@@ -636,69 +603,14 @@ select.proof-input {
     opacity: 1;
   }
 }
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-}
-@keyframes spin-slow {
+@keyframes page-enter {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(4px);
   }
   to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes pulse-ring {
-  0% {
-    box-shadow: 0 0 0 0 currentColor;
-  }
-  70% {
-    box-shadow: 0 0 0 6px transparent;
-  }
-  100% {
-    box-shadow: 0 0 0 0 transparent;
-  }
-}
-@keyframes pulseDot {
-  0%,
-  100% {
     opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.4;
-    transform: scale(0.7);
-  }
-}
-@keyframes glow-pulse {
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
+    transform: translateY(0);
   }
 }
 @keyframes spin {
@@ -715,80 +627,32 @@ select.proof-input {
     opacity: 0.4;
   }
 }
-@keyframes edgePulse {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
+@keyframes badge-pulse {
+  0%,
+  100% {
+    opacity: 1;
   }
   50% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(200%);
-    opacity: 0;
+    opacity: 0.55;
   }
 }
-@keyframes bounce-dot {
-  0%,
-  80%,
-  100% {
-    transform: translateY(0) scale(1);
-    opacity: 0.4;
-  }
-  40% {
-    transform: translateY(-6px) scale(1.1);
-    opacity: 1;
-  }
-}
-@keyframes ripple {
-  0% {
-    transform: scale(0.8);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-@keyframes message-in-left {
+@keyframes spin-slow {
   from {
-    opacity: 0;
-    transform: translateX(-12px) translateY(4px);
+    transform: rotate(0deg);
   }
   to {
-    opacity: 1;
-    transform: translateX(0) translateY(0);
-  }
-}
-@keyframes message-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(12px) translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) translateY(0);
-  }
-}
-@keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: rotate(360deg);
   }
 }
 
 .animate-slide-up {
-  animation: slide-up 0.25s ease-out both;
+  animation: slide-up 0.2s ease-out both;
 }
 .animate-slide-down {
-  animation: slide-down 0.2s ease-out both;
+  animation: slide-down 0.15s ease-out both;
 }
 .animate-fade-in {
-  animation: fade-in 0.2s ease-out both;
+  animation: fade-in 0.15s ease-out both;
 }
 .animate-spin-slow {
   animation: spin-slow 2s linear infinite;
@@ -799,134 +663,38 @@ select.proof-input {
    ═══════════════════════════════════════════════════════════════════ */
 .proof-toast {
   position: fixed;
-  bottom: 24px;
+  bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: var(--proof-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--proof-border-accent);
+  gap: 8px;
+  background: var(--proof-surface-2);
+  border: 1px solid var(--proof-border-strong);
   color: var(--proof-text);
-  padding: 11px 20px;
-  border-radius: var(--proof-radius-lg);
+  padding: 6px 14px;
+  border-radius: var(--proof-radius);
   box-shadow: var(--proof-shadow-lg);
   font-size: 13px;
   z-index: 9999;
-  animation: slide-up 0.22s ease-out;
+  animation: slide-up 0.15s ease-out;
   white-space: nowrap;
-  font-weight: 500;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   TYPOGRAPHY HELPERS
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-section-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--proof-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+  font-weight: 400;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    PAGE STRUCTURE
    ═══════════════════════════════════════════════════════════════════ */
 .proof-page {
-  animation: page-enter 0.22s ease-out both;
-  padding-top: 20px;
+  animation: page-enter 0.15s ease-out both;
 }
 
-.proof-page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--proof-grey-bg);
-  padding-top: 16px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--proof-border);
-  margin-bottom: 20px;
-}
-.proof-page-title {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--proof-text);
-  letter-spacing: -0.6px;
-  line-height: 1.2;
-  margin: 0;
-}
-.proof-page-subtitle {
-  font-size: 12.5px;
-  color: var(--proof-text-secondary);
-  margin: 3px 0 0;
-  letter-spacing: -0.1px;
-}
-
-/* Section header */
-.proof-section-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
-}
-.proof-section-bar {
-  width: 3px;
-  height: 16px;
-  border-radius: 99px;
-  flex-shrink: 0;
-  background: var(--proof-blue);
-  box-shadow: 0 0 8px var(--proof-blue-glow);
-}
-.proof-section-title {
+.proof-section-label {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--proof-text-secondary);
-  letter-spacing: 0.4px;
   text-transform: uppercase;
-  flex: 1;
-}
-.proof-section-meta {
-  font-size: 10.5px;
-  color: var(--proof-text-muted);
-  font-family: var(--font-mono);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   EMPTY STATE
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 64px 24px;
-  color: var(--proof-text-secondary);
-  text-align: center;
-}
-.proof-empty-icon {
-  color: var(--proof-text-muted);
-  opacity: 0.4;
-  margin-bottom: 4px;
-}
-.proof-empty-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--proof-text);
-  margin: 0;
-}
-.proof-empty-desc {
-  font-size: 13px;
-  color: var(--proof-text-secondary);
-  max-width: 320px;
-  line-height: 1.65;
-  margin: 0;
+  letter-spacing: 0.4px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -936,45 +704,36 @@ select.proof-input {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 2px 7px;
-  border-radius: 5px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  padding: 0 6px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 500;
   white-space: nowrap;
-  text-transform: uppercase;
-  border: 1px solid;
-  font-family: var(--font-mono);
+  line-height: 18px;
 }
 .proof-tag-blue {
-  color: var(--proof-blue-bright);
+  color: var(--proof-blue);
   background: var(--proof-blue-bg);
-  border-color: rgba(59, 130, 246, 0.25);
 }
 .proof-tag-green {
-  color: var(--proof-green-bright);
+  color: var(--proof-green);
   background: var(--proof-green-bg);
-  border-color: rgba(74, 222, 128, 0.25);
 }
 .proof-tag-red {
-  color: var(--proof-red-bright);
+  color: var(--proof-red);
   background: var(--proof-red-bg);
-  border-color: rgba(248, 113, 113, 0.25);
 }
 .proof-tag-yellow {
-  color: var(--proof-yellow-bright);
+  color: var(--proof-yellow);
   background: var(--proof-yellow-bg);
-  border-color: rgba(251, 191, 36, 0.25);
 }
 .proof-tag-purple {
-  color: var(--proof-purple-bright);
+  color: var(--proof-purple);
   background: var(--proof-purple-bg);
-  border-color: rgba(167, 139, 250, 0.25);
 }
 .proof-tag-muted {
   color: var(--proof-text-secondary);
-  background: var(--proof-subtle-bg2);
-  border-color: var(--proof-border);
+  background: var(--proof-subtle-bg);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -984,13 +743,13 @@ select.proof-input {
   width: 100%;
   height: 4px;
   background: var(--proof-bar-track);
-  border-radius: 99px;
+  border-radius: 2px;
   overflow: hidden;
 }
 .proof-pass-bar-fill {
   height: 100%;
-  border-radius: 99px;
-  transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+  transition: width 0.4s ease;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1002,61 +761,6 @@ select.proof-input {
   border: none;
   margin: 0;
 }
-.proof-divider-strong {
-  background: var(--proof-border-strong);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   STAGGER ANIMATION
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-stagger > * {
-  animation: slide-up 0.25s ease-out both;
-}
-.proof-stagger > *:nth-child(1) {
-  animation-delay: 0ms;
-}
-.proof-stagger > *:nth-child(2) {
-  animation-delay: 40ms;
-}
-.proof-stagger > *:nth-child(3) {
-  animation-delay: 80ms;
-}
-.proof-stagger > *:nth-child(4) {
-  animation-delay: 120ms;
-}
-.proof-stagger > *:nth-child(5) {
-  animation-delay: 160ms;
-}
-.proof-stagger > *:nth-child(6) {
-  animation-delay: 200ms;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   NAV
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-nav-link {
-  text-decoration: none;
-}
-.proof-nav-link:hover {
-  color: var(--proof-text) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   METRIC CARD
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-metric-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--proof-radius-lg);
-  background: var(--proof-surface);
-  border: 1px solid var(--proof-border);
-  transition: all var(--proof-transition);
-}
-.proof-metric-card:hover {
-  border-color: var(--proof-border-accent);
-  transform: translateY(-2px);
-  box-shadow: var(--proof-shadow);
-}
 
 /* ═══════════════════════════════════════════════════════════════════
    STATUS PILLS
@@ -1064,13 +768,12 @@ select.proof-input {
 .proof-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  border-radius: 999px;
+  gap: 4px;
+  padding: 0 8px;
+  border-radius: 2px;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  border: 1px solid;
+  font-weight: 500;
+  line-height: 20px;
 }
 .proof-status-dot {
   width: 6px;
@@ -1080,79 +783,83 @@ select.proof-input {
 }
 .proof-status-live {
   background: var(--proof-green-bg);
-  color: var(--proof-green-bright);
-  border-color: rgba(74, 222, 128, 0.25);
+  color: var(--proof-green);
 }
 .proof-status-live .proof-status-dot {
-  background: var(--proof-green-bright);
+  background: var(--proof-green);
   animation: pulseDot 2s ease-in-out infinite;
 }
 .proof-status-degraded {
   background: var(--proof-yellow-bg);
-  color: var(--proof-yellow-bright);
-  border-color: rgba(251, 191, 36, 0.25);
+  color: var(--proof-yellow);
 }
 .proof-status-critical {
   background: var(--proof-red-bg);
-  color: var(--proof-red-bright);
-  border-color: rgba(248, 113, 113, 0.25);
+  color: var(--proof-red);
+}
+
+@keyframes pulseDot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   ENV HEALTH CARD
+   STAGGER ANIMATION
    ═══════════════════════════════════════════════════════════════════ */
-.proof-env-card {
-  padding: 16px 18px;
-  cursor: pointer;
-  transition:
-    background var(--proof-transition),
-    border-color var(--proof-transition),
-    transform var(--proof-transition),
-    box-shadow var(--proof-transition);
-  border-radius: var(--proof-radius-lg);
-  border: 1px solid var(--proof-border);
-  background: var(--proof-surface);
+.proof-stagger > * {
+  animation: slide-up 0.2s ease-out both;
+}
+.proof-stagger > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.proof-stagger > *:nth-child(2) {
+  animation-delay: 30ms;
+}
+.proof-stagger > *:nth-child(3) {
+  animation-delay: 60ms;
+}
+.proof-stagger > *:nth-child(4) {
+  animation-delay: 90ms;
+}
+.proof-stagger > *:nth-child(5) {
+  animation-delay: 120ms;
+}
+.proof-stagger > *:nth-child(6) {
+  animation-delay: 150ms;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NAV LINK
+   ═══════════════════════════════════════════════════════════════════ */
+.proof-nav-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   METRIC CARD
+   ═══════════════════════════════════════════════════════════════════ */
+.proof-metric-card {
   position: relative;
   overflow: hidden;
+  border-radius: var(--proof-radius);
+  background: var(--proof-surface);
+  border: 1px solid var(--proof-border);
+  transition: all var(--proof-transition);
 }
-.proof-env-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--card-accent, var(--proof-blue)),
-    transparent
-  );
-  opacity: 0;
-  transition: opacity var(--proof-transition);
-}
-.proof-env-card:hover {
-  background: var(--proof-surface-hover);
-  border-color: var(--proof-border-accent);
-  transform: translateY(-2px);
-  box-shadow: var(--proof-shadow);
-}
-.proof-env-card:hover::before {
-  opacity: 1;
+.proof-metric-card:hover {
+  border-color: var(--proof-border-strong);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   GLOW UTILS
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-glow-blue {
-  box-shadow: var(--proof-glow-blue);
-}
-.proof-glow-green {
-  box-shadow: var(--proof-glow-green);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   COPILOT
+   COPILOT STYLES
    ═══════════════════════════════════════════════════════════════════ */
 .copilot-thinking-dot {
   display: inline-block;
@@ -1169,45 +876,72 @@ select.proof-input {
   animation-delay: 0.32s;
 }
 
+@keyframes bounce-dot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-6px) scale(1.1);
+    opacity: 1;
+  }
+}
+
 .copilot-user-bubble {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  background: var(--proof-blue);
   color: #fff;
-  border-radius: 18px 18px 4px 18px;
-  padding: 10px 14px;
-  font-size: 13.5px;
-  line-height: 1.55;
+  border-radius: 4px 4px 4px 16px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.5;
   word-break: break-word;
   white-space: pre-wrap;
-  box-shadow:
-    0 2px 12px rgba(59, 130, 246, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  animation: message-in-right 0.25s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  animation: message-in-right 0.2s ease-out both;
   max-width: 75%;
 }
+
 .copilot-assistant-bubble {
-  animation: message-in-left 0.25s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  animation: message-in-left 0.2s ease-out both;
+}
+
+@keyframes message-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-8px) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+@keyframes message-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(8px) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
 }
 
 .copilot-input-wrap {
   background: var(--proof-surface);
-  border: 1px solid var(--proof-border-accent);
-  border-radius: var(--proof-radius-xl);
-  padding: 6px 6px 6px 14px;
-  transition:
-    border-color var(--proof-transition),
-    box-shadow var(--proof-transition);
+  border: 1px solid var(--proof-border);
+  border-radius: var(--proof-radius);
+  padding: 4px 4px 4px 12px;
+  transition: border-color var(--proof-transition);
 }
 .copilot-input-wrap:focus-within {
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow:
-    0 0 0 3px rgba(59, 130, 246, 0.1),
-    var(--proof-shadow);
+  border-color: var(--proof-border-focus);
 }
 
 .copilot-send-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--proof-radius);
   border: none;
   display: flex;
   align-items: center;
@@ -1217,16 +951,14 @@ select.proof-input {
   flex-shrink: 0;
 }
 .copilot-send-btn-active {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  background: var(--proof-blue);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
 }
 .copilot-send-btn-active:hover {
-  transform: scale(1.06);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.55);
+  background: var(--proof-blue-bright);
 }
 .copilot-send-btn-inactive {
-  background: var(--proof-subtle-bg2);
+  background: var(--proof-subtle-bg);
   color: var(--proof-text-muted);
   cursor: not-allowed;
 }
@@ -1234,27 +966,25 @@ select.proof-input {
 .copilot-quick-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  border-radius: 999px;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 2px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
-  border: 1px solid var(--proof-border-strong);
-  background: var(--proof-subtle-bg);
+  border: 1px solid var(--proof-border);
+  background: transparent;
   color: var(--proof-text-secondary);
   transition: all var(--proof-transition);
   white-space: nowrap;
 }
 .copilot-quick-chip:hover {
-  background: var(--proof-blue-bg);
-  border-color: var(--proof-border-accent);
+  background: var(--proof-hover);
   color: var(--proof-text);
-  transform: translateY(-1px);
 }
 
 .copilot-tool-card {
-  border-radius: var(--proof-radius-lg);
+  border-radius: var(--proof-radius);
   border: 1px solid var(--proof-border);
   background: var(--proof-surface-2);
   overflow: hidden;
@@ -1262,76 +992,54 @@ select.proof-input {
   transition: border-color var(--proof-transition);
 }
 .copilot-tool-card:hover {
-  border-color: var(--proof-border-accent);
+  border-color: var(--proof-border-strong);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   CONSOLE TOPBAR  (use CSS vars so light mode works)
+   EMPTY STATE
    ═══════════════════════════════════════════════════════════════════ */
-.proof-topbar {
-  height: var(--proof-console-topbar-height);
-  background: var(--proof-topbar-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid var(--proof-border);
+.proof-empty-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 0 16px;
+  justify-content: center;
   gap: 8px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  flex-shrink: 0;
-  box-shadow:
-    0 1px 0 var(--proof-border),
-    var(--proof-shadow);
+  padding: 48px 24px;
+  color: var(--proof-text-secondary);
+  text-align: center;
+}
+.proof-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--proof-text);
+  margin: 0;
+}
+.proof-empty-desc {
+  font-size: 13px;
+  color: var(--proof-text-secondary);
+  max-width: 320px;
+  line-height: 1.5;
+  margin: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   CONSOLE SIDEBAR  (use CSS vars)
+   BACKGROUND PATTERNS
    ═══════════════════════════════════════════════════════════════════ */
-.proof-sidebar {
-  background: var(--proof-sidebar-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-right: 1px solid var(--proof-border);
+.proof-grid-bg {
+  background-image:
+    linear-gradient(var(--proof-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--proof-border) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    COMPAT ALIASES
    ═══════════════════════════════════════════════════════════════════ */
 :root {
-  --proof-subtle-bg015: rgba(255, 255, 255, 0.012);
-  --proof-cta-bg: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.1),
-    rgba(139, 92, 246, 0.07),
-    var(--proof-surface)
-  );
-  --proof-flow-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.03), transparent);
-  --proof-env-card: linear-gradient(180deg, var(--proof-subtle-bg2), var(--proof-subtle-bg));
-  --proof-tab-bar: var(--proof-subtle-bg2);
-  /* Theme-adaptive surface aliases for inline styles */
-  --proof-hover: rgba(255, 255, 255, 0.06);
-  --proof-hover-light: rgba(255, 255, 255, 0.03);
-  --proof-overlay: rgba(10, 22, 40, 0.7);
-  --proof-overlay-strong: rgba(10, 22, 40, 0.95);
-  --proof-overlay-dark: rgba(0, 0, 0, 0.5);
-  --proof-topbar-bg-fallback: rgba(10, 22, 40, 0.95);
-  --proof-sidebar-bg-fallback: rgba(10, 22, 40, 0.7);
-  --proof-notif-bg: rgba(10, 22, 40, 0.98);
-}
-
-.light {
-  --proof-subtle-bg015: rgba(15, 23, 42, 0.012);
-  --proof-hover: rgba(59, 130, 246, 0.08);
-  --proof-hover-light: rgba(59, 130, 246, 0.04);
-  --proof-overlay: rgba(248, 250, 252, 0.95);
-  --proof-overlay-strong: rgba(255, 255, 255, 0.98);
-  --proof-overlay-dark: rgba(0, 0, 0, 0.1);
-  --proof-topbar-bg-fallback: var(--proof-topbar-bg);
+  --proof-topbar-bg-fallback: var(--proof-title-bar-bg);
   --proof-sidebar-bg-fallback: var(--proof-sidebar-bg);
-  --proof-notif-bg: var(--proof-glass);
+  --proof-subtle-bg015: rgba(255, 255, 255, 0.015);
+}
+.light {
+  --proof-subtle-bg015: rgba(0, 0, 0, 0.015);
 }

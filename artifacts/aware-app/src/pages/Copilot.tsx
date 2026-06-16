@@ -1001,7 +1001,7 @@ export default function CopilotPage() {
                 style={{
                   height: "100%",
                   width: `${Math.round((downloadProgress.progress ?? 0) * 100)}%`,
-                  background: "linear-gradient(90deg, #2563eb, #3b82f6)",
+                  background: "linear-gradient(90deg, var(--proof-blue-hover), var(--proof-blue))",
                   borderRadius: 99,
                   transition: "width 0.3s",
                 }}

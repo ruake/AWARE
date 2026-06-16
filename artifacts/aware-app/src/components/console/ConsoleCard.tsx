@@ -14,11 +14,11 @@ interface ConsoleCardProps {
 }
 
 const ACCENT_COLORS: Record<string, { main: string; glow: string }> = {
-  blue: { main: "#3b82f6", glow: "rgba(59,130,246,0.4)" },
-  green: { main: "#10b981", glow: "rgba(16,185,129,0.4)" },
-  red: { main: "#ef4444", glow: "rgba(239,68,68,0.4)" },
-  yellow: { main: "#f59e0b", glow: "rgba(245,158,11,0.4)" },
-  purple: { main: "#8b5cf6", glow: "rgba(139,92,246,0.4)" },
+  blue: { main: "var(--proof-blue)", glow: "var(--proof-blue-glow)" },
+  green: { main: "var(--proof-green)", glow: "rgba(78,201,176,0.4)" },
+  red: { main: "var(--proof-red)", glow: "rgba(244,71,71,0.4)" },
+  yellow: { main: "var(--proof-yellow)", glow: "rgba(215,186,125,0.4)" },
+  purple: { main: "var(--proof-purple)", glow: "rgba(197,134,192,0.4)" },
 };
 
 export function ConsoleCard({
@@ -39,27 +39,13 @@ export function ConsoleCard({
     <div
       style={{
         border: "1px solid var(--proof-border)",
-        borderRadius: 12,
+        borderRadius: 4,
         background: variant === "inset" ? "var(--proof-grey-bg)" : "var(--proof-surface)",
         overflow: "hidden",
         position: "relative",
-        boxShadow: "var(--proof-shadow-card)",
         transition: "border-color 0.15s",
       }}
     >
-      {/* Subtle top gradient highlight */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 1,
-          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
-          pointerEvents: "none",
-        }}
-      />
-
       {/* Accent bar */}
       {accentCfg && (
         <div

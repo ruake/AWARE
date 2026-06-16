@@ -64,11 +64,11 @@ export function RunHistoryDots({ testName }: RunHistoryDotsProps) {
             width: 8,
             height: 8,
             borderRadius: "50%",
-            background: d.status === "PASS" ? "#22c55e" : "#ef4444",
+            background: d.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
             cursor: "pointer",
             flexShrink: 0,
             transition: "transform 0.12s",
-            border: "1px solid rgba(0,0,0,0.25)",
+            border: "1px solid rgba(0,0,0,0.3)",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = "scale(1.8)";

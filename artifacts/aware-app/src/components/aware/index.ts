@@ -1,4 +1,3 @@
-export { AppLayout } from "./AppLayout";
 export { CiConfigBanner } from "./CiConfigBanner";
 export { ColumnFilter } from "./ColumnFilter";
 export type { ColumnFilterState } from "./ColumnFilter";

@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useSyncExternalStore } from "react";
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import React, { useEffect, useSyncExternalStore } from "react";
+import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ErrorBoundary } from "@/components/aware/ErrorBoundary";
 import { ConsoleShell } from "@/components/console";
@@ -50,63 +50,6 @@ import { AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
  *     Copilot     /copilot    AI assistant
  *     About       /about      Project info + sharing
  */
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: string;
-  badge?: number | string;
-}
-
-interface NavGroup {
-  title: string;
-  items: NavItem[];
-}
-
-const SIDEBAR_NAV: NavGroup[] = [
-  {
-    title: "Monitor",
-    items: [
-      { label: "Dashboard", href: "/", icon: "LayoutDashboard" },
-      { label: "Activity", href: "/runs", icon: "Activity" },
-    ],
-  },
-  {
-    title: "Investigate",
-    items: [
-      { label: "Runs", href: "/runs", icon: "History" },
-      { label: "Compare", href: "/compare", icon: "GitCompare" },
-      { label: "Trends", href: "/trends", icon: "BarChart3" },
-    ],
-  },
-  {
-    title: "Configure",
-    items: [{ label: "Test Suites", href: "/suites", icon: "FolderTree" }],
-  },
-  {
-    title: "Assist",
-    items: [
-      { label: "Copilot", href: "/copilot", icon: "Bot" },
-      { label: "About", href: "/about", icon: "Info" },
-    ],
-  },
-];
-
-// Strong information scent: labels describe content, not brand names
-const BREADCRUMB_MAP: Record<string, { label: string; parent?: { label: string; href: string } }> =
-  {
-    "/": { label: "Dashboard" },
-    "/runs": { label: "Activity & Runs", parent: { label: "Monitor", href: "/" } },
-    "/runs/:runId": { label: "Run Detail", parent: { label: "Runs", href: "/runs" } },
-    "/compare": { label: "Compare", parent: { label: "Investigate", href: "/" } },
-    "/trends": { label: "Trends", parent: { label: "Investigate", href: "/" } },
-    "/suites": { label: "Test Suites", parent: { label: "Configure", href: "/" } },
-    "/copilot": { label: "Copilot", parent: { label: "Assist", href: "/" } },
-    "/about": { label: "About", parent: { label: "Assist", href: "/" } },
-    "/testdoc": { label: "Test Documentation" },
-    "/start": { label: "Start Run" },
-    "/share": { label: "Sharing" },
-  };
 
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 const Runs = React.lazy(() => import("@/pages/Runs"));
@@ -249,37 +192,8 @@ function DataGate({ children }: { children: React.ReactNode }) {
 }
 
 function Router() {
-  const [location] = useLocation();
-
-  const breadcrumbs = useMemo(() => {
-    const direct = BREADCRUMB_MAP[location];
-    if (direct) {
-      const items: { label: string; href?: string }[] = [];
-      if (direct.parent) {
-        items.push({ label: direct.parent.label, href: direct.parent.href });
-      }
-      items.push({ label: direct.label });
-      return items;
-    }
-    // Dynamic route: /runs/:runId
-    if (/^\/runs\//.test(location)) {
-      const segments = location.split("/");
-      const key = `/runs/:runId`;
-      const entry = BREADCRUMB_MAP[key];
-      if (entry && segments.length === 3) {
-        const items: { label: string; href?: string }[] = [];
-        if (entry.parent) {
-          items.push({ label: entry.parent.label, href: entry.parent.href });
-        }
-        items.push({ label: entry.label });
-        return items;
-      }
-    }
-    return [];
-  }, [location]);
-
   return (
-    <ConsoleShell sidebarNav={SIDEBAR_NAV} breadcrumbs={breadcrumbs} activePath={location}>
+    <ConsoleShell>
       <Switch>
         <Route path="/">
           <React.Suspense fallback={<PageLoader />}>
