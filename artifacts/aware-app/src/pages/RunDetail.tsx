@@ -74,13 +74,7 @@ function AssertionRow({ a }: { a: TestAssertionResult }) {
   );
 }
 
-function FilmstripViewer({
-  frames,
-  onClose,
-}: {
-  frames: FilmstripFrame[];
-  onClose: () => void;
-}) {
+function FilmstripViewer({ frames, onClose }: { frames: FilmstripFrame[]; onClose: () => void }) {
   const [activeIdx, setActiveIdx] = React.useState<number | null>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
@@ -110,8 +104,14 @@ function FilmstripViewer({
     const el = scrollRef.current;
     if (!el) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") { el.scrollBy({ left: -160, behavior: "smooth" }); e.preventDefault(); }
-      if (e.key === "ArrowRight") { el.scrollBy({ left: 160, behavior: "smooth" }); e.preventDefault(); }
+      if (e.key === "ArrowLeft") {
+        el.scrollBy({ left: -160, behavior: "smooth" });
+        e.preventDefault();
+      }
+      if (e.key === "ArrowRight") {
+        el.scrollBy({ left: 160, behavior: "smooth" });
+        e.preventDefault();
+      }
     };
     el.addEventListener("keydown", handler);
     return () => el.removeEventListener("keydown", handler);
@@ -120,18 +120,45 @@ function FilmstripViewer({
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", flex: 1 }}>
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            color: "var(--proof-text-secondary)",
+            textTransform: "uppercase",
+            letterSpacing: "0.5px",
+            flex: 1,
+          }}
+        >
           Filmstrip ({frames.length})
         </span>
         <button
           onClick={() => scrollTo(-1)}
-          style={{ border: "none", background: "var(--proof-surface-hover)", cursor: "pointer", padding: "2px 6px", borderRadius: 3, color: "var(--proof-text-secondary)", display: "flex", alignItems: "center" }}
+          style={{
+            border: "none",
+            background: "var(--proof-surface-hover)",
+            cursor: "pointer",
+            padding: "2px 6px",
+            borderRadius: 3,
+            color: "var(--proof-text-secondary)",
+            display: "flex",
+            alignItems: "center",
+          }}
         >
           <ChevronLeft size={11} />
         </button>
         <button
           onClick={() => scrollTo(1)}
-          style={{ border: "none", background: "var(--proof-surface-hover)", cursor: "pointer", padding: "2px 6px", borderRadius: 3, color: "var(--proof-text-secondary)", display: "flex", alignItems: "center" }}
+          style={{
+            border: "none",
+            background: "var(--proof-surface-hover)",
+            cursor: "pointer",
+            padding: "2px 6px",
+            borderRadius: 3,
+            color: "var(--proof-text-secondary)",
+            display: "flex",
+            alignItems: "center",
+          }}
         >
           <ChevronRight size={11} />
         </button>
@@ -167,7 +194,9 @@ function FilmstripViewer({
       {/* Lightbox gallery */}
       <Dialog
         open={activeIdx !== null}
-        onOpenChange={(open) => { if (!open) setActiveIdx(null); }}
+        onOpenChange={(open) => {
+          if (!open) setActiveIdx(null);
+        }}
       >
         <DialogContent
           style={{
@@ -181,14 +210,24 @@ function FilmstripViewer({
         >
           {activeIdx !== null && (
             <>
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 12px",
-                borderBottom: "1px solid var(--proof-grey)",
-              }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)", flex: 1 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 12px",
+                  borderBottom: "1px solid var(--proof-grey)",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "var(--proof-text-secondary)",
+                    fontFamily: "var(--font-mono)",
+                    flex: 1,
+                  }}
+                >
                   {frames[activeIdx].label}
                 </span>
                 <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
@@ -196,7 +235,13 @@ function FilmstripViewer({
                 </span>
                 <button
                   onClick={onClose}
-                  style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--proof-text-secondary)", display: "flex" }}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    color: "var(--proof-text-secondary)",
+                    display: "flex",
+                  }}
                 >
                   <X size={14} />
                 </button>
@@ -220,13 +265,35 @@ function LazyGalleryImage({ source }: { source: string }) {
     preloadImage(source).then(setUrl);
   }, [source]);
   if (!url) {
-    return <div style={{ width: 400, height: 300, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "var(--proof-text-secondary)" }}>Loading…</div>;
+    return (
+      <div
+        style={{
+          width: 400,
+          height: 300,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 12,
+          color: "var(--proof-text-secondary)",
+        }}
+      >
+        Loading…
+      </div>
+    );
   }
-  return <img src={url} alt="" style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 4, display: "block" }} />;
+  return (
+    <img
+      src={url}
+      alt=""
+      style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 4, display: "block" }}
+    />
+  );
 }
 
 function GalleryImage({
-  frame, onPrev, onNext,
+  frame,
+  onPrev,
+  onNext,
 }: {
   frame: FilmstripFrame;
   onPrev: (() => void) | null;
@@ -236,31 +303,64 @@ function GalleryImage({
 
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft" && onPrev) { onPrev(); e.preventDefault(); }
-      if (e.key === "ArrowRight" && onNext) { onNext(); e.preventDefault(); }
-      if (e.key === "Escape") { /* handled by Dialog */ }
+      if (e.key === "ArrowLeft" && onPrev) {
+        onPrev();
+        e.preventDefault();
+      }
+      if (e.key === "ArrowRight" && onNext) {
+        onNext();
+        e.preventDefault();
+      }
+      if (e.key === "Escape") {
+        /* handled by Dialog */
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onPrev, onNext]);
 
   return (
-    <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", padding: 12, maxHeight: "80vh" }}>
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 12,
+        maxHeight: "80vh",
+      }}
+    >
       {onPrev && (
         <button
           onClick={onPrev}
           style={{
-            position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)",
-            border: "none", background: "rgba(0,0,0,0.5)", color: "#fff", cursor: "pointer",
-            borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
-            zIndex: 10, backdropFilter: "blur(4px)",
+            position: "absolute",
+            left: 8,
+            top: "50%",
+            transform: "translateY(-50%)",
+            border: "none",
+            background: "rgba(0,0,0,0.5)",
+            color: "#fff",
+            cursor: "pointer",
+            borderRadius: "50%",
+            width: 32,
+            height: 32,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10,
+            backdropFilter: "blur(4px)",
           }}
         >
           <ChevronLeft size={18} />
         </button>
       )}
       {source.startsWith("data:") ? (
-        <img src={source} alt={frame.label} style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 4, display: "block" }} />
+        <img
+          src={source}
+          alt={frame.label}
+          style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 4, display: "block" }}
+        />
       ) : (
         <LazyGalleryImage source={source} />
       )}
@@ -268,10 +368,22 @@ function GalleryImage({
         <button
           onClick={onNext}
           style={{
-            position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
-            border: "none", background: "rgba(0,0,0,0.5)", color: "#fff", cursor: "pointer",
-            borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
-            zIndex: 10, backdropFilter: "blur(4px)",
+            position: "absolute",
+            right: 8,
+            top: "50%",
+            transform: "translateY(-50%)",
+            border: "none",
+            background: "rgba(0,0,0,0.5)",
+            color: "#fff",
+            cursor: "pointer",
+            borderRadius: "50%",
+            width: 32,
+            height: 32,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10,
+            backdropFilter: "blur(4px)",
           }}
         >
           <ChevronRight size={18} />
@@ -281,7 +393,15 @@ function GalleryImage({
   );
 }
 
-function FilmstripThumbnail({ frame, isActive, onExpand }: { frame: FilmstripFrame; isActive: boolean; onExpand: () => void }) {
+function FilmstripThumbnail({
+  frame,
+  isActive,
+  onExpand,
+}: {
+  frame: FilmstripFrame;
+  isActive: boolean;
+  onExpand: () => void;
+}) {
   const isDataUri = React.useMemo(() => getImageSource(frame).startsWith("data:"), [frame]);
   const [src, setSrc] = React.useState<string>(() => getImageSource(frame));
   const [loaded, setLoaded] = React.useState(isDataUri);
@@ -584,8 +704,24 @@ export default function RunDetail() {
       {/* Chart + results table */}
       <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
         <PanelErrorBoundary label="Run KPIs">
-          <div className="proof-card" style={{ padding: 14, width: categoryCollapsed ? 48 : 220, flexShrink: 0, transition: "width 0.15s", overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: categoryCollapsed ? 0 : 10 }}>
+          <div
+            className="proof-card"
+            style={{
+              padding: 14,
+              width: categoryCollapsed ? 48 : 220,
+              flexShrink: 0,
+              transition: "width 0.15s",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: categoryCollapsed ? 0 : 10,
+              }}
+            >
               {!categoryCollapsed && (
                 <h3
                   style={{
@@ -603,52 +739,262 @@ export default function RunDetail() {
                 onClick={() => setCategoryCollapsed((c) => !c)}
                 aria-label={categoryCollapsed ? "Expand" : "Collapse"}
                 style={{
-                  border: "none", background: "transparent", cursor: "pointer",
-                  color: "var(--proof-text-secondary)", display: "flex", alignItems: "center", padding: 4,
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  color: "var(--proof-text-secondary)",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: 4,
                   marginTop: categoryCollapsed ? 8 : 0,
                 }}
               >
-                <ChevronDown size={14} style={{ transform: categoryCollapsed ? "rotate(-90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
+                <ChevronDown
+                  size={14}
+                  style={{
+                    transform: categoryCollapsed ? "rotate(-90deg)" : "rotate(0deg)",
+                    transition: "transform 0.15s",
+                  }}
+                />
               </button>
             </div>
             {!categoryCollapsed && (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ padding: "8px 10px", borderRadius: 6, background: passRate === 100 ? "rgba(34,197,94,0.08)" : passRate < 90 ? "rgba(239,68,68,0.08)" : "rgba(234,179,8,0.08)", border: `1px solid ${passRate === 100 ? "rgba(34,197,94,0.2)" : passRate < 90 ? "rgba(239,68,68,0.2)" : "rgba(234,179,8,0.2)"}` }}>
-                  <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Pass Rate</div>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 700, color: passRate === 100 ? "var(--proof-green)" : passRate < 90 ? "var(--proof-red)" : "var(--proof-yellow)" }}>{passRate}%</div>
+                <div
+                  style={{
+                    padding: "8px 10px",
+                    borderRadius: 6,
+                    background:
+                      passRate === 100
+                        ? "rgba(34,197,94,0.08)"
+                        : passRate < 90
+                          ? "rgba(239,68,68,0.08)"
+                          : "rgba(234,179,8,0.08)",
+                    border: `1px solid ${passRate === 100 ? "rgba(34,197,94,0.2)" : passRate < 90 ? "rgba(239,68,68,0.2)" : "rgba(234,179,8,0.2)"}`,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 9,
+                      color: "var(--proof-text-secondary)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.3px",
+                    }}
+                  >
+                    Pass Rate
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 22,
+                      fontWeight: 700,
+                      color:
+                        passRate === 100
+                          ? "var(--proof-green)"
+                          : passRate < 90
+                            ? "var(--proof-red)"
+                            : "var(--proof-yellow)",
+                    }}
+                  >
+                    {passRate}%
+                  </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-                  <div style={{ padding: "6px 8px", borderRadius: 4, background: "var(--proof-grey-bg)", border: "1px solid var(--proof-grey)" }}>
-                    <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Total</div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, color: "var(--proof-text)" }}>{results.length}</div>
+                  <div
+                    style={{
+                      padding: "6px 8px",
+                      borderRadius: 4,
+                      background: "var(--proof-grey-bg)",
+                      border: "1px solid var(--proof-grey)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 9,
+                        color: "var(--proof-text-secondary)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.3px",
+                      }}
+                    >
+                      Total
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: "var(--proof-text)",
+                      }}
+                    >
+                      {results.length}
+                    </div>
                   </div>
-                  <div style={{ padding: "6px 8px", borderRadius: 4, background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
-                    <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Failed</div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)" }}>{failCount}</div>
+                  <div
+                    style={{
+                      padding: "6px 8px",
+                      borderRadius: 4,
+                      background: "rgba(239,68,68,0.05)",
+                      border: "1px solid rgba(239,68,68,0.15)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 9,
+                        color: "var(--proof-text-secondary)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.3px",
+                      }}
+                    >
+                      Failed
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)",
+                      }}
+                    >
+                      {failCount}
+                    </div>
                   </div>
-                  <div style={{ padding: "6px 8px", borderRadius: 4, background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.15)" }}>
-                    <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Passed</div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, color: "var(--proof-green)" }}>{passCount}</div>
+                  <div
+                    style={{
+                      padding: "6px 8px",
+                      borderRadius: 4,
+                      background: "rgba(34,197,94,0.05)",
+                      border: "1px solid rgba(34,197,94,0.15)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 9,
+                        color: "var(--proof-text-secondary)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.3px",
+                      }}
+                    >
+                      Passed
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: "var(--proof-green)",
+                      }}
+                    >
+                      {passCount}
+                    </div>
                   </div>
-                  <div style={{ padding: "6px 8px", borderRadius: 4, background: "var(--proof-grey-bg)", border: "1px solid var(--proof-grey)" }}>
-                    <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Avg Dur</div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: "var(--proof-text)" }}>
-                      {results.length > 0 ? `${Math.round(results.reduce((s, r) => s + r.duration, 0) / results.length)}ms` : "—"}
+                  <div
+                    style={{
+                      padding: "6px 8px",
+                      borderRadius: 4,
+                      background: "var(--proof-grey-bg)",
+                      border: "1px solid var(--proof-grey)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 9,
+                        color: "var(--proof-text-secondary)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.3px",
+                      }}
+                    >
+                      Avg Dur
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: "var(--proof-text)",
+                      }}
+                    >
+                      {results.length > 0
+                        ? `${Math.round(results.reduce((s, r) => s + r.duration, 0) / results.length)}ms`
+                        : "—"}
                     </div>
                   </div>
                 </div>
-                <div style={{ padding: "6px 8px", borderRadius: 4, border: "1px solid var(--proof-grey)", background: "var(--proof-grey-bg)" }}>
-                  <div style={{ fontSize: 9, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px", marginBottom: 2 }}>Tests by Category</div>
+                <div
+                  style={{
+                    padding: "6px 8px",
+                    borderRadius: 4,
+                    border: "1px solid var(--proof-grey)",
+                    background: "var(--proof-grey-bg)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 9,
+                      color: "var(--proof-text-secondary)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.3px",
+                      marginBottom: 2,
+                    }}
+                  >
+                    Tests by Category
+                  </div>
                   {categories.map((cat) => {
                     const catResults = results.filter((r) => r.category === cat);
-                    const pct = Math.round((catResults.filter((r) => r.status === "PASS").length / catResults.length) * 100);
+                    const pct = Math.round(
+                      (catResults.filter((r) => r.status === "PASS").length / catResults.length) *
+                        100,
+                    );
                     return (
-                      <div key={cat} style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
-                        <span style={{ fontSize: 9, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cat.slice(0, 10)}</span>
-                        <div style={{ width: 60, height: 6, borderRadius: 3, background: "var(--proof-grey)" }}>
-                          <div style={{ width: `${pct}%`, height: "100%", borderRadius: 3, background: pct === 100 ? "var(--proof-green)" : pct < 80 ? "var(--proof-red)" : "var(--proof-yellow)" }} />
+                      <div
+                        key={cat}
+                        style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 9,
+                            color: "var(--proof-text-muted)",
+                            fontFamily: "var(--font-mono)",
+                            flex: 1,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {cat.slice(0, 10)}
+                        </span>
+                        <div
+                          style={{
+                            width: 60,
+                            height: 6,
+                            borderRadius: 3,
+                            background: "var(--proof-grey)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: `${pct}%`,
+                              height: "100%",
+                              borderRadius: 3,
+                              background:
+                                pct === 100
+                                  ? "var(--proof-green)"
+                                  : pct < 80
+                                    ? "var(--proof-red)"
+                                    : "var(--proof-yellow)",
+                            }}
+                          />
                         </div>
-                        <span style={{ fontSize: 8, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", minWidth: 20, textAlign: "right" }}>{pct}%</span>
+                        <span
+                          style={{
+                            fontSize: 8,
+                            color: "var(--proof-text-muted)",
+                            fontFamily: "var(--font-mono)",
+                            minWidth: 20,
+                            textAlign: "right",
+                          }}
+                        >
+                          {pct}%
+                        </span>
                       </div>
                     );
                   })}
@@ -1014,10 +1360,7 @@ export default function RunDetail() {
 
                     {/* Filmstrip */}
                     {selectedResult.filmstrip && selectedResult.filmstrip.length > 0 && (
-                      <FilmstripViewer
-                        frames={selectedResult.filmstrip}
-                        onClose={() => {}}
-                      />
+                      <FilmstripViewer frames={selectedResult.filmstrip} onClose={() => {}} />
                     )}
 
                     {/* HTTP Exchange — always visible */}
