@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">52% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/25</span>
+                <span class='fraction'>13/25</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">83.33% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>5/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">77.77% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>7/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">47.82% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/23</span>
+                <span class='fraction'>11/23</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -247,35 +247,35 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">15x</span>
+<span class="cline-any cline-yes">15x</span>
+<span class="cline-any cline-yes">15x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">15x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">112x</span>
+<span class="cline-any cline-yes">56x</span>
+<span class="cline-any cline-yes">30x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">56x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">56x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -384,41 +384,41 @@ interface CiRunners {
   pytest: { version: string; markers: string[] };
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >generateCiConfig(): CiConfig {</span>
-  const <span class="cstat-no" title="statement not covered" >suites = getTestSuites();</span>
-  const <span class="cstat-no" title="statement not covered" >tests = getTestCases();</span>
-  const <span class="cstat-no" title="statement not covered" >envConfigs = getEnvConfigs();</span>
+export function generateCiConfig(): CiConfig {
+  const suites = getTestSuites();
+  const tests = getTestCases();
+  const envConfigs = getEnvConfigs();
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return {</span>
+  return {
     version: "3.0",
     project: "A.W.A.R.E. — Akamai Web Analytics Regression Engine",
     description:
       "Auto-generated Akamai CDN regression test configuration. " +
       "Playwright + pytest suites running via GitHub Actions across QA, UAT, and PROD.",
-    suites: suites.map(<span class="fstat-no" title="function not covered" >(s</span>) =&gt; {
-      const suiteTests = <span class="cstat-no" title="statement not covered" >tests.filter(<span class="fstat-no" title="function not covered" >(t</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.testIds.includes(t.id))</span>;</span>
-      const cats = <span class="cstat-no" title="statement not covered" >[...new Set(suiteTests.map(<span class="fstat-no" title="function not covered" >(t</span>) =&gt; <span class="cstat-no" title="statement not covered" >t.category)</span>)];</span>
-      const runners = <span class="cstat-no" title="statement not covered" >[</span>
+    suites: suites.map((s) =&gt; {
+      const suiteTests = tests.filter((t) =&gt; s.testIds.includes(t.id));
+      const cats = [...new Set(suiteTests.map((t) =&gt; t.category))];
+      const runners = [
         ...new Set(
-          suiteTests.map(<span class="fstat-no" title="function not covered" >(t</span>) =&gt;
-<span class="cstat-no" title="statement not covered" >            t.testType === "pytest" ? "pytest" : t.testType === "web" ? "playwright" : "pytest",</span>
+          suiteTests.map((t) =&gt;
+            t.testType === "pytest" ? "pytest" : t.testType === "web" ? "playwright" : "pytest",
           ),
         ),
       ];
-<span class="cstat-no" title="statement not covered" >      return {</span>
+      return {
         name: s.name,
         testCount: suiteTests.length,
-        testIds: suiteTests.map(<span class="fstat-no" title="function not covered" >(t</span>) =&gt; <span class="cstat-no" title="statement not covered" >t.id)</span>,
+        testIds: suiteTests.map((t) =&gt; t.id),
         categories: cats,
         runners,
       };
     }),
-    environments: envConfigs.map(<span class="fstat-no" title="function not covered" >(c</span>) =&gt; (<span class="cstat-no" title="statement not covered" >{</span>
+    environments: envConfigs.map((c) =&gt; ({
       label: c.label,
       target: c.target,
       network: c.network,
       baseUrl: c.baseUrl,
-      ips: c.ips.length &gt; 0 ? c.ips : undefined,
+      ips: c.ips.length &gt; 0 ? <span class="branch-0 cbranch-no" title="branch not covered" >c.ips : u</span>ndefined,
       property: c.property,
       propertyVersion: c.propertyVersion,
       edgeHostname: c.edgeHostname,
@@ -484,7 +484,7 @@ export function <span class="fstat-no" title="function not covered" >downloadCiC
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-17T10:10:23.210Z
+                at 2026-06-17T10:31:22.325Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

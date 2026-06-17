@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">84.21% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>16/19</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>1/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">80% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>8/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">86.66% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>13/15</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -109,20 +109,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -134,12 +130,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -149,16 +149,16 @@ import { fetchJson } from "./dataFetcher";
 &nbsp;
 export { subscribeToTestSuites };
 &nbsp;
-let _testSuitesStore: TestSuite[] = <span class="cstat-no" title="statement not covered" >[];</span>
-let _tsSnapshot: TestSuite[] = <span class="cstat-no" title="statement not covered" >[];</span>
-let _suitesLoaded = <span class="cstat-no" title="statement not covered" >false;</span>
+let _testSuitesStore: TestSuite[] = [];
+let _tsSnapshot: TestSuite[] = [];
+let _suitesLoaded = false;
 &nbsp;
-export async function <span class="fstat-no" title="function not covered" >loadTestSuites(): Promise&lt;void&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  if (_suitesLoaded) <span class="cstat-no" title="statement not covered" >return;</span></span>
-<span class="cstat-no" title="statement not covered" >  _suitesLoaded = true;</span>
-<span class="cstat-no" title="statement not covered" >  _testSuitesStore = await fetchJson&lt;TestSuite[]&gt;("test-suites.json");</span>
-<span class="cstat-no" title="statement not covered" >  _tsSnapshot = [..._testSuitesStore];</span>
-<span class="cstat-no" title="statement not covered" >  _notifyTS();</span>
+export async function loadTestSuites(): Promise&lt;void&gt; {
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (_suitesLoaded) <span class="cstat-no" title="statement not covered" >return;</span>
+  _suitesLoaded = true;
+  _testSuitesStore = await fetchJson&lt;TestSuite[]&gt;("test-suites.json");
+  _tsSnapshot = [..._testSuitesStore];
+  _notifyTS();
 }
 &nbsp;
 export function <span class="fstat-no" title="function not covered" >getTestSuitesStore(): TestSuite[] {</span>
@@ -169,17 +169,17 @@ export function <span class="fstat-no" title="function not covered" >getTestSuit
 <span class="cstat-no" title="statement not covered" >  return _tsSnapshot;</span>
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >getTestSuiteById(i</span>d: string): TestSuite | undefined {
-<span class="cstat-no" title="statement not covered" >  return _testSuitesStore.find(<span class="fstat-no" title="function not covered" >(s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.id === id)</span>;</span>
+export function getTestSuiteById(id: string): TestSuite | undefined {
+  return _testSuitesStore.find((s) =&gt; s.id === id);
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >buildSuiteTree(): SuiteNode[] {</span>
-  const rootSuites = <span class="cstat-no" title="statement not covered" >_testSuitesStore.filter(<span class="fstat-no" title="function not covered" >(s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.parentId === null)</span>;</span>
-<span class="cstat-no" title="statement not covered" >  return rootSuites.map(<span class="fstat-no" title="function not covered" >(s</span>) =&gt; (<span class="cstat-no" title="statement not covered" >{</span></span>
+export function buildSuiteTree(): SuiteNode[] {
+  const rootSuites = _testSuitesStore.filter((s) =&gt; s.parentId === null);
+  return rootSuites.map((s) =&gt; ({
     suite: s,
     children: _testSuitesStore
-      .filter(<span class="fstat-no" title="function not covered" >(c</span>) =&gt; <span class="cstat-no" title="statement not covered" >c.parentId === s.id)</span>
-      .map(<span class="fstat-no" title="function not covered" >(c</span>) =&gt; (<span class="cstat-no" title="statement not covered" >{ suite: c, children: [], depth: 1 }))</span>,
+      .filter((c) =&gt; c.parentId === s.id)
+      .map((c) =&gt; ({ suite: c, children: [], depth: 1 })),
     depth: 0,
   }));
 }
@@ -190,7 +190,7 @@ export function <span class="fstat-no" title="function not covered" >buildSuiteT
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-17T10:10:23.210Z
+                at 2026-06-17T10:31:22.325Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

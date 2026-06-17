@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/20</span>
+                <span class='fraction'>20/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/16</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -106,82 +106,82 @@
 <a name='L41'></a><a href='#L41'>41</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type { PromotionDecision } from "./types";
 import { fetchJson } from "./dataFetcher";
 &nbsp;
-let _promotionDecisions: PromotionDecision[] = <span class="cstat-no" title="statement not covered" >[];</span>
-let _promotionsSnapshot: PromotionDecision[] = <span class="cstat-no" title="statement not covered" >[];</span>
-let _promotionsLoaded = <span class="cstat-no" title="statement not covered" >false;</span>
-const _listeners = <span class="cstat-no" title="statement not covered" >new Set&lt;() =&gt; void&gt;();</span>
+let _promotionDecisions: PromotionDecision[] = [];
+let _promotionsSnapshot: PromotionDecision[] = [];
+let _promotionsLoaded = false;
+const _listeners = new Set&lt;() =&gt; void&gt;();
 &nbsp;
-function <span class="fstat-no" title="function not covered" >notify(): void {</span>
-<span class="cstat-no" title="statement not covered" >  _listeners.forEach(<span class="fstat-no" title="function not covered" >(c</span>b) =&gt; <span class="cstat-no" title="statement not covered" >cb())</span>;</span>
+function notify(): void {
+  _listeners.forEach((cb) =&gt; cb());
 }
 &nbsp;
-function <span class="fstat-no" title="function not covered" >updateSnapshot(): void {</span>
-<span class="cstat-no" title="statement not covered" >  _promotionsSnapshot = [..._promotionDecisions];</span>
+function updateSnapshot(): void {
+  _promotionsSnapshot = [..._promotionDecisions];
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >subscribeToPromotions(c</span>b: () =&gt; void): () =&gt; void {
-<span class="cstat-no" title="statement not covered" >  _listeners.add(cb);</span>
-<span class="cstat-no" title="statement not covered" >  return <span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >_</span>listeners.delete(cb);</span></span>
+export function subscribeToPromotions(cb: () =&gt; void): () =&gt; void {
+  _listeners.add(cb);
+  return () =&gt; _listeners.delete(cb);
 }
 &nbsp;
-export async function <span class="fstat-no" title="function not covered" >loadPromotions(): Promise&lt;void&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  if (_promotionsLoaded) <span class="cstat-no" title="statement not covered" >return;</span></span>
-<span class="cstat-no" title="statement not covered" >  _promotionsLoaded = true;</span>
-<span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    _promotionDecisions = await fetchJson&lt;PromotionDecision[]&gt;("promotions.json");</span>
-<span class="cstat-no" title="statement not covered" >    updateSnapshot();</span>
-<span class="cstat-no" title="statement not covered" >    notify();</span>
+export async function loadPromotions(): Promise&lt;void&gt; {
+  if (_promotionsLoaded) return;
+  _promotionsLoaded = true;
+  try {
+    _promotionDecisions = await fetchJson&lt;PromotionDecision[]&gt;("promotions.json");
+    updateSnapshot();
+    notify();
   } catch {
     /* fetch failed, keep defaults */
   }
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >getPromotionDecision(r</span>unId: string): PromotionDecision | undefined {
-<span class="cstat-no" title="statement not covered" >  return _promotionDecisions.find(<span class="fstat-no" title="function not covered" >(d</span>) =&gt; <span class="cstat-no" title="statement not covered" >d.runId === runId)</span>;</span>
+export function getPromotionDecision(runId: string): PromotionDecision | undefined {
+  return _promotionDecisions.find((d) =&gt; d.runId === runId);
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >getAllPromotionDecisions(): PromotionDecision[] {</span>
-<span class="cstat-no" title="statement not covered" >  return _promotionsSnapshot;</span>
+export function getAllPromotionDecisions(): PromotionDecision[] {
+  return _promotionsSnapshot;
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -190,7 +190,7 @@ export function <span class="fstat-no" title="function not covered" >getAllPromo
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-17T10:10:23.210Z
+                at 2026-06-17T10:31:22.325Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
