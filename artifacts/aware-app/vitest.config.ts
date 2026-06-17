@@ -14,6 +14,7 @@ export default defineConfig({
     coverage: {
       enabled: true,
       provider: "v8",
+      reportsDirectory: "/tmp/aware-coverage",
       include: ["src/**/*.{ts,tsx}"],
       exclude: ["src/**/*.test.*", "src/**/*.d.ts", "src/data/**"],
     },
