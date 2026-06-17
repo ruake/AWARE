@@ -4,12 +4,13 @@ import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { CompareSidePanel } from "@/components/aware/CompareSidePanel";
 import { useSyncedUrlState } from "@/lib/urlState";
 import {
-  RUNS,
-  DIFF_ROWS,
   computeDiffRows,
   getDataInitState,
   subscribeToDataInit,
-  getRunsByEnv,
+  subscribeToRuns,
+  getRuns,
+  subscribeToDiffRows,
+  getDiffRows,
 } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { loadResultsForRun } from "@/lib/runsLoader";
@@ -32,35 +33,37 @@ export default function Compare() {
   const [, navigate] = useLocation();
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
+  const runs = useSyncExternalStore(subscribeToRuns, getRuns);
+  const diffRowsSnapshot = useSyncExternalStore(subscribeToDiffRows, getDiffRows);
 
-  const envRuns = envSnap.envIds.length > 0 ? getRunsByEnv(envSnap.envIds) : RUNS;
-  const [baseline, setBaseline] = useSyncedUrlState(
-    "baseline",
-    envRuns[envRuns.length - 1]?.id ?? "",
-  );
-  const [candidate, setCandidate] = useSyncedUrlState("candidate", envRuns[0]?.id ?? "");
+  const envRuns = envSnap.envIds.length > 0 ? runs.filter((r) => envSnap.envIds.includes(r.envId)) : runs;
+  const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
+  const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
   const [selectedId, setSelectedId] = useSyncedUrlState<string | null>("sel", null);
   const [searchText, setSearchText] = useSyncedUrlState("q", "");
   const [regressionsOnly, setRegressionsOnly] = useSyncedUrlState("regressions", false);
   const [activeFilter, setActiveFilter] = useSyncedUrlState<string | null>("filter", null);
   const [swapped, setSwapped] = React.useState(false);
   const [selectedIdx, setSelectedIdx] = React.useState(-1);
-  const [computedRows, setComputedRows] = React.useState<DiffRow[]>(DIFF_ROWS);
+  const [computedRows, setComputedRows] = React.useState<DiffRow[]>([]);
   const [baseResults, setBaseResults] = React.useState<TestResult[]>([]);
   const [candResults, setCandResults] = React.useState<TestResult[]>([]);
   const [diffPage, setDiffPage] = React.useState(1);
   const DIFF_PAGE_SIZE = 25;
-  const baselineRun = RUNS.find((r) => r.id === baseline);
-  const candidateRun = RUNS.find((r) => r.id === candidate);
+  // Derive effective run IDs: use URL param if set, otherwise pick from envRuns
+  const effectiveBaseline = baseline || envRuns[envRuns.length - 1]?.id || "";
+  const effectiveCandidate = candidate || envRuns[0]?.id || "";
+  const baselineRun = runs.find((r) => r.id === effectiveBaseline);
+  const candidateRun = runs.find((r) => r.id === effectiveCandidate);
 
   React.useEffect(() => {
-    if (!baseline || !candidate) return;
-    Promise.all([loadResultsForRun(baseline), loadResultsForRun(candidate)]).then(([br, cr]) => {
+    if (!effectiveBaseline || !effectiveCandidate) return;
+    Promise.all([loadResultsForRun(effectiveBaseline), loadResultsForRun(effectiveCandidate)]).then(([br, cr]) => {
       setBaseResults(br);
       setCandResults(cr);
-      setComputedRows(computeDiffRows(baseline, candidate));
+      setComputedRows(computeDiffRows(effectiveBaseline, effectiveCandidate));
     });
-  }, [baseline, candidate]);
+  }, [effectiveBaseline, effectiveCandidate]);
 
   const diffs = React.useMemo(() => {
     const rows = computedRows;
@@ -175,7 +178,7 @@ export default function Compare() {
 
   if (!baselineRun || !candidateRun) return null;
 
-  const categories = [...new Set(DIFF_ROWS.map((d) => d.category))];
+  const categories = [...new Set(diffRowsSnapshot.map((d) => d.category))];
 
   const selectedDiff = selectedId ? (diffs.find((d) => d.id === selectedId) ?? null) : null;
   const hasActiveFilters = Object.values(colFilters).some((v) => v);
