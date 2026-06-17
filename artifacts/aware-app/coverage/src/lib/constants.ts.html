@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>10/10</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>10/10</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -166,19 +166,19 @@
 <a name='L101'></a><a href='#L101'>101</a>
 <a name='L102'></a><a href='#L102'>102</a>
 <a name='L103'></a><a href='#L103'>103</a>
-<a name='L104'></a><a href='#L104'>104</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L104'></a><a href='#L104'>104</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -200,7 +200,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -221,7 +221,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -242,7 +242,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -269,19 +269,19 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export const ENVS = <span class="cstat-no" title="statement not covered" >["QA", "UAT", "PROD"];</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export const ENVS = ["QA", "UAT", "PROD"];
 &nbsp;
-export const CATEGORIES = <span class="cstat-no" title="statement not covered" >["geo-match", "caching", "security", "edge-routing", "http-protocol"];</span>
+export const CATEGORIES = ["geo-match", "caching", "security", "edge-routing", "http-protocol"];
 &nbsp;
-export const PRIORITIES: string[] = <span class="cstat-no" title="statement not covered" >["P0", "P1", "P2", "P3"];</span>
+export const PRIORITIES: string[] = ["P0", "P1", "P2", "P3"];
 &nbsp;
-export const SEVERITIES: string[] = <span class="cstat-no" title="statement not covered" >["critical", "major", "minor", "trivial"];</span>
+export const SEVERITIES: string[] = ["critical", "major", "minor", "trivial"];
 &nbsp;
-export const STATUSES = <span class="cstat-no" title="statement not covered" >["active", "disabled", "deprecated"] as const;</span>
+export const STATUSES = ["active", "disabled", "deprecated"] as const;
 &nbsp;
-export const OWNERS: string[] = <span class="cstat-no" title="statement not covered" >[];</span>
+export const OWNERS: string[] = [];
 &nbsp;
-export const TAG_COLORS: Record&lt;string, string&gt; = <span class="cstat-no" title="statement not covered" >{</span>
+export const TAG_COLORS: Record&lt;string, string&gt; = {
   geo: "#5b8af5",
   caching: "#a855f7",
   health: "#f97316",
@@ -303,7 +303,7 @@ export const TAG_COLORS: Record&lt;string, string&gt; = <span class="cstat-no" t
   routing: "#6366f1",
 };
 &nbsp;
-export const CATEGORY_COLORS = <span class="cstat-no" title="statement not covered" >[</span>
+export const CATEGORY_COLORS = [
   "#5b8af5",
   "#f97316",
   "#22c55e",
@@ -324,7 +324,7 @@ export const CATEGORY_COLORS = <span class="cstat-no" title="statement not cover
   "#0ea5e9",
 ];
 &nbsp;
-export const TEST_TAGS = <span class="cstat-no" title="statement not covered" >[</span>
+export const TEST_TAGS = [
   { id: "tag_geo", name: "geo", color: "#5b8af5" },
   { id: "tag_caching", name: "caching", color: "#a855f7" },
   { id: "tag_health", name: "health", color: "#f97316" },
@@ -345,7 +345,7 @@ export const TEST_TAGS = <span class="cstat-no" title="statement not covered" >[
   { id: "tag_routing", name: "routing", color: "#6366f1" },
 ];
 &nbsp;
-export const TEST_NAMES = <span class="cstat-no" title="statement not covered" >[</span>
+export const TEST_NAMES = [
   "Verify Geo match for /api/v1/data resolves correct PoP",
   "Check cache HIT ratio exceeds 80% on /static/* in PROD",
   "Validate EdgeWorker executes locale-split logic for fr-CA",
@@ -379,7 +379,7 @@ export const TEST_NAMES = <span class="cstat-no" title="statement not covered" >
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-17T10:10:23.210Z
+                at 2026-06-17T10:31:22.325Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -1,4 +1,5 @@
 import React from "react";
+import { Loader2, AlertCircle, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 
 interface ZoomableImageProps {
   src: string;
@@ -11,6 +12,8 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
   const imgRef = React.useRef<HTMLImageElement>(null);
   const [zoom, setZoom] = React.useState(1);
   const [pan, setPan] = React.useState({ x: 0, y: 0 });
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(false);
   const isDragging = React.useRef(false);
   const dragStart = React.useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const lastPinchDist = React.useRef(0);
@@ -20,10 +23,28 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
     setPan({ x: 0, y: 0 });
   }, []);
 
+  // Update bounds to prevent panning out of view
+  const clampPan = (newPan: { x: number; y: number }, currentZoom: number) => {
+    if (!containerRef.current || currentZoom <= 1) return { x: 0, y: 0 };
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const maxX = (rect.width * (currentZoom - 1)) / 2;
+    const maxY = (rect.height * (currentZoom - 1)) / 2;
+    
+    return {
+      x: Math.max(-maxX, Math.min(maxX, newPan.x)),
+      y: Math.max(-maxY, Math.min(maxY, newPan.y)),
+    };
+  };
+
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom((z) => Math.max(0.5, Math.min(5, z * delta)));
+    setZoom((z) => {
+      const newZoom = Math.max(1, Math.min(10, z * delta));
+      if (newZoom === 1) setPan({ x: 0, y: 0 });
+      return newZoom;
+    });
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -37,7 +58,7 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
     if (!isDragging.current) return;
     const dx = e.clientX - dragStart.current.x;
     const dy = e.clientY - dragStart.current.y;
-    setPan({ x: dragStart.current.panX + dx, y: dragStart.current.panY + dy });
+    setPan(clampPan({ x: dragStart.current.panX + dx, y: dragStart.current.panY + dy }, zoom));
   };
 
   const handleMouseUp = () => {
@@ -45,18 +66,18 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    if (isDragging.current) return;
+    if (isDragging.current || error || loading) return;
     if (zoom > 1) {
       resetView();
     } else {
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       const cx = (e.clientX - rect.left) / rect.width;
       const cy = (e.clientY - rect.top) / rect.height;
-      setZoom(2);
-      setPan({
-        x: -(cx - 0.5) * rect.width,
-        y: -(cy - 0.5) * rect.height,
-      });
+      setZoom(2.5);
+      setPan(clampPan({
+        x: -(cx - 0.5) * rect.width * 1.5,
+        y: -(cy - 0.5) * rect.height * 1.5,
+      }, 2.5));
     }
   };
 
@@ -78,7 +99,11 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
       );
       const delta = dist / (lastPinchDist.current || dist);
       lastPinchDist.current = dist;
-      setZoom((z) => Math.max(0.5, Math.min(5, z * delta)));
+      setZoom((z) => {
+        const newZoom = Math.max(1, Math.min(10, z * delta));
+        if (newZoom === 1) setPan({ x: 0, y: 0 });
+        return newZoom;
+      });
     }
   };
 
@@ -96,8 +121,10 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        cursor: zoom > 1 ? "grab" : "zoom-in",
+        cursor: loading ? "wait" : error ? "default" : zoom > 1 ? "grab" : "zoom-in",
         maxHeight,
+        width: "100%",
+        backgroundColor: "var(--proof-surface-2)",
         borderRadius: 4,
         userSelect: "none",
       }}
@@ -111,39 +138,101 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
     >
+      {loading && !error && (
+        <div style={{ position: "absolute", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+          <Loader2 className="animate-spin text-proof-blue" size={32} />
+          <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>Loading Image...</span>
+        </div>
+      )}
+
+      {error && (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 40, color: "var(--proof-red)" }}>
+          <AlertCircle size={40} />
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>Failed to load image</div>
+            <div style={{ fontSize: 12, opacity: 0.8 }}>The image could not be retrieved</div>
+          </div>
+          <button 
+            onClick={(e) => { e.stopPropagation(); setError(false); setLoading(true); }}
+            className="proof-button proof-button-sm"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       <img
         ref={imgRef}
         src={src}
         alt={alt}
         draggable={false}
+        onLoad={() => setLoading(false)}
+        onError={() => { setLoading(false); setError(true); }}
         style={{
-          display: "block",
+          display: loading || error ? "none" : "block",
           maxWidth: "100%",
           maxHeight,
           borderRadius: 4,
-          transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-          transition: isDragging.current ? "none" : "transform 0.15s ease",
+          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          transition: isDragging.current ? "none" : "transform 0.1s ease-out",
           transformOrigin: "center center",
           pointerEvents: "none",
         }}
       />
-      {zoom !== 1 && (
+
+      {!loading && !error && (
         <div
           style={{
             position: "absolute",
-            bottom: 8,
-            right: 8,
-            fontSize: 10,
-            fontFamily: "var(--font-mono)",
-            color: "#fff",
-            background: "rgba(0,0,0,0.5)",
-            padding: "2px 6px",
-            borderRadius: 3,
-            backdropFilter: "blur(4px)",
-            pointerEvents: "none",
+            bottom: 12,
+            right: 12,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            zIndex: 10,
           }}
         >
-          {Math.round(zoom * 100)}%
+          {zoom !== 1 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); resetView(); }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: "rgba(0,0,0,0.6)",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                backdropFilter: "blur(4px)",
+              }}
+              title="Reset Zoom"
+            >
+              <RotateCcw size={14} />
+            </button>
+          )}
+          <div
+            style={{
+              height: 28,
+              padding: "0 10px",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 11,
+              fontWeight: 600,
+              fontFamily: "var(--font-mono)",
+              color: "#fff",
+              background: "rgba(0,0,0,0.6)",
+              borderRadius: 14,
+              backdropFilter: "blur(4px)",
+              pointerEvents: "none",
+            }}
+          >
+            {zoom > 1 ? <ZoomIn size={12} /> : <ZoomOut size={12} />}
+            {Math.round(zoom * 100)}%
+          </div>
         </div>
       )}
     </div>
