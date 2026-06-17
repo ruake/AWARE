@@ -16,7 +16,7 @@ import {
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { RUNS } from "@/lib/data";
 import type { Run } from "@/lib/types";
-const GH_ACTIONS_URL = `https://github.com/your-org/your-repo/actions`;
+const GH_ACTIONS_URL = `https://github.com/ruake/AWARE/actions`;
 
 const STATUS_CONFIG: Record<
   Run["status"],

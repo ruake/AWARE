@@ -37,7 +37,8 @@ export default function Compare() {
   const runs = useSyncExternalStore(subscribeToRuns, getRuns);
   const diffRowsSnapshot = useSyncExternalStore(subscribeToDiffRows, getDiffRows);
 
-  const envRuns = envSnap.envIds.length > 0 ? runs.filter((r) => envSnap.envIds.includes(r.envId)) : runs;
+  const envRuns =
+    envSnap.envIds.length > 0 ? runs.filter((r) => envSnap.envIds.includes(r.envId)) : runs;
   const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
   const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
   const [selectedId, setSelectedId] = useSyncedUrlState<string | null>("sel", null);
@@ -59,11 +60,13 @@ export default function Compare() {
 
   React.useEffect(() => {
     if (!effectiveBaseline || !effectiveCandidate) return;
-    Promise.all([loadResultsForRun(effectiveBaseline), loadResultsForRun(effectiveCandidate)]).then(([br, cr]) => {
-      setBaseResults(br);
-      setCandResults(cr);
-      setComputedRows(computeDiffRows(effectiveBaseline, effectiveCandidate));
-    });
+    Promise.all([loadResultsForRun(effectiveBaseline), loadResultsForRun(effectiveCandidate)]).then(
+      ([br, cr]) => {
+        setBaseResults(br);
+        setCandResults(cr);
+        setComputedRows(computeDiffRows(effectiveBaseline, effectiveCandidate));
+      },
+    );
   }, [effectiveBaseline, effectiveCandidate]);
 
   const diffs = React.useMemo(() => {
@@ -107,24 +110,66 @@ export default function Compare() {
   );
 
   const diffStats = React.useMemo(() => {
-    const regressions = diffs.filter(d => d.state === "regression").length;
-    const fixed = diffs.filter(d => d.state === "fixed").length;
-    const duration = diffs.filter(d => d.state === "duration").length;
-    const unchanged = diffs.filter(d => d.state === "unchanged").length;
-    const fishy = diffs.filter(d => d.state === "fishy").length;
-    const basePass = baseResults.filter(r => r.status === "PASS").length;
-    const candPass = candResults.filter(r => r.status === "PASS").length;
+    const regressions = diffs.filter((d) => d.state === "regression").length;
+    const fixed = diffs.filter((d) => d.state === "fixed").length;
+    const duration = diffs.filter((d) => d.state === "duration").length;
+    const unchanged = diffs.filter((d) => d.state === "unchanged").length;
+    const fishy = diffs.filter((d) => d.state === "fishy").length;
+    const basePass = baseResults.filter((r) => r.status === "PASS").length;
+    const candPass = candResults.filter((r) => r.status === "PASS").length;
     const basePct = baseResults.length > 0 ? Math.round((basePass / baseResults.length) * 100) : 0;
     const candPct = candResults.length > 0 ? Math.round((candPass / candResults.length) * 100) : 0;
     const delta = candPct - basePct;
     return [
-      { label: "Total", value: diffs.length.toString(), color: "var(--proof-text-secondary)", key: "total", count: diffs.length },
-      { label: "Regressions", value: regressions.toString(), color: regressions > 0 ? "var(--proof-red)" : "var(--proof-green)", key: "regression", count: regressions },
-      { label: "Fixed", value: fixed.toString(), color: "var(--proof-green)", key: "fixed", count: fixed },
-      { label: "Duration ↑", value: duration.toString(), color: "var(--proof-yellow)", key: "duration", count: duration },
-      { label: "Unchanged", value: unchanged.toString(), color: "var(--proof-text-muted)", key: "unchanged", count: unchanged },
-      { label: "Fishy", value: fishy.toString(), color: "var(--proof-purple)", key: "fishy", count: fishy },
-      { label: "Pass Rate Δ", value: `${delta >= 0 ? "+" : ""}${delta}%`, color: delta >= 0 ? "var(--proof-green)" : "var(--proof-red)", key: "passRateDelta", count: Math.abs(delta) },
+      {
+        label: "Total",
+        value: diffs.length.toString(),
+        color: "var(--proof-text-secondary)",
+        key: "total",
+        count: diffs.length,
+      },
+      {
+        label: "Regressions",
+        value: regressions.toString(),
+        color: regressions > 0 ? "var(--proof-red)" : "var(--proof-green)",
+        key: "regression",
+        count: regressions,
+      },
+      {
+        label: "Fixed",
+        value: fixed.toString(),
+        color: "var(--proof-green)",
+        key: "fixed",
+        count: fixed,
+      },
+      {
+        label: "Duration ↑",
+        value: duration.toString(),
+        color: "var(--proof-yellow)",
+        key: "duration",
+        count: duration,
+      },
+      {
+        label: "Unchanged",
+        value: unchanged.toString(),
+        color: "var(--proof-text-muted)",
+        key: "unchanged",
+        count: unchanged,
+      },
+      {
+        label: "Fishy",
+        value: fishy.toString(),
+        color: "var(--proof-purple)",
+        key: "fishy",
+        count: fishy,
+      },
+      {
+        label: "Pass Rate Δ",
+        value: `${delta >= 0 ? "+" : ""}${delta}%`,
+        color: delta >= 0 ? "var(--proof-green)" : "var(--proof-red)",
+        key: "passRateDelta",
+        count: Math.abs(delta),
+      },
     ];
   }, [diffs, baseResults, candResults]);
 

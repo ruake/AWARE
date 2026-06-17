@@ -85,7 +85,7 @@ interface EnvHealthItem {
   lastRun?: string;
 }
 
-function computeEnvHealth(runsList: Run[], selectedEnvIds?: string[]): EnvHealthItem[] {
+function computeEnvHealth(runsList: readonly Run[], selectedEnvIds?: string[]): EnvHealthItem[] {
   const groups = new Map<string, Run[]>();
   for (const run of runsList) {
     if (!groups.has(run.envId)) groups.set(run.envId, []);
@@ -466,7 +466,12 @@ export default function Dashboard() {
         </div>
         <div style={{ display: "flex", gap: 7 }}>
           <button
-            onClick={() => window.open("https://github.com/your-org/your-repo/actions/workflows/run-tests.yml", "_blank")}
+            onClick={() =>
+              window.open(
+                "https://github.com/ruake/AWARE/actions/workflows/run-tests.yml",
+                "_blank",
+              )
+            }
             className="proof-button-primary"
             style={{ fontSize: 12.5 }}
           >

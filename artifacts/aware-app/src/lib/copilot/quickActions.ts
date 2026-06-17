@@ -1,5 +1,12 @@
 import {
-  Activity, RefreshCw, GitCompare, Shield, AlertTriangle, Layers, Timer, Globe,
+  Activity,
+  RefreshCw,
+  GitCompare,
+  Shield,
+  AlertTriangle,
+  Layers,
+  Timer,
+  Globe,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -19,7 +26,8 @@ export const QUICK_ACTIONS: QuickAction[] = [
     icon: Activity,
     color: "#3b82f6",
     badge: "query_runs",
-    message: "Show me the last 15 test runs with pass rates, failure counts, and environments as a table.",
+    message:
+      "Show me the last 15 test runs with pass rates, failure counts, and environments as a table.",
   },
   {
     id: "flaky-tests",
@@ -27,7 +35,8 @@ export const QUICK_ACTIONS: QuickAction[] = [
     icon: RefreshCw,
     color: "#f59e0b",
     badge: "get_flaky_tests",
-    message: "Which tests are flaky? Rank them by flakiness score and show the PASS/FAIL flip sequence.",
+    message:
+      "Which tests are flaky? Rank them by flakiness score and show the PASS/FAIL flip sequence.",
   },
   {
     id: "env-compare",
@@ -35,7 +44,8 @@ export const QUICK_ACTIONS: QuickAction[] = [
     icon: GitCompare,
     color: "#8b5cf6",
     badge: "compare_environments",
-    message: "Compare QA, UAT, and PROD environments — show avg pass rates, total failures, and health status.",
+    message:
+      "Compare QA, UAT, and PROD environments — show avg pass rates, total failures, and health status.",
   },
   {
     id: "promotion-gate",
@@ -43,7 +53,8 @@ export const QUICK_ACTIONS: QuickAction[] = [
     icon: Shield,
     color: "#10b981",
     badge: "get_promotion_status",
-    message: "Show UAT→PROD promotion gate status — how many decisions promoted, blocked, or pending?",
+    message:
+      "Show UAT→PROD promotion gate status — how many decisions promoted, blocked, or pending?",
   },
   {
     id: "failure-breakdown",
@@ -51,7 +62,8 @@ export const QUICK_ACTIONS: QuickAction[] = [
     icon: AlertTriangle,
     color: "#ef4444",
     badge: "get_failure_breakdown",
-    message: "Break down failures in the latest run by category (WAF, TLS, API, EdgeWorker). Show which area has the most failures.",
+    message:
+      "Break down failures in the latest run by category (WAF, TLS, API, EdgeWorker). Show which area has the most failures.",
   },
   {
     id: "suite-health",
@@ -67,7 +79,8 @@ export const QUICK_ACTIONS: QuickAction[] = [
     icon: Timer,
     color: "#ec4899",
     badge: "get_duration_trends",
-    message: "Show execution duration trends across the last 10 runs. Are there any timing regressions?",
+    message:
+      "Show execution duration trends across the last 10 runs. Are there any timing regressions?",
   },
   {
     id: "akamai-property",
@@ -75,6 +88,7 @@ export const QUICK_ACTIONS: QuickAction[] = [
     icon: Globe,
     color: "#f97316",
     badge: "get_akamai_property",
-    message: "Show Akamai property versions, EdgeWorker versions, PoP counts, and activation status for all environments.",
+    message:
+      "Show Akamai property versions, EdgeWorker versions, PoP counts, and activation status for all environments.",
   },
 ];

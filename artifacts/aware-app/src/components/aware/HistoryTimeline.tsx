@@ -20,11 +20,7 @@ export function TimeWindowProvider({ children }: { children: React.ReactNode }) 
     end: new Date(),
     sizeDays: 30,
   });
-  return (
-    <TimeWindowCtx.Provider value={{ window, setWindow }}>
-      {children}
-    </TimeWindowCtx.Provider>
-  );
+  return <TimeWindowCtx.Provider value={{ window, setWindow }}>{children}</TimeWindowCtx.Provider>;
 }
 
 function useTimeWindow() {
@@ -84,11 +80,7 @@ export function TimeWindowControls() {
         flexShrink: 0,
       }}
     >
-      <button
-        onClick={() => shiftWindow(-window.sizeDays)}
-        title="Skip back"
-        style={navBtnStyle}
-      >
+      <button onClick={() => shiftWindow(-window.sizeDays)} title="Skip back" style={navBtnStyle}>
         <SkipBack size={12} />
       </button>
       <button
@@ -119,11 +111,7 @@ export function TimeWindowControls() {
       >
         <ChevronRight size={12} />
       </button>
-      <button
-        onClick={() => shiftWindow(window.sizeDays)}
-        title="Skip forward"
-        style={navBtnStyle}
-      >
+      <button onClick={() => shiftWindow(window.sizeDays)} title="Skip forward" style={navBtnStyle}>
         <SkipForward size={12} />
       </button>
       <div style={{ width: 1, height: 16, background: "var(--proof-border)", margin: "0 4px" }} />
@@ -170,9 +158,16 @@ interface DotData {
   runId: string;
   status: "PASS" | "FAIL";
   date: string;
+  resultId: string;
 }
 
-export function TestHistoryStrip({ testName, currentRunId }: { testName: string; currentRunId?: string }) {
+export function TestHistoryStrip({
+  testName,
+  currentRunId,
+}: {
+  testName: string;
+  currentRunId?: string;
+}) {
   const [, navigate] = useLocation();
   const { window } = useTimeWindow();
 
@@ -184,7 +179,7 @@ export function TestHistoryStrip({ testName, currentRunId }: { testName: string;
       const match = results.find((r) => r.name === testName);
       if (match && !seen.has(run.id)) {
         seen.add(run.id);
-        result.push({ runId: run.id, status: match.status, date: run.started });
+        result.push({ runId: run.id, status: match.status, date: run.started, resultId: match.id });
       }
     }
     result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -226,9 +221,7 @@ export function TestHistoryStrip({ testName, currentRunId }: { testName: string;
 
   if (filtered.length === 0) {
     return (
-      <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontStyle: "italic" }}>
-        —
-      </span>
+      <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontStyle: "italic" }}>—</span>
     );
   }
 
@@ -257,7 +250,16 @@ export function TestHistoryStrip({ testName, currentRunId }: { testName: string;
       onClick={(e) => e.stopPropagation()}
     >
       {hasOlder && (
-        <span style={{ fontSize: 7, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", marginRight: 1 }}>◀</span>
+        <span
+          style={{
+            fontSize: 7,
+            color: "var(--proof-text-muted)",
+            fontFamily: "var(--font-mono)",
+            marginRight: 1,
+          }}
+        >
+          ◀
+        </span>
       )}
       {visible.map((g) => {
         const pct = g.items.filter((i) => i.status === "PASS").length / g.items.length;
@@ -279,7 +281,7 @@ export function TestHistoryStrip({ testName, currentRunId }: { testName: string;
             onClick={(e) => {
               e.stopPropagation();
               if (g.items.length === 1) {
-                navigate(`/runs/${g.items[0].runId}`);
+                navigate(`/runs/${g.items[0].runId}?testId=${g.items[0].resultId}`);
               }
             }}
             style={{
@@ -322,21 +324,64 @@ export function TestHistoryStrip({ testName, currentRunId }: { testName: string;
               >
                 {g.items.length}
               </span>
-            ) : (() => {
-              const color = g.items[0].status === "PASS" ? "var(--proof-green)" : "var(--proof-red)";
-              const isSelected = currentRunId && g.items[0].runId === currentRunId;
-              return (
-                <div style={{ position: "relative", width: isSelected ? 18 : 10, height: isSelected ? 18 : 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  {isSelected && <div style={{ position: "absolute", width: 16, height: 16, borderRadius: "50%", border: `2px solid ${color}`, background: "transparent", boxSizing: "border-box" }} />}
-                  <div style={{ width: isSelected ? 8 : 10, height: isSelected ? 8 : 10, borderRadius: "50%", background: color, flexShrink: 0, border: "1px solid rgba(0,0,0,0.25)" }} />
-                </div>
-              );
-            })()}
+            ) : (
+              (() => {
+                const color =
+                  g.items[0].status === "PASS" ? "var(--proof-green)" : "var(--proof-red)";
+                const isSelected = currentRunId && g.items[0].runId === currentRunId;
+                return (
+                  <div
+                    style={{
+                      position: "relative",
+                      width: isSelected ? 18 : 10,
+                      height: isSelected ? 18 : 10,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {isSelected && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          width: 16,
+                          height: 16,
+                          borderRadius: "50%",
+                          border: `2px solid ${color}`,
+                          background: "transparent",
+                          boxSizing: "border-box",
+                        }}
+                      />
+                    )}
+                    <div
+                      style={{
+                        width: isSelected ? 8 : 10,
+                        height: isSelected ? 8 : 10,
+                        borderRadius: "50%",
+                        background: color,
+                        flexShrink: 0,
+                        border: "1px solid rgba(0,0,0,0.25)",
+                      }}
+                    />
+                  </div>
+                );
+              })()
+            )}
           </div>
         );
       })}
       {hasNewer && (
-        <span style={{ fontSize: 7, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", marginLeft: 1 }}>▶</span>
+        <span
+          style={{
+            fontSize: 7,
+            color: "var(--proof-text-muted)",
+            fontFamily: "var(--font-mono)",
+            marginLeft: 1,
+          }}
+        >
+          ▶
+        </span>
       )}
     </div>
   );

@@ -25,7 +25,7 @@ export function subscribeToRuns(cb: () => void): () => void {
 }
 
 // Backward-compat: direct access to the raw array (consumers that don't need reactivity)
-export const RUNS: Run[] = _runs;
+export const RUNS: readonly Run[] = _runs;
 
 // ── DIFF_ROWS store ──────────────────────────────────────────────────
 const _diffRows: DiffRow[] = [];
@@ -50,7 +50,7 @@ export function subscribeToDiffRows(cb: () => void): () => void {
 }
 
 // Backward-compat
-export const DIFF_ROWS: DiffRow[] = _diffRows;
+export const DIFF_ROWS: readonly DiffRow[] = _diffRows;
 
 let _runsLoaded = false;
 export async function loadRuns(): Promise<void> {
@@ -330,7 +330,7 @@ export function recomputeAll(): void {
     if (sorted.length >= 2) {
       const rows = computeDiffRows(sorted[1].id, sorted[0].id);
       rows.forEach((r) => _diffRows.push(r));
-      break;
+      continue;
     }
   }
   updateDiffRowsSnapshot();
@@ -407,7 +407,7 @@ export function computeRunFrequency(): RunFrequency {
   };
 }
 
-export function getRunsByEnv(envIds?: string[]): Run[] {
+export function getRunsByEnv(envIds?: string[]): readonly Run[] {
   if (!envIds || envIds.length === 0) return RUNS;
   return RUNS.filter((r) => envIds.includes(r.envId));
 }

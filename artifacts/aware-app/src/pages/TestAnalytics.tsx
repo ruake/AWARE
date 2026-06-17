@@ -259,7 +259,13 @@ export default function TestAnalytics() {
   React.useEffect(() => {
     if (detail.history.length > 0) {
       setTestDetailStat(
-        { passRate: detail.passRate, flakinessScore: detail.flakinessScore, avgDuration: detail.avgDuration, failCount, errorCount },
+        {
+          passRate: detail.passRate,
+          flakinessScore: detail.flakinessScore,
+          avgDuration: detail.avgDuration,
+          failCount,
+          errorCount,
+        },
         hStatus,
       );
     }
@@ -277,8 +283,6 @@ export default function TestAnalytics() {
         margin: "0 auto",
       }}
     >
-
-
       {/* Charts */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         {/* Pass/Fail + Duration combined */}

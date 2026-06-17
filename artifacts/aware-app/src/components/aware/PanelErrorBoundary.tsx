@@ -9,20 +9,21 @@ interface Props {
 
 interface State {
   error: Error | null;
+  retryKey: number;
 }
 
 export class PanelErrorBoundary extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { error: null };
+    this.state = { error: null, retryKey: 0 };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<State> {
     return { error };
   }
 
   handleRetry = () => {
-    this.setState({ error: null });
+    this.setState((s) => ({ error: null, retryKey: s.retryKey + 1 }));
   };
 
   render() {
@@ -79,6 +80,6 @@ export class PanelErrorBoundary extends React.Component<Props, State> {
         </div>
       );
     }
-    return this.props.children;
+    return <div key={this.state.retryKey}>{this.props.children}</div>;
   }
 }

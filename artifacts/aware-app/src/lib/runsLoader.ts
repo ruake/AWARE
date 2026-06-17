@@ -18,7 +18,7 @@ async function ensureAllResultsLoaded(): Promise<void> {
     })
     .catch(() => {
       _allResultsLoading = null;
-      _allResultsLoaded = true;
+      _allResultsLoaded = false;
     });
   return _allResultsLoading;
 }
