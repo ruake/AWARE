@@ -3,7 +3,6 @@ import { useLocation, useParams } from "wouter";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { getRunById, getTestResultsForRun, subscribeToRuns, getRuns } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
-import { getEnvConfigs } from "@/lib/envConfig";
 import { EnvSelector } from "../EnvSelector";
 import { SuiteSelector } from "../SuiteSelector";
 import type { Run, TestResult } from "@/lib/types";
@@ -67,15 +66,15 @@ function RunsStatSummary({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
     { label: "Running", value: running.length.toString(), color: "var(--proof-blue-hover)", onClick: () => navigate("/runs?status=RUNNING") },
     { label: "Passed", value: passed.toString(), color: "var(--proof-green)", onClick: () => navigate("/runs?status=PASS") },
     { label: "Failed", value: failed.toString(), color: "var(--proof-red)", onClick: () => navigate("/runs?status=FAIL") },
-    { label: "Pass Rate", value: `${avgPassRate}%`, color: avgPassRate >= 80 ? "var(--proof-green)" : avgPassRate >= 50 ? "var(--proof-yellow)" : "var(--proof-red)" },
-    { label: "Duration", value: avgDurationStr, color: "var(--proof-purple)" },
+    { label: "Pass Rate", value: `${avgPassRate}%`, color: avgPassRate >= 80 ? "var(--proof-green)" : avgPassRate >= 50 ? "var(--proof-yellow)" : "var(--proof-red)", onClick: () => navigate("/trends") },
+    { label: "Duration", value: avgDurationStr, color: "var(--proof-purple)", onClick: () => navigate("/runs") },
   ];
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, padding: "8px 10px", borderBottom: "1px solid var(--proof-border)" }}>
       {items.map((item) => (
-        <div key={item.label} onClick={item.onClick} style={{ padding: "6px 8px", borderRadius: 3, background: "var(--proof-hover-light)", display: "flex", flexDirection: "column", gap: 1, cursor: item.onClick ? "pointer" : "default", transition: "background 0.1s" }}
-          onMouseEnter={(e) => { if (item.onClick) (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
+        <div key={item.label} onClick={item.onClick} style={{ padding: "6px 8px", borderRadius: 3, background: "var(--proof-hover-light)", display: "flex", flexDirection: "column", gap: 1, cursor: "pointer", transition: "background 0.1s" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover-light)"; }}
         >
           <span style={{ fontSize: 16, fontWeight: 700, fontFamily: "var(--font-mono)", color: item.color, lineHeight: 1.2 }}>{item.value}</span>
@@ -255,6 +254,7 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
 }
 
 function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
+  const [, navigate] = useLocation();
   const passCount = results.filter((r) => r.status === "PASS").length;
   const failCount = results.filter((r) => r.status === "FAIL").length;
   const passRate = results.length > 0 ? Math.round((passCount / results.length) * 100) : 0;
@@ -272,18 +272,21 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
       </div>
       {!collapsed && (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <div style={{ padding: "6px 8px", borderRadius: 4, background: passRate === 100 ? "rgba(34,197,94,0.08)" : passRate < 90 ? "rgba(239,68,68,0.08)" : "rgba(234,179,8,0.08)", border: `1px solid ${passRate === 100 ? "rgba(34,197,94,0.2)" : passRate < 90 ? "rgba(239,68,68,0.2)" : "rgba(234,179,8,0.2)"}` }}>
+          <div onClick={() => navigate(`/trends`)} style={{ padding: "6px 8px", borderRadius: 4, background: passRate === 100 ? "rgba(34,197,94,0.08)" : passRate < 90 ? "rgba(239,68,68,0.08)" : "rgba(234,179,8,0.08)", border: `1px solid ${passRate === 100 ? "rgba(34,197,94,0.2)" : passRate < 90 ? "rgba(239,68,68,0.2)" : "rgba(234,179,8,0.2)"}`, cursor: "pointer" }}>
             <div style={{ fontSize: 8, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>Pass Rate</div>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 700, color: passRate === 100 ? "var(--proof-green)" : passRate < 90 ? "var(--proof-red)" : "var(--proof-yellow)" }}>{passRate}%</div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
             {[
-              { label: "Total", value: results.length, color: "var(--proof-text)" },
-              { label: "Failed", value: failCount, color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)" },
-              { label: "Passed", value: passCount, color: "var(--proof-green)" },
-              { label: "Avg Dur", value: `${avgDuration}ms`, color: "var(--proof-text)" },
+              { label: "Total", value: results.length, color: "var(--proof-text)", onClick: () => navigate(`/runs/${run.id}`) },
+              { label: "Failed", value: failCount, color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)", onClick: failCount > 0 ? () => navigate(`/runs/${run.id}?status=FAIL`) : undefined },
+              { label: "Passed", value: passCount, color: "var(--proof-green)", onClick: passCount > 0 ? () => navigate(`/runs/${run.id}?status=PASS`) : undefined },
+              { label: "Avg Dur", value: `${avgDuration}ms`, color: "var(--proof-text)", onClick: () => navigate(`/trends`) },
             ].map((s) => (
-              <div key={s.label} style={{ padding: "5px 6px", borderRadius: 4, background: "var(--proof-grey-bg)", border: "1px solid var(--proof-grey)" }}>
+              <div key={s.label} onClick={s.onClick} style={{ padding: "5px 6px", borderRadius: 4, background: "var(--proof-grey-bg)", border: "1px solid var(--proof-grey)", cursor: s.onClick ? "pointer" : "default", transition: "background 0.1s" }}
+                onMouseEnter={(e) => { if (s.onClick) (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-grey-bg)"; }}
+              >
                 <div style={{ fontSize: 8, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.3px" }}>{s.label}</div>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: s.color }}>{s.value}</div>
               </div>
@@ -296,7 +299,10 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                 const catResults = results.filter((r) => r.category === cat);
                 const pct = Math.round((catResults.filter((r) => r.status === "PASS").length / catResults.length) * 100);
                 return (
-                  <div key={cat} style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
+                  <div key={cat} onClick={() => navigate(`/runs/${run.id}?cat=${encodeURIComponent(cat)}`)} style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2, cursor: "pointer" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                  >
                     <span style={{ fontSize: 8, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cat}</span>
                     <div style={{ width: 50, height: 4, borderRadius: 2, background: "var(--proof-grey)" }}>
                       <div style={{ width: `${pct}%`, height: "100%", borderRadius: 2, background: pct === 100 ? "var(--proof-green)" : pct < 80 ? "var(--proof-red)" : "var(--proof-yellow)" }} />
@@ -352,28 +358,33 @@ function RunDetailFilters() {
 }
 
 function RecentRunsList({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
-  const [, navigate] = useLocation();
-  const recent = [...envFilteredRuns].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()).slice(0, 12);
+  const [location, navigate] = useLocation();
+  const recent = [...envFilteredRuns].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()).slice(0, 20);
+  const selectedRunId = location.split("/runs/")[1]?.split(/[?/]/)[0] ?? "";
 
   return (
     <div style={{ padding: "4px 0" }}>
-      <div style={{ padding: "6px 12px 4px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.6px", color: "var(--proof-text-muted)" }}>Recent Runs</div>
-      {recent.map((run) => {
-        const pct = run.passPct ?? 0;
-        const passColor = pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
-        const envCfg = getEnvConfigs().find((c) => c.id === run.envId);
-        const label = envCfg?.label || run.envId || run.env;
-        return (
-          <div key={run.id} onClick={() => navigate(`/runs/${run.id}`)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 12px", cursor: "pointer", fontSize: 11, color: "var(--proof-text-secondary)", transition: "background 0.1s", lineHeight: "20px" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)"; }}
-          >
-            <span style={{ width: 5, height: 5, borderRadius: "50%", background: passColor, flexShrink: 0 }} />
-            <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 10 }}>{run.label || run.id}</span>
-            <span style={{ fontSize: 8, fontFamily: "var(--font-mono)", opacity: 0.6, flexShrink: 0 }}>{label}</span>
-          </div>
-        );
-      })}
+      <div style={{ padding: "4px 12px 2px", fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-muted)" }}>Recent Runs</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        {recent.map((run, i) => {
+          const pct = run.passPct ?? 0;
+          const passColor = pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
+          const isSelected = run.id === selectedRunId;
+          return (
+            <div key={run.id} onClick={() => navigate(`/runs/${run.id}`)} title={`${run.label || run.id} (${pct}%)`} style={{ display: "flex", alignItems: "center", gap: 4, padding: "1px 0", cursor: "pointer", lineHeight: "14px", position: "relative" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+            >
+              <div style={{ width: 14, display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+                {i > 0 && <div style={{ width: 1, height: 2, background: "var(--proof-border)", flexShrink: 0 }} />}
+                <div style={{ width: 5, height: 5, borderRadius: "50%", background: passColor, flexShrink: 0, outline: isSelected ? `2px solid ${passColor}` : "none", outlineOffset: 2 }} />
+                {i < recent.length - 1 && <div style={{ width: 1, height: 2, background: "var(--proof-border)", flexShrink: 0 }} />}
+              </div>
+              <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 9, color: "var(--proof-text-secondary)" }}>{run.label || run.id}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

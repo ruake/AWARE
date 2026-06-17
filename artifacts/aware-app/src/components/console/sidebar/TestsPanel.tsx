@@ -13,21 +13,25 @@ const STATUSES = ["All", "active", "disabled", "deprecated"] as const;
 const PRIORITIES = ["All", "P0", "P1", "P2", "P3"] as const;
 
 function TestKpis() {
+  const [, navigate] = useLocation();
   const { tcs, suites } = useTestData();
   const stats = React.useMemo(() => computeTestStats(), []);
 
   const kpis = [
-    { label: "Total Suites", value: suites.length, color: "var(--proof-blue)" },
-    { label: "Total Tests", value: tcs.length, color: "var(--proof-blue)" },
-    { label: "Active Tests", value: tcs.filter((t) => t.status === "active").length, color: "var(--proof-green)" },
-    { label: "Scheduled", value: suites.filter((s) => s.schedule).length, color: "var(--proof-orange)" },
-    { label: "Coverage", value: `${stats.coverage}%`, color: "var(--proof-text)" },
+    { label: "Total Suites", value: suites.length, color: "var(--proof-blue)", onClick: () => navigate("/suites") },
+    { label: "Total Tests", value: tcs.length, color: "var(--proof-blue)", onClick: () => navigate("/tests") },
+    { label: "Active Tests", value: tcs.filter((t) => t.status === "active").length, color: "var(--proof-green)", onClick: () => navigate("/tests?status=active") },
+    { label: "Scheduled", value: suites.filter((s) => s.schedule).length, color: "var(--proof-orange)", onClick: () => navigate("/suites") },
+    { label: "Coverage", value: `${stats.coverage}%`, color: "var(--proof-text)", onClick: () => navigate("/tests") },
   ];
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, padding: "8px 10px", borderBottom: "1px solid var(--proof-border)" }}>
       {kpis.map((kpi) => (
-        <div key={kpi.label} style={{ padding: "6px 6px", borderRadius: 4, background: "var(--proof-hover-light)", border: "1px solid var(--proof-border)", textAlign: "center" }}>
+        <div key={kpi.label} onClick={kpi.onClick} style={{ padding: "6px 6px", borderRadius: 4, background: "var(--proof-hover-light)", border: "1px solid var(--proof-border)", textAlign: "center", cursor: "pointer", transition: "background 0.1s" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover-light)"; }}
+        >
           <div style={{ fontSize: 13, fontWeight: 700, fontFamily: "var(--font-mono)", color: kpi.color, lineHeight: 1.2 }}>{kpi.value}</div>
           <div style={{ fontSize: 7, color: "var(--proof-text-muted)", textTransform: "uppercase", letterSpacing: "0.3px", marginTop: 1 }}>{kpi.label}</div>
         </div>

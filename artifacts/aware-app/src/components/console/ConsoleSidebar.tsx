@@ -55,8 +55,8 @@ function KpiSummary() {
     { label: "Runs", value: total.toString(), color: "var(--proof-blue)", onClick: () => navigate("/runs") },
     { label: "Pass Rate", value: `${passPct}%`, color: passPct >= 95 ? "var(--proof-green)" : "var(--proof-yellow)", onClick: () => navigate("/trends") },
     { label: "Failed Runs", value: failed.toString(), color: failed > 0 ? "var(--proof-red)" : "var(--proof-text-muted)", onClick: failed > 0 ? () => navigate("/runs?status=FAIL") : undefined },
-    { label: "Envs", value: envCount.toString(), color: "var(--proof-purple)" },
-    { label: "Tests", value: testCasesCount.toString(), color: "var(--proof-cyan)" },
+    { label: "Envs", value: envCount.toString(), color: "var(--proof-purple)", onClick: () => navigate("/about") },
+    { label: "Tests", value: testCasesCount.toString(), color: "var(--proof-cyan)", onClick: () => navigate("/tests") },
     { label: "Regressions", value: regressions.toString(), color: regressions > 0 ? "var(--proof-red)" : "var(--proof-text-muted)", onClick: regressions > 0 ? () => navigate("/compare") : undefined },
   ];
 
@@ -76,31 +76,36 @@ function KpiSummary() {
 }
 
 function RecentRunsList() {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const runs = useSyncExternalStore(subscribeToRuns, getRuns);
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
   const envFilteredRuns = envSnap.envIds.length > 0 ? runs.filter((r) => envSnap.envIds.includes(r.envId)) : runs;
-  const recent = [...envFilteredRuns].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()).slice(0, 12);
+  const recent = [...envFilteredRuns].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()).slice(0, 20);
+  const selectedRunId = location.split("/runs/")[1]?.split(/[?/]/)[0] ?? "";
 
   return (
     <div style={{ padding: "4px 0" }}>
-      <div style={{ padding: "6px 12px 4px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.6px", color: "var(--proof-text-muted)" }}>Recent Runs</div>
-      {recent.map((run) => {
-        const pct = run.passPct ?? 0;
-        const passColor = pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
-        const envCfg = getEnvConfigs().find((c) => c.id === run.envId);
-        const label = envCfg?.label || run.envId || run.env;
-        return (
-          <div key={run.id} onClick={() => navigate(`/runs/${run.id}`)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 12px", cursor: "pointer", fontSize: 12, color: "var(--proof-text-secondary)", transition: "background 0.1s", lineHeight: "20px" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)"; }}
-          >
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: passColor, flexShrink: 0 }} />
-            <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 11 }}>{run.label || run.id}</span>
-            <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", opacity: 0.6, flexShrink: 0 }}>{label}</span>
-          </div>
-        );
-      })}
+      <div style={{ padding: "4px 12px 2px", fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-muted)" }}>Recent Runs</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        {recent.map((run, i) => {
+          const pct = run.passPct ?? 0;
+          const passColor = pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
+          const isSelected = run.id === selectedRunId;
+          return (
+            <div key={run.id} onClick={() => navigate(`/runs/${run.id}`)} title={`${run.label || run.id} (${pct}%)`} style={{ display: "flex", alignItems: "center", gap: 4, padding: "1px 0", cursor: "pointer", lineHeight: "14px", position: "relative" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+            >
+              <div style={{ width: 14, display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+                {i > 0 && <div style={{ width: 1, height: 2, background: "var(--proof-border)", flexShrink: 0 }} />}
+                <div style={{ width: 5, height: 5, borderRadius: "50%", background: passColor, flexShrink: 0, outline: isSelected ? `2px solid ${passColor}` : "none", outlineOffset: 2 }} />
+                {i < recent.length - 1 && <div style={{ width: 1, height: 2, background: "var(--proof-border)", flexShrink: 0 }} />}
+              </div>
+              <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 9, color: "var(--proof-text-secondary)" }}>{run.label || run.id}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -112,7 +117,7 @@ function NavFooter() {
     { id: "runs", label: "Runs", href: "/runs" },
     { id: "compare", label: "Compare", href: "/compare" },
     { id: "trends", label: "Trends", href: "/trends" },
-    { id: "suites", label: "Suites", href: "/suites" },
+    { id: "tests", label: "Tests", href: "/tests" },
     { id: "copilot", label: "Copilot", href: "/copilot" },
     { id: "about", label: "About", href: "/about" },
   ];

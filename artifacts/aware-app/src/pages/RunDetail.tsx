@@ -653,7 +653,7 @@ export default function RunDetail() {
                         </span>
                       </td>
                       <td style={{ width: 200, whiteSpace: "nowrap" }}>
-                        <TestHistoryStrip testName={r.name} />
+                        <TestHistoryStrip testName={r.name} currentRunId={runId} />
                       </td>
                       <td
                         style={{

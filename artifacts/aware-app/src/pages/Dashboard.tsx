@@ -33,6 +33,7 @@ import {
   Zap,
   ChevronRight,
   Clock,
+  ExternalLink,
 } from "lucide-react";
 import {
   AreaChart,
@@ -465,11 +466,11 @@ export default function Dashboard() {
         </div>
         <div style={{ display: "flex", gap: 7 }}>
           <button
-            onClick={() => navigate("/start")}
+            onClick={() => window.open("https://github.com/your-org/your-repo/actions/workflows/run-tests.yml", "_blank")}
             className="proof-button-primary"
             style={{ fontSize: 12.5 }}
           >
-            <Play size={12} /> Start Run
+            <Play size={12} /> Start Run <ExternalLink size={10} style={{ opacity: 0.7 }} />
           </button>
           <button
             onClick={() => navigate("/compare")}
