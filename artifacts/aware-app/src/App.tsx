@@ -101,7 +101,7 @@ function DataGate({ children }: { children: React.ReactNode }) {
       triggeredRef.current = true;
       loadAllData().catch(() => {});
     }
-  }, [state.loaded, state.loading]);
+  }, [state.loaded, state.loading, triggeredRef.current]);
 
   if (state.error && !state.loading && !state.loaded) {
     return (
@@ -136,6 +136,7 @@ function DataGate({ children }: { children: React.ReactNode }) {
         <button
           onClick={() => {
             triggeredRef.current = false;
+            loadAllData().catch(() => {});
           }}
           style={{
             padding: "8px 18px",

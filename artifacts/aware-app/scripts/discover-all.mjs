@@ -99,18 +99,17 @@ function mergeWithExisting(tests, existing) {
 function mergeAndWrite(pytestTests, playwrightTests, puppeteerTests, httpTests, existingSeed) {
   let all = [...pytestTests, ...playwrightTests, ...puppeteerTests, ...httpTests];
 
-  // Collision check
-  const ids = new Set();
-  for (const t of all) {
-    if (ids.has(t.id)) {
+  // Collision check — deduplicate by ID
+  const seen = new Set();
+  const unique = all.filter(t => {
+    if (seen.has(t.id)) {
       console.error(`  [WARN] Duplicate ID: ${t.id} — skipping`);
-      continue;
+      return false;
     }
-    ids.add(t.id);
-  }
-
-  const unique = all.filter(t => ids.has(t.id));
-  ids.clear();
+    seen.add(t.id);
+    return true;
+  });
+  seen.clear();
   all = null;
 
   // Preserve filmstrip from previous run + any seed tests not on filesystem

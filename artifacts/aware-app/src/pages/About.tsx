@@ -806,7 +806,6 @@ export default function About() {
           </div>
         </PanelErrorBoundary>
       )}
-
     </div>
   );
 }

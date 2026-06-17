@@ -6,7 +6,7 @@
  * On every reconciliation tick:
  *   1. **Poll phase**: reconcile RUNNING runs against GitHub workflow state
  *   2. **Cron evaluation**: check which suites are due
- *   3. **Dispatch phase**: dispatch controller.yml for due suites × environments
+    *   3. **Dispatch phase**: dispatch job-playwright.yml / job-pytest.yml for due suites × environments
  *   4. **Status commit**: push updated runs.json + scheduler-status.json to `data` branch
  *
  * Controller pattern (like k8s):
@@ -46,7 +46,13 @@ const DATA_DIR = join(ROOT, "artifacts", "aware-app", "data");
 const RUNS_FILE = join(DATA_DIR, "runs.json");
 const STATUS_FILE = join(DATA_DIR, "scheduler-status.json");
 const CONFIG_FILE = join(ROOT, "config", "test-suites.yml");
-const WORKFLOW_FILE = "controller.yml";
+const PLAYWRIGHT_WORKFLOW = process.env.PLAYWRIGHT_WORKFLOW || "job-playwright.yml";
+const PYTEST_WORKFLOW = process.env.PYTEST_WORKFLOW || "job-pytest.yml";
+
+const WORKFLOW_MAP = {
+  playwright: PLAYWRIGHT_WORKFLOW,
+  pytest: PYTEST_WORKFLOW,
+};
 const DATA_BRANCH = "data";
 
 // ── Utilities ────────────────────────────────────────────────────────────────
@@ -129,10 +135,11 @@ const ENV_MAP = {
   "PROD / Production":{ id: "prod_prod",  target: "PROD", network: "production" },
 };
 
-function makeRunId(suiteId, envLabel) {
+function makeRunId(suiteId, envLabel, runner = "") {
   const slug = suiteId.replace(/^suite_/, "").slice(0, 8);
   const ts = Date.now().toString(36);
-  return `${slug}_${ts}`;
+  const suffix = Math.random().toString(36).slice(2, 6);
+  return `${slug}_${runner.slice(0, 4)}_${ts}_${suffix}`;
 }
 
 // ── Git commit (pushes data files to the `data` branch) ─────────────────────
@@ -259,41 +266,49 @@ async function main() {
       } else {
         let dispatched = 0;
         let errors = [];
-        for (const env of envs) {
-          const ok = dispatchWorkflow(WORKFLOW_FILE, process.env.GITHUB_REF_NAME || "main", {
-            force_suite: suite.id,
-            force_env: env,
-          });
-          if (ok) {
-            const runId = makeRunId(suite.id, env);
-            const envInfo = ENV_MAP[env] || { id: "qa_staging", target: "QA", network: "staging" };
-
-            // Wait for GH to index, then find workflowRunId
-            await sleep(2000);
-            const latest = findLatestDispatch(WORKFLOW_FILE, suite.id, env);
-
-            runs.unshift({
-              id: runId,
-              label: `${suite.name} — ${env}`,
-              suiteId: suite.id,
-              envId: envInfo.id,
-              status: "RUNNING",
-              conditions: initialRunConditions(),
-              passPct: 0,
-              failures: 0,
-              duration: "\u2014",
-              durationMs: 0,
-              started: timestamp,
-              build: (process.env.GITHUB_SHA || "?").slice(0, 7),
-              rev: process.env.GITHUB_SHA || "?",
-              env: envInfo.target,
-              network: envInfo.network,
-              workflowRunId: latest?.databaseId || null,
+        const runners = suite.runners || ["playwright", "pytest"];
+        for (const runner of runners) {
+          const workflowFile = WORKFLOW_MAP[runner];
+          if (!workflowFile) {
+            errors.push(`${envs.join(",")} (unknown runner: ${runner})`);
+            continue;
+          }
+          for (const env of envs) {
+            const ok = dispatchWorkflow(workflowFile, process.env.GITHUB_REF_NAME || "main", {
+              force_suite: suite.id,
+              force_env: env,
             });
-            dispatched++;
-            await sleep(1000);
-          } else {
-            errors.push(env);
+            if (ok) {
+              const runId = makeRunId(suite.id, env, runner);
+              const envInfo = ENV_MAP[env] || { id: "qa_staging", target: "QA", network: "staging" };
+
+              // Wait for GH to index, then find workflowRunId
+              await sleep(2000);
+              const latest = findLatestDispatch(workflowFile, suite.id, env);
+
+              runs.unshift({
+                id: runId,
+                label: `${suite.name} — ${env} (${runner})`,
+                suiteId: suite.id,
+                envId: envInfo.id,
+                status: "RUNNING",
+                conditions: initialRunConditions(),
+                passPct: 0,
+                failures: 0,
+                duration: "\u2014",
+                durationMs: 0,
+                started: timestamp,
+                build: (process.env.GITHUB_SHA || "?").slice(0, 7),
+                rev: process.env.GITHUB_SHA || "?",
+                env: envInfo.target,
+                network: envInfo.network,
+                workflowRunId: latest?.databaseId || null,
+              });
+              dispatched++;
+              await sleep(1000);
+            } else {
+              errors.push(env);
+            }
           }
         }
         writeRuns(RUNS_FILE, runs);
@@ -304,6 +319,7 @@ async function main() {
         }
 
         if (dispatched > 0) {
+          const runnerWorkflows = [...new Set((suite.runners || ["playwright", "pytest"]).map(r => WORKFLOW_MAP[r] || r))];
           dispatchResults.push({
             timestamp,
             suite: suite.id,
@@ -311,7 +327,7 @@ async function main() {
             dispatched,
             failed: errors.length,
             errors: errors.length > 0 ? errors : undefined,
-            workflow: WORKFLOW_FILE,
+            workflows: runnerWorkflows,
           });
         }
       }

@@ -29,6 +29,7 @@ import {
   TestHistoryStrip,
 } from "@/components/aware/HistoryTimeline";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ZoomableImage } from "@/components/aware/ZoomableImage";
 
 function AssertionRow({ a }: { a: TestAssertionResult }) {
   return (
@@ -279,13 +280,7 @@ function LazyGalleryImage({ source }: { source: string }) {
       </div>
     );
   }
-  return (
-    <img
-      src={url}
-      alt=""
-      style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 4, display: "block" }}
-    />
-  );
+  return <ZoomableImage src={url} alt="" />;
 }
 
 function GalleryImage({
@@ -354,11 +349,7 @@ function GalleryImage({
         </button>
       )}
       {source.startsWith("data:") ? (
-        <img
-          src={source}
-          alt={frame.label}
-          style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 4, display: "block" }}
-        />
+        <ZoomableImage src={source} alt={frame.label} />
       ) : (
         <LazyGalleryImage source={source} />
       )}
@@ -591,132 +582,132 @@ export default function RunDetail() {
               <div style={{ padding: "6px 14px", borderBottom: "1px solid var(--proof-grey)" }}>
                 <TimeWindowControls />
               </div>
-            <div style={{ flex: 1, overflowY: "auto" }}>
-              <table className="proof-table">
-                <thead>
-                  <tr>
-                    <th>Test Name</th>
-                    <th>Status</th>
-                    <th>Category</th>
-                    <th style={{ width: 200, whiteSpace: "nowrap" }}>History</th>
-                    <th style={{ textAlign: "right" }}>Duration</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pagedResults.map((r) => (
-                    <tr
-                      key={r.id}
-                      onClick={() =>
-                        setSelectedResultSyncUrl(selectedResult?.id === r.id ? null : r)
-                      }
-                      style={{
-                        cursor: "pointer",
-                        background:
-                          selectedResult?.id === r.id
-                            ? "var(--proof-blue-bg)"
-                            : r.status === "FAIL"
-                              ? "rgba(217,48,37,0.03)"
-                              : undefined,
-                        outline:
-                          selectedResult?.id === r.id
-                            ? "2px solid var(--proof-blue) inset"
-                            : undefined,
-                      }}
-                    >
-                      <td
+              <div style={{ flex: 1, overflowY: "auto" }}>
+                <table className="proof-table">
+                  <thead>
+                    <tr>
+                      <th>Test Name</th>
+                      <th>Status</th>
+                      <th>Category</th>
+                      <th style={{ width: 200, whiteSpace: "nowrap" }}>History</th>
+                      <th style={{ textAlign: "right" }}>Duration</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pagedResults.map((r) => (
+                      <tr
+                        key={r.id}
+                        onClick={() =>
+                          setSelectedResultSyncUrl(selectedResult?.id === r.id ? null : r)
+                        }
                         style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 11,
+                          cursor: "pointer",
+                          background:
+                            selectedResult?.id === r.id
+                              ? "var(--proof-blue-bg)"
+                              : r.status === "FAIL"
+                                ? "rgba(217,48,37,0.03)"
+                                : undefined,
+                          outline:
+                            selectedResult?.id === r.id
+                              ? "2px solid var(--proof-blue) inset"
+                              : undefined,
                         }}
                       >
-                        {r.name}
-                      </td>
-                      <td>
-                        <span
-                          className={`proof-badge ${r.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                        >
-                          {r.status}
-                        </span>
-                      </td>
-                      <td>
-                        <span
+                        <td
                           style={{
+                            fontFamily: "var(--font-mono)",
                             fontSize: 11,
-                            background: "var(--proof-grey-bg)",
-                            padding: "2px 7px",
-                            borderRadius: 4,
-                            border: "1px solid var(--proof-grey)",
                           }}
                         >
-                          {r.category}
-                        </span>
-                      </td>
-                      <td style={{ width: 200, whiteSpace: "nowrap" }}>
-                        <TestHistoryStrip testName={r.name} currentRunId={runId} />
-                      </td>
-                      <td
-                        style={{
-                          textAlign: "right",
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 11,
-                          color: "var(--proof-text-secondary)",
-                        }}
-                      >
-                        {r.duration}ms
-                      </td>
-                      <td onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => navigate(`/trends?testId=${r.id}`)}
-                          className="proof-button proof-button-xs"
-                          style={{ padding: "2px 7px" }}
+                          {r.name}
+                        </td>
+                        <td>
+                          <span
+                            className={`proof-badge ${r.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
+                          >
+                            {r.status}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            style={{
+                              fontSize: 11,
+                              background: "var(--proof-grey-bg)",
+                              padding: "2px 7px",
+                              borderRadius: 4,
+                              border: "1px solid var(--proof-grey)",
+                            }}
+                          >
+                            {r.category}
+                          </span>
+                        </td>
+                        <td style={{ width: 200, whiteSpace: "nowrap" }}>
+                          <TestHistoryStrip testName={r.name} currentRunId={runId} />
+                        </td>
+                        <td
+                          style={{
+                            textAlign: "right",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 11,
+                            color: "var(--proof-text-secondary)",
+                          }}
                         >
-                          Analytics
-                        </button>
-                        <button
-                          onClick={() => navigate(`/tests?q=${r.id}`)}
-                          className="proof-button proof-button-xs"
-                          style={{ padding: "2px 7px", marginLeft: 4 }}
-                        >
-                          <FileText size={10} /> Def
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {totalPages > 1 && (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 12,
-                    padding: "8px 14px",
-                    borderTop: "1px solid var(--proof-border)",
-                    fontSize: 12,
-                  }}
-                >
-                  <button
-                    disabled={page === 0}
-                    onClick={() => setPage((p) => Math.max(0, p - 1))}
-                    className="proof-button proof-button-xs"
+                          {r.duration}ms
+                        </td>
+                        <td onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => navigate(`/trends?testId=${r.id}`)}
+                            className="proof-button proof-button-xs"
+                            style={{ padding: "2px 7px" }}
+                          >
+                            Analytics
+                          </button>
+                          <button
+                            onClick={() => navigate(`/tests?q=${r.id}`)}
+                            className="proof-button proof-button-xs"
+                            style={{ padding: "2px 7px", marginLeft: 4 }}
+                          >
+                            <FileText size={10} /> Def
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {totalPages > 1 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 12,
+                      padding: "8px 14px",
+                      borderTop: "1px solid var(--proof-border)",
+                      fontSize: 12,
+                    }}
                   >
-                    Prev
-                  </button>
-                  <span style={{ color: "var(--proof-text-secondary)" }}>
-                    Page {page + 1} of {totalPages}
-                  </span>
-                  <button
-                    disabled={page >= totalPages - 1}
-                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                    className="proof-button proof-button-xs"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </div>
+                    <button
+                      disabled={page === 0}
+                      onClick={() => setPage((p) => Math.max(0, p - 1))}
+                      className="proof-button proof-button-xs"
+                    >
+                      Prev
+                    </button>
+                    <span style={{ color: "var(--proof-text-secondary)" }}>
+                      Page {page + 1} of {totalPages}
+                    </span>
+                    <button
+                      disabled={page >= totalPages - 1}
+                      onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                      className="proof-button proof-button-xs"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </div>
             </TimeWindowProvider>
           </div>
         </PanelErrorBoundary>

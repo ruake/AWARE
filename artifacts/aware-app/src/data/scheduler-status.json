@@ -11,7 +11,7 @@
       "due": false,
       "lastDispatched": "2026-06-12T06:00:01.000Z",
       "lastConclusion": "success",
-      "lastRunUrl": "https://github.com/your-org/your-repo/actions/runs/123",
+      "lastRunUrl": "https://github.com/ruake/AWARE/actions/runs/123",
       "activeRuns": 0,
       "status": "idle",
       "nextDue": "2026-06-12T08:00:00.000Z",

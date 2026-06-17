@@ -9,14 +9,7 @@ import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEn
 import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import type { Run } from "@/lib/types";
-import {
-  Play,
-  GitCompare,
-  Globe,
-  Network,
-  Loader2,
-  ExternalLink,
-} from "lucide-react";
+import { Play, GitCompare, Globe, Network, Loader2, ExternalLink } from "lucide-react";
 
 const STATUS_CONFIG: Record<
   Run["status"],
@@ -345,7 +338,9 @@ export default function Runs() {
               onClick={(e) => {
                 e.stopPropagation();
                 const allRuns = getRuns();
-                const latestRun = [...allRuns].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())[0];
+                const latestRun = [...allRuns].sort(
+                  (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
+                )[0];
                 navigate(`/compare?baseline=${latestRun?.id ?? ""}&candidate=${run.id}`);
               }}
               className="proof-button proof-button-xs"
@@ -359,11 +354,17 @@ export default function Runs() {
     },
   ];
 
-  const failCount = envFilteredRuns.filter((r) => ["FAIL", "PARTIAL", "ERROR", "FLAKY"].includes(r.status)).length;
+  const failCount = envFilteredRuns.filter((r) =>
+    ["FAIL", "PARTIAL", "ERROR", "FLAKY"].includes(r.status),
+  ).length;
   const runningCount = envFilteredRuns.filter((r) => r.status === "RUNNING").length;
   const pageTitle = "Activity & Runs";
   const pageSubtitle = `${total} runs${envSnap.envIds.length > 0 ? " (env filtered)" : ""} · ${
-    runningCount > 0 ? `${runningCount} running` : failCount > 0 ? `${failCount} failed` : "all passing"
+    runningCount > 0
+      ? `${runningCount} running`
+      : failCount > 0
+        ? `${failCount} failed`
+        : "all passing"
   }`;
 
   return (
@@ -371,7 +372,15 @@ export default function Runs() {
       title={pageTitle}
       subtitle={pageSubtitle}
       headerActions={
-        <button onClick={() => window.open("https://github.com/your-org/your-repo/actions/workflows/run-tests.yml", "_blank")} className="proof-button-primary">
+        <button
+          onClick={() =>
+            window.open(
+              "https://github.com/ruake/AWARE/actions/workflows/run-tests.yml",
+              "_blank",
+            )
+          }
+          className="proof-button-primary"
+        >
           <Play size={14} /> Start New Run <ExternalLink size={11} style={{ opacity: 0.7 }} />
         </button>
       }

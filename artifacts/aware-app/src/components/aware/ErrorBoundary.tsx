@@ -18,8 +18,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
     this.state = { error: null, retryKey: 0 };
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return { error, retryKey: 0 };
+  static getDerivedStateFromError(error: Error): Partial<State> {
+    return { error };
   }
 
   handleRetry = () => {

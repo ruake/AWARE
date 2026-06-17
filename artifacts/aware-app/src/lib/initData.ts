@@ -54,9 +54,10 @@ export async function loadAllData(): Promise<void> {
     safeLoad(loadSchedulerStatus, "scheduler"),
     safeLoad(loadAutoDiscoveredTests, "discovery"),
   ]);
-  recomputeAll();
-  _loaded = true;
-  if (errors.length > 0) {
+  if (errors.length === 0) {
+    recomputeAll();
+    _loaded = true;
+  } else {
     _error = errors.join("; ");
     console.error("Data load errors:", errors);
   }

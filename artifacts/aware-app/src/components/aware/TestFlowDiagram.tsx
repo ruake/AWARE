@@ -465,9 +465,7 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
               <Pill label="Capture" value="On Failure" color="var(--proof-yellow)" />
             )}
             <Pill label="Max" value={`${testCase.filmstrip.maxFrames} frames`} />
-            {testCase.filmstrip.region && (
-              <Pill label="Region" value={testCase.filmstrip.region} />
-            )}
+            {testCase.filmstrip.region && <Pill label="Region" value={testCase.filmstrip.region} />}
             {testCase.filmstrip.ignoreAreas && testCase.filmstrip.ignoreAreas.length > 0 && (
               <Pill label="Ignores" value={`${testCase.filmstrip.ignoreAreas.length} areas`} />
             )}

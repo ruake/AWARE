@@ -18,13 +18,19 @@ export function dataUrl(path: string): string {
   return rawUrl(path);
 }
 
-export async function fetchJson<T>(path: string): Promise<T> {
+export async function fetchJson<T>(path: string, timeoutMs = 15000): Promise<T> {
   const url = dataUrl(path);
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+    }
+    return res.json() as Promise<T>;
+  } finally {
+    clearTimeout(timeout);
   }
-  return res.json() as Promise<T>;
 }
 
 export async function fetchBlob(path: string): Promise<Blob> {

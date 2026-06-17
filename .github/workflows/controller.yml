@@ -85,9 +85,8 @@ jobs:
 
       - name: Validate ConfigMap
         run: |
-          node scripts/validate-config.mjs --warn-only 2>/dev/null || \
+          node scripts/validate-config.mjs --warn-only || \
           echo "::warning::Config validation warnings — run validate.yml for details"
-        working-directory: artifacts/aware-app
 
       - name: Reconcile desired vs actual state
         id: reconcile
