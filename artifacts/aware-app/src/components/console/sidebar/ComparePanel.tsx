@@ -1,7 +1,7 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useSyncedUrlState } from "@/lib/urlState";
-import { RUNS, DIFF_ROWS, getRunsByEnv } from "@/lib/data";
+import { subscribeToRuns, getRuns, subscribeToDiffRows, getDiffRows } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { getCompareStats, subscribeToSidebarData } from "@/lib/sidebarData";
 import { CompareRunSelector } from "@/components/aware/CompareRunSelector";
@@ -44,16 +44,20 @@ export function ComparePanel() {
   const [, navigate] = useLocation();
   const { show } = { show: copy };
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
-  const envRuns = envSnap.envIds.length > 0 ? getRunsByEnv(envSnap.envIds) : RUNS;
+  const runs = useSyncExternalStore(subscribeToRuns, getRuns);
+  const diffs = useSyncExternalStore(subscribeToDiffRows, getDiffRows);
+  const envRuns = envSnap.envIds.length > 0 ? runs.filter((r) => envSnap.envIds.includes(r.envId)) : runs;
 
-  const [baseline, setBaseline] = useSyncedUrlState("baseline", envRuns[envRuns.length - 1]?.id ?? "");
-  const [candidate, setCandidate] = useSyncedUrlState("candidate", envRuns[0]?.id ?? "");
+  const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
+  const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
   const [swapped, setSwapped] = React.useState(false);
 
-  const baselineRun = RUNS.find((r) => r.id === baseline);
-  const candidateRun = RUNS.find((r) => r.id === candidate);
+  // Derive effective run IDs: use URL param if set, otherwise pick from envRuns
+  const effectiveBaseline = baseline || envRuns[envRuns.length - 1]?.id || "";
+  const effectiveCandidate = candidate || envRuns[0]?.id || "";
+  const baselineRun = runs.find((r) => r.id === effectiveBaseline);
+  const candidateRun = runs.find((r) => r.id === effectiveCandidate);
 
-  const diffs = DIFF_ROWS;
   const regressions = diffs.filter((d) => d.state === "regression");
   const fixed = diffs.filter((d) => d.state === "fixed");
   const duration = diffs.filter((d) => d.state === "duration");
@@ -69,11 +73,11 @@ export function ComparePanel() {
           <span style={{ fontSize: 9, fontWeight: 600, color: "var(--proof-blue)", textTransform: "uppercase", letterSpacing: "0.3px", flex: 1, textAlign: "right" }}>Candidate</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <select value={baseline} onChange={(e) => { setBaseline(e.target.value); setSwapped(false); }} style={{ flex: 1, fontSize: 10, padding: "3px 5px", border: "1px solid var(--proof-border)", borderRadius: 3, background: "var(--proof-surface)", color: "var(--proof-text)", minWidth: 0 }}>
+          <select value={effectiveBaseline} onChange={(e) => { setBaseline(e.target.value); setSwapped(false); }} style={{ flex: 1, fontSize: 10, padding: "3px 5px", border: "1px solid var(--proof-border)", borderRadius: 3, background: "var(--proof-surface)", color: "var(--proof-text)", minWidth: 0 }}>
             {envRuns.map((r) => <option key={r.id} value={r.id}>{r.label || r.id}</option>)}
           </select>
-          <button onClick={() => { const t = baseline; setBaseline(candidate); setCandidate(t); setSwapped(false); }} style={{ border: "1px solid var(--proof-border)", background: "var(--proof-surface)", cursor: "pointer", padding: "2px 5px", borderRadius: 3, color: "var(--proof-text-secondary)", fontSize: 10, flexShrink: 0 }}>⇄</button>
-          <select value={candidate} onChange={(e) => { setCandidate(e.target.value); setSwapped(false); }} style={{ flex: 1, fontSize: 10, padding: "3px 5px", border: "1px solid var(--proof-border)", borderRadius: 3, background: "var(--proof-surface)", color: "var(--proof-text)", minWidth: 0 }}>
+          <button onClick={() => { const t = effectiveBaseline; setBaseline(effectiveCandidate); setCandidate(t); setSwapped(false); }} style={{ border: "1px solid var(--proof-border)", background: "var(--proof-surface)", cursor: "pointer", padding: "2px 5px", borderRadius: 3, color: "var(--proof-text-secondary)", fontSize: 10, flexShrink: 0 }}>⇄</button>
+          <select value={effectiveCandidate} onChange={(e) => { setCandidate(e.target.value); setSwapped(false); }} style={{ flex: 1, fontSize: 10, padding: "3px 5px", border: "1px solid var(--proof-border)", borderRadius: 3, background: "var(--proof-surface)", color: "var(--proof-text)", minWidth: 0 }}>
             {envRuns.map((r) => <option key={r.id} value={r.id}>{r.label || r.id}</option>)}
           </select>
         </div>

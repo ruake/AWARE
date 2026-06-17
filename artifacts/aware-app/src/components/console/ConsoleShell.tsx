@@ -88,8 +88,18 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  // Auto-hide sidebar on About (no useful sidebar context there)
+  React.useEffect(() => {
+    if (currentActivity === "about") {
+      setSidebarVisible(false);
+    }
+  }, [currentActivity]);
+
   const handleActivityClick = (item: (typeof ACTIVITY_ITEMS)[number]) => {
-    if (item.id === currentActivity && sidebarVisible) {
+    if (item.id === "about") {
+      navigate(item.href);
+      setSidebarVisible(false);
+    } else if (item.id === currentActivity && sidebarVisible) {
       setSidebarVisible(false);
     } else {
       setSidebarVisible(true);
