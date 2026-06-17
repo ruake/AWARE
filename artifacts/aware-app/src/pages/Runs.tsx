@@ -4,7 +4,7 @@ import { Link, useLocation } from "wouter";
 import { ConsoleCard, ConsolePagination, PageShell } from "@/components/console";
 import { DataTable, type ColumnDef } from "@/components/console/DataTable";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
-import { RUNS, getRunsByEnv } from "@/lib/data";
+import { RUNS, getRuns, getRunsByEnv } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
@@ -15,6 +15,7 @@ import {
   Globe,
   Network,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 
 const STATUS_CONFIG: Record<
@@ -343,7 +344,9 @@ export default function Runs() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/compare?baseline=${RUNS[RUNS.length - 1]?.id}&candidate=${run.id}`);
+                const allRuns = getRuns();
+                const latestRun = [...allRuns].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())[0];
+                navigate(`/compare?baseline=${latestRun?.id ?? ""}&candidate=${run.id}`);
               }}
               className="proof-button proof-button-xs"
               style={{ display: "flex", alignItems: "center", gap: 3 }}
@@ -356,18 +359,20 @@ export default function Runs() {
     },
   ];
 
+  const failCount = envFilteredRuns.filter((r) => ["FAIL", "PARTIAL", "ERROR", "FLAKY"].includes(r.status)).length;
+  const runningCount = envFilteredRuns.filter((r) => r.status === "RUNNING").length;
   const pageTitle = "Activity & Runs";
-  const pageSubtitle = `${total} runs${
-    envSnap.envIds.length > 0 ? " (env filtered)" : ""
-  } · all completed`;
+  const pageSubtitle = `${total} runs${envSnap.envIds.length > 0 ? " (env filtered)" : ""} · ${
+    runningCount > 0 ? `${runningCount} running` : failCount > 0 ? `${failCount} failed` : "all passing"
+  }`;
 
   return (
     <PageShell
       title={pageTitle}
       subtitle={pageSubtitle}
       headerActions={
-        <button onClick={() => navigate("/start")} className="proof-button-primary">
-          <Play size={14} /> Start New Run
+        <button onClick={() => window.open("https://github.com/your-org/your-repo/actions/workflows/run-tests.yml", "_blank")} className="proof-button-primary">
+          <Play size={14} /> Start New Run <ExternalLink size={11} style={{ opacity: 0.7 }} />
         </button>
       }
     >

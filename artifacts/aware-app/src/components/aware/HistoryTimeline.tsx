@@ -172,7 +172,7 @@ interface DotData {
   date: string;
 }
 
-export function TestHistoryStrip({ testName }: { testName: string }) {
+export function TestHistoryStrip({ testName, currentRunId }: { testName: string; currentRunId?: string }) {
   const [, navigate] = useLocation();
   const { window } = useTimeWindow();
 
@@ -232,9 +232,16 @@ export function TestHistoryStrip({ testName }: { testName: string }) {
     );
   }
 
-  const MAX_VISIBLE = Math.min(groups.length, 15);
-  const visible = groups.slice(0, MAX_VISIBLE);
-  const extra = groups.length - MAX_VISIBLE;
+  // Center on current run, show ~7 before and ~7 after
+  const centerIdx = currentRunId
+    ? groups.findIndex((g) => g.items.some((i) => i.runId === currentRunId))
+    : -1;
+  const half = 7;
+  const startIdx = centerIdx >= 0 ? Math.max(0, centerIdx - half) : Math.max(0, groups.length - 15);
+  const endIdx = centerIdx >= 0 ? Math.min(groups.length, centerIdx + half + 1) : groups.length;
+  const visible = groups.slice(startIdx, endIdx);
+  const hasOlder = startIdx > 0;
+  const hasNewer = endIdx < groups.length;
 
   return (
     <div
@@ -249,6 +256,9 @@ export function TestHistoryStrip({ testName }: { testName: string }) {
       }}
       onClick={(e) => e.stopPropagation()}
     >
+      {hasOlder && (
+        <span style={{ fontSize: 7, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", marginRight: 1 }}>◀</span>
+      )}
       {visible.map((g) => {
         const pct = g.items.filter((i) => i.status === "PASS").length / g.items.length;
         const allPass = pct === 1;
@@ -262,7 +272,7 @@ export function TestHistoryStrip({ testName }: { testName: string }) {
               g.items
                 .map(
                   (i) =>
-                    `  ${i.status} · ${i.runId}${i.runId ? " · " + new Date(i.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}`,
+                    `  ${i.status} · ${new Date(i.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
                 )
                 .join("\n")
             }
@@ -287,19 +297,6 @@ export function TestHistoryStrip({ testName }: { testName: string }) {
               e.currentTarget.style.transform = "scale(1)";
             }}
           >
-            {/* Date label */}
-            <span
-              style={{
-                fontSize: 8,
-                fontWeight: 600,
-                color: "var(--proof-text-muted)",
-                fontFamily: "var(--font-mono)",
-                marginRight: 1,
-                lineHeight: "12px",
-              }}
-            >
-              {g.day.slice(5)} {/* MM-DD */}
-            </span>
             {/* Dot */}
             {isDense ? (
               <span
@@ -325,34 +322,21 @@ export function TestHistoryStrip({ testName }: { testName: string }) {
               >
                 {g.items.length}
               </span>
-            ) : (
-              <span
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  background:
-                    g.items[0].status === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
-                  flexShrink: 0,
-                  border: "1px solid rgba(0,0,0,0.25)",
-                }}
-              />
-            )}
+            ) : (() => {
+              const color = g.items[0].status === "PASS" ? "var(--proof-green)" : "var(--proof-red)";
+              const isSelected = currentRunId && g.items[0].runId === currentRunId;
+              return (
+                <div style={{ position: "relative", width: isSelected ? 18 : 10, height: isSelected ? 18 : 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {isSelected && <div style={{ position: "absolute", width: 16, height: 16, borderRadius: "50%", border: `2px solid ${color}`, background: "transparent", boxSizing: "border-box" }} />}
+                  <div style={{ width: isSelected ? 8 : 10, height: isSelected ? 8 : 10, borderRadius: "50%", background: color, flexShrink: 0, border: "1px solid rgba(0,0,0,0.25)" }} />
+                </div>
+              );
+            })()}
           </div>
         );
       })}
-      {extra > 0 && (
-        <span
-          style={{
-            fontSize: 8,
-            color: "var(--proof-text-muted)",
-            fontFamily: "var(--font-mono)",
-            marginLeft: 2,
-          }}
-          title={`${extra} more days in this window`}
-        >
-          +{extra}d
-        </span>
+      {hasNewer && (
+        <span style={{ fontSize: 7, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", marginLeft: 1 }}>▶</span>
       )}
     </div>
   );

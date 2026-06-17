@@ -9,7 +9,8 @@ function readParam<T>(key: string, defaultValue: T): T {
   try {
     return JSON.parse(raw) as T;
   } catch {
-    return defaultValue;
+    // Not valid JSON — treat as plain string (setter stores strings as-is)
+    return raw as unknown as T;
   }
 }
 
@@ -33,8 +34,11 @@ export function useSyncedUrlState<T>(
     return () => window.removeEventListener(SYNC_EVENT, handler);
   }, [key, defaultValue]);
 
+  const scheduleSync = React.useRef(false);
+
   const setSynced = React.useCallback(
     (val: T | ((prev: T) => T)) => {
+      scheduleSync.current = true;
       setState((prev) => {
         const next = typeof val === "function" ? (val as (prev: T) => T)(prev) : val;
         const url = new URL(window.location.href);
@@ -52,12 +56,19 @@ export function useSyncedUrlState<T>(
           url.searchParams.set(key, typeof next === "string" ? next : JSON.stringify(next));
         }
         window.history.replaceState({}, "", url.toString());
-        triggerSync();
         return next;
       });
     },
     [key, defaultValue],
   );
+
+  // Fire sync event after commit so other components see the new URL
+  React.useEffect(() => {
+    if (scheduleSync.current) {
+      scheduleSync.current = false;
+      triggerSync();
+    }
+  });
 
   return [state, setSynced];
 }

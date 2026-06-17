@@ -1,10 +1,12 @@
 import React, { useSyncExternalStore } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { useSyncedUrlState } from "@/lib/urlState";
-import { DIFF_ROWS, RUNS, getTestResultsForRun, getTestDetailsAsync } from "@/lib/data";
+import { DIFF_ROWS, RUNS, getTestResultsForRun, getTestDetailsAsync, computeRunFrequency, subscribeToRuns, getRuns } from "@/lib/data";
 import { getTestDetailStat, subscribeToSidebarData } from "@/lib/sidebarData";
 import { useTestData } from "@/hooks/useTestData";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
+import { detectAnomalies } from "@/lib/anomalyDetection";
+import { getTestDetailsSync } from "@/lib/runsLoader";
 import { ArrowLeft, ChevronRight, Search, FileText, Share2, AlertTriangle, X } from "lucide-react";
 
 function selectorLabel(item: { id: string; name: string }, query: string): React.ReactNode {
@@ -161,6 +163,48 @@ function TrendAlert() {
   );
 }
 
+function TrendsOverviewStats() {
+  const [, navigate] = useLocation();
+  const runs = useSyncExternalStore(subscribeToRuns, getRuns);
+
+  const freq = React.useMemo(() => computeRunFrequency(), [runs.length]);
+  const avgPassRate = React.useMemo(() => {
+    if (runs.length === 0) return 0;
+    return Math.round(runs.reduce((s, r) => s + r.passPct, 0) / runs.length);
+  }, [runs]);
+  const flakyCount = React.useMemo(() => {
+    try { return getTestDetailsSync().filter((d) => d.flakinessScore > 20).length; }
+    catch { return 0; }
+  }, [runs.length]);
+  const anomalyCount = React.useMemo(() => {
+    try { return detectAnomalies().filter((a) => a.severity !== "low").length; }
+    catch { return 0; }
+  }, [runs.length]);
+
+  const items = [
+    { label: "Total Runs", value: freq.totalRuns.toLocaleString(), color: "var(--proof-blue)", onClick: () => navigate("/runs") },
+    { label: "Avg Pass Rate", value: `${avgPassRate}%`, color: avgPassRate >= 85 ? "var(--proof-green)" : "var(--proof-yellow)", onClick: () => navigate("/runs") },
+    { label: "Days", value: `${freq.daysCovered}d`, color: "var(--proof-text-secondary)", onClick: () => navigate("/trends") },
+    { label: "Flaky Tests", value: flakyCount.toString(), color: flakyCount > 0 ? "var(--proof-yellow)" : "var(--proof-text-muted)", onClick: flakyCount > 0 ? () => navigate("/trends") : undefined },
+    { label: "Anomalies", value: anomalyCount.toString(), color: anomalyCount > 0 ? "var(--proof-red)" : "var(--proof-green)", onClick: anomalyCount > 0 ? () => navigate("/trends") : undefined },
+  ];
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, padding: "8px 10px", borderBottom: "1px solid var(--proof-border)" }}>
+      {items.map((item) => (
+        <div key={item.label} onClick={item.onClick}
+          style={{ padding: "5px 7px", borderRadius: 3, background: "var(--proof-hover-light)", display: "flex", flexDirection: "column", gap: 1, cursor: item.onClick ? "pointer" : "default", transition: "background 0.1s" }}
+          onMouseEnter={(e) => { if (item.onClick) (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover-light)"; }}
+        >
+          <span style={{ fontSize: 14, fontWeight: 700, fontFamily: "var(--font-mono)", color: item.color, lineHeight: 1.2 }}>{item.value}</span>
+          <span style={{ fontSize: 8, color: "var(--proof-text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>{item.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function TestDetailSummary() {
   const search = useSearch();
   const params = new URLSearchParams(search);
@@ -171,15 +215,15 @@ function TestDetailSummary() {
   if (!testId || !detail) {
     return (
       <div style={{ padding: "12px 10px", fontSize: 11, color: "var(--proof-text-secondary)", textAlign: "center", lineHeight: 1.5 }}>
-        Select a test from the Trends page to view pass rate history, assertion trends, and flakiness.
+        Select a test to view pass rate history, assertion trends, and flakiness.
       </div>
     );
   }
 
   const items = [
     { label: "Pass Rate", value: `${detail.passRate}%`, color: "var(--proof-blue)", onClick: () => navigate(`/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}`) },
-    { label: "Flakiness", value: `${detail.flakinessScore}%`, color: detail.flakinessScore > 20 ? "var(--proof-yellow)" : "var(--proof-green)" },
-    { label: "Avg Duration", value: `${detail.avgDuration}ms`, color: "var(--proof-green)" },
+    { label: "Flakiness", value: `${detail.flakinessScore}%`, color: detail.flakinessScore > 20 ? "var(--proof-yellow)" : "var(--proof-green)", onClick: () => navigate(`/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}`) },
+    { label: "Avg Duration", value: `${detail.avgDuration}ms`, color: "var(--proof-green)", onClick: () => navigate(`/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}`) },
     { label: "Failures", value: detail.failCount.toString(), color: detail.failCount > 0 ? "var(--proof-red)" : "var(--proof-text-muted)", onClick: detail.failCount > 0 ? () => navigate(`/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}&hStatus=FAIL`) : undefined, active: hStatus === "FAIL" },
   ];
 
@@ -201,6 +245,7 @@ function TestDetailSummary() {
 export function TrendsPanel() {
   return (
     <>
+      <TrendsOverviewStats />
       <TestDetailSummary />
       <TestSelector />
       <TestHeader />

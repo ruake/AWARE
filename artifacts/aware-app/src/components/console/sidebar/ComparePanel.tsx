@@ -2,12 +2,35 @@ import React, { useSyncExternalStore } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { subscribeToRuns, getRuns, subscribeToDiffRows, getDiffRows } from "@/lib/data";
-import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
+import { getSelectedEnvSnapshot, subscribeToSelectedEnv, setSelectedEnvIds } from "@/lib/selectedEnv";
 import { getCompareStats, subscribeToSidebarData } from "@/lib/sidebarData";
-import { CompareRunSelector } from "@/components/aware/CompareRunSelector";
+import { EnvSelector } from "@/components/console/EnvSelector";
 import { Link2, Share2, Github, Zap, ExternalLink } from "lucide-react";
 
 function copy(text: string) { navigator.clipboard.writeText(text).catch(() => {}); }
+
+function StatCard({ stat, activeFilter, baseline, candidate }: { stat: { label: string; value: string | number; color: string; key: string; count: number }; activeFilter: string | null; baseline: string; candidate: string }) {
+  const [, navigate] = useLocation();
+  const isActive = stat.key === activeFilter;
+  const maxVal = Math.max(stat.count, 1);
+  const barWidth = ["total", "passRateDelta"].includes(stat.key) ? undefined : `${Math.min(100, Math.round((stat.count / maxVal) * 100))}%`;
+
+  return (
+    <div onClick={() => navigate(`/compare?baseline=${baseline}&candidate=${candidate}&filter=${isActive ? "" : stat.key}`)}
+      style={{ padding: "5px 7px", borderRadius: 3, background: isActive ? "var(--proof-hover)" : "var(--proof-hover-light)", display: "flex", flexDirection: "column", gap: 1, cursor: "pointer", transition: "background 0.1s", border: isActive ? `1px solid ${stat.color}40` : "1px solid transparent" }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = isActive ? "var(--proof-hover)" : "var(--proof-hover-light)"; }}
+    >
+      <span style={{ fontSize: 14, fontWeight: 700, fontFamily: "var(--font-mono)", color: stat.color, lineHeight: 1.2 }}>{stat.value}</span>
+      <span style={{ fontSize: 8, color: "var(--proof-text-muted)", textTransform: "uppercase", letterSpacing: "0.3px" }}>{stat.label}</span>
+      {barWidth && (
+        <div style={{ marginTop: 2, height: 3, borderRadius: 99, background: "var(--proof-bar-track)", overflow: "hidden" }}>
+          <div style={{ width: barWidth, height: "100%", borderRadius: 99, background: stat.color, transition: "width 0.3s" }} />
+        </div>
+      )}
+    </div>
+  );
+}
 
 function CompareStatSummary() {
   const [, navigate] = useLocation();
@@ -26,16 +49,26 @@ function CompareStatSummary() {
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, padding: "8px 10px", borderBottom: "1px solid var(--proof-border)" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 3, padding: "6px 8px", borderBottom: "1px solid var(--proof-border)" }}>
       {stats.map((s) => (
-        <div key={s.key} onClick={() => navigate(`/compare?baseline=${baseline}&candidate=${candidate}&filter=${s.key === activeFilter ? "" : s.key}`)} style={{ padding: "6px 8px", borderRadius: 3, background: s.key === activeFilter ? "var(--proof-hover)" : "var(--proof-hover-light)", display: "flex", flexDirection: "column", gap: 1, cursor: "pointer", transition: "background 0.1s", border: s.key === activeFilter ? `1px solid ${s.color}40` : "1px solid transparent" }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = s.key === activeFilter ? "var(--proof-hover)" : "var(--proof-hover-light)"; }}
-        >
-          <span style={{ fontSize: 15, fontWeight: 700, fontFamily: "var(--font-mono)", color: s.color, lineHeight: 1.2 }}>{s.value}</span>
-          <span style={{ fontSize: 8, color: "var(--proof-text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>{s.label}</span>
-        </div>
+        <StatCard key={s.key} stat={s} activeFilter={activeFilter} baseline={baseline!} candidate={candidate!} />
       ))}
+    </div>
+  );
+}
+
+function EnvTags({ baseline, candidate }: { baseline: string; candidate: string }) {
+  const envColor = (e: string) =>
+    e === "QA" ? { color: "var(--proof-purple)", bg: "var(--proof-purple-bg)" }
+    : e === "UAT" ? { color: "var(--proof-orange)", bg: "var(--proof-orange-bg)" }
+    : { color: "var(--proof-green)", bg: "var(--proof-green-bg)" };
+  const b = envColor(baseline);
+  const c_ = envColor(candidate);
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 6px", borderRadius: 3, fontSize: 9, fontWeight: 600, background: b.bg, border: `1px solid ${b.color}`, color: b.color }}>{baseline}</span>
+      <span style={{ fontSize: 9, color: "var(--proof-text-muted)" }}>vs</span>
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 6px", borderRadius: 3, fontSize: 9, fontWeight: 600, background: c_.bg, border: `1px solid ${c_.color}`, color: c_.color }}>{candidate}</span>
     </div>
   );
 }
@@ -64,6 +97,10 @@ export function ComparePanel() {
 
   return (
     <>
+      <div style={{ padding: "8px 10px", borderBottom: "1px solid var(--proof-border)" }}>
+        <EnvSelector currentEnvIds={envSnap.envIds} onEnvChange={setSelectedEnvIds} variant="topbar" />
+      </div>
+
       <CompareStatSummary />
 
       {/* Run selectors */}
@@ -74,13 +111,15 @@ export function ComparePanel() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <select value={effectiveBaseline} onChange={(e) => { setBaseline(e.target.value); setSwapped(false); }} style={{ flex: 1, fontSize: 10, padding: "3px 5px", border: "1px solid var(--proof-border)", borderRadius: 3, background: "var(--proof-surface)", color: "var(--proof-text)", minWidth: 0 }}>
-            {envRuns.map((r) => <option key={r.id} value={r.id}>{r.label || r.id}</option>)}
+            {envRuns.map((r) => <option key={r.id} value={r.id}>{r.env} · {r.label || r.id}</option>)}
           </select>
           <button onClick={() => { const t = effectiveBaseline; setBaseline(effectiveCandidate); setCandidate(t); setSwapped(false); }} style={{ border: "1px solid var(--proof-border)", background: "var(--proof-surface)", cursor: "pointer", padding: "2px 5px", borderRadius: 3, color: "var(--proof-text-secondary)", fontSize: 10, flexShrink: 0 }}>⇄</button>
           <select value={effectiveCandidate} onChange={(e) => { setCandidate(e.target.value); setSwapped(false); }} style={{ flex: 1, fontSize: 10, padding: "3px 5px", border: "1px solid var(--proof-border)", borderRadius: 3, background: "var(--proof-surface)", color: "var(--proof-text)", minWidth: 0 }}>
-            {envRuns.map((r) => <option key={r.id} value={r.id}>{r.label || r.id}</option>)}
+            {envRuns.map((r) => <option key={r.id} value={r.id}>{r.env} · {r.label || r.id}</option>)}
           </select>
         </div>
+        {/* Selected run env tags */}
+        {baselineRun && candidateRun && <EnvTags baseline={baselineRun.env} candidate={candidateRun.env} />}
       </div>
 
       {/* Share / Report buttons */}
