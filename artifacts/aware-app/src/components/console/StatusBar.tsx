@@ -1,29 +1,40 @@
 import React from "react";
-import { useSyncExternalStore } from "react";
-import { getRuns, subscribeToRuns } from "@/lib/runs";
-import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
-import { getSelectedSuiteSnapshot, subscribeToSelectedSuites } from "@/lib/filters";
+import { useRuns, useSelectedEnv } from "@/lib/hooks/useData";
 import { getEnvConfigs } from "@/lib/envConfig";
 
 export function StatusBar() {
-  const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
-  const suiteSnap = useSyncExternalStore(subscribeToSelectedSuites, getSelectedSuiteSnapshot);
+  const runs = useRuns();
+  const { envIds, isAll } = useSelectedEnv();
 
-  const runs = useSyncExternalStore(subscribeToRuns, getRuns);
   const totalRuns = runs.length;
   const envConfigs = getEnvConfigs();
-  const activeEnvLabels =
-    envSnap.envIds.length > 0
-      ? envConfigs
-          .filter((c) => envSnap.envIds.includes(c.id))
-          .map((c) => c.label)
-          .join(", ")
-      : "All environments";
 
-  const passPct =
-    totalRuns > 0 ? Math.round(runs.reduce((s, r) => s + (r.passPct ?? 0), 0) / totalRuns) : 0;
+  const activeEnvLabel = React.useMemo(() => {
+    if (isAll) return "All environments";
+    const labels = envConfigs
+      .filter((c) => envIds.includes(c.id))
+      .map((c) => c.label);
+    if (labels.length === 0) return "All environments";
+    if (labels.length === 1) return labels[0];
+    return `${labels[0]} + ${labels.length - 1} more`;
+  }, [envIds, isAll, envConfigs]);
 
-  const failedRuns = runs.filter((r) => (r.passPct ?? 100) < 90).length;
+  const passPct = React.useMemo(() => {
+    if (totalRuns === 0) return 0;
+    return Math.round(runs.reduce((s, r) => s + (r.passPct ?? 0), 0) / totalRuns);
+  }, [runs, totalRuns]);
+
+  const failedRuns = React.useMemo(
+    () => runs.filter((r) => (r.failures ?? 0) > 0).length,
+    [runs],
+  );
+
+  const statusColor =
+    passPct >= 95
+      ? "rgba(78,201,176,0.8)"
+      : passPct >= 80
+        ? "rgba(232,184,76,0.8)"
+        : "rgba(244,71,71,0.8)";
 
   return (
     <footer
@@ -34,50 +45,74 @@ export function StatusBar() {
         color: "var(--proof-status-bar-text)",
         display: "flex",
         alignItems: "center",
-        padding: "0 10px",
-        fontSize: 12,
-        gap: 12,
+        padding: "0 12px",
+        fontSize: 11.5,
+        gap: 0,
         flexShrink: 0,
         userSelect: "none",
         fontFamily: "var(--font-sans)",
       }}
     >
-      {/* Left section */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
-        <span style={{ opacity: 0.9 }}>{totalRuns} runs</span>
-        {suiteSnap.suiteIds.length > 0 && (
-          <span style={{ opacity: 0.7, fontSize: 11 }}>
-            {suiteSnap.suiteIds.length} suite{suiteSnap.suiteIds.length !== 1 ? "s" : ""}
-          </span>
-        )}
-      </div>
+      {/* Left: env filter context */}
+      <StatusItem>{activeEnvLabel}</StatusItem>
 
-      {/* Right section */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-        {passPct > 0 && (
-          <span style={{ opacity: 0.9, display: "flex", alignItems: "center", gap: 4 }}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background:
-                  passPct >= 95
-                    ? "var(--proof-green)"
-                    : passPct >= 80
-                      ? "var(--proof-yellow)"
-                      : "var(--proof-red)",
-                flexShrink: 0,
-              }}
-            />
-            {passPct}% pass
-          </span>
-        )}
-        {failedRuns > 0 && (
-          <span style={{ opacity: 0.9, color: "#ffb0b0" }}>{failedRuns} failed</span>
-        )}
-        <span style={{ opacity: 0.6, fontSize: 11 }}>{activeEnvLabels}</span>
-      </div>
+      <div style={{ flex: 1 }} />
+
+      {/* Right: aggregates */}
+      {totalRuns > 0 && (
+        <>
+          <StatusItem>
+            {totalRuns} run{totalRuns !== 1 ? "s" : ""}
+          </StatusItem>
+
+          {passPct > 0 && (
+            <StatusItem>
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: statusColor,
+                  display: "inline-block",
+                  flexShrink: 0,
+                }}
+              />
+              {passPct}% pass
+            </StatusItem>
+          )}
+
+          {failedRuns > 0 && (
+            <StatusItem style={{ color: "rgba(255,180,180,0.9)" }}>
+              {failedRuns} failed
+            </StatusItem>
+          )}
+        </>
+      )}
     </footer>
+  );
+}
+
+function StatusItem({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 5,
+        padding: "0 8px",
+        opacity: 0.9,
+        borderRight: "1px solid rgba(255,255,255,0.12)",
+        height: "100%",
+        ...style,
+      }}
+    >
+      {children}
+    </span>
   );
 }

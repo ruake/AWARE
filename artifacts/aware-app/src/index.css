@@ -10,228 +10,282 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   DESIGN TOKENS — VS Code Dark+ (default)
+   DESIGN TOKENS — Radically improved dark theme
+   Premium, modern, more breathing room, stronger hierarchy
    ═══════════════════════════════════════════════════════════════════ */
 :root {
-  /* Brand palette — VS Code blue */
+  /* ── Brand palette ─────────────────────────────────────── */
   --proof-blue: #007acc;
-  --proof-blue-bright: #1a8ad4;
+  --proof-blue-bright: #1e9aee;
   --proof-blue-hover: #006bb3;
-  --proof-blue-bg: rgba(0, 122, 204, 0.1);
-  --proof-blue-glow: rgba(0, 122, 204, 0.25);
+  --proof-blue-bg: rgba(0, 122, 204, 0.12);
+  --proof-blue-bg-strong: rgba(0, 122, 204, 0.18);
+  --proof-blue-glow: rgba(0, 122, 204, 0.3);
+  --proof-blue-border: rgba(0, 122, 204, 0.35);
+
+  /* Cyan / teal — success/healthy */
   --proof-cyan: #4ec9b0;
-  --proof-cyan-bg: rgba(78, 201, 176, 0.1);
+  --proof-cyan-bright: #72d9c5;
+  --proof-cyan-bg: rgba(78, 201, 176, 0.12);
   --proof-green: #4ec9b0;
-  --proof-green-bright: #6bdbbe;
-  --proof-green-bg: rgba(78, 201, 176, 0.1);
+  --proof-green-bright: #72d9c5;
+  --proof-green-bg: rgba(78, 201, 176, 0.12);
+  --proof-green-bg-strong: rgba(78, 201, 176, 0.2);
+  --proof-green-border: rgba(78, 201, 176, 0.3);
+  --proof-green-glow: rgba(78, 201, 176, 0.25);
+
+  /* Red — failure/critical */
   --proof-red: #f44747;
-  --proof-red-bright: #f66868;
+  --proof-red-bright: #f77070;
   --proof-red-bg: rgba(244, 71, 71, 0.1);
-  --proof-yellow: #d7ba7d;
-  --proof-yellow-bright: #e0c990;
-  --proof-yellow-bg: rgba(215, 186, 125, 0.1);
+  --proof-red-bg-strong: rgba(244, 71, 71, 0.16);
+  --proof-red-border: rgba(244, 71, 71, 0.3);
+  --proof-red-glow: rgba(244, 71, 71, 0.2);
+
+  /* Amber — degraded/warning */
+  --proof-yellow: #e8b84c;
+  --proof-yellow-bright: #f0cb72;
+  --proof-yellow-bg: rgba(232, 184, 76, 0.12);
+  --proof-yellow-bg-strong: rgba(232, 184, 76, 0.18);
+  --proof-yellow-border: rgba(232, 184, 76, 0.3);
+
+  /* Orange */
   --proof-orange: #cc7832;
-  --proof-orange-bright: #d98e4a;
+  --proof-orange-bright: #e09050;
   --proof-orange-bg: rgba(204, 120, 50, 0.1);
+
+  /* Purple / violet */
   --proof-purple: #c586c0;
   --proof-purple-bright: #d4a0ce;
   --proof-purple-bg: rgba(197, 134, 192, 0.1);
-  --proof-pink: #d16969;
-  --proof-pink-bg: rgba(209, 105, 105, 0.1);
 
-  /* Surfaces — VS Code Dark+ */
-  --proof-bg: #1e1e1e;
-  --proof-grey-bg: #1e1e1e;
-  --proof-surface: #252526;
-  --proof-surface-2: #2d2d2d;
-  --proof-surface-hover: #2a2d2e;
-  --proof-surface-3: #333333;
-  --proof-editor-bg: #1e1e1e;
-  --proof-sidebar-bg: #252526;
-  --proof-activity-bar-bg: #2c2c2c;
-  --proof-title-bar-bg: #3c3c3c;
+  /* ── Surfaces — layered dark background system ──────────── */
+  --proof-bg: #141414;
+  --proof-bg-elevated: #1a1a1a;
+  --proof-surface: #1e1e1e;
+  --proof-surface-2: #242424;
+  --proof-surface-3: #2a2a2a;
+  --proof-surface-hover: #2d2d2d;
+  --proof-surface-active: #333333;
+  --proof-editor-bg: #141414;
+  --proof-sidebar-bg: #1a1a1a;
+  --proof-activity-bar-bg: #111111;
+  --proof-title-bar-bg: #1a1a1a;
   --proof-status-bar-bg: #007acc;
   --proof-status-bar-text: #ffffff;
-  --proof-tab-active-bg: #1e1e1e;
-  --proof-tab-inactive-bg: #2d2d2d;
-  --proof-panel-border: #3c3c3c;
 
-  --proof-glass: rgba(30, 30, 30, 0.95);
+  /* Glass / overlay */
+  --proof-glass: rgba(20, 20, 20, 0.96);
   --proof-glass-border: rgba(255, 255, 255, 0.06);
+  --proof-glass-surface: rgba(30, 30, 30, 0.95);
 
-  /* Borders — VS Code */
-  --proof-grey: rgba(255, 255, 255, 0.04);
-  --proof-border: #3c3c3c;
-  --proof-border-strong: #454545;
-  --proof-border-focus: rgba(0, 122, 204, 0.6);
-  --proof-border-accent: rgba(0, 122, 204, 0.35);
+  /* ── Borders ─────────────────────────────────────────────── */
+  --proof-border: #2e2e2e;
+  --proof-border-light: #262626;
+  --proof-border-strong: #3d3d3d;
+  --proof-border-focus: rgba(0, 122, 204, 0.7);
+  --proof-border-accent: rgba(0, 122, 204, 0.4);
 
-  /* Text — VS Code Dark+ */
-  --proof-text: #cccccc;
-  --proof-text-primary: #cccccc;
-  --proof-text-secondary: #969696;
-  --proof-text-muted: #6e6e6e;
-  --proof-text-tertiary: #515151;
+  /* ── Text — 4-level hierarchy ────────────────────────────── */
+  --proof-text: #e2e2e2;
+  --proof-text-primary: #e2e2e2;
+  --proof-text-secondary: #a0a0a0;
+  --proof-text-muted: #666666;
+  --proof-text-tertiary: #444444;
+  --proof-text-inverse: #111111;
 
-  /* Selection */
-  --proof-selection-bg: #264f78;
+  /* ── Shadows — more dramatic ─────────────────────────────── */
+  --proof-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --proof-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --proof-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --proof-shadow-md: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --proof-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --proof-shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.6);
+  --proof-shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --proof-shadow-card-hover: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --proof-shadow-glow-blue: 0 0 0 1px var(--proof-blue-border), 0 4px 16px var(--proof-blue-glow);
+  --proof-shadow-glow-green: 0 0 0 1px var(--proof-green-border), 0 4px 16px var(--proof-green-glow);
+  --proof-shadow-glow-red: 0 0 0 1px var(--proof-red-border), 0 4px 16px var(--proof-red-glow);
 
-  /* Shadows */
-  --proof-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --proof-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --proof-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.45);
-  --proof-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.55);
-  --proof-shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  /* ── Border radius — rounded, modern ────────────────────── */
+  --proof-radius-xs: 3px;
+  --proof-radius-sm: 5px;
+  --proof-radius: 7px;
+  --proof-radius-md: 9px;
+  --proof-radius-lg: 12px;
+  --proof-radius-xl: 16px;
+  --proof-radius-2xl: 20px;
+  --proof-radius-full: 9999px;
 
-  /* Radius — VS Code uses sharp corners */
-  --proof-radius-xs: 2px;
-  --proof-radius-sm: 3px;
-  --proof-radius: 4px;
-  --proof-radius-lg: 6px;
-  --proof-radius-xl: 8px;
-  --proof-radius-2xl: 12px;
+  /* ── Typography ──────────────────────────────────────────── */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 26px;
+  --font-size-3xl: 34px;
+  --font-size-4xl: 44px;
 
-  /* Typography — VS Code system font stack */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: "Cascadia Code", "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
+  /* ── Spacing scale ───────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
 
-  /* Transitions */
-  --proof-transition: 0.1s ease;
-  --proof-transition-slow: 0.2s ease;
+  /* ── Transitions ─────────────────────────────────────────── */
+  --proof-transition: 120ms ease;
+  --proof-transition-slow: 220ms ease;
+  --proof-transition-spring: 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* Layout dimensions */
-  --proof-activity-bar-width: 48px;
-  --proof-sidebar-width: 260px;
-  --proof-sidebar-collapsed: 0px;
-  --proof-title-bar-height: 32px;
+  /* ── Layout dimensions ───────────────────────────────────── */
+  --proof-activity-bar-width: 56px;
+  --proof-sidebar-width: 268px;
+  --proof-title-bar-height: 36px;
   --proof-status-bar-height: 22px;
-
-  /* Console layout aliases (for backward compat) */
   --proof-console-topbar-height: var(--proof-title-bar-height);
   --proof-console-sidebar-width: var(--proof-sidebar-width);
   --proof-console-sidebar-collapsed: 0px;
   --proof-console-breadcrumb-height: 0px;
 
-  /* Nav */
-  --proof-console-nav-bg: transparent;
-  --proof-console-nav-hover: rgba(255, 255, 255, 0.06);
-  --proof-console-nav-active: rgba(0, 122, 204, 0.18);
-  --proof-console-nav-active-text: #ffffff;
-  --proof-console-nav-text: #969696;
+  /* ── Navigation ──────────────────────────────────────────── */
+  --proof-nav-hover: rgba(255, 255, 255, 0.05);
+  --proof-nav-active: rgba(0, 122, 204, 0.15);
+  --proof-nav-active-text: #ffffff;
+  --proof-nav-text: #8a8a8a;
 
-  /* Table */
-  --proof-console-table-header-bg: rgba(0, 0, 0, 0.2);
-  --proof-console-table-row-hover: rgba(255, 255, 255, 0.03);
-  --proof-console-table-row-selected: rgba(0, 122, 204, 0.08);
-  --proof-console-table-border: var(--proof-border);
-  --proof-console-table-stripe: rgba(255, 255, 255, 0.008);
+  /* ── Table ───────────────────────────────────────────────── */
+  --proof-table-header-bg: rgba(0, 0, 0, 0.25);
+  --proof-table-row-hover: rgba(255, 255, 255, 0.03);
+  --proof-table-border: var(--proof-border);
 
-  /* Glow */
-  --proof-glow-blue: none;
-  --proof-glow-green: none;
-  --proof-glow-red: none;
-
-  /* Misc */
-  --proof-hover: rgba(255, 255, 255, 0.06);
+  /* ── Misc ────────────────────────────────────────────────── */
+  --proof-hover: rgba(255, 255, 255, 0.05);
   --proof-hover-light: rgba(255, 255, 255, 0.03);
-  --proof-overlay: rgba(0, 0, 0, 0.6);
-  --proof-overlay-strong: rgba(0, 0, 0, 0.85);
-  --proof-overlay-dark: rgba(0, 0, 0, 0.4);
+  --proof-overlay: rgba(0, 0, 0, 0.7);
+  --proof-overlay-strong: rgba(0, 0, 0, 0.88);
+  --proof-subtle-bg: rgba(255, 255, 255, 0.02);
+  --proof-subtle-bg2: rgba(255, 255, 255, 0.05);
+  --proof-subtle-bg3: rgba(255, 255, 255, 0.04);
+  --proof-code-bg: rgba(0, 0, 0, 0.45);
+  --proof-bar-track: rgba(255, 255, 255, 0.08);
+  --proof-selection-bg: #264f78;
+  --proof-muted: var(--proof-text-secondary);
+  --proof-grey: rgba(255, 255, 255, 0.04);
+  --proof-grey-bg: var(--proof-bg);
+  --proof-pink: #d16969;
+  --proof-pink-bg: rgba(209, 105, 105, 0.1);
+
+  /* back-compat aliases */
+  --proof-surface-2: #242424;
+  --proof-panel-border: var(--proof-border);
   --proof-topbar-bg: var(--proof-title-bar-bg);
   --proof-topbar-bg-fallback: var(--proof-title-bar-bg);
   --proof-sidebar-bg-fallback: var(--proof-sidebar-bg);
   --proof-notif-bg: var(--proof-surface);
-  --proof-subtle-bg: rgba(255, 255, 255, 0.03);
-  --proof-subtle-bg2: rgba(255, 255, 255, 0.06);
-  --proof-subtle-bg3: rgba(255, 255, 255, 0.04);
-  --proof-code-bg: rgba(0, 0, 0, 0.4);
-  --proof-bar-track: rgba(255, 255, 255, 0.08);
-  --proof-muted: var(--proof-text-secondary);
+  --proof-console-nav-bg: transparent;
+  --proof-console-nav-hover: var(--proof-nav-hover);
+  --proof-console-nav-active: var(--proof-nav-active);
+  --proof-console-nav-active-text: var(--proof-nav-active-text);
+  --proof-console-nav-text: var(--proof-nav-text);
+  --proof-console-table-header-bg: var(--proof-table-header-bg);
+  --proof-console-table-row-hover: var(--proof-table-row-hover);
+  --proof-console-table-row-selected: rgba(0, 122, 204, 0.08);
+  --proof-console-table-border: var(--proof-table-border);
+  --proof-console-table-stripe: rgba(255, 255, 255, 0.007);
+  --proof-glow-blue: none;
+  --proof-glow-green: none;
+  --proof-glow-red: none;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   LIGHT MODE — VS Code Light+
+   LIGHT MODE
    ═══════════════════════════════════════════════════════════════════ */
 .light {
-  --proof-bg: #ffffff;
-  --proof-grey-bg: #ffffff;
-  --proof-surface: #f3f3f3;
-  --proof-surface-2: #e8e8e8;
-  --proof-surface-hover: #e8e8e8;
-  --proof-surface-3: #dcdcdc;
-  --proof-editor-bg: #ffffff;
-  --proof-sidebar-bg: #f3f3f3;
-  --proof-activity-bar-bg: #2c2c2c;
-  --proof-title-bar-bg: #dddddd;
-  --proof-status-bar-bg: #007acc;
-  --proof-status-bar-text: #ffffff;
-  --proof-tab-active-bg: #ffffff;
-  --proof-tab-inactive-bg: #ececec;
-  --proof-panel-border: #e0e0e0;
-
-  --proof-glass: rgba(255, 255, 255, 0.95);
-  --proof-glass-border: rgba(0, 122, 204, 0.15);
-
-  --proof-grey: rgba(0, 0, 0, 0.03);
-  --proof-border: #e0e0e0;
-  --proof-border-strong: #d4d4d4;
+  --proof-bg: #f7f7f7;
+  --proof-bg-elevated: #ffffff;
+  --proof-surface: #ffffff;
+  --proof-surface-2: #f0f0f0;
+  --proof-surface-3: #e8e8e8;
+  --proof-surface-hover: #efefef;
+  --proof-surface-active: #e4e4e4;
+  --proof-editor-bg: #f7f7f7;
+  --proof-sidebar-bg: #fafafa;
+  --proof-activity-bar-bg: #1e1e1e;
+  --proof-title-bar-bg: #f0f0f0;
+  --proof-grey-bg: #f7f7f7;
+  --proof-glass: rgba(255, 255, 255, 0.96);
+  --proof-glass-border: rgba(0, 0, 0, 0.07);
+  --proof-border: #e4e4e4;
+  --proof-border-light: #eeeeee;
+  --proof-border-strong: #d0d0d0;
   --proof-border-focus: rgba(0, 122, 204, 0.6);
   --proof-border-accent: rgba(0, 122, 204, 0.25);
-
-  --proof-text: #333333;
-  --proof-text-primary: #333333;
-  --proof-text-secondary: #717171;
-  --proof-text-muted: #999999;
-  --proof-text-tertiary: #b0b0b0;
-
-  --proof-selection-bg: #add6ff;
-
-  --proof-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --proof-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --proof-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --proof-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.15);
-  --proof-shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.04);
-
-  --proof-blue: #007acc;
-  --proof-blue-bright: #1a8ad4;
-  --proof-blue-hover: #006bb3;
+  --proof-text: #1a1a1a;
+  --proof-text-primary: #1a1a1a;
+  --proof-text-secondary: #5c5c5c;
+  --proof-text-muted: #a0a0a0;
+  --proof-text-tertiary: #c4c4c4;
+  --proof-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --proof-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.07);
+  --proof-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --proof-shadow-md: 0 6px 20px rgba(0, 0, 0, 0.1);
+  --proof-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --proof-shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.15);
+  --proof-shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --proof-shadow-card-hover: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.1);
   --proof-blue-bg: rgba(0, 122, 204, 0.07);
-  --proof-cyan: #4ec9b0;
-  --proof-green: #4ec9b0;
-  --proof-green-bright: #3ab090;
-  --proof-green-bg: rgba(78, 201, 176, 0.07);
-  --proof-red: #f44747;
-  --proof-red-bright: #d73a3a;
-  --proof-red-bg: rgba(244, 71, 71, 0.07);
-  --proof-yellow: #d7ba7d;
-  --proof-yellow-bright: #c0a060;
-  --proof-yellow-bg: rgba(215, 186, 125, 0.07);
-  --proof-purple: #c586c0;
-  --proof-purple-bright: #b072a8;
-  --proof-purple-bg: rgba(197, 134, 192, 0.07);
-
-  --proof-console-nav-hover: rgba(0, 0, 0, 0.05);
-  --proof-console-nav-active: rgba(0, 122, 204, 0.1);
-  --proof-console-nav-active-text: #007acc;
-  --proof-console-nav-text: #616161;
-  --proof-console-table-header-bg: rgba(0, 0, 0, 0.04);
-  --proof-console-table-row-hover: rgba(0, 0, 0, 0.02);
-
-  --proof-hover: rgba(0, 0, 0, 0.05);
+  --proof-blue-bg-strong: rgba(0, 122, 204, 0.12);
+  --proof-green: #0d8e72;
+  --proof-green-bright: #0fa37f;
+  --proof-green-bg: rgba(13, 142, 114, 0.07);
+  --proof-green-bg-strong: rgba(13, 142, 114, 0.13);
+  --proof-red: #d93030;
+  --proof-red-bright: #c02020;
+  --proof-red-bg: rgba(217, 48, 48, 0.07);
+  --proof-red-bg-strong: rgba(217, 48, 48, 0.12);
+  --proof-yellow: #c09020;
+  --proof-yellow-bright: #a07010;
+  --proof-yellow-bg: rgba(192, 144, 32, 0.07);
+  --proof-yellow-bg-strong: rgba(192, 144, 32, 0.12);
+  --proof-hover: rgba(0, 0, 0, 0.04);
   --proof-hover-light: rgba(0, 0, 0, 0.02);
-  --proof-overlay: rgba(255, 255, 255, 0.85);
-  --proof-overlay-strong: rgba(255, 255, 255, 0.95);
-  --proof-overlay-dark: rgba(0, 0, 0, 0.05);
+  --proof-overlay: rgba(255, 255, 255, 0.88);
+  --proof-overlay-strong: rgba(255, 255, 255, 0.96);
   --proof-subtle-bg: rgba(0, 0, 0, 0.02);
   --proof-subtle-bg2: rgba(0, 0, 0, 0.04);
   --proof-subtle-bg3: rgba(0, 0, 0, 0.03);
-  --proof-code-bg: rgba(0, 0, 0, 0.03);
-  --proof-bar-track: rgba(0, 0, 0, 0.06);
+  --proof-code-bg: rgba(0, 0, 0, 0.04);
+  --proof-bar-track: rgba(0, 0, 0, 0.07);
+  --proof-selection-bg: #c8d8f0;
+  --proof-console-nav-hover: rgba(0, 0, 0, 0.04);
+  --proof-console-nav-active: rgba(0, 122, 204, 0.1);
+  --proof-console-nav-active-text: #007acc;
+  --proof-console-nav-text: #5c5c5c;
+  --proof-console-table-header-bg: rgba(0, 0, 0, 0.04);
+  --proof-console-table-row-hover: rgba(0, 0, 0, 0.025);
+  --proof-nav-hover: rgba(0, 0, 0, 0.04);
+  --proof-nav-active: rgba(0, 122, 204, 0.1);
+  --proof-nav-active-text: #007acc;
+  --proof-nav-text: #5c5c5c;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    BASE
    ═══════════════════════════════════════════════════════════════════ */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-sans);
   color: var(--proof-text);
@@ -243,28 +297,30 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SCROLLBAR — VS Code thin style
+   SCROLLBAR — thin, polished
    ═══════════════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(121, 121, 121, 0.4);
+  background: rgba(121, 121, 121, 0.3);
   border: 2px solid transparent;
   background-clip: content-box;
   border-radius: 99px;
+  transition: background var(--proof-transition);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 100, 100, 0.7);
+  background: rgba(121, 121, 121, 0.6);
   border: 2px solid transparent;
   background-clip: content-box;
 }
@@ -273,110 +329,211 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   CARDS — VS Code flat style
+   CARDS
    ═══════════════════════════════════════════════════════════════════ */
 .proof-card {
   background: var(--proof-surface);
   border: 1px solid var(--proof-border);
-  border-radius: var(--proof-radius);
+  border-radius: var(--proof-radius-lg);
   position: relative;
-  transition: border-color var(--proof-transition);
+  transition: border-color var(--proof-transition), box-shadow var(--proof-transition);
+  box-shadow: var(--proof-shadow-card);
 }
 .proof-card:hover {
   border-color: var(--proof-border-strong);
+  box-shadow: var(--proof-shadow-card-hover);
 }
 
 .proof-card-flat {
   background: var(--proof-surface);
   border: 1px solid var(--proof-border);
-  border-radius: var(--proof-radius);
+  border-radius: var(--proof-radius-lg);
 }
 
 .proof-card-glass {
   background: var(--proof-glass);
   border: 1px solid var(--proof-glass-border);
-  border-radius: var(--proof-radius);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--proof-radius-lg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Metric KPI card */
+.proof-metric-card {
+  background: var(--proof-surface);
+  border: 1px solid var(--proof-border);
+  border-radius: var(--proof-radius-xl);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color var(--proof-transition), box-shadow var(--proof-transition),
+    transform var(--proof-transition);
+  box-shadow: var(--proof-shadow-card);
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+.proof-metric-card:hover {
+  border-color: var(--proof-border-strong);
+  box-shadow: var(--proof-shadow-card-hover);
+  transform: translateY(-1px);
+}
+.proof-metric-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 70% 0%,
+    var(--card-glow, transparent) 0%,
+    transparent 60%
+  );
+  opacity: 0.6;
+}
+
+/* Section card with header */
+.proof-section-card {
+  background: var(--proof-surface);
+  border: 1px solid var(--proof-border);
+  border-radius: var(--proof-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--proof-shadow-card);
+}
+.proof-section-card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--proof-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.012);
+}
+.proof-section-card-body {
+  padding: 16px 18px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   BADGES — VS Code style
+   BADGES
    ═══════════════════════════════════════════════════════════════════ */
 .proof-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 0 6px;
-  border-radius: 2px;
+  padding: 2px 8px;
+  border-radius: var(--proof-radius-full);
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
   font-family: var(--font-sans);
-  line-height: 18px;
+  line-height: 16px;
+  letter-spacing: 0.2px;
 }
 .proof-badge-pass {
   background: var(--proof-green-bg);
   color: var(--proof-green);
+  border: 1px solid var(--proof-green-border);
 }
 .proof-badge-fail {
   background: var(--proof-red-bg);
   color: var(--proof-red);
+  border: 1px solid var(--proof-red-border);
 }
 .proof-badge-flaky {
   background: var(--proof-yellow-bg);
   color: var(--proof-yellow);
+  border: 1px solid var(--proof-yellow-border);
 }
 .proof-badge-partial {
   background: var(--proof-orange-bg);
   color: var(--proof-orange);
+  border: 1px solid rgba(204, 120, 50, 0.25);
 }
 .proof-badge-skip {
   background: var(--proof-subtle-bg);
   color: var(--proof-text-secondary);
+  border: 1px solid var(--proof-border);
 }
 .proof-badge-running {
   background: var(--proof-blue-bg);
-  color: var(--proof-blue);
+  color: var(--proof-blue-bright);
+  border: 1px solid var(--proof-blue-border);
   animation: badge-pulse 1.5s ease-in-out infinite;
+}
+.proof-badge-neutral {
+  background: var(--proof-subtle-bg2);
+  color: var(--proof-text-secondary);
+  border: 1px solid var(--proof-border);
 }
 
 @keyframes badge-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.55;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   BUTTONS — VS Code flat, no gradients
+   STATUS DOTS
+   ═══════════════════════════════════════════════════════════════════ */
+.proof-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.proof-dot-green {
+  background: var(--proof-green);
+  box-shadow: 0 0 0 2px var(--proof-green-bg);
+}
+.proof-dot-red {
+  background: var(--proof-red);
+  box-shadow: 0 0 0 2px var(--proof-red-bg);
+}
+.proof-dot-yellow {
+  background: var(--proof-yellow);
+  box-shadow: 0 0 0 2px var(--proof-yellow-bg);
+}
+.proof-dot-blue {
+  background: var(--proof-blue);
+  box-shadow: 0 0 0 2px var(--proof-blue-bg);
+}
+.proof-dot-pulse {
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BUTTONS
    ═══════════════════════════════════════════════════════════════════ */
 .proof-button {
-  background: transparent;
+  background: var(--proof-surface-2);
   border: 1px solid var(--proof-border-strong);
   color: var(--proof-text);
-  padding: 3px 11px;
+  padding: 5px 13px;
   border-radius: var(--proof-radius);
-  font-weight: 400;
-  font-size: 13px;
+  font-weight: 500;
+  font-size: 12.5px;
   cursor: pointer;
   transition: all var(--proof-transition);
   font-family: var(--font-sans);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  line-height: 20px;
+  gap: 5px;
+  line-height: 18px;
+  letter-spacing: -0.01em;
 }
 .proof-button:hover {
-  background: var(--proof-hover);
+  background: var(--proof-surface-3);
   border-color: var(--proof-border-strong);
+  color: var(--proof-text);
 }
 .proof-button:active {
-  background: var(--proof-subtle-bg2);
+  transform: scale(0.98);
 }
 .proof-button:disabled {
   opacity: 0.4;
@@ -385,21 +542,21 @@ body {
 }
 
 .proof-button-sm {
-  padding: 1px 8px;
+  padding: 3px 10px;
   font-size: 12px;
-  line-height: 18px;
+  line-height: 16px;
 }
 .proof-button-xs {
-  padding: 0 6px;
+  padding: 1px 7px;
   font-size: 11px;
-  line-height: 16px;
+  line-height: 14px;
 }
 
 .proof-button-icon {
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 4px;
+  padding: 5px;
   color: var(--proof-text-secondary);
   border-radius: var(--proof-radius);
   display: inline-flex;
@@ -415,43 +572,46 @@ body {
 .proof-button-primary {
   background: var(--proof-blue);
   color: #fff;
-  border: none;
-  padding: 3px 11px;
+  border: 1px solid transparent;
+  padding: 5px 14px;
   border-radius: var(--proof-radius);
-  font-weight: 500;
-  font-size: 13px;
+  font-weight: 600;
+  font-size: 12.5px;
   cursor: pointer;
   font-family: var(--font-sans);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   transition: all var(--proof-transition);
   white-space: nowrap;
-  line-height: 20px;
+  line-height: 18px;
+  letter-spacing: -0.01em;
+  box-shadow: 0 0 0 0 var(--proof-blue-glow);
 }
 .proof-button-primary:hover {
   background: var(--proof-blue-bright);
+  box-shadow: 0 0 0 3px var(--proof-blue-glow);
 }
 .proof-button-primary:active {
-  opacity: 0.8;
+  transform: scale(0.98);
 }
 
 .proof-button-danger {
   background: var(--proof-red);
   color: #fff;
-  border: none;
-  padding: 3px 11px;
+  border: 1px solid transparent;
+  padding: 5px 14px;
   border-radius: var(--proof-radius);
-  font-weight: 500;
-  font-size: 13px;
+  font-weight: 600;
+  font-size: 12.5px;
   cursor: pointer;
   font-family: var(--font-sans);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   transition: all var(--proof-transition);
   white-space: nowrap;
-  line-height: 20px;
+  line-height: 18px;
 }
 .proof-button-danger:hover {
   background: var(--proof-red-bright);
@@ -460,33 +620,53 @@ body {
 .proof-button-success {
   background: var(--proof-green);
   color: #fff;
-  border: none;
-  padding: 3px 11px;
+  border: 1px solid transparent;
+  padding: 5px 14px;
   border-radius: var(--proof-radius);
-  font-weight: 500;
-  font-size: 13px;
+  font-weight: 600;
+  font-size: 12.5px;
   cursor: pointer;
   font-family: var(--font-sans);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   transition: all var(--proof-transition);
   white-space: nowrap;
-  line-height: 20px;
+  line-height: 18px;
 }
-.proof-button-success:hover {
-  background: var(--proof-green-bright);
+
+.proof-button-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--proof-text-secondary);
+  padding: 5px 13px;
+  border-radius: var(--proof-radius);
+  font-weight: 500;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all var(--proof-transition);
+  font-family: var(--font-sans);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 18px;
+}
+.proof-button-ghost:hover {
+  background: var(--proof-hover);
+  color: var(--proof-text);
+  border-color: var(--proof-border);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   INPUTS — VS Code style
+   INPUTS
    ═══════════════════════════════════════════════════════════════════ */
 .proof-input {
   border: 1px solid var(--proof-border);
   border-radius: var(--proof-radius);
-  padding: 3px 8px;
+  padding: 5px 10px;
   font-size: 13px;
-  background: var(--proof-editor-bg);
+  background: var(--proof-surface-2);
   color: var(--proof-text);
   font-family: var(--font-sans);
   outline: none;
@@ -498,6 +678,8 @@ body {
 }
 .proof-input:focus {
   border-color: var(--proof-border-focus);
+  background: var(--proof-surface);
+  box-shadow: 0 0 0 3px var(--proof-blue-glow);
 }
 .proof-input::placeholder {
   color: var(--proof-text-muted);
@@ -507,7 +689,21 @@ select.proof-input {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   TABLES — VS Code style
+   PROGRESS BARS
+   ═══════════════════════════════════════════════════════════════════ */
+.proof-progress-track {
+  background: var(--proof-bar-track);
+  border-radius: var(--proof-radius-full);
+  overflow: hidden;
+}
+.proof-progress-bar {
+  height: 100%;
+  border-radius: var(--proof-radius-full);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TABLES
    ═══════════════════════════════════════════════════════════════════ */
 .proof-table {
   width: 100%;
@@ -517,7 +713,7 @@ select.proof-input {
 }
 .proof-table th {
   text-align: left;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--proof-border);
   color: var(--proof-text-secondary);
   font-weight: 600;
@@ -525,13 +721,13 @@ select.proof-input {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: var(--proof-console-table-header-bg);
+  background: var(--proof-table-header-bg);
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
   user-select: none;
 }
 .proof-table td {
-  padding: 5px 10px;
+  padding: 7px 12px;
   border-bottom: 1px solid var(--proof-border);
   font-size: 13px;
   overflow: hidden;
@@ -546,117 +742,96 @@ select.proof-input {
   transition: background var(--proof-transition);
 }
 .proof-table tbody tr:hover td {
-  background: var(--proof-console-table-row-hover);
+  background: var(--proof-table-row-hover);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SKELETON
+   SKELETON / LOADING
    ═══════════════════════════════════════════════════════════════════ */
 @keyframes skeleton-shimmer {
-  0% {
-    background-position: -400px 0;
-  }
-  100% {
-    background-position: 400px 0;
-  }
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
 }
 .proof-skeleton {
   background: linear-gradient(
     90deg,
-    var(--proof-subtle-bg) 25%,
-    var(--proof-subtle-bg2) 50%,
-    var(--proof-subtle-bg) 75%
+    var(--proof-subtle-bg) 0%,
+    var(--proof-subtle-bg2) 40%,
+    var(--proof-subtle-bg3) 60%,
+    var(--proof-subtle-bg) 100%
   );
-  background-size: 800px 100%;
+  background-size: 1200px 100%;
   border-radius: var(--proof-radius);
-  animation: skeleton-shimmer 2s ease-in-out infinite;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    ANIMATIONS
    ═══════════════════════════════════════════════════════════════════ */
 @keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes slide-down {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
 }
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 @keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
-}
-@keyframes badge-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.55;
-  }
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
 }
 @keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(4px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes bar-grow {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
 }
 
-.animate-slide-up {
-  animation: slide-up 0.2s ease-out both;
-}
-.animate-slide-down {
-  animation: slide-down 0.15s ease-out both;
-}
-.animate-fade-in {
-  animation: fade-in 0.15s ease-out both;
-}
-.animate-spin-slow {
-  animation: spin-slow 2s linear infinite;
-}
+.animate-slide-up      { animation: slide-up 0.22s ease-out both; }
+.animate-slide-down    { animation: slide-down 0.18s ease-out both; }
+.animate-slide-in-right { animation: slide-in-right 0.2s ease-out both; }
+.animate-fade-in       { animation: fade-in 0.18s ease-out both; }
+.animate-fade-in-up    { animation: fade-in-up 0.22s ease-out both; }
+.animate-scale-in      { animation: scale-in 0.18s ease-out both; }
+.animate-spin-slow     { animation: spin-slow 2s linear infinite; }
+.animate-page-enter    { animation: page-enter 0.24s ease-out both; }
+
+/* Staggered children */
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 40ms; }
+.stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 120ms; }
+.stagger > *:nth-child(5) { animation-delay: 160ms; }
+.stagger > *:nth-child(6) { animation-delay: 200ms; }
 
 /* ═══════════════════════════════════════════════════════════════════
    TOAST
@@ -669,87 +844,56 @@ select.proof-input {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--proof-surface-2);
+  background: var(--proof-surface-3);
   border: 1px solid var(--proof-border-strong);
   color: var(--proof-text);
-  padding: 6px 14px;
-  border-radius: var(--proof-radius);
+  padding: 8px 16px;
+  border-radius: var(--proof-radius-lg);
   box-shadow: var(--proof-shadow-lg);
   font-size: 13px;
   z-index: 9999;
-  animation: slide-up 0.15s ease-out;
+  animation: slide-up 0.2s ease-out;
   white-space: nowrap;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    PAGE STRUCTURE
    ═══════════════════════════════════════════════════════════════════ */
 .proof-page {
-  animation: page-enter 0.15s ease-out both;
+  animation: page-enter 0.2s ease-out both;
 }
 
 .proof-section-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--proof-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.6px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   TAGS / CHIPS
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-tag {
-  display: inline-flex;
+.proof-page-header {
+  display: flex;
   align-items: center;
-  gap: 3px;
-  padding: 0 6px;
-  border-radius: 2px;
-  font-size: 11px;
-  font-weight: 500;
-  white-space: nowrap;
-  line-height: 18px;
-}
-.proof-tag-blue {
-  color: var(--proof-blue);
-  background: var(--proof-blue-bg);
-}
-.proof-tag-green {
-  color: var(--proof-green);
-  background: var(--proof-green-bg);
-}
-.proof-tag-red {
-  color: var(--proof-red);
-  background: var(--proof-red-bg);
-}
-.proof-tag-yellow {
-  color: var(--proof-yellow);
-  background: var(--proof-yellow-bg);
-}
-.proof-tag-purple {
-  color: var(--proof-purple);
-  background: var(--proof-purple-bg);
-}
-.proof-tag-muted {
-  color: var(--proof-text-secondary);
-  background: var(--proof-subtle-bg);
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--proof-border);
+  gap: 12px;
+  flex-shrink: 0;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   PASS RATE BAR
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-pass-bar-track {
-  width: 100%;
-  height: 4px;
-  background: var(--proof-bar-track);
-  border-radius: 2px;
-  overflow: hidden;
+.proof-page-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--proof-text);
+  letter-spacing: -0.3px;
 }
-.proof-pass-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.4s ease;
+
+.proof-page-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -761,285 +905,63 @@ select.proof-input {
   border: none;
   margin: 0;
 }
-
-/* ═══════════════════════════════════════════════════════════════════
-   STATUS PILLS
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 8px;
-  border-radius: 2px;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 20px;
-}
-.proof-status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+.proof-divider-v {
+  width: 1px;
+  background: var(--proof-border);
+  align-self: stretch;
   flex-shrink: 0;
 }
-.proof-status-live {
-  background: var(--proof-green-bg);
-  color: var(--proof-green);
-}
-.proof-status-live .proof-status-dot {
-  background: var(--proof-green);
-  animation: pulseDot 2s ease-in-out infinite;
-}
-.proof-status-degraded {
-  background: var(--proof-yellow-bg);
-  color: var(--proof-yellow);
-}
-.proof-status-critical {
-  background: var(--proof-red-bg);
-  color: var(--proof-red);
-}
-
-@keyframes pulseDot {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.4;
-    transform: scale(0.7);
-  }
-}
 
 /* ═══════════════════════════════════════════════════════════════════
-   STAGGER ANIMATION
+   CONSOLE SIDEBAR NAV
    ═══════════════════════════════════════════════════════════════════ */
-.proof-stagger > * {
-  animation: slide-up 0.2s ease-out both;
-}
-.proof-stagger > *:nth-child(1) {
-  animation-delay: 0ms;
-}
-.proof-stagger > *:nth-child(2) {
-  animation-delay: 30ms;
-}
-.proof-stagger > *:nth-child(3) {
-  animation-delay: 60ms;
-}
-.proof-stagger > *:nth-child(4) {
-  animation-delay: 90ms;
-}
-.proof-stagger > *:nth-child(5) {
-  animation-delay: 120ms;
-}
-.proof-stagger > *:nth-child(6) {
-  animation-delay: 150ms;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   NAV LINK
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-nav-link {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   METRIC CARD
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-metric-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--proof-radius);
-  background: var(--proof-surface);
-  border: 1px solid var(--proof-border);
-  transition: all var(--proof-transition);
-}
-.proof-metric-card:hover {
-  border-color: var(--proof-border-strong);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   COPILOT STYLES
-   ═══════════════════════════════════════════════════════════════════ */
-.copilot-thinking-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--proof-blue);
-  animation: bounce-dot 1.4s ease-in-out infinite;
-}
-.copilot-thinking-dot:nth-child(2) {
-  animation-delay: 0.16s;
-}
-.copilot-thinking-dot:nth-child(3) {
-  animation-delay: 0.32s;
-}
-
-@keyframes bounce-dot {
-  0%,
-  80%,
-  100% {
-    transform: translateY(0) scale(1);
-    opacity: 0.4;
-  }
-  40% {
-    transform: translateY(-6px) scale(1.1);
-    opacity: 1;
-  }
-}
-
-.copilot-user-bubble {
-  background: var(--proof-blue);
-  color: #fff;
-  border-radius: 4px 4px 4px 16px;
-  padding: 8px 12px;
-  font-size: 13px;
-  line-height: 1.5;
-  word-break: break-word;
-  white-space: pre-wrap;
-  animation: message-in-right 0.2s ease-out both;
-  max-width: 75%;
-}
-
-.copilot-assistant-bubble {
-  animation: message-in-left 0.2s ease-out both;
-}
-
-@keyframes message-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-8px) translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) translateY(0);
-  }
-}
-@keyframes message-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(8px) translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) translateY(0);
-  }
-}
-
-.copilot-input-wrap {
-  background: var(--proof-surface);
-  border: 1px solid var(--proof-border);
-  border-radius: var(--proof-radius);
-  padding: 4px 4px 4px 12px;
-  transition: border-color var(--proof-transition);
-}
-.copilot-input-wrap:focus-within {
-  border-color: var(--proof-border-focus);
-}
-
-.copilot-send-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--proof-radius);
-  border: none;
+.proof-nav-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--proof-transition);
-  flex-shrink: 0;
-}
-.copilot-send-btn-active {
-  background: var(--proof-blue);
-  color: #fff;
-}
-.copilot-send-btn-active:hover {
-  background: var(--proof-blue-bright);
-}
-.copilot-send-btn-inactive {
-  background: var(--proof-subtle-bg);
-  color: var(--proof-text-muted);
-  cursor: not-allowed;
-}
-
-.copilot-quick-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  border-radius: 2px;
-  font-size: 12px;
-  font-weight: 400;
-  cursor: pointer;
-  border: 1px solid var(--proof-border);
-  background: transparent;
-  color: var(--proof-text-secondary);
-  transition: all var(--proof-transition);
-  white-space: nowrap;
-}
-.copilot-quick-chip:hover {
-  background: var(--proof-hover);
-  color: var(--proof-text);
-}
-
-.copilot-tool-card {
-  border-radius: var(--proof-radius);
-  border: 1px solid var(--proof-border);
-  background: var(--proof-surface-2);
-  overflow: hidden;
-  margin: 4px 0;
-  transition: border-color var(--proof-transition);
-}
-.copilot-tool-card:hover {
-  border-color: var(--proof-border-strong);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   EMPTY STATE
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
-  padding: 48px 24px;
-  color: var(--proof-text-secondary);
-  text-align: center;
-}
-.proof-empty-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--proof-text);
-  margin: 0;
-}
-.proof-empty-desc {
+  padding: 6px 12px;
+  border-radius: var(--proof-radius);
+  cursor: pointer;
+  color: var(--proof-nav-text);
   font-size: 13px;
+  font-weight: 400;
+  transition: all var(--proof-transition);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+  font-family: var(--font-sans);
+}
+.proof-nav-item:hover {
+  background: var(--proof-nav-hover);
+  color: var(--proof-text);
+}
+.proof-nav-item.active {
+  background: var(--proof-nav-active);
+  color: var(--proof-nav-active-text);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GLOW RING HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+.proof-ring-green {
+  box-shadow: 0 0 0 2px var(--proof-green-bg), 0 0 0 1px var(--proof-green-border);
+}
+.proof-ring-red {
+  box-shadow: 0 0 0 2px var(--proof-red-bg), 0 0 0 1px var(--proof-red-border);
+}
+.proof-ring-yellow {
+  box-shadow: 0 0 0 2px var(--proof-yellow-bg), 0 0 0 1px var(--proof-yellow-border);
+}
+.proof-ring-blue {
+  box-shadow: 0 0 0 2px var(--proof-blue-bg), 0 0 0 1px var(--proof-blue-border);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LEGACY / BACKWARD COMPAT — keeps old pages working
+   ═══════════════════════════════════════════════════════════════════ */
+.proof-grey {
   color: var(--proof-text-secondary);
-  max-width: 320px;
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   BACKGROUND PATTERNS
-   ═══════════════════════════════════════════════════════════════════ */
-.proof-grid-bg {
-  background-image:
-    linear-gradient(var(--proof-border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--proof-border) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   COMPAT ALIASES
-   ═══════════════════════════════════════════════════════════════════ */
-:root {
-  --proof-topbar-bg-fallback: var(--proof-title-bar-bg);
-  --proof-sidebar-bg-fallback: var(--proof-sidebar-bg);
-  --proof-subtle-bg015: rgba(255, 255, 255, 0.015);
-}
-.light {
-  --proof-subtle-bg015: rgba(0, 0, 0, 0.015);
 }
