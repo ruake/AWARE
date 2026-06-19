@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation } from "wouter";
 import { Search, Sun, Moon, WifiOff } from "lucide-react";
-import { useDataInit } from "@/lib/hooks/useData";
+import { useDataInit, useEnvHealth } from "@/lib/hooks/useData";
 
 interface ConsoleTopBarProps {
   onSearchOpen: () => void;
@@ -16,30 +16,79 @@ function routeLabel(path: string): string {
   if (path.startsWith("/copilot")) return "Copilot";
   if (path.startsWith("/about")) return "About";
   if (path.startsWith("/tests")) return "Tests";
-  if (path.startsWith("/start")) return "Start Run";
-  if (path.startsWith("/share")) return "Sharing";
   return "A.W.A.R.E.";
 }
 
+/* Derive tier health by grouping useEnvHealth results (which already have correct pass rates) */
+function useTierHealth() {
+  const envHealth = useEnvHealth();
+  return React.useMemo(() => {
+    const TIERS = ["QA", "UAT", "PROD"] as const;
+    return TIERS.map((tier) => {
+      const tierEnvs = envHealth.filter((e) => e.label.toUpperCase().startsWith(tier));
+      if (tierEnvs.length === 0) return { tier, passRate: 0, status: "critical" as const };
+      const avg = Math.round(tierEnvs.reduce((s, e) => s + e.passRate, 0) / tierEnvs.length);
+      const min = Math.min(...tierEnvs.map((e) => e.passRate));
+      const status: "healthy" | "degraded" | "critical" =
+        min >= 95 ? "healthy" : min >= 80 ? "degraded" : "critical";
+      return { tier, passRate: avg, status };
+    });
+  }, [envHealth]);
+}
+
+function TierPill({
+  tier, passRate, status, onClick,
+}: {
+  tier: string; passRate: number; status: "healthy" | "degraded" | "critical"; onClick: () => void;
+}) {
+  const color =
+    status === "healthy" ? "var(--proof-green)" :
+    status === "degraded" ? "var(--proof-yellow)" :
+    "var(--proof-red)";
+  const bg =
+    status === "healthy" ? "var(--proof-green-bg)" :
+    status === "degraded" ? "var(--proof-yellow-bg)" :
+    "var(--proof-red-bg)";
+  const border =
+    status === "healthy" ? "var(--proof-green-border)" :
+    status === "degraded" ? "var(--proof-yellow-border)" :
+    "var(--proof-red-border)";
+
+  return (
+    <button
+      onClick={onClick}
+      className="proof-env-pill"
+      style={{ background: bg, borderColor: border, color }}
+    >
+      <span style={{
+        width: 5, height: 5, borderRadius: "50%", background: color, flexShrink: 0,
+        boxShadow: status !== "healthy" ? `0 0 4px ${color}` : undefined,
+        animation: status !== "healthy" ? "badge-pulse 1.4s ease-in-out infinite" : undefined,
+      }} />
+      <span style={{ fontWeight: 700, letterSpacing: "-0.1px" }}>{tier}</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "-0.5px" }}>
+        {passRate}%
+      </span>
+    </button>
+  );
+}
+
 export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const dataState = useDataInit();
+  const tierHealth = useTierHealth();
 
   const [isDark, setIsDark] = React.useState<boolean>(() => {
     try {
       const saved = localStorage.getItem("proof-theme");
       return saved !== null ? saved === "dark" : true;
-    } catch {
-      return true;
-    }
+    } catch { return true; }
   });
 
   const toggleTheme = () => {
     const next = !isDark;
     setIsDark(next);
-    try {
-      localStorage.setItem("proof-theme", next ? "dark" : "light");
-    } catch { /* ignore */ }
+    try { localStorage.setItem("proof-theme", next ? "dark" : "light"); } catch { /* ignore */ }
     if (next) document.documentElement.classList.remove("light");
     else document.documentElement.classList.add("light");
   };
@@ -54,231 +103,140 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
         background: "var(--proof-title-bar-bg)",
         display: "flex",
         alignItems: "center",
-        padding: "0 14px",
-        gap: 8,
+        padding: "0 12px",
+        gap: 6,
         flexShrink: 0,
         userSelect: "none",
         borderBottom: "1px solid var(--proof-border)",
       }}
     >
-      {/* App logo + title */}
-      <div
+      {/* Logo */}
+      <button
+        onClick={() => navigate("/")}
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 7,
-          flexShrink: 0,
+          display: "flex", alignItems: "center", gap: 7, flexShrink: 0,
+          background: "transparent", border: "none", cursor: "pointer", padding: "2px 4px",
+          borderRadius: "var(--proof-radius-sm)",
         }}
+        title="Dashboard"
       >
-        <span
-          style={{
-            width: 18,
-            height: 18,
-            borderRadius: 5,
-            background: "var(--proof-blue)",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.08)",
-          }}
-        >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+        <span style={{
+          width: 20, height: 20, borderRadius: 6,
+          background: "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-blue-bright) 100%)",
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          flexShrink: 0, boxShadow: "0 0 0 1px rgba(255,255,255,0.08), 0 2px 6px var(--proof-blue-glow)",
+        }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white"
+            strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
           </svg>
         </span>
-        <span
-          style={{
-            fontSize: 12.5,
-            fontWeight: 700,
-            color: "var(--proof-text)",
-            letterSpacing: "-0.2px",
-          }}
-        >
+        <span style={{ fontSize: 13, fontWeight: 800, color: "var(--proof-text)", letterSpacing: "-0.4px" }}>
           A.W.A.R.E.
         </span>
-      </div>
+      </button>
 
-      {/* Separator + breadcrumb */}
-      <span style={{ color: "var(--proof-border-strong)", fontSize: 14, margin: "0 1px", fontWeight: 300 }}>
-        /
-      </span>
-      <span
-        style={{
-          fontSize: 12.5,
-          color: "var(--proof-text-secondary)",
-          fontWeight: 500,
-          letterSpacing: "-0.1px",
-        }}
-      >
+      {/* Breadcrumb */}
+      <span style={{ color: "var(--proof-border-strong)", fontSize: 13, fontWeight: 300, opacity: 0.6 }}>/</span>
+      <span style={{ fontSize: 12.5, color: "var(--proof-text-secondary)", fontWeight: 500, letterSpacing: "-0.1px" }}>
         {label}
       </span>
 
-      {/* Data status indicator */}
+      {/* Data status */}
       {dataState.loading && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 5,
-            padding: "2px 8px",
-            borderRadius: "var(--proof-radius-full)",
-            background: "var(--proof-blue-bg)",
-            border: "1px solid var(--proof-blue-border)",
-            fontSize: 10.5,
-            fontWeight: 500,
-            color: "var(--proof-blue-bright)",
-            marginLeft: 4,
-          }}
-        >
-          <span
-            style={{
-              width: 5,
-              height: 5,
-              borderRadius: "50%",
-              background: "var(--proof-blue-bright)",
-              animation: "badge-pulse 1s ease-in-out infinite",
-              display: "inline-block",
-            }}
-          />
-          Loading data…
-        </div>
+        <span style={{
+          display: "flex", alignItems: "center", gap: 4, padding: "2px 7px",
+          borderRadius: "var(--proof-radius-full)", background: "var(--proof-blue-bg)",
+          border: "1px solid var(--proof-blue-border)", fontSize: 10, fontWeight: 600,
+          color: "var(--proof-blue-bright)", marginLeft: 2,
+        }}>
+          <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--proof-blue-bright)",
+            animation: "badge-pulse 1s ease-in-out infinite", display: "inline-block" }} />
+          Loading…
+        </span>
       )}
       {!!dataState.error && !dataState.loading && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 5,
-            padding: "2px 8px",
-            borderRadius: "var(--proof-radius-full)",
-            background: "var(--proof-red-bg)",
-            border: "1px solid var(--proof-red-border)",
-            fontSize: 10.5,
-            fontWeight: 500,
-            color: "var(--proof-red-bright)",
-            marginLeft: 4,
-          }}
-        >
-          <WifiOff size={10} />
-          Data error
-        </div>
-      )}
-      {dataState.loaded && !dataState.error && dataState.loaded && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            padding: "2px 7px",
-            borderRadius: "var(--proof-radius-full)",
-            background: "var(--proof-green-bg)",
-            fontSize: 10,
-            fontWeight: 600,
-            color: "var(--proof-green)",
-            marginLeft: 4,
-            letterSpacing: "0.2px",
-          }}
-        >
-          <span
-            style={{
-              width: 4,
-              height: 4,
-              borderRadius: "50%",
-              background: "var(--proof-green)",
-              display: "inline-block",
-            }}
-          />
-          Live
-        </div>
+        <span style={{
+          display: "flex", alignItems: "center", gap: 4, padding: "2px 7px",
+          borderRadius: "var(--proof-radius-full)", background: "var(--proof-red-bg)",
+          border: "1px solid var(--proof-red-border)", fontSize: 10, fontWeight: 600,
+          color: "var(--proof-red-bright)", marginLeft: 2,
+        }}>
+          <WifiOff size={9} />Error
+        </span>
       )}
 
       <div style={{ flex: 1 }} />
 
-      {/* Search trigger */}
+      {/* Tier health pills — always visible */}
+      {dataState.loaded && !dataState.error && (
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          {tierHealth.map(({ tier, passRate, status }) => (
+            <TierPill
+              key={tier}
+              tier={tier}
+              passRate={passRate}
+              status={status}
+              onClick={() => navigate("/")}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Divider */}
+      <div style={{ width: 1, height: 16, background: "var(--proof-border)", margin: "0 4px", flexShrink: 0 }} />
+
+      {/* Search */}
       <button
         onClick={onSearchOpen}
         title="Search (⌘K)"
-        aria-label="Open command palette"
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 5,
-          padding: "3px 10px",
-          fontSize: 12,
-          cursor: "pointer",
-          border: "1px solid var(--proof-border)",
-          borderRadius: "var(--proof-radius)",
-          background: "var(--proof-surface-2)",
-          color: "var(--proof-text-secondary)",
-          transition: "all var(--proof-transition)",
+          display: "flex", alignItems: "center", gap: 5, padding: "3px 10px",
+          fontSize: 11.5, cursor: "pointer",
+          border: "1px solid var(--proof-border)", borderRadius: "var(--proof-radius-sm)",
+          background: "var(--proof-surface-2)", color: "var(--proof-text-muted)",
+          transition: "all var(--proof-transition)", fontFamily: "var(--font-sans)",
           lineHeight: "16px",
-          fontFamily: "var(--font-sans)",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-strong)";
-          (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-          (e.currentTarget as HTMLElement).style.background = "var(--proof-surface-3)";
+          const el = e.currentTarget as HTMLElement;
+          el.style.borderColor = "var(--proof-border-strong)";
+          el.style.color = "var(--proof-text)";
+          el.style.background = "var(--proof-surface-3)";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)";
-          (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
-          (e.currentTarget as HTMLElement).style.background = "var(--proof-surface-2)";
+          const el = e.currentTarget as HTMLElement;
+          el.style.borderColor = "var(--proof-border)";
+          el.style.color = "var(--proof-text-muted)";
+          el.style.background = "var(--proof-surface-2)";
         }}
       >
         <Search size={11} />
         <span>Search</span>
-        <kbd
-          style={{
-            fontSize: 9,
-            border: "1px solid var(--proof-border-strong)",
-            borderRadius: 3,
-            padding: "0 4px",
-            fontFamily: "var(--font-mono)",
-            lineHeight: "14px",
-            opacity: 0.6,
-            background: "var(--proof-surface-3)",
-          }}
-        >
-          ⌘K
-        </kbd>
+        <kbd style={{
+          fontSize: 9, border: "1px solid var(--proof-border-strong)", borderRadius: 3,
+          padding: "0 4px", fontFamily: "var(--font-mono)", lineHeight: "14px",
+          opacity: 0.5, background: "var(--proof-surface-3)",
+        }}>⌘K</kbd>
       </button>
 
       {/* Theme toggle */}
       <button
         onClick={toggleTheme}
-        title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-        aria-label="Toggle theme"
+        title={isDark ? "Light mode" : "Dark mode"}
         style={{
-          width: 28,
-          height: 28,
-          padding: 0,
-          border: "none",
-          background: "transparent",
-          cursor: "pointer",
-          color: "var(--proof-text-muted)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "var(--proof-radius)",
+          width: 28, height: 28, padding: 0, border: "none", background: "transparent",
+          cursor: "pointer", color: "var(--proof-text-muted)", display: "flex",
+          alignItems: "center", justifyContent: "center", borderRadius: "var(--proof-radius-sm)",
           transition: "all var(--proof-transition)",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-          (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+          const el = e.currentTarget as HTMLElement;
+          el.style.color = "var(--proof-text)"; el.style.background = "var(--proof-hover)";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)";
-          (e.currentTarget as HTMLElement).style.background = "transparent";
+          const el = e.currentTarget as HTMLElement;
+          el.style.color = "var(--proof-text-muted)"; el.style.background = "transparent";
         }}
       >
         {isDark ? <Sun size={13} /> : <Moon size={13} />}
