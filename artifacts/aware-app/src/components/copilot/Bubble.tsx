@@ -1,6 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Highlight, themes } from "prism-react-renderer";
 import { Bot, User, RefreshCw, Copy, Check } from "lucide-react";
 import type { Message, ProviderType } from "@/lib/copilot/types";
 import ToolCallCard from "./ToolCallCard";
@@ -14,7 +15,7 @@ interface BubbleProps {
   providerType?: ProviderType;
 }
 
-function CopyButton({ text }: { text: string }) {
+function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
   const [copied, setCopied] = React.useState(false);
   const copy = () => {
     navigator.clipboard.writeText(text).then(() => {
@@ -25,8 +26,8 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={copy}
-      title={copied ? "Copied!" : "Copy message"}
-      aria-label={copied ? "Copied!" : "Copy message"}
+      title={copied ? "Copied!" : label}
+      aria-label={copied ? "Copied!" : label}
       style={{
         padding: "3px 7px",
         borderRadius: 6,
@@ -42,8 +43,91 @@ function CopyButton({ text }: { text: string }) {
       }}
     >
       {copied ? <Check size={11} /> : <Copy size={11} />}
-      {copied ? "Copied" : "Copy"}
+      {copied ? "Copied" : label}
     </button>
+  );
+}
+
+function CodeBlock({ children, language }: { children: string; language: string }) {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(children).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+  };
+
+  const lang = language || "text";
+
+  return (
+    <div style={{ position: "relative", margin: "8px 0" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          background: "rgba(0,0,0,0.3)",
+          borderRadius: "8px 8px 0 0",
+          padding: "4px 10px",
+          borderBottom: "1px solid var(--proof-border)",
+        }}
+      >
+        <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}>
+          {lang}
+        </span>
+        <button
+          onClick={handleCopy}
+          aria-label={copied ? "Copied!" : "Copy code"}
+          title={copied ? "Copied!" : "Copy code"}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: copied ? "#34d399" : "var(--proof-text-muted)",
+            fontSize: 10,
+            padding: "2px 4px",
+            borderRadius: 4,
+            transition: "color 0.15s",
+          }}
+        >
+          {copied ? <Check size={10} /> : <Copy size={10} />}
+          {copied ? "Copied!" : "Copy code"}
+        </button>
+      </div>
+      <Highlight
+        theme={themes.vsDark}
+        code={children.trimEnd()}
+        language={lang as Parameters<typeof Highlight>[0]["language"]}
+      >
+        {({ className, style, tokens, getLineProps, getTokenProps }) => (
+          <pre
+            className={className}
+            style={{
+              ...style,
+              margin: 0,
+              borderRadius: "0 0 8px 8px",
+              padding: "10px 12px",
+              fontSize: 12,
+              overflowX: "auto",
+              fontFamily: "var(--font-mono)",
+              background: "rgba(0,0,0,0.35)",
+            }}
+          >
+            {tokens.map((line, i) => (
+              <div key={i} {...getLineProps({ line })}>
+                {line.map((token, key) => (
+                  <span key={key} {...getTokenProps({ token })} />
+                ))}
+              </div>
+            ))}
+          </pre>
+        )}
+      </Highlight>
+    </div>
   );
 }
 
@@ -101,7 +185,7 @@ function ThinkingDots() {
   );
 }
 
-export function AssistantBubble({ message, onRetry, providerType = "openai" }: BubbleProps) {
+function AssistantBubbleInner({ message, onRetry, providerType = "openai" }: BubbleProps) {
   const hasContent = message.content.length > 0;
   const hasToolCalls = (message.toolCalls?.length ?? 0) > 0;
   const isStreaming = !!message.streaming;
@@ -216,26 +300,13 @@ export function AssistantBubble({ message, onRetry, providerType = "openai" }: B
                     <li style={{ margin: "3px 0", lineHeight: 1.6 }}>{children}</li>
                   ),
                   code: ({ children, className }) => {
+                    const match = /language-(\w+)/.exec(className || "");
                     const isBlock = !!className;
+                    const code = String(children).replace(/\n$/, "");
                     return isBlock ? (
-                      <pre
-                        style={{
-                          background: "var(--proof-surface)",
-                          border: "1px solid var(--proof-border)",
-                          borderRadius: 8,
-                          padding: "10px 12px",
-                          fontSize: 12,
-                          overflowX: "auto",
-                          margin: "8px 0",
-                          fontFamily: "var(--font-mono)",
-                        }}
-                      >
-                        <code
-                          style={{ fontFamily: "var(--font-mono)", color: "var(--proof-text)" }}
-                        >
-                          {children}
-                        </code>
-                      </pre>
+                      <CodeBlock language={match?.[1] ?? "text"}>
+                        {code}
+                      </CodeBlock>
                     ) : (
                       <code
                         style={{
@@ -386,7 +457,6 @@ export function AssistantBubble({ message, onRetry, providerType = "openai" }: B
           </div>
         )}
 
-        {/* Error state — only shown outside the content bubble for clarity */}
         {hasError && !isStreaming && (
           <div
             role="alert"
@@ -418,7 +488,7 @@ export function AssistantBubble({ message, onRetry, providerType = "openai" }: B
               minute: "2-digit",
             })}
           </span>
-          {!isStreaming && hasContent && <CopyButton text={message.content} />}
+          {!isStreaming && hasContent && <CopyButton text={message.content} label="Copy" />}
           {!isStreaming && hasError && onRetry && (
             <button
               onClick={() => onRetry(message.id)}
@@ -445,3 +515,5 @@ export function AssistantBubble({ message, onRetry, providerType = "openai" }: B
     </div>
   );
 }
+
+export const AssistantBubble = React.memo(AssistantBubbleInner);

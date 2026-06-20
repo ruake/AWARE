@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation } from "wouter";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import type { TableData, TableColumn } from "@/lib/copilot/types";
 
 interface Props {
@@ -20,6 +21,8 @@ const ENV_TEXT: Record<string, string> = {
   PASS: "#4ade80",
   FAIL: "#f87171",
 };
+
+const VIRTUAL_THRESHOLD = 50;
 
 function formatCell(
   value: string | number | null,
@@ -95,12 +98,131 @@ function formatCell(
   }
 }
 
+const ROW_HEIGHT = 32;
+
+function VirtualBody({
+  rows,
+  columns,
+  colStats,
+  onNavigate,
+  onVisibleCount,
+}: {
+  rows: Array<Record<string, string | number | null>>;
+  columns: TableColumn[];
+  colStats: Record<string, { max: number | string; min: number | string }>;
+  onNavigate: (href: string) => void;
+  onVisibleCount?: (n: number) => void;
+}) {
+  const parentRef = React.useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 8,
+  });
+
+  const visibleItems = virtualizer.getVirtualItems();
+  React.useEffect(() => {
+    onVisibleCount?.(visibleItems.length);
+  }, [visibleItems.length, onVisibleCount]);
+
+  return (
+    <div
+      ref={parentRef}
+      style={{ overflowY: "auto", maxHeight: 320 }}
+    >
+      <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+        {virtualizer.getVirtualItems().map((vItem) => {
+          const row = rows[vItem.index];
+          const ri = vItem.index;
+          return (
+            <div
+              key={vItem.key}
+              data-index={vItem.index}
+              ref={virtualizer.measureElement}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                transform: `translateY(${vItem.start}px)`,
+                display: "flex",
+                borderBottom: ri < rows.length - 1 ? "1px solid var(--proof-border)" : "none",
+                background: ri % 2 === 0 ? "transparent" : "var(--proof-subtle-bg)",
+              }}
+            >
+              {columns.map((col) => {
+                const val = row[col.key] ?? null;
+                const stats = colStats[col.key];
+                const isMax = stats !== undefined && val === stats.max && col.highlight === "max";
+                const isMin = stats !== undefined && val === stats.min && col.highlight === "min";
+                const href = col.link ? col.link(row) : null;
+                const cellContent = formatCell(val, col, isMax, isMin);
+                return (
+                  <div
+                    key={col.key}
+                    style={{
+                      padding: "6px 12px",
+                      textAlign: col.align ?? "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      flex: col.width ? `0 0 ${col.width}px` : 1,
+                      minWidth: 0,
+                      fontSize: 11.5,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent:
+                        col.align === "right"
+                          ? "flex-end"
+                          : col.align === "center"
+                            ? "center"
+                            : "flex-start",
+                    }}
+                  >
+                    {href ? (
+                      <a
+                        href={href}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onNavigate(href);
+                        }}
+                        style={{
+                          color: "var(--proof-blue-bright)",
+                          textDecoration: "none",
+                          cursor: "pointer",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.textDecoration = "underline";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.textDecoration = "none";
+                        }}
+                      >
+                        {cellContent}
+                      </a>
+                    ) : (
+                      cellContent
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function DataTable({ table }: Props) {
   const [, navigate] = useLocation();
   const [sortKey, setSortKey] = React.useState<string>(table.sortBy ?? "");
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">(table.sortDir ?? "desc");
+  const [showAll, setShowAll] = React.useState(false);
+  const [visibleCount, setVisibleCount] = React.useState(0);
 
-  const rows = React.useMemo(() => {
+  const sorted = React.useMemo(() => {
     if (!sortKey) return table.rows;
     return [...table.rows].sort((a, b) => {
       const av = a[sortKey],
@@ -115,7 +237,9 @@ export default function DataTable({ table }: Props) {
     });
   }, [table.rows, sortKey, sortDir]);
 
-  // Compute max/min per column
+  const useVirtual = sorted.length > VIRTUAL_THRESHOLD && !showAll;
+  const rows = useVirtual ? sorted : sorted;
+
   const colStats = React.useMemo(() => {
     const stats: Record<string, { max: number | string; min: number | string }> = {};
     for (const col of table.columns) {
@@ -149,7 +273,6 @@ export default function DataTable({ table }: Props) {
         background: "var(--proof-hover-light)",
       }}
     >
-      {/* Header */}
       {(table.title || table.subtitle) && (
         <div style={{ padding: "10px 14px 8px", borderBottom: "1px solid var(--proof-border)" }}>
           {table.title && (
@@ -165,7 +288,6 @@ export default function DataTable({ table }: Props) {
         </div>
       )}
 
-      {/* Table */}
       <div style={{ overflowX: "auto" }}>
         <table
           style={{
@@ -207,76 +329,87 @@ export default function DataTable({ table }: Props) {
               ))}
             </tr>
           </thead>
-          <tbody>
-            {rows.map((row, ri) => (
-              <tr
-                key={ri}
-                style={{
-                  borderBottom: ri < rows.length - 1 ? "1px solid var(--proof-border)" : "none",
-                  background: ri % 2 === 0 ? "transparent" : "var(--proof-subtle-bg)",
-                  transition: "background 0.1s",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background =
-                    ri % 2 === 0 ? "transparent" : "var(--proof-subtle-bg)";
-                }}
-              >
-                {table.columns.map((col) => {
-                  const val = row[col.key] ?? null;
-                  const stats = colStats[col.key];
-                  const isMax = stats !== undefined && val === stats.max && col.highlight === "max";
-                  const isMin = stats !== undefined && val === stats.min && col.highlight === "min";
-                  const href = col.link ? col.link(row) : null;
-                  const cellContent = formatCell(val, col, isMax, isMin);
-                  return (
-                    <td
-                      key={col.key}
-                      style={{
-                        padding: "6px 12px",
-                        textAlign: col.align ?? "left",
-                        whiteSpace: "nowrap",
-                        maxWidth: 200,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {href ? (
-                        <a
-                          href={href}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate(href);
-                          }}
-                          style={{
-                            color: "var(--proof-blue-bright)",
-                            textDecoration: "none",
-                            cursor: "pointer",
-                          }}
-                          onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLElement).style.textDecoration = "underline";
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.textDecoration = "none";
-                          }}
-                        >
-                          {cellContent}
-                        </a>
-                      ) : (
-                        cellContent
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
+          {!useVirtual && (
+            <tbody>
+              {rows.map((row, ri) => (
+                <tr
+                  key={ri}
+                  style={{
+                    borderBottom: ri < rows.length - 1 ? "1px solid var(--proof-border)" : "none",
+                    background: ri % 2 === 0 ? "transparent" : "var(--proof-subtle-bg)",
+                    transition: "background 0.1s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background =
+                      ri % 2 === 0 ? "transparent" : "var(--proof-subtle-bg)";
+                  }}
+                >
+                  {table.columns.map((col) => {
+                    const val = row[col.key] ?? null;
+                    const stats = colStats[col.key];
+                    const isMax = stats !== undefined && val === stats.max && col.highlight === "max";
+                    const isMin = stats !== undefined && val === stats.min && col.highlight === "min";
+                    const href = col.link ? col.link(row) : null;
+                    const cellContent = formatCell(val, col, isMax, isMin);
+                    return (
+                      <td
+                        key={col.key}
+                        style={{
+                          padding: "6px 12px",
+                          textAlign: col.align ?? "left",
+                          whiteSpace: "nowrap",
+                          maxWidth: 200,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {href ? (
+                          <a
+                            href={href}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              navigate(href);
+                            }}
+                            style={{
+                              color: "var(--proof-blue-bright)",
+                              textDecoration: "none",
+                              cursor: "pointer",
+                            }}
+                            onMouseEnter={(e) => {
+                              (e.currentTarget as HTMLElement).style.textDecoration = "underline";
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.currentTarget as HTMLElement).style.textDecoration = "none";
+                            }}
+                          >
+                            {cellContent}
+                          </a>
+                        ) : (
+                          cellContent
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          )}
         </table>
+
+        {useVirtual && (
+          <VirtualBody
+            rows={sorted}
+            columns={table.columns}
+            colStats={colStats}
+            onNavigate={navigate}
+            onVisibleCount={setVisibleCount}
+          />
+        )}
       </div>
 
-      {/* Footer */}
       <div
         style={{
           padding: "5px 12px",
@@ -288,11 +421,33 @@ export default function DataTable({ table }: Props) {
           color: "var(--proof-text-muted)",
         }}
       >
-        <span>
-          {rows.length} row{rows.length !== 1 ? "s" : ""}
-        </span>
-        <span>·</span>
-        <span>Click header to sort</span>
+        {useVirtual ? (
+          <>
+            <span>Showing {visibleCount} of {sorted.length} rows</span>
+            <span>·</span>
+            <button
+              onClick={() => setShowAll(true)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--proof-blue-bright)",
+                cursor: "pointer",
+                fontSize: 9.5,
+                padding: 0,
+              }}
+            >
+              Load all
+            </button>
+          </>
+        ) : (
+          <>
+            <span>
+              {rows.length} row{rows.length !== 1 ? "s" : ""}
+            </span>
+            <span>·</span>
+            <span>Click header to sort</span>
+          </>
+        )}
       </div>
     </div>
   );

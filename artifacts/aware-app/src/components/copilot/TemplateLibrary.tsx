@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import { Search, X, Star, Pin, Trash2, FileText, Sparkles, Bookmark } from "lucide-react";
 import type { PromptTemplate } from "../../lib/copilot/types";
 import { loadTemplates, saveTemplates, deleteTemplate } from "../../lib/copilot/storage";
@@ -32,6 +32,7 @@ const CARD_STYLE: React.CSSProperties = {
   cursor: "pointer",
   transition: "all var(--proof-transition)",
   position: "relative",
+  outline: "none",
 };
 
 export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryProps) {
@@ -39,6 +40,10 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("All");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const listRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const filtered = useMemo(() => {
     let list = templates;
@@ -54,7 +59,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
     return [...pinned, ...unpinned];
   }, [templates, search, category]);
 
-  const handleDelete = (e: React.MouseEvent, id: string) => {
+  const handleDelete = useCallback((e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (confirmDelete === id) {
       deleteTemplate(id);
@@ -63,12 +68,62 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
     } else {
       setConfirmDelete(id);
     }
-  };
+  }, [confirmDelete]);
 
-  const handleUse = (content: string) => {
+  const handleUse = useCallback((content: string) => {
     onSelect(content);
     onClose();
-  };
+  }, [onSelect, onClose]);
+
+  const focusItem = useCallback((idx: number) => {
+    setFocusedIndex(idx);
+    itemRefs.current.get(idx)?.focus();
+  }, []);
+
+  const handleListKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const len = filtered.length;
+    if (len === 0) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        focusItem(focusedIndex < len - 1 ? focusedIndex + 1 : 0);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        focusItem(focusedIndex > 0 ? focusedIndex - 1 : len - 1);
+        break;
+      case "Home":
+        e.preventDefault();
+        focusItem(0);
+        break;
+      case "End":
+        e.preventDefault();
+        focusItem(len - 1);
+        break;
+      case "Enter":
+        if (focusedIndex >= 0 && focusedIndex < len) {
+          e.preventDefault();
+          handleUse(filtered[focusedIndex].content);
+        }
+        break;
+      case "Escape":
+        onClose();
+        break;
+    }
+  }, [filtered, focusedIndex, focusItem, handleUse, onClose]);
+
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  React.useEffect(() => {
+    setFocusedIndex(-1);
+  }, [search, category]);
 
   return (
     <div
@@ -95,6 +150,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
           flexDirection: "column",
           animation: "fadeSlideIn 180ms ease-out",
         }}
+        onKeyDown={handleListKeyDown}
       >
         {/* Header */}
         <div
@@ -127,6 +183,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
           </div>
           <button
             onClick={onClose}
+            aria-label="Close template library"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -159,9 +216,11 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
           >
             <Search size={13} color="var(--proof-text-muted)" />
             <input
+              ref={searchRef}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search templates..."
+              placeholder="Search templates... (↑↓ to navigate)"
+              aria-label="Search templates"
               style={{
                 flex: 1,
                 background: "transparent",
@@ -200,12 +259,16 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
             flexWrap: "wrap",
             flexShrink: 0,
           }}
+          role="tablist"
+          aria-label="Template categories"
         >
           {CATEGORIES.map((cat) => {
             const active = category === cat;
             return (
               <button
                 key={cat}
+                role="tab"
+                aria-selected={active}
                 onClick={() => setCategory(cat)}
                 style={{
                   display: "inline-flex",
@@ -230,7 +293,13 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
         </div>
 
         {/* List */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 16px" }}>
+        <div
+          ref={listRef}
+          role="listbox"
+          aria-label="Template list"
+          aria-activedescendant={focusedIndex >= 0 ? `template-item-${focusedIndex}` : undefined}
+          style={{ flex: 1, overflowY: "auto", padding: "0 16px 16px" }}
+        >
           {filtered.length === 0 ? (
             <div
               style={{
@@ -253,7 +322,6 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {/* Pinned section header */}
               {filtered.some((t) => t.pinned) && (
                 <div
                   style={{
@@ -275,6 +343,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
               {filtered.map((template, idx) => {
                 const isFirstUnpinned =
                   idx > 0 && !template.pinned && filtered[idx - 1]?.pinned;
+                const isFocused = focusedIndex === idx;
                 return (
                   <React.Fragment key={template.id}>
                     {isFirstUnpinned && (
@@ -296,20 +365,44 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                       </div>
                     )}
                     <div
+                      id={`template-item-${idx}`}
+                      role="option"
+                      aria-selected={isFocused}
+                      tabIndex={isFocused ? 0 : -1}
+                      ref={(el) => {
+                        if (el) itemRefs.current.set(idx, el);
+                        else itemRefs.current.delete(idx);
+                      }}
                       onClick={() => handleUse(template.content)}
-                      style={CARD_STYLE}
+                      onFocus={() => setFocusedIndex(idx)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleUse(template.content);
+                        }
+                      }}
+                      style={{
+                        ...CARD_STYLE,
+                        border: isFocused
+                          ? "1px solid var(--proof-blue-border)"
+                          : "1px solid var(--proof-border)",
+                        background: isFocused ? "var(--proof-surface-hover)" : "var(--proof-surface)",
+                      }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.borderColor = "var(--proof-border-accent)";
                         e.currentTarget.style.background = "var(--proof-surface-hover)";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "var(--proof-border)";
-                        e.currentTarget.style.background = "var(--proof-surface)";
+                        if (!isFocused) {
+                          e.currentTarget.style.borderColor = "var(--proof-border)";
+                          e.currentTarget.style.background = "var(--proof-surface)";
+                        }
                       }}
                     >
                       {/* Delete button */}
                       <button
                         onClick={(e) => handleDelete(e, template.id)}
+                        tabIndex={-1}
                         style={{
                           position: "absolute",
                           top: 6,
@@ -334,7 +427,6 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                       </button>
 
                       <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                        {/* Icon */}
                         <div
                           style={{
                             width: 32,
@@ -352,7 +444,6 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                         </div>
 
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          {/* Name + Pinned badge */}
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                             <span
                               style={{
@@ -385,7 +476,6 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                             )}
                           </div>
 
-                          {/* Description */}
                           <div
                             style={{
                               fontSize: 10.5,
@@ -401,7 +491,6 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                             {template.description}
                           </div>
 
-                          {/* Content preview */}
                           <div
                             style={{
                               marginTop: 6,
@@ -425,7 +514,6 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                         </div>
                       </div>
 
-                      {/* Use button */}
                       <div
                         style={{
                           display: "flex",
@@ -438,6 +526,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                             e.stopPropagation();
                             handleUse(template.content);
                           }}
+                          tabIndex={-1}
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
@@ -453,7 +542,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                             transition: "all var(--proof-transition)",
                           }}
                         >
-                          Use
+                          Use ↵
                         </button>
                       </div>
                     </div>
@@ -478,16 +567,16 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
           }}
         >
           <Pin size={9} />
-          Hover over a card to reveal delete
+          ↑↓ navigate · Enter to use · Esc to close
         </div>
       </div>
 
-      {/* Hover reveal for delete buttons */}
       <style>{`
         .template-delete-btn {
           opacity: 0 !important;
         }
         div:hover > .template-delete-btn,
+        div:focus > .template-delete-btn,
         div:focus-within > .template-delete-btn {
           opacity: 1 !important;
         }

@@ -85,6 +85,11 @@ export interface GraphNodeState {
   toolNames?: string[];
 }
 
+// ── Tool Execution Context ────────────────────────────────────────────────────
+export interface ToolContext {
+  signal: AbortSignal;
+}
+
 // ── Tool Definition ──────────────────────────────────────────────────────────
 export interface ToolDefinition {
   name: string;
@@ -96,7 +101,7 @@ export interface ToolDefinition {
     properties: Record<string, { type: string; description: string; enum?: string[] }>;
     required?: string[];
   };
-  execute(args: Record<string, unknown>): Promise<ToolResult>;
+  execute(args: Record<string, unknown>, context: ToolContext): Promise<ToolResult>;
 }
 
 // ── Streaming Delta ──────────────────────────────────────────────────────────

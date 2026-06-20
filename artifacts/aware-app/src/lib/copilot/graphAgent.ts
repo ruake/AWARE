@@ -358,7 +358,7 @@ function executeNode(): AgentNode {
 
         try {
           const start = performance.now();
-          const result: ToolResult = await toolDef.execute(tc.args);
+          const result: ToolResult = await toolDef.execute(tc.args, { signal: ctx.signal });
           const duration = Math.round(performance.now() - start);
 
           ctx.onEvent({
