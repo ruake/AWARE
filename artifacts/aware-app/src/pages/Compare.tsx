@@ -33,12 +33,12 @@ export default function Compare() {
   const [searchText, setSearchText] = useSyncedUrlState("q", "");
   const [regressionsOnly, setRegressionsOnly] = useSyncedUrlState("regressions", false);
   const [activeFilter, setActiveFilter] = useSyncedUrlState<string | null>("filter", null);
-  const [swapped] = React.useState(false);
+  const [swapped, setSwapped] = React.useState(false);
   const [selectedIdx, setSelectedIdx] = React.useState(-1);
   const [computedRows, setComputedRows] = React.useState<DiffRow[]>([]);
   const [baseResults, setBaseResults] = React.useState<TestResult[]>([]);
   const [candResults, setCandResults] = React.useState<TestResult[]>([]);
-  const [diffPage] = React.useState(1);
+  const [diffPage, setDiffPage] = React.useState(1);
   const DIFF_PAGE_SIZE = 25;
   // Derive effective run IDs: use URL param if set, otherwise pick from envRuns
   const effectiveBaseline = baseline || envRuns[envRuns.length - 1]?.id || "";
@@ -269,6 +269,14 @@ export default function Compare() {
               />
               Regressions only
             </label>
+            <button
+              onClick={() => setSwapped((s) => !s)}
+              className="proof-button-ghost"
+              title="Swap baseline and candidate"
+              style={{ fontSize: 11, whiteSpace: "nowrap", flexShrink: 0, display: "flex", alignItems: "center", gap: 4 }}
+            >
+              ⇄ Swap
+            </button>
             {hasActiveFilters && (
               <button onClick={() => setColFilters({})} className="proof-button-ghost" style={{ fontSize: 11, color: "var(--proof-red)" }}>
                 Clear column filters
@@ -436,6 +444,23 @@ export default function Compare() {
           </tbody>
         </table>
       </PageTemplate>
+      {diffTotalPages > 1 && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "8px 0 4px", fontSize: 12 }}>
+          <button
+            disabled={safeDiffPage <= 1}
+            onClick={() => setDiffPage((p) => Math.max(1, p - 1))}
+            className="proof-button proof-button-xs"
+          >Prev</button>
+          <span style={{ color: "var(--proof-text-secondary)" }}>
+            Page {safeDiffPage} of {diffTotalPages}
+          </span>
+          <button
+            disabled={safeDiffPage >= diffTotalPages}
+            onClick={() => setDiffPage((p) => Math.min(diffTotalPages, p + 1))}
+            className="proof-button proof-button-xs"
+          >Next</button>
+        </div>
+      )}
     </>
   );
 }

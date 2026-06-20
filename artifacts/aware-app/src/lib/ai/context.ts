@@ -448,7 +448,7 @@ STRICT RULES — YOU MUST FOLLOW THESE:
     {"type":"ColumnChart","title":"Pass Rate by Env","headers":["Env","Rate"],"rows":[["QA",95],["UAT",90],["PROD",100]],"colors":["#5b8af5"]}
     \`\`\`
   - INCORRECT: \`\`\`chart {"type":"ColumnChart"...}\`\`\` (JSON on same line — won't render)
-- LINK FORMAT: Run IDs → [id](/runs/id). Test IDs → [id](/analytics?testId=id).
+- LINK FORMAT: Run IDs → [id](/runs/id). Test IDs → [id](/trends?testId=id).
 - If the data doesn't contain the answer, say "I don't have that data available" — no elaboration.
 
 ${SETUP_KNOWLEDGE}`;

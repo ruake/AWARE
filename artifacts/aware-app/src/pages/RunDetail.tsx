@@ -39,19 +39,21 @@ export default function RunDetail() {
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const run = getRunById(runId) ?? null;
   const results = run ? getTestResultsForRun(run.id) : [];
-  const [search, _setSearch] = useSyncedUrlState("q", "");
-  const [statusFilter, _setStatusFilter] = useSyncedUrlState("status", "all");
-  const [catFilter, _setCatFilter] = useSyncedUrlState("cat", "all");
+  const [search, setSearch] = useSyncedUrlState("q", "");
+  const [statusFilter, setStatusFilter] = useSyncedUrlState("status", "all");
+  const [catFilter, setCatFilter] = useSyncedUrlState("cat", "all");
   const [page, setPage] = React.useState(0);
   const [detailPanelCollapsed, setDetailPanelCollapsed] = React.useState(false);
   const PAGE_SIZE = 20;
 
-  const [prevFilterKey, setPrevFilterKey] = React.useState("");
   const filterKey = `${search}|${statusFilter}|${catFilter}`;
-  if (prevFilterKey !== filterKey) {
-    setPrevFilterKey(filterKey);
-    setPage(0);
-  }
+  const prevFilterKeyRef = React.useRef(filterKey);
+  React.useEffect(() => {
+    if (prevFilterKeyRef.current !== filterKey) {
+      prevFilterKeyRef.current = filterKey;
+      setPage(0);
+    }
+  }, [filterKey]);
   const urlTestId = React.useMemo(() => new URLSearchParams(urlSearch).get("testId"), [urlSearch]);
   const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(null);
 
@@ -145,8 +147,50 @@ export default function RunDetail() {
             }}
           >
             <TimeWindowProvider>
-              <div style={{ padding: "6px 14px", borderBottom: "1px solid var(--proof-grey)" }}>
+              <div style={{ padding: "6px 14px", borderBottom: "1px solid var(--proof-grey)", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                 <TimeWindowControls />
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto" }}>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      className="proof-input"
+                      placeholder="Search tests…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      style={{ paddingLeft: 22, width: 160, height: 24, fontSize: 11 }}
+                    />
+                    <span style={{ position: "absolute", left: 6, top: "50%", transform: "translateY(-50%)", color: "var(--proof-text-muted)", pointerEvents: "none", fontSize: 11 }}>⌕</span>
+                  </div>
+                  <select
+                    className="proof-input"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    style={{ fontSize: 11, height: 24, padding: "0 6px" }}
+                  >
+                    <option value="all">All statuses</option>
+                    <option value="PASS">PASS</option>
+                    <option value="FAIL">FAIL</option>
+                  </select>
+                  <select
+                    className="proof-input"
+                    value={catFilter}
+                    onChange={(e) => setCatFilter(e.target.value)}
+                    style={{ fontSize: 11, height: 24, padding: "0 6px" }}
+                  >
+                    <option value="all">All categories</option>
+                    {[...new Set(results.map((r) => r.category).filter(Boolean))].sort().map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  {(search || statusFilter !== "all" || catFilter !== "all") && (
+                    <button
+                      onClick={() => { setSearch(""); setStatusFilter("all"); setCatFilter("all"); }}
+                      className="proof-button-ghost"
+                      style={{ fontSize: 10, padding: "2px 6px" }}
+                    >
+                      ✕ Clear
+                    </button>
+                  )}
+                </div>
               </div>
               <div style={{ flex: 1, overflowY: "auto" }}>
                 <table className="proof-table">
@@ -521,7 +565,7 @@ export default function RunDetail() {
                     }}
                   >
                     <button
-                      onClick={() => navigate(`/analytics?testId=${selectedResult.id}`)}
+                      onClick={() => navigate(`/trends?testId=${selectedResult.id}`)}
                       className="proof-button proof-button-xs"
                       style={{ flex: 1 }}
                     >

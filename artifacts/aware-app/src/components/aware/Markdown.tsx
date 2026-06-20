@@ -16,11 +16,11 @@ const LINK_PATTERNS = [
   { pattern: /\b(tr_\w+)\b/g, href: (id: string) => `/runs/${encodeURIComponent(id)}` },
   {
     pattern: /\b(diff_\w+)\b/g,
-    href: (id: string) => `/analytics?diffId=${encodeURIComponent(id)}`,
+    href: (id: string) => `/trends?diffId=${encodeURIComponent(id)}`,
   },
   {
     pattern: /\b([a-z]+_\d+)\b/g,
-    href: (id: string) => `/analytics?testId=${encodeURIComponent(id)}`,
+    href: (id: string) => `/trends?testId=${encodeURIComponent(id)}`,
   },
 ];
 

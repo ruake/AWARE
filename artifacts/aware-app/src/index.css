@@ -195,6 +195,13 @@ html.light {
   --proof-glass-border:     rgba(37,99,235,0.10);
   --proof-shadow-card:      0 0 0 1px rgba(37,99,235,0.08), 0 2px 12px rgba(37,99,235,0.07);
   --proof-shadow-card-hover:0 0 0 1px rgba(37,99,235,0.16), 0 6px 24px rgba(37,99,235,0.12);
+  --proof-grey:             rgba(37,99,235,0.18);
+  --proof-grey-bg:          rgba(37,99,235,0.05);
+  --proof-text-dim:         #6b86b3;
+  --proof-active-bg:        var(--proof-surface-active);
+  --proof-shadow-sm:        0 1px 4px rgba(37,99,235,0.10);
+  --proof-shadow-md:        0 4px 16px rgba(37,99,235,0.12);
+  --proof-shadow-lg:        0 8px 32px rgba(37,99,235,0.14);
 }
 
 /* ═══════════════════════════════════════════════════════════════════

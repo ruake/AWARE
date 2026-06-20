@@ -415,7 +415,7 @@ export function TestManagerSidePanel({
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button
-            onClick={() => navigate(`/analytics?testId=${tc.id}`)}
+            onClick={() => navigate(`/trends?testId=${tc.id}`)}
             className="proof-button proof-button-sm"
             style={{ flex: 1 }}
           >

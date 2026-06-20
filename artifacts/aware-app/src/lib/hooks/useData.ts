@@ -167,7 +167,10 @@ export function usePassRateChart() {
 
 /** Per-env pass rate data for multi-line chart. */
 export function usePerEnvPassRate() {
-  return getPerEnvPassRate();
+  // Subscribe to both runs and selected-env so callers re-render on any data change.
+  React.useSyncExternalStore(subscribeToRuns, getRuns);
+  const snap = React.useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
+  return React.useMemo(() => getPerEnvPassRate(), [snap]);
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -256,9 +259,10 @@ export function useRun(runId: string | undefined): Run | undefined {
 
 /** Formats a timestamp relative to now (e.g. "3 min ago", "2 days ago"). */
 export function useRelativeTime(iso: string | undefined): string {
-  const [now, setNow] = React.useState(0);
+  const [now, setNow] = React.useState(Date.now);
   React.useEffect(() => {
     const tick = () => setNow(Date.now());
+    tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
   }, []);

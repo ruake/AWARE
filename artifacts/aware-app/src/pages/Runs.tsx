@@ -107,10 +107,6 @@ export default function Runs() {
     ? allRuns.filter((r) => envSnap.envIds.includes(r.envId))
     : allRuns;
 
-  React.useEffect(() => {
-    const interval = setInterval(() => {}, 10000);
-    return () => clearInterval(interval);
-  }, []);
 
   const filtered = envFilteredRuns.filter((r) => {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;

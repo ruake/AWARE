@@ -80,13 +80,12 @@ export default function StartRun() {
               Review baseline vs candidate differences
             </div>
           </div>
-          <a
-            href="/compare"
+          <button
+            onClick={() => window.location.assign("/compare")}
             className="proof-button proof-button-sm"
-            style={{ textDecoration: "none" }}
           >
             Compare <ExternalLink size={12} />
-          </a>
+          </button>
         </div>
       </div>
     </div>

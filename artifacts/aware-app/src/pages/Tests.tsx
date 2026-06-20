@@ -26,9 +26,9 @@ export default function Tests() {
   const { tcs, suites } = useTestData();
   const [, navigate] = useLocation();
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
-  const params = new URLSearchParams(window.location.search);
-  const suiteFilter = params.get("suite") || "";
-  const detailId = params.get("detail") || "";
+  const rawSearch = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+  const suiteFilter = rawSearch.get("suite") || "";
+  const detailId = rawSearch.get("detail") || "";
 
   const [search, setSearch] = useSyncedUrlState("q", "");
   const [testType, setTestType] = useSyncedUrlState("type", "All");
