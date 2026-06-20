@@ -1,6 +1,8 @@
 import type { TestCase } from "./types";
 import { fetchJson } from "./dataFetcher";
-import { _notifyTC } from "./store";
+import { _notifyTC, subscribeToTestCases } from "./store";
+
+export { subscribeToTestCases as subscribeToAutoTests };
 
 let _autoTests: TestCase[] = [];
 let _testsLoaded = false;

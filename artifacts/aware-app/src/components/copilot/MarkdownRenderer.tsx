@@ -82,8 +82,7 @@ function CustomLink({ href, children }: { href?: string; children: React.ReactNo
     return (
       <a
         href={href}
-        target="_blank"
-        rel="noopener noreferrer"
+        target="_blank" rel="noopener noreferrer"
         style={{
           color: "var(--proof-blue-bright)",
           textDecoration: "underline",

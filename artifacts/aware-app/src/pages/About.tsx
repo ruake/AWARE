@@ -1,8 +1,9 @@
 import React, { useSyncExternalStore } from "react";
-import { ENV_SUMMARY, computeRunFrequency, subscribeToRuns, getRuns } from "@/lib/data";
-import { getAutoDiscoveredTests, getAutoDiscoverySummary } from "@/lib/data";
-import { getTestSuites } from "@/lib/data";
-import { getAllPromotionDecisions } from "@/lib/data";
+import { computeRunFrequency, subscribeToRuns, getRuns } from "@/lib/data";
+import { getAutoDiscoverySummary, subscribeToAutoTests, getAutoDiscoveredTests } from "@/lib/data";
+import { getTestSuites, subscribeToTestSuites } from "@/lib/data";
+import { getTestCases, subscribeToTestCases } from "@/lib/data";
+import { getAllPromotionDecisions, subscribeToPromotions } from "@/lib/data";
 import { getEnvConfigs } from "@/lib/envConfig";
 import { AboutHero } from "@/components/aware/AboutHero";
 import { AboutStats } from "@/components/aware/AboutStats";
@@ -13,23 +14,23 @@ import { AboutTestCategories } from "@/components/aware/AboutTestCategories";
 
 export default function About() {
   const liveRuns = useSyncExternalStore(subscribeToRuns, getRuns);
-  const suites = getTestSuites();
-  const tests = getAutoDiscoveredTests();
-  const summary = getAutoDiscoverySummary();
-  const promos = getAllPromotionDecisions();
+  const suites = useSyncExternalStore(subscribeToTestSuites, getTestSuites);
+  const testCases = useSyncExternalStore(subscribeToTestCases, getTestCases);
+  const autoTests = useSyncExternalStore(subscribeToAutoTests, getAutoDiscoveredTests);
+  const promos = useSyncExternalStore(subscribeToPromotions, getAllPromotionDecisions);
   const freq = computeRunFrequency();
   const promoteCount = promos.filter((p) => p.decision === "promote").length;
   const promoPct = promos.length > 0 ? Math.round((promoteCount / promos.length) * 100) : 0;
+  const totalTests = testCases.length > 0 ? testCases.length : autoTests.length;
   const recentRuns = [...liveRuns]
     .sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())
     .slice(0, 20);
   const overallRate =
     recentRuns.length > 0
       ? Math.round(recentRuns.reduce((s, r) => s + r.passPct, 0) / recentRuns.length)
-      : ENV_SUMMARY.length > 0
-      ? Math.round(ENV_SUMMARY.reduce((s, e) => s + e.passRate, 0) / ENV_SUMMARY.length)
       : 0;
   const envs = getEnvConfigs();
+  const summary = getAutoDiscoverySummary();
   const cats = summary.byCategory ?? {};
   const runsPerDay = typeof freq === "object" ? `${freq.runsPerDay.toFixed(1)}/day` : String(freq);
 
@@ -56,7 +57,7 @@ export default function About() {
         <AboutHero />
         <AboutStats
           runs={liveRuns.length}
-          tests={tests.length}
+          tests={totalTests}
           suites={suites.length}
           passRate={overallRate}
           promoPct={promoPct}

@@ -58,7 +58,7 @@ export default function TestAnalytics() {
     }[]
   >([]);
   React.useEffect(() => {
-    getTestDetailsAsync().then(setTestDetails);
+    getTestDetailsAsync().then(setTestDetails).catch(() => {});
   }, []);
 
   const rawTestId = (() => {

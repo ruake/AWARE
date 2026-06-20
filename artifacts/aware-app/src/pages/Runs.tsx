@@ -7,6 +7,7 @@ import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import type { Run } from "@/lib/types";
 import { Play, GitCompare, Loader2, ExternalLink, Search, X } from "lucide-react";
+import { repo } from "@/lib/nav";
 
 /* ── status config ─────────────────────────────────────────────── */
 const STATUS_CFG: Record<Run["status"], { label: string; color: string; bg: string; border: string }> = {
@@ -161,7 +162,7 @@ export default function Runs() {
         }
         headerActions={
           <button
-            onClick={() => window.open("https://github.com/ruake/AWARE/actions/workflows/run-tests.yml", "_blank")}
+            onClick={() => window.open(`${repo}/actions/workflows/run-tests.yml`, "_blank")}
             className="proof-button-primary"
           >
             <Play size={12} /> Start Run <ExternalLink size={10} style={{ opacity: 0.7 }} />

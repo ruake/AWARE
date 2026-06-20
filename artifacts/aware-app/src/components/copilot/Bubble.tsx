@@ -20,7 +20,7 @@ function CopyButton({ text }: { text: string }) {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    });
+    }).catch(() => {});
   };
   return (
     <button
@@ -348,8 +348,7 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
                   a: ({ children, href }) => (
                     <a
                       href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      target="_blank" rel="noopener noreferrer"
                       style={{
                         color: "var(--proof-blue-bright)",
                         textDecoration: "underline",

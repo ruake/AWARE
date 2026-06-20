@@ -117,6 +117,7 @@ export {
   getAutoDiscoveredTests,
   getAutoDiscoverySummary,
   loadAutoDiscoveredTests,
+  subscribeToAutoTests,
 } from "./testDiscovery";
 
 export {

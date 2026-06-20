@@ -1,6 +1,6 @@
 import React from "react";
 
-type StatusType = "PASS" | "FAIL" | "FLAKY" | "WARNING" | "SKIP" | "RUNNING" | "PARTIAL";
+type StatusType = "PASS" | "FAIL" | "FLAKY" | "WARNING" | "SKIP" | "RUNNING" | "PARTIAL" | "ERROR" | "PENDING";
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -15,6 +15,8 @@ const STATUS_MAP: Record<string, string> = {
   SKIP: "proof-badge-skip",
   RUNNING: "proof-badge-running",
   PARTIAL: "proof-badge-partial",
+  ERROR: "proof-badge-error",
+  PENDING: "proof-badge-skip",
 };
 
 export function StatusBadge({ status, label }: StatusBadgeProps) {

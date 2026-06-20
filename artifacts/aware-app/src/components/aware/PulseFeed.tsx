@@ -2,8 +2,9 @@ import React from "react";
 import { Activity, ExternalLink } from "lucide-react";
 import type { Run } from "@/lib/types";
 import { RunRow } from "./PulseDetail";
+import { repo } from "@/lib/nav";
 
-const GH_ACTIONS_URL = `https://github.com/ruake/AWARE/actions`;
+const GH_ACTIONS_URL = `${repo}/actions`;
 
 interface PulseFeedProps {
   filtered: readonly Run[];
@@ -144,8 +145,7 @@ export function PulseFeed({ filtered, activeTab, onTabChange, tabCounts, onRunCl
           {filtered.length} workflow{filtered.length > 1 ? "s" : ""}{" "}
           <a
             href={GH_ACTIONS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             style={{
               color: "var(--proof-blue)",
               textDecoration: "none",

@@ -8,7 +8,7 @@ import { ZoomableImage } from "@/components/aware/ZoomableImage";
 function LazyGalleryImage({ source }: { source: string }) {
   const [url, setUrl] = React.useState("");
   React.useEffect(() => {
-    preloadImage(source).then(setUrl);
+    preloadImage(source).then(setUrl).catch(() => {});
   }, [source]);
   if (!url) {
     return (
@@ -148,7 +148,7 @@ function FilmstripThumbnail({
       preloadImage(source).then((url) => {
         setSrc(url);
         setLoaded(true);
-      });
+      }).catch(() => {});
     }
   }, [frame, frame.dataUri, frame.imageUrl]);
 

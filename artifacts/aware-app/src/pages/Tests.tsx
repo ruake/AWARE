@@ -1,6 +1,6 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
-import { getAutoDiscoveredTests, getDataInitState, subscribeToDataInit } from "@/lib/data";
+import { getAutoDiscoveredTests, subscribeToAutoTests, getDataInitState, subscribeToDataInit } from "@/lib/data";
 import { useTestData } from "@/hooks/useTestData";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { PageTemplate } from "@/components/aware";
@@ -26,9 +26,8 @@ export default function Tests() {
   const { tcs, suites } = useTestData();
   const [, navigate] = useLocation();
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
-  const rawSearch = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
-  const suiteFilter = rawSearch.get("suite") || "";
-  const detailId = rawSearch.get("detail") || "";
+  const [suiteFilter] = useSyncedUrlState("suite", "");
+  const [detailId] = useSyncedUrlState("detail", "");
 
   const [search, setSearch] = useSyncedUrlState("q", "");
   const [testType, setTestType] = useSyncedUrlState("type", "All");
@@ -38,7 +37,7 @@ export default function Tests() {
   const [page, setPage] = React.useState(1);
   const [hoveredRow, setHoveredRow] = React.useState<string | null>(null);
 
-  const allTests = React.useMemo(() => getAutoDiscoveredTests(), []);
+  const allTests = useSyncExternalStore(subscribeToAutoTests, getAutoDiscoveredTests);
 
   const filtered = React.useMemo(() => {
     let result = allTests;

@@ -6,6 +6,12 @@ export interface ColumnFilterState {
   selected: string[];
 }
 
+export const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
+
+export function priorityColor(p: string): string {
+  return p === "P0" ? "#ef4444" : p === "P1" ? "#f97316" : p === "P2" ? "#5b8af5" : "#9aa0a6";
+}
+
 export function ColumnFilter({
   label,
   allValues,

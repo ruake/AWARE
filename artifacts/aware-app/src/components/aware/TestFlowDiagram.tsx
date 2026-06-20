@@ -516,8 +516,7 @@ export function TestFlowDiagram({ testCase }: { testCase: TestCase }) {
           {testCase.scriptPath ? (
             <a
               href={getGitHubUrl(testCase)}
-              target="_blank"
-              rel="noopener noreferrer"
+              target="_blank" rel="noopener noreferrer"
               style={{
                 fontFamily: "var(--font-mono)",
                 color: "var(--proof-blue)",
