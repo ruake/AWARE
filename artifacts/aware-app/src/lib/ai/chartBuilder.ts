@@ -1,4 +1,4 @@
-import type { ChartOutput, GoogleChartType } from "./langGraphTypes";
+import type { ChartOutput, ChartType } from "./langGraphTypes";
 
 export const CHART_COLORS = [
   "#5b8af5",
@@ -197,7 +197,7 @@ export function serializeCharts(charts: ChartOutput[]): string {
 }
 
 export function buildChart(
-  type: GoogleChartType,
+  type: ChartType,
   title: string,
   headers: string[],
   rows: unknown[][],

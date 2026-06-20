@@ -2,49 +2,13 @@ import React from "react";
 import { useLocation, useSearch } from "wouter";
 import { DIFF_ROWS, RUNS, getTestResultsForRun, getTestDetailsAsync } from "@/lib/data";
 import { setTestDetailStat } from "@/lib/sidebarData";
-import { getEnvLabels } from "@/lib/envConfig";
-import { ENVS, CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import { useTestData } from "@/hooks/useTestData";
-import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { useSyncedUrlState } from "@/lib/urlState";
-import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-
-import {
-  BarChart3,
-  Clock,
-  Activity,
-  AlertTriangle,
-  FileText,
-  X,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Filter,
-  Bug,
-} from "lucide-react";
-
-interface EnrichedHistoryRow {
-  runId: string;
-  status: "PASS" | "FAIL";
-  duration: number;
-  env: string;
-  error?: string;
-  assertionsPassed: number;
-  assertionsFailed: number;
-}
+import { PageTemplate, FlakinessTable } from "@/components/aware";
+import type { EnrichedHistoryRow } from "@/components/aware/FlakinessTable";
+import { ChevronLeft, ChevronRight, X, Bug, AlertTriangle, Activity } from "lucide-react";
 
 type SortKey = "runId" | "status" | "duration" | "env";
-type SortDir = "asc" | "desc";
 
 function getTestNameForDetail(
   tcs: ReturnType<typeof useTestData>["tcs"],
@@ -127,7 +91,6 @@ export default function TestAnalytics() {
   const [hSort, setHSort] = useSyncedUrlState<string>("hSort", "runId");
   const [selectedRow, setSelectedRow] = React.useState<EnrichedHistoryRow | null>(null);
 
-  // ── Derived values (safe for empty diffs) ──
   const idx =
     diffs.length === 0
       ? 0
@@ -137,7 +100,7 @@ export default function TestAnalytics() {
             0,
             diffs.findIndex((d) => d.id === selectedTestId),
           );
-  const diff = diffs[Math.min(idx, diffs.length - 1)] ?? diffs[0];
+  const _diff = diffs[Math.min(idx, diffs.length - 1)] ?? diffs[0];
   const detail =
     diffs.length === 0 || testDetails.length === 0
       ? { history: [], passRate: 0, flakinessScore: 0, avgDuration: 0 }
@@ -162,7 +125,7 @@ export default function TestAnalytics() {
     if (hErrOnly) rows = rows.filter((r) => r.error);
     const desc = hSort.startsWith("-");
     const key = (desc ? hSort.slice(1) : hSort) as SortKey;
-    const dir: SortDir = desc ? "desc" : "asc";
+    const dir: "asc" | "desc" = desc ? "desc" : "asc";
     return [...rows].sort((a, b) => {
       let cmp = 0;
       if (key === "runId") cmp = a.runId.localeCompare(b.runId);
@@ -173,24 +136,27 @@ export default function TestAnalytics() {
     });
   }, [enriched, hStatus, hEnv, hErrOnly, hSort]);
 
+  const failCount = enriched.filter((r) => r.status === "FAIL").length;
+  const errorCount = enriched.filter((r) => r.error).length;
+  React.useEffect(() => {
+    if (detail.history.length > 0) {
+      setTestDetailStat(
+        {
+          passRate: detail.passRate,
+          flakinessScore: detail.flakinessScore,
+          avgDuration: detail.avgDuration,
+          failCount,
+          errorCount,
+        },
+        hStatus,
+      );
+    }
+  }, [detail.passRate, detail.flakinessScore, detail.avgDuration, detail.history.length, failCount, errorCount, hStatus]);
+
   const uniqueEnvs = React.useMemo(
     () => [...new Set(enriched.map((r) => r.env))].sort(),
     [enriched],
   );
-
-  const toggleSort = (key: SortKey) => {
-    setHSort((prev) => {
-      const clean = prev.startsWith("-") ? prev.slice(1) : prev;
-      if (clean === key) return prev.startsWith("-") ? key : `-${key}`;
-      return key;
-    });
-  };
-
-  const sortIcon = (key: SortKey) => {
-    const clean = hSort.startsWith("-") ? hSort.slice(1) : hSort;
-    if (clean !== key) return <ArrowUpDown size={11} style={{ opacity: 0.3 }} />;
-    return hSort.startsWith("-") ? <ArrowDown size={11} /> : <ArrowUp size={11} />;
-  };
 
   if (diffs.length === 0) {
     return (
@@ -212,1123 +178,225 @@ export default function TestAnalytics() {
     );
   }
 
-  // ── Derived stats ──
-  const envLabels = getEnvLabels();
-  const envStatus = (envLabels.length > 0 ? envLabels : ENVS).map((env) => {
-    const target = env.split("/")[0].toLowerCase();
-    const stage = env.split("/")[1]?.toLowerCase();
-    const runs = detail.history.filter((h) => h.env === stage || h.env === target);
-    const pass = runs.filter((r) => r.status === "PASS").length;
-    const fail = runs.filter((r) => r.status === "FAIL").length;
-    return { env, pass, fail, total: runs.length };
-  });
+  const selIdx = selectedRow ? filteredHistory.findIndex((r) => r.runId === selectedRow.runId) : -1;
 
-  const historyChartData = detail.history
-    .map((h, i) => {
-      const enrichedRow = enriched[i];
-      return {
-        index: i,
-        label: `#${detail.history.length - i}`,
-        runId: h.runId,
-        _realRunId: h.runId,
-        status: h.status,
-        pass: h.status === "PASS" ? 1 : 0,
-        fail: h.status === "FAIL" ? 1 : 0,
-        duration: h.duration,
-        env: h.env,
-        assertionsPassed: enrichedRow?.assertionsPassed ?? 0,
-        assertionsFailed: enrichedRow?.assertionsFailed ?? 0,
-      };
-    })
-    .reverse();
-
-  const isFlaky = detail.flakinessScore > 20;
-  const recent = detail.history.slice(-3);
-  const trend =
-    recent.length < 3
-      ? "insufficient"
-      : recent.every((h) => h.status === "FAIL")
-        ? "degrading"
-        : recent.every((h) => h.status === "PASS")
-          ? "stable"
-          : "flaky";
-
-  const failCount = enriched.filter((r) => r.status === "FAIL").length;
-  const errorCount = enriched.filter((r) => r.error).length;
-
-  React.useEffect(() => {
-    if (detail.history.length > 0) {
-      setTestDetailStat(
-        {
-          passRate: detail.passRate,
-          flakinessScore: detail.flakinessScore,
-          avgDuration: detail.avgDuration,
-          failCount,
-          errorCount,
-        },
-        hStatus,
-      );
+  const navigateDetail = (dir: -1 | 1) => {
+    const next = selIdx + dir;
+    if (next >= 0 && next < filteredHistory.length) {
+      setSelectedRow(filteredHistory[next]);
     }
-  }, [detail.passRate, detail.flakinessScore, detail.avgDuration, failCount, errorCount, hStatus]);
+  };
 
   return (
-    <div
-      className="proof-page"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 20,
-        padding: "24px 32px",
-        maxWidth: "2000px",
-        margin: "0 auto",
-      }}
+    <PageTemplate
+      title="Test Analytics"
+      subtitle={testCase ? `${testCase.name} · ${tcIdx + 1} of ${tcs.length}` : `${testName} · ${idx + 1} of ${diffs.length}`}
     >
-      {/* Charts */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-        {/* Pass/Fail + Duration combined */}
-        <PanelErrorBoundary label="History chart">
-          <div className="proof-card" style={{ padding: 16 }}>
-            <h3
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--proof-text-secondary)",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                marginBottom: 12,
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <Activity size={13} /> Run History Timeline
-            </h3>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart
-                data={historyChartData}
-                margin={{ top: 4, right: 4, bottom: 0, left: 0 }}
-                onClick={(e) => {
-                  if (e?.activePayload?.[0]?.payload?._realRunId) {
-                    navigate(`/runs/${encodeURIComponent(e.activePayload[0].payload._realRunId)}`);
-                  }
-                }}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="var(--proof-border)"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="label"
-                  tick={
-                    {
-                      fontSize: 9,
-                      fill: "var(--proof-text-muted)",
-                    } as React.SVGProps<SVGTextElement>
-                  }
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={
-                    {
-                      fontSize: 9,
-                      fill: "var(--proof-text-muted)",
-                    } as React.SVGProps<SVGTextElement>
-                  }
-                  axisLine={false}
-                  tickLine={false}
-                  domain={[0, 1.2]}
-                  ticks={[0, 1]}
-                  tickFormatter={(v: number) => (v === 1 ? "PASS" : "FAIL")}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--proof-surface)",
-                    border: "1px solid var(--proof-border)",
-                    borderRadius: 8,
-                    fontSize: 11,
-                  }}
-                  labelStyle={{ color: "var(--proof-text-muted)" }}
-                  formatter={(_: unknown, name: string) => {
-                    if (name === "duration") return null;
-                    return [name === "pass" ? "PASS" : "FAIL", "Status"];
-                  }}
-                />
-                <Bar
-                  dataKey="pass"
-                  stackId="a"
-                  fill="#22c55e"
-                  radius={[2, 2, 0, 0]}
-                  maxBarSize={20}
-                />
-                <Bar
-                  dataKey="fail"
-                  stackId="a"
-                  fill="#ef4444"
-                  radius={[2, 2, 0, 0]}
-                  maxBarSize={20}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1, minHeight: 0 }}>
+        <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
+          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+            <FlakinessTable
+              filteredHistory={filteredHistory}
+              enriched={enriched}
+              hStatus={hStatus}
+              setHStatus={setHStatus}
+              hEnv={hEnv}
+              setHEnv={setHEnv}
+              hErrOnly={hErrOnly}
+              setHErrOnly={setHErrOnly}
+              hSort={hSort}
+              setHSort={setHSort}
+              uniqueEnvs={uniqueEnvs}
+              selectedRow={selectedRow}
+              setSelectedRow={setSelectedRow}
+              testName={testName}
+            />
           </div>
-        </PanelErrorBoundary>
 
-        {/* Duration trend */}
-        <PanelErrorBoundary label="Duration chart">
-          <div className="proof-card" style={{ padding: 16 }}>
-            <h3
+          {selectedRow && (
+            <div
+              className="proof-card"
               style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--proof-text-secondary)",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                marginBottom: 12,
+                width: 380,
+                flexShrink: 0,
                 display: "flex",
-                alignItems: "center",
-                gap: 6,
+                flexDirection: "column",
+                overflow: "hidden",
+                borderLeft: `3px solid ${selectedRow.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
               }}
             >
-              <Clock size={13} /> Duration Trend (ms)
-            </h3>
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart
-                data={historyChartData}
-                margin={{ top: 4, right: 4, bottom: 0, left: -18 }}
-                onClick={(e) => {
-                  if (e?.activePayload?.[0]?.payload?._realRunId) {
-                    navigate(`/runs/${encodeURIComponent(e.activePayload[0].payload._realRunId)}`);
-                  }
-                }}
-              >
-                <defs>
-                  <linearGradient id="dur-trend-fill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--proof-blue)" stopOpacity={0.18} />
-                    <stop offset="100%" stopColor="var(--proof-blue)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="var(--proof-border)"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="label"
-                  tick={
-                    {
-                      fontSize: 9,
-                      fill: "var(--proof-text-muted)",
-                    } as React.SVGProps<SVGTextElement>
-                  }
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={
-                    {
-                      fontSize: 9,
-                      fill: "var(--proof-text-muted)",
-                    } as React.SVGProps<SVGTextElement>
-                  }
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--proof-surface)",
-                    border: "1px solid var(--proof-border)",
-                    borderRadius: 8,
-                    fontSize: 11,
-                  }}
-                  labelStyle={{ color: "var(--proof-text-muted)" }}
-                  formatter={(value: number) => [`${value}ms`, "Duration"]}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="duration"
-                  stroke="var(--proof-blue)"
-                  strokeWidth={2}
-                  fill="url(#dur-trend-fill)"
-                  dot={(props: { cx: number; cy: number; payload: { status: string } }) => (
-                    <circle
-                      key={props.cx}
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={3}
-                      fill={props.payload.status === "PASS" ? "#22c55e" : "#ef4444"}
-                    />
-                  )}
-                  activeDot={{ r: 4, fill: "var(--proof-blue)" }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </PanelErrorBoundary>
+              {(() => {
+                const run = RUNS.find((r) => r.id === selectedRow.runId);
+                const allResults = getTestResultsForRun(selectedRow.runId);
+                const testResult = allResults.find((r) => {
+                  const rn = r.name.toLowerCase();
+                  const tn = testName.toLowerCase().replace(/_/g, " ");
+                  return rn === tn || rn.includes(tn) || tn.includes(rn);
+                });
+                const assertions = testResult?.assertions ?? testResult?.evidence?.assertions ?? [];
+                const passed = assertions.filter((a) => a.passed).length;
+                const failed = assertions.filter((a) => !a.passed).length;
+                const evidence = testResult?.evidence;
 
-        {/* Env breakdown */}
-        <div className="proof-card" style={{ padding: 16 }}>
-          <h3
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "var(--proof-text-secondary)",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              marginBottom: 12,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <BarChart3 size={13} /> Pass/Fail by Environment
-          </h3>
-          <ResponsiveContainer width="100%" height={140}>
-            <BarChart
-              data={envStatus}
-              layout="vertical"
-              margin={{ top: 4, right: 4, bottom: 0, left: 80 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="var(--proof-border)"
-                horizontal={false}
-              />
-              <XAxis
-                type="number"
-                tick={
-                  { fontSize: 9, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>
-                }
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                type="category"
-                dataKey="env"
-                tick={
-                  { fontSize: 9, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>
-                }
-                axisLine={false}
-                tickLine={false}
-                width={80}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: "var(--proof-surface)",
-                  border: "1px solid var(--proof-border)",
-                  borderRadius: 8,
-                  fontSize: 11,
-                }}
-              />
-              <Bar dataKey="pass" fill="#22c55e" radius={[0, 2, 2, 0]} />
-              <Bar dataKey="fail" fill="#ef4444" radius={[0, 2, 2, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Assertions trend */}
-        <div className="proof-card" style={{ padding: 16 }}>
-          <h3
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "var(--proof-text-secondary)",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              marginBottom: 12,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Bug size={13} /> Assertions Trend
-          </h3>
-          <ResponsiveContainer width="100%" height={140}>
-            <BarChart
-              data={historyChartData}
-              margin={{ top: 4, right: 4, bottom: 0, left: -18 }}
-              onClick={(e) => {
-                if (e?.activePayload?.[0]?.payload?._realRunId) {
-                  navigate(`/runs/${encodeURIComponent(e.activePayload[0].payload._realRunId)}`);
-                }
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" vertical={false} />
-              <XAxis
-                dataKey="label"
-                tick={
-                  { fontSize: 9, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>
-                }
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={
-                  { fontSize: 9, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>
-                }
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: "var(--proof-surface)",
-                  border: "1px solid var(--proof-border)",
-                  borderRadius: 8,
-                  fontSize: 11,
-                }}
-                labelStyle={{ color: "var(--proof-text-muted)" }}
-              />
-              <Bar
-                dataKey="assertionsPassed"
-                stackId="a"
-                fill="#22c55e"
-                radius={[2, 2, 0, 0]}
-                maxBarSize={20}
-                name="Passed"
-              />
-              <Bar
-                dataKey="assertionsFailed"
-                stackId="a"
-                fill="#ef4444"
-                radius={[2, 2, 0, 0]}
-                maxBarSize={20}
-                name="Failed"
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Run history table with filters */}
-      <div
-        className="proof-card"
-        style={{ overflow: "hidden", display: "flex", flexDirection: "row" }}
-      >
-        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-          <div
-            style={{
-              padding: "10px 14px",
-              borderBottom: "1px solid var(--proof-grey)",
-              background: "var(--proof-grey-bg)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: 8,
-            }}
-          >
-            <h3
-              style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: "var(--proof-text)",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <Filter size={13} /> Run History
-              <span style={{ fontSize: 11, fontWeight: 400, color: "var(--proof-text-secondary)" }}>
-                ({filteredHistory.length} of {enriched.length})
-              </span>
-            </h3>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              {/* Status filter */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: 2,
-                  background: "var(--proof-surface)",
-                  borderRadius: 4,
-                  border: "1px solid var(--proof-grey)",
-                  overflow: "hidden",
-                }}
-              >
-                {(["all", "PASS", "FAIL"] as const).map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setHStatus(s)}
-                    style={{
-                      border: "none",
-                      cursor: "pointer",
-                      padding: "3px 10px",
-                      fontSize: 11,
-                      fontWeight: 500,
-                      background: hStatus === s ? "var(--proof-blue)" : "transparent",
-                      color: hStatus === s ? "white" : "var(--proof-text-secondary)",
-                    }}
-                  >
-                    {s === "all" ? "All" : s}
-                  </button>
-                ))}
-              </div>
-              {/* Env filter */}
-              <select
-                className="proof-input"
-                value={hEnv}
-                onChange={(e) => setHEnv(e.target.value)}
-                style={{ fontSize: 11, padding: "3px 6px", maxWidth: 120 }}
-              >
-                <option value="all">All envs</option>
-                {uniqueEnvs.map((e) => (
-                  <option key={e} value={e}>
-                    {e}
-                  </option>
-                ))}
-              </select>
-              {/* Errors only toggle */}
-              <button
-                onClick={() => setHErrOnly((prev) => !prev)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                  cursor: "pointer",
-                  padding: "3px 8px",
-                  borderRadius: 4,
-                  fontSize: 11,
-                  fontWeight: 500,
-                  border: hErrOnly
-                    ? "1px solid var(--proof-yellow)"
-                    : "1px solid var(--proof-grey)",
-                  background: hErrOnly ? "var(--proof-yellow-bg)" : "var(--proof-surface)",
-                  color: hErrOnly ? "var(--proof-yellow)" : "var(--proof-text-secondary)",
-                }}
-              >
-                <Bug size={11} /> Errors only
-              </button>
-            </div>
-          </div>
-          <div style={{ overflowX: "auto" }}>
-            <table className="proof-table">
-              <thead>
-                <tr>
-                  <th
-                    onClick={() => toggleSort("runId")}
-                    style={{ cursor: "pointer", userSelect: "none" }}
-                  >
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-                      Run ID {sortIcon("runId")}
-                    </span>
-                  </th>
-                  <th
-                    onClick={() => toggleSort("status")}
-                    style={{ cursor: "pointer", userSelect: "none" }}
-                  >
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-                      Status {sortIcon("status")}
-                    </span>
-                  </th>
-                  <th
-                    onClick={() => toggleSort("duration")}
-                    style={{ textAlign: "right", cursor: "pointer", userSelect: "none" }}
-                  >
-                    <span
+                return (
+                  <>
+                    <div
                       style={{
-                        display: "inline-flex",
+                        padding: "10px 14px",
+                        borderBottom: "1px solid var(--proof-grey)",
+                        background: "var(--proof-blue-bg)",
+                        display: "flex",
                         alignItems: "center",
-                        gap: 3,
-                        justifyContent: "flex-end",
+                        gap: 8,
+                        flexShrink: 0,
                       }}
                     >
-                      Duration {sortIcon("duration")}
-                    </span>
-                  </th>
-                  <th
-                    onClick={() => toggleSort("env")}
-                    style={{ cursor: "pointer", userSelect: "none" }}
-                  >
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-                      Environment {sortIcon("env")}
-                    </span>
-                  </th>
-                  <th>Error</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredHistory.map((h) => (
-                  <tr
-                    key={h.runId}
-                    onClick={() => setSelectedRow(h)}
-                    style={{
-                      cursor: "pointer",
-                      background:
-                        selectedRow?.runId === h.runId ? "var(--proof-blue-bg)" : undefined,
-                    }}
-                  >
-                    <td>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedRow(h);
-                        }}
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 11,
-                          color: "var(--proof-blue)",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: 0,
-                        }}
-                      >
-                        {h.runId}
-                      </button>
-                    </td>
-                    <td>
-                      <span
-                        className={`proof-badge ${h.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                      >
-                        {h.status}
-                      </span>
-                      {h.assertionsFailed > 0 && (
-                        <span
-                          style={{
-                            fontSize: 10,
-                            marginLeft: 4,
-                            color: "var(--proof-red)",
-                            fontFamily: "var(--font-mono)",
-                          }}
-                        >
-                          {h.assertionsFailed}✗
-                        </span>
-                      )}
-                    </td>
-                    <td
-                      style={{
-                        textAlign: "right",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 11,
-                        color: "var(--proof-text-secondary)",
-                      }}
-                    >
-                      {h.duration}ms
-                    </td>
-                    <td style={{ fontSize: 12 }}>{h.env}</td>
-                    <td
-                      style={{
-                        fontSize: 11,
-                      }}
-                    >
-                      {h.error ? (
-                        <span
-                          style={{
-                            color: "var(--proof-red)",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 10,
-                          }}
-                        >
-                          {h.error.length > 80 ? h.error.slice(0, 80) + "…" : h.error}
-                        </span>
-                      ) : h.status === "FAIL" ? (
-                        <span style={{ color: "var(--proof-text-secondary)", fontSize: 10 }}>
-                          no error message
-                        </span>
-                      ) : null}
-                    </td>
-                    <td>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedRow(h);
-                        }}
-                        className="proof-button proof-button-xs"
-                        style={{ padding: "2px 7px" }}
-                      >
-                        Detail
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredHistory.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      style={{
-                        textAlign: "center",
-                        padding: 24,
-                        fontSize: 12,
-                        color: "var(--proof-text-secondary)",
-                      }}
-                    >
-                      No matching results for the selected filters
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        {/* end left column */}
-
-        {/* Test detail side panel — full test output */}
-        {selectedRow &&
-          (() => {
-            const run = RUNS.find((r) => r.id === selectedRow.runId);
-            const allResults = getTestResultsForRun(selectedRow.runId);
-            const testResult = allResults.find((r) => {
-              const rn = r.name.toLowerCase();
-              const tn = testName.toLowerCase().replace(/_/g, " ");
-              return rn === tn || rn.includes(tn) || tn.includes(rn);
-            });
-            const assertions = testResult?.assertions ?? testResult?.evidence?.assertions ?? [];
-            const passed = assertions.filter((a) => a.passed).length;
-            const failed = assertions.filter((a) => !a.passed).length;
-            const evidence = testResult?.evidence;
-
-            return (
-              <div
-                style={{
-                  width: 380,
-                  flexShrink: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden",
-                  borderLeft: "2px solid var(--proof-blue)",
-                  background: "var(--proof-surface)",
-                }}
-              >
-                {/* Panel header */}
-                <div
-                  style={{
-                    padding: "10px 14px",
-                    borderBottom: "1px solid var(--proof-grey)",
-                    background: "var(--proof-blue-bg)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    flexShrink: 0,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: "var(--proof-blue)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <FileText size={13} /> Test Output
-                  </span>
-                  <button
-                    onClick={() => setSelectedRow(null)}
-                    aria-label="Close"
-                    style={{
-                      border: "none",
-                      background: "none",
-                      cursor: "pointer",
-                      color: "var(--proof-text-secondary)",
-                      fontSize: 18,
-                      lineHeight: 1,
-                    }}
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-
-                {/* Panel body */}
-                <div
-                  style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    padding: "14px 16px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 14,
-                  }}
-                >
-                  {/* Test name */}
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: "var(--proof-text)",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {testName}
-                  </div>
-
-                  {/* Metadata strip */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                    {[
-                      {
-                        label: "Run ID",
-                        value: selectedRow.runId,
-                        mono: true,
-                        color: "var(--proof-blue)",
-                      },
-                      { label: "Environment", value: selectedRow.env, mono: false },
-                      { label: "Duration", value: `${selectedRow.duration}ms`, mono: true },
-                      {
-                        label: "Started",
-                        value: run
-                          ? new Date(run.started).toLocaleString(undefined, {
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })
-                          : "—",
-                        mono: false,
-                      },
-                    ].map(({ label, value, mono, color }) => (
-                      <div
-                        key={label}
-                        style={{
-                          padding: "6px 8px",
-                          borderRadius: 6,
-                          background: "var(--proof-grey-bg)",
-                          border: "1px solid var(--proof-border)",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: 9,
-                            fontWeight: 700,
-                            textTransform: "uppercase",
-                            letterSpacing: "0.5px",
-                            color: "var(--proof-text-secondary)",
-                            marginBottom: 2,
-                          }}
-                        >
-                          {label}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 11,
-                            fontFamily: mono ? "var(--font-mono)" : undefined,
-                            color: color ?? "var(--proof-text)",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {value}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Status + assertion summary */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "8px 10px",
-                      borderRadius: 7,
-                      background:
-                        selectedRow.status === "PASS"
-                          ? "rgba(34,197,94,0.07)"
-                          : "rgba(239,68,68,0.07)",
-                      border: `1px solid ${selectedRow.status === "PASS" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}`,
-                    }}
-                  >
-                    <span
-                      className={`proof-badge ${selectedRow.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                    >
-                      {selectedRow.status}
-                    </span>
-                    {assertions.length > 0 && (
-                      <span
-                        style={{
-                          fontSize: 11,
-                          fontFamily: "var(--font-mono)",
-                          color: "var(--proof-text-secondary)",
-                          marginLeft: 4,
-                        }}
-                      >
-                        <span style={{ color: "var(--proof-green)" }}>{passed}✓</span>
-                        {" / "}
-                        <span
-                          style={{
-                            color: failed > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)",
-                          }}
-                        >
-                          {failed}✗
-                        </span>
-                        {" assertions"}
-                      </span>
-                    )}
-                    {run && (
-                      <span
-                        style={{
-                          marginLeft: "auto",
-                          fontSize: 10,
-                          fontFamily: "var(--font-mono)",
-                          color: "var(--proof-text-tertiary)",
-                          background: "var(--proof-grey-bg)",
-                          padding: "1px 5px",
-                          borderRadius: 3,
-                        }}
-                      >
-                        {run.build?.slice(0, 7)}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Assertions list */}
-                  {assertions.length > 0 && (
-                    <div>
                       <div
                         style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          color: "var(--proof-text-secondary)",
-                          marginBottom: 6,
                           display: "flex",
                           alignItems: "center",
-                          gap: 5,
+                          gap: 1,
+                          border: "1px solid var(--proof-grey)",
+                          borderRadius: 4,
+                          background: "var(--proof-surface)",
                         }}
                       >
-                        <Bug size={11} /> Assertions ({assertions.length})
+                        <button
+                          disabled={selIdx <= 0}
+                          onClick={() => navigateDetail(-1)}
+                          style={{
+                            padding: "4px 7px",
+                            border: "none",
+                            background: "transparent",
+                            cursor: selIdx > 0 ? "pointer" : "not-allowed",
+                            color: selIdx > 0 ? "var(--proof-blue)" : "var(--proof-grey)",
+                          }}
+                        >
+                          <ChevronLeft size={13} />
+                        </button>
+                        <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", padding: "0 4px" }}>
+                          {selIdx + 1}/{filteredHistory.length}
+                        </span>
+                        <button
+                          disabled={selIdx >= filteredHistory.length - 1}
+                          onClick={() => navigateDetail(1)}
+                          style={{
+                            padding: "4px 7px",
+                            border: "none",
+                            background: "transparent",
+                            cursor: selIdx < filteredHistory.length - 1 ? "pointer" : "not-allowed",
+                            color: selIdx < filteredHistory.length - 1 ? "var(--proof-blue)" : "var(--proof-grey)",
+                          }}
+                        >
+                          <ChevronRight size={13} />
+                        </button>
                       </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                        {assertions.map((a, i) => (
-                          <div
-                            key={i}
-                            style={{
-                              padding: "6px 8px",
-                              borderRadius: 5,
-                              background: a.passed
-                                ? "rgba(34,197,94,0.05)"
-                                : "rgba(239,68,68,0.06)",
-                              border: `1px solid ${a.passed ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.2)"}`,
-                              borderLeft: `3px solid ${a.passed ? "var(--proof-green)" : "var(--proof-red)"}`,
-                            }}
-                          >
-                            <div
-                              style={{
-                                fontSize: 10,
-                                fontWeight: 600,
-                                color: a.passed ? "var(--proof-green)" : "var(--proof-red)",
-                                marginBottom: 3,
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 4,
-                              }}
-                            >
-                              {a.passed ? "✓" : "✗"} {a.assertion}
-                            </div>
-                            {!a.passed && (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: 2,
-                                  fontSize: 9,
-                                  fontFamily: "var(--font-mono)",
-                                }}
-                              >
-                                <div>
-                                  <span style={{ color: "var(--proof-text-secondary)" }}>
-                                    expected:{" "}
-                                  </span>
-                                  <span style={{ color: "var(--proof-green)" }}>{a.expected}</span>
-                                </div>
-                                <div>
-                                  <span style={{ color: "var(--proof-text-secondary)" }}>
-                                    actual:{" "}
-                                  </span>
-                                  <span style={{ color: "var(--proof-red)" }}>{a.actual}</span>
-                                </div>
-                              </div>
-                            )}
+                      <span style={{ fontSize: 12, fontWeight: 600, color: selectedRow.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)", flex: 1 }}>
+                        {selectedRow.status}
+                      </span>
+                      <button onClick={() => setSelectedRow(null)} aria-label="Close" style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--proof-text-secondary)", fontSize: 18, lineHeight: 1 }}>
+                        <X size={14} />
+                      </button>
+                    </div>
+
+                    <div style={{ flex: 1, overflowY: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 12 }}>
+                      <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, lineHeight: 1.5, wordBreak: "break-all" }}>
+                        {testName}
+                      </div>
+
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                        {[
+                          { label: "Run ID", value: selectedRow.runId, mono: true, color: "var(--proof-blue)" },
+                          { label: "Environment", value: selectedRow.env, mono: false },
+                          { label: "Duration", value: `${selectedRow.duration}ms`, mono: true },
+                          { label: "Started", value: run ? new Date(run.started).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "\u2014", mono: false },
+                        ].map(({ label, value, mono, color }) => (
+                          <div key={label} style={{ padding: "6px 8px", borderRadius: 6, background: "var(--proof-grey-bg)", border: "1px solid var(--proof-border)" }}>
+                            <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-secondary)", marginBottom: 2 }}>{label}</div>
+                            <div style={{ fontSize: 11, fontFamily: mono ? "var(--font-mono)" : undefined, color: color ?? "var(--proof-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</div>
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
 
-                  {/* Error output */}
-                  {selectedRow.error && (
-                    <div>
-                      <div
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          color: "var(--proof-red)",
-                          marginBottom: 6,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 5,
-                        }}
-                      >
-                        <AlertTriangle size={11} /> Error Output
-                      </div>
-                      <pre
-                        style={{
-                          fontSize: 10,
-                          color: "var(--proof-red)",
-                          fontFamily: "var(--font-mono)",
-                          background: "rgba(239,68,68,0.06)",
-                          border: "1px solid rgba(239,68,68,0.15)",
-                          borderRadius: 6,
-                          padding: "8px 10px",
-                          whiteSpace: "pre-wrap",
-                          wordBreak: "break-all",
-                          margin: 0,
-                          lineHeight: 1.55,
-                        }}
-                      >
-                        {selectedRow.error}
-                      </pre>
-                    </div>
-                  )}
-
-                  {/* HTTP evidence */}
-                  {evidence && (
-                    <div>
-                      <div
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          color: "var(--proof-text-secondary)",
-                          marginBottom: 6,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 5,
-                        }}
-                      >
-                        <Activity size={11} /> HTTP Evidence
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                        <div
-                          style={{
-                            padding: "5px 8px",
-                            borderRadius: 5,
-                            background: "var(--proof-grey-bg)",
-                            border: "1px solid var(--proof-border)",
-                            fontSize: 10,
-                            fontFamily: "var(--font-mono)",
-                          }}
-                        >
-                          <span style={{ color: "var(--proof-blue)", fontWeight: 600 }}>
-                            {evidence.request.method}
-                          </span>{" "}
-                          <span
-                            style={{
-                              color: "var(--proof-text)",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              display: "inline-block",
-                              maxWidth: 280,
-                            }}
-                          >
-                            {evidence.request.url}
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 7, background: selectedRow.status === "PASS" ? "rgba(34,197,94,0.07)" : "rgba(239,68,68,0.07)", border: `1px solid ${selectedRow.status === "PASS" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}` }}>
+                        <span className={`proof-badge ${selectedRow.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}>{selectedRow.status}</span>
+                        {assertions.length > 0 && (
+                          <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--proof-text-secondary)", marginLeft: 4 }}>
+                            <span style={{ color: "var(--proof-green)" }}>{passed}\u2713</span>{" / "}
+                            <span style={{ color: failed > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)" }}>{failed}\u2717</span>{" assertions"}
                           </span>
-                        </div>
-                        <div
-                          style={{
-                            padding: "5px 8px",
-                            borderRadius: 5,
-                            background: "var(--proof-grey-bg)",
-                            border: "1px solid var(--proof-border)",
-                            fontSize: 10,
-                            fontFamily: "var(--font-mono)",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontWeight: 600,
-                              color:
-                                evidence.response.status < 300
-                                  ? "var(--proof-green)"
-                                  : evidence.response.status < 400
-                                    ? "var(--proof-yellow)"
-                                    : "var(--proof-red)",
-                            }}
-                          >
-                            HTTP {evidence.response.status}
-                          </span>
-                          {evidence.response.headers["content-type"] && (
-                            <span style={{ color: "var(--proof-text-secondary)", marginLeft: 8 }}>
-                              {evidence.response.headers["content-type"].split(";")[0]}
-                            </span>
-                          )}
-                        </div>
-                        {evidence.response.body && (
-                          <details style={{ fontSize: 10 }}>
-                            <summary
-                              style={{
-                                cursor: "pointer",
-                                color: "var(--proof-text-secondary)",
-                                padding: "3px 0",
-                                userSelect: "none",
-                              }}
-                            >
-                              Response body
-                            </summary>
-                            <pre
-                              style={{
-                                fontFamily: "var(--font-mono)",
-                                fontSize: 9,
-                                color: "var(--proof-text-secondary)",
-                                background: "var(--proof-grey-bg)",
-                                border: "1px solid var(--proof-border)",
-                                borderRadius: 4,
-                                padding: "6px 8px",
-                                whiteSpace: "pre-wrap",
-                                wordBreak: "break-all",
-                                margin: "4px 0 0",
-                                lineHeight: 1.5,
-                                maxHeight: 140,
-                                overflow: "auto",
-                              }}
-                            >
-                              {evidence.response.body.length > 400
-                                ? evidence.response.body.slice(0, 400) + "\n…"
-                                : evidence.response.body}
-                            </pre>
-                          </details>
                         )}
+                        {run && <span style={{ marginLeft: "auto", fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--proof-text-tertiary)", background: "var(--proof-grey-bg)", padding: "1px 5px", borderRadius: 3 }}>{run.build?.slice(0, 7)}</span>}
                       </div>
-                    </div>
-                  )}
-                </div>
 
-                {/* Panel footer */}
-                <div
-                  style={{
-                    padding: "10px 14px",
-                    borderTop: "1px solid var(--proof-grey)",
-                    flexShrink: 0,
-                    display: "flex",
-                    gap: 6,
-                  }}
-                >
-                  <button
-                    onClick={() => navigate(`/runs/${selectedRow.runId}`)}
-                    className="proof-button-primary"
-                    style={{ flex: 1, fontSize: 12, justifyContent: "center" }}
-                  >
-                    View Full Run →
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedRow(null);
-                    }}
-                    className="proof-button"
-                    style={{ fontSize: 12 }}
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            );
-          })()}
+                      {assertions.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-secondary)", marginBottom: 6, display: "flex", alignItems: "center", gap: 5 }}>
+                            <Bug size={11} /> Assertions ({assertions.length})
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                            {assertions.map((a, i) => (
+                              <div key={i} style={{ padding: "6px 8px", borderRadius: 5, background: a.passed ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.06)", border: `1px solid ${a.passed ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.2)"}`, borderLeft: `3px solid ${a.passed ? "var(--proof-green)" : "var(--proof-red)"}` }}>
+                                <div style={{ fontSize: 10, fontWeight: 600, color: a.passed ? "var(--proof-green)" : "var(--proof-red)", marginBottom: 3, display: "flex", alignItems: "center", gap: 4 }}>
+                                  {a.passed ? "\u2713" : "\u2717"} {a.assertion}
+                                </div>
+                                {!a.passed && (
+                                  <div style={{ display: "flex", flexDirection: "column", gap: 2, fontSize: 9, fontFamily: "var(--font-mono)" }}>
+                                    <div><span style={{ color: "var(--proof-text-secondary)" }}>expected: </span><span style={{ color: "var(--proof-green)" }}>{a.expected}</span></div>
+                                    <div><span style={{ color: "var(--proof-text-secondary)" }}>actual: </span><span style={{ color: "var(--proof-red)" }}>{a.actual}</span></div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedRow.error && (
+                        <div>
+                          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-red)", marginBottom: 6, display: "flex", alignItems: "center", gap: 5 }}>
+                            <AlertTriangle size={11} /> Error Output
+                          </div>
+                          <pre style={{ fontSize: 10, color: "var(--proof-red)", fontFamily: "var(--font-mono)", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 6, padding: "8px 10px", whiteSpace: "pre-wrap", wordBreak: "break-all", margin: 0, lineHeight: 1.55 }}>
+                            {selectedRow.error}
+                          </pre>
+                        </div>
+                      )}
+
+                      {evidence && (
+                        <div>
+                          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--proof-text-secondary)", marginBottom: 6, display: "flex", alignItems: "center", gap: 5 }}>
+                            <Activity size={11} /> HTTP Evidence
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                            <div style={{ padding: "5px 8px", borderRadius: 5, background: "var(--proof-grey-bg)", border: "1px solid var(--proof-border)", fontSize: 10, fontFamily: "var(--font-mono)" }}>
+                              <span style={{ color: "var(--proof-blue)", fontWeight: 600 }}>{evidence.request.method}</span>{" "}
+                              <span style={{ color: "var(--proof-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", maxWidth: 280 }}>{evidence.request.url}</span>
+                            </div>
+                            {evidence.response.body && (
+                              <details style={{ fontSize: 10 }}>
+                                <summary style={{ cursor: "pointer", color: "var(--proof-text-secondary)", padding: "3px 0", userSelect: "none" }}>Response body</summary>
+                                <pre style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--proof-text-secondary)", background: "var(--proof-grey-bg)", border: "1px solid var(--proof-border)", borderRadius: 4, padding: "6px 8px", whiteSpace: "pre-wrap", wordBreak: "break-all", margin: "4px 0 0", lineHeight: 1.5, maxHeight: 140, overflow: "auto" }}>
+                                  {evidence.response.body.length > 400 ? evidence.response.body.slice(0, 400) + "\n\u2026" : evidence.response.body}
+                                </pre>
+                              </details>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ padding: "8px 14px", borderTop: "1px solid var(--proof-grey)", display: "flex", gap: 6, flexShrink: 0 }}>
+                      <button onClick={() => navigate(`/runs/${selectedRow.runId}`)} className="proof-button proof-button-xs" style={{ flex: 1, justifyContent: "center" }}>View Full Run \u2192</button>
+                      <button onClick={() => setSelectedRow(null)} className="proof-button proof-button-xs">Close</button>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </PageTemplate>
   );
 }

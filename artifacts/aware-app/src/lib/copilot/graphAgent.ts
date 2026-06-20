@@ -13,7 +13,7 @@ import type {
 import type { AgentNode, AgentGraphContext, AgentNodeResult } from "./graphTypes";
 import { buildSystemPrompt, truncateMessages } from "./context";
 import { routeByKeyword } from "./providers";
-import { logInfo, logDebug, logError } from "@/lib/ai/debugLogger";
+import { logInfo, logError } from "@/lib/ai/debugLogger";
 
 export interface GraphAgentOptions {
   userContent: string;

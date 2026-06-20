@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from "wouter";
+
 
 interface DayData {
   date: string;
@@ -50,7 +50,6 @@ const MONTH_LABELS = [
 ];
 
 export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellClick }: Props) {
-  const [, navigate] = useLocation();
   const today = endDate ? new Date(endDate) : new Date();
   const start = startDate ? new Date(startDate) : new Date(today);
   if (!startDate) start.setDate(start.getDate() - 84);

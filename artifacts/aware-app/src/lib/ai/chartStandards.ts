@@ -1,6 +1,5 @@
-import type { ChartOutput, GoogleChartType } from "./langGraphTypes";
-import { logWarn, logDebug } from "./debugLogger";
-import { CHART_COLORS } from "./chartBuilder";
+import type { ChartOutput, ChartType } from "./langGraphTypes";
+import { logWarn } from "./debugLogger";
 
 // ── Color Palette ────────────────────────────────────────────────
 export const PROOF_COLORS = {
@@ -20,7 +19,7 @@ export const MAX_SENTENCES = 3;
 export const MAX_CHART_TITLE_LENGTH = 50;
 export const MAX_HEADER_LENGTH = 8;
 export const MAX_ROWS = 50;
-export const MIN_SENTENCE_LENGTH = 3;
+const MIN_SENTENCE_LENGTH = 3;
 
 const INTRO_PATTERNS = [
   /^here('s| is) (the |an |my )?(analysis|summary|breakdown|report|look)( of| at| on|:)/i,
@@ -31,7 +30,7 @@ const INTRO_PATTERNS = [
 ];
 
 // ── Chart Type Guidelines ────────────────────────────────────────
-export const CHART_TYPE_GUIDELINES: Record<GoogleChartType, string> = {
+const CHART_TYPE_GUIDELINES: Record<ChartType, string> = {
   Table: "Raw data display. Use for showing lists of runs, tests, or configuration details.",
   ColumnChart:
     "Comparing values across categories. Use for env pass rates, failures by suite, durations by env.",
@@ -45,16 +44,7 @@ export const CHART_TYPE_GUIDELINES: Record<GoogleChartType, string> = {
   Sankey: "Flow or comparison between stages. Use for UAT→PROD promotion flow, env transitions.",
 };
 
-export const CHART_TYPE_PREFERENCE: GoogleChartType[] = [
-  "LineChart",
-  "ColumnChart",
-  "BarChart",
-  "Table",
-  "PieChart",
-  "AreaChart",
-  "Sankey",
-  "Gauge",
-];
+
 
 // ── Chart Block Regex ────────────────────────────────────────────
 /**
@@ -63,8 +53,6 @@ export const CHART_TYPE_PREFERENCE: GoogleChartType[] = [
  * Group 1: optional preceding text up to the opening fence
  * Group 2: the JSON content between fences
  */
-const CHART_FENCE_REGEX = /(?:^|\n)?\s*```chart\s*\n?([\s\S]*?)```/g;
-
 // ── Validation ───────────────────────────────────────────────────
 export interface ValidationWarning {
   field: string;
@@ -137,7 +125,6 @@ export function countSentences(text: string): number {
 }
 
 export function truncateSentences(text: string, max: number = MAX_SENTENCES): string {
-  const blocks: string[] = [];
   let remaining = text;
   const codeBlocks: string[] = [];
   remaining = remaining.replace(/```[\s\S]*?```/g, (match) => {
@@ -360,20 +347,4 @@ export function enforceChartPresence(response: string, fallbackChart: () => Char
   return response;
 }
 
-export function populateChartDefaults(chart: Partial<ChartOutput>, index: number): ChartOutput {
-  const rows = chart.rows || [];
-  let colors = chart.colors || [];
-  if (colors.length === 0) {
-    colors = rows.map((_, i) => STANDARD_PALETTE[i % STANDARD_PALETTE.length]);
-  } else if (colors.length === 1 && rows.length > 1) {
-    colors = rows.map((_, i) => STANDARD_PALETTE[i % STANDARD_PALETTE.length]);
-  }
-  return {
-    type: chart.type || "Table",
-    title: chart.title || `Chart ${index + 1}`,
-    headers: chart.headers || [],
-    rows,
-    colors,
-    options: chart.options || {},
-  };
-}
+

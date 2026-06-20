@@ -1,5 +1,5 @@
 import type { AIAnalysisRequest, AIAnalysisResult, AIInsight } from "./types";
-import { AI_USE_CASES, getUseCaseById } from "./useCases";
+import { AI_USE_CASES, getUseCaseById } from "./skillRegistry";
 import { buildAIContext, buildSystemPrompt } from "./context";
 import { getSystemPromptForUseCase } from "./prompts";
 import { getProvider, getLLMConfig, truncateMessagesToFit } from "@/lib/llm";
@@ -15,12 +15,11 @@ import {
   buildBarChart,
   buildPieChart,
   buildLineChart,
-  buildAreaChart,
 } from "./chartBuilder";
 import { logInfo, logDebug, logError, startTiming, endTiming } from "./debugLogger";
 import { getSkillDefinition } from "./skillRegistry";
 import { enforceChartStandards, enforceChartPresence } from "./chartStandards";
-import { serializeCharts } from "./chartBuilder";
+
 
 export async function runAnalysis(request: AIAnalysisRequest): Promise<AIAnalysisResult> {
   const useCase = getUseCaseById(request.useCaseId);
@@ -95,7 +94,6 @@ export async function runLangGraphAnalysis(
   if (result.details) {
     result.details = enforceChartStandards(result.details);
     result.details = enforceChartPresence(result.details, () => {
-      const ctx = buildAIContext();
       return buildTable(
         "Run Summary",
         ["Run", "Rate", "Status"],
@@ -122,7 +120,7 @@ export async function runLangGraphChat(
     id: "data_fetch",
     label: "Data Fetch",
     description: "Loading current test data",
-    execute: async (ctx) => {
+    execute: async (_ctx) => {
       logInfo("data_fetch", "Fetching store data for context");
       return { status: "completed", dataUpdate: { timestamp: Date.now() } };
     },
@@ -132,7 +130,7 @@ export async function runLangGraphChat(
     id: "context_build",
     label: "Context Build",
     description: "Building system prompt from live data",
-    execute: async (ctx) => {
+    execute: async (_ctx) => {
       const context = buildAIContext();
       const systemPrompt = buildSystemPrompt(context);
       logInfo(
@@ -264,7 +262,7 @@ export async function runLangGraphChat(
     id: "response",
     label: "Response",
     description: "Finalizing output",
-    execute: async (ctx) => {
+    execute: async (_ctx) => {
       logInfo("response", "LLM chat response ready");
       return { status: "completed" };
     },
@@ -2206,7 +2204,7 @@ function fallbackEnvDrift(): AIAnalysisResult {
   };
 }
 
-function fallbackBuildRiskAssessment(request: AIAnalysisRequest): AIAnalysisResult {
+function fallbackBuildRiskAssessment(_request: AIAnalysisRequest): AIAnalysisResult {
   const sortedRuns = [...RUNS].sort(
     (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
   );

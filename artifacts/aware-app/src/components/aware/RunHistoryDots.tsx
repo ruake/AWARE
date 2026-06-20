@@ -60,6 +60,10 @@ export function RunHistoryDots({ testName }: RunHistoryDotsProps) {
           key={d.runId}
           onClick={() => navigate(`/runs/${d.runId}`)}
           title={`${d.runId} · ${d.status} · ${new Date(d.date).toLocaleDateString()}`}
+          aria-label={`Run ${d.runId}: ${d.status} on ${new Date(d.date).toLocaleDateString()}`}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/runs/${d.runId}`); } }}
           style={{
             width: 8,
             height: 8,

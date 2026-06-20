@@ -51,7 +51,6 @@ export function CompareRunSelector({
       if (btn) {
         const r = btn.getBoundingClientRect();
         const dw = 420;
-        const dh = Math.min(440, window.innerHeight - r.bottom - 16);
         let left = r.left;
         if (left + dw > window.innerWidth - 8) left = window.innerWidth - dw - 8;
         if (left < 8) left = 8;

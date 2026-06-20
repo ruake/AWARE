@@ -3,473 +3,31 @@ import { useParams, useLocation, useSearch } from "wouter";
 import {
   getRunById,
   getTestResultsForRun,
-  getImageSource,
-  preloadImage,
   getDataInitState,
   subscribeToDataInit,
 } from "@/lib/data";
-import type { TestResult, TestAssertionResult, FilmstripFrame } from "@/lib/types";
+import type { TestResult } from "@/lib/types";
 import {
-  XCircle,
   ChevronLeft,
   ChevronRight,
-  Check,
   BarChart3,
   FileText,
-  Maximize2,
-  X,
   ChevronDown,
+  X,
 } from "lucide-react";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
-import { getEnvConfigById, envIdToLabel } from "@/lib/envConfig";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
+import { SkeletonTable, SkeletonText } from "@/components/aware/Skeleton";
 import {
   TimeWindowProvider,
   TimeWindowControls,
   TestHistoryStrip,
 } from "@/components/aware/HistoryTimeline";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ZoomableImage } from "@/components/aware/ZoomableImage";
-
-function AssertionRow({ a }: { a: TestAssertionResult }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        padding: "6px 8px",
-        borderRadius: 4,
-        background: a.passed ? "var(--proof-green-bg)" : "var(--proof-red-bg)",
-        border: `1px solid ${a.passed ? "var(--proof-green)" : "var(--proof-red)"}`,
-        fontSize: 12,
-      }}
-    >
-      {a.passed ? (
-        <Check size={13} style={{ color: "var(--proof-green)", flexShrink: 0 }} />
-      ) : (
-        <XCircle size={13} style={{ color: "var(--proof-red)", flexShrink: 0 }} />
-      )}
-      <span style={{ flex: 1, fontWeight: 500 }}>{a.assertion}</span>
-      <span style={{ color: "var(--proof-text-secondary)", fontSize: 11 }}>
-        Expected:{" "}
-        <span
-          style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--proof-text)" }}
-        >
-          {a.expected}
-        </span>
-      </span>
-      {!a.passed && (
-        <span style={{ color: "var(--proof-text-secondary)", fontSize: 11 }}>
-          Actual:{" "}
-          <span
-            style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--proof-red)" }}
-          >
-            {a.actual}
-          </span>
-        </span>
-      )}
-    </div>
-  );
-}
-
-function FilmstripViewer({ frames, onClose }: { frames: FilmstripFrame[]; onClose: () => void }) {
-  const [activeIdx, setActiveIdx] = React.useState<number | null>(null);
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = React.useState(false);
-  const dragStart = React.useRef({ x: 0, scrollLeft: 0 });
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return;
-    setIsDragging(true);
-    dragStart.current = { x: e.clientX, scrollLeft: scrollRef.current.scrollLeft };
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    e.preventDefault();
-    const dx = e.clientX - dragStart.current.x;
-    scrollRef.current.scrollLeft = dragStart.current.scrollLeft - dx;
-  };
-
-  const handleMouseUp = () => setIsDragging(false);
-
-  const scrollTo = (dir: -1 | 1) => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollBy({ left: dir * 160, behavior: "smooth" });
-  };
-
-  React.useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        el.scrollBy({ left: -160, behavior: "smooth" });
-        e.preventDefault();
-      }
-      if (e.key === "ArrowRight") {
-        el.scrollBy({ left: 160, behavior: "smooth" });
-        e.preventDefault();
-      }
-    };
-    el.addEventListener("keydown", handler);
-    return () => el.removeEventListener("keydown", handler);
-  }, []);
-
-  return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-        <span
-          style={{
-            fontSize: 10,
-            fontWeight: 600,
-            color: "var(--proof-text-secondary)",
-            textTransform: "uppercase",
-            letterSpacing: "0.5px",
-            flex: 1,
-          }}
-        >
-          Filmstrip ({frames.length})
-        </span>
-        <button
-          onClick={() => scrollTo(-1)}
-          style={{
-            border: "none",
-            background: "var(--proof-surface-hover)",
-            cursor: "pointer",
-            padding: "2px 6px",
-            borderRadius: 3,
-            color: "var(--proof-text-secondary)",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <ChevronLeft size={11} />
-        </button>
-        <button
-          onClick={() => scrollTo(1)}
-          style={{
-            border: "none",
-            background: "var(--proof-surface-hover)",
-            cursor: "pointer",
-            padding: "2px 6px",
-            borderRadius: 3,
-            color: "var(--proof-text-secondary)",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <ChevronRight size={11} />
-        </button>
-      </div>
-      <div
-        ref={scrollRef}
-        tabIndex={0}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        style={{
-          display: "flex",
-          gap: 6,
-          overflowX: "auto",
-          paddingBottom: 4,
-          cursor: isDragging ? "grabbing" : "grab",
-          userSelect: "none",
-          scrollBehavior: "smooth",
-          outline: "none",
-        }}
-      >
-        {frames.map((f, i) => (
-          <FilmstripThumbnail
-            key={f.id}
-            frame={f}
-            isActive={activeIdx === i}
-            onExpand={() => setActiveIdx(i)}
-          />
-        ))}
-      </div>
-
-      {/* Lightbox gallery */}
-      <Dialog
-        open={activeIdx !== null}
-        onOpenChange={(open) => {
-          if (!open) setActiveIdx(null);
-        }}
-      >
-        <DialogContent
-          style={{
-            maxWidth: "95vw",
-            width: "auto",
-            background: "var(--proof-surface)",
-            border: "1px solid var(--proof-grey)",
-            padding: 0,
-            overflow: "hidden",
-          }}
-        >
-          {activeIdx !== null && (
-            <>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "8px 12px",
-                  borderBottom: "1px solid var(--proof-grey)",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: "var(--proof-text-secondary)",
-                    fontFamily: "var(--font-mono)",
-                    flex: 1,
-                  }}
-                >
-                  {frames[activeIdx].label}
-                </span>
-                <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
-                  {activeIdx + 1} / {frames.length}
-                </span>
-                <button
-                  onClick={onClose}
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    cursor: "pointer",
-                    color: "var(--proof-text-secondary)",
-                    display: "flex",
-                  }}
-                >
-                  <X size={14} />
-                </button>
-              </div>
-              <GalleryImage
-                frame={frames[activeIdx]}
-                onPrev={activeIdx > 0 ? () => setActiveIdx(activeIdx - 1) : null}
-                onNext={activeIdx < frames.length - 1 ? () => setActiveIdx(activeIdx + 1) : null}
-              />
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-function LazyGalleryImage({ source }: { source: string }) {
-  const [url, setUrl] = React.useState("");
-  React.useEffect(() => {
-    preloadImage(source).then(setUrl);
-  }, [source]);
-  if (!url) {
-    return (
-      <div
-        style={{
-          width: 400,
-          height: 300,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 12,
-          color: "var(--proof-text-secondary)",
-        }}
-      >
-        Loading…
-      </div>
-    );
-  }
-  return <ZoomableImage src={url} alt="" />;
-}
-
-function GalleryImage({
-  frame,
-  onPrev,
-  onNext,
-}: {
-  frame: FilmstripFrame;
-  onPrev: (() => void) | null;
-  onNext: (() => void) | null;
-}) {
-  const source = getImageSource(frame);
-
-  React.useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft" && onPrev) {
-        onPrev();
-        e.preventDefault();
-      }
-      if (e.key === "ArrowRight" && onNext) {
-        onNext();
-        e.preventDefault();
-      }
-      if (e.key === "Escape") {
-        /* handled by Dialog */
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onPrev, onNext]);
-
-  return (
-    <div
-      style={{
-        position: "relative",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 12,
-        maxHeight: "80vh",
-      }}
-    >
-      {onPrev && (
-        <button
-          onClick={onPrev}
-          style={{
-            position: "absolute",
-            left: 8,
-            top: "50%",
-            transform: "translateY(-50%)",
-            border: "none",
-            background: "rgba(0,0,0,0.5)",
-            color: "#fff",
-            cursor: "pointer",
-            borderRadius: "50%",
-            width: 32,
-            height: 32,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 10,
-            backdropFilter: "blur(4px)",
-          }}
-        >
-          <ChevronLeft size={18} />
-        </button>
-      )}
-      {source.startsWith("data:") ? (
-        <ZoomableImage src={source} alt={frame.label} />
-      ) : (
-        <LazyGalleryImage source={source} />
-      )}
-      {onNext && (
-        <button
-          onClick={onNext}
-          style={{
-            position: "absolute",
-            right: 8,
-            top: "50%",
-            transform: "translateY(-50%)",
-            border: "none",
-            background: "rgba(0,0,0,0.5)",
-            color: "#fff",
-            cursor: "pointer",
-            borderRadius: "50%",
-            width: 32,
-            height: 32,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 10,
-            backdropFilter: "blur(4px)",
-          }}
-        >
-          <ChevronRight size={18} />
-        </button>
-      )}
-    </div>
-  );
-}
-
-function FilmstripThumbnail({
-  frame,
-  isActive,
-  onExpand,
-}: {
-  frame: FilmstripFrame;
-  isActive: boolean;
-  onExpand: () => void;
-}) {
-  const isDataUri = React.useMemo(() => getImageSource(frame).startsWith("data:"), [frame]);
-  const [src, setSrc] = React.useState<string>(() => getImageSource(frame));
-  const [loaded, setLoaded] = React.useState(isDataUri);
-
-  React.useEffect(() => {
-    const source = getImageSource(frame);
-    if (!source.startsWith("data:")) {
-      preloadImage(source).then((url) => {
-        setSrc(url);
-        setLoaded(true);
-      });
-    }
-  }, [frame, frame.dataUri, frame.imageUrl]);
-
-  return (
-    <div style={{ flexShrink: 0, width: 140 }}>
-      <button
-        onClick={onExpand}
-        style={{
-          padding: 0,
-          border: "none",
-          background: "none",
-          cursor: "pointer",
-          display: "block",
-          width: "100%",
-        }}
-      >
-        {loaded ? (
-          <img
-            src={src}
-            alt={frame.label}
-            loading="lazy"
-            style={{
-              width: "100%",
-              borderRadius: 4,
-              border: isActive ? "2px solid var(--proof-blue)" : "1px solid var(--proof-grey)",
-              display: "block",
-              boxShadow: isActive ? "0 0 0 2px var(--proof-blue-bg)" : undefined,
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: "100%",
-              height: 80,
-              borderRadius: 4,
-              border: "1px solid var(--proof-grey)",
-              background: "var(--proof-grey-bg)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 10,
-              color: "var(--proof-text-secondary)",
-            }}
-          >
-            Loading…
-          </div>
-        )}
-      </button>
-      <div
-        style={{
-          fontSize: 9,
-          color: isActive ? "var(--proof-blue)" : "var(--proof-text-secondary)",
-          marginTop: 2,
-          textAlign: "center",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 2,
-          fontWeight: isActive ? 600 : 400,
-        }}
-      >
-        {frame.label}
-        <Maximize2 size={9} />
-      </div>
-    </div>
-  );
-}
+import { AssertionRow } from "@/components/aware/AssertionRow";
+import { EvidenceViewer } from "@/components/aware/EvidenceViewer";
+import { FilmstripViewer } from "@/components/aware/FilmstripViewer";
+import { RunHeader } from "@/components/aware/RunHeader";
 
 export default function RunDetail() {
   const params = useParams<{ runId: string }>();
@@ -481,9 +39,9 @@ export default function RunDetail() {
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const run = getRunById(runId) ?? null;
   const results = run ? getTestResultsForRun(run.id) : [];
-  const [search, setSearch] = useSyncedUrlState("q", "");
-  const [statusFilter, setStatusFilter] = useSyncedUrlState("status", "all");
-  const [catFilter, setCatFilter] = useSyncedUrlState("cat", "all");
+  const [search, _setSearch] = useSyncedUrlState("q", "");
+  const [statusFilter, _setStatusFilter] = useSyncedUrlState("status", "all");
+  const [catFilter, _setCatFilter] = useSyncedUrlState("cat", "all");
   const [page, setPage] = React.useState(0);
   const [detailPanelCollapsed, setDetailPanelCollapsed] = React.useState(false);
   const PAGE_SIZE = 20;
@@ -495,26 +53,32 @@ export default function RunDetail() {
     setPage(0);
   }
   const urlTestId = React.useMemo(() => new URLSearchParams(urlSearch).get("testId"), [urlSearch]);
-  const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(() => {
-    if (urlTestId && run) return null;
-    return null;
-  });
+  const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(null);
+
+  // Auto-select from URL param or first test on run load
+  const autoSelectedRunRef = React.useRef<string>("");
+  React.useEffect(() => {
+    if (!run || results.length === 0) return;
+    if (autoSelectedRunRef.current === run.id && urlTestId) {
+      const match = results.find((r) => r.id === urlTestId);
+      if (match && selectedResult?.id !== match.id) setSelectedResult(match);
+      return;
+    }
+    if (autoSelectedRunRef.current === run.id) return;
+    autoSelectedRunRef.current = run.id;
+    if (urlTestId) {
+      const match = results.find((r) => r.id === urlTestId);
+      if (match) { setSelectedResult(match); return; }
+    }
+    setSelectedResult(results[0]);
+  }, [run?.id, urlTestId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!run) {
     if (initState.loading) {
       return (
-        <div style={{ textAlign: "center", padding: 64 }}>
-          <div
-            className="proof-skeleton"
-            style={{ width: 48, height: 48, borderRadius: "50%", margin: "0 auto 16px" }}
-          />
-          <div
-            className="proof-skeleton"
-            style={{ width: 200, height: 16, borderRadius: 4, margin: "0 auto 8px" }}
-          />
-          <div style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 12 }}>
-            Loading run data...
-          </div>
+        <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+          <SkeletonText lines={2} lastLineWidth="40%" />
+          <SkeletonTable rows={10} cols={6} />
         </div>
       );
     }
@@ -563,177 +127,9 @@ export default function RunDetail() {
 
   return (
     <div
-      className="proof-page"
-      style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}
+      style={{ display: "flex", flexDirection: "column", gap: 16, height: "100%", minHeight: 0 }}
     >
-      {/* Env Details Card */}
-      {(() => {
-        const envCfg = getEnvConfigById(run.envId);
-        return (
-          <div
-            className="proof-card"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 20,
-              padding: "10px 16px",
-              fontSize: 12,
-              flexShrink: 0,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  background:
-                    run.env === "QA" ? "rgba(168,85,247,0.15)" : run.env === "UAT" ? "rgba(245,158,11,0.15)" : "rgba(34,197,94,0.15)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color:
-                    run.env === "QA" ? "#a855f7" : run.env === "UAT" ? "#f59e0b" : "#22c55e",
-                  flexShrink: 0,
-                }}
-              >
-                {run.env}
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: 13 }}>{envIdToLabel(run.envId)}</div>
-                <div style={{ color: "var(--proof-text-secondary)", fontSize: 11 }}>
-                  {run.suiteId}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ width: 1, height: 28, background: "var(--proof-grey)" }} />
-
-            <div style={{ display: "flex", gap: 20 }}>
-              <div>
-                <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
-                  Network
-                </div>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: run.network === "production" ? "#22c55e" : "#f59e0b",
-                    background: run.network === "production" ? "rgba(34,197,94,0.1)" : "rgba(245,158,11,0.1)",
-                    padding: "1px 7px",
-                    borderRadius: 4,
-                  }}
-                >
-                  {run.network}
-                </span>
-              </div>
-
-              <div>
-                <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
-                  Pass Rate
-                </div>
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color:
-                      run.passPct === 100
-                        ? "#22c55e"
-                        : run.passPct >= 80
-                          ? "#f59e0b"
-                          : "#ef4444",
-                  }}
-                >
-                  {run.passPct}%
-                </span>
-              </div>
-
-              <div>
-                <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
-                  Status
-                </div>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: run.status === "PASS" ? "#22c55e" : run.status === "RUNNING" ? "#3b82f6" : "#ef4444",
-                  }}
-                >
-                  {run.status}
-                </span>
-              </div>
-
-              <div>
-                <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
-                  Duration
-                </div>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)" }}>
-                  {run.duration}
-                </span>
-              </div>
-
-              <div>
-                <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
-                  Started
-                </div>
-                <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
-                  {new Date(run.started).toLocaleString()}
-                </span>
-              </div>
-            </div>
-
-            {envCfg && (
-              <>
-                <div style={{ width: 1, height: 28, background: "var(--proof-grey)" }} />
-                <div style={{ display: "flex", gap: 20 }}>
-                  <div>
-                    <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
-                      Property
-                    </div>
-                    <span style={{ fontSize: 11, fontWeight: 500 }}>
-                      {envCfg.property} v{envCfg.propertyVersion}
-                    </span>
-                  </div>
-                  {envCfg.baseUrl && (
-                    <div>
-                      <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
-                        Base URL
-                      </div>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          fontFamily: "var(--font-mono)",
-                          color: "var(--proof-text-secondary)",
-                        }}
-                      >
-                        {envCfg.baseUrl}
-                      </span>
-                    </div>
-                  )}
-                  {run.build && (
-                    <div>
-                      <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
-                        Build
-                      </div>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          fontFamily: "var(--font-mono)",
-                          color: "var(--proof-text-secondary)",
-                        }}
-                      >
-                        {run.build}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        );
-      })()}
+      <RunHeader run={run} />
 
       {/* Chart + results table */}
       <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
@@ -756,12 +152,12 @@ export default function RunDetail() {
                 <table className="proof-table">
                   <thead>
                     <tr>
-                      <th>Test Name</th>
-                      <th>Status</th>
-                      <th>Category</th>
-                      <th style={{ width: 200, whiteSpace: "nowrap" }}>History</th>
-                      <th style={{ textAlign: "right" }}>Duration</th>
-                      <th>Actions</th>
+                      <th style={{ width: "30%" }}>Test Name</th>
+                      <th style={{ width: 70 }}>Status</th>
+                      <th style={{ width: 100 }}>Category</th>
+                      <th style={{ width: "22%", whiteSpace: "nowrap" }}>History</th>
+                      <th style={{ width: 80, textAlign: "right" }}>Duration</th>
+                      <th style={{ width: 110 }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1053,247 +449,7 @@ export default function RunDetail() {
                       <FilmstripViewer frames={selectedResult.filmstrip} onClose={() => {}} />
                     )}
 
-                    {/* HTTP Exchange — always visible */}
-                    {(() => {
-                      const e = selectedResult.evidence;
-                      if (!e)
-                        return (
-                          <div>
-                            <div
-                              style={{
-                                fontSize: 10,
-                                fontWeight: 600,
-                                color: "var(--proof-text-secondary)",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.5px",
-                                marginBottom: 6,
-                              }}
-                            >
-                              HTTP Exchange
-                            </div>
-                            <div
-                              style={{
-                                fontSize: 11,
-                                color: "var(--proof-text-secondary)",
-                                fontStyle: "italic",
-                              }}
-                            >
-                              No HTTP data captured
-                            </div>
-                          </div>
-                        );
-                      const rows: { label: string; val: string }[] = [];
-                      rows.push({ label: "Method", val: e.request.method });
-                      rows.push({ label: "URL", val: e.request.url });
-                      rows.push({ label: "Status", val: String(e.response.status) });
-                      const ct = e.response.headers?.["Content-Type"] ?? "";
-                      if (ct) rows.push({ label: "Content-Type", val: ct });
-                      const cl = e.response.headers?.["Content-Length"] ?? "";
-                      if (cl) rows.push({ label: "Size", val: cl + " bytes" });
-                      const cache = e.response.headers?.["Cache-Control"] ?? "";
-                      if (cache) rows.push({ label: "Cache", val: cache });
-                      return (
-                        <div>
-                          <div
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 600,
-                              color: "var(--proof-text-secondary)",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.5px",
-                              marginBottom: 6,
-                            }}
-                          >
-                            HTTP Exchange
-                          </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: 3,
-                              fontSize: 11,
-                              fontFamily: "var(--font-mono)",
-                            }}
-                          >
-                            {rows.map((r) => (
-                              <div key={r.label} style={{ display: "flex", gap: 6 }}>
-                                <span
-                                  style={{
-                                    color: "var(--proof-text-secondary)",
-                                    width: 80,
-                                    flexShrink: 0,
-                                  }}
-                                >
-                                  {r.label}
-                                </span>
-                                <span
-                                  style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                                >
-                                  {r.val}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                          {/* Response headers */}
-                          {e.response.headers && Object.keys(e.response.headers).length > 0 && (
-                            <details open style={{ marginTop: 8, fontSize: 11 }}>
-                              <summary
-                                style={{
-                                  cursor: "pointer",
-                                  color: "var(--proof-text-secondary)",
-                                  fontWeight: 600,
-                                  fontSize: 10,
-                                  textTransform: "uppercase",
-                                  letterSpacing: "0.5px",
-                                }}
-                              >
-                                Response Headers ({Object.keys(e.response.headers).length})
-                              </summary>
-                              <div
-                                style={{
-                                  marginTop: 4,
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: 2,
-                                }}
-                              >
-                                {Object.entries(e.response.headers).map(([k, v]) => (
-                                  <div
-                                    key={k}
-                                    style={{
-                                      display: "flex",
-                                      gap: 6,
-                                      fontFamily: "var(--font-mono)",
-                                      fontSize: 10,
-                                    }}
-                                  >
-                                    <span style={{ color: "var(--proof-blue)", minWidth: 140 }}>
-                                      {k}
-                                    </span>
-                                    <span
-                                      style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                                    >
-                                      {v}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </details>
-                          )}
-                          {/* Request headers */}
-                          {e.request.headers && Object.keys(e.request.headers).length > 0 && (
-                            <details open style={{ marginTop: 6, fontSize: 11 }}>
-                              <summary
-                                style={{
-                                  cursor: "pointer",
-                                  color: "var(--proof-text-secondary)",
-                                  fontWeight: 600,
-                                  fontSize: 10,
-                                  textTransform: "uppercase",
-                                  letterSpacing: "0.5px",
-                                }}
-                              >
-                                Request Headers ({Object.keys(e.request.headers).length})
-                              </summary>
-                              <div
-                                style={{
-                                  marginTop: 4,
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: 2,
-                                }}
-                              >
-                                {Object.entries(e.request.headers).map(([k, v]) => (
-                                  <div
-                                    key={k}
-                                    style={{
-                                      display: "flex",
-                                      gap: 6,
-                                      fontFamily: "var(--font-mono)",
-                                      fontSize: 10,
-                                    }}
-                                  >
-                                    <span style={{ color: "var(--proof-purple)", minWidth: 140 }}>
-                                      {k}
-                                    </span>
-                                    <span
-                                      style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                                    >
-                                      {v}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </details>
-                          )}
-                          {/* Cookies */}
-                          {e.response.cookies && e.response.cookies.length > 0 && (
-                            <details open style={{ marginTop: 6, fontSize: 11 }}>
-                              <summary
-                                style={{
-                                  cursor: "pointer",
-                                  color: "var(--proof-text-secondary)",
-                                  fontWeight: 600,
-                                  fontSize: 10,
-                                  textTransform: "uppercase",
-                                  letterSpacing: "0.5px",
-                                }}
-                              >
-                                Cookies ({e.response.cookies.length})
-                              </summary>
-                              <div
-                                style={{
-                                  marginTop: 4,
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: 2,
-                                }}
-                              >
-                                {e.response.cookies.map((c, i) => (
-                                  <div
-                                    key={i}
-                                    style={{
-                                      display: "flex",
-                                      gap: 6,
-                                      fontFamily: "var(--font-mono)",
-                                      fontSize: 10,
-                                      padding: "4px 6px",
-                                      background: "var(--proof-grey-bg)",
-                                      borderRadius: 4,
-                                    }}
-                                  >
-                                    <span style={{ color: "var(--proof-orange)", fontWeight: 600 }}>
-                                      {c.name}
-                                    </span>
-                                    <span
-                                      style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                                    >
-                                      = {c.value}
-                                    </span>
-                                    {c.domain && (
-                                      <span style={{ color: "var(--proof-text-secondary)" }}>
-                                        domain={c.domain}
-                                      </span>
-                                    )}
-                                    {c.path && (
-                                      <span style={{ color: "var(--proof-text-secondary)" }}>
-                                        path={c.path}
-                                      </span>
-                                    )}
-                                    {c.httpOnly && (
-                                      <span style={{ color: "var(--proof-green)" }}>HttpOnly</span>
-                                    )}
-                                    {c.secure && (
-                                      <span style={{ color: "var(--proof-green)" }}>Secure</span>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </details>
-                          )}
-                        </div>
-                      );
-                    })()}
+                    <EvidenceViewer evidence={selectedResult.evidence} />
 
                     {/* Assertions */}
                     {selectedResult.assertions && selectedResult.assertions.length > 0 && (

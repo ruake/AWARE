@@ -1,5 +1,5 @@
 import React from "react";
-import { Terminal, EyeOff, XCircle, Loader2 } from "lucide-react";
+import { Terminal, EyeOff, XCircle } from "lucide-react";
 import type { DebugLogEntry } from "@/lib/ai/langGraphTypes";
 
 interface Props {

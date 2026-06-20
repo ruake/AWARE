@@ -23,16 +23,17 @@ export function useSyncedUrlState<T>(
   defaultValue: T,
 ): [T, (val: T | ((prev: T) => T)) => void] {
   // Subscribe to wouter location so we re-read URL on navigate() from any component
-  const [location] = useLocation();
-
-  // Derive state directly from URL — re-computes whenever location changes
-  const urlKey = location + window.location.search;
-  const state = React.useMemo(() => readParam(key, defaultValue), [urlKey, key, defaultValue]);
+  const [_location] = useLocation();
 
   // Force re-read on replaceState-based updates and browser back/forward
-  const [, bump] = React.useState(0);
+  const [bump, setBump] = React.useState(0);
+
+  // Derive state directly from URL — re-computes whenever bump changes (urlstate:sync events)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const state = React.useMemo(() => readParam(key, defaultValue), [key, defaultValue, bump]);
+
   React.useEffect(() => {
-    const handler = () => bump((n) => n + 1);
+    const handler = () => setBump((n) => n + 1);
     window.addEventListener("popstate", handler);
     window.addEventListener(SYNC_EVENT, handler);
     return () => {

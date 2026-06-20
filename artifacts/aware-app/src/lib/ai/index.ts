@@ -1,11 +1,10 @@
-export { AI_USE_CASES, getUseCaseById, getUseCasesByCategory } from "./useCases";
+export { AI_USE_CASES, getUseCaseById, getUseCasesByCategory } from "./skillRegistry";
 export type { AIUseCase } from "./types";
 export type { AIAnalysisRequest, AIAnalysisResult, AIInsight } from "./types";
 export { runAnalysis, runFallbackAnalysis, generateInsights } from "./analyzer";
 export { runLangGraphAnalysis, runLangGraphChat } from "./analyzer";
 export { buildAIContext, buildSystemPrompt } from "./context";
 export { executeDataQuery, DATA_QUERIES, getDataQueryById } from "./dataQueries";
-export type { DataQuery, AITool, AIToolResult } from "./types";
 
 export { LangGraph, buildDefaultGraph } from "./langGraph";
 export type {
@@ -16,7 +15,7 @@ export type {
   LangGraphExecutionState,
   SubAgentStep,
   ChartOutput,
-  GoogleChartType,
+  ChartType,
   DebugLogEntry,
 } from "./langGraphTypes";
 export {
@@ -34,8 +33,6 @@ export {
   buildBarChart,
   buildPieChart,
   buildLineChart,
-  buildAreaChart,
-  buildSankeyChart,
   serializeCharts,
   buildChart,
 } from "./chartBuilder";

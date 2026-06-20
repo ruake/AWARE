@@ -271,14 +271,6 @@ declare global {
   }
 }
 
-function hasNewAPI(): boolean {
-  return typeof (window as any).LanguageModel?.create === "function";
-}
-
-function hasOldAPI(): boolean {
-  return typeof (window as any).ai?.languageModel?.create === "function";
-}
-
 // ── Keyword routing ───────────────────────────────────────────────────────────
 // Deterministic tool selection — no LLM needed. Ordered from most-specific to
 // least-specific so "flaky run history" → get_flaky_tests, not query_runs.

@@ -1,5 +1,5 @@
 import type { TestResult, TestDetail } from "./types";
-import { RUNS, computeTestDetailForName } from "./runs";
+import { computeTestDetailForName } from "./runs";
 import { fetchJson } from "./dataFetcher";
 
 const _resultsByRun = new Map<string, TestResult[]>();

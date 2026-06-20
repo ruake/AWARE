@@ -2,8 +2,10 @@ import React from "react";
 import Fuse from "fuse.js";
 import { useLocation } from "wouter";
 import { getTestCases, getTestSuites, RUNS, DIFF_ROWS } from "@/lib/data";
+import { CommandSearch } from "./CommandSearch";
+import { CommandResults } from "./CommandResults";
 
-type SearchResult = {
+export type SearchResult = {
   id: string;
   label: string;
   description: string;
@@ -287,13 +289,6 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
     if (r.type in typeCounts) typeCounts[r.type as keyof typeof typeCounts]++;
   });
 
-  const typeColor = (type: string) => {
-    if (type === "test") return { bg: "rgba(168,85,247,0.15)", color: "var(--proof-purple)" };
-    if (type === "suite") return { bg: "rgba(245,158,11,0.15)", color: "var(--proof-yellow)" };
-    if (type === "run") return { bg: "rgba(91,138,245,0.15)", color: "var(--proof-blue)" };
-    return { bg: "rgba(34,197,94,0.15)", color: "var(--proof-green)" };
-  };
-
   return (
     <div
       style={{
@@ -320,236 +315,25 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Search input */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "14px 18px",
-            borderBottom: "1px solid var(--proof-grey)",
+        <CommandSearch
+          query={query}
+          typeFilter={typeFilter}
+          typeCounts={typeCounts}
+          inputRef={inputRef}
+          onQueryChange={(value) => {
+            setQuery(value);
+            setActiveIdx(0);
           }}
-        >
-          <span style={{ fontSize: 16, color: "var(--proof-text-secondary)" }}>🔍</span>
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Search tests, runs, suites, or type &gt; for actions..."
-            style={{
-              flex: 1,
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              fontSize: 15,
-              color: "var(--proof-text)",
-              fontFamily: "var(--font-sans)",
-            }}
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setActiveIdx(0);
-            }}
-            onKeyDown={handleKey}
-          />
-          <kbd
-            style={{
-              fontSize: 11,
-              padding: "2px 6px",
-              background: "var(--proof-grey-bg)",
-              border: "1px solid var(--proof-grey)",
-              borderRadius: 4,
-              color: "var(--proof-text-secondary)",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            ESC
-          </kbd>
-        </div>
-
-        {/* Filter chips */}
-        <div
-          style={{
-            display: "flex",
-            gap: 6,
-            padding: "8px 18px",
-            borderBottom: "1px solid var(--proof-grey)",
-            background: "var(--proof-grey-bg)",
-            flexWrap: "wrap",
-          }}
-        >
-          {(["test", "suite", "run", "compare", "action"] as const).map((type) => (
-            <button
-              key={type}
-              onClick={() => setTypeFilter(typeFilter === type ? null : type)}
-              style={{
-                fontSize: 11,
-                padding: "3px 10px",
-                borderRadius: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-                border: "1px solid",
-                background: typeFilter === type ? "var(--proof-blue)" : "var(--proof-surface)",
-                color: typeFilter === type ? "white" : "var(--proof-text-secondary)",
-                borderColor: typeFilter === type ? "var(--proof-blue)" : "var(--proof-grey)",
-                transition: "all 0.15s",
-              }}
-            >
-              {type === "test"
-                ? "Tests"
-                : type === "run"
-                  ? "Runs"
-                  : type === "compare"
-                    ? "Compare"
-                    : type === "action"
-                      ? "Actions"
-                      : "Suites"}{" "}
-              ({typeCounts[type]})
-            </button>
-          ))}
-          {typeFilter && (
-            <button
-              onClick={() => setTypeFilter(null)}
-              style={{
-                fontSize: 11,
-                padding: "3px 10px",
-                color: "var(--proof-red)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              Clear
-            </button>
-          )}
-        </div>
-
-        {/* Results */}
-        <div style={{ maxHeight: 360, overflowY: "auto" }}>
-          {filtered.length === 0 ? (
-            <div
-              style={{
-                padding: "40px 18px",
-                textAlign: "center",
-                color: "var(--proof-text-secondary)",
-                fontSize: 13,
-              }}
-            >
-              {q.startsWith(">")
-                ? `No actions for "${q.slice(1).trim()}"`
-                : `No results for "${query}"`}
-            </div>
-          ) : (
-            filtered.map((r, i) => {
-              const tc = typeColor(r.type);
-              return (
-                <div
-                  key={r.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "10px 18px",
-                    cursor: "pointer",
-                    background: i === safeActiveIdx ? "var(--proof-blue-bg)" : "transparent",
-                    transition: "background 0.1s",
-                  }}
-                  onClick={() => handleSelect(r)}
-                  onMouseEnter={() => setActiveIdx(i)}
-                >
-                  <div
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 6,
-                      background: tc.bg,
-                      color: tc.color,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 14,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {r.icon}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        fontWeight: 500,
-                        color: "var(--proof-text)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {r.label}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: "var(--proof-text-secondary)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {r.description}
-                    </div>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      padding: "2px 7px",
-                      borderRadius: 4,
-                      fontWeight: 600,
-                      background: tc.bg,
-                      color: tc.color,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {r.type}
-                  </span>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Footer */}
-        <div
-          style={{
-            padding: "8px 18px",
-            borderTop: "1px solid var(--proof-grey)",
-            display: "flex",
-            gap: 14,
-            fontSize: 11,
-            color: "var(--proof-text-secondary)",
-          }}
-        >
-          {[
-            ["↑↓", "Navigate"],
-            ["↵", "Open"],
-            ["⌘K", "Toggle"],
-            ["ESC", "Close"],
-          ].map(([key, label]) => (
-            <span key={key}>
-              <kbd
-                style={{
-                  padding: "1px 5px",
-                  background: "var(--proof-grey-bg)",
-                  border: "1px solid var(--proof-grey)",
-                  borderRadius: 3,
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                }}
-              >
-                {key}
-              </kbd>{" "}
-              {label}
-            </span>
-          ))}
-        </div>
+          onTypeFilterChange={setTypeFilter}
+          onKeyDown={handleKey}
+        />
+        <CommandResults
+          filtered={filtered}
+          query={query}
+          activeIdx={safeActiveIdx}
+          onSelect={handleSelect}
+          onHover={setActiveIdx}
+        />
       </div>
     </div>
   );

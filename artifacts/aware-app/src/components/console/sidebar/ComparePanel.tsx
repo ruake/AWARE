@@ -5,11 +5,9 @@ import { subscribeToRuns, getRuns, subscribeToDiffRows, getDiffRows } from "@/li
 import {
   getSelectedEnvSnapshot,
   subscribeToSelectedEnv,
-  setSelectedEnvIds,
 } from "@/lib/selectedEnv";
 import { getCompareStats, subscribeToSidebarData } from "@/lib/sidebarData";
-import { EnvSelector } from "@/components/console/EnvSelector";
-import { Link2, Share2, Github, Zap, ExternalLink } from "lucide-react";
+import { Link2, Share2, Github, Zap } from "lucide-react";
 
 function copy(text: string) {
   navigator.clipboard.writeText(text).catch(() => {});
@@ -107,14 +105,20 @@ function StatCard({
 }
 
 function CompareStatSummary() {
-  const [, navigate] = useLocation();
+  const [_navigate] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);
   const baseline = params.get("baseline");
   const candidate = params.get("candidate");
+  const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
+  const allRuns = useSyncExternalStore(subscribeToRuns, getRuns);
+  const envRuns =
+    envSnap.envIds.length > 0 ? allRuns.filter((r) => envSnap.envIds.includes(r.envId)) : allRuns;
+  const effectiveBaseline = baseline || envRuns[envRuns.length - 1]?.id || "";
+  const effectiveCandidate = candidate || envRuns[0]?.id || "";
   const { stats, activeFilter } = useSyncExternalStore(subscribeToSidebarData, getCompareStats);
 
-  if (!baseline || !candidate || stats.length === 0) {
+  if (!effectiveBaseline || !effectiveCandidate || stats.length === 0) {
     return (
       <div
         style={{
@@ -145,8 +149,8 @@ function CompareStatSummary() {
           key={s.key}
           stat={s}
           activeFilter={activeFilter}
-          baseline={baseline!}
-          candidate={candidate!}
+          baseline={effectiveBaseline}
+          candidate={effectiveCandidate}
         />
       ))}
     </div>
@@ -202,8 +206,7 @@ function EnvTags({ baseline, candidate }: { baseline: string; candidate: string 
 }
 
 export function ComparePanel() {
-  const [, navigate] = useLocation();
-  const { show } = { show: copy };
+  const [, _navigate] = useLocation();
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
   const runs = useSyncExternalStore(subscribeToRuns, getRuns);
   const diffs = useSyncExternalStore(subscribeToDiffRows, getDiffRows);
@@ -212,7 +215,7 @@ export function ComparePanel() {
 
   const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
   const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
-  const [swapped, setSwapped] = React.useState(false);
+  const [_swapped, setSwapped] = React.useState(false);
 
   // Derive effective run IDs: use URL param if set, otherwise pick from envRuns
   const effectiveBaseline = baseline || envRuns[envRuns.length - 1]?.id || "";
@@ -226,14 +229,6 @@ export function ComparePanel() {
 
   return (
     <>
-      <div style={{ padding: "8px 10px", borderBottom: "1px solid var(--proof-border)" }}>
-        <EnvSelector
-          currentEnvIds={envSnap.envIds}
-          onEnvChange={setSelectedEnvIds}
-          variant="topbar"
-        />
-      </div>
-
       <CompareStatSummary />
 
       {/* Run selectors */}
@@ -360,7 +355,6 @@ export function ComparePanel() {
         <button
           onClick={() => {
             copy(window.location.href);
-            show("Permalink copied");
           }}
           style={{
             display: "flex",
@@ -382,7 +376,6 @@ export function ComparePanel() {
             copy(
               `Comparison: ${baseline} vs ${candidate}\nNew failures: ${regressions.length}\nFixed: ${fixed.length}\nDuration regressions: ${duration.length}`,
             );
-            show("Slack summary copied");
           }}
           style={{
             display: "flex",
@@ -404,7 +397,6 @@ export function ComparePanel() {
             copy(
               `## Regression Report\n**Baseline:** ${baseline}\n**Candidate:** ${candidate}\n\n### Regressions (${regressions.length})\n${regressions.map((r) => `- ${r.name}`).join("\n")}\n\n### Fixed (${fixed.length})\n${fixed.map((r) => `- ${r.name}`).join("\n")}`,
             );
-            show("Markdown report copied");
           }}
           style={{
             display: "flex",

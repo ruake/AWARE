@@ -2,8 +2,9 @@ import React, { useEffect, useSyncExternalStore } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ErrorBoundary } from "@/components/aware/ErrorBoundary";
+import { SkeletonTable, SkeletonChart, SkeletonCard } from "@/components/aware/Skeleton";
 import { ConsoleShell } from "@/components/console";
-import NotFound from "@/pages/not-found";
+import NotFound from "@/pages/NotFound";
 import { loadAllData, getDataInitState, subscribeToDataInit } from "@/lib/data";
 import { AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
 
@@ -64,34 +65,6 @@ const Sharing = React.lazy(() => import("@/pages/Sharing"));
 
 const queryClient = new QueryClient();
 
-function PageLoader({ text }: { text?: string }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        background: "var(--proof-grey-bg)",
-      }}
-    >
-      <div
-        style={{
-          textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 16,
-        }}
-      >
-        <div className="proof-skeleton" style={{ width: 48, height: 48, borderRadius: "50%" }} />
-        <div className="proof-skeleton" style={{ width: 200, height: 16, borderRadius: 4 }} />
-        {text && <div style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>{text}</div>}
-      </div>
-    </div>
-  );
-}
-
 function DataGate({ children }: { children: React.ReactNode }) {
   const state = useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const triggeredRef = React.useRef(false);
@@ -101,7 +74,7 @@ function DataGate({ children }: { children: React.ReactNode }) {
       triggeredRef.current = true;
       loadAllData().catch(() => {});
     }
-  }, [state.loaded, state.loading, triggeredRef.current]);
+  }, [state.loaded, state.loading]);
 
   if (state.error && !state.loading && !state.loaded) {
     return (
@@ -196,54 +169,54 @@ function Router() {
     <ConsoleShell>
       <Switch>
         <Route path="/">
-          <React.Suspense fallback={<PageLoader />}>
+          <ErrorBoundary><React.Suspense fallback={<SkeletonChart />}>
             <Dashboard />
-          </React.Suspense>
+          </React.Suspense></ErrorBoundary>
         </Route>
         <Route path="/runs">
-          <React.Suspense fallback={<PageLoader />}>
+          <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
             <Runs />
-          </React.Suspense>
+          </React.Suspense></ErrorBoundary>
         </Route>
         <Route path="/runs/:runId">
-          <React.Suspense fallback={<PageLoader />}>
+          <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
             <RunDetail />
-          </React.Suspense>
+          </React.Suspense></ErrorBoundary>
         </Route>
         <Route path="/compare">
-          <React.Suspense fallback={<PageLoader />}>
+          <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
             <Compare />
-          </React.Suspense>
+          </React.Suspense></ErrorBoundary>
         </Route>
         <Route path="/trends">
-          <React.Suspense fallback={<PageLoader />}>
+          <ErrorBoundary><React.Suspense fallback={<SkeletonChart />}>
             <Trends />
-          </React.Suspense>
+          </React.Suspense></ErrorBoundary>
         </Route>
         <Route path="/tests">
-          <React.Suspense fallback={<PageLoader />}>
+          <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
             <Tests />
-          </React.Suspense>
+          </React.Suspense></ErrorBoundary>
         </Route>
         <Route path="/suites">
           {() => {
             window.history.replaceState(null, "", `${import.meta.env.BASE_URL}tests`);
             return (
-              <React.Suspense fallback={<PageLoader />}>
+              <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
                 <Tests />
-              </React.Suspense>
+              </React.Suspense></ErrorBoundary>
             );
           }}
         </Route>
         <Route path="/copilot">
-          <React.Suspense fallback={<PageLoader />}>
+          <ErrorBoundary><React.Suspense fallback={<SkeletonCard />}>
             <Copilot />
-          </React.Suspense>
+          </React.Suspense></ErrorBoundary>
         </Route>
         <Route path="/about">
-          <React.Suspense fallback={<PageLoader />}>
+          <ErrorBoundary><React.Suspense fallback={<SkeletonCard />}>
             <About />
-          </React.Suspense>
+          </React.Suspense></ErrorBoundary>
         </Route>
         {/* Redirects from old route names (Nielsen #4: don't break bookmarks) */}
         <Route path="/activity">
@@ -254,9 +227,9 @@ function Router() {
               window.location.pathname.replace("/activity", "/runs"),
             );
             return (
-              <React.Suspense fallback={<PageLoader />}>
+              <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
                 <Runs />
-              </React.Suspense>
+              </React.Suspense></ErrorBoundary>
             );
           }}
         </Route>
@@ -268,9 +241,9 @@ function Router() {
               window.location.pathname.replace("/pulse", "/runs"),
             );
             return (
-              <React.Suspense fallback={<PageLoader />}>
+              <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
                 <Runs />
-              </React.Suspense>
+              </React.Suspense></ErrorBoundary>
             );
           }}
         </Route>
@@ -282,22 +255,22 @@ function Router() {
               window.location.pathname.replace("/analytics", "/trends"),
             );
             return (
-              <React.Suspense fallback={<PageLoader />}>
+              <ErrorBoundary><React.Suspense fallback={<SkeletonChart />}>
                 <Trends />
-              </React.Suspense>
+              </React.Suspense></ErrorBoundary>
             );
           }}
         </Route>
         {/* Thin pages kept for deep-link compat but not in nav (progressive disclosure) */}
         <Route path="/start">
-          <React.Suspense fallback={<PageLoader />}>
+          <ErrorBoundary><React.Suspense fallback={<SkeletonCard />}>
             <StartRun />
-          </React.Suspense>
+          </React.Suspense></ErrorBoundary>
         </Route>
         <Route path="/share">
-          <React.Suspense fallback={<PageLoader />}>
+          <ErrorBoundary><React.Suspense fallback={<SkeletonCard />}>
             <Sharing />
-          </React.Suspense>
+          </React.Suspense></ErrorBoundary>
         </Route>
         <Route component={NotFound} />
       </Switch>

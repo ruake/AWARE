@@ -191,13 +191,13 @@ The Copilot page (/copilot) has:
 - Right panel: Debug log panel (toggle with "Debug" button in top bar)
 - Top bar: Provider selector (OpenAI/WebLLM/Chrome), Configure button, New Chat
 - Thinking indicator: shows currently executing LangGraph node chain
-- Charts & tables rendered as Google Charts inside Markdown blocks
+- Charts & tables rendered with recharts and HTML inside Markdown blocks
 
 ## Architecture
 - **Stack**: React 19 + TypeScript 5.9 + Vite 7 SPA
 - **Routing**: wouter (not React Router) — use <Link> or useLocation() for SPA nav
 - **Styling**: inline style={{}} with \`--proof-*\` CSS variables for domain components; Tailwind only in shadcn/radix primitives
-- **Charts**: Google Charts (react-google-charts) embedded via \`\`\`chart fenced code blocks
+- **Charts**: recharts embedded via \`\`\`chart fenced code blocks
 - **Data**: Fetched at runtime from raw.githubusercontent.com/ruake/AWARE/data/ (or /data/ in dev)
 - **State**: Custom pub/sub stores (no Redux/Zustand), useSyncExternalStore for reactivity
 - **AI Engine**: LangGraph node pipeline with 26 analysis skills, debug logger with ring buffer
