@@ -96,8 +96,7 @@ export function AboutHero() {
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <a
             href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             style={{
               display: "flex",
               alignItems: "center",
@@ -125,8 +124,7 @@ export function AboutHero() {
           </a>
           <a
             href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             style={{
               display: "flex",
               alignItems: "center",

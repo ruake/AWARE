@@ -446,8 +446,7 @@ const components = {
     return (
       <a
         href={href}
-        target="_blank"
-        rel="noopener noreferrer"
+        target="_blank" rel="noopener noreferrer"
         style={{ color: "var(--proof-blue)", textDecoration: "underline", fontWeight: 500 }}
       >
         {children}

@@ -138,37 +138,28 @@ function DataGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return (
-    <>
-      {!state.loaded && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 10000,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "6px 16px",
-            fontSize: 12,
-            fontWeight: 500,
-            color: "var(--proof-blue)",
-            background: "var(--proof-blue-bg)",
-            borderBottom: "1px solid var(--proof-blue)",
-            pointerEvents: "none",
-          }}
-        >
-          <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
-          <span>
-            Loading data: runs, results, suites, promotions, scheduler status, test discovery...
-          </span>
-        </div>
-      )}
-      {children}
-    </>
-  );
+  if (!state.loaded) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          flexDirection: "column",
+          gap: 12,
+          background: "var(--proof-bg)",
+        }}
+      >
+        <Loader2 size={28} style={{ color: "var(--proof-blue)", animation: "spin 1s linear infinite" }} />
+        <span style={{ fontSize: 13, color: "var(--proof-text-secondary)", fontWeight: 500 }}>
+          Loading A.W.A.R.E. data…
+        </span>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }
 
 function Router() {
@@ -204,6 +195,16 @@ function Router() {
           <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
             <Tests />
           </React.Suspense></ErrorBoundary>
+        </Route>
+        <Route path="/tests/:testId">
+          {({ testId }: { testId: string }) => {
+            window.history.replaceState(null, "", `${import.meta.env.BASE_URL}tests?detail=${testId}`);
+            return (
+              <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
+                <Tests />
+              </React.Suspense></ErrorBoundary>
+            );
+          }}
         </Route>
         <Route path="/suites">
           {() => {

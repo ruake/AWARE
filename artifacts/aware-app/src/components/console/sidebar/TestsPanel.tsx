@@ -1,6 +1,6 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
-import { getAutoDiscoveredTests, computeTestStats, getAutoDiscoverySummary } from "@/lib/data";
+import { getAutoDiscoveredTests, subscribeToAutoTests, computeTestStats, getAutoDiscoverySummary } from "@/lib/data";
 import { useTestData } from "@/hooks/useTestData";
 import {
   subscribeToTestSuites,
@@ -33,7 +33,7 @@ const PRIORITIES = ["All", "P0", "P1", "P2", "P3"] as const;
 function TestKpis() {
   const [, navigate] = useLocation();
   const { tcs, suites } = useTestData();
-  const stats = React.useMemo(() => computeTestStats(), []);
+  const stats = React.useMemo(() => computeTestStats(), [tcs]);
 
   const kpis = [
     {
@@ -129,7 +129,7 @@ function TestKpis() {
 function TestFilters() {
   const [loc, navigate] = useLocation();
   const { tcs, suites } = useTestData();
-  const allTests = React.useMemo(() => getAutoDiscoveredTests(), []);
+  const allTests = useSyncExternalStore(subscribeToAutoTests, getAutoDiscoveredTests);
   const discovery = React.useMemo(() => getAutoDiscoverySummary(), []);
   const params = React.useMemo(() => new URLSearchParams(window.location.search), [loc]);
   const suiteFilter = params.get("suite") || "";

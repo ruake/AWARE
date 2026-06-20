@@ -553,7 +553,7 @@ export default function CopilotPage() {
             flexShrink: 0,
           }}
         >
-          <Bot size={14} style={{ color: "#60a5fa" }} />
+          <Bot size={14} style={{ color: "var(--proof-blue)" }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
@@ -642,9 +642,9 @@ export default function CopilotPage() {
                 fontSize: 10.5,
                 fontWeight: 600,
                 cursor: "pointer",
-                border: "1px solid rgba(248,113,113,0.25)",
-                background: "rgba(239,68,68,0.08)",
-                color: "#f87171",
+                border: "1px solid var(--proof-red-border)",
+                background: "var(--proof-red-bg)",
+                color: "var(--proof-red)",
                 transition: "all 0.15s",
                 marginLeft: 4,
               }}
@@ -681,7 +681,7 @@ export default function CopilotPage() {
         >
           <Loader2
             size={8}
-            style={{ animation: "spin 0.8s linear infinite", color: "#60a5fa", flexShrink: 0 }}
+            style={{ animation: "spin 0.8s linear infinite", color: "var(--proof-blue)", flexShrink: 0 }}
           />
           {agentSteps.slice(-4).map((s, i) => (
             <React.Fragment key={s.id}>
@@ -690,9 +690,9 @@ export default function CopilotPage() {
                 style={{
                   color:
                     s.status === "completed"
-                      ? "#34d399"
+                      ? "var(--proof-green)"
                       : s.status === "running"
-                        ? "#60a5fa"
+                        ? "var(--proof-blue)"
                         : "var(--proof-text-muted)",
                   fontWeight: s.status === "running" ? 600 : 400,
                   fontFamily: "var(--font-mono)",

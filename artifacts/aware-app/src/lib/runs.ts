@@ -60,6 +60,7 @@ export async function loadRuns(): Promise<void> {
   _runs.length = 0;
   _runs.push(...data);
   updateRunsSnapshot();
+  notifyRuns();
 }
 
 export function getRunIndex(runId: string): number {
@@ -333,6 +334,7 @@ export function recomputeAll(): void {
       continue;
     }
   }
+  updateRunsSnapshot();
   updateDiffRowsSnapshot();
   notifyRuns();
   notifyDiffRows();

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { TestCase } from "@/lib/types";
 import { ConsolePagination } from "@/components/console";
+import { repo } from "@/lib/nav";
 import {
   PRI_COLORS,
   PRI_BGS,
@@ -292,7 +293,7 @@ export function TestList({
                             const filePath = test.scriptPath?.split("::")[0];
                             if (filePath)
                               window.open(
-                                `https://github.com/ruake/AWARE/blob/main/${filePath}`,
+                                `${repo}/blob/main/${filePath}`,
                                 "_blank",
                               );
                           }}

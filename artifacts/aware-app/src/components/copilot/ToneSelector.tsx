@@ -101,7 +101,7 @@ export default function ToneSelector({ currentTone, onToneChange }: ToneSelector
                   transition: "background 0.1s",
                 }}
                 onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.background = "var(--proof-surface-1)";
+                  if (!isActive) e.currentTarget.style.background = "var(--proof-hover)";
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) e.currentTarget.style.background = "transparent";

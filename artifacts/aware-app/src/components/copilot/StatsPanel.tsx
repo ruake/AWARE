@@ -174,7 +174,7 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
     navigator.clipboard.writeText(buildCopyText(stats, thread)).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
-    });
+    }).catch(() => {});
   };
 
   return (

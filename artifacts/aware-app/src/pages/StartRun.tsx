@@ -1,4 +1,5 @@
 import { Play, Github, GitCompare, ExternalLink } from "lucide-react";
+import { navTo } from "@/lib/data";
 
 export default function StartRun() {
   return (
@@ -51,8 +52,7 @@ export default function StartRun() {
           </div>
           <a
             href="https://github.com/ruake/AWARE/actions"
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             className="proof-button proof-button-sm"
             style={{ textDecoration: "none" }}
           >
@@ -81,7 +81,7 @@ export default function StartRun() {
             </div>
           </div>
           <button
-            onClick={() => window.location.assign("/compare")}
+            onClick={() => navTo("/compare")}
             className="proof-button proof-button-sm"
           >
             Compare <ExternalLink size={12} />

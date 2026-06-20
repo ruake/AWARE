@@ -4,6 +4,7 @@ import { useSyncedUrlState } from "@/lib/urlState";
 import { getRunById, getTestResultsForRun, subscribeToRuns, getRuns } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import type { Run, TestResult } from "@/lib/types";
+import { repo } from "@/lib/nav";
 
 import {
   Search,
@@ -19,7 +20,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-const GH_ACTIONS_URL = `https://github.com/ruake/AWARE/actions`;
+const GH_ACTIONS_URL = `${repo}/actions`;
 
 function RunsStatSummary({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
   const [, navigate] = useLocation();
@@ -163,8 +164,7 @@ function RunsListBanner({ running }: { running: Run[] }) {
         </span>
         <a
           href={GH_ACTIONS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+          target="_blank" rel="noopener noreferrer"
           style={{
             fontSize: 9,
             fontWeight: 600,
@@ -199,8 +199,7 @@ function RunsListBanner({ running }: { running: Run[] }) {
         </span>
         <a
           href={GH_ACTIONS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+          target="_blank" rel="noopener noreferrer"
           style={{
             fontSize: 9,
             fontWeight: 600,
@@ -497,8 +496,7 @@ function RunsGhActions() {
         </div>
         <a
           href={GH_ACTIONS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+          target="_blank" rel="noopener noreferrer"
           style={{
             display: "flex",
             alignItems: "center",
@@ -670,9 +668,8 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
           <GitCompare size={9} /> Diff
         </button>
         <a
-          href={`https://github.com/ruake/AWARE/actions/runs/${run.id}`}
-          target="_blank"
-          rel="noopener"
+          href={`${repo}/actions/runs/${run.id}`}
+          target="_blank" rel="noopener noreferrer"
           style={{
             border: "1px solid var(--proof-border)",
             background: "var(--proof-surface)",

@@ -188,7 +188,7 @@ const CodeHighlight: React.FC<CodeHighlightProps> = ({ code, language }) => {
     navigator.clipboard.writeText(code).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    });
+    }).catch(() => {});
   }, [code]);
 
   return (

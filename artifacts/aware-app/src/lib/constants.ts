@@ -8,7 +8,13 @@ export const SEVERITIES: string[] = ["critical", "major", "minor", "trivial"];
 
 export const STATUSES = ["active", "disabled", "deprecated"] as const;
 
-export const OWNERS: string[] = [];
+export const OWNERS: string[] = [
+  "platform-eng",
+  "cdn-ops",
+  "security",
+  "performance",
+  "auto@discovery",
+];
 
 export const TAG_COLORS: Record<string, string> = {
   geo: "#5b8af5",

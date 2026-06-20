@@ -2,7 +2,8 @@ import React from "react";
 import { getTestChangelog } from "@/lib/data";
 import { getGitHubUrl, cleanScriptPath } from "@/lib/utils";
 import type { TestCase } from "@/lib/types";
-import { TagBadge, TestCaseStatusBadge, priorityColor } from "@/components/aware/TestCard";
+import { TagBadge, TestCaseStatusBadge } from "@/components/aware/TestCard";
+import { priorityColor } from "@/components/aware/ColumnFilter";
 import { RepoStatusBadge } from "./RepoStatusBadge";
 import { TestFlowDiagram } from "./TestFlowDiagram";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
@@ -173,8 +174,7 @@ export function TestManagerSidePanel({
               {k === "Script" && tc.scriptPath ? (
                 <a
                   href={getGitHubUrl(tc)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target="_blank" rel="noopener noreferrer"
                   style={{
                     fontFamily: "var(--font-mono)",
                     fontSize: 11,
@@ -378,8 +378,7 @@ export function TestManagerSidePanel({
             {tc.repoStatus === "synced" && tc.scriptPath && (
               <a
                 href={getGitHubUrl(tc)}
-                target="_blank"
-                rel="noreferrer"
+                target="_blank" rel="noopener noreferrer"
                 style={{
                   fontSize: 11,
                   color: "var(--proof-blue)",
@@ -423,7 +422,7 @@ export function TestManagerSidePanel({
           </button>
           <button
             onClick={() => {
-              navigator.clipboard.writeText(`${window.location.origin}/tests/${tc.id}`);
+              navigator.clipboard.writeText(`${window.location.origin}/tests?detail=${tc.id}`);
               toast("Link copied");
             }}
             className="proof-button proof-button-sm"

@@ -11,7 +11,8 @@ import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { getRuns, subscribeToRuns } from "@/lib/data";
 import type { Run } from "@/lib/types";
 import { PulseFeed, PulseFilterBar } from "@/components/aware";
-const GH_ACTIONS_URL = `https://github.com/ruake/AWARE/actions`;
+import { repo } from "@/lib/nav";
+const GH_ACTIONS_URL = `${repo}/actions`;
 
 export default function Pulse() {
   const [, navigate] = useLocation();
@@ -98,8 +99,7 @@ export default function Pulse() {
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <a
             href={GH_ACTIONS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             style={{
               display: "flex",
               alignItems: "center",
@@ -164,8 +164,7 @@ export default function Pulse() {
           </div>
           <a
             href={GH_ACTIONS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             style={{
               marginLeft: "auto",
               fontSize: 11,
@@ -225,8 +224,7 @@ export default function Pulse() {
           </div>
           <a
             href={GH_ACTIONS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             style={{
               marginLeft: "auto",
               fontSize: 11,
@@ -295,8 +293,7 @@ export default function Pulse() {
         </div>
         <a
           href={GH_ACTIONS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+          target="_blank" rel="noopener noreferrer"
           style={{
             display: "flex",
             alignItems: "center",
