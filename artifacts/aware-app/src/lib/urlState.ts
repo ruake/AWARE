@@ -15,7 +15,9 @@ function readParam<T>(key: string, defaultValue: T): T {
 }
 
 function triggerSync() {
-  window.dispatchEvent(new CustomEvent(SYNC_EVENT));
+  // Defer to avoid "setState during render" when two useSyncedUrlState
+  // consumers share a key and one updates during another's render cycle.
+  queueMicrotask(() => window.dispatchEvent(new CustomEvent(SYNC_EVENT)));
 }
 
 export function useSyncedUrlState<T>(

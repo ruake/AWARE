@@ -96,9 +96,10 @@ function RunRibbonCard({
   onClick?: () => void;
   index: number;
 }) {
-  const [now, setNow] = React.useState(0);
+  const [now, setNow] = React.useState(Date.now);
   React.useEffect(() => {
     const tick = () => setNow(Date.now());
+    tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
   }, []);

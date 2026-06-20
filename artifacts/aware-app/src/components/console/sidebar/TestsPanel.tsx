@@ -127,11 +127,11 @@ function TestKpis() {
 }
 
 function TestFilters() {
-  const [, navigate] = useLocation();
+  const [loc, navigate] = useLocation();
   const { tcs, suites } = useTestData();
   const allTests = React.useMemo(() => getAutoDiscoveredTests(), []);
   const discovery = React.useMemo(() => getAutoDiscoverySummary(), []);
-  const params = new URLSearchParams(window.location.search);
+  const params = React.useMemo(() => new URLSearchParams(window.location.search), [loc]);
   const suiteFilter = params.get("suite") || "";
   const selectedSuite = suiteFilter ? (suites.find((s) => s.id === suiteFilter) ?? null) : null;
 
@@ -414,11 +414,11 @@ function flattenForSearch(suite: TestSuite, allSuites: TestSuite[]): TestSuite[]
 }
 
 function SuiteTreePanel() {
-  const [, navigate] = useLocation();
+  const [loc2, navigate] = useLocation();
   const suites = useSyncExternalStore(subscribeToTestSuites, getTestSuites);
   const tests = useSyncExternalStore(subscribeToTestCases, getTestCases);
   const [treeSearch, setTreeSearch] = React.useState("");
-  const currentSuite = new URLSearchParams(window.location.search).get("suite");
+  const currentSuite = React.useMemo(() => new URLSearchParams(window.location.search).get("suite"), [loc2]);
 
   const rootSuites = React.useMemo(() => {
     let roots = suites.filter(

@@ -63,7 +63,14 @@ const Copilot = React.lazy(() => import("@/pages/Copilot"));
 const StartRun = React.lazy(() => import("@/pages/StartRun"));
 const Sharing = React.lazy(() => import("@/pages/Sharing"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function DataGate({ children }: { children: React.ReactNode }) {
   const state = useSyncExternalStore(subscribeToDataInit, getDataInitState);
