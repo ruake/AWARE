@@ -1,9 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Keyboard, X } from "lucide-react";
-import {
-  KEYBOARD_SHORTCUTS,
-  KeyboardShortcut,
-} from "../../lib/copilot/types";
+import { KEYBOARD_SHORTCUTS, type KeyboardShortcut } from "../../lib/copilot/types";
 
 interface Props {
   onClose: () => void;

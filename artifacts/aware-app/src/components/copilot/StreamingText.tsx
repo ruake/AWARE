@@ -32,13 +32,14 @@ export default function StreamingText({
   const speedRef = React.useRef(speed);
   const wordsLengthRef = React.useRef(words.length);
 
-  onCompleteRef.current = onComplete;
-  speedRef.current = speed;
-  wordsLengthRef.current = words.length;
+  React.useEffect(() => {
+    onCompleteRef.current = onComplete;
+    speedRef.current = speed;
+    wordsLengthRef.current = words.length;
+  }, [onComplete, speed, words.length]);
 
   React.useEffect(() => {
     if (!isStreaming) {
-      setRevealedCount(words.length);
       if (words.length > 0 && !completedRef.current) {
         completedRef.current = true;
         onCompleteRef.current?.();
@@ -52,7 +53,7 @@ export default function StreamingText({
         timerRef.current = null;
       }
     };
-  }, [isStreaming]);
+  }, [isStreaming, words.length]);
 
   React.useEffect(() => {
     if (!isStreaming) return;
@@ -81,8 +82,9 @@ export default function StreamingText({
     };
   }, [revealedCount, words.length, isStreaming]);
 
-  const visible = words.slice(0, revealedCount);
-  const isComplete = revealedCount >= words.length;
+  const displayCount = !isStreaming ? words.length : revealedCount;
+  const visible = words.slice(0, displayCount);
+  const isComplete = displayCount >= words.length;
 
   return (
     <span>

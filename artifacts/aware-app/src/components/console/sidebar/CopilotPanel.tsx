@@ -170,9 +170,7 @@ export function CopilotPanel() {
     }
   }, [editingId]);
 
-  React.useEffect(() => {
-    setFocusedIndex(-1);
-  }, [search]);
+
 
   const activeIdx = filtered.findIndex((t) => t.id === activeId);
   // Roving tabIndex: exactly ONE item always has tabIndex=0 so Tab can enter the list.
@@ -233,7 +231,10 @@ export function CopilotPanel() {
           <Search size={10} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setFocusedIndex(-1);
+            }}
             placeholder="Search threads..."
             aria-label="Search threads"
             style={{

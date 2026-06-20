@@ -160,6 +160,8 @@ const statLabelStyle: React.CSSProperties = {
 };
 
 export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
+  const [copied, setCopied] = React.useState(false);
+
   if (!thread) return null;
 
   const stats = computeStats(thread.messages);
@@ -167,8 +169,6 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
   const assistantRatio = stats.totalMessages > 0 ? stats.assistantMessages / stats.totalMessages : 0;
   const toolNames = Object.keys(stats.toolCallBreakdown);
   const maxToolCount = Math.max(1, ...Object.values(stats.toolCallBreakdown));
-
-  const [copied, setCopied] = React.useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(buildCopyText(stats, thread)).then(() => {

@@ -90,9 +90,12 @@ function RouteAnnouncer() {
     const base = "/" + location.replace(/^\//, "").split(/[/?]/)[0];
     const routeKey = base === "/" ? "/" : base;
     const name = ROUTE_NAMES[routeKey] ?? "Page";
-    setAnnouncement(`Navigated to ${name}`);
-    const t = setTimeout(() => setAnnouncement(""), 2500);
-    return () => clearTimeout(t);
+    const t0 = setTimeout(() => setAnnouncement(`Navigated to ${name}`), 0);
+    const t1 = setTimeout(() => setAnnouncement(""), 2500);
+    return () => {
+      clearTimeout(t0);
+      clearTimeout(t1);
+    };
   }, [location]);
 
   return (
