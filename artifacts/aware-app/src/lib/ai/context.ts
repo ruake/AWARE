@@ -277,7 +277,7 @@ Q: How do I point the dashboard at a custom API endpoint?
 A: In the Copilot settings panel (gear icon top-right of the Copilot page), set the API URL field to your endpoint. Supports any OpenAI-compatible API (Ollama, LM Studio, etc.).
 
 Q: Can I use a self-hosted LLM?
-A: Yes. Three providers are supported: OpenAI (any compatible endpoint), WebLLM (runs in the browser via WebGPU, no API key), Chrome Built-in AI (experimental). Configure in Copilot → Settings.
+A: Yes. Three providers are supported: Custom Endpoint (any OpenAI-compatible server: Ollama, LM Studio, Mistral, vLLM, etc.), WebLLM (runs in the browser via WebGPU, no API key), Chrome Built-in AI (experimental). Configure in Copilot → Settings.
 `.trim();
 
 export function buildSystemPrompt(context: AIContext): string {
