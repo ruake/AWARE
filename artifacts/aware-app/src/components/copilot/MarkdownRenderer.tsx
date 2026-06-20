@@ -168,7 +168,7 @@ function TableBody({ children }: { children: React.ReactNode }) {
   return <tbody>{children}</tbody>;
 }
 
-export function MarkdownRenderer({ content, streaming }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, streaming: _streaming }: MarkdownRendererProps) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}

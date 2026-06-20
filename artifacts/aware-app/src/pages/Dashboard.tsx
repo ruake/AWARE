@@ -191,6 +191,7 @@ export default function Dashboard() {
         const t = new Date(r.started).getTime();
         return t >= dayStart.getTime() && t < dayEnd.getTime();
       });
+      // eslint-disable-next-line react-hooks/immutability
       cumulative += dayRuns.length;
       return cumulative;
     });

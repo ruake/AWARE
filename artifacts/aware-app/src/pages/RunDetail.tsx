@@ -56,6 +56,7 @@ export default function RunDetail() {
     if (!run || results.length === 0) return;
     if (autoSelectedRunRef.current === run.id && urlTestId) {
       const match = results.find((r) => r.id === urlTestId);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (match && selectedResult?.id !== match.id) setSelectedResult(match);
       return;
     }

@@ -124,7 +124,7 @@ export class CustomEndpointProvider implements IProvider {
   readonly supportsToolCalling = true;
 
   async checkAvailability(): Promise<ProviderStatus> {
-    const { apiKey, apiUrl } = loadCustomEndpointConfig();
+    const { apiUrl } = loadCustomEndpointConfig();
     return apiUrl ? "available" : "unavailable";
   }
 

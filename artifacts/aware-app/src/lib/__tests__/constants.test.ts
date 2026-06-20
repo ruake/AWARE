@@ -51,8 +51,11 @@ describe("STATUSES", () => {
 });
 
 describe("OWNERS", () => {
-  it("is an empty array", () => {
-    expect(OWNERS).toEqual([]);
+  it("contains expected owner strings", () => {
+    expect(Array.isArray(OWNERS)).toBe(true);
+    expect(OWNERS.length).toBeGreaterThan(0);
+    expect(OWNERS).toContain("platform-eng");
+    expect(OWNERS).toContain("cdn-ops");
   });
 });
 

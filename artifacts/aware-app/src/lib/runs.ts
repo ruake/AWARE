@@ -301,9 +301,12 @@ export function getTestResultsForRun(runId: string): TestResult[] {
   return getCachedResults(runId);
 }
 
-export function getRunsByEnv(env: string | string[]): Run[] {
-  const envs = Array.isArray(env) ? env : [env];
-  return _runs.filter((r) => envs.includes(r.env));
+export function getRunsByEnv(envIds?: string | string[]): Run[] {
+  if (envIds === undefined || (Array.isArray(envIds) && envIds.length === 0)) {
+    return [..._runs];
+  }
+  const ids = Array.isArray(envIds) ? envIds : [envIds];
+  return _runs.filter((r) => ids.includes(r.envId));
 }
 
 // ── Run frequency analysis ────────────────────────────────────────────

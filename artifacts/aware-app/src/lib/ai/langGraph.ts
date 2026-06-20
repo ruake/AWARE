@@ -4,6 +4,7 @@ import type {
   LangGraphExecutionContext,
   LangGraphNodeResult,
   LangGraphExecutionState,
+  SubAgentStep,
 } from "./langGraphTypes";
 import type { AIAnalysisRequest, AIAnalysisResult } from "./types";
 import {
@@ -58,7 +59,7 @@ export class LangGraph {
     nodeId: string,
     status: LangGraphExecutionState["status"],
     error?: string,
-    steps?: import("./langGraphTypes").SubAgentStep[],
+    steps?: SubAgentStep[],
   ): void {
     const existing = this.executionStates.find((s) => s.nodeId === nodeId);
     if (existing) {
@@ -306,7 +307,7 @@ export function buildDefaultGraph(analysisFn: LangGraphNode): LangGraph {
     description: "Building analysis context from loaded data",
     execute: async (ctx) => {
       logInfo("context_build", "Building context from parallel queries");
-      const steps: import("./langGraphTypes").SubAgentStep[] = [];
+      const steps: SubAgentStep[] = [];
       const runData = ctx.data.runs as Record<string, unknown> | undefined;
       const tcData = ctx.data.testCases as unknown[] | undefined;
       const sData = ctx.data.suites as unknown[] | undefined;
@@ -334,7 +335,7 @@ export function buildDefaultGraph(analysisFn: LangGraphNode): LangGraph {
     execute: async (ctx) => {
       const systemPrompt = (ctx.data.systemPrompt as string) || "";
       const sysTokens = estimateTokenCount(systemPrompt);
-      const steps: import("./langGraphTypes").SubAgentStep[] = [];
+      const steps: SubAgentStep[] = [];
       if (sysTokens > 0) {
         steps.push({ label: "Token estimation", status: "completed", detail: `~${sysTokens}t` });
         if (sysTokens > 3500) {
@@ -370,7 +371,7 @@ export function buildDefaultGraph(analysisFn: LangGraphNode): LangGraph {
     description: "Dispatching to analysis skill",
     execute: async (ctx) => {
       const skillDef = getSkillDefinition(ctx.request.useCaseId);
-      const steps: import("./langGraphTypes").SubAgentStep[] = [];
+      const steps: SubAgentStep[] = [];
       if (skillDef) {
         steps.push({
           label: `Skill: ${skillDef.name}`,
@@ -395,7 +396,7 @@ export function buildDefaultGraph(analysisFn: LangGraphNode): LangGraph {
       const systemPrompt = (ctx.data.systemPrompt as string) || "";
       const sysTokens = estimateTokenCount(systemPrompt);
       logInfo("llm_query", "Sending query to LLM provider", `~${sysTokens}t system prompt`);
-      const steps: import("./langGraphTypes").SubAgentStep[] = [
+      const steps: SubAgentStep[] = [
         { label: "LLM dispatch", status: "completed", detail: `~${sysTokens}t context` },
       ];
       return { status: "completed", steps };
@@ -416,7 +417,7 @@ export function buildDefaultGraph(analysisFn: LangGraphNode): LangGraph {
     description: "Rendering results as Google Charts",
     execute: async (ctx) => {
       logInfo("chart_render", `Serializing ${ctx.charts.length} chart(s) for output`);
-      const steps: import("./langGraphTypes").SubAgentStep[] = [
+      const steps: SubAgentStep[] = [
         { label: "Charts", status: "completed", detail: `${ctx.charts.length} chart(s)` },
       ];
       return { status: "completed", steps };
@@ -433,7 +434,7 @@ export function buildDefaultGraph(analysisFn: LangGraphNode): LangGraph {
     execute: async (ctx) => {
       logInfo("response", "Finalizing analysis response");
       const totalDuration = Date.now() - ctx.startedAt;
-      const steps: import("./langGraphTypes").SubAgentStep[] = [
+      const steps: SubAgentStep[] = [
         { label: "Complete", status: "completed", detail: `${totalDuration}ms total` },
       ];
       return { status: "completed", steps };

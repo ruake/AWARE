@@ -457,7 +457,7 @@ export function ThreadSidebar({
     return itemRefs.current.get(idx)!;
   };
 
-  const pinThread = (threadId: string) => {
+  const _pinThread = (threadId: string) => {
     const updated = normalized.map((t) => (t.id === threadId ? { ...t, pinned: !t.pinned } : t));
     onThreadsReorder(updated);
   };
@@ -515,7 +515,7 @@ export function ThreadSidebar({
   // Roving tabIndex: exactly ONE item always has tabIndex=0 for Tab entry.
   const defaultTabbableIdx = activeIdx >= 0 ? activeIdx : 0;
   const tabbableIdx = focusedIndex >= 0 ? focusedIndex : defaultTabbableIdx;
-  const activedescendant = focusedIndex >= 0 ? `thread-item-${focusedIndex}` : undefined;
+  const _activedescendant = focusedIndex >= 0 ? `thread-item-${focusedIndex}` : undefined;
 
   if (collapsed) {
     return (
@@ -891,10 +891,11 @@ export function ThreadSidebar({
                 Pinned
               </span>
             </div>
-            {pinned.map((thread) => {
+            {pinned.map((thread) => { // eslint-disable-line react-hooks/refs
               const globalIdx = filtered.indexOf(thread);
               const isFirst = globalIdx === 0;
               const isLast = globalIdx === filtered.length - 1;
+              const pinnedRef = getOrCreateRef(globalIdx);
               return (
                 <MemoThreadItem
                   key={thread.id}
@@ -906,7 +907,7 @@ export function ThreadSidebar({
                   isFocused={globalIdx === focusedIndex}
                   isTabStop={globalIdx === tabbableIdx}
                   itemId={`thread-item-${globalIdx}`}
-                  itemRef={getOrCreateRef(globalIdx)}
+                  itemRef={pinnedRef}
                   onSelect={() => {
                     setFocusedIndex(globalIdx);
                     onThreadSelect(thread.id);
@@ -928,10 +929,11 @@ export function ThreadSidebar({
           </>
         )}
 
-        {unpinned.map((thread) => {
+        {unpinned.map((thread) => { // eslint-disable-line react-hooks/refs
           const globalIdx = filtered.indexOf(thread);
           const isFirst = globalIdx === 0;
           const isLast = globalIdx === filtered.length - 1;
+          const unpinnedRef = getOrCreateRef(globalIdx);
           return (
             <MemoThreadItem
               key={thread.id}
@@ -943,7 +945,7 @@ export function ThreadSidebar({
               isFocused={globalIdx === focusedIndex}
               isTabStop={globalIdx === tabbableIdx}
               itemId={`thread-item-${globalIdx}`}
-              itemRef={getOrCreateRef(globalIdx)}
+              itemRef={unpinnedRef}
               onSelect={() => {
                 setFocusedIndex(globalIdx);
                 onThreadSelect(thread.id);

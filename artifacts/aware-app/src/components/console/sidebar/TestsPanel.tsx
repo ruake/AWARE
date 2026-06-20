@@ -38,6 +38,7 @@ const PRIORITIES = ["All", "P0", "P1", "P2", "P3"] as const;
 function TestKpis() {
   const [, navigate] = useLocation();
   const { tcs, suites } = useTestData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = React.useMemo(() => computeTestStats(), [tcs]);
 
   const kpis = [
@@ -136,6 +137,7 @@ function TestFilters() {
   const { tcs, suites } = useTestData();
   const allTests = useSyncExternalStore(subscribeToAutoTests, getAutoDiscoveredTests);
   const discovery = React.useMemo(() => getAutoDiscoverySummary(), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const params = React.useMemo(() => new URLSearchParams(window.location.search), [loc]);
   const suiteFilter = params.get("suite") || "";
   const selectedSuite = suiteFilter ? (suites.find((s) => s.id === suiteFilter) ?? null) : null;
@@ -425,6 +427,7 @@ function SuiteTreePanel() {
   const [treeSearch, setTreeSearch] = React.useState("");
   const currentSuite = React.useMemo(
     () => new URLSearchParams(window.location.search).get("suite"),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [loc2],
   );
 

@@ -525,7 +525,7 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
               overflowY: "auto",
             }}
           >
-            {thread.messages.map((msg, i) => (
+            {thread.messages.map((msg, _i) => (
               <div key={msg.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <div
                   style={{

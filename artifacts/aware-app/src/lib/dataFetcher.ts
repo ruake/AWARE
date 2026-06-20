@@ -1,3 +1,5 @@
+import type { Run } from "./types";
+
 const REPO_OWNER = import.meta.env.VITE_DATA_REPO_OWNER ?? "ruake";
 const REPO_NAME = import.meta.env.VITE_DATA_REPO_NAME ?? "AWARE";
 const DATA_BRANCH = import.meta.env.VITE_DATA_BRANCH ?? "data";
@@ -86,7 +88,7 @@ export function isArrayOf<T>(guard: (x: unknown) => x is T): (data: unknown) => 
   return (data): data is T[] => Array.isArray(data) && data.every(guard);
 }
 
-export function isRunArray(data: unknown): data is import("./types").Run[] {
+export function isRunArray(data: unknown): data is Run[] {
   if (!Array.isArray(data)) return false;
   return data.every(
     (item) =>

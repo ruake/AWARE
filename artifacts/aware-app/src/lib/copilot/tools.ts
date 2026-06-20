@@ -1,7 +1,6 @@
 import type { ToolDefinition, ToolContext, ToolResult, ChartData, TableData } from "./types";
 import { RUNS, getTestResultsForRun } from "@/lib/runs";
 import { getAllPromotionDecisions } from "@/lib/promotions";
-import { getRunById } from "@/lib/data";
 import { PROMOTION_GATE_THRESHOLD } from "@/lib/ciConfig";
 
 const PASS_GATE_PCT = Math.round(PROMOTION_GATE_THRESHOLD * 100);
