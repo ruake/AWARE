@@ -56,15 +56,16 @@ export function RunHistoryDots({ testName }: RunHistoryDotsProps) {
       onClick={(e) => e.stopPropagation()}
     >
       {visible.map((d) => (
-        <div
+        <button
           key={d.runId}
+          type="button"
           onClick={() => navigate(`/runs/${d.runId}`)}
           title={`${d.runId} · ${d.status} · ${new Date(d.date).toLocaleDateString()}`}
           aria-label={`Run ${d.runId}: ${d.status} on ${new Date(d.date).toLocaleDateString()}`}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/runs/${d.runId}`); } }}
           style={{
+            appearance: "none",
+            border: "1px solid rgba(0,0,0,0.3)",
+            padding: 0,
             width: 8,
             height: 8,
             borderRadius: "50%",
@@ -72,14 +73,9 @@ export function RunHistoryDots({ testName }: RunHistoryDotsProps) {
             cursor: "pointer",
             flexShrink: 0,
             transition: "transform 0.12s",
-            border: "1px solid rgba(0,0,0,0.3)",
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
-          }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.8)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
         />
       ))}
       {extra > 0 && (

@@ -2,14 +2,15 @@ import type { Run, TestResult, TestDetail, TestRunPoint, DiffRow } from "./types
 import { fetchJson } from "./dataFetcher";
 import { getCachedResults } from "./runsLoader";
 
-// ── Runs store (pub/sub) ─────────────────────────────────────────────
+// ── Notification stores (Zustand vanilla — same interface as pub/sub but managed by Zustand) ────
+import { createStore } from "zustand/vanilla";
+const _runsNotify = createStore(() => ({}));
+const _diffRowsNotify = createStore(() => ({}));
+const _derivedNotify = createStore(() => ({}));
+
+// ── Runs store ─────────────────────────────────────────────────────────
 const _runs: Run[] = [];
 let _runsSnapshot: Run[] = [];
-const _runsListeners = new Set<() => void>();
-
-function notifyRuns(): void {
-  _runsListeners.forEach((cb) => cb());
-}
 
 function updateRunsSnapshot(): void {
   _runsSnapshot = [..._runs];
@@ -20,8 +21,7 @@ export function getRuns(): Run[] {
 }
 
 export function subscribeToRuns(cb: () => void): () => void {
-  _runsListeners.add(cb);
-  return () => _runsListeners.delete(cb);
+  return _runsNotify.subscribe(cb);
 }
 
 // Backward-compat: direct access to the raw array (consumers that don't need reactivity)
@@ -30,11 +30,6 @@ export const RUNS: readonly Run[] = _runs;
 // ── DIFF_ROWS store ──────────────────────────────────────────────────
 const _diffRows: DiffRow[] = [];
 let _diffRowsSnapshot: DiffRow[] = [];
-const _diffRowsListeners = new Set<() => void>();
-
-function notifyDiffRows(): void {
-  _diffRowsListeners.forEach((cb) => cb());
-}
 
 function updateDiffRowsSnapshot(): void {
   _diffRowsSnapshot = [..._diffRows];
@@ -45,8 +40,7 @@ export function getDiffRows(): DiffRow[] {
 }
 
 export function subscribeToDiffRows(cb: () => void): () => void {
-  _diffRowsListeners.add(cb);
-  return () => _diffRowsListeners.delete(cb);
+  return _diffRowsNotify.subscribe(cb);
 }
 
 // Backward-compat
@@ -60,7 +54,7 @@ export async function loadRuns(): Promise<void> {
   _runs.length = 0;
   _runs.push(...data);
   updateRunsSnapshot();
-  notifyRuns();
+  _runsNotify.setState({});
 }
 
 export function getRunIndex(runId: string): number {
@@ -72,8 +66,6 @@ export function getRunById(id: string): Run | undefined {
 }
 
 // ── Dynamic diff computation ───────────────────────────────────────────────
-// Computes a DiffRow array from two runs' test results.
-// Used by the Compare page and as the default DIFF_ROWS source.
 export function computeDiffRows(baseRunId: string, candRunId: string): DiffRow[] {
   const baseResults = getCachedResults(baseRunId);
   const candResults = getCachedResults(candRunId);
@@ -165,7 +157,6 @@ export function getEnvSummary(): EnvSummaryEntry[] {
   return _envSummarySnapshot;
 }
 
-// Backward-compat
 export const ENV_SUMMARY: EnvSummaryEntry[] = _envSummary;
 
 export function computeEnvSummary(): void {
@@ -210,7 +201,6 @@ export function getPassRateChart(): { label: string; passRate: number; runId: st
   return _passRateChartSnapshot;
 }
 
-// Backward-compat
 export const PASS_RATE_CHART: { label: string; passRate: number; runId: string }[] = _passRateChart;
 
 export function computePassRateChart(): void {
@@ -238,7 +228,6 @@ export function getPerEnvPassRate(): PerEnvPassRateEntry[] {
   return _perEnvPassRateSnapshot;
 }
 
-// Backward-compat
 export const PER_ENV_PASS_RATE: PerEnvPassRateEntry[] = _perEnvPassRate;
 
 const ENV_COLOR_MAP: Record<string, string> = {
@@ -252,6 +241,7 @@ const ENV_COLOR_MAP: Record<string, string> = {
   "PROD / Staging": "#22c55e",
   "PROD / Production": "#4ade80",
 };
+
 function envColor(label: string): string {
   return ENV_COLOR_MAP[label] ?? "#9aa0a6";
 }
@@ -269,151 +259,97 @@ export function computePerEnvPassRate(): void {
       .get(key)!
       .push({ runId: run.id, label: run.started.slice(0, 10), passRate: run.passPct });
   }
-  const entries = [...groups.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([env, data]) => ({ env, color: envColor(env), data }));
-  _perEnvPassRate.push(...entries);
+  for (const [env, data] of groups) {
+    _perEnvPassRate.push({ env, color: envColor(env), data });
+  }
+  _perEnvPassRate.sort((a, b) => a.env.localeCompare(b.env));
   _perEnvPassRateSnapshot = [..._perEnvPassRate];
 }
 
 // ── ENV_PASS_RATE_CHART ──────────────────────────────────────────────
-const _envPassRateChart: Record<string, unknown>[] = [];
-let _envPassRateChartSnapshot: Record<string, unknown>[] = [];
+export interface EnvPassRateChartEntry {
+  label: string;
+  [env: string]: string | number;
+}
 
-export function getEnvPassRateChart(): Record<string, unknown>[] {
+const _envPassRateChart: EnvPassRateChartEntry[] = [];
+let _envPassRateChartSnapshot: EnvPassRateChartEntry[] = [];
+
+export function getEnvPassRateChart(): EnvPassRateChartEntry[] {
   return _envPassRateChartSnapshot;
 }
 
-// Backward-compat
-export const ENV_PASS_RATE_CHART: Record<string, unknown>[] = _envPassRateChart;
+export const ENV_PASS_RATE_CHART: EnvPassRateChartEntry[] = _envPassRateChart;
 
 export function computeEnvPassRateChart(): void {
   _envPassRateChart.length = 0;
-  const envLabels = [...new Set(_runs.map((r) => r.env))].sort();
-  const dayMap = new Map<string, Record<string, unknown>>();
+  const byDate = new Map<string, EnvPassRateChartEntry>();
   const sorted = [..._runs].sort(
     (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
   );
   for (const run of sorted) {
-    const day = run.started.slice(0, 10);
-    const key = run.env;
-    if (!dayMap.has(day)) {
-      const entry: Record<string, unknown> = { day, runId: run.id };
-      for (const l of envLabels) entry[l] = 0;
-      dayMap.set(day, entry);
-    }
-    const entry = dayMap.get(day)!;
-    entry[key] = run.passPct;
-    entry.runId = run.id;
+    const label = run.started.slice(0, 10);
+    if (!byDate.has(label)) byDate.set(label, { label });
+    byDate.get(label)![run.env] = run.passPct;
   }
-  const entries = [...dayMap.values()].sort((a, b) => String(a.day).localeCompare(String(b.day)));
-  _envPassRateChart.push(...entries);
+  _envPassRateChart.push(...byDate.values());
   _envPassRateChartSnapshot = [..._envPassRateChart];
 }
 
-export function recomputeAll(): void {
-  computeEnvSummary();
-  computePassRateChart();
-  computePerEnvPassRate();
-  computeEnvPassRateChart();
-  // Compute default DIFF_ROWS from the two most recent runs in the same env
-  const byEnv = new Map<string, Run[]>();
-  for (const run of _runs) {
-    const k = run.envId;
-    if (!byEnv.has(k)) byEnv.set(k, []);
-    byEnv.get(k)!.push(run);
-  }
-  _diffRows.length = 0;
-  for (const runs of byEnv.values()) {
-    const sorted = [...runs].sort(
-      (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
-    );
-    if (sorted.length >= 2) {
-      const rows = computeDiffRows(sorted[1].id, sorted[0].id);
-      rows.forEach((r) => _diffRows.push(r));
-      continue;
-    }
-  }
-  updateRunsSnapshot();
-  updateDiffRowsSnapshot();
-  notifyRuns();
-  notifyDiffRows();
+// ── Per-run test results ──────────────────────────────────────────────
+export function getTestResultsForRun(runId: string): TestResult[] {
+  return getCachedResults(runId);
 }
 
+export function getRunsByEnv(env: string | string[]): Run[] {
+  const envs = Array.isArray(env) ? env : [env];
+  return _runs.filter((r) => envs.includes(r.env));
+}
+
+// ── Run frequency analysis ────────────────────────────────────────────
 export interface RunFrequency {
   totalRuns: number;
   daysCovered: number;
   runsPerDay: number;
-  byDay: { date: string; count: number; envs: Record<string, number> }[];
-  byEnv: Record<string, number>;
-  byHour: Record<string, number>;
-  avgIntervalHours: number;
-  gaps: { date: string; gapDays: number }[];
+  hourly: number;
+  daily: number;
+  weekly: number;
 }
 
 export function computeRunFrequency(): RunFrequency {
-  const sorted = [...RUNS].sort(
+  if (_runs.length < 2) {
+    return { totalRuns: _runs.length, daysCovered: 0, runsPerDay: 0, hourly: 0, daily: 0, weekly: 0 };
+  }
+  const sorted = [..._runs].sort(
     (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),
   );
-  const byDay: Map<string, { count: number; envs: Record<string, number> }> = new Map();
-  const byEnv: Record<string, number> = {};
-  const byHour: Record<string, number> = {};
-
-  for (const run of sorted) {
-    const d = new Date(run.started);
-    const day = d.toISOString().slice(0, 10);
-    const hour = String(d.getUTCHours());
-    const entry = byDay.get(day) ?? { count: 0, envs: {} };
-    entry.count++;
-    entry.envs[run.env] = (entry.envs[run.env] || 0) + 1;
-    byDay.set(day, entry);
-    byEnv[run.env] = (byEnv[run.env] || 0) + 1;
-    byHour[hour] = (byHour[hour] || 0) + 1;
+  const first = new Date(sorted[0].started).getTime();
+  const last = new Date(sorted[sorted.length - 1].started).getTime();
+  const totalHours = (last - first) / (1000 * 60 * 60);
+  const daysCovered = Math.max(1, Math.ceil(totalHours / 24));
+  if (totalHours === 0) {
+    return { totalRuns: _runs.length, daysCovered, runsPerDay: 0, hourly: 0, daily: 0, weekly: 0 };
   }
-
-  const dayKeys = [...byDay.keys()].sort();
-  const daysCovered = dayKeys.length;
-  const runsPerDay = daysCovered > 0 ? Math.round((sorted.length / daysCovered) * 10) / 10 : 0;
-
-  let totalIntervalMs = 0;
-  let intervals = 0;
-  for (let i = 1; i < sorted.length; i++) {
-    totalIntervalMs +=
-      new Date(sorted[i].started).getTime() - new Date(sorted[i - 1].started).getTime();
-    intervals++;
-  }
-  const avgIntervalHours =
-    intervals > 0 ? Math.round((totalIntervalMs / intervals / 3600000) * 10) / 10 : 0;
-
-  const gaps: { date: string; gapDays: number }[] = [];
-  for (let i = 1; i < dayKeys.length; i++) {
-    const prev = new Date(dayKeys[i - 1]);
-    const curr = new Date(dayKeys[i]);
-    const diffDays = Math.round((curr.getTime() - prev.getTime()) / 86400000);
-    if (diffDays > 1) gaps.push({ date: dayKeys[i], gapDays: diffDays - 1 });
-  }
-
+  const hourly = _runs.length / totalHours;
   return {
-    totalRuns: sorted.length,
+    totalRuns: _runs.length,
     daysCovered,
-    runsPerDay,
-    byDay: dayKeys.map((d) => ({
-      date: d,
-      count: byDay.get(d)!.count,
-      envs: byDay.get(d)!.envs,
-    })),
-    byEnv,
-    byHour,
-    avgIntervalHours,
-    gaps,
+    runsPerDay: Math.round(hourly * 24 * 100) / 100,
+    hourly: Math.round(hourly * 100) / 100,
+    daily: Math.round(hourly * 24 * 100) / 100,
+    weekly: Math.round(hourly * 24 * 7 * 100) / 100,
   };
 }
 
-export function getRunsByEnv(envIds?: string[]): readonly Run[] {
-  if (!envIds || envIds.length === 0) return RUNS;
-  return RUNS.filter((r) => envIds.includes(r.envId));
-}
-
-export function getTestResultsForRun(runId: string): TestResult[] {
-  return getCachedResults(runId);
+// ── Master recompute ──────────────────────────────────────────────────
+export function recomputeAll(): void {
+  updateRunsSnapshot();
+  updateDiffRowsSnapshot();
+  computeEnvSummary();
+  computePassRateChart();
+  computePerEnvPassRate();
+  computeEnvPassRateChart();
+  _derivedNotify.setState({});
+  _runsNotify.setState({});
+  _diffRowsNotify.setState({});
 }
