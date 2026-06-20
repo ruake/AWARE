@@ -1,5 +1,5 @@
 import React, { useEffect, useSyncExternalStore } from "react";
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ErrorBoundary } from "@/components/aware/ErrorBoundary";
 import { SkeletonTable, SkeletonChart, SkeletonCard } from "@/components/aware/Skeleton";
@@ -37,15 +37,12 @@ import { AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
  *
  *   MONITOR    (Overview — Shneiderman's "overview first")
  *     Dashboard   /     Signal: KPIs, anomalies, sparklines. No tables.
- *     Activity    /activity  Chronological feed of all events.
  *
  *   INVESTIGATE (Zoom/Filter → Detail — Shneiderman's "zoom, filter, details")
  *     Runs        /runs       Filterable list → RunDetail at /runs/:id
  *     Compare     /compare    Side-by-side baseline vs candidate diff
  *     Trends      /trends     Charts, flakiness, heatmaps (was "Analytics")
- *
- *   CONFIGURE   (System setup — progressive disclosure)
- *     Test Suites /suites     Suite hierarchy + YAML
+ *     Tests       /tests      Test case library
  *
  *   ASSIST      (Cross-cutting tools)
  *     Copilot     /copilot    AI assistant
@@ -71,6 +68,55 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// ── Route names for accessibility announcements (U-06) ───────────────
+const ROUTE_NAMES: Record<string, string> = {
+  "/": "Dashboard",
+  "/runs": "Runs",
+  "/compare": "Compare",
+  "/trends": "Trends",
+  "/tests": "Tests",
+  "/copilot": "Copilot",
+  "/about": "About",
+  "/start": "Start Run",
+  "/share": "Share",
+};
+
+function RouteAnnouncer() {
+  const [location] = useLocation();
+  const [announcement, setAnnouncement] = React.useState("");
+
+  useEffect(() => {
+    const base = "/" + location.replace(/^\//, "").split(/[/?]/)[0];
+    const routeKey = base === "/" ? "/" : base;
+    const name = ROUTE_NAMES[routeKey] ?? "Page";
+    setAnnouncement(`Navigated to ${name}`);
+    const t = setTimeout(() => setAnnouncement(""), 2500);
+    return () => clearTimeout(t);
+  }, [location]);
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      style={{
+        position: "absolute",
+        width: 1,
+        height: 1,
+        padding: 0,
+        margin: -1,
+        overflow: "hidden",
+        clip: "rect(0,0,0,0)",
+        whiteSpace: "nowrap",
+        border: 0,
+        zIndex: -1,
+      }}
+    >
+      {announcement}
+    </div>
+  );
+}
 
 function DataGate({ children }: { children: React.ReactNode }) {
   const state = useSyncExternalStore(subscribeToDataInit, getDataInitState);
@@ -138,7 +184,7 @@ function DataGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!state.loaded) {
+  if (!state.runsReady && !state.loaded) {
     return (
       <div
         style={{
@@ -151,7 +197,10 @@ function DataGate({ children }: { children: React.ReactNode }) {
           background: "var(--proof-bg)",
         }}
       >
-        <Loader2 size={28} style={{ color: "var(--proof-blue)", animation: "spin 1s linear infinite" }} />
+        <Loader2
+          size={28}
+          style={{ color: "var(--proof-blue)", animation: "spin 1s linear infinite" }}
+        />
         <span style={{ fontSize: 13, color: "var(--proof-text-secondary)", fontWeight: 500 }}>
           Loading A.W.A.R.E. data…
         </span>
@@ -162,127 +211,106 @@ function DataGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+const SEB = ({ children }: { children: React.ReactNode }) => (
+  <ErrorBoundary>
+    <React.Suspense fallback={<SkeletonTable />}>{children}</React.Suspense>
+  </ErrorBoundary>
+);
+
 function Router() {
   return (
-    <ConsoleShell>
-      <Switch>
-        <Route path="/">
-          <ErrorBoundary><React.Suspense fallback={<SkeletonChart />}>
-            <Dashboard />
-          </React.Suspense></ErrorBoundary>
-        </Route>
-        <Route path="/runs">
-          <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
-            <Runs />
-          </React.Suspense></ErrorBoundary>
-        </Route>
-        <Route path="/runs/:runId">
-          <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
-            <RunDetail />
-          </React.Suspense></ErrorBoundary>
-        </Route>
-        <Route path="/compare">
-          <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
-            <Compare />
-          </React.Suspense></ErrorBoundary>
-        </Route>
-        <Route path="/trends">
-          <ErrorBoundary><React.Suspense fallback={<SkeletonChart />}>
-            <Trends />
-          </React.Suspense></ErrorBoundary>
-        </Route>
-        <Route path="/tests">
-          <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
-            <Tests />
-          </React.Suspense></ErrorBoundary>
-        </Route>
-        <Route path="/tests/:testId">
-          {({ testId }: { testId: string }) => {
-            window.history.replaceState(null, "", `${import.meta.env.BASE_URL}tests?detail=${testId}`);
-            return (
-              <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
-                <Tests />
-              </React.Suspense></ErrorBoundary>
-            );
-          }}
-        </Route>
-        <Route path="/suites">
-          {() => {
-            window.history.replaceState(null, "", `${import.meta.env.BASE_URL}tests`);
-            return (
-              <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
-                <Tests />
-              </React.Suspense></ErrorBoundary>
-            );
-          }}
-        </Route>
-        <Route path="/copilot">
-          <ErrorBoundary><React.Suspense fallback={<SkeletonCard />}>
-            <Copilot />
-          </React.Suspense></ErrorBoundary>
-        </Route>
-        <Route path="/about">
-          <ErrorBoundary><React.Suspense fallback={<SkeletonCard />}>
-            <About />
-          </React.Suspense></ErrorBoundary>
-        </Route>
-        {/* Redirects from old route names (Nielsen #4: don't break bookmarks) */}
-        <Route path="/activity">
-          {() => {
-            window.history.replaceState(
-              null,
-              "",
-              window.location.pathname.replace("/activity", "/runs"),
-            );
-            return (
-              <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
+    <>
+      <RouteAnnouncer />
+      <ConsoleShell>
+        {/* display:contents means this div is invisible to layout but anchors #main-content */}
+        <div id="main-content" style={{ display: "contents" }}>
+          <Switch>
+            <Route path="/">
+              <ErrorBoundary>
+                <React.Suspense fallback={<SkeletonChart />}>
+                  <Dashboard />
+                </React.Suspense>
+              </ErrorBoundary>
+            </Route>
+            <Route path="/runs">
+              <SEB>
                 <Runs />
-              </React.Suspense></ErrorBoundary>
-            );
-          }}
-        </Route>
-        <Route path="/pulse">
-          {() => {
-            window.history.replaceState(
-              null,
-              "",
-              window.location.pathname.replace("/pulse", "/runs"),
-            );
-            return (
-              <ErrorBoundary><React.Suspense fallback={<SkeletonTable />}>
-                <Runs />
-              </React.Suspense></ErrorBoundary>
-            );
-          }}
-        </Route>
-        <Route path="/analytics">
-          {() => {
-            window.history.replaceState(
-              null,
-              "",
-              window.location.pathname.replace("/analytics", "/trends"),
-            );
-            return (
-              <ErrorBoundary><React.Suspense fallback={<SkeletonChart />}>
-                <Trends />
-              </React.Suspense></ErrorBoundary>
-            );
-          }}
-        </Route>
-        {/* Thin pages kept for deep-link compat but not in nav (progressive disclosure) */}
-        <Route path="/start">
-          <ErrorBoundary><React.Suspense fallback={<SkeletonCard />}>
-            <StartRun />
-          </React.Suspense></ErrorBoundary>
-        </Route>
-        <Route path="/share">
-          <ErrorBoundary><React.Suspense fallback={<SkeletonCard />}>
-            <Sharing />
-          </React.Suspense></ErrorBoundary>
-        </Route>
-        <Route component={NotFound} />
-      </Switch>
-    </ConsoleShell>
+              </SEB>
+            </Route>
+            <Route path="/runs/:runId">
+              <SEB>
+                <RunDetail />
+              </SEB>
+            </Route>
+            <Route path="/compare">
+              <SEB>
+                <Compare />
+              </SEB>
+            </Route>
+            <Route path="/trends">
+              <ErrorBoundary>
+                <React.Suspense fallback={<SkeletonChart />}>
+                  <Trends />
+                </React.Suspense>
+              </ErrorBoundary>
+            </Route>
+            <Route path="/tests">
+              <SEB>
+                <Tests />
+              </SEB>
+            </Route>
+            {/* Redirect /tests/:testId → /tests?detail=id (no history stack pollution) */}
+            <Route path="/tests/:testId">
+              {({ testId }: { testId: string }) => <Redirect to={`/tests?detail=${testId}`} />}
+            </Route>
+            {/* Redirect /suites → /tests */}
+            <Route path="/suites">
+              <Redirect to="/tests" />
+            </Route>
+            <Route path="/copilot">
+              <ErrorBoundary>
+                <React.Suspense fallback={<SkeletonCard />}>
+                  <Copilot />
+                </React.Suspense>
+              </ErrorBoundary>
+            </Route>
+            <Route path="/about">
+              <ErrorBoundary>
+                <React.Suspense fallback={<SkeletonCard />}>
+                  <About />
+                </React.Suspense>
+              </ErrorBoundary>
+            </Route>
+            {/* Permanent redirects from old route names — preserve deep-links (Nielsen #4) */}
+            <Route path="/activity">
+              <Redirect to="/runs" />
+            </Route>
+            <Route path="/pulse">
+              <Redirect to="/runs" />
+            </Route>
+            <Route path="/analytics">
+              <Redirect to="/trends" />
+            </Route>
+            {/* Thin utility pages — not in main nav (progressive disclosure) */}
+            <Route path="/start">
+              <ErrorBoundary>
+                <React.Suspense fallback={<SkeletonCard />}>
+                  <StartRun />
+                </React.Suspense>
+              </ErrorBoundary>
+            </Route>
+            <Route path="/share">
+              <ErrorBoundary>
+                <React.Suspense fallback={<SkeletonCard />}>
+                  <Sharing />
+                </React.Suspense>
+              </ErrorBoundary>
+            </Route>
+            <Route component={NotFound} />
+          </Switch>
+        </div>
+      </ConsoleShell>
+    </>
   );
 }
 

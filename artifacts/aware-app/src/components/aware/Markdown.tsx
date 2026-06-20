@@ -247,19 +247,36 @@ function badgeifyContent(text: string): string {
     .join("");
 }
 
-function colorCellHtml(value: string): string {
+function ColorCell({ value }: { value: string }) {
   const v = value.toLowerCase().trim();
   if (STATUS_COLORS[v]) {
-    const c = STATUS_COLORS[v];
-    return `<span style="display:inline-flex;align-items:center;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:0.35px;background:color-mix(in srgb,${c} 10%,transparent);color:${c};border:1px solid color-mix(in srgb,${c} 20%,transparent)">${value}</span>`;
+    const c = STATUS_COLORS[v] as string;
+    return (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          padding: "1px 8px",
+          borderRadius: "10px",
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: "0.35px",
+          background: `color-mix(in srgb, ${c} 10%, transparent)`,
+          color: c,
+          border: `1px solid color-mix(in srgb, ${c} 20%, transparent)`,
+        }}
+      >
+        {value}
+      </span>
+    );
   }
   if (/^[\d.]+%$/.test(value)) {
     const pct = parseFloat(value);
     const c =
       pct >= 90 ? "var(--proof-green)" : pct >= 70 ? "var(--proof-yellow)" : "var(--proof-red)";
-    return `<span style="font-weight:700;color:${c}">${value}</span>`;
+    return <span style={{ fontWeight: 700, color: c }}>{value}</span>;
   }
-  return value;
+  return <>{value}</>;
 }
 
 // ── SmartTable (HTML table with filter + sort) ───────────────────────────────────────
@@ -403,8 +420,9 @@ function SmartTable({ headers, rows }: { headers: string[]; rows: string[][] }) 
                         borderBottom: "1px solid var(--proof-border)",
                         color: "var(--proof-text)",
                       }}
-                      dangerouslySetInnerHTML={{ __html: colorCellHtml(cell) }}
-                    />
+                    >
+                      <ColorCell value={cell} />
+                    </td>
                   ))}
                 </tr>
               ))}

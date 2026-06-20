@@ -1,38 +1,10 @@
-// ── Filter Store (env + suite) + Layout Settings ─────────────────────
+import { createStore } from "zustand/vanilla";
+
 const ENV_STORAGE_KEY = "aware-selected-env-v2";
 const SUITE_STORAGE_KEY = "aware-selected-suites-v1";
 const LAYOUT_STORAGE_KEY = "aware-layout-v1";
 
-// ── Listeners ────────────────────────────────────────────────────────
-const _envListeners = new Set<() => void>();
-const _suiteListeners = new Set<() => void>();
-const _layoutListeners = new Set<() => void>();
-
-// ── Env IDs ──────────────────────────────────────────────────────────
-let _selectedEnvIds: string[] = (() => {
-  try {
-    const raw = localStorage.getItem(ENV_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-})();
-
-// ── Suite IDs ────────────────────────────────────────────────────────
-let _selectedSuiteIds: string[] = (() => {
-  try {
-    const raw = localStorage.getItem(SUITE_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-})();
-
-// ── Layout Settings ──────────────────────────────────────────────────
+// ── Layout Settings type ──────────────────────────────────────────────
 export interface LayoutSettings {
   sidebarWidth: number;
   detailPanelWidth: number;
@@ -51,139 +23,131 @@ const DEFAULT_LAYOUT: LayoutSettings = {
   envHealthCollapsed: false,
 };
 
-let _layout: LayoutSettings = (() => {
+function readStorage<T>(key: string, fallback: T): T {
   try {
-    const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
-    if (!raw) return DEFAULT_LAYOUT;
-    return { ...DEFAULT_LAYOUT, ...JSON.parse(raw) };
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(fallback)) return (Array.isArray(parsed) ? parsed : fallback) as T;
+    return { ...(fallback as object), ...(parsed as object) } as T;
   } catch {
-    return DEFAULT_LAYOUT;
+    return fallback;
   }
-})();
-
-// ── Snapshots ────────────────────────────────────────────────────────
-// Each domain has its own stable snapshot for useSyncExternalStore,
-// so consumers only re-render when their relevant data changes.
-
-let _envSnapshot = { envIds: _selectedEnvIds };
-let _suiteSnapshot = { suiteIds: _selectedSuiteIds };
-let _layoutSnapshot = { ..._layout };
-
-function updateEnvSnapshot(): void {
-  _envSnapshot = { envIds: _selectedEnvIds };
 }
 
-function updateSuiteSnapshot(): void {
-  _suiteSnapshot = { suiteIds: _selectedSuiteIds };
+// ── Zustand vanilla stores ────────────────────────────────────────────
+
+interface EnvState {
+  envIds: string[];
 }
 
-function updateLayoutSnapshot(): void {
-  _layoutSnapshot = { ..._layout };
+interface SuiteState {
+  suiteIds: string[];
 }
+
+const _envStore = createStore<EnvState>()(() => ({
+  envIds: readStorage<string[]>(ENV_STORAGE_KEY, []),
+}));
+
+const _suiteStore = createStore<SuiteState>()(() => ({
+  suiteIds: readStorage<string[]>(SUITE_STORAGE_KEY, []),
+}));
+
+const _layoutStore = createStore<LayoutSettings>()(() =>
+  readStorage<LayoutSettings>(LAYOUT_STORAGE_KEY, DEFAULT_LAYOUT),
+);
 
 // ── Env public API ───────────────────────────────────────────────────
+
 export function getSelectedEnvIds(): string[] {
-  return _selectedEnvIds;
+  return _envStore.getState().envIds;
 }
 
 export function getSelectedEnvSnapshot(): { envIds: string[] } {
-  return _envSnapshot;
+  return _envStore.getState();
 }
 
 export function setSelectedEnvIds(envIds: string[]): void {
-  _selectedEnvIds = envIds;
   try {
     localStorage.setItem(ENV_STORAGE_KEY, JSON.stringify(envIds));
   } catch {
     /* ignore */
   }
-  updateEnvSnapshot();
-  _envListeners.forEach((cb) => cb());
+  _envStore.setState({ envIds });
 }
 
 export function toggleSelectedEnvId(envId: string): void {
-  const idx = _selectedEnvIds.indexOf(envId);
-  let next: string[];
-  if (idx >= 0) {
-    next = _selectedEnvIds.filter((id) => id !== envId);
-  } else {
-    next = [..._selectedEnvIds, envId];
-  }
+  const current = _envStore.getState().envIds;
+  const next = current.includes(envId)
+    ? current.filter((id) => id !== envId)
+    : [...current, envId];
   setSelectedEnvIds(next);
 }
 
 export function subscribeToSelectedEnv(cb: () => void): () => void {
-  _envListeners.add(cb);
-  return () => _envListeners.delete(cb);
+  return _envStore.subscribe(cb);
 }
 
 // ── Suite public API ─────────────────────────────────────────────────
+
 export function getSelectedSuiteIds(): string[] {
-  return _selectedSuiteIds;
+  return _suiteStore.getState().suiteIds;
 }
 
 export function getSelectedSuiteSnapshot(): { suiteIds: string[] } {
-  return _suiteSnapshot;
+  return _suiteStore.getState();
 }
 
 export function setSelectedSuiteIds(suiteIds: string[]): void {
-  _selectedSuiteIds = suiteIds;
   try {
     localStorage.setItem(SUITE_STORAGE_KEY, JSON.stringify(suiteIds));
   } catch {
     /* ignore */
   }
-  updateSuiteSnapshot();
-  _suiteListeners.forEach((cb) => cb());
+  _suiteStore.setState({ suiteIds });
 }
 
 export function toggleSelectedSuiteId(suiteId: string): void {
-  const idx = _selectedSuiteIds.indexOf(suiteId);
-  let next: string[];
-  if (idx >= 0) {
-    next = _selectedSuiteIds.filter((id) => id !== suiteId);
-  } else {
-    next = [..._selectedSuiteIds, suiteId];
-  }
+  const current = _suiteStore.getState().suiteIds;
+  const next = current.includes(suiteId)
+    ? current.filter((id) => id !== suiteId)
+    : [...current, suiteId];
   setSelectedSuiteIds(next);
 }
 
 export function subscribeToSelectedSuites(cb: () => void): () => void {
-  _suiteListeners.add(cb);
-  return () => _suiteListeners.delete(cb);
+  return _suiteStore.subscribe(cb);
 }
 
-// ── Combined filter subscription ─────────────────────────────────────
 export function subscribeToFilters(cb: () => void): () => void {
-  _envListeners.add(cb);
-  _suiteListeners.add(cb);
+  const unsubEnv = _envStore.subscribe(cb);
+  const unsubSuite = _suiteStore.subscribe(cb);
   return () => {
-    _envListeners.delete(cb);
-    _suiteListeners.delete(cb);
+    unsubEnv();
+    unsubSuite();
   };
 }
 
 // ── Layout public API ────────────────────────────────────────────────
+
 export function getLayoutSettings(): LayoutSettings {
-  return _layout;
+  return _layoutStore.getState();
 }
 
 export function getLayoutSnapshot(): LayoutSettings {
-  return _layoutSnapshot;
+  return _layoutStore.getState();
 }
 
 export function setLayoutSettings(partial: Partial<LayoutSettings>): void {
-  _layout = { ..._layout, ...partial };
+  const next = { ..._layoutStore.getState(), ...partial };
   try {
-    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(_layout));
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(next));
   } catch {
     /* ignore */
   }
-  updateLayoutSnapshot();
-  _layoutListeners.forEach((cb) => cb());
+  _layoutStore.setState(next);
 }
 
 export function subscribeToLayout(cb: () => void): () => void {
-  _layoutListeners.add(cb);
-  return () => _layoutListeners.delete(cb);
+  return _layoutStore.subscribe(cb);
 }

@@ -1,3 +1,5 @@
+import { createStore } from "zustand/vanilla";
+
 export const LS_TC_KEY = "aware_test_cases_v2";
 export const LS_SUITE_KEY = "aware_test_suites_v2";
 export const LS_DECISIONS_KEY = "aware_promotion_decisions";
@@ -11,14 +13,15 @@ export function loadFromStorage<T>(key: string, fallback: T[]): T[] {
   }
 }
 
-export const _tcListeners = new Set<() => void>();
-export const _tsListeners = new Set<() => void>();
+// Zustand vanilla stores for subscription management
+const _tcStore = createStore(() => ({}));
+const _tsStore = createStore(() => ({}));
 
 export function _notifyTC() {
-  _tcListeners.forEach((fn) => fn());
+  _tcStore.setState({});
 }
 export function _notifyTS() {
-  _tsListeners.forEach((fn) => fn());
+  _tsStore.setState({});
 }
 export function _notify() {
   _notifyTC();
@@ -26,11 +29,9 @@ export function _notify() {
 }
 
 export function subscribeToTestCases(onChange: () => void): () => void {
-  _tcListeners.add(onChange);
-  return () => _tcListeners.delete(onChange);
+  return _tcStore.subscribe(onChange);
 }
 
 export function subscribeToTestSuites(onChange: () => void): () => void {
-  _tsListeners.add(onChange);
-  return () => _tsListeners.delete(onChange);
+  return _tsStore.subscribe(onChange);
 }

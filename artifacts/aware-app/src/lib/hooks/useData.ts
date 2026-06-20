@@ -79,7 +79,7 @@ export function useFilteredRuns(): Run[] {
   const runs = useRuns();
   const envSnap = React.useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
   return React.useMemo(
-    () => (envSnap.envIds.length === 0 ? runs : getRunsByEnv(envSnap.envIds) as Run[]),
+    () => (envSnap.envIds.length === 0 ? runs : getRunsByEnv(envSnap.envIds)),
     [runs, envSnap.envIds],
   );
 }

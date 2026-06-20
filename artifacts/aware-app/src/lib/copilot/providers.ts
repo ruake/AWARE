@@ -8,6 +8,7 @@ import type {
 } from "./types";
 import { loadOpenAIConfig } from "./storage";
 import { synthesizeWithChromeAI, answerDirectWithChromeAI } from "./chromeAIDataLayer";
+import { checkAIRateLimit } from "@/lib/rateLimit";
 
 // ── WebLLM Provider ──────────────────────────────────────────────────────────
 const WEBLLM_MODEL = "Hermes-2-Pro-Mistral-7B-q4f16_1-MLC";
@@ -129,10 +130,21 @@ export class OpenAIProvider implements IProvider {
     signal: AbortSignal,
     onDelta: (delta: StreamDelta) => void,
   ): Promise<void> {
+    if (!checkAIRateLimit()) {
+      onDelta({
+        content:
+          "⚠️ Rate limit reached (10 requests/min). Please wait a moment before sending another message.",
+        done: true,
+      });
+      return;
+    }
+
     const { apiKey, apiUrl, model } = loadOpenAIConfig();
     const base = apiUrl || "https://api.openai.com/v1";
 
-    if (!apiKey) {
+    const useServerProxy = import.meta.env.DEV || import.meta.env.VITE_USE_AI_PROXY === "true";
+
+    if (!useServerProxy && !apiKey) {
       onDelta({
         content: "⚠️ No OpenAI API key — open **Settings** (top right) to add one.",
         done: true,
@@ -150,9 +162,14 @@ export class OpenAIProvider implements IProvider {
 
     const msgs = toolDefs ? mergeSystemIntoUser(messages) : messages;
 
-    const resp = await fetch(`${base}/chat/completions`, {
+    const endpoint = useServerProxy ? "/api/ai/chat" : `${base}/chat/completions`;
+    const authHeaders: Record<string, string> = useServerProxy
+      ? {}
+      : { Authorization: `Bearer ${apiKey}` };
+
+    const resp = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify({
         model: model || "gpt-4o-mini",
         messages: msgs,
