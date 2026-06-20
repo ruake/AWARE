@@ -103,9 +103,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
     [groupedResults],
   );
 
-  React.useEffect(() => {
-    setSelectedIndex(0);
-  }, [query]);
+
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -163,7 +161,10 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setSelectedIndex(0);
+          }}
           placeholder="Search messages\u2026"
           style={{
             flex: 1,

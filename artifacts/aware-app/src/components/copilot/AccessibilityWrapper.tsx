@@ -6,11 +6,11 @@ export function useAccessibility(options: {
   role?: string;
   tabIndex?: number;
   onKeyDown?: (e: React.KeyboardEvent) => void;
-}): Record<string, any> {
+}): React.HTMLAttributes<HTMLElement> {
   const id = React.useId();
   const describedById = options.description ? `${id}-desc` : undefined;
 
-  const props: Record<string, any> = {
+  const props: React.HTMLAttributes<HTMLElement> = {
     "aria-label": options.label,
     role: options.role ?? "region",
     tabIndex: options.tabIndex ?? 0,
@@ -31,7 +31,9 @@ export function useKeyboardNavigation(
   handlers: Record<string, (e: KeyboardEvent) => void>,
 ): void {
   const stableHandlers = React.useRef(handlers);
-  stableHandlers.current = handlers;
+  React.useEffect(() => {
+    stableHandlers.current = handlers;
+  }, [handlers]);
 
   React.useEffect(() => {
     const listener = (e: KeyboardEvent) => {
