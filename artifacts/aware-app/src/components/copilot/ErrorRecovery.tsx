@@ -69,7 +69,7 @@ function classifyError(error: string): ErrorClassification {
   if (lower.includes("rate limit") || lower.includes("429") || lower.includes("rate_limit") || lower.includes("too many requests")) {
     return {
       label: "Rate Limited",
-      description: "Rate limited. Waiting before retry...",
+      description: "Rate limited. Waiting before retry…",
       actions: [
         { label: "Retry", icon: <RefreshCw size={12} />, action: "retry" },
       ],
@@ -154,6 +154,7 @@ export default function ErrorRecovery({ message, onRetry, onRetryWithFix, onDism
 
   return (
     <div
+      role="alert"
       style={{
         background: "rgba(239,68,68,0.06)",
         border: "1px solid rgba(248,113,113,0.25)",
@@ -162,19 +163,13 @@ export default function ErrorRecovery({ message, onRetry, onRetryWithFix, onDism
         fontSize: 13,
         lineHeight: 1.5,
         color: "var(--proof-text)",
-        animation: "slide-up 0.25s ease-out",
+        animation: "copilotSlideUp 0.25s ease-out",
         marginTop: 6,
       }}
     >
-      <style>{`
-        @keyframes slide-up {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-
       <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
         <div
+          aria-hidden="true"
           style={{
             width: 28,
             height: 28,
@@ -255,6 +250,7 @@ export default function ErrorRecovery({ message, onRetry, onRetryWithFix, onDism
             <div style={{ marginTop: 10 }}>
               <button
                 onClick={() => setStackVisible((p) => !p)}
+                aria-expanded={stackVisible}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -308,6 +304,7 @@ export default function ErrorRecovery({ message, onRetry, onRetryWithFix, onDism
 
         <button
           onClick={handleDismiss}
+          aria-label="Dismiss error"
           title="Dismiss"
           style={{
             display: "flex",

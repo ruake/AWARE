@@ -1,6 +1,6 @@
 import React from "react";
 import { Download, Copy, Check, X, FileText, Code, File } from "lucide-react";
-import type { Thread, Message, ExportFormat } from "@/lib/copilot/types";
+import type { Thread, ExportFormat } from "@/lib/copilot/types";
 
 interface ExportDialogProps {
   thread: Thread | null;
@@ -119,6 +119,9 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
   const [includeToolCalls, setIncludeToolCalls] = React.useState(false);
   const [includeMetadata, setIncludeMetadata] = React.useState(true);
   const [copied, setCopied] = React.useState(false);
+  const [downloadError, setDownloadError] = React.useState<string | null>(null);
+
+  const isJsonOnly = format !== "json";
 
   const content = thread
     ? formatExport(thread, format, includeTimestamps, includeToolCalls, includeMetadata)
@@ -140,20 +143,26 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
       await navigator.clipboard.writeText(content);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {}
+    } catch {
+      setDownloadError("Failed to copy to clipboard.");
+    }
   };
 
   const handleDownload = () => {
     if (!thread || !content) return;
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${thread.title.replace(/[^a-zA-Z0-9-_ ]/g, "")}${getExtension(format)}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${thread.title.replace(/[^a-zA-Z0-9-_ ]/g, "")}${getExtension(format)}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      setDownloadError("Download failed. Try copying instead.");
+    }
   };
 
   if (!thread) return null;
@@ -161,6 +170,9 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
   return (
     <div
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Export Conversation"
       style={{
         position: "fixed",
         inset: 0,
@@ -208,6 +220,7 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close export dialog"
             style={{
               background: "none",
               border: "none",
@@ -226,12 +239,39 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
 
         {/* Body */}
         <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Error banner */}
+          {downloadError && (
+            <div
+              role="alert"
+              style={{
+                fontSize: 12,
+                color: "var(--proof-red-bright)",
+                background: "var(--proof-red-bg)",
+                border: "1px solid var(--proof-red-border)",
+                borderRadius: 6,
+                padding: "6px 10px",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              {downloadError}
+              <button
+                aria-label="Dismiss error"
+                onClick={() => setDownloadError(null)}
+                style={{ background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: "auto", color: "inherit", display: "flex" }}
+              >
+                <X size={12} />
+              </button>
+            </div>
+          )}
+
           {/* Format selector */}
           <div>
             <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
               Format
             </div>
-            <div style={{ display: "flex", gap: 6 }}>
+            <div style={{ display: "flex", gap: 6 }} role="group" aria-label="Export format">
               {(Object.keys(FORMAT_META) as ExportFormat[]).map((key) => {
                 const meta = FORMAT_META[key];
                 const active = key === format;
@@ -239,6 +279,7 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
                   <button
                     key={key}
                     onClick={() => setFormat(key)}
+                    aria-pressed={active}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -277,15 +318,27 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
                 />
                 Include timestamps
               </label>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, color: "var(--proof-text)" }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  cursor: isJsonOnly ? "not-allowed" : "pointer",
+                  fontSize: 13,
+                  color: isJsonOnly ? "var(--proof-text-muted)" : "var(--proof-text)",
+                  opacity: isJsonOnly ? 0.6 : 1,
+                }}
+                title={isJsonOnly ? "Tool calls are only available in JSON format" : undefined}
+              >
                 <input
                   type="checkbox"
                   checked={includeToolCalls}
+                  disabled={isJsonOnly}
                   onChange={(e) => setIncludeToolCalls(e.target.checked)}
                   style={{ accentColor: "var(--proof-blue)" }}
                 />
                 Include tool calls
-                <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>(JSON only)</span>
+                <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>(JSON only)</span>
               </label>
               <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, color: "var(--proof-text)" }}>
                 <input
@@ -295,7 +348,7 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
                   style={{ accentColor: "var(--proof-blue)" }}
                 />
                 Include metadata
-                <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>(thread info header)</span>
+                <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>(thread info header)</span>
               </label>
             </div>
           </div>
@@ -306,6 +359,7 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
               Preview
             </div>
             <pre
+              aria-label="Export preview"
               style={{
                 margin: 0,
                 padding: 12,

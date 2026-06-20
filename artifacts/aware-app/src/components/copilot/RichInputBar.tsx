@@ -153,6 +153,7 @@ export default function RichInputBar({
       {/* Drag overlay */}
       {dragging && (
         <div
+          aria-live="polite"
           style={{
             position: "absolute",
             inset: 0,
@@ -177,6 +178,8 @@ export default function RichInputBar({
       {/* Generating indicator */}
       {busy && (
         <div
+          role="status"
+          aria-live="polite"
           style={{
             display: "flex",
             alignItems: "center",
@@ -187,7 +190,7 @@ export default function RichInputBar({
             fontWeight: 500,
           }}
         >
-          <div style={{ display: "flex", gap: 3 }}>
+          <div style={{ display: "flex", gap: 3 }} aria-hidden="true">
             <span className="copilot-thinking-dot" style={{ width: 5, height: 5 }} />
             <span className="copilot-thinking-dot" style={{ width: 5, height: 5 }} />
             <span className="copilot-thinking-dot" style={{ width: 5, height: 5 }} />
@@ -195,6 +198,7 @@ export default function RichInputBar({
           <span>Generating response…</span>
           <button
             onClick={onStop}
+            aria-label="Stop generating"
             style={{
               marginLeft: "auto",
               display: "inline-flex",
@@ -225,7 +229,8 @@ export default function RichInputBar({
         }}
       >
         <button
-          title="Bold"
+          title="Bold (select text first)"
+          aria-label="Bold"
           onClick={() => applyFormat("**", "**")}
           style={toolBtnBase}
           onMouseEnter={(e) => {
@@ -240,7 +245,8 @@ export default function RichInputBar({
           <Bold size={14} />
         </button>
         <button
-          title="Italic"
+          title="Italic (select text first)"
+          aria-label="Italic"
           onClick={() => applyFormat("_", "_")}
           style={toolBtnBase}
           onMouseEnter={(e) => {
@@ -255,7 +261,8 @@ export default function RichInputBar({
           <Italic size={14} />
         </button>
         <button
-          title="Code"
+          title="Inline code (select text first)"
+          aria-label="Code"
           onClick={() => applyFormat("`", "`")}
           style={toolBtnBase}
           onMouseEnter={(e) => {
@@ -274,6 +281,7 @@ export default function RichInputBar({
 
         <button
           title="Attach file"
+          aria-label="Attach file"
           onClick={() => fileInputRef.current?.click()}
           style={toolBtnBase}
           onMouseEnter={(e) => {
@@ -294,10 +302,13 @@ export default function RichInputBar({
           accept={ACCEPTED_TYPES.join(",")}
           onChange={handleFileSelect}
           style={hiddenInputStyle}
+          aria-hidden="true"
+          tabIndex={-1}
         />
 
         <button
-          title="Use template"
+          title="Use a prompt template"
+          aria-label="Use template"
           onClick={onTemplateSelect}
           style={toolBtnBase}
           onMouseEnter={(e) => {
@@ -314,10 +325,34 @@ export default function RichInputBar({
 
         <div style={{ flex: 1 }} />
 
-        {!busy && (
+        {/* Send/Stop button — always in DOM to prevent layout shift */}
+        {busy ? (
+          <button
+            onClick={onStop}
+            aria-label="Stop generating"
+            title="Stop generating"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              border: "1px solid rgba(248,113,113,0.3)",
+              background: "rgba(239,68,68,0.1)",
+              color: "#f87171",
+              cursor: "pointer",
+              flexShrink: 0,
+              transition: "all 0.15s",
+            }}
+          >
+            <Square size={13} fill="currentColor" />
+          </button>
+        ) : (
           <button
             onClick={onSend}
             disabled={!canSend}
+            aria-label={canSend ? "Send message" : "Type a message to send"}
             title={canSend ? "Send (Enter)" : "Type a message"}
             className={`copilot-send-btn ${canSend ? "copilot-send-btn-active" : "copilot-send-btn-inactive"}`}
           >
@@ -329,6 +364,7 @@ export default function RichInputBar({
       {/* File size warning */}
       {sizeWarning && (
         <div
+          role="alert"
           style={{
             fontSize: 11,
             color: "var(--proof-red-bright)",
@@ -338,7 +374,13 @@ export default function RichInputBar({
             gap: 6,
           }}
         >
-          <X size={12} style={{ cursor: "pointer" }} onClick={() => setSizeWarning(null)} />
+          <button
+            aria-label="Dismiss warning"
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", color: "inherit" }}
+            onClick={() => setSizeWarning(null)}
+          >
+            <X size={12} />
+          </button>
           {sizeWarning}
         </div>
       )}
@@ -381,10 +423,10 @@ export default function RichInputBar({
                     }}
                   />
                 ) : (
-                  <Image size={16} style={{ flexShrink: 0, color: "var(--proof-text-muted)" }} />
+                  <Image size={16} style={{ flexShrink: 0, color: "var(--proof-text-muted)" }} aria-hidden="true" />
                 )
               ) : (
-                <FileText size={16} style={{ flexShrink: 0, color: "var(--proof-text-muted)" }} />
+                <FileText size={16} style={{ flexShrink: 0, color: "var(--proof-text-muted)" }} aria-hidden="true" />
               )}
               <div style={{ minWidth: 0 }}>
                 <div
@@ -405,7 +447,8 @@ export default function RichInputBar({
               </div>
               <button
                 onClick={() => onRemoveAttachment(att.id)}
-                title="Remove"
+                title={`Remove ${att.name}`}
+                aria-label={`Remove ${att.name}`}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -447,13 +490,10 @@ export default function RichInputBar({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           onPaste={onPaste}
-          placeholder={
-            busy
-              ? "Waiting for response…"
-              : "Ask about tests, failures, flakiness, promotion status…"
-          }
+          placeholder="Ask about tests, failures, flakiness, promotion status…"
           rows={1}
-          disabled={busy}
+          aria-label="Message input"
+          aria-multiline="true"
           style={{
             flex: 1,
             resize: "none",
@@ -468,7 +508,6 @@ export default function RichInputBar({
             maxHeight: 160,
             overflowY: "auto",
             padding: "4px 0",
-            opacity: busy ? 0.5 : 1,
           }}
         />
       </div>
@@ -509,7 +548,7 @@ export default function RichInputBar({
         >
           ⇧Enter
         </kbd>{" "}
-        for new line
+        new line
         {" · "}
         <kbd
           style={{
@@ -521,9 +560,9 @@ export default function RichInputBar({
             padding: "1px 4px",
           }}
         >
-          ⌘K
+          ⌘F
         </kbd>{" "}
-        for commands
+        search
       </div>
     </div>
   );

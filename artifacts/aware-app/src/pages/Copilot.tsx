@@ -34,8 +34,6 @@ import StatsPanel from "@/components/copilot/StatsPanel";
 import { CopilotSettings as CopilotSettingsPanel } from "@/components/aware/CopilotSettings";
 import ProviderSelector from "@/components/copilot/ProviderSelector";
 import { useSyncedUrlState } from "@/lib/urlState";
-import { getLogs, subscribeLogs } from "@/lib/ai/debugLogger";
-import type { DebugLogEntry } from "@/lib/ai/langGraphTypes";
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 const ESTIMATED_CHARS_PER_TOKEN = 4;
@@ -67,7 +65,6 @@ export default function CopilotPage() {
   const [openaiConfig, setOpenaiConfig] = React.useState(loadOpenAIConfig);
   const [input, setInput] = React.useState("");
   const [agentSteps, setAgentSteps] = React.useState<SubAgentStep[]>([]);
-  const [_debugLogs, _setDebugLogs] = React.useState<DebugLogEntry[]>(() => getLogs());
 
   const [threads, setThreads] = React.useState<Thread[]>(() => loadThreads());
   const [showSearch, setShowSearch] = React.useState(false);
@@ -135,11 +132,6 @@ export default function CopilotPage() {
       }
     }
   }, [threadUrl]);
-
-  React.useEffect(() => {
-    const unsub = subscribeLogs(() => _setDebugLogs([...getLogs()]));
-    return unsub;
-  }, []);
 
   const ensureActiveThread = React.useCallback((msgs: Message[]) => {
     setThreads((prev) => {
@@ -327,16 +319,16 @@ export default function CopilotPage() {
     [messages, busy, providers, providerType, handleEvent],
   );
 
-  const handleStop = () => {
+  const handleStop = React.useCallback(() => {
     abortRef.current?.abort();
     handleEvent({ type: "done" });
-  };
+  }, [handleEvent]);
 
-  const handleProviderSwitch = (type: ProviderType) => {
+  const handleProviderSwitch = React.useCallback((type: ProviderType) => {
     setProviderType(type);
     saveProviderType(type);
     setShowSettings(false);
-  };
+  }, []);
 
   const handleNewChat = () => {
     abortRef.current?.abort();
@@ -567,7 +559,7 @@ export default function CopilotPage() {
           >
             Copilot
           </div>
-          <div style={{ fontSize: 9.5, color: "var(--proof-text-muted)", lineHeight: 1.2 }}>
+          <div style={{ fontSize: 11, color: "var(--proof-text-muted)", lineHeight: 1.2 }}>
             {providerType === "openai"
               ? openaiConfig.model || "gpt-4o-mini"
               : providerType === "webllm"
@@ -726,10 +718,7 @@ export default function CopilotPage() {
             />
           ) : showingOnboarding ? (
             <OnboardingWizard
-              onStartChat={(msg) => {
-                setInput(msg);
-                setTimeout(() => handleSend(msg), 50);
-              }}
+              onStartChat={handleSend}
               onDismiss={() => setDismissedOnboarding(true)}
             />
           ) : (
@@ -836,9 +825,10 @@ export default function CopilotPage() {
       {/* ── Overlays ───────────────────────────────────────────── */}
       {showExport && (() => {
         const activeId = getActiveThreadId();
-        const t = activeId ? threads.find((th) => th.id === activeId) : null;
-        if (!t) return null;
-        return <ExportDialog thread={t} onClose={() => setShowExport(false)} />;
+        const exportThread = activeId ? threads.find((th) => th.id === activeId) : null;
+        return exportThread ? (
+          <ExportDialog thread={exportThread} onClose={() => setShowExport(false)} />
+        ) : null;
       })()}
 
       {showTemplateLibrary && (
@@ -859,9 +849,10 @@ export default function CopilotPage() {
 
       {showStats && (() => {
         const activeId = getActiveThreadId();
-        const t = activeId ? threads.find((th) => th.id === activeId) : null;
-        if (!t) return null;
-        return <StatsPanel thread={t} onClose={() => setShowStats(false)} />;
+        const statsThread = activeId ? threads.find((th) => th.id === activeId) : null;
+        return statsThread ? (
+          <StatsPanel thread={statsThread} onClose={() => setShowStats(false)} />
+        ) : null;
       })()}
     </div>
   );
@@ -879,6 +870,8 @@ function IconBtn({
     <button
       onClick={onClick}
       title={title}
+      aria-label={title}
+      aria-pressed={active}
       style={{
         padding: "5px 6px",
         borderRadius: 6,

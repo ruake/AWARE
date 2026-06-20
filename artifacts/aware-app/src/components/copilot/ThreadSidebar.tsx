@@ -287,7 +287,7 @@ function ThreadItem({
               color: "var(--proof-text-muted)",
             }}
           >
-            {thread.messageCount} msgs
+            {thread.messageCount === 0 ? "Empty" : `${thread.messageCount} msg${thread.messageCount !== 1 ? "s" : ""}`}
           </span>
           <span style={{ fontSize: 8, color: "var(--proof-text-tertiary)" }}>·</span>
           <span
@@ -382,16 +382,6 @@ function ThreadItem({
         </button>
       </div>
 
-      <style>{`
-        .thread-actions button:hover {
-          color: var(--proof-text-secondary) !important;
-          background: var(--proof-hover) !important;
-        }
-        .thread-actions button:last-child:hover {
-          color: var(--proof-red-bright) !important;
-          background: rgba(248,68,90,0.12) !important;
-        }
-      `}</style>
     </div>
   );
 }
@@ -557,12 +547,6 @@ export function ThreadSidebar({
         overflow: "hidden",
       }}
     >
-      <style>{`
-        .thread-sidebar-scroll::-webkit-scrollbar { width: 3px; }
-        .thread-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-        .thread-sidebar-scroll::-webkit-scrollbar-thumb { background: var(--proof-border-strong); border-radius: 99px; }
-        .thread-sidebar-scroll { scrollbar-width: thin; scrollbar-color: var(--proof-border-strong) transparent; }
-      `}</style>
 
       <div
         style={{

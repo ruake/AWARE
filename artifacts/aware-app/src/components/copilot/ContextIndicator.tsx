@@ -16,11 +16,17 @@ export default function ContextIndicator({ usedTokens, maxTokens, messageCount }
   const pct = maxTokens > 0 ? Math.min((usedTokens / maxTokens) * 100, 100) : 0;
   const color = getColor(pct);
   const [hovered, setHovered] = React.useState(false);
-  const label = `${usedTokens.toLocaleString()} / ${maxTokens.toLocaleString()} tokens used (${Math.round(pct)}%)`;
+  const tokenLabel = `${usedTokens.toLocaleString()} / ${maxTokens.toLocaleString()} tokens`;
+  const tooltipLabel = `${tokenLabel} (${Math.round(pct)}%) · ${messageCount} message${messageCount !== 1 ? "s" : ""} in context`;
 
   return (
     <div
-      style={{ position: "relative", width: 100, userSelect: "none" }}
+      role="meter"
+      aria-valuenow={Math.round(pct)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`Context window: ${tooltipLabel}`}
+      style={{ position: "relative", userSelect: "none" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -28,16 +34,27 @@ export default function ContextIndicator({ usedTokens, maxTokens, messageCount }
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
+          gap: 5,
           marginBottom: 2,
         }}
       >
         <span
           style={{
             fontSize: 9,
+            color: "var(--proof-text-muted)",
+            fontWeight: 500,
+            letterSpacing: "0.2px",
+            textTransform: "uppercase",
+          }}
+        >
+          Context
+        </span>
+        <span
+          style={{
+            fontSize: 9,
             fontFamily: "'JetBrains Mono', monospace",
             color: color,
-            fontWeight: 600,
+            fontWeight: 700,
             transition: "color 0.2s",
             animation: pct > 80 ? "contextPulse 1.5s ease-in-out infinite" : "none",
           }}
@@ -48,7 +65,7 @@ export default function ContextIndicator({ usedTokens, maxTokens, messageCount }
 
       <div
         style={{
-          width: "100%",
+          width: 80,
           height: 3,
           background: "var(--proof-border)",
           borderRadius: 2,
@@ -69,33 +86,31 @@ export default function ContextIndicator({ usedTokens, maxTokens, messageCount }
 
       {hovered && (
         <div
+          role="tooltip"
           style={{
             position: "absolute",
-            bottom: "calc(100% + 6px)",
+            bottom: "calc(100% + 8px)",
             right: 0,
             background: "var(--proof-surface-2)",
             border: "1px solid var(--proof-border)",
             borderRadius: 6,
-            padding: "6px 10px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+            padding: "7px 11px",
+            boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
             zIndex: 60,
             whiteSpace: "nowrap",
-            fontSize: 10.5,
-            lineHeight: 1.5,
+            fontSize: 11,
+            lineHeight: 1.6,
             color: "var(--proof-text-secondary)",
+            minWidth: 180,
           }}
         >
-          <div style={{ color: "var(--proof-text)" }}>{label}</div>
+          <div style={{ color: "var(--proof-text)", fontWeight: 600, marginBottom: 2 }}>
+            {tokenLabel}
+          </div>
+          <div>{Math.round(pct)}% of context window used</div>
           <div>{messageCount} message{messageCount !== 1 ? "s" : ""} in context</div>
         </div>
       )}
-
-      <style>{`
-        @keyframes contextPulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
     </div>
   );
 }

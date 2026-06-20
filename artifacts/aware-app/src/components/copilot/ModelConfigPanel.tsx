@@ -156,7 +156,7 @@ export default function ModelConfigPanel({ settings, onSettingsChange, onClose }
                 value={local.temperature}
                 onChange={(e) => update({ temperature: parseFloat(e.target.value) })}
                 className="model-config-slider"
-                style={{ flex: 1 }}
+                style={{ flex: 1, background: tempGradient }}
               />
               <span
                 style={{
@@ -194,7 +194,7 @@ export default function ModelConfigPanel({ settings, onSettingsChange, onClose }
                 value={local.maxTokens}
                 onChange={(e) => update({ maxTokens: parseInt(e.target.value, 10) })}
                 className="model-config-slider model-config-slider-purple"
-                style={{ flex: 1 }}
+                style={{ flex: 1, background: tokensGradient }}
               />
               <span
                 style={{
@@ -516,57 +516,6 @@ export default function ModelConfigPanel({ settings, onSettingsChange, onClose }
         </div>
       </div>
 
-      <style>{`
-        @keyframes modelConfigFadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-        @keyframes modelConfigSlideIn {
-          from { transform: translateX(100%); }
-          to   { transform: translateX(0); }
-        }
-        input[type="range"].model-config-slider {
-          -webkit-appearance: none;
-          appearance: none;
-          height: 5px;
-          border-radius: 99px;
-          outline: none;
-          background: ${tempGradient};
-          cursor: pointer;
-        }
-        input[type="range"].model-config-slider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: var(--proof-surface-2);
-          border: 2px solid var(--proof-orange);
-          cursor: pointer;
-          transition: transform 0.1s, box-shadow 0.1s;
-        }
-        input[type="range"].model-config-slider::-webkit-slider-thumb:hover {
-          transform: scale(1.15);
-          box-shadow: 0 0 8px var(--proof-orange-glow);
-        }
-        input[type="range"].model-config-slider::-moz-range-thumb {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: var(--proof-surface-2);
-          border: 2px solid var(--proof-orange);
-          cursor: pointer;
-        }
-        input[type="range"].model-config-slider-purple::-webkit-slider-thumb {
-          border-color: var(--proof-purple);
-        }
-        input[type="range"].model-config-slider-purple::-webkit-slider-thumb:hover {
-          box-shadow: 0 0 8px var(--proof-purple-glow);
-        }
-        input[type="range"].model-config-slider-purple::-moz-range-thumb {
-          border-color: var(--proof-purple);
-        }
-      `}</style>
     </>
   );
 }

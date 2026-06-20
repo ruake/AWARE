@@ -307,14 +307,16 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
           </div>
         </div>
 
-        {/* Rate card */}
-        <div style={statCardStyle}>
-          <Hash size={14} style={statIconStyle} />
-          <div style={{ flex: 1 }}>
-            <div style={statValueStyle}>{stats.messagesPerMinute.toFixed(1)}</div>
-            <div style={statLabelStyle}>Messages / min</div>
+        {/* Rate card — only meaningful when session > 1 min with multiple exchanges */}
+        {stats.durationMs > 60000 && stats.totalMessages > 2 && (
+          <div style={statCardStyle}>
+            <Hash size={14} style={statIconStyle} />
+            <div style={{ flex: 1 }}>
+              <div style={statValueStyle}>{stats.messagesPerMinute.toFixed(1)}</div>
+              <div style={statLabelStyle}>Messages / min</div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Message breakdown bar */}
         <div

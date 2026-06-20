@@ -73,6 +73,8 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
         {/* Dismiss button */}
         <button
           onClick={onDismiss}
+          aria-label="Close onboarding"
+          title="Dismiss"
           style={{
             position: "absolute",
             top: 12,
@@ -103,6 +105,7 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
 
         {/* Bot icon */}
         <div
+          aria-hidden="true"
           style={{
             width: 72,
             height: 72,
@@ -178,6 +181,7 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
               }}
             >
               <div
+                aria-hidden="true"
                 style={{
                   width: 34,
                   height: 34,
@@ -218,7 +222,7 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
 
         {/* Suggested prompts */}
         <div style={{ width: "100%" }}>
-          <h3
+          <h2
             style={{
               fontSize: 12,
               fontWeight: 700,
@@ -229,8 +233,8 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
               letterSpacing: "0.4px",
             }}
           >
-            Suggested Prompts
-          </h3>
+            Try asking…
+          </h2>
           <div
             style={{
               display: "flex",
@@ -284,7 +288,7 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
             padding: "18px 20px",
           }}
         >
-          <h3
+          <h2
             style={{
               fontSize: 12,
               fontWeight: 700,
@@ -296,7 +300,7 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
             }}
           >
             How It Works
-          </h3>
+          </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {STEPS.map((step) => (
               <div
@@ -304,6 +308,7 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
                 style={{ display: "flex", gap: 12, alignItems: "flex-start" }}
               >
                 <div
+                  aria-hidden="true"
                   style={{
                     width: 28,
                     height: 28,
@@ -341,132 +346,15 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
           </div>
         </div>
 
-        {/* Mock chat illustration */}
-        <div
-          style={{
-            width: "100%",
-            background: "var(--proof-surface-2)",
-            border: "1px solid var(--proof-border)",
-            borderRadius: 12,
-            padding: "16px 18px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 10,
-              fontWeight: 600,
-              color: "var(--proof-text-muted)",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              marginBottom: 4,
-            }}
-          >
-            <MessageSquare size={11} />
-            Preview
-          </div>
-          <div
-            style={{
-              alignSelf: "flex-end",
-              maxWidth: "80%",
-              background: "var(--proof-blue-bg)",
-              border: "1px solid var(--proof-blue-border)",
-              borderRadius: "12px 12px 4px 12px",
-              padding: "9px 13px",
-              fontSize: 12,
-              color: "var(--proof-text)",
-              lineHeight: 1.5,
-            }}
-          >
-            What's the current health status?
-          </div>
-          <div
-            style={{
-              alignSelf: "flex-start",
-              maxWidth: "85%",
-              background: "var(--proof-surface-3)",
-              border: "1px solid var(--proof-border)",
-              borderRadius: "12px 12px 12px 4px",
-              padding: "9px 13px",
-              fontSize: 12,
-              color: "var(--proof-text)",
-              lineHeight: 1.5,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
-              <span
-                style={{
-                  width: 5,
-                  height: 5,
-                  borderRadius: "50%",
-                  background: "#22d3a0",
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ fontSize: 10.5, fontWeight: 600, color: "#22d3a0" }}>
-                Healthy
-              </span>
-            </div>
-            <div>
-              All environments are green. QA: 94% · UAT: 91% · PROD: 97% pass rate. No
-              anomalies detected in the last 3 runs.
-            </div>
-          </div>
-          <div
-            style={{
-              alignSelf: "flex-start",
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              padding: "8px 12px",
-              background: "var(--proof-surface-3)",
-              border: "1px solid var(--proof-border)",
-              borderRadius: "12px 12px 12px 4px",
-            }}
-          >
-            <div
-              style={{
-                width: 5,
-                height: 5,
-                borderRadius: "50%",
-                background: "var(--proof-text-tertiary)",
-                animation: "glow-pulse 1.4s infinite",
-              }}
-            />
-            <div
-              style={{
-                width: 5,
-                height: 5,
-                borderRadius: "50%",
-                background: "var(--proof-text-tertiary)",
-                animation: "glow-pulse 1.4s 0.2s infinite",
-              }}
-            />
-            <div
-              style={{
-                width: 5,
-                height: 5,
-                borderRadius: "50%",
-                background: "var(--proof-text-tertiary)",
-                animation: "glow-pulse 1.4s 0.4s infinite",
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Start Exploring button */}
+        {/* Single primary CTA */}
         <button
           onClick={onDismiss}
+          autoFocus
           style={{
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
-            padding: "10px 24px",
+            padding: "10px 28px",
             borderRadius: 10,
             border: "none",
             background: "linear-gradient(135deg, var(--proof-blue), var(--proof-blue-hover))",
@@ -488,28 +376,6 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
         >
           Start Exploring
           <ArrowRight size={14} />
-        </button>
-
-        {/* Skip link */}
-        <button
-          onClick={onDismiss}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--proof-text-muted)",
-            cursor: "pointer",
-            fontSize: 11.5,
-            padding: 4,
-            transition: "color var(--proof-transition)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "var(--proof-text-secondary)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "var(--proof-text-muted)";
-          }}
-        >
-          Skip — I know what I'm doing
         </button>
       </div>
     </div>
