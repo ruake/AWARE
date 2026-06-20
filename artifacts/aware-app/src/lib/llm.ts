@@ -131,7 +131,7 @@ class WebLLMProvider implements ILLMProvider {
     if (!avail) {
       return {
         content:
-          "WebLLM requires WebGPU support (Chrome 113+). Your browser doesn't support it.\n\nClick **⚙ Configure** above to use OpenAI or another API instead.",
+          "WebLLM requires WebGPU support (Chrome 113+). Your browser doesn't support it.\n\nClick **⚙ Configure** above to use a Custom Endpoint instead.",
         finishReason: "error",
       };
     }
@@ -155,7 +155,7 @@ class WebLLMProvider implements ILLMProvider {
       this._initPromise = null;
       const msg = err instanceof Error ? err.message : String(err);
       return {
-        content: `WebLLM failed to load model "${this._webllmModel}": ${msg}\n\nClick **⚙ Configure** above to use OpenAI or another API instead.`,
+        content: `WebLLM failed to load model "${this._webllmModel}": ${msg}\n\nClick **⚙ Configure** above to use a Custom Endpoint instead.`,
         finishReason: "error",
       };
     }
