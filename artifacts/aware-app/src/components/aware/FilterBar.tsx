@@ -47,6 +47,7 @@ export function FilterBar({
         <input
           className="proof-input"
           placeholder={searchPlaceholder}
+          aria-label={searchPlaceholder}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           style={{ flex: 1, minWidth: 0 }}

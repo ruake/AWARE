@@ -1,7 +1,7 @@
 import React from "react";
 import { ChevronDown, Check, Search, Layers } from "lucide-react";
 import { getTestSuites } from "@/lib/data";
-import { getSelectedSuiteIds, toggleSelectedSuiteId, setSelectedSuiteIds } from "@/lib/filters";
+import { getSelectedSuiteIds, toggleSelectedSuiteId } from "@/lib/filters";
 
 interface SuiteSelectorProps {
   currentSuiteIds: string[];
@@ -59,7 +59,7 @@ export function SuiteSelector({
       items.push({ suiteId: suite.id, label: suite.name });
     }
     return items;
-  }, [query, filtered]);
+  }, [filtered]);
 
   React.useEffect(() => {
     if (!open) return;

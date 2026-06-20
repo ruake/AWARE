@@ -91,8 +91,10 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
   // Auto-hide sidebar on About (no useful sidebar context there)
   React.useEffect(() => {
     if (currentActivity === "about") {
-      setSidebarVisible(false);
+      const id = setTimeout(() => setSidebarVisible(false), 0);
+      return () => clearTimeout(id);
     }
+    return;
   }, [currentActivity]);
 
   const handleActivityClick = (item: (typeof ACTIVITY_ITEMS)[number]) => {

@@ -3,6 +3,16 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
+function cssVar(name: string): string {
+  if (typeof document === "undefined") return "#3b82f6";
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#3b82f6";
+}
+
+const BLUE_BRIGHT = () => cssVar("--proof-blue-bright");
+const BLUE = () => cssVar("--proof-blue");
+const SURFACE = () => cssVar("--proof-surface");
+const BG = () => cssVar("--proof-bg");
+
 interface PoPGlobeProps {
   size?: number;
   interactive?: boolean;
@@ -36,11 +46,12 @@ const DOT_POSITIONS = (() => {
 
 const DOT_COLORS = (() => {
   const c = new Float32Array(DOT_COUNT * 3);
+  const col = new THREE.Color(BLUE_BRIGHT());
   for (let i = 0; i < DOT_COUNT; i++) {
     const b = 0.4 + Math.random() * 0.6;
-    c[i * 3] = (91 / 255) * b;
-    c[i * 3 + 1] = (138 / 255) * b;
-    c[i * 3 + 2] = (245 / 255) * b;
+    c[i * 3] = col.r * b;
+    c[i * 3 + 1] = col.g * b;
+    c[i * 3 + 2] = col.b * b;
   }
   return c;
 })();
@@ -100,7 +111,7 @@ function ActiveDots({ onMarkerClick }: { onMarkerClick?: (index: number) => void
         <bufferGeometry>
           <bufferAttribute args={[ACTIVE_DOT_POSITIONS, 3]} attach="attributes-position" />
         </bufferGeometry>
-        <pointsMaterial color="#5b8af5" size={0.04} sizeAttenuation transparent opacity={0.8} />
+        <pointsMaterial color={BLUE_BRIGHT()} size={0.04} sizeAttenuation transparent opacity={0.8} />
       </points>
       {/* Invisible clickable spheres over active dots */}
       {activePositions.map((pos, i) => (
@@ -134,11 +145,11 @@ function GlobeGroup({ onMarkerClick }: { onMarkerClick?: (index: number) => void
       <mesh>
         <sphereGeometry args={[1, 48, 48]} />
         <meshPhongMaterial
-          color="#1a2a5e"
-          emissive="#0d1a3a"
+          color={SURFACE()}
+          emissive={BG()}
           emissiveIntensity={0.25}
           shininess={15}
-          specular="#3a5a9e"
+          specular={BLUE()}
         />
       </mesh>
       <StaticDots />
@@ -151,7 +162,7 @@ export default function PoPGlobe({
   size = 200,
   interactive = true,
   className,
-  runIds,
+  runIds: _runIds,
   onMarkerClick,
 }: PoPGlobeProps) {
   const cameraZ = 2.5 * (size / 200);

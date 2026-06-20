@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { preloadImage, revokeImage } from "@/lib/images";
+import { preloadImage } from "@/lib/images";
 import { ImageIcon, AlertCircle } from "lucide-react";
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -57,7 +57,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
         if (mounted) {
           setBlobUrl(url);
         }
-      } catch (err) {
+      } catch {
         if (mounted) {
           setError(true);
           onError?.();
@@ -113,7 +113,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
             justifyContent: "center",
           }}
         >
-          <ImageIcon size={20} className="text-proof-text-muted opacity-20" />
+          <ImageIcon size={20} style={{ color: "var(--proof-text-muted)", opacity: 0.2 }} />
         </div>
       )}
 

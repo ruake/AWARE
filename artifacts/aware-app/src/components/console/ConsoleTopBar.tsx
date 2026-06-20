@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
 import { Search, Sun, Moon, WifiOff } from "lucide-react";
-import { useDataInit, useEnvHealth } from "@/lib/hooks/useData";
+import { useDataInit } from "@/lib/hooks/useData";
+import { EnvTierSelector } from "./EnvTierSelector";
+import { EnvSelector } from "./EnvSelector";
+import { SuiteSelector } from "./SuiteSelector";
+import { getSelectedEnvSnapshot, subscribeToSelectedEnv, setSelectedEnvIds } from "@/lib/selectedEnv";
+import { getSelectedSuiteSnapshot, subscribeToSelectedSuites, setSelectedSuiteIds } from "@/lib/filters";
 
 interface ConsoleTopBarProps {
   onSearchOpen: () => void;
@@ -19,64 +24,11 @@ function routeLabel(path: string): string {
   return "A.W.A.R.E.";
 }
 
-/* Derive tier health by grouping useEnvHealth results (which already have correct pass rates) */
-function useTierHealth() {
-  const envHealth = useEnvHealth();
-  return React.useMemo(() => {
-    const TIERS = ["QA", "UAT", "PROD"] as const;
-    return TIERS.map((tier) => {
-      const tierEnvs = envHealth.filter((e) => e.label.toUpperCase().startsWith(tier));
-      if (tierEnvs.length === 0) return { tier, passRate: 0, status: "critical" as const };
-      const avg = Math.round(tierEnvs.reduce((s, e) => s + e.passRate, 0) / tierEnvs.length);
-      const min = Math.min(...tierEnvs.map((e) => e.passRate));
-      const status: "healthy" | "degraded" | "critical" =
-        min >= 95 ? "healthy" : min >= 80 ? "degraded" : "critical";
-      return { tier, passRate: avg, status };
-    });
-  }, [envHealth]);
-}
-
-function TierPill({
-  tier, passRate, status, onClick,
-}: {
-  tier: string; passRate: number; status: "healthy" | "degraded" | "critical"; onClick: () => void;
-}) {
-  const color =
-    status === "healthy" ? "var(--proof-green)" :
-    status === "degraded" ? "var(--proof-yellow)" :
-    "var(--proof-red)";
-  const bg =
-    status === "healthy" ? "var(--proof-green-bg)" :
-    status === "degraded" ? "var(--proof-yellow-bg)" :
-    "var(--proof-red-bg)";
-  const border =
-    status === "healthy" ? "var(--proof-green-border)" :
-    status === "degraded" ? "var(--proof-yellow-border)" :
-    "var(--proof-red-border)";
-
-  return (
-    <button
-      onClick={onClick}
-      className="proof-env-pill"
-      style={{ background: bg, borderColor: border, color }}
-    >
-      <span style={{
-        width: 5, height: 5, borderRadius: "50%", background: color, flexShrink: 0,
-        boxShadow: status !== "healthy" ? `0 0 4px ${color}` : undefined,
-        animation: status !== "healthy" ? "badge-pulse 1.4s ease-in-out infinite" : undefined,
-      }} />
-      <span style={{ fontWeight: 700, letterSpacing: "-0.1px" }}>{tier}</span>
-      <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: "-0.5px" }}>
-        {passRate}%
-      </span>
-    </button>
-  );
-}
-
 export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
   const [location, navigate] = useLocation();
   const dataState = useDataInit();
-  const tierHealth = useTierHealth();
+  const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
+  const suiteSnap = useSyncExternalStore(subscribeToSelectedSuites, getSelectedSuiteSnapshot);
 
   const [isDark, setIsDark] = React.useState<boolean>(() => {
     try {
@@ -168,20 +120,23 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
 
       <div style={{ flex: 1 }} />
 
-      {/* Tier health pills — always visible */}
-      {dataState.loaded && !dataState.error && (
-        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-          {tierHealth.map(({ tier, passRate, status }) => (
-            <TierPill
-              key={tier}
-              tier={tier}
-              passRate={passRate}
-              status={status}
-              onClick={() => navigate("/")}
-            />
-          ))}
-        </div>
-      )}
+      {/* Global env + suite filters */}
+      <EnvSelector
+        currentEnvIds={envSnap.envIds}
+        onEnvChange={setSelectedEnvIds}
+        variant="topbar"
+      />
+      <SuiteSelector
+        currentSuiteIds={suiteSnap.suiteIds}
+        onSuiteChange={setSelectedSuiteIds}
+        variant="topbar"
+      />
+
+      {/* Divider */}
+      <div style={{ width: 1, height: 16, background: "var(--proof-border)", margin: "0 4px", flexShrink: 0 }} />
+
+      {/* Env tier selector (includes pass rates) */}
+      <EnvTierSelector />
 
       {/* Divider */}
       <div style={{ width: 1, height: 16, background: "var(--proof-border)", margin: "0 4px", flexShrink: 0 }} />

@@ -21,7 +21,6 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import {
   getRuns,
   subscribeToRuns,
-  getEnvSummary,
   getDiffRows,
   subscribeToDiffRows,
   getPassRateChart,
@@ -29,8 +28,6 @@ import {
   getRunById,
   getRunsByEnv,
   computeDiffRows,
-  computeTestDetailForName,
-  getTestResultsForRun,
   getSelectedEnvSnapshot,
   subscribeToSelectedEnv,
   setSelectedEnvIds,
@@ -39,18 +36,17 @@ import {
   subscribeToSelectedSuites,
   setSelectedSuiteIds,
   getLayoutSnapshot,
-  getLayoutSettings,
   setLayoutSettings,
   subscribeToLayout,
   loadResultsForRun,
-  getCachedResults,
   getEnvConfigs,
   getEnvConfigById,
-  loadAllData,
   getDataInitState,
   subscribeToDataInit,
+  getSchedulerStatus,
+  subscribeToSchedulerStatus,
 } from "@/lib/data";
-import type { Run, TestResult, DiffRow } from "@/lib/types";
+import type { Run, TestResult, DiffRow, SchedulerStatus } from "@/lib/types";
 
 /* ─────────────────────────────────────────────────────────────────────
    Query keys — centralised so cache invalidation is consistent
@@ -244,6 +240,11 @@ export function useRunDiff(
    Utility hooks
 ───────────────────────────────────────────────────────────────────── */
 
+/** Reactive scheduler status. */
+export function useSchedulerStatus(): SchedulerStatus {
+  return React.useSyncExternalStore(subscribeToSchedulerStatus, getSchedulerStatus);
+}
+
 /** Returns a single run by ID. */
 export function useRun(runId: string | undefined): Run | undefined {
   const _runs = useRuns();
@@ -255,17 +256,21 @@ export function useRun(runId: string | undefined): Run | undefined {
 
 /** Formats a timestamp relative to now (e.g. "3 min ago", "2 days ago"). */
 export function useRelativeTime(iso: string | undefined): string {
-  return React.useMemo(() => {
-    if (!iso) return "—";
-    const diffMs = Date.now() - new Date(iso).getTime();
-    const mins = Math.floor(diffMs / 60_000);
-    if (mins < 1) return "just now";
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    const days = Math.floor(hrs / 24);
-    return `${days}d ago`;
-  }, [iso]);
+  const [now, setNow] = React.useState(0);
+  React.useEffect(() => {
+    const tick = () => setNow(Date.now());
+    const id = setInterval(tick, 60_000);
+    return () => clearInterval(id);
+  }, []);
+  if (!iso) return "—";
+  const diffMs = now - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
 }
 
 export { getRunById, getEnvConfigs, getEnvConfigById };

@@ -31,10 +31,10 @@ export function StatusBar() {
 
   const statusColor =
     passPct >= 95
-      ? "rgba(78,201,176,0.8)"
+      ? "var(--proof-green)"
       : passPct >= 80
-        ? "rgba(232,184,76,0.8)"
-        : "rgba(244,71,71,0.8)";
+        ? "var(--proof-yellow)"
+        : "var(--proof-red)";
 
   return (
     <footer
@@ -51,14 +51,13 @@ export function StatusBar() {
         flexShrink: 0,
         userSelect: "none",
         fontFamily: "var(--font-sans)",
+        borderTop: "1px solid var(--proof-border)",
       }}
     >
-      {/* Left: env filter context */}
       <StatusItem>{activeEnvLabel}</StatusItem>
 
       <div style={{ flex: 1 }} />
 
-      {/* Right: aggregates */}
       {totalRuns > 0 && (
         <>
           <StatusItem>
@@ -82,7 +81,7 @@ export function StatusBar() {
           )}
 
           {failedRuns > 0 && (
-            <StatusItem style={{ color: "rgba(255,180,180,0.9)" }}>
+            <StatusItem style={{ color: "var(--proof-red-bright)" }}>
               {failedRuns} failed
             </StatusItem>
           )}
@@ -107,7 +106,7 @@ function StatusItem({
         gap: 5,
         padding: "0 8px",
         opacity: 0.9,
-        borderRight: "1px solid rgba(255,255,255,0.12)",
+        borderRight: "1px solid var(--proof-border)",
         height: "100%",
         ...style,
       }}

@@ -1,29 +1,3 @@
-export type AIToolCategory = "analysis" | "query" | "alert" | "report" | "recommendation";
-
-export interface AITool {
-  id: string;
-  name: string;
-  description: string;
-  category: AIToolCategory;
-  parameters: AIToolParam[];
-  fn: (args: Record<string, unknown>) => Promise<AIToolResult>;
-}
-
-export interface AIToolParam {
-  name: string;
-  type: "string" | "number" | "boolean" | "array";
-  description: string;
-  required: boolean;
-  enum?: string[];
-}
-
-export interface AIToolResult {
-  success: boolean;
-  data: unknown;
-  summary: string;
-  error?: string;
-}
-
 export interface AIUseCase {
   id: string;
   name: string;

@@ -3,13 +3,10 @@ import { useLocation, useParams } from "wouter";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { getRunById, getTestResultsForRun, subscribeToRuns, getRuns } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
-import { EnvSelector } from "../EnvSelector";
-import { SuiteSelector } from "../SuiteSelector";
 import type { Run, TestResult } from "@/lib/types";
 
 import {
   Search,
-  Filter,
   X,
   Loader2,
   Check,
@@ -19,48 +16,10 @@ import {
   GitCompare,
   ArrowLeft,
   Share2,
-  Globe,
-  Network,
   ChevronDown,
-  Link2,
 } from "lucide-react";
 
 const GH_ACTIONS_URL = `https://github.com/ruake/AWARE/actions`;
-
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  if (diff < 60000) return "just now";
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-  return `${Math.floor(diff / 86400000)}d ago`;
-}
-
-function FilterSection({
-  envIds,
-  suiteIds,
-  onEnvChange,
-  onSuiteChange,
-}: {
-  envIds: string[];
-  suiteIds: string[];
-  onEnvChange: (ids: string[]) => void;
-  onSuiteChange: (ids: string[]) => void;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 6,
-        padding: "8px 10px",
-        borderBottom: "1px solid var(--proof-border)",
-      }}
-    >
-      <EnvSelector currentEnvIds={envIds} onEnvChange={onEnvChange} variant="topbar" />
-      <SuiteSelector currentSuiteIds={suiteIds} onSuiteChange={onSuiteChange} variant="topbar" />
-    </div>
-  );
-}
 
 function RunsStatSummary({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
   const [, navigate] = useLocation();
@@ -1216,7 +1175,7 @@ function RecentRunsList({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
 }
 
 export function RunsPanel() {
-  const [location] = useLocation();
+  const [_location] = useLocation();
   const params = useParams<{ runId?: string }>();
   const isDetail = !!params.runId;
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
@@ -1230,12 +1189,6 @@ export function RunsPanel() {
 
   return (
     <>
-      <FilterSection
-        envIds={envSnap.envIds}
-        suiteIds={[]}
-        onEnvChange={() => {}}
-        onSuiteChange={() => {}}
-      />
       <RunsStatSummary envFilteredRuns={envFilteredRuns} />
       {isDetail && run ? (
         <>

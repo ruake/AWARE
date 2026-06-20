@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "wouter";
 import type { TableData, TableColumn } from "@/lib/copilot/types";
 
 interface Props {
@@ -95,6 +96,7 @@ function formatCell(
 }
 
 export default function DataTable({ table }: Props) {
+  const [, navigate] = useLocation();
   const [sortKey, setSortKey] = React.useState<string>(table.sortBy ?? "");
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">(table.sortDir ?? "desc");
 
@@ -227,6 +229,8 @@ export default function DataTable({ table }: Props) {
                   const stats = colStats[col.key];
                   const isMax = stats !== undefined && val === stats.max && col.highlight === "max";
                   const isMin = stats !== undefined && val === stats.min && col.highlight === "min";
+                  const href = col.link ? col.link(row) : null;
+                  const cellContent = formatCell(val, col, isMax, isMin);
                   return (
                     <td
                       key={col.key}
@@ -239,7 +243,30 @@ export default function DataTable({ table }: Props) {
                         textOverflow: "ellipsis",
                       }}
                     >
-                      {formatCell(val, col, isMax, isMin)}
+                      {href ? (
+                        <a
+                          href={href}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            navigate(href);
+                          }}
+                          style={{
+                            color: "var(--proof-blue-bright)",
+                            textDecoration: "none",
+                            cursor: "pointer",
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.textDecoration = "underline";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.textDecoration = "none";
+                          }}
+                        >
+                          {cellContent}
+                        </a>
+                      ) : (
+                        cellContent
+                      )}
                     </td>
                   );
                 })}

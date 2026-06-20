@@ -1,6 +1,5 @@
 import React from "react";
 import { ConsolePagination } from "./ConsolePagination";
-import { ConsoleCard } from "./ConsoleCard";
 
 interface PageShellProps {
   title: string;

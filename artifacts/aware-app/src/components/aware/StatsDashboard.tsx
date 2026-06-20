@@ -1,7 +1,29 @@
-import { GoogleBarChart, GooglePieChart } from "@/components/aware/GoogleCharts";
+import React from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import type { TestStats } from "@/lib/types";
 import type { ColumnFilterState } from "@/components/aware/ColumnFilter";
 import { CATEGORY_COLORS } from "@/lib/constants";
+
+const TICK_STYLE = { fontSize: 10, fill: "var(--proof-text-secondary)" };
+const TOOLTIP_STYLE = {
+  contentStyle: {
+    background: "var(--proof-surface-2)",
+    border: "1px solid var(--proof-border)",
+    borderRadius: 6,
+    fontSize: 11,
+    color: "var(--proof-text)",
+  },
+};
 
 export function StatsDashboard({
   stats,
@@ -30,6 +52,11 @@ export function StatsDashboard({
   const catColors = Object.keys(categoryData).map(
     (_, i) => CATEGORY_COLORS[i % CATEGORY_COLORS.length],
   );
+
+  const catPieData = Object.entries(categoryData).map(([k, v]) => ({
+    name: k,
+    value: v,
+  }));
 
   return (
     <>
@@ -76,38 +103,66 @@ export function StatsDashboard({
       </div>
       <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
         <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
-          <GoogleBarChart
-            title="By Status"
-            columns={["Status", "Count"]}
-            data={statusData}
-            xKey="status"
-            yKeys={["count"]}
-            colors={["#5b8af5"]}
-            height="60px"
-            showTimeFrame={false}
-            onPointClick={(p) => onToggleFilter("status", String(p.status))}
-          />
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
+            By Status
+          </div>
+          <ResponsiveContainer width="100%" height={60}>
+            <BarChart data={statusData} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
+              <XAxis dataKey="status" tick={TICK_STYLE} axisLine={false} tickLine={false} />
+              <YAxis hide domain={[0, "auto"]} />
+              <Tooltip {...TOOLTIP_STYLE} cursor={false} />
+              <Bar
+                dataKey="count"
+                fill="#5b8af5"
+                radius={[3, 3, 0, 0]}
+                onClick={(data) => onToggleFilter("status", String(data.status))}
+                style={{ cursor: "pointer" }}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
         <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
-          <GoogleBarChart
-            title="By Priority"
-            columns={["Priority", "Count"]}
-            data={priorityData}
-            xKey="priority"
-            yKeys={["count"]}
-            colors={["#5b8af5"]}
-            height="60px"
-            showTimeFrame={false}
-            onPointClick={(p) => onToggleFilter("priority", String(p.priority))}
-          />
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
+            By Priority
+          </div>
+          <ResponsiveContainer width="100%" height={60}>
+            <BarChart data={priorityData} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
+              <XAxis dataKey="priority" tick={TICK_STYLE} axisLine={false} tickLine={false} />
+              <YAxis hide domain={[0, "auto"]} />
+              <Tooltip {...TOOLTIP_STYLE} cursor={false} />
+              <Bar
+                dataKey="count"
+                fill="#5b8af5"
+                radius={[3, 3, 0, 0]}
+                onClick={(data) => onToggleFilter("priority", String(data.priority))}
+                style={{ cursor: "pointer" }}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
         <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
-          <GooglePieChart
-            title="By Category"
-            data={categoryData}
-            height="80px"
-            colors={catColors}
-          />
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
+            By Category
+          </div>
+          <ResponsiveContainer width="100%" height={80}>
+            <PieChart>
+              <Pie
+                data={catPieData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={35}
+                innerRadius={0}
+                paddingAngle={1}
+              >
+                {catPieData.map((_, i) => (
+                  <Cell key={i} fill={catColors[i % catColors.length]} />
+                ))}
+              </Pie>
+              <Tooltip {...TOOLTIP_STYLE} />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </>

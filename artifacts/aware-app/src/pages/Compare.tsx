@@ -1,6 +1,6 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
-import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
+import { PageTemplate, StateBadge } from "@/components/aware";
 import { CompareSidePanel } from "@/components/aware/CompareSidePanel";
 import { useSyncedUrlState } from "@/lib/urlState";
 import {
@@ -18,18 +18,6 @@ import type { DiffRow, TestResult } from "@/lib/types";
 import { setCompareStats } from "@/lib/sidebarData";
 import { Search } from "lucide-react";
 
-function stateBadge(state: DiffRow["state"]) {
-  const map: Record<string, { color: string; label: string }> = {
-    regression: { color: "var(--proof-red)", label: "Regression" },
-    fixed: { color: "var(--proof-green)", label: "Fixed" },
-    duration: { color: "var(--proof-yellow)", label: "Duration ↑" },
-    unchanged: { color: "var(--proof-text-secondary)", label: "Unchanged" },
-    fishy: { color: "var(--proof-purple)", label: "Fishy ⚠" },
-  };
-  const s = map[state] ?? { color: "var(--proof-text-secondary)", label: state };
-  return <span style={{ fontSize: 11, fontWeight: 600, color: s.color }}>{s.label}</span>;
-}
-
 export default function Compare() {
   const [, navigate] = useLocation();
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
@@ -39,18 +27,18 @@ export default function Compare() {
 
   const envRuns =
     envSnap.envIds.length > 0 ? runs.filter((r) => envSnap.envIds.includes(r.envId)) : runs;
-  const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
-  const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
-  const [selectedId, setSelectedId] = useSyncedUrlState<string | null>("sel", null);
+  const [baseline] = useSyncedUrlState("baseline", "");
+  const [candidate] = useSyncedUrlState("candidate", "");
+  const [selectedName, setSelectedName] = useSyncedUrlState<string | null>("sel", null);
   const [searchText, setSearchText] = useSyncedUrlState("q", "");
   const [regressionsOnly, setRegressionsOnly] = useSyncedUrlState("regressions", false);
   const [activeFilter, setActiveFilter] = useSyncedUrlState<string | null>("filter", null);
-  const [swapped, setSwapped] = React.useState(false);
+  const [swapped] = React.useState(false);
   const [selectedIdx, setSelectedIdx] = React.useState(-1);
   const [computedRows, setComputedRows] = React.useState<DiffRow[]>([]);
   const [baseResults, setBaseResults] = React.useState<TestResult[]>([]);
   const [candResults, setCandResults] = React.useState<TestResult[]>([]);
-  const [diffPage, setDiffPage] = React.useState(1);
+  const [diffPage] = React.useState(1);
   const DIFF_PAGE_SIZE = 25;
   // Derive effective run IDs: use URL param if set, otherwise pick from envRuns
   const effectiveBaseline = baseline || envRuns[envRuns.length - 1]?.id || "";
@@ -181,9 +169,9 @@ export default function Compare() {
 
   React.useEffect(() => {
     if (clampedIdx >= 0 && clampedIdx < filtered.length) {
-      setSelectedId(filtered[clampedIdx].id);
+      setSelectedName(filtered[clampedIdx].name);
     }
-  }, [clampedIdx, filtered, setSelectedId, selectedIdx]);
+  }, [clampedIdx, filtered, setSelectedName, selectedIdx]);
 
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -252,316 +240,202 @@ export default function Compare() {
 
   const categories = [...new Set(diffRowsSnapshot.map((d) => d.category))];
 
-  const selectedDiff = selectedId ? (diffs.find((d) => d.id === selectedId) ?? null) : null;
+  const selectedDiff = selectedName ? (diffs.find((d) => d.name === selectedName) ?? null) : null;
   const hasActiveFilters = Object.values(colFilters).some((v) => v);
 
   return (
-    <div className="proof-page" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <PanelErrorBoundary label="Diff area">
-        <div style={{ display: "flex", gap: 14 }}>
-          <div
-            className="proof-card"
-            style={{
-              flex: 1,
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              minHeight: 420,
-            }}
-          >
-            <div
-              style={{
-                padding: "8px 12px",
-                borderBottom: "1px solid var(--proof-grey)",
-                background: "var(--proof-grey-bg)",
-                display: "flex",
-                gap: 10,
-                alignItems: "center",
-                flexWrap: "wrap",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 140 }}
-              >
-                <Search size={13} style={{ color: "var(--proof-text-secondary)" }} />
-                <input
-                  className="proof-input"
-                  placeholder="Search tests…"
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  style={{ flex: 1, minWidth: 0 }}
-                />
-              </div>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontSize: 12,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={regressionsOnly}
-                  onChange={(e) => {
-                    setRegressionsOnly(e.target.checked);
-                    setActiveFilter(null);
-                  }}
-                />
-                Regressions only
-              </label>
-              {hasActiveFilters && (
-                <button
-                  onClick={() => setColFilters({})}
-                  style={{
-                    fontSize: 11,
-                    color: "var(--proof-red)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                >
-                  Clear filters
-                </button>
-              )}
-              <span
-                style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginLeft: "auto" }}
-              >
-                {filtered.length}/{diffs.length} tests
-              </span>
-            </div>
-            <div style={{ flex: 1, overflowY: "auto" }}>
-              <table className="proof-table">
-                <colgroup>
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                </colgroup>
-                <thead
-                  style={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 10,
-                    background: "var(--proof-surface)",
-                  }}
-                >
-                  <tr>
-                    <th>
-                      <input
-                        className="proof-input"
-                        placeholder="Name"
-                        value={colFilters.name ?? ""}
-                        onChange={(e) => setColFilters((f) => ({ ...f, name: e.target.value }))}
-                        style={{ width: "100%", fontSize: 10, padding: "2px 6px" }}
-                      />
-                    </th>
-                    <th>
-                      <select
-                        className="proof-input"
-                        style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
-                        value={colFilters.baseStatus ?? ""}
-                        onChange={(e) =>
-                          setColFilters((f) => ({ ...f, baseStatus: e.target.value }))
-                        }
-                      >
-                        <option value="">Baseline</option>
-                        <option value="PASS">PASS</option>
-                        <option value="FAIL">FAIL</option>
-                      </select>
-                    </th>
-                    <th>
-                      <select
-                        className="proof-input"
-                        style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
-                        value={colFilters.candStatus ?? ""}
-                        onChange={(e) =>
-                          setColFilters((f) => ({ ...f, candStatus: e.target.value }))
-                        }
-                      >
-                        <option value="">Candidate</option>
-                        <option value="PASS">PASS</option>
-                        <option value="FAIL">FAIL</option>
-                      </select>
-                    </th>
-                    <th
-                      style={{
-                        textAlign: "right",
-                        fontSize: 10,
-                        color: "var(--proof-text-secondary)",
-                        fontWeight: 600,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      Δ Duration
-                    </th>
-                    <th>
-                      <select
-                        className="proof-input"
-                        style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
-                        value={colFilters.category ?? ""}
-                        onChange={(e) => setColFilters((f) => ({ ...f, category: e.target.value }))}
-                      >
-                        <option value="">Category</option>
-                        {categories.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
-                    </th>
-                    <th>
-                      <select
-                        className="proof-input"
-                        style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
-                        value={colFilters.state ?? ""}
-                        onChange={(e) => setColFilters((f) => ({ ...f, state: e.target.value }))}
-                      >
-                        <option value="">State</option>
-                        <option value="regression">Regression</option>
-                        <option value="fixed">Fixed</option>
-                        <option value="duration">Duration ↑</option>
-                        <option value="unchanged">Unchanged</option>
-                      </select>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedDiffs.map((d, i) => {
-                    const absIdx = (safeDiffPage - 1) * DIFF_PAGE_SIZE + i;
-                    const isSelected = selectedId === d.id;
-                    const deltams = d.durCand - d.durBase;
-                    return (
-                      <tr
-                        key={d.id}
-                        onClick={() => {
-                          setSelectedId(isSelected ? null : d.id);
-                          setSelectedIdx(isSelected ? -1 : absIdx);
-                        }}
-                        style={{
-                          cursor: "pointer",
-                          background: isSelected
-                            ? "var(--proof-blue-bg)"
-                            : d.state === "regression"
-                              ? "rgba(217,48,37,0.04)"
-                              : d.state === "fixed"
-                                ? "rgba(30,142,62,0.04)"
-                                : undefined,
-                          outline: isSelected ? "2px solid var(--proof-blue)" : "none",
-                          outlineOffset: -2,
-                        }}
-                      >
-                        <td
-                          style={{
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 11,
-                            color: "var(--proof-blue)",
-                            fontWeight: 500,
-                          }}
-                        >
-                          {d.name}
-                        </td>
-                        <td>
-                          <span
-                            className={`proof-badge ${d.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                          >
-                            {d.baseStatus}
-                          </span>
-                        </td>
-                        <td>
-                          <span
-                            className={`proof-badge ${d.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                          >
-                            {d.candStatus}
-                          </span>
-                        </td>
-                        <td
-                          style={{
-                            textAlign: "right",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 11,
-                          }}
-                        >
-                          {Math.abs(deltams) > 20 ? (
-                            <span
-                              style={{
-                                color: deltams > 0 ? "var(--proof-red)" : "var(--proof-green)",
-                                fontWeight: 700,
-                              }}
-                            >
-                              {deltams > 0 ? "+" : ""}
-                              {deltams}ms
-                            </span>
-                          ) : (
-                            <span style={{ color: "var(--proof-text-secondary)" }}>~0ms</span>
-                          )}
-                        </td>
-                        <td>
-                          <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>
-                            {d.category}
-                          </span>
-                        </td>
-                        <td>{stateBadge(d.state)}</td>
-                      </tr>
-                    );
-                  })}
-                  {filtered.length === 0 && initState.loading && (
-                    <tr>
-                      <td colSpan={6} style={{ textAlign: "center", padding: "28px" }}>
-                        <div
-                          className="proof-skeleton"
-                          style={{ width: 160, height: 14, borderRadius: 4, margin: "0 auto" }}
-                        />
-                      </td>
-                    </tr>
-                  )}
-                  {filtered.length === 0 && !initState.loading && (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        style={{
-                          textAlign: "center",
-                          padding: "28px",
-                          color: "var(--proof-text-secondary)",
-                          fontSize: 13,
-                        }}
-                      >
-                        No tests match your filters
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          {/* Detail side panel */}
-          {selectedDiff && selectedId && (
-            <div
-              style={{
-                width: 440,
-                flexShrink: 0,
-                display: "flex",
-                borderLeft: "1px solid var(--proof-border)",
-              }}
-            >
-              <CompareSidePanel
-                diff={selectedDiff}
-                diffs={filtered}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                navigate={navigate}
-                baseResult={baseResults.find((r) => r.name === selectedDiff.name) ?? null}
-                candResult={candResults.find((r) => r.name === selectedDiff.name) ?? null}
+    <>
+      <PageTemplate
+        title="Compare Runs"
+        subtitle={`${baselineRun?.id ?? "—"} vs ${candidateRun?.id ?? "—"} · ${filtered.length}/${diffs.length} tests`}
+        filters={
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flex: "1 1 200px", minWidth: 140 }}>
+              <Search size={13} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
+              <input
+                className="proof-input"
+                placeholder="Search tests…"
+                aria-label="Search tests"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ flex: 1, minWidth: 0 }}
               />
             </div>
-          )}
-        </div>
-      </PanelErrorBoundary>
-    </div>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+              <input
+                type="checkbox"
+                checked={regressionsOnly}
+                onChange={(e) => { setRegressionsOnly(e.target.checked); setActiveFilter(null); }}
+              />
+              Regressions only
+            </label>
+            {hasActiveFilters && (
+              <button onClick={() => setColFilters({})} className="proof-button-ghost" style={{ fontSize: 11, color: "var(--proof-red)" }}>
+                Clear column filters
+              </button>
+            )}
+            {diffStats.length > 0 && (
+              <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginLeft: "auto" }}>
+                {filtered.length}/{diffs.length} tests
+              </span>
+            )}
+          </>
+        }
+        isEmpty={filtered.length === 0 && !initState.loading}
+        emptyMessage="No tests match your filters"
+        loading={filtered.length === 0 && initState.loading}
+        loadingCols={6}
+        sidePanel={selectedDiff && selectedName ? (
+          <CompareSidePanel
+            diff={selectedDiff}
+            diffs={filtered}
+            selectedId={selectedDiff.id}
+            onSelect={(id) => setSelectedName(id ? diffs.find((d) => d.id === id)?.name ?? null : null)}
+            navigate={navigate}
+            baseResult={baseResults.find((r) => r.name === selectedDiff.name) ?? null}
+            candResult={candResults.find((r) => r.name === selectedDiff.name) ?? null}
+          />
+        ) : undefined}
+        sidePanelWidth={440}
+      >
+        <table className="proof-table">
+          <colgroup>
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+          </colgroup>
+          <thead style={{ position: "sticky", top: 0, zIndex: 10, background: "var(--proof-surface)" }}>
+            <tr>
+              <th>
+                <input
+                  className="proof-input"
+                  placeholder="Name"
+                  aria-label="Filter by test name"
+                  value={colFilters.name ?? ""}
+                  onChange={(e) => setColFilters((f) => ({ ...f, name: e.target.value }))}
+                  style={{ width: "100%", fontSize: 10, padding: "2px 6px" }}
+                />
+              </th>
+              <th>
+                <select
+                  className="proof-input"
+                  style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
+                  aria-label="Filter by baseline status"
+                  value={colFilters.baseStatus ?? ""}
+                  onChange={(e) => setColFilters((f) => ({ ...f, baseStatus: e.target.value }))}
+                >
+                  <option value="">Baseline</option>
+                  <option value="PASS">PASS</option>
+                  <option value="FAIL">FAIL</option>
+                </select>
+              </th>
+              <th>
+                <select
+                  className="proof-input"
+                  style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
+                  aria-label="Filter by candidate status"
+                  value={colFilters.candStatus ?? ""}
+                  onChange={(e) => setColFilters((f) => ({ ...f, candStatus: e.target.value }))}
+                >
+                  <option value="">Candidate</option>
+                  <option value="PASS">PASS</option>
+                  <option value="FAIL">FAIL</option>
+                </select>
+              </th>
+              <th style={{ textAlign: "right", fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                Δ Duration
+              </th>
+              <th>
+                <select
+                  className="proof-input"
+                  style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
+                  aria-label="Filter by category"
+                  value={colFilters.category ?? ""}
+                  onChange={(e) => setColFilters((f) => ({ ...f, category: e.target.value }))}
+                >
+                  <option value="">Category</option>
+                  {categories.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </th>
+              <th>
+                <select
+                  className="proof-input"
+                  style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
+                  aria-label="Filter by state"
+                  value={colFilters.state ?? ""}
+                  onChange={(e) => setColFilters((f) => ({ ...f, state: e.target.value }))}
+                >
+                  <option value="">State</option>
+                  <option value="regression">Regression</option>
+                  <option value="fixed">Fixed</option>
+                  <option value="duration">Duration ↑</option>
+                  <option value="unchanged">Unchanged</option>
+                </select>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedDiffs.map((d, i) => {
+              const absIdx = (safeDiffPage - 1) * DIFF_PAGE_SIZE + i;
+              const isSelected = selectedName === d.name;
+              const deltams = d.durCand - d.durBase;
+              return (
+                <tr
+                  key={d.id}
+                  onClick={() => {
+                    setSelectedName(isSelected ? null : d.name);
+                    setSelectedIdx(isSelected ? -1 : absIdx);
+                  }}
+                  style={{
+                    cursor: "pointer",
+                    background: isSelected
+                      ? "var(--proof-blue-bg)"
+                      : d.state === "regression"
+                        ? "rgba(217,48,37,0.04)"
+                        : d.state === "fixed"
+                          ? "rgba(30,142,62,0.04)"
+                          : undefined,
+                    outline: isSelected ? "2px solid var(--proof-blue)" : "none",
+                    outlineOffset: -2,
+                  }}
+                >
+                  <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)", fontWeight: 500 }}>
+                    {d.name}
+                  </td>
+                  <td>
+                    <span className={`proof-badge ${d.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}>
+                      {d.baseStatus}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`proof-badge ${d.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}>
+                      {d.candStatus}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11 }}>
+                    {Math.abs(deltams) > 20 ? (
+                      <span style={{ color: deltams > 0 ? "var(--proof-red)" : "var(--proof-green)", fontWeight: 700 }}>
+                        {deltams > 0 ? "+" : ""}{deltams}ms
+                      </span>
+                    ) : (
+                      <span style={{ color: "var(--proof-text-secondary)" }}>~0ms</span>
+                    )}
+                  </td>
+                  <td>
+                    <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>{d.category}</span>
+                  </td>
+                  <td><StateBadge state={d.state} /></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </PageTemplate>
+    </>
   );
 }

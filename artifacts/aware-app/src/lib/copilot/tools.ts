@@ -1,6 +1,7 @@
 import type { ToolDefinition, ToolResult, ChartData, TableData } from "./types";
 import { RUNS, getTestResultsForRun } from "@/lib/runs";
 import { getAllPromotionDecisions } from "@/lib/promotions";
+import { getRunById } from "@/lib/data";
 
 const PALETTE = [
   "#3b82f6",
@@ -63,7 +64,10 @@ const queryRuns: ToolDefinition = {
       title: `Last ${runs.length} Test Runs${envFilter ? ` · ${envFilter}` : ""}`,
       subtitle: `Avg pass rate: ${avgPass}% · ${totalFails} total failures`,
       columns: [
-        { key: "run", label: "Run", type: "mono", align: "left" },
+        { key: "run", label: "Run", type: "mono", align: "left", link: (row) => {
+          const run = runs.find(r => (r.label || r.id.slice(0, 8)) === row.run);
+          return run ? `/runs/${run.id}` : null;
+        }},
         { key: "env", label: "Env", type: "badge", align: "center" },
         { key: "suite", label: "Suite", type: "text", align: "left" },
         { key: "passRate", label: "Pass %", type: "percent", align: "right", highlight: "max" },
@@ -144,7 +148,7 @@ const getFlakyTests: ToolDefinition = {
       title: "Flaky Test Rankings",
       subtitle: `${flaky.length} tests with instability across last ${lookback} runs`,
       columns: [
-        { key: "test", label: "Test ID", type: "mono", align: "left" },
+        { key: "test", label: "Test ID", type: "mono", align: "left", link: (row) => `/tests?q=${row.test}` },
         { key: "score", label: "Flakiness %", type: "percent", align: "right", highlight: "max" },
         { key: "flips", label: "Flips", type: "number", align: "right" },
         { key: "passes", label: "Passes", type: "number", align: "right" },
@@ -288,7 +292,11 @@ const getPromotionStatus: ToolDefinition = {
       subtitle: `${promoted} promoted · ${blocked} blocked · ${pending} pending · ${promoteRate}% success rate`,
       columns: [
         { key: "#", label: "#", type: "number", align: "center", width: 40 },
-        { key: "runId", label: "Run", type: "mono", align: "left" },
+        { key: "runId", label: "Run", type: "mono", align: "left", link: (row) => {
+          const runId = row.runId as string;
+          const run = RUNS.find(r => r.id.startsWith(runId));
+          return run ? `/runs/${run.id}` : null;
+        }},
         { key: "decision", label: "Decision", type: "text", align: "center" },
         { key: "passRate", label: "Pass %", type: "percent", align: "right" },
         { key: "threshold", label: "Threshold", type: "text", align: "center" },
@@ -375,6 +383,7 @@ const getFailureBreakdown: ToolDefinition = {
       rows,
       sortBy: "failed",
       sortDir: "desc",
+      link: `/runs/${targetRun.id}`,
     };
 
     const chartData: ChartData = {
@@ -451,7 +460,7 @@ const getSuiteHealth: ToolDefinition = {
       title: `Suite Health${envFilter ? ` — ${envFilter}` : " — All Environments"}`,
       subtitle: `${rows.length} suites · ${runs.length} total runs analyzed`,
       columns: [
-        { key: "suite", label: "Suite", type: "mono", align: "left" },
+        { key: "suite", label: "Suite", type: "mono", align: "left", link: (row) => `/tests?q=${row.suite}` },
         {
           key: "avgPassRate",
           label: "Avg Pass %",
@@ -542,7 +551,10 @@ const getDurationTrends: ToolDefinition = {
       title: `Execution Duration Trends — Last ${rows.length} Runs`,
       subtitle: `Avg: ${avgDuration}s · Min: ${minDur}s · Max: ${maxDur}s`,
       columns: [
-        { key: "run", label: "Run", type: "mono", align: "left" },
+        { key: "run", label: "Run", type: "mono", align: "left", link: (row) => {
+          const run = recent.find(r => (r.label || r.id.slice(0, 8)) === row.run);
+          return run ? `/runs/${run.id}` : null;
+        }},
         { key: "env", label: "Env", type: "badge", align: "center" },
         {
           key: "durationSec",
@@ -607,7 +619,7 @@ const getAkamaiProperty: ToolDefinition = {
       title: "Akamai Property Status",
       subtitle: "CDN property versions, EdgeWorker versions, and activation state per environment",
       columns: [
-        { key: "env", label: "Tier", type: "badge", align: "center" },
+        { key: "env", label: "Tier", type: "badge", align: "center", link: (row) => `/runs?env=${row.env}` },
         { key: "network", label: "Network", type: "badge", align: "center" },
         { key: "propertyVersion", label: "Prop Ver", type: "number", align: "center" },
         { key: "edgeWorkerVersion", label: "EW Version", type: "mono", align: "left" },

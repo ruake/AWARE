@@ -1,10 +1,8 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
-import { EnvSelector } from "./EnvSelector";
-import { SuiteSelector } from "./SuiteSelector";
 import { subscribeToRuns, getRuns } from "@/lib/data";
-import { getSelectedEnvSnapshot, subscribeToSelectedEnv, setSelectedEnvIds } from "@/lib/selectedEnv";
-import { getSelectedSuiteSnapshot, subscribeToSelectedSuites, setSelectedSuiteIds } from "@/lib/filters";
+import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
+import { getSelectedSuiteSnapshot, subscribeToSelectedSuites } from "@/lib/filters";
 import { RunsPanel } from "./sidebar/RunsPanel";
 import { ComparePanel } from "./sidebar/ComparePanel";
 import { TrendsPanel } from "./sidebar/TrendsPanel";
@@ -122,23 +120,6 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
       case "dashboard":
         return (
           <>
-            {/* Filters only — no duplicate KPI grid */}
-            <div style={{
-              padding: "8px 10px 6px",
-              borderBottom: "1px solid var(--proof-border)",
-              display: "flex", flexDirection: "column", gap: 5,
-            }}>
-              <EnvSelector
-                currentEnvIds={envSnap.envIds}
-                onEnvChange={setSelectedEnvIds}
-                variant="topbar"
-              />
-              <SuiteSelector
-                currentSuiteIds={suiteSnap.suiteIds}
-                onSuiteChange={setSelectedSuiteIds}
-                variant="topbar"
-              />
-            </div>
             <div style={{ flex: 1, overflowY: "auto" }}>
               <RecentRunsList />
             </div>

@@ -1,5 +1,5 @@
 import type { AgentEvent, IProvider, Message, ToolDefinition } from "./types";
-import { logInfo, logDebug, logError } from "@/lib/ai/debugLogger";
+import { logInfo, logError } from "@/lib/ai/debugLogger";
 import { runGraphAgent } from "./graphAgent";
 
 export interface AgentOptions {

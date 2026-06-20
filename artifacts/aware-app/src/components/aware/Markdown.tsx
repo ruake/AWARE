@@ -1,8 +1,8 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Chart } from "react-google-charts";
 import { Link } from "wouter";
+import { MarkdownCode, STATUS_COLORS } from "./MarkdownCode";
 
 interface MarkdownProps {
   content: string;
@@ -225,36 +225,6 @@ function parseMarkdownTable(raw: string): { headers: string[]; rows: string[][] 
 
 // ─── Color coding ─────────────────────────────────────────────────────────────
 
-const STATUS_COLORS: Record<string, string> = {
-  pass: "var(--proof-green)",
-  passed: "var(--proof-green)",
-  success: "var(--proof-green)",
-  ok: "var(--proof-green)",
-  healthy: "var(--proof-green)",
-  stable: "var(--proof-green)",
-  good: "var(--proof-green)",
-  fail: "var(--proof-red)",
-  failed: "var(--proof-red)",
-  error: "var(--proof-red)",
-  critical: "var(--proof-red)",
-  broken: "var(--proof-red)",
-  down: "var(--proof-red)",
-  warning: "var(--proof-yellow)",
-  warn: "var(--proof-yellow)",
-  flaky: "var(--proof-yellow)",
-  unstable: "var(--proof-yellow)",
-  degraded: "var(--proof-yellow)",
-  slow: "var(--proof-yellow)",
-  high: "var(--proof-yellow)",
-  skip: "#9ca3af",
-  skipped: "#9ca3af",
-  pending: "#9ca3af",
-  disabled: "#9ca3af",
-  "n/a": "#9ca3af",
-  none: "#9ca3af",
-  low: "var(--proof-green)",
-  medium: "var(--proof-yellow)",
-};
 
 /** Convert bare status words in text into backtick-wrapped inline code.
  *  Runs only on non-table segments so SmartTable stays clean. */
@@ -292,50 +262,12 @@ function colorCellHtml(value: string): string {
   return value;
 }
 
-// ─── SmartTable (Google Charts Table + filter) ────────────────────────────────
-
-/**
- * Detect whether ALL parseable values in a column are numeric.
- * Used to assign consistent Google Charts column types.
- */
-function detectColTypes(headers: string[], rows: string[][]): ("string" | "number")[] {
-  return headers.map((_, ci) => {
-    const vals = rows
-      .map((r) => (r[ci] ?? "").trim())
-      .filter((v) => v && v !== "—" && v !== "-" && v.toLowerCase() !== "n/a");
-    if (vals.length === 0) return "string";
-    const allNum = vals.every((v) => /^[\d,]+(\.\d+)?$/.test(v) || /^[\d.]+%$/.test(v));
-    return allNum ? "number" : "string";
-  });
-}
-
-function buildGChartData(
-  headers: string[],
-  rows: string[][],
-  colTypes: ("string" | "number")[],
-): unknown[][] {
-  // Header row: typed column descriptors
-  const headerRow = headers.map((h, i) => ({ label: h, type: colTypes[i] }));
-
-  const dataRows = rows.map((row) =>
-    row.map((cell, ci) => {
-      const f = colorCellHtml(cell);
-      if (colTypes[ci] === "number") {
-        const pctMatch = cell.match(/^([\d.]+)%$/);
-        if (pctMatch) return { v: parseFloat(pctMatch[1]), f };
-        const numMatch = cell.match(/^[\d,]+(\.\d+)?$/);
-        if (numMatch) return { v: parseFloat(cell.replace(/,/g, "")), f };
-        return { v: null, f }; // null keeps the column type consistent
-      }
-      return { v: cell, f };
-    }),
-  );
-
-  return [headerRow, ...dataRows];
-}
+// ── SmartTable (HTML table with filter + sort) ───────────────────────────────────────
 
 function SmartTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
   const [filter, setFilter] = React.useState("");
+  const [sortCol, setSortCol] = React.useState<number | null>(null);
+  const [sortAsc, setSortAsc] = React.useState(true);
 
   const filteredRows = React.useMemo(() => {
     if (!filter.trim()) return rows;
@@ -343,12 +275,31 @@ function SmartTable({ headers, rows }: { headers: string[]; rows: string[][] }) 
     return rows.filter((row) => row.some((cell) => cell.toLowerCase().includes(q)));
   }, [rows, filter]);
 
-  const colTypes = React.useMemo(() => detectColTypes(headers, rows), [headers, rows]);
+  const sortedRows = React.useMemo(() => {
+    if (sortCol === null) return filteredRows;
+    const sorted = [...filteredRows].sort((a, b) => {
+      const aVal = (a[sortCol] ?? "").toLowerCase();
+      const bVal = (b[sortCol] ?? "").toLowerCase();
+      const aNum = parseFloat(aVal);
+      const bNum = parseFloat(bVal);
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return sortAsc ? aNum - bNum : bNum - aNum;
+      }
+      if (aVal < bVal) return sortAsc ? -1 : 1;
+      if (aVal > bVal) return sortAsc ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [filteredRows, sortCol, sortAsc]);
 
-  const chartData = React.useMemo(
-    () => buildGChartData(headers, filteredRows, colTypes),
-    [headers, filteredRows, colTypes],
-  );
+  function toggleSort(colIdx: number) {
+    if (sortCol === colIdx) {
+      setSortAsc((prev) => !prev);
+    } else {
+      setSortCol(colIdx);
+      setSortAsc(true);
+    }
+  }
 
   return (
     <div style={{ margin: "12px 0" }}>
@@ -395,7 +346,7 @@ function SmartTable({ headers, rows }: { headers: string[]; rows: string[][] }) 
         </div>
         {filter && (
           <span style={{ fontSize: 11, color: "var(--proof-text-muted)" }}>
-            {filteredRows.length} / {rows.length} rows
+            {sortedRows.length} / {rows.length} rows
           </span>
         )}
         <span
@@ -410,21 +361,55 @@ function SmartTable({ headers, rows }: { headers: string[]; rows: string[][] }) 
         </span>
       </div>
 
-      {/* Google Charts Table */}
+      {/* HTML Table */}
       <div style={{ borderRadius: 8, overflow: "hidden", border: "1px solid var(--proof-border)" }}>
-        {filteredRows.length > 0 ? (
-          <Chart
-            chartType="Table"
-            data={chartData}
-            options={{
-              allowHtml: true,
-              showRowNumber: false,
-              width: "100%" as unknown as number,
-              alternatingRowStyle: true,
-            }}
-            width="100%"
-            chartPackages={["corechart", "table"]}
-          />
+        {sortedRows.length > 0 ? (
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+            <thead>
+              <tr style={{ background: "var(--proof-grey-bg)", fontWeight: 600 }}>
+                {headers.map((h, i) => (
+                  <th
+                    key={i}
+                    onClick={() => toggleSort(i)}
+                    style={{
+                      padding: "6px 10px",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      borderBottom: "1px solid var(--proof-border)",
+                      color: "var(--proof-text)",
+                      userSelect: "none",
+                    }}
+                  >
+                    {h}
+                    {sortCol === i ? (sortAsc ? " \u25B2" : " \u25BC") : ""}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {sortedRows.map((row, ri) => (
+                <tr
+                  key={ri}
+                  style={{
+                    background: ri % 2 === 0 ? "transparent" : "var(--proof-grey-bg)",
+                  }}
+                >
+                  {row.map((cell, ci) => (
+                    <td
+                      key={ci}
+                      style={{
+                        padding: "4px 10px",
+                        borderBottom: "1px solid var(--proof-border)",
+                        color: "var(--proof-text)",
+                      }}
+                      dangerouslySetInnerHTML={{ __html: colorCellHtml(cell) }}
+                    />
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : (
           <div
             style={{
@@ -445,116 +430,7 @@ function SmartTable({ headers, rows }: { headers: string[]; rows: string[][] }) 
 // ─── Markdown component map ───────────────────────────────────────────────────
 
 const components = {
-  code: ({ className, children, ...props }: { className?: string; children?: React.ReactNode }) => {
-    const lang = className?.replace(/^language-/, "");
-    if (lang === "chart") {
-      try {
-        const config = JSON.parse(String(children).trim());
-        const rows = config.rows || [];
-        if (rows.length === 0)
-          return (
-            <div
-              style={{
-                padding: 12,
-                fontSize: 11,
-                color: "var(--proof-text-secondary)",
-                textAlign: "center",
-              }}
-            >
-              No data
-            </div>
-          );
-        const chartType = config.type || "ColumnChart";
-        const data = [config.headers || ["X", "Y"], ...rows];
-        return (
-          <Chart
-            chartType={chartType}
-            data={data}
-            options={{
-              title: config.title || "",
-              titleTextStyle: { fontSize: 12, color: "#9aa0a6" },
-              legend: { position: "bottom", textStyle: { fontSize: 10 } },
-              colors: config.colors || ["#5b8af5", "#f59e0b", "#22c55e", "#ef4444", "#a855f7"],
-              backgroundColor: "transparent",
-              chartArea: { width: "90%", height: "70%" },
-              hAxis: { textStyle: { fontSize: 10 } },
-              vAxis: { textStyle: { fontSize: 10 } },
-              pointSize: config.pointSize || 0,
-              curveType: config.curveType || "none",
-              isStacked: config.isStacked || false,
-              pieHole: config.pieHole || 0,
-              ...(config.options || {}),
-            }}
-            width="100%"
-            height={config.height || "200px"}
-            chartLanguage="en"
-            chartPackages={["corechart", "controls", "table"]}
-          />
-        );
-      } catch {
-        // fall through
-      }
-    }
-    const isInline = !className;
-    if (isInline) {
-      const text = String(children).trim();
-      const statusKey = text.toLowerCase();
-      const statusColor = STATUS_COLORS[statusKey];
-      if (statusColor) {
-        return (
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "1px 8px",
-              borderRadius: 10,
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.35px",
-              background: `color-mix(in srgb, ${statusColor} 10%, transparent)`,
-              color: statusColor,
-              border: `1px solid color-mix(in srgb, ${statusColor} 20%, transparent)`,
-              lineHeight: 1.5,
-            }}
-          >
-            {text}
-          </span>
-        );
-      }
-      return (
-        <code
-          style={{
-            background: "var(--proof-grey-bg)",
-            padding: "1px 5px",
-            borderRadius: 3,
-            fontSize: 11,
-            fontFamily: "var(--font-mono)",
-            color: "var(--proof-blue)",
-          }}
-          {...props}
-        >
-          {children}
-        </code>
-      );
-    }
-    return (
-      <pre
-        style={{
-          background: "var(--proof-grey-bg)",
-          padding: 12,
-          borderRadius: 6,
-          overflowX: "auto",
-          fontSize: 11,
-          fontFamily: "var(--font-mono)",
-          lineHeight: 1.5,
-          border: "1px solid var(--proof-grey)",
-          margin: "8px 0",
-        }}
-      >
-        <code {...props}>{children}</code>
-      </pre>
-    );
-  },
+  code: MarkdownCode,
   a: ({ href, children }: { href?: string; children?: React.ReactNode }) => {
     const isInternal = !!href && href.startsWith("/");
     if (isInternal) {

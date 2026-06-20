@@ -14,7 +14,7 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
   const [pan, setPan] = React.useState({ x: 0, y: 0 });
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(false);
-  const isDragging = React.useRef(false);
+  const [isDragging, setIsDragging] = React.useState(false);
   const dragStart = React.useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const lastPinchDist = React.useRef(0);
 
@@ -49,24 +49,24 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (zoom <= 1) return;
-    isDragging.current = true;
+    setIsDragging(true);
     dragStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
     e.preventDefault();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging.current) return;
+    if (!isDragging) return;
     const dx = e.clientX - dragStart.current.x;
     const dy = e.clientY - dragStart.current.y;
     setPan(clampPan({ x: dragStart.current.panX + dx, y: dragStart.current.panY + dy }, zoom));
   };
 
   const handleMouseUp = () => {
-    isDragging.current = false;
+    setIsDragging(false);
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    if (isDragging.current || error || loading) return;
+    if (isDragging || error || loading) return;
     if (zoom > 1) {
       resetView();
     } else {
@@ -174,7 +174,7 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
           maxHeight,
           borderRadius: 4,
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-          transition: isDragging.current ? "none" : "transform 0.1s ease-out",
+          transition: isDragging ? "none" : "transform 0.1s ease-out",
           transformOrigin: "center center",
           pointerEvents: "none",
         }}

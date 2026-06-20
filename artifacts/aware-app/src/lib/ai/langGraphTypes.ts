@@ -60,7 +60,7 @@ export interface DebugLogEntry {
   level: "info" | "warn" | "error" | "debug";
 }
 
-export type GoogleChartType =
+export type ChartType =
   | "Table"
   | "ColumnChart"
   | "BarChart"
@@ -71,7 +71,7 @@ export type GoogleChartType =
   | "Sankey";
 
 export interface ChartOutput {
-  type: GoogleChartType;
+  type: ChartType;
   title: string;
   headers: string[];
   rows: unknown[][];

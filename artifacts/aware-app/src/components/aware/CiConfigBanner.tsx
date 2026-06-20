@@ -24,7 +24,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
           <code
             style={{
               fontSize: 11,
-              background: "rgba(26,115,232,0.1)",
+              background: "var(--proof-blue-bg)",
               padding: "1px 5px",
               borderRadius: 3,
               fontFamily: "var(--font-mono)",
@@ -85,7 +85,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
         <div
           style={{
             padding: "0 14px 12px",
-            borderTop: "1px solid rgba(26,115,232,0.2)",
+            borderTop: "1px solid var(--proof-blue-border)",
             marginTop: 0,
           }}
         >
@@ -118,18 +118,18 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
                 }}
               >
                 <div>
-                  <span style={{ color: "#60a5fa" }}>$</span> mv ~/Downloads/proof-test-config-*.yml
+                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> mv ~/Downloads/proof-test-config-*.yml
                   config/proof-test-config.yml
                 </div>
                 <div>
-                  <span style={{ color: "#60a5fa" }}>$</span> git add config/proof-test-config.yml
+                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git add config/proof-test-config.yml
                 </div>
                 <div>
-                  <span style={{ color: "#60a5fa" }}>$</span> git commit -m "update proof test
+                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git commit -m "update proof test
                   config from AWARE"
                 </div>
                 <div>
-                  <span style={{ color: "#60a5fa" }}>$</span> git push
+                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git push
                 </div>
               </div>
             </div>
@@ -160,11 +160,11 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
                   color: "var(--proof-text)",
                 }}
               >
-                <div style={{ color: "#f59e0b" }}>.github/workflows/controller.yml</div>
-                <div style={{ color: "#6b7280" }}> └─ workflow_dispatch inputs</div>
-                <div style={{ color: "#6b7280" }}> ├─ suite (reads from config)</div>
-                <div style={{ color: "#6b7280" }}> ├─ target (Prod | UAT)</div>
-                <div style={{ color: "#6b7280" }}> └─ environment (Production | Staging)</div>
+                <div style={{ color: "var(--proof-yellow)" }}>.github/workflows/controller.yml</div>
+                <div style={{ color: "var(--proof-text-muted)" }}> └─ workflow_dispatch inputs</div>
+                <div style={{ color: "var(--proof-text-muted)" }}> ├─ suite (reads from config)</div>
+                <div style={{ color: "var(--proof-text-muted)" }}> ├─ target (Prod | UAT)</div>
+                <div style={{ color: "var(--proof-text-muted)" }}> └─ environment (Production | Staging)</div>
               </div>
             </div>
           </div>

@@ -406,6 +406,13 @@ function TestFilters() {
   );
 }
 
+function flattenForSearch(suite: TestSuite, allSuites: TestSuite[]): TestSuite[] {
+  const result = [suite];
+  for (const c of allSuites.filter((s) => s.parentId === suite.id))
+    result.push(...flattenForSearch(c, allSuites));
+  return result;
+}
+
 function SuiteTreePanel() {
   const [, navigate] = useLocation();
   const suites = useSyncExternalStore(subscribeToTestSuites, getTestSuites);
@@ -427,12 +434,6 @@ function SuiteTreePanel() {
     return roots;
   }, [suites, treeSearch]);
 
-  function flattenForSearch(suite: TestSuite, allSuites: TestSuite[]): TestSuite[] {
-    const result = [suite];
-    for (const c of allSuites.filter((s) => s.parentId === suite.id))
-      result.push(...flattenForSearch(c, allSuites));
-    return result;
-  }
 
   function getChildren(suite: TestSuite): TestSuite[] {
     return suites.filter((s) => s.parentId === suite.id);

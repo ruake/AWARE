@@ -1,3 +1,15 @@
+/**
+ * @deprecated Migrate to recharts equivalents:
+ *   - GoogleBarChart → recharts BarChart (use inline recharts components)
+ *   - GooglePieChart → recharts PieChart
+ *   - GoogleAreaChart → recharts AreaChart
+ *   - GoogleFilterableTable → FilterableTable (src/components/aware/FilterableTable.tsx)
+ *   - GoogleGauge → custom CSS gauge
+ * See ChartCard.tsx (copilot) for recharts usage patterns.
+ *
+ * This file is kept for backward compatibility but should NOT be used for new work.
+ */
+
 import React from "react";
 import { Chart } from "react-google-charts";
 

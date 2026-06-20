@@ -7,133 +7,17 @@ import {
   ArrowUpRight,
   Link2,
   Github,
-  Activity,
   Clock,
   Maximize2,
   Minimize2,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { CompareWaterfall } from "./CompareWaterfall";
+import { CompareSummary } from "./CompareSummary";
+import { CompareWatermark } from "./CompareWatermark";
+import { StateBadge } from "./StateBadge";
+import { DiffRowItem, compareHeaders, compareCookies } from "./CompareDiffRow";
 import type { DiffRow, TestResult, HttpTimings } from "@/lib/types";
-
-function stateBadge(state: DiffRow["state"]) {
-  const map: Record<string, { color: string; label: string }> = {
-    regression: { color: "var(--proof-red)", label: "Regression" },
-    fixed: { color: "var(--proof-green)", label: "Fixed" },
-    duration: { color: "var(--proof-yellow)", label: "Duration ↑" },
-    unchanged: { color: "var(--proof-text-secondary)", label: "Unchanged" },
-    fishy: { color: "var(--proof-purple)", label: "Fishy ⚠" },
-  };
-  const s = map[state] ?? { color: "var(--proof-text-secondary)", label: state };
-  return <span style={{ fontSize: 11, fontWeight: 600, color: s.color }}>{s.label}</span>;
-}
-
-function compareHeaders(
-  base: Record<string, string> | undefined,
-  cand: Record<string, string> | undefined,
-) {
-  const allKeys = [...new Set([...Object.keys(base ?? {}), ...Object.keys(cand ?? {})])].sort();
-  return allKeys.map((key) => {
-    const b = (base ?? {})[key] ?? "—";
-    const c = (cand ?? {})[key] ?? "—";
-    return { key, base: b, cand: c, changed: b !== c };
-  });
-}
-
-function compareCookies(
-  base:
-    | {
-        name: string;
-        value: string;
-        domain?: string;
-        path?: string;
-        httpOnly?: boolean;
-        secure?: boolean;
-      }[]
-    | undefined,
-  cand:
-    | {
-        name: string;
-        value: string;
-        domain?: string;
-        path?: string;
-        httpOnly?: boolean;
-        secure?: boolean;
-      }[]
-    | undefined,
-) {
-  const allNames = [
-    ...new Set([...(base ?? []).map((c) => c.name), ...(cand ?? []).map((c) => c.name)]),
-  ].sort();
-  return allNames.map((name) => {
-    const b = (base ?? []).find((c) => c.name === name);
-    const c = (cand ?? []).find((c) => c.name === name);
-    return { name, base: b, cand: c, changed: JSON.stringify(b) !== JSON.stringify(c) };
-  });
-}
-
-function DiffRowItem({
-  label,
-  base,
-  cand,
-  changed,
-  indent,
-}: {
-  label: string;
-  base: string;
-  cand: string;
-  changed: boolean;
-  indent?: boolean;
-}) {
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr",
-        gap: 4,
-        padding: "3px 0",
-        borderBottom: "1px solid rgba(255,255,255,0.03)",
-        background: changed ? "rgba(239,68,68,0.04)" : "transparent",
-        borderRadius: changed ? 3 : 0,
-        fontSize: 10,
-        fontFamily: "var(--font-mono)",
-        marginLeft: indent ? 8 : 0,
-      }}
-    >
-      <span
-        style={{
-          color: "var(--proof-text-secondary)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          fontWeight: changed ? 600 : 400,
-        }}
-      >
-        {label}
-      </span>
-      <span
-        style={{
-          color: changed ? "var(--proof-red)" : "var(--proof-text)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {base}
-      </span>
-      <span
-        style={{
-          color: changed ? "var(--proof-red)" : "var(--proof-text)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {cand}
-      </span>
-    </div>
-  );
-}
 
 function SectionHeader({ label, count, color }: { label: string; count: number; color?: string }) {
   return (
@@ -337,136 +221,12 @@ export function CompareSidePanel({
             <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>
               {diff.category}
             </span>
-            {stateBadge(diff.state)}
+            <StateBadge state={diff.state} />
           </div>
         </div>
 
         {/* Status + Duration summary */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8 }}>
-          <div
-            style={{
-              padding: 8,
-              borderRadius: 6,
-              border: `1px solid ${diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-              background:
-                diff.baseStatus === "PASS" ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
-            }}
-          >
-            <div
-              style={{
-                fontSize: 9,
-                fontWeight: 700,
-                color: diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
-                textTransform: "uppercase",
-                letterSpacing: "0.3px",
-                marginBottom: 3,
-              }}
-            >
-              Baseline
-            </div>
-            <span
-              className={`proof-badge ${diff.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-              style={{ fontSize: 10 }}
-            >
-              {diff.baseStatus}
-            </span>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--proof-text)",
-                marginTop: 4,
-                fontWeight: 600,
-              }}
-            >
-              {diff.durBase}ms
-            </div>
-          </div>
-          <div
-            style={{
-              padding: 8,
-              borderRadius: 6,
-              border: `1px solid ${diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-              background:
-                diff.candStatus === "PASS" ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
-            }}
-          >
-            <div
-              style={{
-                fontSize: 9,
-                fontWeight: 700,
-                color: diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
-                textTransform: "uppercase",
-                letterSpacing: "0.3px",
-                marginBottom: 3,
-              }}
-            >
-              Candidate
-            </div>
-            <span
-              className={`proof-badge ${diff.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-              style={{ fontSize: 10 }}
-            >
-              {diff.candStatus}
-            </span>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                color: "var(--proof-text)",
-                marginTop: 4,
-                fontWeight: 600,
-              }}
-            >
-              {diff.durCand}ms
-            </div>
-          </div>
-          <div
-            style={{
-              padding: "6px 8px",
-              borderRadius: 6,
-              border: "1px solid var(--proof-grey)",
-              background: "var(--proof-grey-bg)",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              minWidth: 80,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 9,
-                fontWeight: 700,
-                color: "var(--proof-text-secondary)",
-                textTransform: "uppercase",
-                letterSpacing: "0.3px",
-                marginBottom: 2,
-              }}
-            >
-              Δ
-            </div>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                fontWeight: 700,
-                color:
-                  deltaMs > 20
-                    ? "var(--proof-red)"
-                    : deltaMs < -20
-                      ? "var(--proof-green)"
-                      : "var(--proof-text-secondary)",
-              }}
-            >
-              {Math.abs(deltaMs) > 20 ? `${deltaMs > 0 ? "+" : ""}${deltaMs}ms` : "~0ms"}
-            </div>
-            <div style={{ fontSize: 9, color: "var(--proof-text-muted)" }}>
-              {diff.baseStatus !== diff.candStatus
-                ? `${diff.baseStatus}→${diff.candStatus}`
-                : "same"}
-            </div>
-          </div>
-        </div>
+        <CompareSummary diff={diff} deltaMs={deltaMs} size="normal" />
 
         {/* HTTP Waterfall */}
         <div style={{ padding: 10, border: "1px solid var(--proof-grey)", borderRadius: 6 }}>
@@ -883,20 +643,7 @@ export function CompareSidePanel({
 
       {/* Fullscreen overlay */}
       {fullView && (
-        <div
-          onClick={() => setFullView(false)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9999,
-            background: "rgba(0,0,0,0.55)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-          }}
-        >
+        <CompareWatermark onClose={() => setFullView(false)}>
           <div
             onClick={(e) => e.stopPropagation()}
             className="proof-card"
@@ -1014,133 +761,7 @@ export function CompareSidePanel({
               }}
             >
               {/* Status + Duration summary - wider */}
-              <div style={{ display: "flex", gap: 12 }}>
-                <div
-                  style={{
-                    flex: 1,
-                    padding: "10px 14px",
-                    borderRadius: 6,
-                    border: `1px solid ${diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-                    background:
-                      diff.baseStatus === "PASS" ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.3px",
-                      marginBottom: 4,
-                    }}
-                  >
-                    Baseline
-                  </div>
-                  <span
-                    className={`proof-badge ${diff.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                    style={{ fontSize: 11 }}
-                  >
-                    {diff.baseStatus}
-                  </span>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 13,
-                      color: "var(--proof-text)",
-                      marginTop: 6,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {diff.durBase}ms
-                  </div>
-                </div>
-                <div
-                  style={{
-                    flex: 1,
-                    padding: "10px 14px",
-                    borderRadius: 6,
-                    border: `1px solid ${diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-                    background:
-                      diff.candStatus === "PASS" ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.3px",
-                      marginBottom: 4,
-                    }}
-                  >
-                    Candidate
-                  </div>
-                  <span
-                    className={`proof-badge ${diff.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                    style={{ fontSize: 11 }}
-                  >
-                    {diff.candStatus}
-                  </span>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 13,
-                      color: "var(--proof-text)",
-                      marginTop: 6,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {diff.durCand}ms
-                  </div>
-                </div>
-                <div
-                  style={{
-                    padding: "8px 12px",
-                    borderRadius: 6,
-                    border: "1px solid var(--proof-grey)",
-                    background: "var(--proof-grey-bg)",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    minWidth: 100,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: "var(--proof-text-secondary)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.3px",
-                      marginBottom: 3,
-                    }}
-                  >
-                    Δ
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color:
-                        deltaMs > 20
-                          ? "var(--proof-red)"
-                          : deltaMs < -20
-                            ? "var(--proof-green)"
-                            : "var(--proof-text-secondary)",
-                    }}
-                  >
-                    {Math.abs(deltaMs) > 20 ? `${deltaMs > 0 ? "+" : ""}${deltaMs}ms` : "~0ms"}
-                  </div>
-                  <div style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
-                    {diff.baseStatus !== diff.candStatus
-                      ? `${diff.baseStatus}→${diff.candStatus}`
-                      : "same"}
-                  </div>
-                </div>
-              </div>
+              <CompareSummary diff={diff} deltaMs={deltaMs} size="large" />
 
               {/* HTTP Waterfall */}
               <div style={{ padding: 12, border: "1px solid var(--proof-grey)", borderRadius: 6 }}>
@@ -1562,7 +1183,7 @@ export function CompareSidePanel({
               </div>
             </div>
           </div>
-        </div>
+        </CompareWatermark>
       )}
     </div>
   );

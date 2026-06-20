@@ -66,7 +66,7 @@ export function YamlPreview({ yaml }: { yaml: string }) {
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.5px",
-            color: "#8b949e",
+            color: "var(--proof-text-secondary)",
           }}
         >
           GitHub Actions Workflow

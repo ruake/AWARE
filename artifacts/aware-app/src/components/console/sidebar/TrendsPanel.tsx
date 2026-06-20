@@ -1,10 +1,7 @@
 import React, { useSyncExternalStore } from "react";
 import { Link, useLocation, useSearch } from "wouter";
-import { useSyncedUrlState } from "@/lib/urlState";
 import {
   DIFF_ROWS,
-  RUNS,
-  getTestResultsForRun,
   getTestDetailsAsync,
   computeRunFrequency,
   subscribeToRuns,
@@ -15,7 +12,7 @@ import { useTestData } from "@/hooks/useTestData";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import { detectAnomalies } from "@/lib/anomalyDetection";
 import { getTestDetailsSync } from "@/lib/runsLoader";
-import { ArrowLeft, ChevronRight, Search, FileText, Share2, AlertTriangle, X } from "lucide-react";
+import { ArrowLeft, ChevronRight, Search, FileText, Share2, AlertTriangle, X, TrendingUp, Grid3x3 } from "lucide-react";
 
 function selectorLabel(item: { id: string; name: string }, query: string): React.ReactNode {
   if (!query.trim()) return item.name;
@@ -38,7 +35,7 @@ function TestSelector() {
   const params = new URLSearchParams(search);
   const [, navigate] = useLocation();
   const { tcs } = useTestData();
-  const [testDetails, setTestDetails] = React.useState<
+  const [, setTestDetails] = React.useState<
     {
       history: { runId: string; status: "PASS" | "FAIL"; duration: number; env: string }[];
       passRate: number;
@@ -52,7 +49,7 @@ function TestSelector() {
 
   const rawTestId = params.get("testId") ?? "";
   const isTcMode = rawTestId !== "" && tcs.some((t) => t.id === rawTestId);
-  const diff =
+  const _diff =
     DIFF_ROWS[
       Math.min(
         Math.max(
@@ -258,8 +255,6 @@ function TestHeader() {
   const params = new URLSearchParams(search);
   const [, navigate] = useLocation();
   const { tcs } = useTestData();
-  const { show } = { show: () => {} };
-
   const rawTestId = params.get("testId") ?? "";
   const isTcMode = rawTestId !== "" && tcs.some((t) => t.id === rawTestId);
   const testCase = isTcMode ? (tcs.find((t) => t.id === rawTestId) ?? null) : null;
@@ -269,7 +264,6 @@ function TestHeader() {
     DIFF_ROWS.findIndex((d) => d.id === (isTcMode ? rawTestId : rawDiffId)),
   );
   const diff = DIFF_ROWS[Math.min(idx, DIFF_ROWS.length - 1)] ?? DIFF_ROWS[0];
-  const isFlakyDetail = DIFF_ROWS.some((d) => d.state === "regression");
 
   const testName = isTcMode && testCase ? testCase.name : (diff?.name ?? "Unknown");
 
@@ -369,12 +363,8 @@ function TrendAlert() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const rawTestId = params.get("testId") ?? "";
-  const isTcMode = rawTestId !== "" && tcs.some((t) => t.id === rawTestId);
-  const rawDiffId = params.get("diffId") ?? "diff_0";
-  const idx = Math.max(
-    0,
-    DIFF_ROWS.findIndex((d) => d.id === (isTcMode ? rawTestId : rawDiffId)),
-  );
+  const _isTcMode = rawTestId !== "" && tcs.some((t) => t.id === rawTestId);
+  const _rawDiffId = params.get("diffId") ?? "diff_0";
   const detail = {
     history: [] as { runId: string; status: "PASS" | "FAIL"; duration: number; env: string }[],
     passRate: 0,
@@ -418,7 +408,7 @@ function TrendsOverviewStats() {
   const [, navigate] = useLocation();
   const runs = useSyncExternalStore(subscribeToRuns, getRuns);
 
-  const freq = React.useMemo(() => computeRunFrequency(), [runs.length]);
+  const freq = React.useMemo(() => computeRunFrequency(), []);
   const avgPassRate = React.useMemo(() => {
     if (runs.length === 0) return 0;
     return Math.round(runs.reduce((s, r) => s + r.passPct, 0) / runs.length);
@@ -429,14 +419,14 @@ function TrendsOverviewStats() {
     } catch {
       return 0;
     }
-  }, [runs.length]);
+  }, []);
   const anomalyCount = React.useMemo(() => {
     try {
       return detectAnomalies().filter((a) => a.severity !== "low").length;
     } catch {
       return 0;
     }
-  }, [runs.length]);
+  }, []);
 
   const items = [
     {
@@ -649,11 +639,217 @@ function TestDetailSummary() {
   );
 }
 
+function CompactTrendChart() {
+  const { detail } = useSyncExternalStore(subscribeToSidebarData, getTestDetailStat);
+
+  if (!detail) return null;
+
+  const flakinessColor =
+    detail.flakinessScore > 30
+      ? "var(--proof-red)"
+      : detail.flakinessScore > 15
+        ? "var(--proof-yellow)"
+        : "var(--proof-green)";
+
+  const items = [
+    {
+      label: "Pass Rate",
+      value: `${detail.passRate}%`,
+      dotColor: detail.passRate >= 80 ? "var(--proof-green)" : "var(--proof-red)",
+    },
+    {
+      label: "Flakiness",
+      value: `${detail.flakinessScore}%`,
+      dotColor: flakinessColor,
+    },
+    {
+      label: "Avg Duration",
+      value: `${detail.avgDuration}ms`,
+      dotColor: "var(--proof-blue)",
+    },
+  ];
+
+  return (
+    <div style={{ padding: "8px 10px", borderBottom: "1px solid var(--proof-border)" }}>
+      <div
+        style={{
+          fontSize: 9,
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          color: "var(--proof-text-secondary)",
+          marginBottom: 6,
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <TrendingUp size={11} /> Trend
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        {items.map((item) => (
+          <div
+            key={item.label}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "4px 6px",
+              borderRadius: 3,
+              background: "var(--proof-hover-light)",
+            }}
+          >
+            <div
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: item.dotColor,
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: 9,
+                color: "var(--proof-text-secondary)",
+                flex: 1,
+              }}
+            >
+              {item.label}
+            </span>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                fontFamily: "var(--font-mono)",
+                color: item.dotColor,
+              }}
+            >
+              {item.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CompactCategoryHeatmap() {
+  const runs = useSyncExternalStore(subscribeToRuns, getRuns);
+
+  const envStats = React.useMemo(() => {
+    const map = new Map<string, { passPctSum: number; totalCount: number }>();
+    for (const run of runs) {
+      const env = run.env;
+      if (!map.has(env)) map.set(env, { passPctSum: 0, totalCount: 0 });
+      const s = map.get(env)!;
+      s.totalCount++;
+      s.passPctSum += run.passPct;
+    }
+    return Array.from(map.entries())
+      .map(([env, s]) => ({
+        env,
+        avgPassRate: Math.round(s.passPctSum / s.totalCount),
+      }))
+      .sort((a, b) => b.avgPassRate - a.avgPassRate);
+  }, [runs]);
+
+  if (envStats.length === 0) return null;
+
+  return (
+    <div style={{ padding: "8px 10px", borderBottom: "1px solid var(--proof-border)" }}>
+      <div
+        style={{
+          fontSize: 9,
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          color: "var(--proof-text-secondary)",
+          marginBottom: 6,
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <Grid3x3 size={11} /> Environments
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        {envStats.map(({ env, avgPassRate }) => {
+          const barColor =
+            avgPassRate >= 90
+              ? "var(--proof-green)"
+              : avgPassRate >= 70
+                ? "var(--proof-yellow)"
+                : "var(--proof-red)";
+          return (
+            <div
+              key={env}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "3px 6px",
+                borderRadius: 3,
+                background: "var(--proof-hover-light)",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 9,
+                  fontWeight: 600,
+                  color: "var(--proof-text-secondary)",
+                  width: 32,
+                  flexShrink: 0,
+                }}
+              >
+                {env}
+              </span>
+              <div
+                style={{
+                  flex: 1,
+                  height: 4,
+                  borderRadius: 2,
+                  background: "var(--proof-grey)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${avgPassRate}%`,
+                    height: "100%",
+                    borderRadius: 2,
+                    background: barColor,
+                    transition: "width 0.3s",
+                  }}
+                />
+              </div>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  fontFamily: "var(--font-mono)",
+                  color: barColor,
+                  width: 32,
+                  textAlign: "right",
+                }}
+              >
+                {avgPassRate}%
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function TrendsPanel() {
   return (
     <>
       <TrendsOverviewStats />
       <TestDetailSummary />
+      <CompactTrendChart />
+      <CompactCategoryHeatmap />
       <TestSelector />
       <TestHeader />
       <TrendAlert />

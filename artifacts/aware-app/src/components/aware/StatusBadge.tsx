@@ -19,5 +19,5 @@ const STATUS_MAP: Record<string, string> = {
 
 export function StatusBadge({ status, label }: StatusBadgeProps) {
   const cls = STATUS_MAP[status] ?? "proof-badge-skip";
-  return <span className={`proof-badge ${cls}`}>{label ?? status}</span>;
+  return <span className={`proof-badge ${cls}`} aria-label={label ?? status}>{label ?? status}</span>;
 }

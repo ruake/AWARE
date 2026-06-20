@@ -73,7 +73,7 @@ export function EnvSelector({ currentEnvIds, onEnvChange, variant = "topbar" }: 
       }
     }
     return items;
-  }, [query, grouped]);
+  }, [grouped]);
 
   React.useEffect(() => {
     if (!open) return;
