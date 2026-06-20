@@ -99,7 +99,6 @@ jobs:
           PLAYWRIGHT_WORKFLOW: "job-playwright.yml"
           PYTEST_WORKFLOW: "job-pytest.yml"
         run: node scripts/scheduler.mjs
-        working-directory: artifacts/aware-app
 
       - name: Persist controller status to data branch
         if: steps.reconcile.outputs.dispatched == 'true'
