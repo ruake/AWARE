@@ -1,7 +1,7 @@
 import React, { useSyncExternalStore } from "react";
 import { Link, useLocation } from "wouter";
 import { PageTemplate } from "@/components/aware";
-import { RUNS, getRuns, getRunsByEnv, getEnvConfigs } from "@/lib/data";
+import { getRuns, subscribeToRuns, getRunsByEnv, getEnvConfigs } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
@@ -101,8 +101,11 @@ export default function Runs() {
   const [suiteFilter, setSuiteFilter] = useSyncedUrlState("suite", "all");
   const [envFilter, setEnvFilter] = useSyncedUrlState("env", "all");
 
+  const allRuns = useSyncExternalStore(subscribeToRuns, getRuns);
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
-  const envFilteredRuns = envSnap.envIds.length > 0 ? getRunsByEnv(envSnap.envIds) : RUNS;
+  const envFilteredRuns = envSnap.envIds.length > 0
+    ? allRuns.filter((r) => envSnap.envIds.includes(r.envId))
+    : allRuns;
 
   React.useEffect(() => {
     const interval = setInterval(() => {}, 10000);

@@ -1,7 +1,7 @@
 import React from "react";
 import { Bug, FolderTree, Code, ExternalLink, X } from "lucide-react";
 import type { TestCase, TestSuite } from "@/lib/types";
-import { PRI_COLORS } from "./TestList";
+import { PRI_COLORS } from "@/lib/testColors";
 
 interface TestDetailPanelProps {
   test: TestCase;

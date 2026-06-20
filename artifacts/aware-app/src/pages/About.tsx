@@ -1,5 +1,5 @@
-import React from "react";
-import { RUNS, ENV_SUMMARY, computeRunFrequency } from "@/lib/data";
+import React, { useSyncExternalStore } from "react";
+import { ENV_SUMMARY, computeRunFrequency, subscribeToRuns, getRuns } from "@/lib/data";
 import { getAutoDiscoveredTests, getAutoDiscoverySummary } from "@/lib/data";
 import { getTestSuites } from "@/lib/data";
 import { getAllPromotionDecisions } from "@/lib/data";
@@ -12,6 +12,7 @@ import { AboutTechStack } from "@/components/aware/AboutTechStack";
 import { AboutTestCategories } from "@/components/aware/AboutTestCategories";
 
 export default function About() {
+  const liveRuns = useSyncExternalStore(subscribeToRuns, getRuns);
   const suites = getTestSuites();
   const tests = getAutoDiscoveredTests();
   const summary = getAutoDiscoverySummary();
@@ -19,8 +20,13 @@ export default function About() {
   const freq = computeRunFrequency();
   const promoteCount = promos.filter((p) => p.decision === "promote").length;
   const promoPct = promos.length > 0 ? Math.round((promoteCount / promos.length) * 100) : 0;
+  const recentRuns = [...liveRuns]
+    .sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())
+    .slice(0, 20);
   const overallRate =
-    ENV_SUMMARY.length > 0
+    recentRuns.length > 0
+      ? Math.round(recentRuns.reduce((s, r) => s + r.passPct, 0) / recentRuns.length)
+      : ENV_SUMMARY.length > 0
       ? Math.round(ENV_SUMMARY.reduce((s, e) => s + e.passRate, 0) / ENV_SUMMARY.length)
       : 0;
   const envs = getEnvConfigs();
@@ -49,7 +55,7 @@ export default function About() {
       >
         <AboutHero />
         <AboutStats
-          runs={RUNS.length}
+          runs={liveRuns.length}
           tests={tests.length}
           suites={suites.length}
           passRate={overallRate}

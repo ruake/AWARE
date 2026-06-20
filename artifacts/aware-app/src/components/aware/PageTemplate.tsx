@@ -86,7 +86,8 @@ export function PageTemplate({
             display: "flex",
             alignItems: "center",
             gap: 8,
-            flexWrap: "wrap",
+            flexWrap: "nowrap",
+            overflowX: "auto",
             background: "var(--proof-surface)",
           }}
         >

@@ -404,7 +404,7 @@ export default function Compare() {
                     outlineOffset: -2,
                   }}
                 >
-                  <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)", fontWeight: 500 }}>
+                  <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)", fontWeight: 500, maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={d.name}>
                     {d.name}
                   </td>
                   <td>
