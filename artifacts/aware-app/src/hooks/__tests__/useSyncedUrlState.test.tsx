@@ -12,7 +12,7 @@ function TestComponent({
   testKey,
   defaultValue,
   onRender,
-  onSet,
+  onSet: _onSet,
 }: {
   testKey: string;
   defaultValue: unknown;

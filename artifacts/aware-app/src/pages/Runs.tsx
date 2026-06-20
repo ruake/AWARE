@@ -1,7 +1,7 @@
 import React, { useSyncExternalStore } from "react";
 import { Link, useLocation } from "wouter";
 import { PageTemplate } from "@/components/aware";
-import { getRuns, subscribeToRuns, getRunsByEnv, getEnvConfigs } from "@/lib/data";
+import { getRuns, subscribeToRuns, getEnvConfigs } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from "react";
 import { Search, X, Star, Pin, Trash2, FileText, Sparkles, Bookmark } from "lucide-react";
 import type { PromptTemplate } from "../../lib/copilot/types";
-import { loadTemplates, saveTemplates, deleteTemplate } from "../../lib/copilot/storage";
+import { loadTemplates, deleteTemplate } from "../../lib/copilot/storage";
 
 interface TemplateLibraryProps {
   onSelect: (content: string) => void;
@@ -132,9 +132,8 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  React.useEffect(() => {
-    setFocusedIndex(-1);
-  }, [search, category]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  React.useEffect(() => { setFocusedIndex(-1); }, [search, category]);
 
   return (
     <div

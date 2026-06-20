@@ -1,3 +1,5 @@
+import type { AIAnalysisRequest } from "./types";
+
 export type LangGraphNodeId =
   | "dispatcher"
   | "data_fetch"
@@ -22,7 +24,7 @@ export interface LangGraphEdge {
 }
 
 export interface LangGraphExecutionContext {
-  request: import("./types").AIAnalysisRequest;
+  request: AIAnalysisRequest;
   data: Record<string, unknown>;
   charts: ChartOutput[];
   currentNode: LangGraphNodeId;

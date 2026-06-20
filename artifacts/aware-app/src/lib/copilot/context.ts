@@ -1,3 +1,4 @@
+import type { ApiMessage, ProviderType } from "./types";
 import { RUNS } from "@/lib/runs";
 
 // Compact system prompt (~500 tokens) — sized for WebLLM's 4096-token context window.
@@ -45,12 +46,12 @@ Behavior rules:
 // WebLLM: ~4096 tokens total. System: ~500. Reserve 800 for response. = ~2796 for history.
 // Very rough estimate: 1 token ≈ 4 chars.
 export function truncateMessages(
-  messages: import("./types").ApiMessage[],
-  providerType: import("./types").ProviderType,
-): import("./types").ApiMessage[] {
+  messages: ApiMessage[],
+  providerType: ProviderType,
+): ApiMessage[] {
   const MAX_CHARS = providerType === "webllm" ? 8000 : 40000;
   let total = 0;
-  const result: import("./types").ApiMessage[] = [];
+  const result: ApiMessage[] = [];
 
   // Always keep system message
   const [sys, ...rest] = messages;
@@ -58,7 +59,7 @@ export function truncateMessages(
   result.push(sys);
 
   // Walk from newest to oldest, include as many as fit
-  const kept: import("./types").ApiMessage[] = [];
+  const kept: ApiMessage[] = [];
   for (let i = rest.length - 1; i >= 0; i--) {
     const size = JSON.stringify(rest[i]).length;
     if (total + size > MAX_CHARS) break;

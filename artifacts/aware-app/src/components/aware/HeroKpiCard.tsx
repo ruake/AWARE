@@ -33,7 +33,7 @@ export function HeroKpiCard({
   const animatedValue = useCountUp(value, 700, delay);
 
   const deltaIsGood = invertDelta ? delta < 0 : delta > 0;
-  const deltaIsBad = invertDelta ? delta > 0 : delta < 0;
+  const _deltaIsBad = invertDelta ? delta > 0 : delta < 0;
   const deltaColor =
     delta === 0
       ? "var(--proof-text-muted)"

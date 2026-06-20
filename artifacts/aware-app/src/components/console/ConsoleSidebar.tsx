@@ -136,8 +136,8 @@ function RecentRunsList() {
 }
 
 export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebarProps) {
-  const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
-  const suiteSnap = useSyncExternalStore(subscribeToSelectedSuites, getSelectedSuiteSnapshot);
+  const _envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
+  const _suiteSnap = useSyncExternalStore(subscribeToSelectedSuites, getSelectedSuiteSnapshot);
 
   if (!visible) return null;
 

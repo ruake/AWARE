@@ -40,7 +40,7 @@ function MessageFeedInner({ messages, onRetry, onSend }: Props) {
   const parentRef = React.useRef<HTMLDivElement | null>(null);
   const atBottomRef = React.useRef(true);
   const prevLenRef = React.useRef(messages.length);
-  const [, navigate] = useLocation();
+  const [, _navigate] = useLocation();
 
   const virtualizer = useVirtualizer({
     count: messages.length,

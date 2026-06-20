@@ -5,7 +5,6 @@ import type {
   PromptTemplate,
   Bookmark,
   CopilotSettings,
-  ToneOption,
 } from "./types";
 
 // ── Session (current active thread) ─────────────────────────────────────────

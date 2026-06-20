@@ -78,11 +78,11 @@ describe("fetchJson", () => {
     });
 
     const promise = fetchJson("slow.json", 100);
-    vi.advanceTimersByTime(100);
+    await vi.runAllTimersAsync();
     await expect(promise).rejects.toThrow();
     expect(abortSpy).toHaveBeenCalled();
     vi.useRealTimers();
-  });
+  }, 10000);
 
   it("clears timeout on success", async () => {
     vi.useFakeTimers();

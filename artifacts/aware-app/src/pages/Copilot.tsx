@@ -10,11 +10,11 @@ import {
   Keyboard,
   BarChart3,
   Sliders,
-  MessageSquare,
 } from "lucide-react";
 import { TOOLS } from "@/lib/copilot/tools";
 import { runAgent } from "@/lib/copilot/agent";
-import { createProvider, WebLLMProvider } from "@/lib/copilot/providers";
+import { createProvider } from "@/lib/copilot/providers";
+import type { WebLLMProvider } from "@/lib/copilot/providers";
 import {
   loadThreads,
   saveThreads,
@@ -37,7 +37,6 @@ import type {
   ProviderType,
   ProviderStatus,
   AgentEvent,
-  SubAgentStep,
   Thread,
   Attachment,
   Bookmark,
@@ -120,7 +119,7 @@ export default function CopilotPage() {
   const [dismissedOnboarding, setDismissedOnboarding] = React.useState(false);
   const [editingMessageId, setEditingMessageId] = React.useState<string | null>(null);
   const [attachments, setAttachments] = React.useState<Attachment[]>([]);
-  const [bookmarks, setBookmarks] = React.useState<Bookmark[]>(() => loadBookmarks());
+  const [_bookmarks, setBookmarks] = React.useState<Bookmark[]>(() => loadBookmarks());
   const [copilotSettings, setCopilotSettings] = React.useState<CopilotSettings>(() =>
     loadCopilotSettings(),
   );
@@ -177,7 +176,7 @@ export default function CopilotPage() {
         return;
       }
     }
-  }, [threadUrl]);
+  }, [threadUrl, threads]);
 
   const ensureActiveThread = React.useCallback(
     (msgs: Message[]) => {
@@ -318,7 +317,7 @@ export default function CopilotPage() {
     setShowSettings(false);
   }, []);
 
-  const handleNewChat = () => {
+  const handleNewChat = React.useCallback(() => {
     abortRef.current?.abort();
     const t = createThread("New Chat", [], providerType);
     setThreads((prev) => {
@@ -333,7 +332,7 @@ export default function CopilotPage() {
     setShowSettings(false);
     clearSession();
     setTimeout(() => textareaRef.current?.focus(), 0);
-  };
+  }, [providerType, setThreadUrl]);
 
   const handleSaveSettings = (cfg: { apiKey: string; apiUrl: string; model: string }) => {
     setCustomEndpointConfig(cfg);
@@ -456,7 +455,7 @@ export default function CopilotPage() {
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
-  const handleBookmarkChange = () => setBookmarks([...loadBookmarks()]);
+  const _handleBookmarkChange = () => setBookmarks([...loadBookmarks()]);
 
   const [copilotAction, setCopilotAction] = useSyncedUrlState<string | null>("copilotAction", null);
   const [copilotNew, setCopilotNew] = useSyncedUrlState<number | null>("copilotNew", null);

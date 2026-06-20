@@ -1,16 +1,11 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { RUNS, getTestResultsForRun } from "@/lib/data";
 import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
   Filter,
   Bug,
-  FileText,
-  AlertTriangle,
-  X,
-  Activity,
 } from "lucide-react";
 
 export interface EnrichedHistoryRow {
@@ -56,9 +51,9 @@ export function FlakinessTable({
   uniqueEnvs,
   selectedRow,
   setSelectedRow,
-  testName,
+  testName: _testName,
 }: FlakinessTableProps) {
-  const [, navigate] = useLocation();
+  const [, _navigate] = useLocation();
 
   if (filteredHistory.length === 0 && enriched.length === 0) {
     return (

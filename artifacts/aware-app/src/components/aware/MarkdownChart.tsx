@@ -67,11 +67,14 @@ function guessYKeys(headers: string[]): string[] {
 }
 
 export function MarkdownChart({ config }: { config: ChartConfig }) {
-  const rows = config.rows || [];
-  const headers = config.headers || ["X", "Y"];
   const colors = config.colors || DEFAULT_COLORS;
   const height = config.height || "200px";
-  const chartData = React.useMemo(() => buildChartData(headers, rows), [headers, rows]);
+  const chartData = React.useMemo(
+    () => buildChartData(config.headers || ["X", "Y"], config.rows || []),
+    [config.headers, config.rows],
+  );
+  const rows = config.rows || [];
+  const headers = config.headers || ["X", "Y"];
   const yKeys = guessYKeys(headers);
   const title = config.title || "";
   const h = parseInt(height) || 200;

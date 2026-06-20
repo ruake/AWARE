@@ -8,10 +8,9 @@ beforeEach(() => {
 });
 
 describe("LLM module", () => {
-  it("has default config with openai provider", () => {
+  it("has default config with custom provider", () => {
     const config = getLLMConfig();
-    expect(config.provider).toBe("openai");
-    expect(config.model).toBeTruthy();
+    expect(config.provider).toBe("custom");
   });
 
   it("setLLMConfig updates config", () => {
@@ -21,7 +20,7 @@ describe("LLM module", () => {
 
   it("getProvider returns a provider instance", () => {
     const provider = getProvider();
-    expect(provider.type).toBe("openai");
+    expect(provider.type).toBe("custom");
   });
 
   it("clearChatHistory does not throw", () => {

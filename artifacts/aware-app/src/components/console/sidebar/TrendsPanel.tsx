@@ -420,6 +420,7 @@ function TrendsOverviewStats() {
   const [, navigate] = useLocation();
   const runs = useSyncExternalStore(subscribeToRuns, getRuns);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const freq = React.useMemo(() => computeRunFrequency(), [runs]);
   const avgPassRate = React.useMemo(() => {
     if (runs.length === 0) return 0;
