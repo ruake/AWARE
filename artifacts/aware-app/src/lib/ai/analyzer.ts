@@ -288,13 +288,12 @@ export async function runLangGraphChat(
   };
 }
 
-const CHART_PATTERN = /```chart\s*\n?([\s\S]*?)```/g;
 const SKILL_PATTERN = /```skill\s*\n?(\{[\s\S]*?\})```/g;
 
 function extractChartBlocksFromText(text: string): ChartOutput[] {
   const charts: ChartOutput[] = [];
-  let match: RegExpExecArray | null;
-  while ((match = CHART_PATTERN.exec(text)) !== null) {
+  const pattern = /```chart\s*\n?([\s\S]*?)```/g;
+  for (const match of text.matchAll(pattern)) {
     try {
       const parsed = JSON.parse(match[1].trim());
       if (parsed.type && parsed.headers && parsed.rows) {
@@ -311,7 +310,6 @@ function extractChartBlocksFromText(text: string): ChartOutput[] {
       // skip malformed chart blocks
     }
   }
-  CHART_PATTERN.lastIndex = 0;
   return charts;
 }
 

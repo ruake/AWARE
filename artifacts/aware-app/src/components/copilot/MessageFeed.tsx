@@ -22,7 +22,7 @@ const QUICK_ACTIONS = [
   { label: "Akamai", query: "What's the Akamai property status?", icon: Globe, color: "#f97316" },
 ];
 
-export default function MessageFeed({ messages, onRetry, onSend }: Props) {
+function MessageFeedInner({ messages, onRetry, onSend }: Props) {
   const parentRef = React.useRef<HTMLDivElement | null>(null);
   const atBottomRef = React.useRef(true);
   const prevLenRef = React.useRef(messages.length);
@@ -197,3 +197,5 @@ export default function MessageFeed({ messages, onRetry, onSend }: Props) {
     </div>
   );
 }
+
+export default React.memo(MessageFeedInner);

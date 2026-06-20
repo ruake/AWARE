@@ -1,7 +1,7 @@
 import React from "react";
 import {
-  MessageSquare, Plus, Trash2, Search, Pin, PinOff,
-  ChevronLeft, ChevronRight, Edit3, Check, X, MoreHorizontal,
+  MessageSquare, Plus, Trash2, Search, Pin,
+  ChevronLeft, ChevronRight, Edit3, Check, X,
 } from "lucide-react";
 import type { Thread } from "@/lib/copilot/types";
 
@@ -36,6 +36,10 @@ function ThreadItem({
   isPinned,
   isFirst,
   isLast,
+  isFocused,
+  isTabStop,
+  itemId,
+  itemRef,
   onSelect,
   onDelete,
   onRename,
@@ -47,6 +51,10 @@ function ThreadItem({
   isPinned: boolean;
   isFirst: boolean;
   isLast: boolean;
+  isFocused: boolean;
+  isTabStop: boolean;
+  itemId: string;
+  itemRef?: React.RefObject<HTMLDivElement | null>;
   onSelect: () => void;
   onDelete: () => void;
   onRename: (title: string) => void;
@@ -198,10 +206,20 @@ function ThreadItem({
 
   return (
     <div
+      ref={itemRef as React.RefObject<HTMLDivElement>}
+      id={itemId}
+      role="option"
+      aria-selected={isActive}
+      tabIndex={isTabStop ? 0 : -1}
       onClick={onSelect}
-      onMouseDown={(e) => {
-        if (e.button === 1) {
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
+          onSelect();
+        }
+        if (e.key === "Delete" || e.key === "Backspace") {
+          e.preventDefault();
+          setConfirmingDelete(true);
         }
       }}
       style={{
@@ -216,10 +234,15 @@ function ThreadItem({
           : isPinned
           ? "rgba(99,130,178,0.04)"
           : "transparent",
-        border: isActive ? "1px solid var(--proof-blue-border)" : "1px solid transparent",
+        border: isActive
+          ? "1px solid var(--proof-blue-border)"
+          : isFocused
+          ? "1px solid var(--proof-border-focus)"
+          : "1px solid transparent",
         transition: "background 0.1s, border-color 0.1s",
         position: "relative",
         userSelect: "none",
+        outline: "none",
       }}
       onMouseEnter={(e) => {
         if (!isActive) {
@@ -317,6 +340,7 @@ function ThreadItem({
           <button
             onClick={onMoveUp}
             title="Move up"
+            tabIndex={-1}
             style={{
               background: "transparent",
               border: "none",
@@ -334,6 +358,7 @@ function ThreadItem({
           <button
             onClick={onMoveDown}
             title="Move down"
+            tabIndex={-1}
             style={{
               background: "transparent",
               border: "none",
@@ -353,6 +378,7 @@ function ThreadItem({
             setEditing(true);
           }}
           title="Rename"
+          tabIndex={-1}
           style={{
             background: "transparent",
             border: "none",
@@ -367,7 +393,8 @@ function ThreadItem({
         </button>
         <button
           onClick={() => setConfirmingDelete(true)}
-          title="Delete"
+          title="Delete (Del)"
+          tabIndex={-1}
           style={{
             background: "transparent",
             border: "none",
@@ -386,6 +413,8 @@ function ThreadItem({
   );
 }
 
+const MemoThreadItem = React.memo(ThreadItem);
+
 export function ThreadSidebar({
   threads,
   activeThreadId,
@@ -398,6 +427,10 @@ export function ThreadSidebar({
   onToggleCollapse,
 }: ThreadSidebarProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [focusedIndex, setFocusedIndex] = React.useState<number>(-1);
+  const [showClearConfirm, setShowClearConfirm] = React.useState(false);
+  const listRef = React.useRef<HTMLDivElement>(null);
+  const itemRefs = React.useRef<Map<number, React.RefObject<HTMLDivElement | null>>>(new Map());
 
   const normalized = threads.map((t) => ({
     ...t,
@@ -412,6 +445,14 @@ export function ThreadSidebar({
 
   const pinned = filtered.filter((t) => t.pinned);
   const unpinned = filtered.filter((t) => !t.pinned);
+  const unpinnedCount = normalized.filter((t) => !t.pinned).length;
+
+  const getOrCreateRef = (idx: number) => {
+    if (!itemRefs.current.has(idx)) {
+      itemRefs.current.set(idx, React.createRef<HTMLDivElement>());
+    }
+    return itemRefs.current.get(idx)!;
+  };
 
   const pinThread = (threadId: string) => {
     const updated = normalized.map((t) =>
@@ -437,6 +478,43 @@ export function ThreadSidebar({
     onThreadCreate();
     setSearchQuery("");
   };
+
+  const handleClearAll = () => {
+    const pinnedOnly = normalized.filter((t) => t.pinned);
+    onThreadsReorder(pinnedOnly);
+    setShowClearConfirm(false);
+  };
+
+  const handleListKeyDown = (e: React.KeyboardEvent) => {
+    const len = filtered.length;
+    if (len === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const next = focusedIndex < len - 1 ? focusedIndex + 1 : 0;
+      setFocusedIndex(next);
+      itemRefs.current.get(next)?.current?.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const prev = focusedIndex > 0 ? focusedIndex - 1 : len - 1;
+      setFocusedIndex(prev);
+      itemRefs.current.get(prev)?.current?.focus();
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setFocusedIndex(0);
+      itemRefs.current.get(0)?.current?.focus();
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setFocusedIndex(len - 1);
+      itemRefs.current.get(len - 1)?.current?.focus();
+    }
+  };
+
+  const activeIdx = filtered.findIndex((t) => t.id === activeThreadId);
+  // Roving tabIndex: exactly ONE item always has tabIndex=0 for Tab entry.
+  const defaultTabbableIdx = activeIdx >= 0 ? activeIdx : 0;
+  const tabbableIdx = focusedIndex >= 0 ? focusedIndex : defaultTabbableIdx;
+  const activedescendant = focusedIndex >= 0 ? `thread-item-${focusedIndex}` : undefined;
 
   if (collapsed) {
     return (
@@ -547,7 +625,6 @@ export function ThreadSidebar({
         overflow: "hidden",
       }}
     >
-
       <div
         style={{
           display: "flex",
@@ -568,23 +645,103 @@ export function ThreadSidebar({
         >
           Threads
         </span>
-        <button
-          onClick={onToggleCollapse}
-          title="Collapse sidebar"
+        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {unpinnedCount > 0 && (
+            <button
+              onClick={() => setShowClearConfirm(true)}
+              title="Clear unpinned threads"
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                padding: 4,
+                borderRadius: 5,
+                display: "flex",
+                color: "var(--proof-text-muted)",
+                transition: "color 0.1s, background 0.1s",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--proof-red-bright)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)";
+              }}
+            >
+              <Trash2 size={13} />
+            </button>
+          )}
+          <button
+            onClick={onToggleCollapse}
+            title="Collapse sidebar"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              padding: 4,
+              borderRadius: 5,
+              display: "flex",
+              color: "var(--proof-text-muted)",
+              transition: "color 0.1s, background 0.1s",
+            }}
+          >
+            <ChevronLeft size={14} />
+          </button>
+        </div>
+      </div>
+
+      {showClearConfirm && (
+        <div
           style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            padding: 4,
-            borderRadius: 5,
-            display: "flex",
-            color: "var(--proof-text-muted)",
-            transition: "color 0.1s, background 0.1s",
+            margin: "8px 10px 0",
+            padding: "8px 10px",
+            background: "rgba(239,68,68,0.06)",
+            border: "1px solid rgba(239,68,68,0.2)",
+            borderRadius: 7,
+            fontSize: 11,
+            color: "var(--proof-text-secondary)",
           }}
         >
-          <ChevronLeft size={14} />
-        </button>
-      </div>
+          <div style={{ fontWeight: 600, color: "var(--proof-red-bright)", marginBottom: 6 }}>
+            Delete {unpinnedCount} conversation{unpinnedCount !== 1 ? "s" : ""}?
+          </div>
+          <div style={{ marginBottom: 8, fontSize: 10.5, color: "var(--proof-text-muted)" }}>
+            Pinned threads are kept.
+          </div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              onClick={handleClearAll}
+              style={{
+                flex: 1,
+                padding: "4px 0",
+                borderRadius: 5,
+                border: "1px solid var(--proof-red-border)",
+                background: "rgba(239,68,68,0.12)",
+                color: "var(--proof-red-bright)",
+                cursor: "pointer",
+                fontSize: 10.5,
+                fontWeight: 600,
+              }}
+            >
+              Delete all
+            </button>
+            <button
+              onClick={() => setShowClearConfirm(false)}
+              style={{
+                flex: 1,
+                padding: "4px 0",
+                borderRadius: 5,
+                border: "1px solid var(--proof-border)",
+                background: "transparent",
+                color: "var(--proof-text-muted)",
+                cursor: "pointer",
+                fontSize: 10.5,
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       <div
         style={{
@@ -645,7 +802,12 @@ export function ThreadSidebar({
       </div>
 
       <div
+        ref={listRef}
+        role="listbox"
+        aria-label="Conversation threads"
+        aria-activedescendant={focusedIndex >= 0 ? `thread-item-${focusedIndex}` : undefined}
         className="thread-sidebar-scroll"
+        onKeyDown={handleListKeyDown}
         style={{
           flex: 1,
           overflowY: "auto",
@@ -653,6 +815,7 @@ export function ThreadSidebar({
           display: "flex",
           flexDirection: "column",
           gap: 2,
+          outline: "none",
         }}
       >
         {filtered.length === 0 && (
@@ -680,7 +843,7 @@ export function ThreadSidebar({
             >
               {searchQuery.trim()
                 ? "No threads match your search"
-                : "No chats yet"}
+                : "Start your first conversation with the AWARE Copilot"}
             </span>
             {!searchQuery.trim() && (
               <button
@@ -733,19 +896,26 @@ export function ThreadSidebar({
                 Pinned
               </span>
             </div>
-            {pinned.map((thread, idx) => {
+            {pinned.map((thread) => {
               const globalIdx = filtered.indexOf(thread);
               const isFirst = globalIdx === 0;
               const isLast = globalIdx === filtered.length - 1;
               return (
-                <ThreadItem
+                <MemoThreadItem
                   key={thread.id}
                   thread={thread}
                   isActive={thread.id === activeThreadId}
                   isPinned={true}
                   isFirst={isFirst}
                   isLast={isLast}
-                  onSelect={() => onThreadSelect(thread.id)}
+                  isFocused={globalIdx === focusedIndex}
+                  isTabStop={globalIdx === tabbableIdx}
+                  itemId={`thread-item-${globalIdx}`}
+                  itemRef={getOrCreateRef(globalIdx)}
+                  onSelect={() => {
+                    setFocusedIndex(globalIdx);
+                    onThreadSelect(thread.id);
+                  }}
                   onDelete={() => onThreadDelete(thread.id)}
                   onRename={(title) => onThreadRename(thread.id, title)}
                   onMoveUp={() => moveThread(globalIdx, -1)}
@@ -763,19 +933,26 @@ export function ThreadSidebar({
           </>
         )}
 
-        {unpinned.map((thread, idx) => {
+        {unpinned.map((thread) => {
           const globalIdx = filtered.indexOf(thread);
           const isFirst = globalIdx === 0;
           const isLast = globalIdx === filtered.length - 1;
           return (
-            <ThreadItem
+            <MemoThreadItem
               key={thread.id}
               thread={thread}
               isActive={thread.id === activeThreadId}
               isPinned={false}
               isFirst={isFirst}
               isLast={isLast}
-              onSelect={() => onThreadSelect(thread.id)}
+              isFocused={globalIdx === focusedIndex}
+              isTabStop={globalIdx === tabbableIdx}
+              itemId={`thread-item-${globalIdx}`}
+              itemRef={getOrCreateRef(globalIdx)}
+              onSelect={() => {
+                setFocusedIndex(globalIdx);
+                onThreadSelect(thread.id);
+              }}
               onDelete={() => onThreadDelete(thread.id)}
               onRename={(title) => onThreadRename(thread.id, title)}
               onMoveUp={() => moveThread(globalIdx, -1)}
@@ -815,6 +992,13 @@ export function ThreadSidebar({
           New Chat
         </button>
       </div>
+
+      <style>{`
+        .thread-actions { opacity: 0 !important; }
+        [role="option"]:hover .thread-actions,
+        [role="option"]:focus .thread-actions,
+        [role="option"]:focus-within .thread-actions { opacity: 1 !important; }
+      `}</style>
     </div>
   );
 }

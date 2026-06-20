@@ -18,6 +18,10 @@ import type {
   Message, ProviderType, ProviderStatus, AgentEvent, SubAgentStep,
   Thread, Attachment, Bookmark, CopilotSettings, ToneOption,
 } from "@/lib/copilot/types";
+import {
+  conversationReducer,
+  INITIAL_CONVERSATION_STATE,
+} from "@/lib/copilot/copilotReducer";
 import MessageFeed from "@/components/copilot/MessageFeed";
 import MessageSearchComp from "@/components/copilot/MessageSearch";
 import EditBranch from "@/components/copilot/EditBranch";
@@ -43,12 +47,22 @@ function estimateTokens(messages: Message[]): number {
 }
 
 export default function CopilotPage() {
-  const [messages, setMessages] = React.useState<Message[]>(() => {
+  const [convState, dispatch] = React.useReducer(conversationReducer, INITIAL_CONVERSATION_STATE, () => {
     const session = loadSession();
-    if (session?.messages?.length) return session.messages;
-    return [];
+    return {
+      ...INITIAL_CONVERSATION_STATE,
+      messages: session?.messages?.length ? session.messages : [],
+    };
   });
-  const [busy, setBusy] = React.useState(false);
+
+  const { messages, busy, agentSteps } = convState;
+
+  // Ref mirror of messages to avoid stale closures in handleSend/handleRetry
+  const messagesRef = React.useRef<Message[]>(messages);
+  React.useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
   const [providerType, setProviderType] = React.useState<ProviderType>(() => {
     const session = loadSession();
     return session?.providerType ?? loadProviderType();
@@ -64,7 +78,6 @@ export default function CopilotPage() {
   const [showSettings, setShowSettings] = React.useState(false);
   const [openaiConfig, setOpenaiConfig] = React.useState(loadOpenAIConfig);
   const [input, setInput] = React.useState("");
-  const [agentSteps, setAgentSteps] = React.useState<SubAgentStep[]>([]);
 
   const [threads, setThreads] = React.useState<Thread[]>(() => loadThreads());
   const [showSearch, setShowSearch] = React.useState(false);
@@ -116,7 +129,7 @@ export default function CopilotPage() {
     if (threadUrl) {
       const t = threads.find((th) => th.id === threadUrl);
       if (t) {
-        setMessages(t.messages);
+        dispatch({ type: "SET_MESSAGES", payload: t.messages });
         setActiveThreadId(t.id);
         return;
       }
@@ -127,7 +140,7 @@ export default function CopilotPage() {
     if (activeId) {
       const t = threads.find((th) => th.id === activeId);
       if (t) {
-        setMessages(t.messages);
+        dispatch({ type: "SET_MESSAGES", payload: t.messages });
         return;
       }
     }
@@ -153,89 +166,9 @@ export default function CopilotPage() {
   }, [providerType, setThreadUrl]);
 
   const handleEvent = React.useCallback((event: AgentEvent) => {
-    switch (event.type) {
-      case "delta":
-        setMessages((prev) => {
-          const last = prev[prev.length - 1];
-          if (last?.streaming)
-            return [...prev.slice(0, -1), { ...last, content: last.content + event.content }];
-          return prev;
-        });
-        break;
-      case "tool_start":
-        setMessages((prev) => {
-          const last = prev[prev.length - 1];
-          if (last?.streaming)
-            return [
-              ...prev.slice(0, -1),
-              { ...last, toolCalls: [...(last.toolCalls ?? []), event.toolCall] },
-            ];
-          return prev;
-        });
-        break;
-      case "tool_done":
-        setMessages((prev) => {
-          const last = prev[prev.length - 1];
-          if (last?.streaming && last.toolCalls)
-            return [
-              ...prev.slice(0, -1),
-              {
-                ...last,
-                toolCalls: last.toolCalls.map((tc) =>
-                  tc.id === event.toolCall.id ? event.toolCall : tc,
-                ),
-              },
-            ];
-          return prev;
-        });
-        break;
-      case "graph_node":
-        setMessages((prev) => {
-          const last = prev[prev.length - 1];
-          if (!last?.streaming) return prev;
-          const existingNodes = last.graphNodes ?? [];
-          const idx = existingNodes.findIndex((n) => n.id === event.node.id);
-          const updatedNodes =
-            idx >= 0
-              ? existingNodes.map((n, i) => (i === idx ? event.node : n))
-              : [...existingNodes, event.node];
-          return [...prev.slice(0, -1), { ...last, graphNodes: updatedNodes }];
-        });
-        break;
-      case "step":
-        setAgentSteps((prev) => {
-          const filtered = prev.filter((s) => s.id !== event.step.id);
-          return [...filtered, event.step];
-        });
-        break;
-      case "done":
-        setMessages((prev) => {
-          const last = prev[prev.length - 1];
-          if (last?.streaming) return [...prev.slice(0, -1), { ...last, streaming: false }];
-          return prev;
-        });
-        setBusy(false);
-        setAgentSteps([]);
-        abortRef.current = null;
-        break;
-      case "error":
-        setMessages((prev) => {
-          const last = prev[prev.length - 1];
-          if (last?.streaming)
-            return [
-              ...prev.slice(0, -1),
-              {
-                ...last,
-                streaming: false,
-                error: event.error,
-                content: last.content || "Something went wrong.",
-              },
-            ];
-          return prev;
-        });
-        setBusy(false);
-        abortRef.current = null;
-        break;
+    dispatch({ type: "AGENT_EVENT", payload: event });
+    if (event.type === "done" || event.type === "error") {
+      abortRef.current = null;
     }
   }, []);
 
@@ -245,18 +178,19 @@ export default function CopilotPage() {
       if (!content || busy) return;
       if (!text) setInput("");
 
-      const history = messages;
+      // Use ref to read current messages without stale closure
+      const history = messagesRef.current;
       const userMsg: Message = { id: uid(), role: "user", content, timestamp: Date.now() };
       const assistantMsg: Message = {
         id: uid(), role: "assistant", content: "", timestamp: Date.now(),
         streaming: true, graphNodes: [],
       };
 
-      const updatedMessages = [...messages, userMsg, assistantMsg];
-      setMessages(updatedMessages);
+      const updatedMessages = [...history, userMsg, assistantMsg];
+      dispatch({ type: "SET_MESSAGES", payload: updatedMessages });
+      dispatch({ type: "SET_BUSY", payload: true });
       ensureActiveThread(updatedMessages);
       setAttachments([]);
-      setBusy(true);
 
       const abort = new AbortController();
       abortRef.current = abort;
@@ -276,18 +210,20 @@ export default function CopilotPage() {
           });
       });
     },
-    [busy, input, messages, providers, providerType, handleEvent, ensureActiveThread],
+    [busy, input, providers, providerType, handleEvent, ensureActiveThread],
   );
 
   const handleRetry = React.useCallback(
     (messageId: string) => {
-      const idx = messages.findIndex((m) => m.id === messageId);
+      // Read from ref to avoid stale closure; this keeps onRetry identity stable across streaming
+      const current = messagesRef.current;
+      const idx = current.findIndex((m) => m.id === messageId);
       if (idx < 0) return;
       let userIdx = idx - 1;
-      while (userIdx >= 0 && messages[userIdx].role !== "user") userIdx--;
+      while (userIdx >= 0 && current[userIdx].role !== "user") userIdx--;
       if (userIdx < 0) return;
-      const userContent = messages[userIdx].content;
-      const slicedHistory = messages.slice(0, userIdx);
+      const userContent = current[userIdx].content;
+      const slicedHistory = current.slice(0, userIdx);
       if (!userContent.trim() || busy) return;
 
       const userMsg: Message = { id: uid(), role: "user", content: userContent, timestamp: Date.now() };
@@ -296,8 +232,8 @@ export default function CopilotPage() {
         streaming: true, graphNodes: [],
       };
       const updated = [...slicedHistory, userMsg, assistantMsg];
-      setMessages(updated);
-      setBusy(true);
+      dispatch({ type: "SET_MESSAGES", payload: updated });
+      dispatch({ type: "SET_BUSY", payload: true });
 
       const abort = new AbortController();
       abortRef.current = abort;
@@ -316,7 +252,7 @@ export default function CopilotPage() {
           });
       });
     },
-    [messages, busy, providers, providerType, handleEvent],
+    [busy, providers, providerType, handleEvent],
   );
 
   const handleStop = React.useCallback(() => {
@@ -340,8 +276,8 @@ export default function CopilotPage() {
     });
     setActiveThreadId(t.id);
     setThreadUrl(t.id);
-    setMessages([]);
-    setBusy(false);
+    dispatch({ type: "SET_MESSAGES", payload: [] });
+    dispatch({ type: "SET_BUSY", payload: false });
     setShowSettings(false);
     clearSession();
     setTimeout(() => textareaRef.current?.focus(), 0);
@@ -411,7 +347,10 @@ export default function CopilotPage() {
   };
 
   const handleEditSave = (messageId: string, newContent: string) => {
-    setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, content: newContent } : m)));
+    dispatch({
+      type: "SET_MESSAGES",
+      payload: messagesRef.current.map((m) => (m.id === messageId ? { ...m, content: newContent } : m)),
+    });
     setEditingMessageId(null);
   };
 
@@ -429,19 +368,22 @@ export default function CopilotPage() {
     });
     setActiveThreadId(t.id);
     setThreadUrl(t.id);
-    setMessages(branchMsgs);
+    dispatch({ type: "SET_MESSAGES", payload: branchMsgs });
     setEditingMessageId(null);
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
   const handleDismissError = (messageId: string) => {
-    setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, error: undefined } : m)));
+    dispatch({
+      type: "SET_MESSAGES",
+      payload: messagesRef.current.map((m) => (m.id === messageId ? { ...m, error: undefined } : m)),
+    });
   };
 
   const handleResultSelect = (threadId: string) => {
     const t = threads.find((th) => th.id === threadId);
     if (t) {
-      setMessages(t.messages);
+      dispatch({ type: "SET_MESSAGES", payload: t.messages });
       setActiveThreadId(t.id);
       setThreadUrl(t.id);
     }
@@ -506,6 +448,8 @@ export default function CopilotPage() {
   const showingOnboarding = messages.length === 0 && !busy && !dismissedOnboarding;
   const erroredMessages = messages.filter((m) => m.role === "assistant" && m.error && !m.streaming);
 
+  const ariaStatus = busy ? "AI is thinking\u2026" : messages.some((m) => m.role === "assistant") ? "Response ready." : "";
+
   return (
     <div
       style={{
@@ -517,6 +461,25 @@ export default function CopilotPage() {
         animation: "page-enter 0.22s ease-out both",
       }}
     >
+      {/* ARIA live region — announces busy start/end to screen readers */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          padding: 0,
+          margin: -1,
+          overflow: "hidden",
+          clip: "rect(0,0,0,0)",
+          whiteSpace: "nowrap",
+          borderWidth: 0,
+        }}
+      >
+        {ariaStatus}
+      </div>
       {/* ── Top bar ───────────────────────────────────────────── */}
       <div
         style={{

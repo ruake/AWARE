@@ -1,7 +1,15 @@
-import type { ToolDefinition, ToolResult, ChartData, TableData } from "./types";
+import type { ToolDefinition, ToolContext, ToolResult, ChartData, TableData } from "./types";
 import { RUNS, getTestResultsForRun } from "@/lib/runs";
 import { getAllPromotionDecisions } from "@/lib/promotions";
 import { getRunById } from "@/lib/data";
+import { PROMOTION_GATE_THRESHOLD } from "@/lib/ciConfig";
+
+const PASS_GATE_PCT = Math.round(PROMOTION_GATE_THRESHOLD * 100);
+
+/** Throw an AbortError if the AbortSignal has already fired. */
+function assertNotAborted(ctx: ToolContext): void {
+  if (ctx.signal?.aborted) throw new DOMException("Tool execution cancelled", "AbortError");
+}
 
 const PALETTE = [
   "#3b82f6",
@@ -32,7 +40,8 @@ const queryRuns: ToolDefinition = {
       },
     },
   },
-  async execute(args): Promise<ToolResult> {
+  async execute(args: Record<string, unknown>, ctx: ToolContext): Promise<ToolResult> {
+    assertNotAborted(ctx);
     const limit = (args.limit as number) || 15;
     const envFilter = args.env as string | undefined;
 
@@ -106,7 +115,8 @@ const getFlakyTests: ToolDefinition = {
       minFlips: { type: "number", description: "Minimum flips to include (default 1)" },
     },
   },
-  async execute(args): Promise<ToolResult> {
+  async execute(args: Record<string, unknown>, ctx: ToolContext): Promise<ToolResult> {
+    assertNotAborted(ctx);
     const lookback = (args.lookback as number) || 8;
     const minFlips = (args.minFlips as number) || 1;
 
@@ -181,7 +191,8 @@ const compareEnvironments: ToolDefinition = {
   description:
     "Compare pass rates and failure counts across QA, UAT, and PROD environments. Returns a full 6-slot breakdown (QA/UAT/PROD × Staging/Production). Use for env health, comparison, or status questions.",
   parameters: { type: "object", properties: {} },
-  async execute(): Promise<ToolResult> {
+  async execute(_args: Record<string, unknown>, ctx: ToolContext): Promise<ToolResult> {
+    assertNotAborted(ctx);
     const byEnv: Record<
       string,
       { runs: number; totalPass: number; failures: number; lastDate: string }
@@ -265,7 +276,8 @@ const getPromotionStatus: ToolDefinition = {
   description:
     "Check UAT→PROD promotion gate decisions (promote/block/pending) and deployment readiness. Use for deployment, 'can we go to PROD', promotion gate, or release readiness questions.",
   parameters: { type: "object", properties: {} },
-  async execute(): Promise<ToolResult> {
+  async execute(_args: Record<string, unknown>, ctx: ToolContext): Promise<ToolResult> {
+    assertNotAborted(ctx);
     const decisions = getAllPromotionDecisions();
     const promoted = decisions.filter((d) => d.decision === "promote").length;
     const blocked = decisions.filter((d) => d.decision === "block").length;
@@ -283,7 +295,7 @@ const getPromotionStatus: ToolDefinition = {
             ? "❌ Block"
             : "⏳ Pending",
       passRate: (d as any).passPct ?? "—",
-      threshold: "95%",
+      threshold: `${PASS_GATE_PCT}%`,
       date: ((d as any).date || (d as any).timestamp || "—").toString().slice(0, 10),
     }));
 
@@ -339,7 +351,8 @@ const getFailureBreakdown: ToolDefinition = {
       runId: { type: "string", description: "Specific run ID. Omit to use the latest run." },
     },
   },
-  async execute(args): Promise<ToolResult> {
+  async execute(args: Record<string, unknown>, ctx: ToolContext): Promise<ToolResult> {
+    assertNotAborted(ctx);
     const runId = args.runId as string | undefined;
     const targetRun = runId
       ? RUNS.find((r) => r.id === runId)
@@ -422,7 +435,8 @@ const getSuiteHealth: ToolDefinition = {
       env: { type: "string", description: "Filter by environment", enum: ["QA", "UAT", "PROD"] },
     },
   },
-  async execute(args): Promise<ToolResult> {
+  async execute(args: Record<string, unknown>, ctx: ToolContext): Promise<ToolResult> {
+    assertNotAborted(ctx);
     const envFilter = args.env as string | undefined;
     let runs = [...RUNS];
     if (envFilter) runs = runs.filter((r) => r.env === envFilter);
@@ -516,7 +530,8 @@ const getDurationTrends: ToolDefinition = {
       limit: { type: "number", description: "Number of recent runs to analyze (default 10)" },
     },
   },
-  async execute(args): Promise<ToolResult> {
+  async execute(args: Record<string, unknown>, ctx: ToolContext): Promise<ToolResult> {
+    assertNotAborted(ctx);
     const limit = (args.limit as number) || 10;
     const recent = [...RUNS]
       .sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())
@@ -593,7 +608,8 @@ const getAkamaiProperty: ToolDefinition = {
   description:
     "Get Akamai CDN property status, EdgeWorker versions, PoP coverage, and activation state across environments. Use for Akamai config, property version, EdgeWorker, PoP, cpcode, or CDN status questions.",
   parameters: { type: "object", properties: {} },
-  async execute(): Promise<ToolResult> {
+  async execute(_args: Record<string, unknown>, ctx: ToolContext): Promise<ToolResult> {
+    assertNotAborted(ctx);
     const envs = ["QA", "UAT", "PROD"];
     const networks = ["Staging", "Production"];
 

@@ -2,6 +2,8 @@ import { getTestSuites, getTestCases } from "./data";
 import { getEnvConfigs } from "./envConfig";
 import yaml from "js-yaml";
 
+export const PROMOTION_GATE_THRESHOLD = 0.95;
+
 export interface CiConfig {
   version: string;
   project: string;
