@@ -408,7 +408,7 @@ function TrendsOverviewStats() {
   const [, navigate] = useLocation();
   const runs = useSyncExternalStore(subscribeToRuns, getRuns);
 
-  const freq = React.useMemo(() => computeRunFrequency(), []);
+  const freq = React.useMemo(() => computeRunFrequency(), [runs]);
   const avgPassRate = React.useMemo(() => {
     if (runs.length === 0) return 0;
     return Math.round(runs.reduce((s, r) => s + r.passPct, 0) / runs.length);

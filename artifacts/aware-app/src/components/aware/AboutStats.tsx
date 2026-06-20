@@ -148,7 +148,7 @@ export function AboutStats({
           icon={<Layers size={14} />}
         />
         <StatCard
-          label="Pass Rate"
+          label="Avg Pass Rate"
           value={`${cRate}%`}
           color="var(--proof-green)"
           icon={<TrendingUp size={14} />}

@@ -8,10 +8,21 @@ import {
   TestTube,
   Unlink,
   Zap,
-  Bug,
+  ChevronRight,
+  ExternalLink,
 } from "lucide-react";
 import type { TestCase } from "@/lib/types";
 import { ConsolePagination } from "@/components/console";
+import {
+  PRI_COLORS,
+  PRI_BGS,
+  TYPE_COLORS,
+  TYPE_BGS,
+  CAT_COLORS,
+  CAT_BGS,
+  STATUS_COLORS,
+  STATUS_BGS,
+} from "@/lib/testColors";
 
 const PAGE_SIZE = 25;
 
@@ -22,78 +33,6 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   edgeworker: <Zap size={14} />,
   transaction: <Unlink size={14} />,
   pytest: <TestTube size={14} />,
-};
-
-const TYPE_COLORS: Record<string, string> = {
-  web: "var(--proof-blue)",
-  api: "var(--proof-green)",
-  http: "var(--proof-purple)",
-  edgeworker: "var(--proof-orange)",
-  transaction: "var(--proof-cyan)",
-  pytest: "var(--proof-yellow)",
-};
-
-const TYPE_BGS: Record<string, string> = {
-  web: "rgba(59,130,246,0.12)",
-  api: "rgba(34,197,94,0.12)",
-  http: "rgba(168,85,247,0.12)",
-  edgeworker: "rgba(245,158,11,0.12)",
-  transaction: "rgba(6,182,212,0.12)",
-  pytest: "rgba(234,179,8,0.12)",
-};
-
-const CAT_COLORS: Record<string, string> = {
-  "geo-match": "var(--proof-blue)",
-  caching: "var(--proof-purple)",
-  security: "var(--proof-red)",
-  performance: "var(--proof-green)",
-  functional: "var(--proof-orange)",
-  general: "var(--proof-text-secondary)",
-  network: "var(--proof-cyan)",
-  screenshots: "var(--proof-yellow)",
-  "url-health": "var(--proof-pink)",
-  "edge-routing": "var(--proof-indigo)",
-  "http-protocol": "var(--proof-teal)",
-};
-
-const CAT_BGS: Record<string, string> = {
-  "geo-match": "rgba(59,130,246,0.1)",
-  caching: "rgba(168,85,247,0.1)",
-  security: "rgba(239,68,68,0.1)",
-  performance: "rgba(34,197,94,0.1)",
-  functional: "rgba(245,158,11,0.1)",
-  general: "rgba(154,160,166,0.1)",
-  network: "rgba(6,182,212,0.1)",
-  screenshots: "rgba(234,179,8,0.1)",
-  "url-health": "rgba(236,72,153,0.1)",
-  "edge-routing": "rgba(99,102,241,0.1)",
-  "http-protocol": "rgba(20,184,166,0.1)",
-};
-
-export const PRI_COLORS: Record<string, string> = {
-  P0: "var(--proof-red)",
-  P1: "var(--proof-yellow)",
-  P2: "var(--proof-blue)",
-  P3: "var(--proof-text-muted)",
-};
-
-const PRI_BGS: Record<string, string> = {
-  P0: "rgba(239,68,68,0.12)",
-  P1: "rgba(234,179,8,0.12)",
-  P2: "rgba(59,130,246,0.12)",
-  P3: "rgba(154,160,166,0.08)",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  active: "var(--proof-green)",
-  disabled: "var(--proof-yellow)",
-  deprecated: "var(--proof-red)",
-};
-
-const STATUS_BGS: Record<string, string> = {
-  active: "rgba(34,197,94,0.12)",
-  disabled: "rgba(234,179,8,0.12)",
-  deprecated: "rgba(239,68,68,0.12)",
 };
 
 const cellStyle: React.CSSProperties = {
@@ -204,12 +143,7 @@ export function TestList({
                   onMouseEnter={() => onHoverRow(test.id)}
                   onMouseLeave={() => onHoverRow(null)}
                   onClick={() => {
-                    const filePath = test.scriptPath?.split("::")[0];
-                    if (filePath)
-                      window.open(
-                        `https://github.com/ruake/AWARE/blob/main/${filePath}`,
-                        "_blank",
-                      );
+                    navigate(`/tests?suite=${suiteFilter}&detail=${test.id}`);
                   }}
                 >
                   <td
@@ -349,29 +283,62 @@ export function TestList({
                   >
                     {test.owner}
                   </td>
-                  <td style={{ ...cellStyle, textAlign: "center" }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(
-                          `/tests?suite=${suiteFilter}&detail=${test.id}`,
-                        );
-                      }}
-                      style={{
-                        border: "none",
-                        background: "none",
-                        cursor: "pointer",
-                        color:
-                          detailId === test.id
-                            ? "var(--proof-blue)"
-                            : "var(--proof-text-muted)",
-                        padding: 2,
-                        display: "inline-flex",
-                      }}
-                      title="Show details"
-                    >
-                      <Bug size={13} />
-                    </button>
+                  <td style={{ ...cellStyle, textAlign: "right", whiteSpace: "nowrap" }}>
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+                      {test.scriptPath && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const filePath = test.scriptPath?.split("::")[0];
+                            if (filePath)
+                              window.open(
+                                `https://github.com/ruake/AWARE/blob/main/${filePath}`,
+                                "_blank",
+                              );
+                          }}
+                          style={{
+                            border: "none", background: "none", cursor: "pointer",
+                            color: "var(--proof-text-muted)", padding: "2px 3px",
+                            display: "inline-flex", borderRadius: 3,
+                            transition: "color 0.1s, background 0.1s",
+                          }}
+                          title="View source on GitHub"
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
+                            (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)";
+                            (e.currentTarget as HTMLElement).style.background = "none";
+                          }}
+                        >
+                          <ExternalLink size={11} />
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/tests?suite=${suiteFilter}&detail=${test.id}`);
+                        }}
+                        style={{
+                          border: "none", background: "none", cursor: "pointer",
+                          color: detailId === test.id ? "var(--proof-blue)" : "var(--proof-text-muted)",
+                          padding: "2px 3px", display: "inline-flex", borderRadius: 3,
+                          transition: "color 0.1s, background 0.1s",
+                        }}
+                        title="Show details"
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.color = "var(--proof-blue)";
+                          (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.color = detailId === test.id ? "var(--proof-blue)" : "var(--proof-text-muted)";
+                          (e.currentTarget as HTMLElement).style.background = "none";
+                        }}
+                      >
+                        <ChevronRight size={13} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

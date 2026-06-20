@@ -8,7 +8,7 @@ import {
   Activity,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
-import { RUNS } from "@/lib/data";
+import { getRuns, subscribeToRuns } from "@/lib/data";
 import type { Run } from "@/lib/types";
 import { PulseFeed, PulseFilterBar } from "@/components/aware";
 const GH_ACTIONS_URL = `https://github.com/ruake/AWARE/actions`;
@@ -17,22 +17,17 @@ export default function Pulse() {
   const [, navigate] = useLocation();
   const { Toast } = useSimpleToast();
   const [activeTab, setActiveTab] = React.useState<"all" | Run["status"]>("all");
-  const [, setRefresh] = React.useState(0);
 
-  // Simulate live updates (re-render every 10s to refresh timeAgo)
-  React.useEffect(() => {
-    const interval = setInterval(() => setRefresh((n) => n + 1), 10000);
-    return () => clearInterval(interval);
-  }, []);
+  const liveRuns = React.useSyncExternalStore(subscribeToRuns, getRuns);
 
-  const running = RUNS.filter((r) => r.status === "RUNNING");
-  const total = RUNS.length;
+  const running = liveRuns.filter((r) => r.status === "RUNNING");
+  const total = liveRuns.length;
 
-  const filtered = activeTab === "all" ? RUNS : RUNS.filter((r) => r.status === activeTab);
+  const filtered = activeTab === "all" ? liveRuns : liveRuns.filter((r) => r.status === activeTab);
 
   const tabCounts: Record<string, number> = { all: total };
   for (const s of ["PASS", "FAIL", "FLAKY", "PARTIAL", "RUNNING"] as Run["status"][]) {
-    tabCounts[s] = RUNS.filter((r) => r.status === s).length;
+    tabCounts[s] = liveRuns.filter((r) => r.status === s).length;
   }
 
   return (

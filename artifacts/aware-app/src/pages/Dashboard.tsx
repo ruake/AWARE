@@ -663,7 +663,7 @@ export default function Dashboard() {
       </section>
 
       {/* ── Trend chart (full width) ────────────────────────── */}
-      <div className="proof-section-card" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div className="proof-section-card" style={{ display: "flex", flexDirection: "column", minHeight: 200 }}>
         {/* Header */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
