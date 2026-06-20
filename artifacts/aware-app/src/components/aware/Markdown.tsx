@@ -225,7 +225,6 @@ function parseMarkdownTable(raw: string): { headers: string[]; rows: string[][] 
 
 // ─── Color coding ─────────────────────────────────────────────────────────────
 
-
 /** Convert bare status words in text into backtick-wrapped inline code.
  *  Runs only on non-table segments so SmartTable stays clean. */
 const STATUS_WORD_PATTERN = new RegExp(`\\b(${Object.keys(STATUS_COLORS).join("|")})\\b`, "gi");
@@ -464,7 +463,8 @@ const components = {
     return (
       <a
         href={href}
-        target="_blank" rel="noopener noreferrer"
+        target="_blank"
+        rel="noopener noreferrer"
         style={{ color: "var(--proof-blue)", textDecoration: "underline", fontWeight: 500 }}
       >
         {children}

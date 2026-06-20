@@ -1,7 +1,15 @@
 import React from "react";
 import type { DiffRow } from "@/lib/types";
 
-export function CompareSummary({ diff, deltaMs, size = "normal" }: { diff: DiffRow; deltaMs: number; size?: "normal" | "large" }) {
+export function CompareSummary({
+  diff,
+  deltaMs,
+  size = "normal",
+}: {
+  diff: DiffRow;
+  deltaMs: number;
+  size?: "normal" | "large";
+}) {
   const isLarge = size === "large";
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8 }}>
@@ -10,8 +18,7 @@ export function CompareSummary({ diff, deltaMs, size = "normal" }: { diff: DiffR
           padding: isLarge ? "10px 14px" : 8,
           borderRadius: 6,
           border: `1px solid ${diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-          background:
-            diff.baseStatus === "PASS" ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
+          background: diff.baseStatus === "PASS" ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
         }}
       >
         <div
@@ -49,8 +56,7 @@ export function CompareSummary({ diff, deltaMs, size = "normal" }: { diff: DiffR
           padding: isLarge ? "10px 14px" : 8,
           borderRadius: 6,
           border: `1px solid ${diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-          background:
-            diff.candStatus === "PASS" ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
+          background: diff.candStatus === "PASS" ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
         }}
       >
         <div
@@ -123,9 +129,7 @@ export function CompareSummary({ diff, deltaMs, size = "normal" }: { diff: DiffR
           {Math.abs(deltaMs) > 20 ? `${deltaMs > 0 ? "+" : ""}${deltaMs}ms` : "~0ms"}
         </div>
         <div style={{ fontSize: isLarge ? 10 : 9, color: "var(--proof-text-muted)" }}>
-          {diff.baseStatus !== diff.candStatus
-            ? `${diff.baseStatus}→${diff.candStatus}`
-            : "same"}
+          {diff.baseStatus !== diff.candStatus ? `${diff.baseStatus}→${diff.candStatus}` : "same"}
         </div>
       </div>
     </div>

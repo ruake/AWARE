@@ -12,7 +12,17 @@ import { useTestData } from "@/hooks/useTestData";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import { detectAnomalies } from "@/lib/anomalyDetection";
 import { getTestDetailsSync } from "@/lib/runsLoader";
-import { ArrowLeft, ChevronRight, Search, FileText, Share2, AlertTriangle, X, TrendingUp, Grid3x3 } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronRight,
+  Search,
+  FileText,
+  Share2,
+  AlertTriangle,
+  X,
+  TrendingUp,
+  Grid3x3,
+} from "lucide-react";
 
 function selectorLabel(item: { id: string; name: string }, query: string): React.ReactNode {
   if (!query.trim()) return item.name;
@@ -44,7 +54,9 @@ function TestSelector() {
     }[]
   >([]);
   React.useEffect(() => {
-    getTestDetailsAsync().then(setTestDetails).catch(() => {});
+    getTestDetailsAsync()
+      .then(setTestDetails)
+      .catch(() => {});
   }, []);
 
   const rawTestId = params.get("testId") ?? "";

@@ -47,9 +47,7 @@ export function AboutEnvMap() {
               <span style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>
                 {t.tier}
               </span>
-              <span
-                style={{ fontSize: 11, color: "var(--proof-text-muted)", marginLeft: "auto" }}
-              >
+              <span style={{ fontSize: 11, color: "var(--proof-text-muted)", marginLeft: "auto" }}>
                 {t.desc}
               </span>
             </div>

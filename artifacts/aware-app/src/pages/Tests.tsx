@@ -1,16 +1,16 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
-import { getAutoDiscoveredTests, subscribeToAutoTests, getDataInitState, subscribeToDataInit } from "@/lib/data";
+import {
+  getAutoDiscoveredTests,
+  subscribeToAutoTests,
+  getDataInitState,
+  subscribeToDataInit,
+} from "@/lib/data";
 import { useTestData } from "@/hooks/useTestData";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { PageTemplate } from "@/components/aware";
 import type { TestSuite } from "@/lib/types";
-import {
-  TestFilters,
-  TestList,
-  SuiteDetailPanel,
-  TestDetailPanel,
-} from "@/components/aware";
+import { TestFilters, TestList, SuiteDetailPanel, TestDetailPanel } from "@/components/aware";
 
 function _getSuiteChildren(suite: TestSuite, allSuites: TestSuite[]): TestSuite[] {
   return allSuites.filter((s) => s.parentId === suite.id);
@@ -109,20 +109,22 @@ export default function Tests() {
           totalCount={allTests.length}
         />
       }
-      sidePanel={selectedTest ? (
-        <TestDetailPanel
-          test={selectedTest}
-          parentSuite={selectedSuite}
-          onClose={() => navigate(`/tests${suiteFilter ? `?suite=${suiteFilter}` : ""}`)}
-        />
-      ) : selectedSuite ? (
-        <SuiteDetailPanel
-          suite={selectedSuite}
-          tests={tcs.filter((t) => selectedSuite.testIds.includes(t.id))}
-          onClose={() => navigate("/tests")}
-          onTestSelect={(testId) => navigate(`/tests?suite=${suiteFilter}&detail=${testId}`)}
-        />
-      ) : undefined}
+      sidePanel={
+        selectedTest ? (
+          <TestDetailPanel
+            test={selectedTest}
+            parentSuite={selectedSuite}
+            onClose={() => navigate(`/tests${suiteFilter ? `?suite=${suiteFilter}` : ""}`)}
+          />
+        ) : selectedSuite ? (
+          <SuiteDetailPanel
+            suite={selectedSuite}
+            tests={tcs.filter((t) => selectedSuite.testIds.includes(t.id))}
+            onClose={() => navigate("/tests")}
+            onTestSelect={(testId) => navigate(`/tests?suite=${suiteFilter}&detail=${testId}`)}
+          />
+        ) : undefined
+      }
       sidePanelWidth={380}
       currentPage={page}
       totalPages={totalPages}

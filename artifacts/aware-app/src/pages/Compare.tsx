@@ -48,13 +48,13 @@ export default function Compare() {
 
   React.useEffect(() => {
     if (!effectiveBaseline || !effectiveCandidate) return;
-    Promise.all([loadResultsForRun(effectiveBaseline), loadResultsForRun(effectiveCandidate)]).then(
-      ([br, cr]) => {
+    Promise.all([loadResultsForRun(effectiveBaseline), loadResultsForRun(effectiveCandidate)])
+      .then(([br, cr]) => {
         setBaseResults(br);
         setCandResults(cr);
         setComputedRows(computeDiffRows(effectiveBaseline, effectiveCandidate));
-      },
-    ).catch(() => {});
+      })
+      .catch(() => {});
   }, [effectiveBaseline, effectiveCandidate]);
 
   const diffs = React.useMemo(() => {
@@ -250,7 +250,15 @@ export default function Compare() {
         subtitle={`${baselineRun?.id ?? "—"} vs ${candidateRun?.id ?? "—"} · ${filtered.length}/${diffs.length} tests`}
         filters={
           <>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flex: "1 1 200px", minWidth: 140 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                flex: "1 1 200px",
+                minWidth: 140,
+              }}
+            >
               <Search size={13} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
               <input
                 className="proof-input"
@@ -261,11 +269,24 @@ export default function Compare() {
                 style={{ flex: 1, minWidth: 0 }}
               />
             </div>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+              }}
+            >
               <input
                 type="checkbox"
                 checked={regressionsOnly}
-                onChange={(e) => { setRegressionsOnly(e.target.checked); setActiveFilter(null); }}
+                onChange={(e) => {
+                  setRegressionsOnly(e.target.checked);
+                  setActiveFilter(null);
+                }}
               />
               Regressions only
             </label>
@@ -273,17 +294,30 @@ export default function Compare() {
               onClick={() => setSwapped((s) => !s)}
               className="proof-button-ghost"
               title="Swap baseline and candidate"
-              style={{ fontSize: 11, whiteSpace: "nowrap", flexShrink: 0, display: "flex", alignItems: "center", gap: 4 }}
+              style={{
+                fontSize: 11,
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+              }}
             >
               ⇄ Swap
             </button>
             {hasActiveFilters && (
-              <button onClick={() => setColFilters({})} className="proof-button-ghost" style={{ fontSize: 11, color: "var(--proof-red)" }}>
+              <button
+                onClick={() => setColFilters({})}
+                className="proof-button-ghost"
+                style={{ fontSize: 11, color: "var(--proof-red)" }}
+              >
                 Clear column filters
               </button>
             )}
             {diffStats.length > 0 && (
-              <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginLeft: "auto" }}>
+              <span
+                style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginLeft: "auto" }}
+              >
                 {filtered.length}/{diffs.length} tests
               </span>
             )}
@@ -293,17 +327,21 @@ export default function Compare() {
         emptyMessage="No tests match your filters"
         loading={filtered.length === 0 && initState.loading}
         loadingCols={6}
-        sidePanel={selectedDiff && selectedName ? (
-          <CompareSidePanel
-            diff={selectedDiff}
-            diffs={filtered}
-            selectedId={selectedDiff.id}
-            onSelect={(id) => setSelectedName(id ? diffs.find((d) => d.id === id)?.name ?? null : null)}
-            navigate={navigate}
-            baseResult={baseResults.find((r) => r.name === selectedDiff.name) ?? null}
-            candResult={candResults.find((r) => r.name === selectedDiff.name) ?? null}
-          />
-        ) : undefined}
+        sidePanel={
+          selectedDiff && selectedName ? (
+            <CompareSidePanel
+              diff={selectedDiff}
+              diffs={filtered}
+              selectedId={selectedDiff.id}
+              onSelect={(id) =>
+                setSelectedName(id ? (diffs.find((d) => d.id === id)?.name ?? null) : null)
+              }
+              navigate={navigate}
+              baseResult={baseResults.find((r) => r.name === selectedDiff.name) ?? null}
+              candResult={candResults.find((r) => r.name === selectedDiff.name) ?? null}
+            />
+          ) : undefined
+        }
         sidePanelWidth={440}
       >
         <table className="proof-table">
@@ -315,7 +353,9 @@ export default function Compare() {
             <col />
             <col />
           </colgroup>
-          <thead style={{ position: "sticky", top: 0, zIndex: 10, background: "var(--proof-surface)" }}>
+          <thead
+            style={{ position: "sticky", top: 0, zIndex: 10, background: "var(--proof-surface)" }}
+          >
             <tr>
               <th>
                 <input
@@ -353,7 +393,15 @@ export default function Compare() {
                   <option value="FAIL">FAIL</option>
                 </select>
               </th>
-              <th style={{ textAlign: "right", fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600, whiteSpace: "nowrap" }}>
+              <th
+                style={{
+                  textAlign: "right",
+                  fontSize: 10,
+                  color: "var(--proof-text-secondary)",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}
+              >
                 Δ Duration
               </th>
               <th>
@@ -366,7 +414,9 @@ export default function Compare() {
                 >
                   <option value="">Category</option>
                   {categories.map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </th>
@@ -412,32 +462,58 @@ export default function Compare() {
                     outlineOffset: -2,
                   }}
                 >
-                  <td style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-blue)", fontWeight: 500, maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={d.name}>
+                  <td
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 11,
+                      color: "var(--proof-blue)",
+                      fontWeight: 500,
+                      maxWidth: 280,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                    title={d.name}
+                  >
                     {d.name}
                   </td>
                   <td>
-                    <span className={`proof-badge ${d.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}>
+                    <span
+                      className={`proof-badge ${d.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
+                    >
                       {d.baseStatus}
                     </span>
                   </td>
                   <td>
-                    <span className={`proof-badge ${d.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}>
+                    <span
+                      className={`proof-badge ${d.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
+                    >
                       {d.candStatus}
                     </span>
                   </td>
                   <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11 }}>
                     {Math.abs(deltams) > 20 ? (
-                      <span style={{ color: deltams > 0 ? "var(--proof-red)" : "var(--proof-green)", fontWeight: 700 }}>
-                        {deltams > 0 ? "+" : ""}{deltams}ms
+                      <span
+                        style={{
+                          color: deltams > 0 ? "var(--proof-red)" : "var(--proof-green)",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {deltams > 0 ? "+" : ""}
+                        {deltams}ms
                       </span>
                     ) : (
                       <span style={{ color: "var(--proof-text-secondary)" }}>~0ms</span>
                     )}
                   </td>
                   <td>
-                    <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>{d.category}</span>
+                    <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>
+                      {d.category}
+                    </span>
                   </td>
-                  <td><StateBadge state={d.state} /></td>
+                  <td>
+                    <StateBadge state={d.state} />
+                  </td>
                 </tr>
               );
             })}
@@ -445,12 +521,23 @@ export default function Compare() {
         </table>
       </PageTemplate>
       {diffTotalPages > 1 && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "8px 0 4px", fontSize: 12 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            padding: "8px 0 4px",
+            fontSize: 12,
+          }}
+        >
           <button
             disabled={safeDiffPage <= 1}
             onClick={() => setDiffPage((p) => Math.max(1, p - 1))}
             className="proof-button proof-button-xs"
-          >Prev</button>
+          >
+            Prev
+          </button>
           <span style={{ color: "var(--proof-text-secondary)" }}>
             Page {safeDiffPage} of {diffTotalPages}
           </span>
@@ -458,7 +545,9 @@ export default function Compare() {
             disabled={safeDiffPage >= diffTotalPages}
             onClick={() => setDiffPage((p) => Math.min(diffTotalPages, p + 1))}
             className="proof-button proof-button-xs"
-          >Next</button>
+          >
+            Next
+          </button>
         </div>
       )}
     </>

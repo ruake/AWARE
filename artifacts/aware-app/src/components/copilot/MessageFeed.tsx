@@ -3,7 +3,16 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useLocation } from "wouter";
 import type { Message } from "@/lib/copilot/types";
 import { UserBubble, AssistantBubble } from "./Bubble";
-import { Zap, Shield, TrendingUp, AlertTriangle, Activity, Clock, BarChart3, Globe } from "lucide-react";
+import {
+  Zap,
+  Shield,
+  TrendingUp,
+  AlertTriangle,
+  Activity,
+  Clock,
+  BarChart3,
+  Globe,
+} from "lucide-react";
 
 interface Props {
   messages: Message[];
@@ -12,7 +21,12 @@ interface Props {
 }
 
 const QUICK_ACTIONS = [
-  { label: "Status", query: "What's the current health status across all environments?", icon: Activity, color: "#22c55e" },
+  {
+    label: "Status",
+    query: "What's the current health status across all environments?",
+    icon: Activity,
+    color: "#22c55e",
+  },
   { label: "Flaky", query: "Show me the flakiest tests", icon: Zap, color: "#f59e0b" },
   { label: "Fails", query: "What are the latest failures?", icon: AlertTriangle, color: "#ef4444" },
   { label: "Promote", query: "Can we promote to PROD?", icon: Shield, color: "#8b5cf6" },
@@ -106,10 +120,19 @@ function MessageFeedInner({ messages, onRetry, onSend }: Props) {
             <span style={{ fontSize: 24 }}>🤖</span>
           </div>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--proof-text)", marginBottom: 4 }}>
+            <div
+              style={{ fontSize: 15, fontWeight: 700, color: "var(--proof-text)", marginBottom: 4 }}
+            >
               A.W.A.R.E. Copilot
             </div>
-            <div style={{ fontSize: 12, color: "var(--proof-text-muted)", maxWidth: 340, lineHeight: 1.5 }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--proof-text-muted)",
+                maxWidth: 340,
+                lineHeight: 1.5,
+              }}
+            >
               Ask about test failures, flakiness, promotion status, or analyze runs.
             </div>
           </div>

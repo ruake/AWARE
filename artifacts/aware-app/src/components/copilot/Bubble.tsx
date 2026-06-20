@@ -18,10 +18,13 @@ interface BubbleProps {
 function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
   const [copied, setCopied] = React.useState(false);
   const copy = () => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {});
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
   };
   return (
     <button
@@ -52,10 +55,13 @@ function CodeBlock({ children, language }: { children: string; language: string 
   const [copied, setCopied] = React.useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(children).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {});
+    navigator.clipboard
+      .writeText(children)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
   };
 
   const lang = language || "text";
@@ -73,7 +79,9 @@ function CodeBlock({ children, language }: { children: string; language: string 
           borderBottom: "1px solid var(--proof-border)",
         }}
       >
-        <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}>
+        <span
+          style={{ fontSize: 10, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}
+        >
           {lang}
         </span>
         <button
@@ -185,7 +193,7 @@ function ThinkingDots() {
   );
 }
 
-function AssistantBubbleInner({ message, onRetry, providerType = "openai" }: BubbleProps) {
+function AssistantBubbleInner({ message, onRetry, providerType = "chrome" }: BubbleProps) {
   const hasContent = message.content.length > 0;
   const hasToolCalls = (message.toolCalls?.length ?? 0) > 0;
   const isStreaming = !!message.streaming;
@@ -304,9 +312,7 @@ function AssistantBubbleInner({ message, onRetry, providerType = "openai" }: Bub
                     const isBlock = !!className;
                     const code = String(children).replace(/\n$/, "");
                     return isBlock ? (
-                      <CodeBlock language={match?.[1] ?? "text"}>
-                        {code}
-                      </CodeBlock>
+                      <CodeBlock language={match?.[1] ?? "text"}>{code}</CodeBlock>
                     ) : (
                       <code
                         style={{
@@ -414,7 +420,8 @@ function AssistantBubbleInner({ message, onRetry, providerType = "openai" }: Bub
                   a: ({ children, href }) => (
                     <a
                       href={href}
-                      target="_blank" rel="noopener noreferrer"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={{
                         color: "var(--proof-blue-bright)",
                         textDecoration: "underline",

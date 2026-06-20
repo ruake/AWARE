@@ -27,9 +27,7 @@ export function useAccessibility(options: {
   return props;
 }
 
-export function useKeyboardNavigation(
-  handlers: Record<string, (e: KeyboardEvent) => void>,
-): void {
+export function useKeyboardNavigation(handlers: Record<string, (e: KeyboardEvent) => void>): void {
   const stableHandlers = React.useRef(handlers);
   React.useEffect(() => {
     stableHandlers.current = handlers;
@@ -156,10 +154,7 @@ export function announceToScreenReader(
   });
 }
 
-export function useFocusTrap(
-  ref: React.RefObject<HTMLElement | null>,
-  active: boolean,
-): void {
+export function useFocusTrap(ref: React.RefObject<HTMLElement | null>, active: boolean): void {
   React.useEffect(() => {
     if (!active || !ref.current) return;
 

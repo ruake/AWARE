@@ -103,7 +103,14 @@ export function StatsDashboard({
       </div>
       <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
         <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--proof-text-secondary)",
+              marginBottom: 4,
+            }}
+          >
             By Status
           </div>
           <ResponsiveContainer width="100%" height={60}>
@@ -122,7 +129,14 @@ export function StatsDashboard({
           </ResponsiveContainer>
         </div>
         <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--proof-text-secondary)",
+              marginBottom: 4,
+            }}
+          >
             By Priority
           </div>
           <ResponsiveContainer width="100%" height={60}>
@@ -141,7 +155,14 @@ export function StatsDashboard({
           </ResponsiveContainer>
         </div>
         <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 4 }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--proof-text-secondary)",
+              marginBottom: 4,
+            }}
+          >
             By Category
           </div>
           <ResponsiveContainer width="100%" height={80}>

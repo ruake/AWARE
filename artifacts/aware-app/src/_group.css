@@ -105,8 +105,14 @@
 
 /* ── Copilot Streaming Word Reveal ────────────────────────────── */
 @keyframes wordFadeIn {
-  from { opacity: 0; transform: translateY(2px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .copilot-word-enter {
   animation: wordFadeIn 0.15s ease-out;
@@ -114,12 +120,24 @@
 
 /* ── Copilot Panel Slide ──────────────────────────────────────── */
 @keyframes slideInRight {
-  from { transform: translateX(100%); opacity: 0; }
-  to   { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 @keyframes slideOutRight {
-  from { transform: translateX(0); opacity: 1; }
-  to   { transform: translateX(100%); opacity: 0; }
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 .copilot-panel-enter {
   animation: slideInRight 0.2s ease-out;
@@ -137,8 +155,12 @@
   display: inline-block;
   animation: thinkingBounce 1.2s ease-in-out infinite;
 }
-.copilot-thinking-dot:nth-child(2) { animation-delay: 0.18s; }
-.copilot-thinking-dot:nth-child(3) { animation-delay: 0.36s; }
+.copilot-thinking-dot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.copilot-thinking-dot:nth-child(3) {
+  animation-delay: 0.36s;
+}
 
 /* ── Copilot Input Styles ─────────────────────────────────────── */
 .copilot-input-wrap {
@@ -167,15 +189,15 @@
   transform: scale(1.05);
 }
 .copilot-send-btn-inactive {
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--proof-text-muted, #4e6285);
   cursor: not-allowed;
 }
 
 /* ── Copilot User Bubble ──────────────────────────────────────── */
 .copilot-user-bubble {
-  background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.06));
-  border: 1px solid rgba(59,130,246,0.2);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(59, 130, 246, 0.06));
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 18px 4px 18px 18px;
   padding: 10px 14px;
   font-size: 13.5px;
@@ -196,8 +218,8 @@
 /* ── Copilot Tool Call Card ────────────────────────────────────── */
 .copilot-tool-card {
   border-radius: 8px;
-  border: 1px solid var(--proof-border, rgba(99,130,178,0.13));
-  background: var(--proof-overlay, rgba(2,8,23,0.5));
+  border: 1px solid var(--proof-border, rgba(99, 130, 178, 0.13));
+  background: var(--proof-overlay, rgba(2, 8, 23, 0.5));
   overflow: hidden;
   margin: 4px 0;
   backdrop-filter: blur(8px);
@@ -205,7 +227,8 @@
 
 /* ── Copilot Skeleton ─────────────────────────────────────────── */
 .copilot-skeleton {
-  background: linear-gradient(90deg,
+  background: linear-gradient(
+    90deg,
     var(--proof-surface, #111826) 25%,
     var(--proof-surface-2, #161e2e) 50%,
     var(--proof-surface, #111826) 75%
@@ -217,8 +240,13 @@
 
 /* ── Copilot Pulse Indicator ──────────────────────────────────── */
 @keyframes copilotPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 .copilot-pulse {
   animation: copilotPulse 1.5s ease-in-out infinite;
@@ -239,12 +267,12 @@
   transition: all 0.12s;
 }
 .copilot-toolbar-btn:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: var(--proof-border, rgba(99,130,178,0.13));
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--proof-border, rgba(99, 130, 178, 0.13));
   color: var(--proof-text-secondary, #8ba3c7);
 }
 .copilot-toolbar-btn:active {
-  background: rgba(59,130,246,0.1);
+  background: rgba(59, 130, 246, 0.1);
   color: var(--proof-blue-bright, #60a5fa);
 }
 
@@ -254,7 +282,7 @@
   inset: 0;
   border: 2px dashed var(--proof-blue, #3b82f6);
   border-radius: 12px;
-  background: rgba(59,130,246,0.04);
+  background: rgba(59, 130, 246, 0.04);
   display: flex;
   align-items: center;
   justify-content: center;

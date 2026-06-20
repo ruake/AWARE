@@ -34,7 +34,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
           observerRef.current?.disconnect();
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
 
     if (containerRef.current) {

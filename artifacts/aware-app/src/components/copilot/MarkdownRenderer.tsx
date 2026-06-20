@@ -82,7 +82,8 @@ function CustomLink({ href, children }: { href?: string; children: React.ReactNo
     return (
       <a
         href={href}
-        target="_blank" rel="noopener noreferrer"
+        target="_blank"
+        rel="noopener noreferrer"
         style={{
           color: "var(--proof-blue-bright)",
           textDecoration: "underline",
@@ -113,11 +114,7 @@ function CustomLink({ href, children }: { href?: string; children: React.ReactNo
 }
 
 function TaskList({ children }: { children: React.ReactNode }) {
-  return (
-    <ul style={{ listStyle: "none", paddingLeft: 0, margin: "0 0 10px" }}>
-      {children}
-    </ul>
-  );
+  return <ul style={{ listStyle: "none", paddingLeft: 0, margin: "0 0 10px" }}>{children}</ul>;
 }
 
 function TaskItem({ children, checked }: { children: React.ReactNode; checked: boolean }) {
@@ -150,7 +147,13 @@ function TaskItem({ children, checked }: { children: React.ReactNode; checked: b
       >
         {checked ? "✓" : ""}
       </span>
-      <span style={{ flex: 1, textDecoration: checked ? "line-through" : "none", opacity: checked ? 0.6 : 1 }}>
+      <span
+        style={{
+          flex: 1,
+          textDecoration: checked ? "line-through" : "none",
+          opacity: checked ? 0.6 : 1,
+        }}
+      >
         {children}
       </span>
     </li>
@@ -158,11 +161,7 @@ function TaskItem({ children, checked }: { children: React.ReactNode; checked: b
 }
 
 function TableHead({ children }: { children: React.ReactNode }) {
-  return (
-    <thead style={{ background: "var(--proof-hover-light)" }}>
-      {children}
-    </thead>
-  );
+  return <thead style={{ background: "var(--proof-hover-light)" }}>{children}</thead>;
 }
 
 function TableBody({ children }: { children: React.ReactNode }) {
@@ -174,19 +173,17 @@ export function MarkdownRenderer({ content, streaming }: MarkdownRendererProps) 
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        p: ({ children }) => (
-          <p style={{ margin: "0 0 10px", lineHeight: 1.65 }}>{children}</p>
-        ),
+        p: ({ children }) => <p style={{ margin: "0 0 10px", lineHeight: 1.65 }}>{children}</p>,
         ul: ({ node, children }) => {
           const cls = String((node?.properties as Record<string, unknown>)?.className ?? "");
           const isTaskList = cls.includes("contains-task-list");
-          return isTaskList ? <TaskList>{children}</TaskList> : (
+          return isTaskList ? (
+            <TaskList>{children}</TaskList>
+          ) : (
             <ul style={{ margin: "0 0 10px", paddingLeft: 18 }}>{children}</ul>
           );
         },
-        ol: ({ children }) => (
-          <ol style={{ margin: "0 0 10px", paddingLeft: 18 }}>{children}</ol>
-        ),
+        ol: ({ children }) => <ol style={{ margin: "0 0 10px", paddingLeft: 18 }}>{children}</ol>,
         li: ({ children, ...props }) => {
           const checked = (props as Record<string, unknown>).checked as boolean | null | undefined;
           if (checked !== null && checked !== undefined) {
@@ -232,20 +229,12 @@ export function MarkdownRenderer({ content, streaming }: MarkdownRendererProps) 
           </h2>
         ),
         h3: ({ children }) => (
-          <h3 style={{ fontSize: 13.5, fontWeight: 700, margin: "8px 0 4px" }}>
-            {children}
-          </h3>
+          <h3 style={{ fontSize: 13.5, fontWeight: 700, margin: "8px 0 4px" }}>{children}</h3>
         ),
         strong: ({ children }) => (
-          <strong style={{ fontWeight: 700, color: "var(--proof-text)" }}>
-            {children}
-          </strong>
+          <strong style={{ fontWeight: 700, color: "var(--proof-text)" }}>{children}</strong>
         ),
-        em: ({ children }) => (
-          <em style={{ color: "#94a3b8", fontStyle: "italic" }}>
-            {children}
-          </em>
-        ),
+        em: ({ children }) => <em style={{ color: "#94a3b8", fontStyle: "italic" }}>{children}</em>,
         blockquote: ({ children }) => (
           <blockquote
             style={{
@@ -322,7 +311,8 @@ export function MarkdownRenderer({ content, streaming }: MarkdownRendererProps) 
               border: "none",
               height: 1,
               margin: "14px 0",
-              background: "linear-gradient(to right, transparent, var(--proof-border), transparent)",
+              background:
+                "linear-gradient(to right, transparent, var(--proof-border), transparent)",
             }}
           />
         ),

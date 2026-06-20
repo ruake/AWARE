@@ -94,9 +94,10 @@ export function useEnvHealth() {
   const filteredRuns = useFilteredRuns();
   const envSnap = React.useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
   return React.useMemo(() => {
-    const configs = envSnap.envIds.length > 0
-      ? getEnvConfigs().filter((c) => envSnap.envIds.includes(c.id))
-      : getEnvConfigs();
+    const configs =
+      envSnap.envIds.length > 0
+        ? getEnvConfigs().filter((c) => envSnap.envIds.includes(c.id))
+        : getEnvConfigs();
 
     const groups = new Map<string, Run[]>();
     for (const run of filteredRuns) {

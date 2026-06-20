@@ -26,11 +26,11 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
   // Update bounds to prevent panning out of view
   const clampPan = (newPan: { x: number; y: number }, currentZoom: number) => {
     if (!containerRef.current || currentZoom <= 1) return { x: 0, y: 0 };
-    
+
     const rect = containerRef.current.getBoundingClientRect();
     const maxX = (rect.width * (currentZoom - 1)) / 2;
     const maxY = (rect.height * (currentZoom - 1)) / 2;
-    
+
     return {
       x: Math.max(-maxX, Math.min(maxX, newPan.x)),
       y: Math.max(-maxY, Math.min(maxY, newPan.y)),
@@ -74,10 +74,15 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
       const cx = (e.clientX - rect.left) / rect.width;
       const cy = (e.clientY - rect.top) / rect.height;
       setZoom(2.5);
-      setPan(clampPan({
-        x: -(cx - 0.5) * rect.width * 1.5,
-        y: -(cy - 0.5) * rect.height * 1.5,
-      }, 2.5));
+      setPan(
+        clampPan(
+          {
+            x: -(cx - 0.5) * rect.width * 1.5,
+            y: -(cy - 0.5) * rect.height * 1.5,
+          },
+          2.5,
+        ),
+      );
     }
   };
 
@@ -139,21 +144,45 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
       onTouchMove={handleTouchMove}
     >
       {loading && !error && (
-        <div style={{ position: "absolute", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+        <div
+          style={{
+            position: "absolute",
+            zIndex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
           <Loader2 className="animate-spin text-proof-blue" size={32} />
-          <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>Loading Image...</span>
+          <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>
+            Loading Image...
+          </span>
         </div>
       )}
 
       {error && (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: 40, color: "var(--proof-red)" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 12,
+            padding: 40,
+            color: "var(--proof-red)",
+          }}
+        >
           <AlertCircle size={40} />
           <div style={{ textAlign: "center" }}>
             <div style={{ fontWeight: 600, fontSize: 14 }}>Failed to load image</div>
             <div style={{ fontSize: 12, opacity: 0.8 }}>The image could not be retrieved</div>
           </div>
-          <button 
-            onClick={(e) => { e.stopPropagation(); setError(false); setLoading(true); }}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setError(false);
+              setLoading(true);
+            }}
             className="proof-button proof-button-sm"
           >
             Retry
@@ -167,7 +196,10 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
         alt={alt}
         draggable={false}
         onLoad={() => setLoading(false)}
-        onError={() => { setLoading(false); setError(true); }}
+        onError={() => {
+          setLoading(false);
+          setError(true);
+        }}
         style={{
           display: loading || error ? "none" : "block",
           maxWidth: "100%",
@@ -194,7 +226,10 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
         >
           {zoom !== 1 && (
             <button
-              onClick={(e) => { e.stopPropagation(); resetView(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                resetView();
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",

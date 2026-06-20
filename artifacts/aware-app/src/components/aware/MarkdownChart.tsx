@@ -27,7 +27,15 @@ const TOOLTIP_STYLE = {
     color: "var(--proof-text)",
   },
 };
-const DEFAULT_COLORS = ["#5b8af5", "#f59e0b", "#22c55e", "#ef4444", "#a855f7", "#06b6d4", "#ec4899"];
+const DEFAULT_COLORS = [
+  "#5b8af5",
+  "#f59e0b",
+  "#22c55e",
+  "#ef4444",
+  "#a855f7",
+  "#06b6d4",
+  "#ec4899",
+];
 
 interface ChartConfig {
   type?: string;
@@ -63,10 +71,7 @@ export function MarkdownChart({ config }: { config: ChartConfig }) {
   const headers = config.headers || ["X", "Y"];
   const colors = config.colors || DEFAULT_COLORS;
   const height = config.height || "200px";
-  const chartData = React.useMemo(
-    () => buildChartData(headers, rows),
-    [headers, rows],
-  );
+  const chartData = React.useMemo(() => buildChartData(headers, rows), [headers, rows]);
   const yKeys = guessYKeys(headers);
   const title = config.title || "";
   const h = parseInt(height) || 200;

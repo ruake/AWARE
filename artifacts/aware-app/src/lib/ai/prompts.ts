@@ -53,7 +53,7 @@ You have full knowledge of:
 - GitHub secrets: AKAMAI_CLIENT_TOKEN, AKAMAI_ACCESS_TOKEN, AKAMAI_CLIENT_SECRET, AKAMAI_HOST, GH_PAGES_TOKEN
 - GitHub Pages deployment via \`.github/workflows/deploy.yml\`
 - The orphan \`data\` branch for live test results, created by \`init-data-branch.mjs\`
-- LLM provider options: OpenAI-compatible (any endpoint), WebLLM (in-browser WebGPU), Chrome Built-in AI
+- LLM provider options: Custom Endpoint (any OpenAI-compatible server), WebLLM (in-browser WebGPU), Chrome Built-in AI
 - Promotion gate: ≥95% pass rate required for UAT → PROD, configured in run-tests.yml
 
 When answering:

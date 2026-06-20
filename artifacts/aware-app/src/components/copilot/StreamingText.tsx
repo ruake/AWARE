@@ -19,13 +19,8 @@ export default function StreamingText({
   speed = "normal",
   onComplete,
 }: StreamingTextProps) {
-  const words = React.useMemo(
-    () => (content ? content.split(/(\s+)/) : []),
-    [content]
-  );
-  const [revealedCount, setRevealedCount] = React.useState(
-    () => (isStreaming ? 0 : words.length)
-  );
+  const words = React.useMemo(() => (content ? content.split(/(\s+)/) : []), [content]);
+  const [revealedCount, setRevealedCount] = React.useState(() => (isStreaming ? 0 : words.length));
   const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const completedRef = React.useRef(false);
   const onCompleteRef = React.useRef(onComplete);

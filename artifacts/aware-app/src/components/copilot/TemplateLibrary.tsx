@@ -52,66 +52,77 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
     }
     if (search.trim()) {
       const q = search.toLowerCase();
-      list = list.filter((t) => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+      list = list.filter(
+        (t) => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q),
+      );
     }
     const pinned = list.filter((t) => t.pinned);
     const unpinned = list.filter((t) => !t.pinned);
     return [...pinned, ...unpinned];
   }, [templates, search, category]);
 
-  const handleDelete = useCallback((e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    if (confirmDelete === id) {
-      deleteTemplate(id);
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
-      setConfirmDelete(null);
-    } else {
-      setConfirmDelete(id);
-    }
-  }, [confirmDelete]);
+  const handleDelete = useCallback(
+    (e: React.MouseEvent, id: string) => {
+      e.stopPropagation();
+      if (confirmDelete === id) {
+        deleteTemplate(id);
+        setTemplates((prev) => prev.filter((t) => t.id !== id));
+        setConfirmDelete(null);
+      } else {
+        setConfirmDelete(id);
+      }
+    },
+    [confirmDelete],
+  );
 
-  const handleUse = useCallback((content: string) => {
-    onSelect(content);
-    onClose();
-  }, [onSelect, onClose]);
+  const handleUse = useCallback(
+    (content: string) => {
+      onSelect(content);
+      onClose();
+    },
+    [onSelect, onClose],
+  );
 
   const focusItem = useCallback((idx: number) => {
     setFocusedIndex(idx);
     itemRefs.current.get(idx)?.focus();
   }, []);
 
-  const handleListKeyDown = useCallback((e: React.KeyboardEvent) => {
-    const len = filtered.length;
-    if (len === 0) return;
+  const handleListKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const len = filtered.length;
+      if (len === 0) return;
 
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        focusItem(focusedIndex < len - 1 ? focusedIndex + 1 : 0);
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        focusItem(focusedIndex > 0 ? focusedIndex - 1 : len - 1);
-        break;
-      case "Home":
-        e.preventDefault();
-        focusItem(0);
-        break;
-      case "End":
-        e.preventDefault();
-        focusItem(len - 1);
-        break;
-      case "Enter":
-        if (focusedIndex >= 0 && focusedIndex < len) {
+      switch (e.key) {
+        case "ArrowDown":
           e.preventDefault();
-          handleUse(filtered[focusedIndex].content);
-        }
-        break;
-      case "Escape":
-        onClose();
-        break;
-    }
-  }, [filtered, focusedIndex, focusItem, handleUse, onClose]);
+          focusItem(focusedIndex < len - 1 ? focusedIndex + 1 : 0);
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          focusItem(focusedIndex > 0 ? focusedIndex - 1 : len - 1);
+          break;
+        case "Home":
+          e.preventDefault();
+          focusItem(0);
+          break;
+        case "End":
+          e.preventDefault();
+          focusItem(len - 1);
+          break;
+        case "Enter":
+          if (focusedIndex >= 0 && focusedIndex < len) {
+            e.preventDefault();
+            handleUse(filtered[focusedIndex].content);
+          }
+          break;
+        case "Escape":
+          onClose();
+          break;
+      }
+    },
+    [filtered, focusedIndex, focusItem, handleUse, onClose],
+  );
 
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -137,7 +148,9 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
         backdropFilter: "blur(4px)",
         WebkitBackdropFilter: "blur(4px)",
       }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
         style={{
@@ -276,7 +289,9 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                   gap: 4,
                   padding: "4px 10px",
                   borderRadius: "var(--proof-radius-full)",
-                  border: active ? "1px solid var(--proof-blue-border)" : "1px solid var(--proof-border)",
+                  border: active
+                    ? "1px solid var(--proof-blue-border)"
+                    : "1px solid var(--proof-border)",
                   background: active ? "var(--proof-blue-bg)" : "var(--proof-surface)",
                   color: active ? "var(--proof-blue-bright)" : "var(--proof-text-secondary)",
                   cursor: "pointer",
@@ -341,8 +356,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                 </div>
               )}
               {filtered.map((template, idx) => {
-                const isFirstUnpinned =
-                  idx > 0 && !template.pinned && filtered[idx - 1]?.pinned;
+                const isFirstUnpinned = idx > 0 && !template.pinned && filtered[idx - 1]?.pinned;
                 const isFocused = focusedIndex === idx;
                 return (
                   <React.Fragment key={template.id}>
@@ -386,7 +400,9 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                         border: isFocused
                           ? "1px solid var(--proof-blue-border)"
                           : "1px solid var(--proof-border)",
-                        background: isFocused ? "var(--proof-surface-hover)" : "var(--proof-surface)",
+                        background: isFocused
+                          ? "var(--proof-surface-hover)"
+                          : "var(--proof-surface)",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.borderColor = "var(--proof-border-accent)";
@@ -414,14 +430,22 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                           height: 20,
                           borderRadius: "var(--proof-radius-sm)",
                           border: "none",
-                          background: confirmDelete === template.id ? "var(--proof-red-bg)" : "transparent",
-                          color: confirmDelete === template.id ? "var(--proof-red)" : "var(--proof-text-tertiary)",
+                          background:
+                            confirmDelete === template.id ? "var(--proof-red-bg)" : "transparent",
+                          color:
+                            confirmDelete === template.id
+                              ? "var(--proof-red)"
+                              : "var(--proof-text-tertiary)",
                           cursor: "pointer",
                           opacity: 0,
                           transition: "opacity var(--proof-transition-fast)",
                         }}
                         className="template-delete-btn"
-                        title={confirmDelete === template.id ? "Click again to confirm" : "Delete template"}
+                        title={
+                          confirmDelete === template.id
+                            ? "Click again to confirm"
+                            : "Delete template"
+                        }
                       >
                         <Trash2 size={11} />
                       </button>

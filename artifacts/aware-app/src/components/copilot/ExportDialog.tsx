@@ -7,7 +7,11 @@ interface ExportDialogProps {
   onClose: () => void;
 }
 
-function formatAsMarkdown(thread: Thread, includeTimestamps: boolean, includeMetadata: boolean): string {
+function formatAsMarkdown(
+  thread: Thread,
+  includeTimestamps: boolean,
+  includeMetadata: boolean,
+): string {
   const parts: string[] = [];
   if (includeMetadata) {
     parts.push(`# Conversation: ${thread.title}`);
@@ -35,7 +39,12 @@ function formatAsMarkdown(thread: Thread, includeTimestamps: boolean, includeMet
   return parts.join("\n");
 }
 
-function formatAsJSON(thread: Thread, includeTimestamps: boolean, includeToolCalls: boolean, includeMetadata: boolean): string {
+function formatAsJSON(
+  thread: Thread,
+  includeTimestamps: boolean,
+  includeToolCalls: boolean,
+  includeMetadata: boolean,
+): string {
   const obj: Record<string, unknown> = {};
   if (includeMetadata) {
     obj.title = thread.title;
@@ -58,7 +67,11 @@ function formatAsJSON(thread: Thread, includeTimestamps: boolean, includeToolCal
   return JSON.stringify(obj, null, 2);
 }
 
-function formatAsText(thread: Thread, includeTimestamps: boolean, includeMetadata: boolean): string {
+function formatAsText(
+  thread: Thread,
+  includeTimestamps: boolean,
+  includeMetadata: boolean,
+): string {
   const parts: string[] = [];
   if (includeMetadata) {
     parts.push(`Conversation: ${thread.title}`);
@@ -94,9 +107,12 @@ function formatExport(
 
 function getExtension(format: ExportFormat): string {
   switch (format) {
-    case "markdown": return ".md";
-    case "json": return ".json";
-    case "text": return ".txt";
+    case "markdown":
+      return ".md";
+    case "json":
+      return ".json";
+    case "text":
+      return ".txt";
   }
 }
 
@@ -259,7 +275,15 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
               <button
                 aria-label="Dismiss error"
                 onClick={() => setDownloadError(null)}
-                style={{ background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: "auto", color: "inherit", display: "flex" }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                  marginLeft: "auto",
+                  color: "inherit",
+                  display: "flex",
+                }}
               >
                 <X size={12} />
               </button>
@@ -268,7 +292,16 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
 
           {/* Format selector */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: "var(--proof-text-secondary)",
+                marginBottom: 6,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}
+            >
               Format
             </div>
             <div style={{ display: "flex", gap: 6 }} role="group" aria-label="Export format">
@@ -286,7 +319,9 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
                       gap: 6,
                       padding: "7px 14px",
                       borderRadius: 20,
-                      border: active ? "1px solid var(--proof-blue)" : "1px solid var(--proof-border)",
+                      border: active
+                        ? "1px solid var(--proof-blue)"
+                        : "1px solid var(--proof-border)",
                       background: active ? "var(--proof-blue)" : "var(--proof-surface)",
                       color: active ? "#fff" : "var(--proof-text)",
                       cursor: "pointer",
@@ -305,11 +340,29 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
 
           {/* Options */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: "var(--proof-text-secondary)",
+                marginBottom: 6,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}
+            >
               Options
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, color: "var(--proof-text)" }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  cursor: "pointer",
+                  fontSize: 13,
+                  color: "var(--proof-text)",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={includeTimestamps}
@@ -340,7 +393,16 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
                 Include tool calls
                 <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>(JSON only)</span>
               </label>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, color: "var(--proof-text)" }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  cursor: "pointer",
+                  fontSize: 13,
+                  color: "var(--proof-text)",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={includeMetadata}
@@ -348,14 +410,25 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
                   style={{ accentColor: "var(--proof-blue)" }}
                 />
                 Include metadata
-                <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>(thread info header)</span>
+                <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>
+                  (thread info header)
+                </span>
               </label>
             </div>
           </div>
 
           {/* Preview */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: "var(--proof-text-secondary)",
+                marginBottom: 6,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}
+            >
               Preview
             </div>
             <pre

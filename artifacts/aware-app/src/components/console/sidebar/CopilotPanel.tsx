@@ -3,8 +3,12 @@ import { useLocation } from "wouter";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { QUICK_ACTIONS } from "@/lib/copilot/quickActions";
 import {
-  loadThreads, saveThreads, deleteThreadFromList, updateThreadInList,
-  getActiveThreadId, setActiveThreadId,
+  loadThreads,
+  saveThreads,
+  deleteThreadFromList,
+  updateThreadInList,
+  getActiveThreadId,
+  setActiveThreadId,
 } from "@/lib/copilot/storage";
 import type { Thread } from "@/lib/copilot/types";
 import { Plus, Bot, Zap, MessageSquare, Trash2, Edit3, Check, X, Search } from "lucide-react";
@@ -170,8 +174,6 @@ export function CopilotPanel() {
     }
   }, [editingId]);
 
-
-
   const activeIdx = filtered.findIndex((t) => t.id === activeId);
   // Roving tabIndex: exactly ONE item always has tabIndex=0 so Tab can enter the list.
   // When nothing is programmatically focused yet, default to the active thread or first item.
@@ -201,11 +203,13 @@ export function CopilotPanel() {
             transition: "all 0.15s",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1))";
+            (e.currentTarget as HTMLElement).style.background =
+              "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1))";
             (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.4)";
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.06))";
+            (e.currentTarget as HTMLElement).style.background =
+              "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.06))";
             (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.2)";
           }}
         >
@@ -254,8 +258,12 @@ export function CopilotPanel() {
               onClick={() => setSearch("")}
               aria-label="Clear search"
               style={{
-                background: "none", border: "none", color: "var(--proof-text-muted)",
-                cursor: "pointer", padding: 2, display: "inline-flex",
+                background: "none",
+                border: "none",
+                color: "var(--proof-text-muted)",
+                cursor: "pointer",
+                padding: 2,
+                display: "inline-flex",
               }}
             >
               <X size={10} />
@@ -308,8 +316,12 @@ export function CopilotPanel() {
                 borderRadius: 3,
                 transition: "color 0.12s",
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--proof-red-bright)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)"; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--proof-red-bright)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)";
+              }}
             >
               <Trash2 size={9} />
             </button>
@@ -335,10 +347,15 @@ export function CopilotPanel() {
               <button
                 onClick={handleClearAll}
                 style={{
-                  flex: 1, padding: "3px 0", borderRadius: 4,
+                  flex: 1,
+                  padding: "3px 0",
+                  borderRadius: 4,
                   border: "1px solid rgba(239,68,68,0.3)",
-                  background: "rgba(239,68,68,0.12)", color: "#f87171",
-                  cursor: "pointer", fontSize: 10, fontWeight: 600,
+                  background: "rgba(239,68,68,0.12)",
+                  color: "#f87171",
+                  cursor: "pointer",
+                  fontSize: 10,
+                  fontWeight: 600,
                 }}
               >
                 Delete all
@@ -346,10 +363,14 @@ export function CopilotPanel() {
               <button
                 onClick={() => setConfirmClearAll(false)}
                 style={{
-                  flex: 1, padding: "3px 0", borderRadius: 4,
+                  flex: 1,
+                  padding: "3px 0",
+                  borderRadius: 4,
                   border: "1px solid var(--proof-border)",
-                  background: "transparent", color: "var(--proof-text-muted)",
-                  cursor: "pointer", fontSize: 10,
+                  background: "transparent",
+                  color: "var(--proof-text-muted)",
+                  cursor: "pointer",
+                  fontSize: 10,
                 }}
               >
                 Cancel
@@ -359,7 +380,14 @@ export function CopilotPanel() {
         )}
 
         {filtered.length === 0 && (
-          <div style={{ padding: "12px 10px", fontSize: 10, color: "var(--proof-text-muted)", textAlign: "center" }}>
+          <div
+            style={{
+              padding: "12px 10px",
+              fontSize: 10,
+              color: "var(--proof-text-muted)",
+              textAlign: "center",
+            }}
+          >
             {search.trim() ? "No threads match" : "No conversations yet"}
           </div>
         )}
@@ -420,10 +448,12 @@ export function CopilotPanel() {
                   transition: "background 0.1s",
                 }}
                 onMouseEnter={(e) => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+                  if (!isActive)
+                    (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
                 }}
                 onMouseLeave={(e) => {
-                  if (!isActive && !isFocused) (e.currentTarget as HTMLElement).style.background = "transparent";
+                  if (!isActive && !isFocused)
+                    (e.currentTarget as HTMLElement).style.background = "transparent";
                 }}
               >
                 {isEditing ? (
@@ -452,16 +482,36 @@ export function CopilotPanel() {
                       }}
                     />
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleRename(t.id); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRename(t.id);
+                      }}
                       aria-label="Save rename"
-                      style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "flex", color: "var(--proof-green)" }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: 2,
+                        display: "flex",
+                        color: "var(--proof-green)",
+                      }}
                     >
                       <Check size={10} />
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); setEditingId(null); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingId(null);
+                      }}
                       aria-label="Cancel rename"
-                      style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "flex", color: "var(--proof-text-muted)" }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: 2,
+                        display: "flex",
+                        color: "var(--proof-text-muted)",
+                      }}
                     >
                       <X size={10} />
                     </button>
@@ -470,7 +520,10 @@ export function CopilotPanel() {
                   <>
                     <MessageSquare
                       size={10}
-                      style={{ flexShrink: 0, color: isActive ? "var(--proof-blue-bright)" : "var(--proof-text-muted)" }}
+                      style={{
+                        flexShrink: 0,
+                        color: isActive ? "var(--proof-blue-bright)" : "var(--proof-text-muted)",
+                      }}
                     />
                     <span
                       style={{
@@ -486,11 +539,25 @@ export function CopilotPanel() {
                       {t.title}
                     </span>
                     {isConfirming ? (
-                      <span style={{ fontSize: 8.5, color: "var(--proof-red-bright)", fontWeight: 600, flexShrink: 0 }}>
+                      <span
+                        style={{
+                          fontSize: 8.5,
+                          color: "var(--proof-red-bright)",
+                          fontWeight: 600,
+                          flexShrink: 0,
+                        }}
+                      >
                         Del again?
                       </span>
                     ) : (
-                      <span style={{ fontSize: 8, color: "var(--proof-text-muted)", flexShrink: 0, marginRight: 2 }}>
+                      <span
+                        style={{
+                          fontSize: 8,
+                          color: "var(--proof-text-muted)",
+                          flexShrink: 0,
+                          marginRight: 2,
+                        }}
+                      >
                         {relTime(t.updatedAt)}
                       </span>
                     )}
@@ -500,11 +567,23 @@ export function CopilotPanel() {
                       style={{ display: "flex", gap: 1, opacity: 0, transition: "opacity 0.12s" }}
                     >
                       <button
-                        onClick={(e) => { e.stopPropagation(); setEditValue(t.title); setEditingId(t.id); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditValue(t.title);
+                          setEditingId(t.id);
+                        }}
                         tabIndex={-1}
                         aria-label="Rename thread"
                         title="Rename"
-                        style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "flex", color: "var(--proof-text-muted)", borderRadius: 3 }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 2,
+                          display: "flex",
+                          color: "var(--proof-text-muted)",
+                          borderRadius: 3,
+                        }}
                       >
                         <Edit3 size={9} />
                       </button>
@@ -514,8 +593,14 @@ export function CopilotPanel() {
                         aria-label={isConfirming ? "Confirm delete" : "Delete thread (Del)"}
                         title={isConfirming ? "Click again to confirm" : "Delete (Del)"}
                         style={{
-                          background: "none", border: "none", cursor: "pointer", padding: 2, display: "flex",
-                          color: isConfirming ? "var(--proof-red-bright)" : "var(--proof-text-muted)",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 2,
+                          display: "flex",
+                          color: isConfirming
+                            ? "var(--proof-red-bright)"
+                            : "var(--proof-text-muted)",
                           borderRadius: 3,
                         }}
                       >
@@ -589,7 +674,14 @@ export function CopilotPanel() {
                 }}
               >
                 <Icon size={11} style={{ flexShrink: 0 }} />
-                <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <span
+                  style={{
+                    flex: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {a.label}
                 </span>
               </button>
@@ -609,7 +701,7 @@ export function CopilotPanel() {
           flexShrink: 0,
         }}
       >
-        <span style={{ fontWeight: 600 }}>AI:</span> Chrome · WebLLM · OpenAI
+        <span style={{ fontWeight: 600 }}>AI:</span> Chrome · WebLLM · Custom Endpoint
       </div>
     </div>
   );

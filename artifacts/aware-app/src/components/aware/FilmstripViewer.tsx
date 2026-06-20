@@ -8,7 +8,9 @@ import { ZoomableImage } from "@/components/aware/ZoomableImage";
 function LazyGalleryImage({ source }: { source: string }) {
   const [url, setUrl] = React.useState("");
   React.useEffect(() => {
-    preloadImage(source).then(setUrl).catch(() => {});
+    preloadImage(source)
+      .then(setUrl)
+      .catch(() => {});
   }, [source]);
   if (!url) {
     return (
@@ -145,10 +147,12 @@ function FilmstripThumbnail({
   React.useEffect(() => {
     const source = getImageSource(frame);
     if (!source.startsWith("data:")) {
-      preloadImage(source).then((url) => {
-        setSrc(url);
-        setLoaded(true);
-      }).catch(() => {});
+      preloadImage(source)
+        .then((url) => {
+          setSrc(url);
+          setLoaded(true);
+        })
+        .catch(() => {});
     }
   }, [frame, frame.dataUri, frame.imageUrl]);
 
@@ -217,7 +221,13 @@ function FilmstripThumbnail({
   );
 }
 
-export function FilmstripViewer({ frames, onClose }: { frames: FilmstripFrame[]; onClose: () => void }) {
+export function FilmstripViewer({
+  frames,
+  onClose,
+}: {
+  frames: FilmstripFrame[];
+  onClose: () => void;
+}) {
   const [activeIdx, setActiveIdx] = React.useState<number | null>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);

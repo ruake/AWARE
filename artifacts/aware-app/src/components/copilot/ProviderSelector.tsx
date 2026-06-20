@@ -9,13 +9,31 @@ interface Props {
   onSwitch: (type: ProviderType) => void;
 }
 
-const META: Record<ProviderType, { label: string; icon: React.ReactNode; color: string; description: string }> = {
-  openai: { label: "OpenAI", icon: <Globe size={12} />, color: "#10a37f", description: "Requires an API key in Settings" },
-  webllm: { label: "WebLLM", icon: <Cpu size={12} />, color: "#8b5cf6", description: "Runs locally — downloads model on first use" },
-  chrome: { label: "Chrome AI", icon: <Zap size={12} />, color: "#4285f4", description: "On-device via Chrome's built-in Gemini Nano" },
+const META: Record<
+  ProviderType,
+  { label: string; icon: React.ReactNode; color: string; description: string }
+> = {
+  custom: {
+    label: "Custom Endpoint",
+    icon: <Globe size={12} />,
+    color: "#10a37f",
+    description: "Any OpenAI-compatible server — configure URL in Settings",
+  },
+  webllm: {
+    label: "WebLLM",
+    icon: <Cpu size={12} />,
+    color: "#8b5cf6",
+    description: "Runs locally — downloads model on first use",
+  },
+  chrome: {
+    label: "Chrome AI",
+    icon: <Zap size={12} />,
+    color: "#4285f4",
+    description: "On-device via Chrome's built-in Gemini Nano",
+  },
 };
 
-const ORDER: ProviderType[] = ["webllm", "openai", "chrome"];
+const ORDER: ProviderType[] = ["webllm", "chrome", "custom"];
 
 const STATUS_DOT: Record<ProviderStatus, { color: string; title: string }> = {
   available: { color: "#22c55e", title: "Available" },
@@ -26,7 +44,7 @@ const STATUS_DOT: Record<ProviderStatus, { color: string; title: string }> = {
 const UNAVAILABLE_REASON: Record<ProviderType, string> = {
   webllm: "Your browser may not support WebGPU, which is required for WebLLM",
   chrome: "Requires Chrome 127+ with Gemini Nano enabled",
-  openai: "Not available",
+  custom: "Configure an API URL in Settings to enable",
 };
 
 export default function ProviderSelector({
@@ -205,8 +223,7 @@ export default function ProviderSelector({
                     e.currentTarget.style.background = "var(--proof-hover)";
                 }}
                 onMouseLeave={(e) => {
-                  if (!disabled && !isActive)
-                    e.currentTarget.style.background = "transparent";
+                  if (!disabled && !isActive) e.currentTarget.style.background = "transparent";
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>

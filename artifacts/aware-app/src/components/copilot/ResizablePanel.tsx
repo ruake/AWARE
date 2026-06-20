@@ -46,9 +46,7 @@ export function ResizablePanel({
       if (!dragRef.current) return;
       const { startX, startWidth } = dragRef.current;
       const delta = e.clientX - startX;
-      const next = side === "left"
-        ? startWidth + delta
-        : startWidth - delta;
+      const next = side === "left" ? startWidth + delta : startWidth - delta;
       const clamped = clamp(next);
       setWidth(clamped);
       onResize?.(clamped);

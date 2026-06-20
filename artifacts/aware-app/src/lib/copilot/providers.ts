@@ -6,7 +6,7 @@ import type {
   ToolDefinition,
   StreamDelta,
 } from "./types";
-import { loadOpenAIConfig } from "./storage";
+import { loadCustomEndpointConfig } from "./storage";
 import { synthesizeWithChromeAI, answerDirectWithChromeAI } from "./chromeAIDataLayer";
 import { checkAIRateLimit } from "@/lib/rateLimit";
 
@@ -115,13 +115,17 @@ export class WebLLMProvider implements IProvider {
   }
 }
 
-// ── OpenAI Provider ──────────────────────────────────────────────────────────
-export class OpenAIProvider implements IProvider {
-  readonly type: ProviderType = "openai";
+// ── Custom Endpoint Provider ──────────────────────────────────────────────────
+// Speaks the OpenAI Chat Completions protocol, but works with ANY compatible
+// server: Ollama, LM Studio, Mistral, vLLM, llama.cpp, etc.
+// No default URL or model is baked in — the user must configure both.
+export class CustomEndpointProvider implements IProvider {
+  readonly type: ProviderType = "custom";
   readonly supportsToolCalling = true;
 
   async checkAvailability(): Promise<ProviderStatus> {
-    return "available";
+    const { apiKey, apiUrl } = loadCustomEndpointConfig();
+    return apiUrl ? "available" : "unavailable";
   }
 
   async stream(
@@ -139,14 +143,12 @@ export class OpenAIProvider implements IProvider {
       return;
     }
 
-    const { apiKey, apiUrl, model } = loadOpenAIConfig();
-    const base = apiUrl || "https://api.openai.com/v1";
+    const { apiKey, apiUrl, model } = loadCustomEndpointConfig();
 
-    const useServerProxy = import.meta.env.DEV || import.meta.env.VITE_USE_AI_PROXY === "true";
-
-    if (!useServerProxy && !apiKey) {
+    if (!apiUrl) {
       onDelta({
-        content: "⚠️ No OpenAI API key — open **Settings** (top right) to add one.",
+        content:
+          "⚠️ No endpoint configured — open **Settings** (top right) to set your API URL and optionally an API key.\n\nAny OpenAI-compatible server works: Ollama, LM Studio, Mistral, vLLM, llama.cpp, etc.",
         done: true,
       });
       return;
@@ -162,16 +164,14 @@ export class OpenAIProvider implements IProvider {
 
     const msgs = toolDefs ? mergeSystemIntoUser(messages) : messages;
 
-    const endpoint = useServerProxy ? "/api/ai/chat" : `${base}/chat/completions`;
-    const authHeaders: Record<string, string> = useServerProxy
-      ? {}
-      : { Authorization: `Bearer ${apiKey}` };
+    const endpoint = `${apiUrl.replace(/\/$/, "")}/chat/completions`;
+    const authHeaders: Record<string, string> = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
 
     const resp = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify({
-        model: model || "gpt-4o-mini",
+        model: model || undefined,
         messages: msgs,
         tools: toolDefs,
         tool_choice: toolDefs ? "auto" : undefined,
@@ -184,7 +184,7 @@ export class OpenAIProvider implements IProvider {
 
     if (!resp.ok) {
       const text = await resp.text().catch(() => "");
-      throw new Error(`OpenAI ${resp.status}: ${text}`);
+      throw new Error(`Endpoint ${resp.status}: ${text}`);
     }
 
     const reader = resp.body!.getReader();
@@ -579,8 +579,8 @@ export function createProvider(type: ProviderType): IProvider {
   switch (type) {
     case "webllm":
       return new WebLLMProvider();
-    case "openai":
-      return new OpenAIProvider();
+    case "custom":
+      return new CustomEndpointProvider();
     case "chrome":
       return new ChromeProvider();
   }

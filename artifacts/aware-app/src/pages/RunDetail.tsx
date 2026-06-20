@@ -7,14 +7,7 @@ import {
   subscribeToDataInit,
 } from "@/lib/data";
 import type { TestResult } from "@/lib/types";
-import {
-  ChevronLeft,
-  ChevronRight,
-  BarChart3,
-  FileText,
-  ChevronDown,
-  X,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, BarChart3, FileText, ChevronDown, X } from "lucide-react";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
@@ -70,7 +63,10 @@ export default function RunDetail() {
     autoSelectedRunRef.current = run.id;
     if (urlTestId) {
       const match = results.find((r) => r.id === urlTestId);
-      if (match) { setSelectedResult(match); return; }
+      if (match) {
+        setSelectedResult(match);
+        return;
+      }
     }
     setSelectedResult(results[0]);
   }, [run?.id, urlTestId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -147,7 +143,16 @@ export default function RunDetail() {
             }}
           >
             <TimeWindowProvider>
-              <div style={{ padding: "6px 14px", borderBottom: "1px solid var(--proof-grey)", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <div
+                style={{
+                  padding: "6px 14px",
+                  borderBottom: "1px solid var(--proof-grey)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  flexWrap: "wrap",
+                }}
+              >
                 <TimeWindowControls />
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto" }}>
                   <div style={{ position: "relative" }}>
@@ -158,7 +163,19 @@ export default function RunDetail() {
                       onChange={(e) => setSearch(e.target.value)}
                       style={{ paddingLeft: 22, width: 160, height: 24, fontSize: 11 }}
                     />
-                    <span style={{ position: "absolute", left: 6, top: "50%", transform: "translateY(-50%)", color: "var(--proof-text-muted)", pointerEvents: "none", fontSize: 11 }}>⌕</span>
+                    <span
+                      style={{
+                        position: "absolute",
+                        left: 6,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "var(--proof-text-muted)",
+                        pointerEvents: "none",
+                        fontSize: 11,
+                      }}
+                    >
+                      ⌕
+                    </span>
                   </div>
                   <select
                     className="proof-input"
@@ -177,13 +194,21 @@ export default function RunDetail() {
                     style={{ fontSize: 11, height: 24, padding: "0 6px" }}
                   >
                     <option value="all">All categories</option>
-                    {[...new Set(results.map((r) => r.category).filter(Boolean))].sort().map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
+                    {[...new Set(results.map((r) => r.category).filter(Boolean))]
+                      .sort()
+                      .map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
                   </select>
                   {(search || statusFilter !== "all" || catFilter !== "all") && (
                     <button
-                      onClick={() => { setSearch(""); setStatusFilter("all"); setCatFilter("all"); }}
+                      onClick={() => {
+                        setSearch("");
+                        setStatusFilter("all");
+                        setCatFilter("all");
+                      }}
                       className="proof-button-ghost"
                       style={{ fontSize: 10, padding: "2px 6px" }}
                     >

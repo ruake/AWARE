@@ -79,7 +79,8 @@ function computeStats(messages: Message[]): ComputedStats {
 
   const assistantMsgs = messages.filter((m) => m.role === "assistant");
   const totalResponseLength = assistantMsgs.reduce((acc, m) => acc + m.content.length, 0);
-  const avgResponseLength = assistantMsgs.length > 0 ? totalResponseLength / assistantMsgs.length : 0;
+  const avgResponseLength =
+    assistantMsgs.length > 0 ? totalResponseLength / assistantMsgs.length : 0;
 
   const toolCallBreakdown: Record<string, number> = {};
   let totalToolCalls = 0;
@@ -166,15 +167,19 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
 
   const stats = computeStats(thread.messages);
   const userRatio = stats.totalMessages > 0 ? stats.userMessages / stats.totalMessages : 0;
-  const assistantRatio = stats.totalMessages > 0 ? stats.assistantMessages / stats.totalMessages : 0;
+  const assistantRatio =
+    stats.totalMessages > 0 ? stats.assistantMessages / stats.totalMessages : 0;
   const toolNames = Object.keys(stats.toolCallBreakdown);
   const maxToolCount = Math.max(1, ...Object.values(stats.toolCallBreakdown));
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(buildCopyText(stats, thread)).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    }).catch(() => {});
+    navigator.clipboard
+      .writeText(buildCopyText(stats, thread))
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1800);
+      })
+      .catch(() => {});
   };
 
   return (
@@ -230,7 +235,16 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
       </div>
 
       {/* Scrollable content */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "10px 12px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
         {/* Thread info */}
         <div
           style={{
@@ -243,10 +257,20 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
             background: "var(--proof-surface)",
           }}
         >
-          <div style={{ fontSize: 9.5, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          <div
+            style={{
+              fontSize: 9.5,
+              color: "var(--proof-text-muted)",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+            }}
+          >
             Thread
           </div>
-          <div style={{ fontSize: 11, color: "var(--proof-text)", fontWeight: 500, lineHeight: 1.3 }}>
+          <div
+            style={{ fontSize: 11, color: "var(--proof-text)", fontWeight: 500, lineHeight: 1.3 }}
+          >
             {thread.title}
           </div>
           <div style={{ display: "flex", gap: 12, marginTop: 2 }}>
@@ -362,9 +386,7 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
                   minWidth: userRatio > 0.1 ? undefined : 0,
                 }}
               >
-                {userRatio > 0.1 && (
-                  <User size={9} style={{ color: "#fff", flexShrink: 0 }} />
-                )}
+                {userRatio > 0.1 && <User size={9} style={{ color: "#fff", flexShrink: 0 }} />}
               </div>
             )}
             {assistantRatio > 0 && (
@@ -379,9 +401,7 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
                   minWidth: assistantRatio > 0.1 ? undefined : 0,
                 }}
               >
-                {assistantRatio > 0.1 && (
-                  <Bot size={9} style={{ color: "#fff", flexShrink: 0 }} />
-                )}
+                {assistantRatio > 0.1 && <Bot size={9} style={{ color: "#fff", flexShrink: 0 }} />}
               </div>
             )}
           </div>
@@ -496,7 +516,15 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
           >
             Timeline
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 3, maxHeight: 140, overflowY: "auto" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
+              maxHeight: 140,
+              overflowY: "auto",
+            }}
+          >
             {thread.messages.map((msg, i) => (
               <div key={msg.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <div
@@ -535,16 +563,12 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
                   ) : (
                     <span style={{ color: "#22c55e" }}>Assistant</span>
                   )}
-                  {msg.content.length > 40
-                    ? `: ${msg.content.slice(0, 40)}…`
-                    : `: ${msg.content}`}
+                  {msg.content.length > 40 ? `: ${msg.content.slice(0, 40)}…` : `: ${msg.content}`}
                 </span>
               </div>
             ))}
             {thread.messages.length === 0 && (
-              <div style={{ fontSize: 9.5, color: "var(--proof-text-muted)" }}>
-                No messages yet
-              </div>
+              <div style={{ fontSize: 9.5, color: "var(--proof-text-muted)" }}>No messages yet</div>
             )}
           </div>
         </div>

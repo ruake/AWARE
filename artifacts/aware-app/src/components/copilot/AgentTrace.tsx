@@ -10,7 +10,7 @@ interface Props {
 
 const PROVIDER_LABEL: Record<ProviderType, { label: string; color: string }> = {
   webllm: { label: "WebLLM · Llama-3.2-3B", color: "#a78bfa" },
-  openai: { label: "OpenAI", color: "#34d399" },
+  custom: { label: "Custom", color: "#34d399" },
   chrome: { label: "Chrome AI · Gemini Nano", color: "#fbbf24" },
 };
 

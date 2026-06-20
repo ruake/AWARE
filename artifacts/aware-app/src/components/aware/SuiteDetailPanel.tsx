@@ -1,12 +1,6 @@
 import React from "react";
 import { useLocation } from "wouter";
-import {
-  FolderTree,
-  X,
-  Settings,
-  PlayCircle,
-  Beaker,
-} from "lucide-react";
+import { FolderTree, X, Settings, PlayCircle, Beaker } from "lucide-react";
 import type { TestSuite, TestCase } from "@/lib/types";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import {
@@ -50,12 +44,7 @@ interface SuiteDetailPanelProps {
   onTestSelect: (id: string) => void;
 }
 
-export function SuiteDetailPanel({
-  suite,
-  tests,
-  onClose,
-  onTestSelect,
-}: SuiteDetailPanelProps) {
+export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteDetailPanelProps) {
   const [, navigate] = useLocation();
   const cats = [...new Set(tests.map((t) => t.category))];
   const activeCount = tests.filter((t) => t.status === "active").length;

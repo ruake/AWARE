@@ -1,6 +1,11 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
-import { getAutoDiscoveredTests, subscribeToAutoTests, computeTestStats, getAutoDiscoverySummary } from "@/lib/data";
+import {
+  getAutoDiscoveredTests,
+  subscribeToAutoTests,
+  computeTestStats,
+  getAutoDiscoverySummary,
+} from "@/lib/data";
 import { useTestData } from "@/hooks/useTestData";
 import {
   subscribeToTestSuites,
@@ -418,7 +423,10 @@ function SuiteTreePanel() {
   const suites = useSyncExternalStore(subscribeToTestSuites, getTestSuites);
   const tests = useSyncExternalStore(subscribeToTestCases, getTestCases);
   const [treeSearch, setTreeSearch] = React.useState("");
-  const currentSuite = React.useMemo(() => new URLSearchParams(window.location.search).get("suite"), [loc2]);
+  const currentSuite = React.useMemo(
+    () => new URLSearchParams(window.location.search).get("suite"),
+    [loc2],
+  );
 
   const rootSuites = React.useMemo(() => {
     let roots = suites.filter(
@@ -433,7 +441,6 @@ function SuiteTreePanel() {
     }
     return roots;
   }, [suites, treeSearch]);
-
 
   function getChildren(suite: TestSuite): TestSuite[] {
     return suites.filter((s) => s.parentId === suite.id);

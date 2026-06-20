@@ -1,7 +1,15 @@
 import React from "react";
 import {
-  MessageSquare, Plus, Trash2, Search, Pin,
-  ChevronLeft, ChevronRight, Edit3, Check, X,
+  MessageSquare,
+  Plus,
+  Trash2,
+  Search,
+  Pin,
+  ChevronLeft,
+  ChevronRight,
+  Edit3,
+  Check,
+  X,
 } from "lucide-react";
 import type { Thread } from "@/lib/copilot/types";
 
@@ -232,13 +240,13 @@ function ThreadItem({
         background: isActive
           ? "var(--proof-blue-bg)"
           : isPinned
-          ? "rgba(99,130,178,0.04)"
-          : "transparent",
+            ? "rgba(99,130,178,0.04)"
+            : "transparent",
         border: isActive
           ? "1px solid var(--proof-blue-border)"
           : isFocused
-          ? "1px solid var(--proof-border-focus)"
-          : "1px solid transparent",
+            ? "1px solid var(--proof-border-focus)"
+            : "1px solid transparent",
         transition: "background 0.1s, border-color 0.1s",
         position: "relative",
         userSelect: "none",
@@ -251,9 +259,7 @@ function ThreadItem({
       }}
       onMouseLeave={(e) => {
         if (!isActive) {
-          e.currentTarget.style.background = isPinned
-            ? "rgba(99,130,178,0.04)"
-            : "transparent";
+          e.currentTarget.style.background = isPinned ? "rgba(99,130,178,0.04)" : "transparent";
         }
       }}
     >
@@ -266,9 +272,7 @@ function ThreadItem({
           background: isActive
             ? "linear-gradient(135deg, rgba(59,130,246,0.25), rgba(59,130,246,0.1))"
             : "var(--proof-surface-3)",
-          border: isActive
-            ? "1px solid var(--proof-blue-border)"
-            : "1px solid var(--proof-border)",
+          border: isActive ? "1px solid var(--proof-blue-border)" : "1px solid var(--proof-border)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -310,7 +314,9 @@ function ThreadItem({
               color: "var(--proof-text-muted)",
             }}
           >
-            {thread.messageCount === 0 ? "Empty" : `${thread.messageCount} msg${thread.messageCount !== 1 ? "s" : ""}`}
+            {thread.messageCount === 0
+              ? "Empty"
+              : `${thread.messageCount} msg${thread.messageCount !== 1 ? "s" : ""}`}
           </span>
           <span style={{ fontSize: 8, color: "var(--proof-text-tertiary)" }}>·</span>
           <span
@@ -408,7 +414,6 @@ function ThreadItem({
           <Trash2 size={11} />
         </button>
       </div>
-
     </div>
   );
 }
@@ -438,9 +443,7 @@ export function ThreadSidebar({
   }));
 
   const filtered = searchQuery.trim()
-    ? normalized.filter((t) =>
-        t.title.toLowerCase().includes(searchQuery.toLowerCase().trim())
-      )
+    ? normalized.filter((t) => t.title.toLowerCase().includes(searchQuery.toLowerCase().trim()))
     : normalized;
 
   const pinned = filtered.filter((t) => t.pinned);
@@ -455,9 +458,7 @@ export function ThreadSidebar({
   };
 
   const pinThread = (threadId: string) => {
-    const updated = normalized.map((t) =>
-      t.id === threadId ? { ...t, pinned: !t.pinned } : t
-    );
+    const updated = normalized.map((t) => (t.id === threadId ? { ...t, pinned: !t.pinned } : t));
     onThreadsReorder(updated);
   };
 
@@ -567,10 +568,7 @@ export function ThreadSidebar({
               width: 32,
               height: 32,
               borderRadius: 7,
-              background:
-                thread.id === activeThreadId
-                  ? "var(--proof-blue-bg)"
-                  : "transparent",
+              background: thread.id === activeThreadId ? "var(--proof-blue-bg)" : "transparent",
               border:
                 thread.id === activeThreadId
                   ? "1px solid var(--proof-blue-border)"
@@ -830,10 +828,7 @@ export function ThreadSidebar({
               textAlign: "center",
             }}
           >
-            <MessageSquare
-              size={24}
-              style={{ color: "var(--proof-text-tertiary)" }}
-            />
+            <MessageSquare size={24} style={{ color: "var(--proof-text-tertiary)" }} />
             <span
               style={{
                 fontSize: 12,

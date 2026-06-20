@@ -52,7 +52,8 @@ export default function StartRun() {
           </div>
           <a
             href="https://github.com/ruake/AWARE/actions"
-            target="_blank" rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
             className="proof-button proof-button-sm"
             style={{ textDecoration: "none" }}
           >
@@ -80,10 +81,7 @@ export default function StartRun() {
               Review baseline vs candidate differences
             </div>
           </div>
-          <button
-            onClick={() => navTo("/compare")}
-            className="proof-button proof-button-sm"
-          >
+          <button onClick={() => navTo("/compare")} className="proof-button proof-button-sm">
             Compare <ExternalLink size={12} />
           </button>
         </div>

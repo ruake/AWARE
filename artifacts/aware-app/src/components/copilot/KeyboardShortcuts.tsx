@@ -6,8 +6,7 @@ interface Props {
   onClose: () => void;
 }
 
-const isMac =
-  typeof navigator !== "undefined" && navigator.platform?.includes("Mac");
+const isMac = typeof navigator !== "undefined" && navigator.platform?.includes("Mac");
 
 function modSymbol(mod: "ctrl" | "meta" | "alt" | "shift"): string {
   if (isMac) {
@@ -117,8 +116,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
           background: "var(--proof-bg-elevated)",
           border: "1px solid var(--proof-border)",
           borderRadius: 12,
-          boxShadow:
-            "var(--proof-shadow-lg), 0 0 0 1px rgba(59,130,246,0.08)",
+          boxShadow: "var(--proof-shadow-lg), 0 0 0 1px rgba(59,130,246,0.08)",
           padding: 0,
           outline: "none",
         }}
@@ -200,9 +198,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
                       alignItems: "center",
                       justifyContent: "space-between",
                       padding: "8px 20px",
-                      background: altRow
-                        ? "var(--proof-hover-light)"
-                        : "transparent",
+                      background: altRow ? "var(--proof-hover-light)" : "transparent",
                     }}
                   >
                     <div

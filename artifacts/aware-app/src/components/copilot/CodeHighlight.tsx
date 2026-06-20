@@ -6,21 +6,21 @@ interface CodeHighlightProps {
 }
 
 const C = {
-  keyword:  "#c678dd",
-  string:   "#98c379",
-  number:   "#d19a66",
-  comment:  "#5c6370",
+  keyword: "#c678dd",
+  string: "#98c379",
+  number: "#d19a66",
+  comment: "#5c6370",
   function: "#61afef",
-  type:     "#e5c07b",
-  attr:     "#56b6c2",
+  type: "#e5c07b",
+  attr: "#56b6c2",
   operator: "#abb2bf",
-  tag:      "#e06c75",
-  decorator:"#56b6c2",
+  tag: "#e06c75",
+  decorator: "#56b6c2",
   property: "#56b6c2",
   selector: "#e5c07b",
-  value:    "#98c379",
-  flag:     "#61afef",
-  command:  "#98c379",
+  value: "#98c379",
+  flag: "#61afef",
+  command: "#98c379",
 } as const;
 
 interface Pattern {
@@ -33,7 +33,11 @@ const PATTERNS: Record<string, Pattern[]> = {
     { regex: /\/\/[^\n]*/g, color: C.comment },
     { regex: /\/\*[\s\S]*?\*\//g, color: C.comment },
     { regex: /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, color: C.string },
-    { regex: /\b(const|let|var|function|return|import|export|if|else|for|while|class|interface|type|async|await|yield|throw|try|catch|finally|new|this|super|extends|implements|typeof|instanceof|of|in|from|as|switch|case|default|break|continue|do|void|delete)\b/g, color: C.keyword },
+    {
+      regex:
+        /\b(const|let|var|function|return|import|export|if|else|for|while|class|interface|type|async|await|yield|throw|try|catch|finally|new|this|super|extends|implements|typeof|instanceof|of|in|from|as|switch|case|default|break|continue|do|void|delete)\b/g,
+      color: C.keyword,
+    },
     { regex: /\b([a-zA-Z_$][\w$]*)(?=\s*\()/g, color: C.function },
     { regex: /\b([A-Z][a-zA-Z0-9_]*)\b/g, color: C.type },
     { regex: /\b(\d+\.?\d*)\b/g, color: C.number },
@@ -43,16 +47,27 @@ const PATTERNS: Record<string, Pattern[]> = {
     { regex: /\/\/[^\n]*/g, color: C.comment },
     { regex: /\/\*[\s\S]*?\*\//g, color: C.comment },
     { regex: /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, color: C.string },
-    { regex: /\b(const|let|var|function|return|import|export|if|else|for|while|class|interface|type|async|await|yield|throw|try|catch|finally|new|this|super|extends|implements|typeof|instanceof|of|in|from|as|switch|case|default|break|continue|do|void|delete|abstract|private|protected|public|readonly|static|declare|enum|namespace|module|satisfies)\b/g, color: C.keyword },
+    {
+      regex:
+        /\b(const|let|var|function|return|import|export|if|else|for|while|class|interface|type|async|await|yield|throw|try|catch|finally|new|this|super|extends|implements|typeof|instanceof|of|in|from|as|switch|case|default|break|continue|do|void|delete|abstract|private|protected|public|readonly|static|declare|enum|namespace|module|satisfies)\b/g,
+      color: C.keyword,
+    },
     { regex: /\b([a-zA-Z_$][\w$]*)(?=\s*\()/g, color: C.function },
     { regex: /\b([A-Z][a-zA-Z0-9_]*)\b/g, color: C.type },
     { regex: /\b(\d+\.?\d*)\b/g, color: C.number },
-    { regex: /(===?|!==?|&&|\|\||[+\-*/%]=?|=>|<<|>>|[<>]=?|\+\+|--|\.\.\.|&|\|)/g, color: C.operator },
+    {
+      regex: /(===?|!==?|&&|\|\||[+\-*/%]=?|=>|<<|>>|[<>]=?|\+\+|--|\.\.\.|&|\|)/g,
+      color: C.operator,
+    },
   ],
   python: [
     { regex: /#[^\n]*/g, color: C.comment },
     { regex: /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, color: C.string },
-    { regex: /\b(def|class|return|import|from|if|elif|else|for|while|try|except|with|as|print|raise|yield|lambda|pass|break|continue|in|not|and|or|is|None|True|False|async|await|finally|global|nonlocal|del|assert|self)\b/g, color: C.keyword },
+    {
+      regex:
+        /\b(def|class|return|import|from|if|elif|else|for|while|try|except|with|as|print|raise|yield|lambda|pass|break|continue|in|not|and|or|is|None|True|False|async|await|finally|global|nonlocal|del|assert|self)\b/g,
+      color: C.keyword,
+    },
     { regex: /@[a-zA-Z_][\w.]*/g, color: C.decorator },
     { regex: /\b([a-zA-Z_][\w]*)(?=\s*\()/g, color: C.function },
     { regex: /\b(\d+\.?\d*)\b/g, color: C.number },
@@ -159,7 +174,11 @@ export function highlightCode(code: string, language: string): React.ReactNode[]
     while (j < code.length && colorMap.get(j) === color) j++;
     const text = code.slice(i, j);
     if (color !== undefined) {
-      nodes.push(<span key={i} style={{ color }}>{text}</span>);
+      nodes.push(
+        <span key={i} style={{ color }}>
+          {text}
+        </span>,
+      );
     } else {
       nodes.push(<span key={i}>{text}</span>);
     }
@@ -181,14 +200,17 @@ const CodeHighlight: React.FC<CodeHighlightProps> = ({ code, language }) => {
 
   const highlightedLines = React.useMemo(
     () => lines.map((line) => highlightCode(line, language)),
-    [lines, language]
+    [lines, language],
   );
 
   const handleCopy = React.useCallback(() => {
-    navigator.clipboard.writeText(code).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {});
+    navigator.clipboard
+      .writeText(code)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
   }, [code]);
 
   return (
@@ -269,7 +291,9 @@ const CodeHighlight: React.FC<CodeHighlightProps> = ({ code, language }) => {
               }}
             >
               {lines.map((_, i) => (
-                <div key={i} style={{ lineHeight: 1.6 }}>{i + 1}</div>
+                <div key={i} style={{ lineHeight: 1.6 }}>
+                  {i + 1}
+                </div>
               ))}
             </div>
           )}

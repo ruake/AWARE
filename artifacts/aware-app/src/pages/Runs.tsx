@@ -10,14 +10,52 @@ import { Play, GitCompare, Loader2, ExternalLink, Search, X } from "lucide-react
 import { repo } from "@/lib/nav";
 
 /* ── status config ─────────────────────────────────────────────── */
-const STATUS_CFG: Record<Run["status"], { label: string; color: string; bg: string; border: string }> = {
-  PASS:    { label: "Passed",  color: "var(--proof-green)",           bg: "var(--proof-green-bg)",   border: "var(--proof-green-border)" },
-  FAIL:    { label: "Failed",  color: "var(--proof-red)",             bg: "var(--proof-red-bg)",     border: "var(--proof-red-border)" },
-  PARTIAL: { label: "Partial", color: "var(--proof-yellow)",          bg: "var(--proof-yellow-bg)",  border: "var(--proof-yellow-border)" },
-  FLAKY:   { label: "Flaky",   color: "var(--proof-orange)",          bg: "var(--proof-orange-bg)",  border: "rgba(249,115,22,0.3)" },
-  RUNNING: { label: "Running", color: "var(--proof-blue-bright)",     bg: "var(--proof-blue-bg)",    border: "var(--proof-blue-border)" },
-  PENDING: { label: "Pending", color: "var(--proof-text-secondary)",  bg: "var(--proof-hover)",      border: "var(--proof-border)" },
-  ERROR:   { label: "Error",   color: "var(--proof-red)",             bg: "var(--proof-red-bg)",     border: "var(--proof-red-border)" },
+const STATUS_CFG: Record<
+  Run["status"],
+  { label: string; color: string; bg: string; border: string }
+> = {
+  PASS: {
+    label: "Passed",
+    color: "var(--proof-green)",
+    bg: "var(--proof-green-bg)",
+    border: "var(--proof-green-border)",
+  },
+  FAIL: {
+    label: "Failed",
+    color: "var(--proof-red)",
+    bg: "var(--proof-red-bg)",
+    border: "var(--proof-red-border)",
+  },
+  PARTIAL: {
+    label: "Partial",
+    color: "var(--proof-yellow)",
+    bg: "var(--proof-yellow-bg)",
+    border: "var(--proof-yellow-border)",
+  },
+  FLAKY: {
+    label: "Flaky",
+    color: "var(--proof-orange)",
+    bg: "var(--proof-orange-bg)",
+    border: "rgba(249,115,22,0.3)",
+  },
+  RUNNING: {
+    label: "Running",
+    color: "var(--proof-blue-bright)",
+    bg: "var(--proof-blue-bg)",
+    border: "var(--proof-blue-border)",
+  },
+  PENDING: {
+    label: "Pending",
+    color: "var(--proof-text-secondary)",
+    bg: "var(--proof-hover)",
+    border: "var(--proof-border)",
+  },
+  ERROR: {
+    label: "Error",
+    color: "var(--proof-red)",
+    bg: "var(--proof-red-bg)",
+    border: "var(--proof-red-border)",
+  },
 };
 
 function timeAgo(iso: string): string {
@@ -31,21 +69,33 @@ function timeAgo(iso: string): string {
 
 /* ── Filter chip button ────────────────────────────────────────── */
 function FilterChip({
-  label, value, active, onSelect,
+  label,
+  value,
+  active,
+  onSelect,
 }: {
-  label: string; value: string; active: boolean; onSelect: (v: string) => void;
+  label: string;
+  value: string;
+  active: boolean;
+  onSelect: (v: string) => void;
 }) {
   return (
     <button
       onClick={() => onSelect(active ? "all" : value)}
       style={{
-        display: "inline-flex", alignItems: "center", gap: 4,
-        padding: "3px 10px", borderRadius: "var(--proof-radius-full)",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 4,
+        padding: "3px 10px",
+        borderRadius: "var(--proof-radius-full)",
         border: `1px solid ${active ? "var(--proof-blue-border)" : "var(--proof-border)"}`,
         background: active ? "var(--proof-blue-bg)" : "transparent",
         color: active ? "var(--proof-blue-bright)" : "var(--proof-text-muted)",
-        fontSize: 11.5, fontWeight: active ? 700 : 500, cursor: "pointer",
-        transition: "all var(--proof-transition)", whiteSpace: "nowrap",
+        fontSize: 11.5,
+        fontWeight: active ? 700 : 500,
+        cursor: "pointer",
+        transition: "all var(--proof-transition)",
+        whiteSpace: "nowrap",
         fontFamily: "var(--font-sans)",
       }}
     >
@@ -58,16 +108,25 @@ function FilterChip({
 function EnvBadge({ env }: { env: string }) {
   const tier = env.split(/[/ ]/)[0]?.toUpperCase() ?? env;
   const colors: Record<string, { color: string; bg: string }> = {
-    QA:   { color: "var(--proof-blue)",   bg: "var(--proof-blue-bg)" },
-    UAT:  { color: "var(--proof-purple)", bg: "var(--proof-purple-bg)" },
-    PROD: { color: "var(--proof-green)",  bg: "var(--proof-green-bg)" },
+    QA: { color: "var(--proof-blue)", bg: "var(--proof-blue-bg)" },
+    UAT: { color: "var(--proof-purple)", bg: "var(--proof-purple-bg)" },
+    PROD: { color: "var(--proof-green)", bg: "var(--proof-green-bg)" },
   };
   const c = colors[tier] ?? { color: "var(--proof-text-muted)", bg: "var(--proof-hover)" };
   return (
-    <span style={{
-      fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.3px",
-      color: c.color, background: c.bg, padding: "1px 6px", borderRadius: 4, flexShrink: 0,
-    }}>
+    <span
+      style={{
+        fontSize: 9.5,
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: "0.3px",
+        color: c.color,
+        background: c.bg,
+        padding: "1px 6px",
+        borderRadius: 4,
+        flexShrink: 0,
+      }}
+    >
       {tier}
     </span>
   );
@@ -75,19 +134,40 @@ function EnvBadge({ env }: { env: string }) {
 
 /* ── Pass rate mini bar ────────────────────────────────────────── */
 function PassBar({ pct }: { pct: number }) {
-  const c = pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
+  const c =
+    pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-      <div style={{
-        width: 52, height: 3, background: "var(--proof-hover)",
-        borderRadius: 99, overflow: "hidden", flexShrink: 0,
-      }}>
-        <div style={{
-          width: `${pct}%`, height: "100%",
-          background: c, borderRadius: 99,
-        }} />
+      <div
+        style={{
+          width: 52,
+          height: 3,
+          background: "var(--proof-hover)",
+          borderRadius: 99,
+          overflow: "hidden",
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            width: `${pct}%`,
+            height: "100%",
+            background: c,
+            borderRadius: 99,
+          }}
+        />
       </div>
-      <span style={{ fontSize: 12.5, fontWeight: 800, fontFamily: "var(--font-mono)", color: c, letterSpacing: "-0.6px", minWidth: 34, textAlign: "right" }}>
+      <span
+        style={{
+          fontSize: 12.5,
+          fontWeight: 800,
+          fontFamily: "var(--font-mono)",
+          color: c,
+          letterSpacing: "-0.6px",
+          minWidth: 34,
+          textAlign: "right",
+        }}
+      >
         {pct}%
       </span>
     </div>
@@ -104,18 +184,21 @@ export default function Runs() {
 
   const allRuns = useSyncExternalStore(subscribeToRuns, getRuns);
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
-  const envFilteredRuns = envSnap.envIds.length > 0
-    ? allRuns.filter((r) => envSnap.envIds.includes(r.envId))
-    : allRuns;
-
+  const envFilteredRuns =
+    envSnap.envIds.length > 0 ? allRuns.filter((r) => envSnap.envIds.includes(r.envId)) : allRuns;
 
   const filtered = envFilteredRuns.filter((r) => {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
     if (suiteFilter !== "all" && r.suiteId !== suiteFilter) return false;
-    if (envFilter !== "all" && !r.env.toUpperCase().startsWith(envFilter.toUpperCase())) return false;
+    if (envFilter !== "all" && !r.env.toUpperCase().startsWith(envFilter.toUpperCase()))
+      return false;
     if (search) {
       const q = search.toLowerCase();
-      if (!r.id.toLowerCase().includes(q) && !r.env.toLowerCase().includes(q) && !r.suiteId.toLowerCase().includes(q))
+      if (
+        !r.id.toLowerCase().includes(q) &&
+        !r.env.toLowerCase().includes(q) &&
+        !r.suiteId.toLowerCase().includes(q)
+      )
         return false;
     }
     return true;
@@ -138,7 +221,9 @@ export default function Runs() {
   const suites = [...new Set(envFilteredRuns.map((r) => r.suiteId).filter(Boolean))].sort();
   const envConfigs = getEnvConfigs();
 
-  const failCount = envFilteredRuns.filter((r) => ["FAIL", "PARTIAL", "ERROR", "FLAKY"].includes(r.status)).length;
+  const failCount = envFilteredRuns.filter((r) =>
+    ["FAIL", "PARTIAL", "ERROR", "FLAKY"].includes(r.status),
+  ).length;
   const runningCount = envFilteredRuns.filter((r) => r.status === "RUNNING").length;
 
   return (
@@ -171,10 +256,17 @@ export default function Runs() {
         filters={
           <>
             <div style={{ position: "relative", flexShrink: 0 }}>
-              <Search size={12} style={{
-                position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)",
-                color: "var(--proof-text-muted)", pointerEvents: "none",
-              }} />
+              <Search
+                size={12}
+                style={{
+                  position: "absolute",
+                  left: 8,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "var(--proof-text-muted)",
+                  pointerEvents: "none",
+                }}
+              />
               <input
                 className="proof-input"
                 style={{ paddingLeft: 26, width: 180, height: 26, fontSize: 12 }}
@@ -183,68 +275,144 @@ export default function Runs() {
                 onChange={(e) => setSearch(e.target.value)}
               />
               {search && (
-                <button onClick={() => setSearch("")} style={{
-                  position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
-                  background: "none", border: "none", cursor: "pointer", color: "var(--proof-text-muted)",
-                  padding: 1, display: "flex", lineHeight: 1,
-                }}>
+                <button
+                  onClick={() => setSearch("")}
+                  style={{
+                    position: "absolute",
+                    right: 6,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--proof-text-muted)",
+                    padding: 1,
+                    display: "flex",
+                    lineHeight: 1,
+                  }}
+                >
                   <X size={10} />
                 </button>
               )}
             </div>
 
-            <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
+            <div
+              style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }}
+            />
 
-            <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.4px", flexShrink: 0 }}>Status:</span>
+            <span
+              style={{
+                fontSize: 10,
+                color: "var(--proof-text-muted)",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.4px",
+                flexShrink: 0,
+              }}
+            >
+              Status:
+            </span>
             {(["PASS", "FAIL", "PARTIAL", "FLAKY", "RUNNING"] as Run["status"][]).map((s) => (
-              <FilterChip key={s} label={STATUS_CFG[s].label} value={s} active={statusFilter === s} onSelect={setStatusFilter} />
+              <FilterChip
+                key={s}
+                label={STATUS_CFG[s].label}
+                value={s}
+                active={statusFilter === s}
+                onSelect={setStatusFilter}
+              />
             ))}
 
-            <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
+            <div
+              style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }}
+            />
 
-            <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.4px", flexShrink: 0 }}>Suite:</span>
+            <span
+              style={{
+                fontSize: 10,
+                color: "var(--proof-text-muted)",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.4px",
+                flexShrink: 0,
+              }}
+            >
+              Suite:
+            </span>
             <select
               value={suiteFilter}
               onChange={(e) => setSuiteFilter(e.target.value)}
               style={{
-                fontSize: 11.5, padding: "2px 6px", borderRadius: 6,
-                border: "1px solid var(--proof-border)", background: "var(--proof-surface)",
-                color: suiteFilter !== "all" ? "var(--proof-blue-bright)" : "var(--proof-text-muted)",
+                fontSize: 11.5,
+                padding: "2px 6px",
+                borderRadius: 6,
+                border: "1px solid var(--proof-border)",
+                background: "var(--proof-surface)",
+                color:
+                  suiteFilter !== "all" ? "var(--proof-blue-bright)" : "var(--proof-text-muted)",
                 fontWeight: suiteFilter !== "all" ? 600 : 400,
-                cursor: "pointer", maxWidth: 170,
+                cursor: "pointer",
+                maxWidth: 170,
               }}
             >
               <option value="all">All suites</option>
               {suites.map((s) => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>
+                  {s}
+                </option>
               ))}
             </select>
 
-            <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
+            <div
+              style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }}
+            />
 
-            <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.4px", flexShrink: 0 }}>Env:</span>
+            <span
+              style={{
+                fontSize: 10,
+                color: "var(--proof-text-muted)",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.4px",
+                flexShrink: 0,
+              }}
+            >
+              Env:
+            </span>
             <select
               value={envFilter}
               onChange={(e) => setEnvFilter(e.target.value)}
               style={{
-                fontSize: 11.5, padding: "2px 6px", borderRadius: 6,
-                border: "1px solid var(--proof-border)", background: "var(--proof-surface)",
+                fontSize: 11.5,
+                padding: "2px 6px",
+                borderRadius: 6,
+                border: "1px solid var(--proof-border)",
+                background: "var(--proof-surface)",
                 color: envFilter !== "all" ? "var(--proof-blue-bright)" : "var(--proof-text-muted)",
                 fontWeight: envFilter !== "all" ? 600 : 400,
-                cursor: "pointer", maxWidth: 170,
+                cursor: "pointer",
+                maxWidth: 170,
               }}
             >
               <option value="all">All envs</option>
               {envConfigs.map((e) => (
-                <option key={e.id} value={e.target}>{e.label}</option>
+                <option key={e.id} value={e.target}>
+                  {e.label}
+                </option>
               ))}
             </select>
 
             {(search || statusFilter !== "all" || suiteFilter !== "all" || envFilter !== "all") && (
               <>
-                <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
+                <div
+                  style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }}
+                />
                 <button
-                  onClick={() => { setSearch(""); setStatusFilter("all"); setSuiteFilter("all"); setEnvFilter("all"); }}
+                  onClick={() => {
+                    setSearch("");
+                    setStatusFilter("all");
+                    setSuiteFilter("all");
+                    setEnvFilter("all");
+                  }}
                   className="proof-button-ghost"
                   style={{ fontSize: 11, color: "var(--proof-text-muted)" }}
                 >
@@ -258,7 +426,12 @@ export default function Runs() {
         emptyMessage="No runs match your filters"
         emptyAction={
           <button
-            onClick={() => { setSearch(""); setStatusFilter("all"); setSuiteFilter("all"); setEnvFilter("all"); }}
+            onClick={() => {
+              setSearch("");
+              setStatusFilter("all");
+              setSuiteFilter("all");
+              setEnvFilter("all");
+            }}
             className="proof-button proof-button-sm"
           >
             Clear filters
@@ -296,12 +469,17 @@ export default function Runs() {
               const cfg = STATUS_CFG[run.status] ?? STATUS_CFG.ERROR;
               const isRunning = run.status === "RUNNING";
               return (
-                <tr
-                  key={run.id}
-                  onClick={() => navigate(`/runs/${run.id}`)}
-                >
+                <tr key={run.id} onClick={() => navigate(`/runs/${run.id}`)}>
                   <td style={{ padding: 0, width: 3 }}>
-                    <div style={{ width: 3, height: "100%", minHeight: 40, background: cfg.color, borderRadius: "0 2px 2px 0" }} />
+                    <div
+                      style={{
+                        width: 3,
+                        height: "100%",
+                        minHeight: 40,
+                        background: cfg.color,
+                        borderRadius: "0 2px 2px 0",
+                      }}
+                    />
                   </td>
 
                   <td>
@@ -309,21 +487,46 @@ export default function Runs() {
                       href={`/runs/${run.id}`}
                       onClick={(e) => e.stopPropagation()}
                       style={{
-                        fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700,
-                        color: "var(--proof-blue-bright)", textDecoration: "none",
-                        display: "flex", alignItems: "center", gap: 5,
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "var(--proof-blue-bright)",
+                        textDecoration: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
                       }}
                     >
-                      {isRunning && <Loader2 size={11} style={{ animation: "spin 1s linear infinite", flexShrink: 0 }} />}
+                      {isRunning && (
+                        <Loader2
+                          size={11}
+                          style={{ animation: "spin 1s linear infinite", flexShrink: 0 }}
+                        />
+                      )}
                       {run.id}
                     </Link>
-                    <div style={{ fontSize: 10, color: "var(--proof-text-muted)", marginTop: 2, fontFamily: "var(--font-mono)" }}>
-                      {run.build}{run.rev ? ` · ${run.rev.slice(0, 7)}` : ""}
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color: "var(--proof-text-muted)",
+                        marginTop: 2,
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    >
+                      {run.build}
+                      {run.rev ? ` · ${run.rev.slice(0, 7)}` : ""}
                     </div>
                   </td>
 
                   <td>
-                    <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--proof-text-secondary)", fontWeight: 500 }}>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontFamily: "var(--font-mono)",
+                        color: "var(--proof-text-secondary)",
+                        fontWeight: 500,
+                      }}
+                    >
                       {run.suiteId}
                     </span>
                   </td>
@@ -331,20 +534,33 @@ export default function Runs() {
                   <td>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <EnvBadge env={run.env} />
-                      <span style={{ fontSize: 11.5, color: "var(--proof-text-secondary)" }}>{run.env}</span>
+                      <span style={{ fontSize: 11.5, color: "var(--proof-text-secondary)" }}>
+                        {run.env}
+                      </span>
                     </div>
                   </td>
 
                   <td>
                     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      <span style={{
-                        display: "inline-flex", alignItems: "center", gap: 4,
-                        padding: "2px 8px", borderRadius: "var(--proof-radius-full)",
-                        fontSize: 10.5, fontWeight: 700, letterSpacing: "0.1px",
-                        color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
-                        width: "fit-content",
-                      }}>
-                        {isRunning && <Loader2 size={9} style={{ animation: "spin 1s linear infinite" }} />}
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                          padding: "2px 8px",
+                          borderRadius: "var(--proof-radius-full)",
+                          fontSize: 10.5,
+                          fontWeight: 700,
+                          letterSpacing: "0.1px",
+                          color: cfg.color,
+                          background: cfg.bg,
+                          border: `1px solid ${cfg.border}`,
+                          width: "fit-content",
+                        }}
+                      >
+                        {isRunning && (
+                          <Loader2 size={9} style={{ animation: "spin 1s linear infinite" }} />
+                        )}
                         {cfg.label}
                       </span>
                       {!isRunning && <PassBar pct={run.passPct} />}
@@ -353,7 +569,15 @@ export default function Runs() {
                   </td>
 
                   <td>
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: isRunning ? "var(--proof-blue-bright)" : "var(--proof-text-secondary)" }}>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 12,
+                        color: isRunning
+                          ? "var(--proof-blue-bright)"
+                          : "var(--proof-text-secondary)",
+                      }}
+                    >
                       {isRunning ? "…" : run.duration}
                     </span>
                   </td>
@@ -367,7 +591,9 @@ export default function Runs() {
                         onClick={(e) => {
                           e.stopPropagation();
                           const allRuns = getRuns();
-                          const latest = [...allRuns].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())[0];
+                          const latest = [...allRuns].sort(
+                            (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
+                          )[0];
                           navigate(`/compare?baseline=${latest?.id ?? ""}&candidate=${run.id}`);
                         }}
                         title="Compare to latest"

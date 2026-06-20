@@ -54,49 +54,78 @@ function RecentRunsList() {
 
   return (
     <div>
-      <div style={{
-        padding: "8px 12px 4px",
-        fontSize: 9.5, fontWeight: 700, textTransform: "uppercase",
-        letterSpacing: "0.6px", color: "var(--proof-text-muted)",
-      }}>
+      <div
+        style={{
+          padding: "8px 12px 4px",
+          fontSize: 9.5,
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "0.6px",
+          color: "var(--proof-text-muted)",
+        }}
+      >
         Recent Runs
       </div>
       {recent.map((run) => {
         const pct = run.passPct ?? 0;
-        const c = pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
+        const c =
+          pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
         const isSelected = run.id === selectedRunId;
         return (
           <div
             key={run.id}
             onClick={() => navigate(`/runs/${run.id}`)}
             style={{
-              display: "flex", alignItems: "center", gap: 7,
-              padding: "4px 12px", cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              padding: "4px 12px",
+              cursor: "pointer",
               background: isSelected ? "var(--proof-blue-bg)" : "transparent",
               transition: "background var(--proof-transition)",
             }}
             onMouseEnter={(e) => {
-              if (!isSelected) (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+              if (!isSelected)
+                (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
             }}
             onMouseLeave={(e) => {
               if (!isSelected) (e.currentTarget as HTMLElement).style.background = "transparent";
             }}
           >
-            <span style={{
-              width: 5, height: 5, borderRadius: "50%", background: c,
-              flexShrink: 0, outline: isSelected ? `2px solid ${c}` : "none", outlineOffset: 2,
-            }} />
-            <span style={{
-              flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              fontSize: 11.5, color: isSelected ? "var(--proof-text)" : "var(--proof-text-secondary)",
-              fontWeight: isSelected ? 600 : 400,
-            }}>
+            <span
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: "50%",
+                background: c,
+                flexShrink: 0,
+                outline: isSelected ? `2px solid ${c}` : "none",
+                outlineOffset: 2,
+              }}
+            />
+            <span
+              style={{
+                flex: 1,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontSize: 11.5,
+                color: isSelected ? "var(--proof-text)" : "var(--proof-text-secondary)",
+                fontWeight: isSelected ? 600 : 400,
+              }}
+            >
               {run.label || run.id}
             </span>
-            <span style={{
-              fontSize: 10.5, fontFamily: "var(--font-mono)", fontWeight: 700,
-              color: c, letterSpacing: "-0.3px", flexShrink: 0,
-            }}>
+            <span
+              style={{
+                fontSize: 10.5,
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                color: c,
+                letterSpacing: "-0.3px",
+                flexShrink: 0,
+              }}
+            >
               {pct}%
             </span>
           </div>
@@ -138,28 +167,55 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
         return <CopilotPanel />;
       case "about":
         return (
-          <div style={{
-            padding: "20px 16px", textAlign: "center",
-            color: "var(--proof-text-secondary)", fontSize: 12, lineHeight: 1.6,
-          }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 14,
-              background: "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-blue-bright) 100%)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              margin: "0 auto 12px", boxShadow: "0 4px 16px var(--proof-blue-glow)",
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white"
-                strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <div
+            style={{
+              padding: "20px 16px",
+              textAlign: "center",
+              color: "var(--proof-text-secondary)",
+              fontSize: 12,
+              lineHeight: 1.6,
+            }}
+          >
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 14,
+                background:
+                  "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-blue-bright) 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 12px",
+                boxShadow: "0 4px 16px var(--proof-blue-glow)",
+              }}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
               </svg>
             </div>
-            <div style={{ fontWeight: 700, fontSize: 13, color: "var(--proof-text)", marginBottom: 4 }}>
+            <div
+              style={{ fontWeight: 700, fontSize: 13, color: "var(--proof-text)", marginBottom: 4 }}
+            >
               A.W.A.R.E.
             </div>
             <div style={{ fontSize: 11, color: "var(--proof-text-muted)", lineHeight: 1.5 }}>
-              Akamai Web Analytics<br />Regression Engine
+              Akamai Web Analytics
+              <br />
+              Regression Engine
             </div>
-            <div style={{ fontSize: 10, color: "var(--proof-text-tertiary)", marginTop: 8 }}>v1.0.0</div>
+            <div style={{ fontSize: 10, color: "var(--proof-text-tertiary)", marginTop: 8 }}>
+              v1.0.0
+            </div>
           </div>
         );
       default:
@@ -182,35 +238,51 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
       }}
     >
       {/* Header */}
-      <div style={{
-        padding: "0 12px",
-        height: 34,
-        fontSize: 10.5, fontWeight: 700,
-        color: "var(--proof-text-muted)",
-        textTransform: "uppercase", letterSpacing: "0.6px",
-        borderBottom: "1px solid var(--proof-border)",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        flexShrink: 0, userSelect: "none",
-      }}>
+      <div
+        style={{
+          padding: "0 12px",
+          height: 34,
+          fontSize: 10.5,
+          fontWeight: 700,
+          color: "var(--proof-text-muted)",
+          textTransform: "uppercase",
+          letterSpacing: "0.6px",
+          borderBottom: "1px solid var(--proof-border)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexShrink: 0,
+          userSelect: "none",
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <span style={{ width: 2, height: 12, borderRadius: 99, background: accent, flexShrink: 0 }} />
+          <span
+            style={{ width: 2, height: 12, borderRadius: 99, background: accent, flexShrink: 0 }}
+          />
           <span>{headline}</span>
         </div>
         <button
           onClick={onClose}
           aria-label="Close sidebar"
           style={{
-            border: "none", background: "transparent", cursor: "pointer",
-            color: "var(--proof-text-muted)", padding: 3, display: "flex",
-            borderRadius: "var(--proof-radius-xs)", transition: "all var(--proof-transition)",
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+            color: "var(--proof-text-muted)",
+            padding: 3,
+            display: "flex",
+            borderRadius: "var(--proof-radius-xs)",
+            transition: "all var(--proof-transition)",
           }}
           onMouseEnter={(e) => {
             const el = e.currentTarget as HTMLElement;
-            el.style.color = "var(--proof-text)"; el.style.background = "var(--proof-hover)";
+            el.style.color = "var(--proof-text)";
+            el.style.background = "var(--proof-hover)";
           }}
           onMouseLeave={(e) => {
             const el = e.currentTarget as HTMLElement;
-            el.style.color = "var(--proof-text-muted)"; el.style.background = "transparent";
+            el.style.color = "var(--proof-text-muted)";
+            el.style.background = "transparent";
           }}
         >
           <X size={12} />
@@ -218,7 +290,15 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
       </div>
 
       {/* Panel content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", overflowX: "hidden" }}>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
+      >
         {renderPanel()}
       </div>
     </aside>

@@ -60,13 +60,9 @@ export default function ToolCallCard({ toolCall }: Props) {
     isDone && toolCall.completedAt ? toolCall.completedAt - toolCall.startedAt : null;
   const hasChart = !!toolCall.result?.chartData;
 
-  const rawJson = toolCall.result?.data
-    ? JSON.stringify(toolCall.result.data, null, 2)
-    : null;
+  const rawJson = toolCall.result?.data ? JSON.stringify(toolCall.result.data, null, 2) : null;
   const isTruncated = rawJson !== null && rawJson.length > RAW_DATA_CHAR_LIMIT;
-  const displayedRaw = rawJson !== null
-    ? rawJson.slice(0, RAW_DATA_CHAR_LIMIT)
-    : null;
+  const displayedRaw = rawJson !== null ? rawJson.slice(0, RAW_DATA_CHAR_LIMIT) : null;
 
   return (
     <div className="copilot-tool-card">
@@ -114,7 +110,9 @@ export default function ToolCallCard({ toolCall }: Props) {
         </div>
 
         {/* Emoji + label */}
-        <span aria-hidden="true" style={{ fontSize: 12, flexShrink: 0 }}>{meta.icon}</span>
+        <span aria-hidden="true" style={{ fontSize: 12, flexShrink: 0 }}>
+          {meta.icon}
+        </span>
         <span
           style={{
             fontSize: 12,
@@ -219,10 +217,7 @@ export default function ToolCallCard({ toolCall }: Props) {
 
       {/* Error message */}
       {isError && (
-        <div
-          role="alert"
-          style={{ padding: "0 12px 10px", fontSize: 11.5 }}
-        >
+        <div role="alert" style={{ padding: "0 12px 10px", fontSize: 11.5 }}>
           {toolCall.error ? (
             <pre
               style={{

@@ -34,11 +34,12 @@ export function HeroKpiCard({
 
   const deltaIsGood = invertDelta ? delta < 0 : delta > 0;
   const deltaIsBad = invertDelta ? delta > 0 : delta < 0;
-  const deltaColor = delta === 0
-    ? "var(--proof-text-muted)"
-    : deltaIsGood
-      ? "var(--proof-green)"
-      : "var(--proof-red)";
+  const deltaColor =
+    delta === 0
+      ? "var(--proof-text-muted)"
+      : deltaIsGood
+        ? "var(--proof-green)"
+        : "var(--proof-red)";
   const DeltaIcon = delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
 
   return (
@@ -47,14 +48,24 @@ export function HeroKpiCard({
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       aria-label={`${label}: ${value}${suffix}`}
-      onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
       style={{
         background: "var(--proof-surface)",
         border: "1px solid var(--proof-border)",
         borderRadius: "var(--proof-radius-xl)",
         padding: "14px 16px 12px",
         cursor: onClick ? "pointer" : "default",
-        transition: "border-color var(--proof-transition), box-shadow var(--proof-transition), transform var(--proof-transition)",
+        transition:
+          "border-color var(--proof-transition), box-shadow var(--proof-transition), transform var(--proof-transition)",
         boxShadow: "var(--proof-shadow-card)",
         position: "relative",
         overflow: "hidden",
@@ -83,54 +94,97 @@ export function HeroKpiCard({
       }}
     >
       {/* Top accent bar */}
-      <div style={{
-        position: "absolute", top: 0, left: 0, right: 0, height: 2,
-        background: `linear-gradient(90deg, ${accentColor}, transparent)`,
-      }} />
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 2,
+          background: `linear-gradient(90deg, ${accentColor}, transparent)`,
+        }}
+      />
 
       {/* Radial glow — visible ambient light */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        background: `radial-gradient(ellipse at 80% 0%, ${accentColor}30 0%, transparent 55%)`,
-        opacity: 0.7,
-      }} />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background: `radial-gradient(ellipse at 80% 0%, ${accentColor}30 0%, transparent 55%)`,
+          opacity: 0.7,
+        }}
+      />
 
       {/* Label + icon */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, position: "relative" }}>
-        <div style={{
-          width: 20, height: 20, borderRadius: 6,
-          background: `${accentColor}18`, border: `1px solid ${accentColor}30`,
-          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-        }}>
-          {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<{ size?: number; style?: React.CSSProperties }>, { size: 12, style: { color: accentColor } }) : icon}
+        <div
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: 6,
+            background: `${accentColor}18`,
+            border: `1px solid ${accentColor}30`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          {React.isValidElement(icon)
+            ? React.cloneElement(
+                icon as React.ReactElement<{ size?: number; style?: React.CSSProperties }>,
+                { size: 12, style: { color: accentColor } },
+              )
+            : icon}
         </div>
-        <span style={{
-          fontSize: 10, fontWeight: 700, color: "var(--proof-text-secondary)",
-          textTransform: "uppercase", letterSpacing: "0.5px",
-        }}>
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            color: "var(--proof-text-secondary)",
+            textTransform: "uppercase",
+            letterSpacing: "0.5px",
+          }}
+        >
           {label}
         </span>
       </div>
 
       {/* Value */}
       <div style={{ display: "flex", alignItems: "flex-end", gap: 6, position: "relative" }}>
-        <span
-          className="proof-hero-number"
-          style={{ fontSize: 44, color: accentColor }}
-        >
-          {animatedValue}{suffix}
+        <span className="proof-hero-number" style={{ fontSize: 44, color: accentColor }}>
+          {animatedValue}
+          {suffix}
         </span>
       </div>
 
       {/* Delta + sparkline */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
-        <span style={{
-          display: "inline-flex", alignItems: "center", gap: 3,
-          fontSize: 11, fontWeight: 600, color: deltaColor,
-        }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          position: "relative",
+        }}
+      >
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 3,
+            fontSize: 11,
+            fontWeight: 600,
+            color: deltaColor,
+          }}
+        >
           <DeltaIcon size={11} />
-          {delta > 0 ? "+" : ""}{delta}{suffix ? "%" : ""}
-          <span style={{ color: "var(--proof-text-muted)", fontWeight: 400, marginLeft: 2 }}>{deltaLabel}</span>
+          {delta > 0 ? "+" : ""}
+          {delta}
+          {suffix ? "%" : ""}
+          <span style={{ color: "var(--proof-text-muted)", fontWeight: 400, marginLeft: 2 }}>
+            {deltaLabel}
+          </span>
         </span>
         {sparkData.length >= 2 && (
           <SparkLine data={sparkData} color={accentColor} width={56} height={18} />

@@ -174,7 +174,8 @@ export function TestManagerSidePanel({
               {k === "Script" && tc.scriptPath ? (
                 <a
                   href={getGitHubUrl(tc)}
-                  target="_blank" rel="noopener noreferrer"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{
                     fontFamily: "var(--font-mono)",
                     fontSize: 11,
@@ -378,7 +379,8 @@ export function TestManagerSidePanel({
             {tc.repoStatus === "synced" && tc.scriptPath && (
               <a
                 href={getGitHubUrl(tc)}
-                target="_blank" rel="noopener noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   fontSize: 11,
                   color: "var(--proof-blue)",

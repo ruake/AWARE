@@ -12,7 +12,11 @@ function getColor(pct: number): string {
   return "#ef4444";
 }
 
-export default function ContextIndicator({ usedTokens, maxTokens, messageCount }: ContextIndicatorProps) {
+export default function ContextIndicator({
+  usedTokens,
+  maxTokens,
+  messageCount,
+}: ContextIndicatorProps) {
   const pct = maxTokens > 0 ? Math.min((usedTokens / maxTokens) * 100, 100) : 0;
   const color = getColor(pct);
   const [hovered, setHovered] = React.useState(false);
@@ -108,7 +112,9 @@ export default function ContextIndicator({ usedTokens, maxTokens, messageCount }
             {tokenLabel}
           </div>
           <div>{Math.round(pct)}% of context window used</div>
-          <div>{messageCount} message{messageCount !== 1 ? "s" : ""} in context</div>
+          <div>
+            {messageCount} message{messageCount !== 1 ? "s" : ""} in context
+          </div>
         </div>
       )}
     </div>
