@@ -88,15 +88,16 @@ export function AboutHero() {
           }}
         >
           CDN test observability dashboard. Monitors Playwright + pytest suites across{" "}
-          <strong style={{ color: "var(--proof-text)" }}>QA → UAT → PROD</strong>, each with
-          staging and production networks, and enforces a{" "}
+          <strong style={{ color: "var(--proof-text)" }}>QA → UAT → PROD</strong>, each with staging
+          and production networks, and enforces a{" "}
           <strong style={{ color: "var(--proof-green)" }}>≥95% pass-rate promotion gate</strong>{" "}
           before each tier advances.
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <a
             href="https://github.com"
-            target="_blank" rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               display: "flex",
               alignItems: "center",
@@ -124,7 +125,8 @@ export function AboutHero() {
           </a>
           <a
             href="https://github.com"
-            target="_blank" rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               display: "flex",
               alignItems: "center",

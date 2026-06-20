@@ -2,7 +2,7 @@ import React from "react";
 import { X } from "lucide-react";
 
 interface CopilotSettingsProps {
-  openaiConfig: { apiKey: string; apiUrl: string; model: string };
+  endpointConfig: { apiKey: string; apiUrl: string; model: string };
   onSave: (cfg: { apiKey: string; apiUrl: string; model: string }) => void;
   onClose: () => void;
 }
@@ -39,7 +39,7 @@ function SettingsForm({
         <input
           value={apiUrl}
           onChange={(e) => setApiUrl(e.target.value)}
-          placeholder="https://api.openai.com/v1"
+          placeholder="http://localhost:11434/v1  (Ollama, LM Studio, …)"
           className="proof-input"
           style={{ fontSize: 12 }}
         />
@@ -51,7 +51,7 @@ function SettingsForm({
         <input
           value={model}
           onChange={(e) => setModel(e.target.value)}
-          placeholder="gpt-4o-mini"
+          placeholder="llama3, mistral, phi3 … (leave blank for server default)"
           className="proof-input"
           style={{ fontSize: 12 }}
         />
@@ -67,7 +67,7 @@ function SettingsForm({
   );
 }
 
-export function CopilotSettings({ openaiConfig, onSave, onClose }: CopilotSettingsProps) {
+export function CopilotSettings({ endpointConfig, onSave, onClose }: CopilotSettingsProps) {
   return (
     <div
       style={{
@@ -88,7 +88,7 @@ export function CopilotSettings({ openaiConfig, onSave, onClose }: CopilotSettin
         }}
       >
         <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--proof-text)" }}>
-          OpenAI Settings
+          Custom Endpoint Settings
         </span>
         <button
           onClick={onClose}
@@ -104,7 +104,7 @@ export function CopilotSettings({ openaiConfig, onSave, onClose }: CopilotSettin
           <X size={14} />
         </button>
       </div>
-      <SettingsForm config={openaiConfig} onSave={onSave} />
+      <SettingsForm config={endpointConfig} onSave={onSave} />
     </div>
   );
 }

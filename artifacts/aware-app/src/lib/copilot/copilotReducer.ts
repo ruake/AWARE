@@ -38,10 +38,7 @@ export function conversationReducer(
           if (!last?.streaming) return state;
           return {
             ...state,
-            messages: [
-              ...msgs.slice(0, -1),
-              { ...last, content: last.content + event.content },
-            ],
+            messages: [...msgs.slice(0, -1), { ...last, content: last.content + event.content }],
           };
         }
 

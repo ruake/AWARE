@@ -135,10 +135,7 @@ export function TestList({
                   key={test.id}
                   style={{
                     cursor: "pointer",
-                    background:
-                      hoveredRow === test.id
-                        ? "var(--proof-hover)"
-                        : "transparent",
+                    background: hoveredRow === test.id ? "var(--proof-hover)" : "transparent",
                     transition: "background 0.1s",
                   }}
                   onMouseEnter={() => onHoverRow(test.id)}
@@ -179,14 +176,11 @@ export function TestList({
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLElement).style.color =
                           "var(--proof-blue-light, #60a5fa)";
-                        (e.currentTarget as HTMLElement).style.textDecoration =
-                          "underline";
+                        (e.currentTarget as HTMLElement).style.textDecoration = "underline";
                       }}
                       onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.color =
-                          "var(--proof-blue)";
-                        (e.currentTarget as HTMLElement).style.textDecoration =
-                          "none";
+                        (e.currentTarget as HTMLElement).style.color = "var(--proof-blue)";
+                        (e.currentTarget as HTMLElement).style.textDecoration = "none";
                       }}
                     >
                       {test.name}
@@ -202,12 +196,8 @@ export function TestList({
                         fontWeight: 600,
                         padding: "2px 8px",
                         borderRadius: 4,
-                        color:
-                          TYPE_COLORS[test.testType] ||
-                          "var(--proof-text-secondary)",
-                        background:
-                          TYPE_BGS[test.testType] ||
-                          "rgba(154,160,166,0.08)",
+                        color: TYPE_COLORS[test.testType] || "var(--proof-text-secondary)",
+                        background: TYPE_BGS[test.testType] || "rgba(154,160,166,0.08)",
                       }}
                     >
                       {TYPE_ICONS[test.testType] || null} {test.testType}
@@ -222,12 +212,8 @@ export function TestList({
                         fontWeight: 600,
                         padding: "2px 8px",
                         borderRadius: 4,
-                        color:
-                          CAT_COLORS[test.category] ||
-                          "var(--proof-text-secondary)",
-                        background:
-                          CAT_BGS[test.category] ||
-                          "rgba(154,160,166,0.08)",
+                        color: CAT_COLORS[test.category] || "var(--proof-text-secondary)",
+                        background: CAT_BGS[test.category] || "rgba(154,160,166,0.08)",
                       }}
                     >
                       {test.category}
@@ -243,12 +229,8 @@ export function TestList({
                         fontFamily: "var(--font-mono)",
                         padding: "1px 7px",
                         borderRadius: 99,
-                        color:
-                          PRI_COLORS[test.priority] ||
-                          "var(--proof-text-secondary)",
-                        background:
-                          PRI_BGS[test.priority] ||
-                          "rgba(154,160,166,0.08)",
+                        color: PRI_COLORS[test.priority] || "var(--proof-text-secondary)",
+                        background: PRI_BGS[test.priority] || "rgba(154,160,166,0.08)",
                       }}
                     >
                       {test.priority}
@@ -263,12 +245,8 @@ export function TestList({
                         fontWeight: 600,
                         padding: "2px 7px",
                         borderRadius: 4,
-                        color:
-                          STATUS_COLORS[test.status] ||
-                          "var(--proof-text-secondary)",
-                        background:
-                          STATUS_BGS[test.status] ||
-                          "rgba(154,160,166,0.08)",
+                        color: STATUS_COLORS[test.status] || "var(--proof-text-secondary)",
+                        background: STATUS_BGS[test.status] || "rgba(154,160,166,0.08)",
                       }}
                     >
                       {test.status}
@@ -291,25 +269,27 @@ export function TestList({
                           onClick={(e) => {
                             e.stopPropagation();
                             const filePath = test.scriptPath?.split("::")[0];
-                            if (filePath)
-                              window.open(
-                                `${repo}/blob/main/${filePath}`,
-                                "_blank",
-                              );
+                            if (filePath) window.open(`${repo}/blob/main/${filePath}`, "_blank");
                           }}
                           style={{
-                            border: "none", background: "none", cursor: "pointer",
-                            color: "var(--proof-text-muted)", padding: "2px 3px",
-                            display: "inline-flex", borderRadius: 3,
+                            border: "none",
+                            background: "none",
+                            cursor: "pointer",
+                            color: "var(--proof-text-muted)",
+                            padding: "2px 3px",
+                            display: "inline-flex",
+                            borderRadius: 3,
                             transition: "color 0.1s, background 0.1s",
                           }}
                           title="View source on GitHub"
                           onMouseEnter={(e) => {
                             (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-                            (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+                            (e.currentTarget as HTMLElement).style.background =
+                              "var(--proof-hover)";
                           }}
                           onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)";
+                            (e.currentTarget as HTMLElement).style.color =
+                              "var(--proof-text-muted)";
                             (e.currentTarget as HTMLElement).style.background = "none";
                           }}
                         >
@@ -322,9 +302,14 @@ export function TestList({
                           navigate(`/tests?suite=${suiteFilter}&detail=${test.id}`);
                         }}
                         style={{
-                          border: "none", background: "none", cursor: "pointer",
-                          color: detailId === test.id ? "var(--proof-blue)" : "var(--proof-text-muted)",
-                          padding: "2px 3px", display: "inline-flex", borderRadius: 3,
+                          border: "none",
+                          background: "none",
+                          cursor: "pointer",
+                          color:
+                            detailId === test.id ? "var(--proof-blue)" : "var(--proof-text-muted)",
+                          padding: "2px 3px",
+                          display: "inline-flex",
+                          borderRadius: 3,
                           transition: "color 0.1s, background 0.1s",
                         }}
                         title="Show details"
@@ -333,7 +318,8 @@ export function TestList({
                           (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
                         }}
                         onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLElement).style.color = detailId === test.id ? "var(--proof-blue)" : "var(--proof-text-muted)";
+                          (e.currentTarget as HTMLElement).style.color =
+                            detailId === test.id ? "var(--proof-blue)" : "var(--proof-text-muted)";
                           (e.currentTarget as HTMLElement).style.background = "none";
                         }}
                       >

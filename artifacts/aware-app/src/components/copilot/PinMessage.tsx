@@ -15,9 +15,7 @@ export function PinMessage({ message, threadId, bookmarks, onBookmarkChange }: P
   const [label, setLabel] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const bookmark = bookmarks.find(
-    (b) => b.threadId === threadId && b.messageId === message.id
-  );
+  const bookmark = bookmarks.find((b) => b.threadId === threadId && b.messageId === message.id);
   const isPinned = !!bookmark;
 
   const handleToggle = () => {
@@ -148,9 +146,7 @@ export function PinBadge({
   threadId: string;
   messageId: string;
 }) {
-  const isPinned = bookmarks.some(
-    (b) => b.threadId === threadId && b.messageId === messageId
-  );
+  const isPinned = bookmarks.some((b) => b.threadId === threadId && b.messageId === messageId);
   if (!isPinned) return null;
   return (
     <span

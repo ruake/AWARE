@@ -60,10 +60,7 @@ export function PageTemplate({
     onPageChange;
 
   return (
-    <div
-      className="proof-page"
-      style={{ animation: "page-enter 0.22s ease-out both" }}
-    >
+    <div className="proof-page" style={{ animation: "page-enter 0.22s ease-out both" }}>
       <div className="proof-page-header">
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -105,7 +102,7 @@ export function PageTemplate({
       >
         <PanelErrorBoundary label={errorLabel ?? title}>
           {loading ? (
-            loadingSkeleton ?? <SkeletonTable rows={loadingRows} cols={loadingCols} />
+            (loadingSkeleton ?? <SkeletonTable rows={loadingRows} cols={loadingCols} />)
           ) : error ? (
             <div
               style={{
@@ -141,9 +138,7 @@ export function PageTemplate({
             </div>
           ) : sidePanel ? (
             <div style={{ flex: 1, display: "flex", gap: 0, minHeight: 0 }}>
-              <div style={{ flex: 1, minWidth: 0, overflow: "auto" }}>
-                {children}
-              </div>
+              <div style={{ flex: 1, minWidth: 0, overflow: "auto" }}>{children}</div>
               <div
                 style={{
                   width: sidePanelWidth,

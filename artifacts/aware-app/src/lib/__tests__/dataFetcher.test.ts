@@ -35,9 +35,7 @@ describe("dataUrl", () => {
   it("preserves path subdirectories", () => {
     import.meta.env.DEV = false;
     const url = dataUrl("subdir/test-results.json");
-    expect(url).toBe(
-      "https://raw.githubusercontent.com/ruake/AWARE/data/subdir/test-results.json",
-    );
+    expect(url).toBe("https://raw.githubusercontent.com/ruake/AWARE/data/subdir/test-results.json");
   });
 });
 

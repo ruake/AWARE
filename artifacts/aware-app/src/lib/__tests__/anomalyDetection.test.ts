@@ -41,7 +41,11 @@ const makeResult = (
   suite: "test-suite",
   evidence: {
     request: { method: "GET", url: "https://example.com", headers: {} },
-    response: { status: 200, headers: {}, timings: { dnsLookup: 0, tcpConnect: 0, tlsHandshake: 0, ttfb: 0, download: 0, total: 0 } },
+    response: {
+      status: 200,
+      headers: {},
+      timings: { dnsLookup: 0, tcpConnect: 0, tlsHandshake: 0, ttfb: 0, download: 0, total: 0 },
+    },
     assertions: [],
   },
   filmstrip: [],
@@ -163,7 +167,7 @@ describe("getLatestAnomalyBanner", () => {
     }
 
     vi.spyOn(runsModule, "getTestResultsForRun").mockReturnValue([
-      makeResult("test_1", "Anomalous Test", i => i === 3 ? 500 : 100),
+      makeResult("test_1", "Anomalous Test", (i) => (i === 3 ? 500 : 100)),
     ]);
     vi.spyOn(runsModule, "getTestResultsForRun").mockImplementation((runId: string) => {
       const duration = runId === "run_3" ? 500 : 100;

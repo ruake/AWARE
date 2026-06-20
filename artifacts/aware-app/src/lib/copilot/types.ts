@@ -2,7 +2,7 @@
 // Copilot Type System — State-of-the-Art LangGraph Edition
 // ============================================================================
 
-export type ProviderType = "webllm" | "openai" | "chrome";
+export type ProviderType = "webllm" | "chrome" | "custom";
 export type ProviderStatus = "available" | "downloading" | "unavailable";
 
 // ── Message (what appears in the feed) ──────────────────────────────────────

@@ -743,5 +743,3 @@ export function buildSkillContextPrompt(useCaseId: string, stepIndex: number): s
       : "[LANGGRAPH] Final step",
   ].join("\n");
 }
-
-

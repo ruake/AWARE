@@ -34,10 +34,7 @@ export class DataValidationError extends Error {
   }
 }
 
-export async function fetchJson<T>(
-  path: string,
-  options?: FetchJsonOptions<T>,
-): Promise<T> {
+export async function fetchJson<T>(path: string, options?: FetchJsonOptions<T>): Promise<T> {
   const { validate, timeoutMs = 15000 } = options ?? {};
   const url = dataUrl(path);
   const controller = new AbortController();
@@ -85,9 +82,7 @@ export async function fetchImage(src: string): Promise<string> {
 
 // ── Type guards for core data shapes ─────────────────────────────────
 
-export function isArrayOf<T>(
-  guard: (x: unknown) => x is T,
-): (data: unknown) => data is T[] {
+export function isArrayOf<T>(guard: (x: unknown) => x is T): (data: unknown) => data is T[] {
   return (data): data is T[] => Array.isArray(data) && data.every(guard);
 }
 

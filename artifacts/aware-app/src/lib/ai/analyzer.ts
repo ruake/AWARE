@@ -20,7 +20,6 @@ import { logInfo, logDebug, logError, startTiming, endTiming } from "./debugLogg
 import { getSkillDefinition } from "./skillRegistry";
 import { enforceChartStandards, enforceChartPresence } from "./chartStandards";
 
-
 export async function runAnalysis(request: AIAnalysisRequest): Promise<AIAnalysisResult> {
   const useCase = getUseCaseById(request.useCaseId);
   if (!useCase) {
@@ -2786,7 +2785,7 @@ function genericFallback(request: AIAnalysisRequest): AIAnalysisResult {
     data: { runCount: RUNS.length, testCount: getTestCases().length, diffCount: DIFF_ROWS.length },
     confidence: 0.5,
     recommendations: [
-      "Configure OpenAI or Chrome AI for full analysis",
+      "Configure Custom Endpoint or Chrome AI for full analysis",
       "Use specific analysis types (failure-analysis, flaky-detection, etc.)",
       "Data is available for all standard queries",
     ],

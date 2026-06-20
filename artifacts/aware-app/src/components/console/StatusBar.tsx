@@ -11,9 +11,7 @@ export function StatusBar() {
 
   const activeEnvLabel = React.useMemo(() => {
     if (isAll) return "All environments";
-    const labels = envConfigs
-      .filter((c) => envIds.includes(c.id))
-      .map((c) => c.label);
+    const labels = envConfigs.filter((c) => envIds.includes(c.id)).map((c) => c.label);
     if (labels.length === 0) return "All environments";
     if (labels.length === 1) return labels[0];
     return `${labels[0]} + ${labels.length - 1} more`;
@@ -24,10 +22,7 @@ export function StatusBar() {
     return Math.round(runs.reduce((s, r) => s + (r.passPct ?? 0), 0) / totalRuns);
   }, [runs, totalRuns]);
 
-  const failedRuns = React.useMemo(
-    () => runs.filter((r) => (r.failures ?? 0) > 0).length,
-    [runs],
-  );
+  const failedRuns = React.useMemo(() => runs.filter((r) => (r.failures ?? 0) > 0).length, [runs]);
 
   const statusColor =
     passPct >= 95

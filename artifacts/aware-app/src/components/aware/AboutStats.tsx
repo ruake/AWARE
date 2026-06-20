@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  Activity,
-  CheckCircle2,
-  Layers,
-  TrendingUp,
-  Shield,
-  Clock,
-  Globe,
-} from "lucide-react";
+import { Activity, CheckCircle2, Layers, TrendingUp, Shield, Clock, Globe } from "lucide-react";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 
 function useCountUp(target: number): string {

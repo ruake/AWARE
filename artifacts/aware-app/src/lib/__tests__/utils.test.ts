@@ -22,7 +22,10 @@ describe("cn", () => {
 
 describe("cleanScriptPath", () => {
   it("returns githubPath when present", () => {
-    const tc = { githubPath: "src/tests/foo.spec.ts", scriptPath: "src/old/foo.spec.ts" } as TestCase;
+    const tc = {
+      githubPath: "src/tests/foo.spec.ts",
+      scriptPath: "src/old/foo.spec.ts",
+    } as TestCase;
     expect(cleanScriptPath(tc)).toBe("src/tests/foo.spec.ts");
   });
 

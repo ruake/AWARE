@@ -1,6 +1,5 @@
 import React from "react";
 
-
 interface DayData {
   date: string;
   count: number;

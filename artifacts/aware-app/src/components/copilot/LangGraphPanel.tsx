@@ -24,7 +24,7 @@ const NODE_DEFS: Array<{
 const PROVIDER_META: Record<ProviderType, { label: string; color: string }> = {
   chrome: { label: "Chrome AI · Gemini Nano", color: "#fbbf24" },
   webllm: { label: "WebLLM · Mistral 7B", color: "#a78bfa" },
-  openai: { label: "OpenAI", color: "#34d399" },
+  custom: { label: "Custom", color: "#34d399" },
 };
 
 function NodePill({

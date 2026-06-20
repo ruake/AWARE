@@ -164,7 +164,8 @@ function RunsListBanner({ running }: { running: Run[] }) {
         </span>
         <a
           href={GH_ACTIONS_URL}
-          target="_blank" rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             fontSize: 9,
             fontWeight: 600,
@@ -199,7 +200,8 @@ function RunsListBanner({ running }: { running: Run[] }) {
         </span>
         <a
           href={GH_ACTIONS_URL}
-          target="_blank" rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             fontSize: 9,
             fontWeight: 600,
@@ -496,7 +498,8 @@ function RunsGhActions() {
         </div>
         <a
           href={GH_ACTIONS_URL}
-          target="_blank" rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             display: "flex",
             alignItems: "center",
@@ -669,7 +672,8 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
         </button>
         <a
           href={`${repo}/actions/runs/${run.id}`}
-          target="_blank" rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             border: "1px solid var(--proof-border)",
             background: "var(--proof-surface)",

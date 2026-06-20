@@ -221,9 +221,10 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
               padding: "5px 12px",
               borderRadius: 7,
               border: "none",
-              background: value.trim().length > 0
-                ? "linear-gradient(135deg, #059669, #0891b2)"
-                : "rgba(255,255,255,0.05)",
+              background:
+                value.trim().length > 0
+                  ? "linear-gradient(135deg, #059669, #0891b2)"
+                  : "rgba(255,255,255,0.05)",
               color: value.trim().length > 0 ? "#fff" : "var(--proof-text-muted)",
               cursor: value.trim().length > 0 ? "pointer" : "not-allowed",
               fontSize: 11,

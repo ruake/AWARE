@@ -9,7 +9,7 @@ export function getImageSource(frame: { dataUri: string; imageUrl?: string }): s
 
 export async function preloadImage(src: string): Promise<string> {
   if (src.startsWith("data:") || src.startsWith("blob:")) return src;
-  
+
   const cached = _imageCache.get(src);
   if (cached) {
     cached.lastUsed = Date.now();
@@ -20,14 +20,14 @@ export async function preloadImage(src: string): Promise<string> {
   if (_imageCache.size >= MAX_CACHE_SIZE) {
     let oldestKey: string | null = null;
     let oldestTime = Infinity;
-    
+
     for (const [key, val] of _imageCache.entries()) {
       if (val.lastUsed < oldestTime) {
         oldestTime = val.lastUsed;
         oldestKey = key;
       }
     }
-    
+
     if (oldestKey) {
       revokeImage(oldestKey);
     }

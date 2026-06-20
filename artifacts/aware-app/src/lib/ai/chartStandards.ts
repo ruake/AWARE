@@ -44,8 +44,6 @@ const CHART_TYPE_GUIDELINES: Record<ChartType, string> = {
   Sankey: "Flow or comparison between stages. Use for UAT→PROD promotion flow, env transitions.",
 };
 
-
-
 // ── Chart Block Regex ────────────────────────────────────────────
 /**
  * Matches both properly-formatted chart blocks (```chart on its own line)
@@ -346,5 +344,3 @@ export function enforceChartPresence(response: string, fallbackChart: () => Char
   }
   return response;
 }
-
-

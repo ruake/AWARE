@@ -318,7 +318,14 @@ export interface RunFrequency {
 
 export function computeRunFrequency(): RunFrequency {
   if (_runs.length < 2) {
-    return { totalRuns: _runs.length, daysCovered: 0, runsPerDay: 0, hourly: 0, daily: 0, weekly: 0 };
+    return {
+      totalRuns: _runs.length,
+      daysCovered: 0,
+      runsPerDay: 0,
+      hourly: 0,
+      daily: 0,
+      weekly: 0,
+    };
   }
   const sorted = [..._runs].sort(
     (a, b) => new Date(a.started).getTime() - new Date(b.started).getTime(),

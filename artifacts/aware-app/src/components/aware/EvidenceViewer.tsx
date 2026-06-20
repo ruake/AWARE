@@ -74,9 +74,7 @@ export function EvidenceViewer({ evidence }: { evidence: TestEvidence | null }) 
             >
               {r.label}
             </span>
-            <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>
-              {r.val}
-            </span>
+            <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>{r.val}</span>
           </div>
         ))}
       </div>
@@ -113,14 +111,8 @@ export function EvidenceViewer({ evidence }: { evidence: TestEvidence | null }) 
                   fontSize: 10,
                 }}
               >
-                <span style={{ color: "var(--proof-blue)", minWidth: 140 }}>
-                  {k}
-                </span>
-                <span
-                  style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                >
-                  {v}
-                </span>
+                <span style={{ color: "var(--proof-blue)", minWidth: 140 }}>{k}</span>
+                <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>{v}</span>
               </div>
             ))}
           </div>
@@ -159,14 +151,8 @@ export function EvidenceViewer({ evidence }: { evidence: TestEvidence | null }) 
                   fontSize: 10,
                 }}
               >
-                <span style={{ color: "var(--proof-purple)", minWidth: 140 }}>
-                  {k}
-                </span>
-                <span
-                  style={{ color: "var(--proof-text)", wordBreak: "break-all" }}
-                >
-                  {v}
-                </span>
+                <span style={{ color: "var(--proof-purple)", minWidth: 140 }}>{k}</span>
+                <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>{v}</span>
               </div>
             ))}
           </div>
@@ -208,28 +194,18 @@ export function EvidenceViewer({ evidence }: { evidence: TestEvidence | null }) 
                   borderRadius: 4,
                 }}
               >
-                <span style={{ color: "var(--proof-orange)", fontWeight: 600 }}>
-                  {c.name}
-                </span>
+                <span style={{ color: "var(--proof-orange)", fontWeight: 600 }}>{c.name}</span>
                 <span style={{ color: "var(--proof-text)", wordBreak: "break-all" }}>
                   = {c.value}
                 </span>
                 {c.domain && (
-                  <span style={{ color: "var(--proof-text-secondary)" }}>
-                    domain={c.domain}
-                  </span>
+                  <span style={{ color: "var(--proof-text-secondary)" }}>domain={c.domain}</span>
                 )}
                 {c.path && (
-                  <span style={{ color: "var(--proof-text-secondary)" }}>
-                    path={c.path}
-                  </span>
+                  <span style={{ color: "var(--proof-text-secondary)" }}>path={c.path}</span>
                 )}
-                {c.httpOnly && (
-                  <span style={{ color: "var(--proof-green)" }}>HttpOnly</span>
-                )}
-                {c.secure && (
-                  <span style={{ color: "var(--proof-green)" }}>Secure</span>
-                )}
+                {c.httpOnly && <span style={{ color: "var(--proof-green)" }}>HttpOnly</span>}
+                {c.secure && <span style={{ color: "var(--proof-green)" }}>Secure</span>}
               </div>
             ))}
           </div>

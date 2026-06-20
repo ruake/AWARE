@@ -127,10 +127,7 @@ function VirtualBody({
   }, [visibleItems.length, onVisibleCount]);
 
   return (
-    <div
-      ref={parentRef}
-      style={{ overflowY: "auto", maxHeight: 320 }}
-    >
+    <div ref={parentRef} style={{ overflowY: "auto", maxHeight: 320 }}>
       <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
         {virtualizer.getVirtualItems().map((vItem) => {
           const row = rows[vItem.index];
@@ -350,8 +347,10 @@ export default function DataTable({ table }: Props) {
                   {table.columns.map((col) => {
                     const val = row[col.key] ?? null;
                     const stats = colStats[col.key];
-                    const isMax = stats !== undefined && val === stats.max && col.highlight === "max";
-                    const isMin = stats !== undefined && val === stats.min && col.highlight === "min";
+                    const isMax =
+                      stats !== undefined && val === stats.max && col.highlight === "max";
+                    const isMin =
+                      stats !== undefined && val === stats.min && col.highlight === "min";
                     const href = col.link ? col.link(row) : null;
                     const cellContent = formatCell(val, col, isMax, isMin);
                     return (
@@ -423,7 +422,9 @@ export default function DataTable({ table }: Props) {
       >
         {useVirtual ? (
           <>
-            <span>Showing {visibleCount} of {sorted.length} rows</span>
+            <span>
+              Showing {visibleCount} of {sorted.length} rows
+            </span>
             <span>·</span>
             <button
               onClick={() => setShowAll(true)}

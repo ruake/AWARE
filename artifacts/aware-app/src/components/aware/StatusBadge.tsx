@@ -1,6 +1,15 @@
 import React from "react";
 
-type StatusType = "PASS" | "FAIL" | "FLAKY" | "WARNING" | "SKIP" | "RUNNING" | "PARTIAL" | "ERROR" | "PENDING";
+type StatusType =
+  | "PASS"
+  | "FAIL"
+  | "FLAKY"
+  | "WARNING"
+  | "SKIP"
+  | "RUNNING"
+  | "PARTIAL"
+  | "ERROR"
+  | "PENDING";
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -21,5 +30,9 @@ const STATUS_MAP: Record<string, string> = {
 
 export function StatusBadge({ status, label }: StatusBadgeProps) {
   const cls = STATUS_MAP[status] ?? "proof-badge-skip";
-  return <span className={`proof-badge ${cls}`} aria-label={label ?? status}>{label ?? status}</span>;
+  return (
+    <span className={`proof-badge ${cls}`} aria-label={label ?? status}>
+      {label ?? status}
+    </span>
+  );
 }

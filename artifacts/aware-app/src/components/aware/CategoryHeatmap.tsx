@@ -118,7 +118,9 @@ export function CategoryHeatmap({ data }: CategoryHeatmapProps) {
             fontSize: 11,
           }}
         >
-          <div style={{ fontWeight: 600, color: "var(--proof-text-secondary)", padding: "4px 6px" }}>
+          <div
+            style={{ fontWeight: 600, color: "var(--proof-text-secondary)", padding: "4px 6px" }}
+          >
             Environment
           </div>
           {grid[0]?.cells.map((cell) => (

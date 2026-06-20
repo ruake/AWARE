@@ -2,10 +2,7 @@ import React, { useSyncExternalStore } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { subscribeToRuns, getRuns, subscribeToDiffRows, getDiffRows } from "@/lib/data";
-import {
-  getSelectedEnvSnapshot,
-  subscribeToSelectedEnv,
-} from "@/lib/selectedEnv";
+import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { getCompareStats, subscribeToSidebarData } from "@/lib/sidebarData";
 import { Link2, Share2, Github, Zap } from "lucide-react";
 

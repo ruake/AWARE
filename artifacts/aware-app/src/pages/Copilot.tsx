@@ -1,27 +1,50 @@
 import React from "react";
 import {
-  Bot, Settings, Plus, Square, Loader2, Search, Download, Keyboard,
-  BarChart3, Sliders, MessageSquare,
+  Bot,
+  Settings,
+  Plus,
+  Square,
+  Loader2,
+  Search,
+  Download,
+  Keyboard,
+  BarChart3,
+  Sliders,
+  MessageSquare,
 } from "lucide-react";
 import { TOOLS } from "@/lib/copilot/tools";
 import { runAgent } from "@/lib/copilot/agent";
 import { createProvider, WebLLMProvider } from "@/lib/copilot/providers";
 import {
-  loadThreads, saveThreads, loadSession, clearSession,
-  loadProviderType, saveProviderType, loadOpenAIConfig, saveOpenAIConfig,
-  createThread, updateThreadInList,
-  getActiveThreadId, setActiveThreadId,
-  loadCopilotSettings, saveCopilotSettings,
+  loadThreads,
+  saveThreads,
+  loadSession,
+  clearSession,
+  loadProviderType,
+  saveProviderType,
+  loadCustomEndpointConfig,
+  saveCustomEndpointConfig,
+  createThread,
+  updateThreadInList,
+  getActiveThreadId,
+  setActiveThreadId,
+  loadCopilotSettings,
+  saveCopilotSettings,
   loadBookmarks,
 } from "@/lib/copilot/storage";
 import type {
-  Message, ProviderType, ProviderStatus, AgentEvent, SubAgentStep,
-  Thread, Attachment, Bookmark, CopilotSettings, ToneOption,
+  Message,
+  ProviderType,
+  ProviderStatus,
+  AgentEvent,
+  SubAgentStep,
+  Thread,
+  Attachment,
+  Bookmark,
+  CopilotSettings,
+  ToneOption,
 } from "@/lib/copilot/types";
-import {
-  conversationReducer,
-  INITIAL_CONVERSATION_STATE,
-} from "@/lib/copilot/copilotReducer";
+import { conversationReducer, INITIAL_CONVERSATION_STATE } from "@/lib/copilot/copilotReducer";
 import MessageFeed from "@/components/copilot/MessageFeed";
 import MessageSearchComp from "@/components/copilot/MessageSearch";
 import EditBranch from "@/components/copilot/EditBranch";
@@ -43,17 +66,24 @@ const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 const ESTIMATED_CHARS_PER_TOKEN = 4;
 
 function estimateTokens(messages: Message[]): number {
-  return messages.reduce((sum, m) => sum + Math.ceil(m.content.length / ESTIMATED_CHARS_PER_TOKEN), 0);
+  return messages.reduce(
+    (sum, m) => sum + Math.ceil(m.content.length / ESTIMATED_CHARS_PER_TOKEN),
+    0,
+  );
 }
 
 export default function CopilotPage() {
-  const [convState, dispatch] = React.useReducer(conversationReducer, INITIAL_CONVERSATION_STATE, () => {
-    const session = loadSession();
-    return {
-      ...INITIAL_CONVERSATION_STATE,
-      messages: session?.messages?.length ? session.messages : [],
-    };
-  });
+  const [convState, dispatch] = React.useReducer(
+    conversationReducer,
+    INITIAL_CONVERSATION_STATE,
+    () => {
+      const session = loadSession();
+      return {
+        ...INITIAL_CONVERSATION_STATE,
+        messages: session?.messages?.length ? session.messages : [],
+      };
+    },
+  );
 
   const { messages, busy, agentSteps } = convState;
 
@@ -69,14 +99,15 @@ export default function CopilotPage() {
   });
   const [providerStatus, setProviderStatus] = React.useState<Record<ProviderType, ProviderStatus>>({
     webllm: "unavailable",
-    openai: "available",
+    custom: "unavailable",
     chrome: "unavailable",
   });
   const [downloadProgress, setDownloadProgress] = React.useState<{
-    progress: number; text: string;
+    progress: number;
+    text: string;
   } | null>(null);
   const [showSettings, setShowSettings] = React.useState(false);
-  const [openaiConfig, setOpenaiConfig] = React.useState(loadOpenAIConfig);
+  const [customEndpointConfig, setCustomEndpointConfig] = React.useState(loadCustomEndpointConfig);
   const [input, setInput] = React.useState("");
 
   const [threads, setThreads] = React.useState<Thread[]>(() => loadThreads());
@@ -90,7 +121,9 @@ export default function CopilotPage() {
   const [editingMessageId, setEditingMessageId] = React.useState<string | null>(null);
   const [attachments, setAttachments] = React.useState<Attachment[]>([]);
   const [bookmarks, setBookmarks] = React.useState<Bookmark[]>(() => loadBookmarks());
-  const [copilotSettings, setCopilotSettings] = React.useState<CopilotSettings>(() => loadCopilotSettings());
+  const [copilotSettings, setCopilotSettings] = React.useState<CopilotSettings>(() =>
+    loadCopilotSettings(),
+  );
 
   const [threadUrl, setThreadUrl] = useSyncedUrlState<string | null>("copilotThread", null);
 
@@ -108,7 +141,7 @@ export default function CopilotPage() {
       setDownloadProgress({ progress, text });
       if (progress >= 1) setTimeout(() => setDownloadProgress(null), 2000);
     };
-    return { webllm: wllm, openai: createProvider("openai"), chrome: createProvider("chrome") };
+    return { webllm: wllm, custom: createProvider("custom"), chrome: createProvider("chrome") };
   }, []);
 
   React.useEffect(() => {
@@ -146,24 +179,30 @@ export default function CopilotPage() {
     }
   }, [threadUrl]);
 
-  const ensureActiveThread = React.useCallback((msgs: Message[]) => {
-    setThreads((prev) => {
-      const activeId = getActiveThreadId();
-      if (activeId) {
-        const updated = updateThreadInList(prev, activeId, { messages: msgs, messageCount: msgs.length });
-        saveThreads(updated);
-        return updated;
-      }
-      if (msgs.length === 0) return prev;
-      const title = msgs[0].content.slice(0, 60) || "New Chat";
-      const t = createThread(title, msgs, providerType);
-      setActiveThreadId(t.id);
-      setThreadUrl(t.id);
-      const next = [t, ...prev];
-      saveThreads(next);
-      return next;
-    });
-  }, [providerType, setThreadUrl]);
+  const ensureActiveThread = React.useCallback(
+    (msgs: Message[]) => {
+      setThreads((prev) => {
+        const activeId = getActiveThreadId();
+        if (activeId) {
+          const updated = updateThreadInList(prev, activeId, {
+            messages: msgs,
+            messageCount: msgs.length,
+          });
+          saveThreads(updated);
+          return updated;
+        }
+        if (msgs.length === 0) return prev;
+        const title = msgs[0].content.slice(0, 60) || "New Chat";
+        const t = createThread(title, msgs, providerType);
+        setActiveThreadId(t.id);
+        setThreadUrl(t.id);
+        const next = [t, ...prev];
+        saveThreads(next);
+        return next;
+      });
+    },
+    [providerType, setThreadUrl],
+  );
 
   const handleEvent = React.useCallback((event: AgentEvent) => {
     dispatch({ type: "AGENT_EVENT", payload: event });
@@ -182,8 +221,12 @@ export default function CopilotPage() {
       const history = messagesRef.current;
       const userMsg: Message = { id: uid(), role: "user", content, timestamp: Date.now() };
       const assistantMsg: Message = {
-        id: uid(), role: "assistant", content: "", timestamp: Date.now(),
-        streaming: true, graphNodes: [],
+        id: uid(),
+        role: "assistant",
+        content: "",
+        timestamp: Date.now(),
+        streaming: true,
+        graphNodes: [],
       };
 
       const updatedMessages = [...history, userMsg, assistantMsg];
@@ -226,10 +269,19 @@ export default function CopilotPage() {
       const slicedHistory = current.slice(0, userIdx);
       if (!userContent.trim() || busy) return;
 
-      const userMsg: Message = { id: uid(), role: "user", content: userContent, timestamp: Date.now() };
+      const userMsg: Message = {
+        id: uid(),
+        role: "user",
+        content: userContent,
+        timestamp: Date.now(),
+      };
       const assistantMsg: Message = {
-        id: uid(), role: "assistant", content: "", timestamp: Date.now(),
-        streaming: true, graphNodes: [],
+        id: uid(),
+        role: "assistant",
+        content: "",
+        timestamp: Date.now(),
+        streaming: true,
+        graphNodes: [],
       };
       const updated = [...slicedHistory, userMsg, assistantMsg];
       dispatch({ type: "SET_MESSAGES", payload: updated });
@@ -284,8 +336,8 @@ export default function CopilotPage() {
   };
 
   const handleSaveSettings = (cfg: { apiKey: string; apiUrl: string; model: string }) => {
-    setOpenaiConfig(cfg);
-    saveOpenAIConfig(cfg);
+    setCustomEndpointConfig(cfg);
+    saveCustomEndpointConfig(cfg);
     setShowSettings(false);
   };
 
@@ -349,7 +401,9 @@ export default function CopilotPage() {
   const handleEditSave = (messageId: string, newContent: string) => {
     dispatch({
       type: "SET_MESSAGES",
-      payload: messagesRef.current.map((m) => (m.id === messageId ? { ...m, content: newContent } : m)),
+      payload: messagesRef.current.map((m) =>
+        m.id === messageId ? { ...m, content: newContent } : m,
+      ),
     });
     setEditingMessageId(null);
   };
@@ -360,7 +414,11 @@ export default function CopilotPage() {
     const idx = messages.findIndex((m) => m.id === messageId);
     if (idx < 0) return;
     const branchMsgs = messages.slice(0, idx + 1);
-    const t = createThread(`Branch: ${branchMsgs[0]?.content.slice(0, 40) || "Chat"}`, branchMsgs, providerType);
+    const t = createThread(
+      `Branch: ${branchMsgs[0]?.content.slice(0, 40) || "Chat"}`,
+      branchMsgs,
+      providerType,
+    );
     setThreads((prev) => {
       const next = [t, ...prev];
       saveThreads(next);
@@ -376,7 +434,9 @@ export default function CopilotPage() {
   const handleDismissError = (messageId: string) => {
     dispatch({
       type: "SET_MESSAGES",
-      payload: messagesRef.current.map((m) => (m.id === messageId ? { ...m, error: undefined } : m)),
+      payload: messagesRef.current.map((m) =>
+        m.id === messageId ? { ...m, error: undefined } : m,
+      ),
     });
   };
 
@@ -448,7 +508,11 @@ export default function CopilotPage() {
   const showingOnboarding = messages.length === 0 && !busy && !dismissedOnboarding;
   const erroredMessages = messages.filter((m) => m.role === "assistant" && m.error && !m.streaming);
 
-  const ariaStatus = busy ? "AI is thinking\u2026" : messages.some((m) => m.role === "assistant") ? "Response ready." : "";
+  const ariaStatus = busy
+    ? "AI is thinking\u2026"
+    : messages.some((m) => m.role === "assistant")
+      ? "Response ready."
+      : "";
 
   return (
     <div
@@ -523,8 +587,8 @@ export default function CopilotPage() {
             Copilot
           </div>
           <div style={{ fontSize: 11, color: "var(--proof-text-muted)", lineHeight: 1.2 }}>
-            {providerType === "openai"
-              ? openaiConfig.model || "gpt-4o-mini"
+            {providerType === "custom"
+              ? customEndpointConfig.model || "Custom Endpoint"
               : providerType === "webllm"
                 ? "WebLLM · Llama-3.2"
                 : "Chrome AI · Gemini Nano"}
@@ -548,12 +612,40 @@ export default function CopilotPage() {
         />
 
         <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <IconBtn icon={<Search size={13} />} title="Search (Cmd+F)" active={showSearch} onClick={() => setShowSearch((p) => !p)} />
-          <IconBtn icon={<Download size={13} />} title="Export (Cmd+Shift+S)" onClick={() => setShowExport(true)} />
-          <IconBtn icon={<BarChart3 size={13} />} title="Stats" active={showStats} onClick={() => setShowStats((p) => !p)} />
-          <IconBtn icon={<Sliders size={13} />} title="Model Config" active={showModelConfig} onClick={() => setShowModelConfig((p) => !p)} />
-          <IconBtn icon={<Keyboard size={13} />} title="Shortcuts" onClick={() => setShowKeyboardShortcuts(true)} />
-          <IconBtn icon={<Settings size={13} />} title="Settings" active={showSettings} onClick={() => setShowSettings((p) => !p)} />
+          <IconBtn
+            icon={<Search size={13} />}
+            title="Search (Cmd+F)"
+            active={showSearch}
+            onClick={() => setShowSearch((p) => !p)}
+          />
+          <IconBtn
+            icon={<Download size={13} />}
+            title="Export (Cmd+Shift+S)"
+            onClick={() => setShowExport(true)}
+          />
+          <IconBtn
+            icon={<BarChart3 size={13} />}
+            title="Stats"
+            active={showStats}
+            onClick={() => setShowStats((p) => !p)}
+          />
+          <IconBtn
+            icon={<Sliders size={13} />}
+            title="Model Config"
+            active={showModelConfig}
+            onClick={() => setShowModelConfig((p) => !p)}
+          />
+          <IconBtn
+            icon={<Keyboard size={13} />}
+            title="Shortcuts"
+            onClick={() => setShowKeyboardShortcuts(true)}
+          />
+          <IconBtn
+            icon={<Settings size={13} />}
+            title="Settings"
+            active={showSettings}
+            onClick={() => setShowSettings((p) => !p)}
+          />
 
           <button
             onClick={handleNewChat}
@@ -613,7 +705,7 @@ export default function CopilotPage() {
       {/* ── Settings panel ─────────────────────────────────────── */}
       {showSettings && (
         <CopilotSettingsPanel
-          openaiConfig={openaiConfig}
+          endpointConfig={customEndpointConfig}
           onSave={handleSaveSettings}
           onClose={() => setShowSettings(false)}
         />
@@ -636,7 +728,11 @@ export default function CopilotPage() {
         >
           <Loader2
             size={8}
-            style={{ animation: "spin 0.8s linear infinite", color: "var(--proof-blue)", flexShrink: 0 }}
+            style={{
+              animation: "spin 0.8s linear infinite",
+              color: "var(--proof-blue)",
+              flexShrink: 0,
+            }}
           />
           {agentSteps.slice(-4).map((s, i) => (
             <React.Fragment key={s.id}>
@@ -672,7 +768,15 @@ export default function CopilotPage() {
           position: "relative",
         }}
       >
-        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", position: "relative" }}>
+        <div
+          style={{
+            flex: 1,
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+          }}
+        >
           {showSearch ? (
             <MessageSearchComp
               threads={threads}
@@ -691,11 +795,7 @@ export default function CopilotPage() {
 
         {erroredMessages.map((msg) => (
           <div key={msg.id} style={{ padding: "0 16px", flexShrink: 0 }}>
-            <ErrorRecovery
-              message={msg}
-              onRetry={handleRetry}
-              onDismiss={handleDismissError}
-            />
+            <ErrorRecovery message={msg} onRetry={handleRetry} onDismiss={handleDismissError} />
           </div>
         ))}
       </div>
@@ -786,16 +886,20 @@ export default function CopilotPage() {
       </div>
 
       {/* ── Overlays ───────────────────────────────────────────── */}
-      {showExport && (() => {
-        const activeId = getActiveThreadId();
-        const exportThread = activeId ? threads.find((th) => th.id === activeId) : null;
-        return exportThread ? (
-          <ExportDialog thread={exportThread} onClose={() => setShowExport(false)} />
-        ) : null;
-      })()}
+      {showExport &&
+        (() => {
+          const activeId = getActiveThreadId();
+          const exportThread = activeId ? threads.find((th) => th.id === activeId) : null;
+          return exportThread ? (
+            <ExportDialog thread={exportThread} onClose={() => setShowExport(false)} />
+          ) : null;
+        })()}
 
       {showTemplateLibrary && (
-        <TemplateLibrary onSelect={handleTemplateSelect} onClose={() => setShowTemplateLibrary(false)} />
+        <TemplateLibrary
+          onSelect={handleTemplateSelect}
+          onClose={() => setShowTemplateLibrary(false)}
+        />
       )}
 
       {showModelConfig && (
@@ -810,19 +914,23 @@ export default function CopilotPage() {
         <KeyboardShortcutsComp onClose={() => setShowKeyboardShortcuts(false)} />
       )}
 
-      {showStats && (() => {
-        const activeId = getActiveThreadId();
-        const statsThread = activeId ? threads.find((th) => th.id === activeId) : null;
-        return statsThread ? (
-          <StatsPanel thread={statsThread} onClose={() => setShowStats(false)} />
-        ) : null;
-      })()}
+      {showStats &&
+        (() => {
+          const activeId = getActiveThreadId();
+          const statsThread = activeId ? threads.find((th) => th.id === activeId) : null;
+          return statsThread ? (
+            <StatsPanel thread={statsThread} onClose={() => setShowStats(false)} />
+          ) : null;
+        })()}
     </div>
   );
 }
 
 function IconBtn({
-  icon, title, active, onClick,
+  icon,
+  title,
+  active,
+  onClick,
 }: {
   icon: React.ReactNode;
   title: string;

@@ -118,15 +118,16 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
                 }}
               >
                 <div>
-                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> mv ~/Downloads/proof-test-config-*.yml
+                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> mv
+                  ~/Downloads/proof-test-config-*.yml config/proof-test-config.yml
+                </div>
+                <div>
+                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git add
                   config/proof-test-config.yml
                 </div>
                 <div>
-                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git add config/proof-test-config.yml
-                </div>
-                <div>
-                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git commit -m "update proof test
-                  config from AWARE"
+                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git commit -m "update
+                  proof test config from AWARE"
                 </div>
                 <div>
                   <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git push
@@ -162,9 +163,15 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
               >
                 <div style={{ color: "var(--proof-yellow)" }}>.github/workflows/controller.yml</div>
                 <div style={{ color: "var(--proof-text-muted)" }}> └─ workflow_dispatch inputs</div>
-                <div style={{ color: "var(--proof-text-muted)" }}> ├─ suite (reads from config)</div>
+                <div style={{ color: "var(--proof-text-muted)" }}>
+                  {" "}
+                  ├─ suite (reads from config)
+                </div>
                 <div style={{ color: "var(--proof-text-muted)" }}> ├─ target (Prod | UAT)</div>
-                <div style={{ color: "var(--proof-text-muted)" }}> └─ environment (Production | Staging)</div>
+                <div style={{ color: "var(--proof-text-muted)" }}>
+                  {" "}
+                  └─ environment (Production | Staging)
+                </div>
               </div>
             </div>
           </div>

@@ -2,11 +2,7 @@ import React from "react";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { AboutSection } from "./AboutSection";
 
-export function AboutTestCategories({
-  categories,
-}: {
-  categories: Record<string, number>;
-}) {
+export function AboutTestCategories({ categories }: { categories: Record<string, number> }) {
   const total = Object.values(categories).reduce((s, c) => s + c, 0);
   return (
     <PanelErrorBoundary label="Test categories">

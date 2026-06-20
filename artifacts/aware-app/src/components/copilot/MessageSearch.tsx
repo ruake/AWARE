@@ -32,12 +32,9 @@ function highlightText(text: string, query: string): React.ReactNode {
       parts.push(text.slice(lastIndex, idx));
     }
     parts.push(
-      <strong
-        key={idx}
-        style={{ fontWeight: 700, color: "var(--proof-blue)" }}
-      >
+      <strong key={idx} style={{ fontWeight: 700, color: "var(--proof-blue)" }}>
         {text.slice(idx, idx + query.length)}
-      </strong>
+      </strong>,
     );
     lastIndex = idx + query.length;
     idx = lowerText.indexOf(lowerQuery, lastIndex);
@@ -98,12 +95,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
     return groups;
   }, [results]);
 
-  const flatResults = React.useMemo(
-    () => Object.values(groupedResults).flat(),
-    [groupedResults],
-  );
-
-
+  const flatResults = React.useMemo(() => Object.values(groupedResults).flat(), [groupedResults]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -253,8 +245,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
           >
             <Search size={28} style={{ color: "var(--proof-text-muted)", opacity: 0.4 }} />
             <div style={{ fontSize: 13, color: "var(--proof-text-muted)" }}>
-              No results for{" "}
-              <strong style={{ color: "var(--proof-text)" }}>"{query}"</strong>
+              No results for <strong style={{ color: "var(--proof-text)" }}>"{query}"</strong>
             </div>
             <div style={{ fontSize: 11.5, color: "var(--proof-text-muted)", opacity: 0.7 }}>
               Try a different search term
@@ -289,7 +280,14 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
                   >
                     {groupResults[0].threadTitle}
                   </span>
-                  <span style={{ fontSize: 10, color: "var(--proof-text-muted)", opacity: 0.6, flexShrink: 0 }}>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: "var(--proof-text-muted)",
+                      opacity: 0.6,
+                      flexShrink: 0,
+                    }}
+                  >
                     {groupResults.length}
                   </span>
                   <ChevronRight size={12} style={{ flexShrink: 0, opacity: 0.5 }} />
@@ -306,12 +304,15 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
                         padding: "8px 14px 8px 16px",
                         cursor: "pointer",
                         background: isSelected ? "rgba(59,130,246,0.08)" : "transparent",
-                        borderLeft: isSelected ? "2px solid var(--proof-blue)" : "2px solid transparent",
+                        borderLeft: isSelected
+                          ? "2px solid var(--proof-blue)"
+                          : "2px solid transparent",
                         transition: "background 0.1s",
                       }}
                       onMouseEnter={(e) => {
                         if (!isSelected) {
-                          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
+                          (e.currentTarget as HTMLElement).style.background =
+                            "rgba(255,255,255,0.03)";
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -321,7 +322,9 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
                       }}
                     >
                       {/* Role badge + timestamp */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                      <div
+                        style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}
+                      >
                         <span
                           style={{
                             display: "inline-flex",
@@ -332,16 +335,16 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
                             fontSize: 10,
                             fontWeight: 600,
                             background:
-                              r.role === "user"
-                                ? "rgba(59,130,246,0.12)"
-                                : "rgba(139,92,246,0.12)",
+                              r.role === "user" ? "rgba(59,130,246,0.12)" : "rgba(139,92,246,0.12)",
                             color: r.role === "user" ? "#60a5fa" : "#a78bfa",
                           }}
                         >
                           {r.role === "user" ? <User size={10} /> : <Bot size={10} />}
                           {r.role === "user" ? "User" : "Assistant"}
                         </span>
-                        <span style={{ fontSize: 10, color: "var(--proof-text-muted)", opacity: 0.6 }}>
+                        <span
+                          style={{ fontSize: 10, color: "var(--proof-text-muted)", opacity: 0.6 }}
+                        >
                           {formatTime(r.timestamp)}
                         </span>
                       </div>

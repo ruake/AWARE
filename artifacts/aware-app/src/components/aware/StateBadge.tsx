@@ -11,5 +11,9 @@ const STATE_MAP: Record<string, { color: string; label: string }> = {
 
 export function StateBadge({ state }: { state: DiffRow["state"] }) {
   const s = STATE_MAP[state] ?? { color: "var(--proof-text-secondary)", label: state };
-  return <span style={{ fontSize: 11, fontWeight: 600, color: s.color }} aria-label={s.label}>{s.label}</span>;
+  return (
+    <span style={{ fontSize: 11, fontWeight: 600, color: s.color }} aria-label={s.label}>
+      {s.label}
+    </span>
+  );
 }

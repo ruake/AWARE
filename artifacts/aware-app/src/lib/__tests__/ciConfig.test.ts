@@ -54,7 +54,13 @@ const mockTestCases: TestCase[] = [
     cookies: {},
     expectedStatus: 200,
     captureResponseHeaders: [],
-    filmstrip: { enabled: false, mode: "screenshot", threshold: 0, captureOnFailure: true, maxFrames: 3 },
+    filmstrip: {
+      enabled: false,
+      mode: "screenshot",
+      threshold: 0,
+      captureOnFailure: true,
+      maxFrames: 3,
+    },
     predicates: [],
     config: {},
     assertions: [],
@@ -85,7 +91,13 @@ const mockTestCases: TestCase[] = [
     cookies: {},
     expectedStatus: 200,
     captureResponseHeaders: [],
-    filmstrip: { enabled: false, mode: "screenshot", threshold: 0, captureOnFailure: true, maxFrames: 3 },
+    filmstrip: {
+      enabled: false,
+      mode: "screenshot",
+      threshold: 0,
+      captureOnFailure: true,
+      maxFrames: 3,
+    },
     predicates: [],
     config: {},
     assertions: [],
@@ -229,7 +241,11 @@ describe("downloadCiConfig", () => {
     vi.stubGlobal("URL", { ...URL, revokeObjectURL: revokeSpy });
 
     const createObjectURLSpy = vi.fn().mockReturnValue("blob:url");
-    vi.stubGlobal("URL", { ...URL, createObjectURL: createObjectURLSpy, revokeObjectURL: revokeSpy });
+    vi.stubGlobal("URL", {
+      ...URL,
+      createObjectURL: createObjectURLSpy,
+      revokeObjectURL: revokeSpy,
+    });
 
     downloadCiConfig();
 

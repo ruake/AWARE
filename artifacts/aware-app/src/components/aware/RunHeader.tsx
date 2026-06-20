@@ -22,14 +22,17 @@ export function RunHeader({ run }: { run: Run }) {
             height: 32,
             borderRadius: "50%",
             background:
-              run.env === "QA" ? "rgba(168,85,247,0.15)" : run.env === "UAT" ? "rgba(245,158,11,0.15)" : "rgba(34,197,94,0.15)",
+              run.env === "QA"
+                ? "rgba(168,85,247,0.15)"
+                : run.env === "UAT"
+                  ? "rgba(245,158,11,0.15)"
+                  : "rgba(34,197,94,0.15)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: 10,
             fontWeight: 700,
-            color:
-              run.env === "QA" ? "#a855f7" : run.env === "UAT" ? "#f59e0b" : "#22c55e",
+            color: run.env === "QA" ? "#a855f7" : run.env === "UAT" ? "#f59e0b" : "#22c55e",
             flexShrink: 0,
           }}
         >
@@ -37,9 +40,7 @@ export function RunHeader({ run }: { run: Run }) {
         </div>
         <div>
           <div style={{ fontWeight: 600, fontSize: 13 }}>{envIdToLabel(run.envId)}</div>
-          <div style={{ color: "var(--proof-text-secondary)", fontSize: 11 }}>
-            {run.suiteId}
-          </div>
+          <div style={{ color: "var(--proof-text-secondary)", fontSize: 11 }}>{run.suiteId}</div>
         </div>
       </div>
 
@@ -55,7 +56,8 @@ export function RunHeader({ run }: { run: Run }) {
               fontSize: 11,
               fontWeight: 600,
               color: run.network === "production" ? "#22c55e" : "#f59e0b",
-              background: run.network === "production" ? "rgba(34,197,94,0.1)" : "rgba(245,158,11,0.1)",
+              background:
+                run.network === "production" ? "rgba(34,197,94,0.1)" : "rgba(245,158,11,0.1)",
               padding: "1px 7px",
               borderRadius: 4,
             }}
@@ -72,12 +74,7 @@ export function RunHeader({ run }: { run: Run }) {
             style={{
               fontSize: 13,
               fontWeight: 700,
-              color:
-                run.passPct === 100
-                  ? "#22c55e"
-                  : run.passPct >= 80
-                    ? "#f59e0b"
-                    : "#ef4444",
+              color: run.passPct === 100 ? "#22c55e" : run.passPct >= 80 ? "#f59e0b" : "#ef4444",
             }}
           >
             {run.passPct}%
@@ -92,7 +89,12 @@ export function RunHeader({ run }: { run: Run }) {
             style={{
               fontSize: 11,
               fontWeight: 600,
-              color: run.status === "PASS" ? "#22c55e" : run.status === "RUNNING" ? "#3b82f6" : "#ef4444",
+              color:
+                run.status === "PASS"
+                  ? "#22c55e"
+                  : run.status === "RUNNING"
+                    ? "#3b82f6"
+                    : "#ef4444",
             }}
           >
             {run.status}
@@ -103,7 +105,13 @@ export function RunHeader({ run }: { run: Run }) {
           <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
             Duration
           </div>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--proof-text-secondary)" }}>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              color: "var(--proof-text-secondary)",
+            }}
+          >
             {run.duration}
           </span>
         </div>
@@ -132,7 +140,9 @@ export function RunHeader({ run }: { run: Run }) {
             </div>
             {envCfg.baseUrl && (
               <div>
-                <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
+                <div
+                  style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}
+                >
                   Base URL
                 </div>
                 <span
@@ -148,7 +158,9 @@ export function RunHeader({ run }: { run: Run }) {
             )}
             {run.build && (
               <div>
-                <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
+                <div
+                  style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}
+                >
                   Build
                 </div>
                 <span

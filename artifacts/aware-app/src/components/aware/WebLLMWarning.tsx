@@ -101,8 +101,8 @@ export function WebLLMWarning({ onConfirm, onCancel }: WebLLMWarningProps) {
         >
           Running the AI model locally requires downloading{" "}
           <strong style={{ color: "var(--proof-text)" }}>~4 GB</strong> of model weights to your
-          browser. This is a one-time download that enables fully private, offline AI processing — no
-          data leaves your device.
+          browser. This is a one-time download that enables fully private, offline AI processing —
+          no data leaves your device.
         </p>
 
         <p
@@ -114,7 +114,7 @@ export function WebLLMWarning({ onConfirm, onCancel }: WebLLMWarningProps) {
           }}
         >
           The download will be cached locally. Requires WebGPU support (Chrome 113+, Edge 113+).
-          Alternatively, use <strong>OpenAI</strong> mode with your own API key.
+          Alternatively, use <strong>Custom Endpoint</strong> mode with an OpenAI-compatible server.
         </p>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>

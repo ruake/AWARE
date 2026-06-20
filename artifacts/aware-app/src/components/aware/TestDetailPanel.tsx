@@ -11,8 +11,7 @@ interface TestDetailPanelProps {
 }
 
 export function TestDetailPanel({ test, parentSuite, onClose }: TestDetailPanelProps) {
-  const getGitHubUrl = (tc: TestCase) =>
-    tc.githubUrl || `${repo}/blob/main/${tc.scriptPath}`;
+  const getGitHubUrl = (tc: TestCase) => tc.githubUrl || `${repo}/blob/main/${tc.scriptPath}`;
   const cleanScriptPath = (tc: TestCase) => {
     if (!tc.scriptPath) return tc.id;
     return tc.scriptPath.split("/").slice(-2).join("/");
@@ -219,7 +218,8 @@ export function TestDetailPanel({ test, parentSuite, onClose }: TestDetailPanelP
           </h4>
           <a
             href={getGitHubUrl(test)}
-            target="_blank" rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               fontSize: 11,
               fontFamily: "var(--font-mono)",

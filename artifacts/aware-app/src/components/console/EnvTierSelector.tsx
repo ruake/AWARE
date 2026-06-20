@@ -12,9 +12,10 @@ export function EnvTierSelector() {
     const TIERS_LIST = ["QA", "UAT", "PROD"] as const;
     return TIERS_LIST.map((tier) => {
       const tierEnvs = envHealth.filter((e) => e.label.toUpperCase().startsWith(tier));
-      const avg = tierEnvs.length > 0
-        ? Math.round(tierEnvs.reduce((s, e) => s + e.passRate, 0) / tierEnvs.length)
-        : 0;
+      const avg =
+        tierEnvs.length > 0
+          ? Math.round(tierEnvs.reduce((s, e) => s + e.passRate, 0) / tierEnvs.length)
+          : 0;
       const min = tierEnvs.length > 0 ? Math.min(...tierEnvs.map((e) => e.passRate)) : 0;
       const status: "healthy" | "degraded" | "critical" =
         min >= 95 ? "healthy" : min >= 80 ? "degraded" : "critical";
@@ -37,12 +38,12 @@ export function EnvTierSelector() {
   const activeTier: string | null =
     envIds.length === 0
       ? "all"
-      : TIERS.find((t) => {
+      : (TIERS.find((t) => {
           const ids = getEnvConfigs()
             .filter((e) => e.target === t)
             .map((e) => e.id);
           return ids.length === envIds.length && ids.every((id) => envIds.includes(id));
-        }) ?? null;
+        }) ?? null);
 
   const options = ["all", ...TIERS] as const;
 
@@ -54,23 +55,24 @@ export function EnvTierSelector() {
         const isLast = i === options.length - 1;
         const health = tier !== "all" ? tierHealth.find((h) => h.tier === tier) : null;
 
-        const color =
-          health
-            ? health.status === "healthy"
-              ? "var(--proof-green)"
-              : health.status === "degraded"
-                ? "var(--proof-yellow)"
-                : "var(--proof-red)"
-            : isActive
-              ? "var(--proof-text)"
-              : "var(--proof-text-muted)";
+        const color = health
+          ? health.status === "healthy"
+            ? "var(--proof-green)"
+            : health.status === "degraded"
+              ? "var(--proof-yellow)"
+              : "var(--proof-red)"
+          : isActive
+            ? "var(--proof-text)"
+            : "var(--proof-text-muted)";
 
         return (
           <button
             key={tier}
             onClick={() => handleSelect(tier)}
             aria-pressed={isActive}
-            title={health ? `${health.tier}: ${health.passRate}% pass rate` : "Show all environments"}
+            title={
+              health ? `${health.tier}: ${health.passRate}% pass rate` : "Show all environments"
+            }
             style={{
               padding: "2px 9px",
               fontSize: 10.5,

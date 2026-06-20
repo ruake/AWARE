@@ -78,9 +78,7 @@ export function setSelectedEnvIds(envIds: string[]): void {
 
 export function toggleSelectedEnvId(envId: string): void {
   const current = _envStore.getState().envIds;
-  const next = current.includes(envId)
-    ? current.filter((id) => id !== envId)
-    : [...current, envId];
+  const next = current.includes(envId) ? current.filter((id) => id !== envId) : [...current, envId];
   setSelectedEnvIds(next);
 }
 

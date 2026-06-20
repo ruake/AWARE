@@ -33,7 +33,11 @@ function formatContextWindow(n: number): string {
   return String(n);
 }
 
-export default function ModelConfigPanel({ settings, onSettingsChange, onClose }: ModelConfigPanelProps) {
+export default function ModelConfigPanel({
+  settings,
+  onSettingsChange,
+  onClose,
+}: ModelConfigPanelProps) {
   const [local, setLocal] = React.useState<CopilotSettings>({ ...settings });
   const [promptChars, setPromptChars] = React.useState(settings.systemPrompt.length);
 
@@ -165,11 +169,12 @@ export default function ModelConfigPanel({ settings, onSettingsChange, onClose }
                   fontFamily: "var(--font-mono)",
                   fontSize: 12,
                   fontWeight: 600,
-                  color: local.temperature > 0.7
-                    ? "var(--proof-orange)"
-                    : local.temperature > 0.3
-                    ? "var(--proof-blue-bright)"
-                    : "var(--proof-blue)",
+                  color:
+                    local.temperature > 0.7
+                      ? "var(--proof-orange)"
+                      : local.temperature > 0.3
+                        ? "var(--proof-blue-bright)"
+                        : "var(--proof-blue)",
                 }}
               >
                 {local.temperature.toFixed(2)}
@@ -383,9 +388,7 @@ export default function ModelConfigPanel({ settings, onSettingsChange, onClose }
                         {TONE_DESCRIPTIONS[tone]}
                       </div>
                     </div>
-                    {active && (
-                      <Check size={12} style={{ color, flexShrink: 0 }} />
-                    )}
+                    {active && <Check size={12} style={{ color, flexShrink: 0 }} />}
                   </button>
                 );
               })}
@@ -515,7 +518,6 @@ export default function ModelConfigPanel({ settings, onSettingsChange, onClose }
           </button>
         </div>
       </div>
-
     </>
   );
 }

@@ -1,5 +1,16 @@
 import React from "react";
-import { Bot, Sparkles, Zap, Shield, TrendingUp, ArrowRight, X, MessageSquare, Settings, Cpu } from "lucide-react";
+import {
+  Bot,
+  Sparkles,
+  Zap,
+  Shield,
+  TrendingUp,
+  ArrowRight,
+  X,
+  MessageSquare,
+  Settings,
+  Cpu,
+} from "lucide-react";
 
 interface OnboardingWizardProps {
   onStartChat: (message: string) => void;
@@ -39,9 +50,21 @@ const PROMPTS = [
 ];
 
 const STEPS = [
-  { icon: <Cpu size={14} />, title: "Select a provider", desc: "Choose OpenAI, WebLLM, or Chrome AI" },
-  { icon: <Settings size={14} />, title: "Configure your settings", desc: "Set API keys or download models" },
-  { icon: <MessageSquare size={14} />, title: "Ask a question", desc: "Use a quick action or type your own" },
+  {
+    icon: <Cpu size={14} />,
+    title: "Select a provider",
+    desc: "Choose WebLLM, Chrome AI, or a custom endpoint",
+  },
+  {
+    icon: <Settings size={14} />,
+    title: "Configure your settings",
+    desc: "Set API keys or download models",
+  },
+  {
+    icon: <MessageSquare size={14} />,
+    title: "Ask a question",
+    desc: "Use a quick action or type your own",
+  },
 ];
 
 export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingWizardProps) {
@@ -144,8 +167,8 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
               lineHeight: 1.5,
             }}
           >
-            Your AI-powered test observability assistant — analyze regressions, detect flakes,
-            and accelerate deployments across QA, UAT, and PROD.
+            Your AI-powered test observability assistant — analyze regressions, detect flakes, and
+            accelerate deployments across QA, UAT, and PROD.
           </p>
         </div>
 
@@ -303,10 +326,7 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {STEPS.map((step) => (
-              <div
-                key={step.title}
-                style={{ display: "flex", gap: 12, alignItems: "flex-start" }}
-              >
+              <div key={step.title} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <div
                   aria-hidden="true"
                   style={{
@@ -366,7 +386,8 @@ export default function OnboardingWizard({ onStartChat, onDismiss }: OnboardingW
             boxShadow: "0 0 20px var(--proof-blue-glow)",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = "0 0 28px var(--proof-blue-glow), 0 0 0 2px var(--proof-blue-border)";
+            e.currentTarget.style.boxShadow =
+              "0 0 28px var(--proof-blue-glow), 0 0 0 2px var(--proof-blue-border)";
             e.currentTarget.style.transform = "translateY(-1px)";
           }}
           onMouseLeave={(e) => {

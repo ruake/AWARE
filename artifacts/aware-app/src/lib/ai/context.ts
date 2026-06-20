@@ -189,7 +189,7 @@ The Copilot page (/copilot) has:
 - Left sidebar: quick-action buttons (Failure Analysis, Flaky Detection, etc.) 
 - Center: conversation area with Markdown rendering of responses
 - Right panel: Debug log panel (toggle with "Debug" button in top bar)
-- Top bar: Provider selector (OpenAI/WebLLM/Chrome), Configure button, New Chat
+- Top bar: Provider selector (Custom Endpoint/WebLLM/Chrome), Configure button, New Chat
 - Thinking indicator: shows currently executing LangGraph node chain
 - Charts & tables rendered with recharts and HTML inside Markdown blocks
 

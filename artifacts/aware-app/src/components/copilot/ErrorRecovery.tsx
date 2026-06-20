@@ -44,7 +44,13 @@ function classifyError(error: string): ErrorClassification {
     };
   }
 
-  if (lower.includes("network error") || lower.includes("fetch") || lower.includes("network") || lower.includes("econnrefused") || lower.includes("enotfound")) {
+  if (
+    lower.includes("network error") ||
+    lower.includes("fetch") ||
+    lower.includes("network") ||
+    lower.includes("econnrefused") ||
+    lower.includes("enotfound")
+  ) {
     return {
       label: "Network Connection Issue",
       description: "Network connection issue. Check your API URL.",
@@ -66,17 +72,27 @@ function classifyError(error: string): ErrorClassification {
     };
   }
 
-  if (lower.includes("rate limit") || lower.includes("429") || lower.includes("rate_limit") || lower.includes("too many requests")) {
+  if (
+    lower.includes("rate limit") ||
+    lower.includes("429") ||
+    lower.includes("rate_limit") ||
+    lower.includes("too many requests")
+  ) {
     return {
       label: "Rate Limited",
       description: "Rate limited. Waiting before retry…",
-      actions: [
-        { label: "Retry", icon: <RefreshCw size={12} />, action: "retry" },
-      ],
+      actions: [{ label: "Retry", icon: <RefreshCw size={12} />, action: "retry" }],
     };
   }
 
-  if (lower.includes("authentication") || lower.includes("auth") || lower.includes("401") || lower.includes("403") || lower.includes("unauthorized") || lower.includes("forbidden")) {
+  if (
+    lower.includes("authentication") ||
+    lower.includes("auth") ||
+    lower.includes("401") ||
+    lower.includes("403") ||
+    lower.includes("unauthorized") ||
+    lower.includes("forbidden")
+  ) {
     return {
       label: "Authentication Failed",
       description: "Authentication failed. Verify your API key.",
@@ -87,7 +103,13 @@ function classifyError(error: string): ErrorClassification {
     };
   }
 
-  if (lower.includes("model") || lower.includes("404") || lower.includes("not found") || lower.includes("model_not_found") || lower.includes("deployment")) {
+  if (
+    lower.includes("model") ||
+    lower.includes("404") ||
+    lower.includes("not found") ||
+    lower.includes("model_not_found") ||
+    lower.includes("deployment")
+  ) {
     return {
       label: "Model Not Found",
       description: "Model not found. Check model name in Settings.",
@@ -98,26 +120,33 @@ function classifyError(error: string): ErrorClassification {
     };
   }
 
-  if (lower.includes("context length") || lower.includes("max tokens") || lower.includes("token limit") || lower.includes("too long") || lower.includes("context_length")) {
+  if (
+    lower.includes("context length") ||
+    lower.includes("max tokens") ||
+    lower.includes("token limit") ||
+    lower.includes("too long") ||
+    lower.includes("context_length")
+  ) {
     return {
       label: "Context Length Exceeded",
       description: "The query was too long. Try a shorter query or reduce context.",
-      actions: [
-        { label: "Simplify Query", icon: <AlertTriangle size={12} />, action: "simplify" },
-      ],
+      actions: [{ label: "Simplify Query", icon: <AlertTriangle size={12} />, action: "simplify" }],
     };
   }
 
   return {
     label: "Something Went Wrong",
     description: "An unexpected error occurred. Please try again or rephrase your query.",
-    actions: [
-      { label: "Retry", icon: <RefreshCw size={12} />, action: "retry" },
-    ],
+    actions: [{ label: "Retry", icon: <RefreshCw size={12} />, action: "retry" }],
   };
 }
 
-export default function ErrorRecovery({ message, onRetry, onRetryWithFix, onDismiss }: ErrorRecoveryProps) {
+export default function ErrorRecovery({
+  message,
+  onRetry,
+  onRetryWithFix,
+  onDismiss,
+}: ErrorRecoveryProps) {
   const [stackVisible, setStackVisible] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
 

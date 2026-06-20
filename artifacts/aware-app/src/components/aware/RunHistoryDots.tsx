@@ -74,8 +74,12 @@ export function RunHistoryDots({ testName }: RunHistoryDotsProps) {
             flexShrink: 0,
             transition: "transform 0.12s",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.8)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.8)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+          }}
         />
       ))}
       {extra > 0 && (

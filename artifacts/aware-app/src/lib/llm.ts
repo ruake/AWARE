@@ -20,30 +20,32 @@ export interface ILLMProvider {
   testConnection(): Promise<boolean>;
 }
 
-// ── OpenAI-Compatible Provider ──────────────────────────────────────
+// ── Custom Endpoint Provider (any OpenAI-compatible server) ─────────
+// Works with Ollama, LM Studio, Mistral, vLLM, llama.cpp, etc.
+// Requires apiUrl to be set; apiKey is optional (some servers don't need it).
 
-class OpenAILLMProvider implements ILLMProvider {
-  readonly type: LLMProviderType = "openai";
+class CustomEndpointLLMProvider implements ILLMProvider {
+  readonly type: LLMProviderType = "custom";
 
   constructor(private config: LLMConfig) {}
 
   async complete(req: LLMCompletionRequest): Promise<LLMCompletionResponse> {
-    if (!this.config.apiKey) {
+    if (!this.config.apiUrl) {
       return {
-        content: "No API key configured. Click **⚙ Configure** above to enter your OpenAI API key.",
+        content:
+          "No endpoint configured. Click **⚙ Configure** above to set your API URL.\n\nWorks with any OpenAI-compatible server: Ollama, LM Studio, Mistral, vLLM, etc.",
         finishReason: "error",
       };
     }
     try {
-      const url = this.config.apiUrl ?? "https://api.openai.com/v1/chat/completions";
+      const url = `${this.config.apiUrl.replace(/\/$/, "")}/chat/completions`;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (this.config.apiKey) headers["Authorization"] = `Bearer ${this.config.apiKey}`;
       const res = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.config.apiKey}`,
-        },
+        headers,
         body: JSON.stringify({
-          model: this.config.model,
+          model: this.config.model || undefined,
           messages: req.messages,
           temperature: req.temperature ?? this.config.temperature,
           max_tokens: req.maxTokens ?? this.config.maxTokens,
@@ -53,7 +55,7 @@ class OpenAILLMProvider implements ILLMProvider {
       if (!res.ok) {
         const text = await res.text().catch(() => "Unknown error");
         return {
-          content: `API error ${res.status}: ${text}\n\nCheck your API key and model name in **⚙ Configure**.`,
+          content: `Endpoint error ${res.status}: ${text}\n\nCheck your API URL and model name in **⚙ Configure**.`,
           finishReason: "error",
         };
       }
@@ -80,7 +82,7 @@ class OpenAILLMProvider implements ILLMProvider {
   }
 
   async testConnection(): Promise<boolean> {
-    if (!this.config.apiKey) return false;
+    if (!this.config.apiUrl) return false;
     try {
       const result = await this.complete({
         messages: [{ role: "user", content: "ping" }],
@@ -336,14 +338,14 @@ export function setLLMConfig(config: Partial<LLMConfig>): LLMConfig {
 
 function _buildProvider(config: LLMConfig): ILLMProvider {
   switch (config.provider) {
-    case "openai":
-      return new OpenAILLMProvider(config);
+    case "custom":
+      return new CustomEndpointLLMProvider(config);
     case "webllm":
       return new WebLLMProvider(config);
     case "chrome":
       return new ChromeBuiltinLLMProvider();
     default:
-      throw new Error(`Unknown LLM provider: ${config.provider}`);
+      return new CustomEndpointLLMProvider(config);
   }
 }
 
@@ -403,6 +405,7 @@ export function getContextWindow(providerType?: LLMProviderType): number {
       return 4096;
     case "chrome":
       return 8192;
+    case "custom":
     default:
       return 128000;
   }

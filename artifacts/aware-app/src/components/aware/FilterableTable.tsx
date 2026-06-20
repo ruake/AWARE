@@ -42,7 +42,9 @@ export function FilterableTable({
         const q = globalSearch.toLowerCase();
         const matches = columns.some((col) => {
           const val = row[col.field];
-          return String(val ?? "").toLowerCase().includes(q);
+          return String(val ?? "")
+            .toLowerCase()
+            .includes(q);
         });
         if (!matches) return false;
       }
@@ -137,10 +139,24 @@ export function FilterableTable({
         )}
       </div>
       {/* HTML table with sort */}
-      <div style={{ flex: 1, overflow: "auto", borderRadius: 8, border: "1px solid var(--proof-border)" }}>
+      <div
+        style={{
+          flex: 1,
+          overflow: "auto",
+          borderRadius: 8,
+          border: "1px solid var(--proof-border)",
+        }}
+      >
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
           <thead>
-            <tr style={{ background: "var(--proof-grey-bg)", fontWeight: 600, position: "sticky", top: 0 }}>
+            <tr
+              style={{
+                background: "var(--proof-grey-bg)",
+                fontWeight: 600,
+                position: "sticky",
+                top: 0,
+              }}
+            >
               {columns.map((col, i) => (
                 <th
                   key={col.field}
@@ -228,7 +244,9 @@ export function FilterableTable({
             >
               Prev
             </button>
-            <span style={{ fontSize: 10, padding: "2px 6px", color: "var(--proof-text-secondary)" }}>
+            <span
+              style={{ fontSize: 10, padding: "2px 6px", color: "var(--proof-text-secondary)" }}
+            >
               {page + 1} / {totalPages}
             </span>
             <button

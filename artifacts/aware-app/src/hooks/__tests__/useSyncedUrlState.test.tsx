@@ -222,7 +222,9 @@ describe("useSyncedUrlState (hooks)", () => {
     root = createRoot(container);
     await React.act(async () => {
       root.render(
-        React.createElement("div", null,
+        React.createElement(
+          "div",
+          null,
           React.createElement(TestComponent, {
             testKey: "a",
             defaultValue: "1",

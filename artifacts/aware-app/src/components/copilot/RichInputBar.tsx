@@ -3,7 +3,20 @@ import { Send, Square, Bold, Italic, Code, Paperclip, FileText, X, Image } from 
 import type { Attachment } from "../../lib/copilot/types";
 
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024;
-const ACCEPTED_TYPES = [".png", ".jpg", ".jpeg", ".gif", ".svg", ".pdf", ".txt", ".log", ".json", ".csv", ".yaml", ".yml"];
+const ACCEPTED_TYPES = [
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".svg",
+  ".pdf",
+  ".txt",
+  ".log",
+  ".json",
+  ".csv",
+  ".yaml",
+  ".yml",
+];
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -17,7 +30,11 @@ function wrapSelection(textarea: HTMLTextAreaElement, before: string, after: str
   const selected = textarea.value.substring(start, end);
   const isWrapped = selected.startsWith(before) && selected.endsWith(after);
   if (isWrapped) {
-    return textarea.value.slice(0, start) + selected.slice(before.length, selected.length - after.length) + textarea.value.slice(end);
+    return (
+      textarea.value.slice(0, start) +
+      selected.slice(before.length, selected.length - after.length) +
+      textarea.value.slice(end)
+    );
   }
   return textarea.value.slice(0, start) + before + selected + after + textarea.value.slice(end);
 }
@@ -376,7 +393,14 @@ export default function RichInputBar({
         >
           <button
             aria-label="Dismiss warning"
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", color: "inherit" }}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              display: "flex",
+              color: "inherit",
+            }}
             onClick={() => setSizeWarning(null)}
           >
             <X size={12} />
@@ -423,10 +447,18 @@ export default function RichInputBar({
                     }}
                   />
                 ) : (
-                  <Image size={16} style={{ flexShrink: 0, color: "var(--proof-text-muted)" }} aria-hidden="true" />
+                  <Image
+                    size={16}
+                    style={{ flexShrink: 0, color: "var(--proof-text-muted)" }}
+                    aria-hidden="true"
+                  />
                 )
               ) : (
-                <FileText size={16} style={{ flexShrink: 0, color: "var(--proof-text-muted)" }} aria-hidden="true" />
+                <FileText
+                  size={16}
+                  style={{ flexShrink: 0, color: "var(--proof-text-muted)" }}
+                  aria-hidden="true"
+                />
               )}
               <div style={{ minWidth: 0 }}>
                 <div

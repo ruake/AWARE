@@ -1,4 +1,12 @@
-import type { Message, ProviderType, Thread, PromptTemplate, Bookmark, CopilotSettings, ToneOption } from "./types";
+import type {
+  Message,
+  ProviderType,
+  Thread,
+  PromptTemplate,
+  Bookmark,
+  CopilotSettings,
+  ToneOption,
+} from "./types";
 
 // ── Session (current active thread) ─────────────────────────────────────────
 const STORAGE_KEY = "aware_copilot_v4";
@@ -43,7 +51,8 @@ export function clearSession(): void {
 export function loadProviderType(): ProviderType {
   try {
     const raw = localStorage.getItem("aware_copilot_provider_v1");
-    if (raw === "webllm" || raw === "openai" || raw === "chrome") return raw;
+    if (raw === "webllm" || raw === "chrome" || raw === "custom") return raw;
+    if (raw === "openai") return "custom";
   } catch {
     /* empty */
   }
@@ -58,19 +67,32 @@ export function saveProviderType(type: ProviderType): void {
   }
 }
 
-export function loadOpenAIConfig(): { apiKey: string; apiUrl: string; model: string } {
+export function loadCustomEndpointConfig(): { apiKey: string; apiUrl: string; model: string } {
   try {
-    const raw = localStorage.getItem("aware_openai_config_v1");
-    if (raw) return JSON.parse(raw);
+    const raw =
+      localStorage.getItem("aware_custom_endpoint_v1") ||
+      localStorage.getItem("aware_openai_config_v1");
+    if (raw) {
+      const parsed = JSON.parse(raw) as { apiKey?: string; apiUrl?: string; model?: string };
+      return {
+        apiKey: parsed.apiKey ?? "",
+        apiUrl: parsed.apiUrl && parsed.apiUrl !== "https://api.openai.com/v1" ? parsed.apiUrl : "",
+        model: parsed.model ?? "",
+      };
+    }
   } catch {
     /* empty */
   }
-  return { apiKey: "", apiUrl: "https://api.openai.com/v1", model: "gpt-4o-mini" };
+  return { apiKey: "", apiUrl: "", model: "" };
 }
 
-export function saveOpenAIConfig(cfg: { apiKey: string; apiUrl: string; model: string }): void {
+export function saveCustomEndpointConfig(cfg: {
+  apiKey: string;
+  apiUrl: string;
+  model: string;
+}): void {
   try {
-    localStorage.setItem("aware_openai_config_v1", JSON.stringify(cfg));
+    localStorage.setItem("aware_custom_endpoint_v1", JSON.stringify(cfg));
   } catch {
     /* empty */
   }
@@ -120,7 +142,11 @@ export function setActiveThreadId(id: string | null): void {
   }
 }
 
-export function createThread(title: string, messages?: Message[], providerType?: ProviderType): Thread {
+export function createThread(
+  title: string,
+  messages?: Message[],
+  providerType?: ProviderType,
+): Thread {
   const now = Date.now();
   return {
     id: `thread_${now}_${Math.random().toString(36).slice(2, 8)}`,
@@ -133,7 +159,11 @@ export function createThread(title: string, messages?: Message[], providerType?:
   };
 }
 
-export function updateThreadInList(threads: Thread[], threadId: string, patch: Partial<Thread>): Thread[] {
+export function updateThreadInList(
+  threads: Thread[],
+  threadId: string,
+  patch: Partial<Thread>,
+): Thread[] {
   return threads.map((t) => (t.id === threadId ? { ...t, ...patch, updatedAt: Date.now() } : t));
 }
 
@@ -148,7 +178,8 @@ const DEFAULT_TEMPLATES: PromptTemplate[] = [
   {
     id: "tmpl_failure_analysis",
     name: "Failure Analysis",
-    content: "Analyze the test failures in the latest run. Group by category, identify patterns, and suggest root causes.",
+    content:
+      "Analyze the test failures in the latest run. Group by category, identify patterns, and suggest root causes.",
     category: "analysis",
     icon: "🔍",
     description: "Deep dive into test failures with category grouping and root cause analysis",
@@ -158,7 +189,8 @@ const DEFAULT_TEMPLATES: PromptTemplate[] = [
   {
     id: "tmpl_flaky_detection",
     name: "Flaky Test Detection",
-    content: "Find tests that flip between PASS and FAIL across recent runs. Rank by flakiness score and show flip sequences.",
+    content:
+      "Find tests that flip between PASS and FAIL across recent runs. Rank by flakiness score and show flip sequences.",
     category: "analysis",
     icon: "⚡",
     description: "Identify unstable tests with flakiness scoring",
@@ -168,7 +200,8 @@ const DEFAULT_TEMPLATES: PromptTemplate[] = [
   {
     id: "tmpl_env_compare",
     name: "Environment Comparison",
-    content: "Compare QA, UAT, and PROD environments. Show avg pass rates, total failures, and health status for each.",
+    content:
+      "Compare QA, UAT, and PROD environments. Show avg pass rates, total failures, and health status for each.",
     category: "analysis",
     icon: "🔀",
     description: "Cross-environment health comparison",
@@ -178,7 +211,8 @@ const DEFAULT_TEMPLATES: PromptTemplate[] = [
   {
     id: "tmpl_promotion_gate",
     name: "Promotion Gate Check",
-    content: "Show UAT→PROD promotion gate status. How many decisions promoted, blocked, or pending? What's the block rate?",
+    content:
+      "Show UAT→PROD promotion gate status. How many decisions promoted, blocked, or pending? What's the block rate?",
     category: "deployment",
     icon: "🛡️",
     description: "Check deployment readiness and promotion history",
@@ -188,7 +222,8 @@ const DEFAULT_TEMPLATES: PromptTemplate[] = [
   {
     id: "tmpl_suite_health",
     name: "Suite Health Report",
-    content: "Show pass rates and failure counts for all test suites. Which suites are below the 95% threshold?",
+    content:
+      "Show pass rates and failure counts for all test suites. Which suites are below the 95% threshold?",
     category: "report",
     icon: "🧪",
     description: "Per-suite pass rate analysis",
@@ -197,7 +232,8 @@ const DEFAULT_TEMPLATES: PromptTemplate[] = [
   {
     id: "tmpl_duration_trends",
     name: "Duration Trends",
-    content: "Show execution duration trends across the last 10 runs. Are there any timing regressions or slow tests?",
+    content:
+      "Show execution duration trends across the last 10 runs. Are there any timing regressions or slow tests?",
     category: "performance",
     icon: "⏱️",
     description: "Execution timing and regression analysis",
