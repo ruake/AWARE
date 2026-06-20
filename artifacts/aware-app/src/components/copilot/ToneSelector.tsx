@@ -34,14 +34,27 @@ export default function ToneSelector({ currentTone, onToneChange }: ToneSelector
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
-    if (open) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    if (open) {
+      document.addEventListener("mousedown", handler);
+      document.addEventListener("keydown", keyHandler);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("keydown", keyHandler);
+    };
   }, [open]);
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button
         onClick={() => setOpen((p) => !p)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`Response tone: ${TONE_LABELS[currentTone]}`}
+        title={`Response tone: ${TONE_LABELS[currentTone]}`}
         style={{
           display: "flex",
           alignItems: "center",
@@ -63,6 +76,8 @@ export default function ToneSelector({ currentTone, onToneChange }: ToneSelector
 
       {open && (
         <div
+          role="listbox"
+          aria-label="Select response tone"
           style={{
             position: "absolute",
             top: "calc(100% + 4px)",
@@ -74,7 +89,7 @@ export default function ToneSelector({ currentTone, onToneChange }: ToneSelector
             padding: 4,
             zIndex: 50,
             boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            animation: "toneFadeIn 0.15s ease-out",
+            animation: "copilotFadeIn 0.15s ease-out",
           }}
         >
           {ORDER.map((tone) => {
@@ -83,6 +98,8 @@ export default function ToneSelector({ currentTone, onToneChange }: ToneSelector
             return (
               <button
                 key={tone}
+                role="option"
+                aria-selected={isActive}
                 onClick={() => {
                   onToneChange(tone);
                   setOpen(false);
@@ -148,13 +165,6 @@ export default function ToneSelector({ currentTone, onToneChange }: ToneSelector
           })}
         </div>
       )}
-
-      <style>{`
-        @keyframes toneFadeIn {
-          from { opacity: 0; transform: translateY(-4px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

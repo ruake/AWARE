@@ -2,16 +2,16 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Bot, User, RefreshCw, Copy, Check } from "lucide-react";
-import type { Message } from "@/lib/copilot/types";
+import type { Message, ProviderType } from "@/lib/copilot/types";
 import ToolCallCard from "./ToolCallCard";
 import AgentTrace from "./AgentTrace";
 import LangGraphPanel from "./LangGraphPanel";
 import DataTable from "./DataTable";
-import { loadProviderType } from "@/lib/copilot/storage";
 
 interface BubbleProps {
   message: Message;
   onRetry?: (messageId: string) => void;
+  providerType?: ProviderType;
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -25,7 +25,8 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={copy}
-      title="Copy"
+      title={copied ? "Copied!" : "Copy message"}
+      aria-label={copied ? "Copied!" : "Copy message"}
       style={{
         padding: "3px 7px",
         borderRadius: 6,
@@ -59,6 +60,7 @@ export function UserBubble({ message }: BubbleProps) {
     >
       <div className="copilot-user-bubble">{message.content}</div>
       <div
+        aria-label="You"
         style={{
           width: 30,
           height: 30,
@@ -80,6 +82,7 @@ export function UserBubble({ message }: BubbleProps) {
 function ThinkingDots() {
   return (
     <div
+      aria-label="Thinking…"
       style={{
         display: "flex",
         alignItems: "center",
@@ -98,15 +101,13 @@ function ThinkingDots() {
   );
 }
 
-export function AssistantBubble({ message, onRetry }: BubbleProps) {
+export function AssistantBubble({ message, onRetry, providerType = "openai" }: BubbleProps) {
   const hasContent = message.content.length > 0;
   const hasToolCalls = (message.toolCalls?.length ?? 0) > 0;
   const isStreaming = !!message.streaming;
   const hasError = !!message.error;
   const isEmptyStreaming = isStreaming && !hasContent && !hasToolCalls;
-  const providerType = loadProviderType();
 
-  // Collect all tableData from completed tool calls
   const tables = (message.toolCalls ?? [])
     .filter((tc) => tc.status === "done" && tc.result?.tableData)
     .map((tc) => tc.result!.tableData!);
@@ -121,6 +122,7 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
     >
       {/* Avatar */}
       <div
+        aria-label="Copilot"
         style={{
           width: 30,
           height: 30,
@@ -140,15 +142,12 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
       </div>
 
       <div style={{ flex: 1, minWidth: 0, maxWidth: "88%" }}>
-        {/* Thinking dots when no content yet */}
         {isEmptyStreaming && !hasGraph && <ThinkingDots />}
 
-        {/* LangGraph live panel — shows 5-node pipeline progress */}
         {hasGraph && (
           <LangGraphPanel nodes={graphNodes} streaming={isStreaming} providerType={providerType} />
         )}
 
-        {/* Legacy agent trace (collapsible tool call list) — shown when no graph nodes */}
         {!hasGraph && (
           <AgentTrace
             toolCalls={message.toolCalls ?? []}
@@ -157,7 +156,6 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
           />
         )}
 
-        {/* Tool call cards */}
         {hasToolCalls && (
           <div
             style={{
@@ -167,13 +165,12 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
               gap: 4,
             }}
           >
-            {message.toolCalls!.map((tc) => (
+            {(message.toolCalls ?? []).map((tc) => (
               <ToolCallCard key={tc.id} toolCall={tc} />
             ))}
           </div>
         )}
 
-        {/* Dynamic data tables rendered from tool results */}
         {tables.length > 0 && (
           <div
             style={{
@@ -189,7 +186,6 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
           </div>
         )}
 
-        {/* Text content */}
         {(hasContent || (isStreaming && hasToolCalls)) && (
           <div
             style={{
@@ -299,13 +295,12 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
                     <blockquote
                       style={{
                         borderLeft: "3px solid var(--proof-blue)",
-                        paddingLeft: 12,
                         margin: "8px 0",
                         color: "var(--proof-text-secondary)",
                         fontSize: 13,
                         background: "rgba(59,130,246,0.05)",
                         borderRadius: "0 6px 6px 0",
-                        padding: "8px 12px",
+                        padding: "8px 12px 8px 14px",
                       }}
                     >
                       {children}
@@ -373,9 +368,9 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
               </ReactMarkdown>
             )}
 
-            {/* Streaming cursor */}
             {isStreaming && (
               <span
+                aria-hidden="true"
                 style={{
                   display: "inline-block",
                   width: 2,
@@ -391,9 +386,10 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
           </div>
         )}
 
-        {/* Error state */}
-        {hasError && (
+        {/* Error state — only shown outside the content bubble for clarity */}
+        {hasError && !isStreaming && (
           <div
+            role="alert"
             style={{
               background: "rgba(239,68,68,0.08)",
               border: "1px solid rgba(248,113,113,0.2)",
@@ -401,10 +397,14 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
               padding: "8px 12px",
               fontSize: 12.5,
               color: "#f87171",
-              marginTop: 6,
+              marginTop: hasContent ? 6 : 0,
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 6,
             }}
           >
-            ⚠ {message.error}
+            <span aria-hidden="true">⚠</span>
+            <span style={{ flex: 1 }}>{message.error}</span>
           </div>
         )}
 
@@ -422,6 +422,7 @@ export function AssistantBubble({ message, onRetry }: BubbleProps) {
           {!isStreaming && hasError && onRetry && (
             <button
               onClick={() => onRetry(message.id)}
+              aria-label="Retry this message"
               style={{
                 display: "inline-flex",
                 alignItems: "center",

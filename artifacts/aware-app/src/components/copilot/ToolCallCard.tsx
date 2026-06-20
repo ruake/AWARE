@@ -15,6 +15,8 @@ interface Props {
   toolCall: ToolCall;
 }
 
+const RAW_DATA_CHAR_LIMIT = 1500;
+
 const TOOL_META: Record<string, { label: string; verb: string; color: string; icon: string }> = {
   query_runs: { label: "Run History", verb: "Querying run history…", color: "#3b82f6", icon: "📊" },
   get_flaky_tests: {
@@ -58,11 +60,21 @@ export default function ToolCallCard({ toolCall }: Props) {
     isDone && toolCall.completedAt ? toolCall.completedAt - toolCall.startedAt : null;
   const hasChart = !!toolCall.result?.chartData;
 
+  const rawJson = toolCall.result?.data
+    ? JSON.stringify(toolCall.result.data, null, 2)
+    : null;
+  const isTruncated = rawJson !== null && rawJson.length > RAW_DATA_CHAR_LIMIT;
+  const displayedRaw = rawJson !== null
+    ? rawJson.slice(0, RAW_DATA_CHAR_LIMIT)
+    : null;
+
   return (
     <div className="copilot-tool-card">
       {/* Header */}
       <button
         onClick={() => isDone && setExpanded((p) => !p)}
+        aria-expanded={isDone ? expanded : undefined}
+        aria-label={`${meta.label} tool call, ${isDone ? "click to expand" : isError ? "failed" : "running"}`}
         style={{
           width: "100%",
           display: "flex",
@@ -77,6 +89,7 @@ export default function ToolCallCard({ toolCall }: Props) {
       >
         {/* Status icon */}
         <div
+          aria-hidden="true"
           style={{
             width: 22,
             height: 22,
@@ -101,7 +114,7 @@ export default function ToolCallCard({ toolCall }: Props) {
         </div>
 
         {/* Emoji + label */}
-        <span style={{ fontSize: 12, flexShrink: 0 }}>{meta.icon}</span>
+        <span aria-hidden="true" style={{ fontSize: 12, flexShrink: 0 }}>{meta.icon}</span>
         <span
           style={{
             fontSize: 12,
@@ -146,7 +159,7 @@ export default function ToolCallCard({ toolCall }: Props) {
       )}
 
       {/* Expanded raw data */}
-      {isDone && expanded && !!toolCall.result?.data && (
+      {isDone && expanded && displayedRaw !== null && (
         <div style={{ padding: "0 12px 12px", borderTop: "1px solid var(--proof-border)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "8px 0 6px" }}>
             <Database size={10} style={{ color: "var(--proof-text-muted)" }} />
@@ -161,6 +174,22 @@ export default function ToolCallCard({ toolCall }: Props) {
             >
               Raw Data
             </span>
+            {isTruncated && (
+              <span
+                style={{
+                  fontSize: 9,
+                  color: "var(--proof-yellow)",
+                  background: "var(--proof-yellow-bg)",
+                  border: "1px solid var(--proof-yellow-border)",
+                  borderRadius: 4,
+                  padding: "1px 5px",
+                  marginLeft: 4,
+                  fontWeight: 600,
+                }}
+              >
+                truncated · {rawJson!.length.toLocaleString()} chars total
+              </span>
+            )}
           </div>
           <pre
             style={{
@@ -178,15 +207,43 @@ export default function ToolCallCard({ toolCall }: Props) {
               lineHeight: 1.5,
             }}
           >
-            {JSON.stringify(toolCall.result!.data, null, 2).slice(0, 1500)}
+            {displayedRaw}
+            {isTruncated && (
+              <span style={{ color: "var(--proof-yellow)", display: "block", marginTop: 4 }}>
+                … [output truncated at {RAW_DATA_CHAR_LIMIT.toLocaleString()} chars]
+              </span>
+            )}
           </pre>
         </div>
       )}
 
       {/* Error message */}
       {isError && (
-        <div style={{ padding: "6px 12px 10px", fontSize: 11.5, color: "#f87171" }}>
-          Tool execution failed. Please retry or rephrase your query.
+        <div
+          role="alert"
+          style={{ padding: "0 12px 10px", fontSize: 11.5 }}
+        >
+          {toolCall.error ? (
+            <pre
+              style={{
+                color: "#f87171",
+                background: "rgba(239,68,68,0.06)",
+                border: "1px solid rgba(248,113,113,0.15)",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: 10.5,
+                fontFamily: "var(--font-mono)",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-all",
+                margin: 0,
+                lineHeight: 1.5,
+              }}
+            >
+              {toolCall.error}
+            </pre>
+          ) : (
+            <span style={{ color: "#f87171" }}>Tool execution failed.</span>
+          )}
         </div>
       )}
     </div>

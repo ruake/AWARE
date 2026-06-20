@@ -151,7 +151,7 @@ function NodePill({
               whiteSpace: "nowrap",
             }}
           >
-            [{state.toolNames.join(",")}]
+            [{state.toolNames.join(", ")}]
           </span>
         )}
       </div>
@@ -194,8 +194,11 @@ export default function LangGraphPanel({ nodes, streaming, providerType }: Props
   };
 
   // Map node id → state from the events array (last state wins)
-  const nodeMap = new Map<string, GraphNodeState>();
-  for (const n of nodes) nodeMap.set(n.id, n);
+  const nodeMap = React.useMemo(() => {
+    const m = new Map<string, GraphNodeState>();
+    for (const n of nodes) m.set(n.id, n);
+    return m;
+  }, [nodes]);
 
   const hasActivity = nodes.length > 0 || streaming;
   if (!hasActivity) return null;
