@@ -55,6 +55,21 @@ export function FlakinessTable({
 }: FlakinessTableProps) {
   const [, _navigate] = useLocation();
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedRow(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [setSelectedRow]);
+
+  const avgDuration = React.useMemo(() => {
+    if (enriched.length === 0) return 0;
+    return enriched.reduce((s, h) => s + h.duration, 0) / enriched.length;
+  }, [enriched]);
+
   if (filteredHistory.length === 0 && enriched.length === 0) {
     return (
       <div className="proof-card" style={{ padding: "24px", textAlign: "center" }}>
@@ -222,104 +237,121 @@ export function FlakinessTable({
                     Environment {sortIcon("env")}
                   </span>
                 </th>
+                <th style={{ textAlign: "right" }}>Flakiness</th>
                 <th>Error</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredHistory.map((h) => (
-                <tr
-                  key={h.runId}
-                  onClick={() => setSelectedRow(h)}
-                  style={{
-                    cursor: "pointer",
-                    background: selectedRow?.runId === h.runId ? "var(--proof-blue-bg)" : undefined,
-                  }}
-                >
-                  <td>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedRow(h);
-                      }}
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 11,
-                        color: "var(--proof-blue)",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: 0,
-                      }}
-                    >
-                      {h.runId}
-                    </button>
-                  </td>
-                  <td>
-                    <span
-                      className={`proof-badge ${h.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                    >
-                      {h.status}
-                    </span>
-                    {h.assertionsFailed > 0 && (
-                      <span
-                        style={{
-                          fontSize: 10,
-                          marginLeft: 4,
-                          color: "var(--proof-red)",
-                          fontFamily: "var(--font-mono)",
-                        }}
-                      >
-                        {h.assertionsFailed}✗
-                      </span>
-                    )}
-                  </td>
-                  <td
+              {filteredHistory.map((h) => {
+                const isSlow = h.duration > avgDuration * 2;
+                const isWarn = h.duration > avgDuration * 1.5;
+                const flakiness = enriched.length > 0 ? (enriched.filter(e => e.status !== enriched[0].status).length / (enriched.length - 1 || 1)) * 100 : 0; // Simplified flakiness for the row
+                
+                return (
+                  <tr
+                    key={h.runId}
+                    onClick={() => setSelectedRow(h)}
                     style={{
-                      textAlign: "right",
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 11,
-                      color: "var(--proof-text-secondary)",
+                      cursor: "pointer",
+                      background: selectedRow?.runId === h.runId ? "var(--proof-blue-bg)" : undefined,
                     }}
                   >
-                    {h.duration}ms
-                  </td>
-                  <td style={{ fontSize: 12 }}>{h.env}</td>
-                  <td style={{ fontSize: 11 }}>
-                    {h.error ? (
-                      <span
+                    <td>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRow(h);
+                        }}
                         style={{
-                          color: "var(--proof-red)",
                           fontFamily: "var(--font-mono)",
-                          fontSize: 10,
+                          fontSize: 11,
+                          color: "var(--proof-blue)",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 0,
                         }}
                       >
-                        {h.error.length > 80 ? h.error.slice(0, 80) + "..." : h.error}
+                        {h.runId}
+                      </button>
+                    </td>
+                    <td>
+                      <span
+                        className={`proof-badge ${h.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
+                      >
+                        {h.status}
                       </span>
-                    ) : h.status === "FAIL" ? (
-                      <span style={{ color: "var(--proof-text-secondary)", fontSize: 10 }}>
-                        no error message
-                      </span>
-                    ) : null}
-                  </td>
-                  <td>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedRow(h);
+                      {h.assertionsFailed > 0 && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            marginLeft: 4,
+                            color: "var(--proof-red)",
+                            fontFamily: "var(--font-mono)",
+                          }}
+                        >
+                          {h.assertionsFailed}✗
+                        </span>
+                      )}
+                    </td>
+                    <td
+                      style={{
+                        textAlign: "right",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 11,
+                        color: isSlow ? "var(--proof-red)" : isWarn ? "var(--proof-yellow)" : "var(--proof-text-secondary)",
+                        fontWeight: isSlow || isWarn ? 600 : 400,
                       }}
-                      className="proof-button proof-button-xs"
-                      style={{ padding: "2px 7px" }}
                     >
-                      Detail
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      {h.duration}ms
+                    </td>
+                    <td style={{ fontSize: 12 }}>{h.env}</td>
+                    <td style={{ textAlign: "right", width: 80 }}>
+                      <div style={{ width: "100%", height: 4, background: "var(--proof-grey-bg)", borderRadius: 2, overflow: "hidden" }}>
+                        <div style={{ 
+                          height: "100%", 
+                          width: `${flakiness}%`, 
+                          background: flakiness > 50 ? "var(--proof-red)" : flakiness > 25 ? "var(--proof-yellow)" : "var(--proof-green)" 
+                        }} />
+                      </div>
+                    </td>
+                    <td style={{ fontSize: 11 }}>
+                      {h.error ? (
+                        <span
+                          style={{
+                            color: "var(--proof-red)",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 10,
+                          }}
+                        >
+                          {h.error.length > 80 ? h.error.slice(0, 80) + "..." : h.error}
+                        </span>
+                      ) : h.status === "FAIL" ? (
+                        <span style={{ color: "var(--proof-text-secondary)", fontSize: 10 }}>
+                          no error message
+                        </span>
+                      ) : null}
+                    </td>
+                    <td>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRow(h);
+                        }}
+                        className="proof-button proof-button-xs"
+                        style={{ padding: "2px 7px" }}
+                      >
+                        Detail
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
               {filteredHistory.length === 0 && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     style={{
                       textAlign: "center",
                       padding: 24,

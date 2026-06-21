@@ -7,7 +7,18 @@ import {
   subscribeToDataInit,
 } from "@/lib/data";
 import type { TestResult } from "@/lib/types";
-import { ChevronLeft, ChevronRight, BarChart3, FileText, ChevronDown, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
+  FileText,
+  ChevronDown,
+  X,
+  Copy,
+  Check as CheckIcon,
+  ArrowLeft,
+  Search,
+} from "lucide-react";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
@@ -72,6 +83,32 @@ export default function RunDetail() {
     setSelectedResult(results[0]);
   }, [run?.id, urlTestId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleKeyDown = (e: React.KeyboardEvent, result: TestResult) => {
+    if (e.key === "Enter") {
+      setSelectedResultSyncUrl(selectedResult?.id === result.id ? null : result);
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const idx = filtered.findIndex((r) => r.id === result.id);
+      if (idx < filtered.length - 1) {
+        const nextResult = filtered[idx + 1];
+        setSelectedResultSyncUrl(nextResult);
+        // Focus the next row
+        const nextRow = document.querySelector(`[data-row-id="${nextResult.id}"]`) as HTMLElement;
+        nextRow?.focus();
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const idx = filtered.findIndex((r) => r.id === result.id);
+      if (idx > 0) {
+        const prevResult = filtered[idx - 1];
+        setSelectedResultSyncUrl(prevResult);
+        // Focus the prev row
+        const prevRow = document.querySelector(`[data-row-id="${prevResult.id}"]`) as HTMLElement;
+        prevRow?.focus();
+      }
+    }
+  };
+
   if (!run) {
     if (initState.loading) {
       return (
@@ -124,11 +161,69 @@ export default function RunDetail() {
     if (next >= 0 && next < filtered.length) setSelectedResultSyncUrl(filtered[next]);
   };
 
+  const counts = React.useMemo(() => {
+    return {
+      total: results.length,
+      passed: results.filter((r) => r.status === "PASS").length,
+      failed: results.filter((r) => r.status === "FAIL").length,
+      skipped: results.filter((r) => (r.status as string) === "SKIPPED").length,
+    };
+  }, [results]);
+
+  const catBreakdown = React.useMemo(() => {
+    const map: Record<string, { pass: number; total: number }> = {};
+    results.forEach((r) => {
+      if (!map[r.category]) map[r.category] = { pass: 0, total: 0 };
+      map[r.category].total++;
+      if (r.status === "PASS") map[r.category].pass++;
+    });
+    return Object.entries(map).sort((a, b) => b[1].total - a[1].total);
+  }, [results]);
+
+  const [copiedId, setCopiedId] = React.useState<string | null>(null);
+  const copyTestId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   return (
     <div
       style={{ display: "flex", flexDirection: "column", gap: 16, height: "100%", minHeight: 0 }}
     >
       <RunHeader run={run} />
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+          padding: "8px 16px",
+          background: "var(--proof-surface)",
+          border: "1px solid var(--proof-border)",
+          borderRadius: "var(--proof-radius)",
+          fontSize: 12,
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>Total: {counts.total}</div>
+        <div style={{ color: "var(--proof-border)" }}>|</div>
+        <div style={{ color: "var(--proof-green)", display: "flex", alignItems: "center", gap: 4 }}>
+          ✓ {counts.passed} passed
+        </div>
+        <div style={{ color: "var(--proof-red)", display: "flex", alignItems: "center", gap: 4 }}>
+          ✗ {counts.failed} failed
+        </div>
+        <div
+          style={{
+            color: "var(--proof-text-secondary)",
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
+          ~ {counts.skipped} skipped
+        </div>
+      </div>
 
       {/* Chart + results table */}
       <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
@@ -219,161 +314,213 @@ export default function RunDetail() {
                 </div>
               </div>
               <div style={{ flex: 1, overflowY: "auto" }}>
-                <table className="proof-table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: "30%" }}>Test Name</th>
-                      <th style={{ width: 70 }}>Status</th>
-                      <th style={{ width: 100 }}>Category</th>
-                      <th style={{ width: "22%", whiteSpace: "nowrap" }}>History</th>
-                      <th style={{ width: 80, textAlign: "right" }}>Duration</th>
-                      <th style={{ width: 110 }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pagedResults.map((r) => (
-                      <tr
-                        key={r.id}
-                        onClick={() =>
-                          setSelectedResultSyncUrl(selectedResult?.id === r.id ? null : r)
-                        }
-                        style={{
-                          cursor: "pointer",
-                          background:
-                            selectedResult?.id === r.id
-                              ? "var(--proof-blue-bg)"
-                              : r.status === "FAIL"
-                                ? "rgba(217,48,37,0.03)"
-                                : undefined,
-                          outline:
-                            selectedResult?.id === r.id
-                              ? "2px solid var(--proof-blue) inset"
-                              : undefined,
-                        }}
-                      >
-                        <td
-                          style={{
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 11,
-                          }}
-                        >
-                          {r.name}
-                        </td>
-                        <td>
-                          <span
-                            className={`proof-badge ${r.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                          >
-                            {r.status}
-                          </span>
-                        </td>
-                        <td>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              background: "var(--proof-grey-bg)",
-                              padding: "2px 7px",
-                              borderRadius: 4,
-                              border: "1px solid var(--proof-grey)",
-                            }}
-                          >
-                            {r.category}
-                          </span>
-                        </td>
-                        <td style={{ width: 200, whiteSpace: "nowrap" }}>
-                          <TestHistoryStrip testName={r.name} currentRunId={runId} />
-                        </td>
-                        <td
-                          style={{
-                            textAlign: "right",
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 11,
-                            color: "var(--proof-text-secondary)",
-                          }}
-                        >
-                          {r.duration}ms
-                        </td>
-                        <td onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => navigate(`/trends?testId=${r.id}`)}
-                            className="proof-button proof-button-xs"
-                            style={{ padding: "2px 7px" }}
-                          >
-                            Analytics
-                          </button>
-                          <button
-                            onClick={() => navigate(`/tests?q=${r.id}`)}
-                            className="proof-button proof-button-xs"
-                            style={{ padding: "2px 7px", marginLeft: 4 }}
-                          >
-                            <FileText size={10} /> Def
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {totalPages > 1 && (
+                {filtered.length === 0 ? (
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 12,
-                      padding: "8px 14px",
-                      borderTop: "1px solid var(--proof-border)",
-                      fontSize: 12,
+                      textAlign: "center",
+                      padding: "60px 24px",
+                      color: "var(--proof-text-secondary)",
                     }}
                   >
-                    <button
-                      disabled={page === 0}
-                      onClick={() => setPage((p) => Math.max(0, p - 1))}
-                      className="proof-button proof-button-xs"
-                    >
-                      Prev
-                    </button>
-                    <span style={{ color: "var(--proof-text-secondary)" }}>
-                      Page {page + 1} of {totalPages}
-                    </span>
-                    <button
-                      disabled={page >= totalPages - 1}
-                      onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                      className="proof-button proof-button-xs"
-                    >
-                      Next
-                    </button>
+                    <Search size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
+                    <div style={{ fontSize: 15, fontWeight: 600, color: "var(--proof-text)", marginBottom: 6 }}>
+                      No results found
+                    </div>
+                    <div style={{ fontSize: 13, marginBottom: 20 }}>
+                      Try adjusting your filters or search terms
+                    </div>
+                    <button className="proof-button" onClick={() => { setSearch(""); setStatusFilter("all"); setCatFilter("all"); }}>Clear filters</button>
                   </div>
+                ) : (
+                  <>
+                    <table className="proof-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: "30%", fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Test Name</th>
+                          <th style={{ width: 70, fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
+                          <th style={{ width: 100, fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Category</th>
+                          <th style={{ width: "22%", whiteSpace: "nowrap", fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>History</th>
+                          <th style={{ width: 80, textAlign: "right", fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Duration</th>
+                          <th style={{ width: 110, fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pagedResults.map((r) => (
+                          <tr
+                            key={r.id}
+                            data-row-id={r.id}
+                            tabIndex={0}
+                            onKeyDown={(e) => handleKeyDown(e, r)}
+                            onClick={() =>
+                              setSelectedResultSyncUrl(selectedResult?.id === r.id ? null : r)
+                            }
+                            style={{
+                              cursor: "pointer",
+                              outline: "none",
+                              background:
+                                selectedResult?.id === r.id
+                                  ? "var(--proof-blue-bg)"
+                                  : r.status === "FAIL"
+                                    ? "rgba(217,48,37,0.03)"
+                                    : undefined,
+                              boxShadow:
+                                selectedResult?.id === r.id
+                                  ? "inset 0 0 0 2px var(--proof-blue)"
+                                  : undefined,
+                            }}
+                          >
+                            <td
+                              style={{
+                                fontFamily: "var(--font-mono)",
+                                fontSize: 11,
+                              }}
+                            >
+                              {r.name}
+                            </td>
+                            <td>
+                              <span
+                                className={`proof-badge ${r.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
+                              >
+                                {r.status}
+                              </span>
+                            </td>
+                            <td>
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  background: "var(--proof-grey-bg)",
+                                  padding: "2px 7px",
+                                  borderRadius: 4,
+                                  border: "1px solid var(--proof-grey)",
+                                }}
+                              >
+                                {r.category}
+                              </span>
+                            </td>
+                            <td style={{ width: 200, whiteSpace: "nowrap" }}>
+                              <TestHistoryStrip testName={r.name} currentRunId={runId} />
+                            </td>
+                            <td
+                              style={{
+                                textAlign: "right",
+                                fontFamily: "var(--font-mono)",
+                                fontSize: 11,
+                                color: "var(--proof-text-secondary)",
+                              }}
+                            >
+                              {r.duration}ms
+                            </td>
+                            <td onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={() => navigate(`/trends?testId=${r.id}`)}
+                                className="proof-button proof-button-xs"
+                                style={{ padding: "2px 7px" }}
+                              >
+                                Analytics
+                              </button>
+                              <button
+                                onClick={() => navigate(`/tests?q=${r.id}`)}
+                                className="proof-button proof-button-xs"
+                                style={{ padding: "2px 7px", marginLeft: 4 }}
+                              >
+                                <FileText size={10} /> Def
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {totalPages > 1 && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 12,
+                          padding: "8px 14px",
+                          borderTop: "1px solid var(--proof-border)",
+                          fontSize: 12,
+                        }}
+                      >
+                        <div style={{ display: "flex", gap: 4 }}>
+                          <button
+                            disabled={page === 0}
+                            onClick={() => setPage(0)}
+                            className="proof-button proof-button-xs"
+                            title="First Page"
+                          >
+                            «
+                          </button>
+                          <button
+                            disabled={page === 0}
+                            onClick={() => setPage((p) => Math.max(0, p - 1))}
+                            className="proof-button proof-button-xs"
+                          >
+                            Prev
+                          </button>
+                        </div>
+                        <span
+                          style={{
+                            color: "var(--proof-text-secondary)",
+                            minWidth: 80,
+                            textAlign: "center",
+                          }}
+                        >
+                          Page {page + 1} of {totalPages}
+                        </span>
+                        <div style={{ display: "flex", gap: 4 }}>
+                          <button
+                            disabled={page >= totalPages - 1}
+                            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                            className="proof-button proof-button-xs"
+                          >
+                            Next
+                          </button>
+                          <button
+                            disabled={page >= totalPages - 1}
+                            onClick={() => setPage(totalPages - 1)}
+                            className="proof-button proof-button-xs"
+                            title="Last Page"
+                          >
+                            »
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </TimeWindowProvider>
           </div>
         </PanelErrorBoundary>
 
-        {/* Test Detail Panel */}
-        {selectedResult && (
-          <PanelErrorBoundary label="Evidence panel">
+      {/* Test Detail Panel */}
+      {selectedResult && (
+        <PanelErrorBoundary label="Evidence panel">
+          <div
+            className="proof-card"
+            style={{
+              width: 380,
+              flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              borderLeft: `3px solid ${selectedResult.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
+            }}
+          >
+            {/* Panel header */}
             <div
-              className="proof-card"
               style={{
-                width: 380,
-                flexShrink: 0,
+                padding: "10px 14px",
+                borderBottom: "1px solid var(--proof-grey)",
                 display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                borderLeft: `3px solid ${selectedResult.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
+                alignItems: "center",
+                gap: 8,
+                background: "var(--proof-blue-bg)",
+                flexShrink: 0,
               }}
             >
-              {/* Panel header */}
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderBottom: "1px solid var(--proof-grey)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  background: "var(--proof-blue-bg)",
-                  flexShrink: 0,
-                }}
-              >
                 <div
                   style={{
                     display: "flex",
@@ -486,9 +633,34 @@ export default function RunDetail() {
                           fontWeight: 600,
                           lineHeight: 1.5,
                           wordBreak: "break-all",
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 6,
                         }}
                       >
-                        {selectedResult.name}
+                        <span style={{ flex: 1 }}>{selectedResult.name}</span>
+                        <button
+                          onClick={() => copyTestId(selectedResult.id)}
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: 2,
+                            color:
+                              copiedId === selectedResult.id
+                                ? "var(--proof-green)"
+                                : "var(--proof-text-muted)",
+                            display: "flex",
+                            flexShrink: 0,
+                          }}
+                          title="Copy ID"
+                        >
+                          {copiedId === selectedResult.id ? (
+                            <CheckIcon size={12} />
+                          ) : (
+                            <Copy size={12} />
+                          )}
+                        </button>
                       </div>
                       <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
                         <span
@@ -520,6 +692,52 @@ export default function RunDetail() {
                     )}
 
                     <EvidenceViewer evidence={selectedResult.evidence} />
+
+                    {/* Category Breakdown */}
+                    <div style={{ marginTop: 4 }}>
+                      <div
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          color: "var(--proof-text-secondary)",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.5px",
+                          marginBottom: 8,
+                        }}
+                      >
+                        Category Pass Rates
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {catBreakdown.map(([cat, stats]) => (
+                          <div
+                            key={cat}
+                            style={{
+                              fontSize: 10,
+                              background: "var(--proof-surface)",
+                              border: "1px solid var(--proof-border)",
+                              borderRadius: 4,
+                              padding: "2px 6px",
+                              display: "flex",
+                              gap: 6,
+                            }}
+                          >
+                            <span style={{ fontWeight: 600 }}>{cat}</span>
+                            <span
+                              style={{
+                                color:
+                                  stats.pass === stats.total
+                                    ? "var(--proof-green)"
+                                    : stats.pass === 0
+                                      ? "var(--proof-red)"
+                                      : "var(--proof-yellow)",
+                              }}
+                            >
+                              {stats.pass}/{stats.total}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
                     {/* Assertions */}
                     {selectedResult.assertions && selectedResult.assertions.length > 0 && (

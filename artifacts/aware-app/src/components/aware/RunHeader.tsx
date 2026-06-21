@@ -1,7 +1,15 @@
+import { Copy } from "lucide-react";
+import React from "react";
 import type { Run } from "@/lib/types";
 import { getEnvConfigById, envIdToLabel } from "@/lib/envConfig";
 
 export function RunHeader({ run }: { run: Run }) {
+  const [copied, setCopied] = React.useState(false);
+  const copyId = () => {
+    navigator.clipboard.writeText(run.id);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   const envCfg = getEnvConfigById(run.envId);
   return (
     <div
@@ -48,6 +56,44 @@ export function RunHeader({ run }: { run: Run }) {
 
       <div style={{ display: "flex", gap: 20 }}>
         <div>
+          <div
+            style={{
+              fontSize: 10,
+              color: "var(--proof-text-secondary)",
+              marginBottom: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            Run ID
+            <button
+              onClick={copyId}
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                display: "flex",
+                color: copied ? "var(--proof-green)" : "var(--proof-text-muted)",
+              }}
+              title="Copy Run ID"
+            >
+              <Copy size={11} />
+            </button>
+          </div>
+          <div
+            style={{
+              fontSize: 10,
+              fontFamily: "var(--font-mono)",
+              color: "var(--proof-text-secondary)",
+            }}
+          >
+            {run.id.slice(0, 8)}...
+          </div>
+        </div>
+
+        <div>
           <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
             Network
           </div>
@@ -85,20 +131,30 @@ export function RunHeader({ run }: { run: Run }) {
           <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", marginBottom: 2 }}>
             Status
           </div>
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color:
-                run.status === "PASS"
-                  ? "#22c55e"
-                  : run.status === "RUNNING"
-                    ? "#3b82f6"
-                    : "#ef4444",
-            }}
-          >
-            {run.status}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {run.status === "RUNNING" && (
+              <div
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "#3b82f6",
+                  boxShadow: "0 0 8px #3b82f6",
+                  animation: "proof-pulse 1.5s infinite",
+                }}
+              />
+            )}
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color:
+                  run.status === "PASS" ? "#22c55e" : run.status === "RUNNING" ? "#3b82f6" : "#ef4444",
+              }}
+            >
+              {run.status}
+            </span>
+          </div>
         </div>
 
         <div>

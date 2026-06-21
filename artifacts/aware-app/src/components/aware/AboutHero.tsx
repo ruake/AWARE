@@ -20,7 +20,7 @@ export function AboutHero() {
           pointerEvents: "none",
           opacity: 0.5,
           background:
-            "radial-gradient(ellipse at top right, rgba(59,130,246,0.08) 0%, transparent 60%), radial-gradient(ellipse at bottom left, rgba(139,92,246,0.06) 0%, transparent 60%)",
+            "radial-gradient(ellipse at top right, var(--proof-blue-glow) 0%, transparent 60%), radial-gradient(ellipse at bottom left, var(--proof-purple-glow) 0%, transparent 60%)",
         }}
       />
       <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -30,11 +30,11 @@ export function AboutHero() {
               width: 52,
               height: 52,
               borderRadius: 14,
-              background: "linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #06b6d4 100%)",
+              background: "linear-gradient(135deg, var(--proof-indigo) 0%, var(--proof-blue) 50%, var(--proof-cyan) 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 4px 20px rgba(59,130,246,0.4)",
+              boxShadow: "var(--proof-blue-glow)",
             }}
           >
             <Activity size={24} style={{ color: "white" }} />
@@ -62,7 +62,7 @@ export function AboutHero() {
                   borderRadius: 5,
                 }}
               >
-                v1.0.0
+                v3.0.4
               </span>
             </div>
             <div

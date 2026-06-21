@@ -10,6 +10,8 @@ import {
   Clock,
   Maximize2,
   Minimize2,
+  ExternalLink,
+  AlertCircle,
 } from "lucide-react";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { CompareWaterfall } from "./CompareWaterfall";
@@ -85,6 +87,9 @@ export function CompareSidePanel({
 
   const baseAssertions = baseResult?.assertions ?? baseEvidence?.assertions ?? [];
   const candAssertions = candResult?.assertions ?? candEvidence?.assertions ?? [];
+
+  const baseError = baseResult?.error;
+  const candError = candResult?.error;
 
   const timingKeys: { key: keyof HttpTimings; label: string }[] = [
     { key: "dnsLookup", label: "DNS" },
@@ -213,9 +218,23 @@ export function CompareSidePanel({
               color: "var(--proof-text)",
               lineHeight: 1.5,
               wordBreak: "break-all",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
             }}
           >
-            {diff.name}
+            <span>{diff.name}</span>
+            {candResult?.runId && (
+              <button
+                onClick={() => navigate(`/run/${candResult.runId}`)}
+                className="proof-button-ghost"
+                style={{ fontSize: 10, padding: "2px 6px", color: "var(--proof-blue)" }}
+                title="View in Runs"
+              >
+                <ExternalLink size={10} style={{ marginRight: 4 }} />
+                View in Runs
+              </button>
+            )}
           </div>
           <div style={{ display: "flex", gap: 4, marginTop: 8, flexWrap: "wrap" }}>
             <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>
@@ -224,6 +243,47 @@ export function CompareSidePanel({
             <StateBadge state={diff.state} />
           </div>
         </div>
+
+        {/* Error prominence */}
+        {(baseError || candError) && (
+          <div
+            style={{
+              background: "rgba(239,68,68,0.1)",
+              border: "1px solid var(--proof-red)",
+              borderRadius: 6,
+              padding: 10,
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: "var(--proof-red)",
+                textTransform: "uppercase",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <AlertCircle size={12} /> Execution Errors
+            </div>
+            {baseError && (
+              <div style={{ fontSize: 11, color: "var(--proof-red)" }}>
+                <span style={{ fontWeight: 700, marginRight: 4 }}>Baseline:</span>
+                {baseError}
+              </div>
+            )}
+            {candError && (
+              <div style={{ fontSize: 11, color: "var(--proof-red)" }}>
+                <span style={{ fontWeight: 700, marginRight: 4 }}>Candidate:</span>
+                {candError}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Status + Duration summary */}
         <CompareSummary diff={diff} deltaMs={deltaMs} size="normal" />

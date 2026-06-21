@@ -66,20 +66,25 @@ export function Pagination({
         flexWrap: "wrap",
       }}
     >
-      <span
-        style={{
-          fontSize: 11,
-          color: "var(--proof-text-secondary)",
-          fontFamily: "var(--font-mono)",
-        }}
-      >
-        Showing {startItem}–{endItem} of {totalItems}
-      </span>
-
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
         <button
           disabled={currentPage <= 1}
+          onClick={() => onPageChange(1)}
+          aria-label="First page"
+          style={{
+            ...btnBase,
+            padding: "3px 8px",
+            fontSize: 11,
+            ...(currentPage <= 1 ? btnDisabled : {}),
+          }}
+        >
+          First
+        </button>
+
+        <button
+          disabled={currentPage <= 1}
           onClick={() => onPageChange(currentPage - 1)}
+          aria-label="Previous page"
           style={{
             ...btnBase,
             padding: "3px 8px",
@@ -104,58 +109,23 @@ export function Pagination({
           Prev
         </button>
 
-        {pageNumbers(currentPage, totalPages).map((p, i) =>
-          p === "ellipsis" ? (
-            <span
-              key={`e-${i}`}
-              style={{
-                padding: "3px 4px",
-                color: "var(--proof-text-muted)",
-                fontSize: 11,
-              }}
-            >
-              …
-            </span>
-          ) : (
-            <button
-              key={p}
-              onClick={() => onPageChange(p)}
-              style={{
-                ...btnBase,
-                padding: "3px 8px",
-                fontSize: 11,
-                fontFamily: "var(--font-mono)",
-                fontWeight: p === currentPage ? 700 : 500,
-                background: p === currentPage ? "var(--proof-blue)" : "var(--proof-subtle-bg2)",
-                border:
-                  p === currentPage
-                    ? "1px solid var(--proof-blue)"
-                    : "1px solid var(--proof-border-strong)",
-                color: p === currentPage ? "#fff" : "var(--proof-text-secondary)",
-              }}
-              onMouseEnter={(e) => {
-                if (p !== currentPage) {
-                  e.currentTarget.style.background = "var(--proof-surface-hover)";
-                  e.currentTarget.style.borderColor = "var(--proof-border-accent)";
-                  e.currentTarget.style.color = "var(--proof-text)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (p !== currentPage) {
-                  e.currentTarget.style.background = "var(--proof-subtle-bg2)";
-                  e.currentTarget.style.borderColor = "var(--proof-border-strong)";
-                  e.currentTarget.style.color = "var(--proof-text-secondary)";
-                }
-              }}
-            >
-              {p}
-            </button>
-          ),
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 4, margin: "0 8px" }}>
+          <span
+            style={{
+              fontSize: 11,
+              color: "var(--proof-text-secondary)",
+            }}
+          >
+            Page{" "}
+            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>{currentPage}</span> of{" "}
+            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>{totalPages}</span>
+          </span>
+        </div>
 
         <button
           disabled={currentPage >= totalPages}
           onClick={() => onPageChange(currentPage + 1)}
+          aria-label="Next page"
           style={{
             ...btnBase,
             padding: "3px 8px",
@@ -179,16 +149,31 @@ export function Pagination({
         >
           Next
         </button>
+
+        <button
+          disabled={currentPage >= totalPages}
+          onClick={() => onPageChange(totalPages)}
+          aria-label="Last page"
+          style={{
+            ...btnBase,
+            padding: "3px 8px",
+            fontSize: 11,
+            ...(currentPage >= totalPages ? btnDisabled : {}),
+          }}
+        >
+          Last
+        </button>
       </div>
 
       <span
         style={{
           fontSize: 11,
-          color: "var(--proof-text-secondary)",
+          color: "var(--proof-text-muted)",
+          fontFamily: "var(--font-mono)",
+          marginLeft: 12,
         }}
       >
-        Page <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>{currentPage}</span>{" "}
-        of <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>{totalPages}</span>
+        Showing {startItem}–{endItem} of {totalItems}
       </span>
     </div>
   );

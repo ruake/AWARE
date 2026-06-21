@@ -8,6 +8,7 @@ interface AnomalyBannerProps {
   degradedTiers: string;
   onInvestigate: () => void;
   onDismiss?: () => void;
+  count?: number;
 }
 
 export function AnomalyBanner({
@@ -17,8 +18,10 @@ export function AnomalyBanner({
   degradedTiers,
   onInvestigate,
   onDismiss,
+  count,
 }: AnomalyBannerProps) {
-  if (!hasAlert && !hasDegradation) return null;
+  const [dismissed, setDismissed] = React.useState(false);
+  if ((!hasAlert && !hasDegradation) || dismissed) return null;
   const isCritical = hasAlert;
 
   const color = isCritical ? "var(--proof-red)" : "var(--proof-yellow)";
@@ -34,6 +37,13 @@ export function AnomalyBanner({
       : "Critical environment failure — pass rate below minimum threshold"
     : `${degradedTiers} degraded — pass rate below promotion gate`;
 
+  const handleDismiss = () => {
+    setDismissed(true);
+    if (onDismiss) {
+      setTimeout(onDismiss, 300);
+    }
+  };
+
   return (
     <div
       role="alert"
@@ -48,6 +58,10 @@ export function AnomalyBanner({
         background: colorBg,
         border: `1px solid ${colorBorder}`,
         borderLeft: `4px solid ${color}`,
+        maxHeight: dismissed ? 0 : 500,
+        opacity: dismissed ? 0 : 1,
+        overflow: dismissed ? "hidden" : "visible",
+        transition: "max-height 0.3s ease-in-out, opacity 0.3s ease-in-out",
       }}
     >
       <div
@@ -75,6 +89,9 @@ export function AnomalyBanner({
             lineHeight: 1.4,
           }}
         >
+          {count && count > 0 ? (
+            <span style={{ fontWeight: 800 }}>{count} anomalies detected • </span>
+          ) : null}
           {message}
         </div>
         {isCritical && regressions > 0 && (
@@ -98,7 +115,7 @@ export function AnomalyBanner({
         </button>
         {onDismiss && (
           <button
-            onClick={onDismiss}
+            onClick={handleDismiss}
             aria-label="Dismiss banner"
             style={{
               background: colorIconBg,

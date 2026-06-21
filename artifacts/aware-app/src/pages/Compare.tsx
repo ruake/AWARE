@@ -16,7 +16,8 @@ import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEn
 import { loadResultsForRun } from "@/lib/runsLoader";
 import type { DiffRow, TestResult } from "@/lib/types";
 import { setCompareStats } from "@/lib/sidebarData";
-import { Search } from "lucide-react";
+import { Search, ArrowLeftRight } from "lucide-react";
+import { CompareRunsHeader } from "@/components/aware/CompareSummary";
 
 export default function Compare() {
   const [, navigate] = useLocation();
@@ -83,6 +84,8 @@ export default function Compare() {
 
   const [colFilters, setColFilters] = React.useState<Record<string, string>>({});
 
+  const hasRegressions = diffs.some((d) => d.state === "regression");
+
   const filtered = React.useMemo(() => {
     return diffs.filter((d) => {
       if (searchText && !d.name.toLowerCase().includes(searchText.toLowerCase())) return false;
@@ -97,9 +100,28 @@ export default function Compare() {
     });
   }, [diffs, searchText, regressionsOnly, activeFilter, colFilters]);
 
-  const diffTotalPages = Math.max(1, Math.ceil(filtered.length / DIFF_PAGE_SIZE));
+  const impactScores = React.useMemo(() => {
+    const scores: Record<string, number> = {
+      regression: 10,
+      fixed: -5,
+      duration: 3,
+      unchanged: 0,
+      fishy: 2,
+    };
+    return scores;
+  }, []);
+
+  const sortedFiltered = React.useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      const scoreA = impactScores[a.state] ?? 0;
+      const scoreB = impactScores[b.state] ?? 0;
+      return scoreB - scoreA;
+    });
+  }, [filtered, impactScores]);
+
+  const diffTotalPages = Math.max(1, Math.ceil(sortedFiltered.length / DIFF_PAGE_SIZE));
   const safeDiffPage = Math.min(diffPage, diffTotalPages);
-  const paginatedDiffs = filtered.slice(
+  const paginatedDiffs = sortedFiltered.slice(
     (safeDiffPage - 1) * DIFF_PAGE_SIZE,
     safeDiffPage * DIFF_PAGE_SIZE,
   );
@@ -117,42 +139,42 @@ export default function Compare() {
     const delta = candPct - basePct;
     return [
       {
-        label: "Total",
+        label: `Total (${diffs.length})`,
         value: diffs.length.toString(),
         color: "var(--proof-text-secondary)",
         key: "total",
         count: diffs.length,
       },
       {
-        label: "Regressions",
+        label: `Regression (${regressions})`,
         value: regressions.toString(),
         color: regressions > 0 ? "var(--proof-red)" : "var(--proof-green)",
         key: "regression",
         count: regressions,
       },
       {
-        label: "Fixed",
+        label: `Fixed (${fixed})`,
         value: fixed.toString(),
         color: "var(--proof-green)",
         key: "fixed",
         count: fixed,
       },
       {
-        label: "Duration ↑",
+        label: `Duration (${duration})`,
         value: duration.toString(),
         color: "var(--proof-yellow)",
         key: "duration",
         count: duration,
       },
       {
-        label: "Unchanged",
+        label: `Unchanged (${unchanged})`,
         value: unchanged.toString(),
         color: "var(--proof-text-muted)",
         key: "unchanged",
         count: unchanged,
       },
       {
-        label: "Fishy",
+        label: `Fishy (${fishy})`,
         value: fishy.toString(),
         color: "var(--proof-purple)",
         key: "fishy",
@@ -252,6 +274,89 @@ export default function Compare() {
 
   return (
     <>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 0,
+        }}
+      >
+        {swapped && (
+          <div
+            style={{
+              background: "var(--proof-blue-bg)",
+              color: "var(--proof-blue)",
+              padding: "6px 16px",
+              fontSize: 12,
+              fontWeight: 500,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              borderBottom: "1px solid var(--proof-blue-border)",
+            }}
+          >
+            <span>⇄</span>
+            <span>Runs swapped — Candidate is now the baseline</span>
+          </div>
+        )}
+        <div style={{ padding: "16px 20px 8px" }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: "var(--proof-text-secondary)",
+                  textTransform: "uppercase",
+                  marginBottom: 4,
+                }}
+              >
+                Baseline Run
+              </label>
+              <select
+                className="proof-input"
+                value={effectiveBaseline}
+                onChange={(e) => navigate(`/compare?baseline=${e.target.value}&candidate=${effectiveCandidate}`)}
+                style={{ width: "100%", fontSize: 12 }}
+              >
+                {envRuns.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.id} — {Math.round(r.passPct)}% — {new Date(r.started).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={{ fontSize: 18, color: "var(--proof-text-muted)", paddingTop: 16 }}>vs</div>
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: "var(--proof-text-secondary)",
+                  textTransform: "uppercase",
+                  marginBottom: 4,
+                }}
+              >
+                Candidate Run
+              </label>
+              <select
+                className="proof-input"
+                value={effectiveCandidate}
+                onChange={(e) => navigate(`/compare?baseline=${effectiveBaseline}&candidate=${e.target.value}`)}
+                style={{ width: "100%", fontSize: 12 }}
+              >
+                {envRuns.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.id} — {Math.round(r.passPct)}% — {new Date(r.started).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
       <PageTemplate
         title="Compare Runs"
         subtitle={`${baselineRun?.id ?? "—"} vs ${candidateRun?.id ?? "—"} · ${filtered.length}/${diffs.length} tests`}
@@ -273,30 +378,44 @@ export default function Compare() {
                 aria-label="Search tests"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                style={{ flex: 1, minWidth: 0 }}
+                style={{ flex: 1, minWidth: 0, fontSize: 13 }}
               />
             </div>
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 12,
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={regressionsOnly}
-                onChange={(e) => {
-                  setRegressionsOnly(e.target.checked);
-                  setActiveFilter(null);
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              {(["regression", "fixed", "duration", "unchanged"] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setActiveFilter(activeFilter === s ? null : s)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    padding: "4px 12px",
+                    borderRadius: 6,
+                    border: `1px solid ${activeFilter === s ? "var(--proof-blue)" : "var(--proof-border)"}`,
+                    background: activeFilter === s ? "var(--proof-blue)" : "transparent",
+                    color: activeFilter === s ? "white" : "var(--proof-text-secondary)",
+                    fontSize: 12,
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    transition: "all 0.1s ease",
+                  }}
+                >
+                  {s.charAt(0).toUpperCase() + s.slice(1)} ({diffs.filter(d => d.state === s).length})
+                </button>
+              ))}
+            </div>
+            {hasRegressions && activeFilter !== "regression" && (
+              <button
+                onClick={() => {
+                  setActiveFilter("regression");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
-              />
-              Regressions only
-            </label>
+                className="proof-button-ghost"
+                style={{ fontSize: 11, color: "var(--proof-red)", fontWeight: 600 }}
+              >
+                Jump to Regressions
+              </button>
+            )}
             <button
               onClick={() => setSwapped((s) => !s)}
               className="proof-button-ghost"
@@ -331,9 +450,9 @@ export default function Compare() {
           </>
         }
         isEmpty={filtered.length === 0 && !initState.loading && !resultsLoading}
-        emptyMessage="No tests match your filters"
-        loading={(filtered.length === 0 && initState.loading) || resultsLoading}
-        loadingCols={6}
+        emptyMessage="No differences found between these runs. Both runs have identical test outcomes."
+        loading={(sortedFiltered.length === 0 && initState.loading) || resultsLoading}
+        loadingCols={7}
         sidePanel={
           selectedDiff && selectedName ? (
             <CompareSidePanel
@@ -351,20 +470,26 @@ export default function Compare() {
         }
         sidePanelWidth={440}
       >
+        <CompareRunsHeader 
+          diffs={diffs}
+          baseResults={baseResults}
+          candResults={candResults}
+        />
         <table className="proof-table">
           <colgroup>
             <col />
-            <col />
-            <col />
-            <col />
-            <col />
-            <col />
+            <col style={{ width: 100 }} />
+            <col style={{ width: 100 }} />
+            <col style={{ width: 100 }} />
+            <col style={{ width: 100 }} />
+            <col style={{ width: 120 }} />
+            <col style={{ width: 120 }} />
           </colgroup>
           <thead
             style={{ position: "sticky", top: 0, zIndex: 4, background: "var(--proof-surface)" }}
           >
             <tr>
-              <th>
+              <th style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <input
                   className="proof-input"
                   placeholder="Name"
@@ -374,7 +499,7 @@ export default function Compare() {
                   style={{ width: "100%", fontSize: 10, padding: "2px 6px" }}
                 />
               </th>
-              <th>
+              <th style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <select
                   className="proof-input"
                   style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
@@ -387,7 +512,7 @@ export default function Compare() {
                   <option value="FAIL">FAIL</option>
                 </select>
               </th>
-              <th>
+              <th style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <select
                   className="proof-input"
                   style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
@@ -403,15 +528,30 @@ export default function Compare() {
               <th
                 style={{
                   textAlign: "right",
-                  fontSize: 10,
-                  color: "var(--proof-text-secondary)",
+                  fontSize: 11,
                   fontWeight: 600,
+                  color: 'var(--proof-text-muted)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
                   whiteSpace: "nowrap",
                 }}
               >
                 Δ Duration
               </th>
-              <th>
+              <th
+                style={{
+                  textAlign: "right",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: 'var(--proof-text-muted)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Impact
+              </th>
+              <th style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <select
                   className="proof-input"
                   style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
@@ -427,7 +567,7 @@ export default function Compare() {
                   ))}
                 </select>
               </th>
-              <th>
+              <th style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <select
                   className="proof-input"
                   style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
@@ -449,6 +589,7 @@ export default function Compare() {
               const absIdx = (safeDiffPage - 1) * DIFF_PAGE_SIZE + i;
               const isSelected = selectedName === d.name;
               const deltams = d.durCand - d.durBase;
+              const impact = impactScores[d.state] ?? 0;
               return (
                 <tr
                   key={d.id}
@@ -511,6 +652,23 @@ export default function Compare() {
                     ) : (
                       <span style={{ color: "var(--proof-text-secondary)" }}>~0ms</span>
                     )}
+                  </td>
+                  <td
+                    style={{
+                      textAlign: "right",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color:
+                        impact > 0
+                          ? "var(--proof-red)"
+                          : impact < 0
+                            ? "var(--proof-green)"
+                            : "var(--proof-text-muted)",
+                    }}
+                  >
+                    {impact > 0 ? "+" : ""}
+                    {impact}
                   </td>
                   <td>
                     <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>

@@ -1,8 +1,9 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { FolderTree, X, Settings, PlayCircle, Beaker } from "lucide-react";
+import { FolderTree, X, Settings, PlayCircle, Beaker, TrendingUp } from "lucide-react";
 import type { TestSuite, TestCase } from "@/lib/types";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
+import { RUNS, getTestResultsForRun } from "@/lib/data";
 import {
   BarChart,
   Bar,
@@ -46,6 +47,22 @@ interface SuiteDetailPanelProps {
 
 export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteDetailPanelProps) {
   const [, navigate] = useLocation();
+
+  const suitePassRate = React.useMemo(() => {
+    const recentRuns = [...RUNS].slice(0, 5);
+    let totalTests = 0;
+    let passedTests = 0;
+
+    for (const run of recentRuns) {
+      const results = getTestResultsForRun(run.id);
+      const suiteResults = results.filter((r) => suite.testIds.includes(r.id));
+      totalTests += suiteResults.length;
+      passedTests += suiteResults.filter((r) => r.status === "PASS").length;
+    }
+
+    return totalTests > 0 ? (passedTests / totalTests) * 100 : null;
+  }, [suite.id, suite.testIds]);
+
   const cats = [...new Set(tests.map((t) => t.category))];
   const activeCount = tests.filter((t) => t.status === "active").length;
   const priorityCounts: Record<string, number> = {};
@@ -154,11 +171,22 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
             { label: "Tests", value: tests.length, color: "var(--proof-blue)" },
             { label: "Active", value: activeCount, color: "var(--proof-green)" },
             {
+              label: "Pass Rate",
+              value: suitePassRate !== null ? `${suitePassRate.toFixed(0)}%` : "--",
+              color:
+                suitePassRate === null
+                  ? "var(--proof-text)"
+                  : suitePassRate >= 95
+                    ? "var(--proof-green)"
+                    : suitePassRate >= 80
+                      ? "var(--proof-yellow)"
+                      : "var(--proof-red)",
+            },
+            {
               label: "Parallelism",
               value: `${suite.config.parallelism}x`,
               color: "var(--proof-text)",
             },
-            { label: "Retries", value: suite.config.retries, color: "var(--proof-text)" },
           ].map((s) => (
             <div
               key={s.label}

@@ -78,8 +78,55 @@ export default function Tests() {
     return c;
   }, [allTests]);
 
+  const statusCounts = React.useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const t of allTests) c[t.status] = (c[t.status] || 0) + 1;
+    return c;
+  }, [allTests]);
+
+  const priorityCounts = React.useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const t of allTests) c[t.priority] = (c[t.priority] || 0) + 1;
+    return c;
+  }, [allTests]);
+
+  const handleExportCSV = () => {
+    const headers = ["ID", "Name", "Type", "Category", "Priority", "Status"];
+    const rows = filtered.map((t) => [
+      t.id,
+      t.name,
+      t.testType,
+      t.category,
+      t.priority,
+      t.status,
+    ]);
+    const csvContent = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "tests.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const avgPriority = React.useMemo(() => {
+    if (allTests.length === 0) return 0;
+    const priMap: Record<string, number> = { P0: 3, P1: 2, P2: 1, P3: 0 };
+    const sum = allTests.reduce((acc, t) => acc + (priMap[t.priority] ?? 0), 0);
+    return (sum / allTests.length).toFixed(1);
+  }, [allTests]);
+
   const selectedSuite = suiteFilter ? (suites.find((s) => s.id === suiteFilter) ?? null) : null;
   const selectedTest = detailId ? (tcs.find((t) => t.id === detailId) ?? null) : null;
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setTestType("All");
+    setCategory("All");
+    setStatus("All");
+    setPriority("All");
+  };
 
   return (
     <PageTemplate
@@ -88,6 +135,67 @@ export default function Tests() {
       loading={initState.loading && allTests.length === 0}
       loadingRows={8}
       loadingCols={5}
+      topContent={
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+            gap: 12,
+            padding: "16px 16px 0 16px",
+          }}
+        >
+          <div className="proof-card" style={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Total Tests
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--proof-text)' }}>{allTests.length}</div>
+          </div>
+          <div className="proof-card" style={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Active
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: "var(--proof-green)" }}>
+              {statusCounts["active"] || 0}
+            </div>
+          </div>
+          <div className="proof-card" style={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Top Types
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--proof-text)', marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+              {Object.entries(typeCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(([k, v]) => (
+                  <span key={k} style={{ background: 'var(--proof-subtle-bg)', padding: '1px 4px', borderRadius: 3, border: '1px solid var(--proof-border)' }}>
+                    {k}: {v}
+                  </span>
+                ))}
+            </div>
+          </div>
+          <div className="proof-card" style={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Avg Priority
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--proof-text)' }}>P{avgPriority}</div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+            }}
+          >
+            <button
+              className="proof-button"
+              onClick={handleExportCSV}
+              style={{ fontSize: 11, height: 32, gap: 6 }}
+            >
+              Export CSV
+            </button>
+          </div>
+        </div>
+      }
       filters={
         <TestFilters
           search={search}
@@ -105,6 +213,8 @@ export default function Tests() {
           onClearSuite={() => navigate("/tests")}
           typeCounts={typeCounts}
           categoryCounts={categoryCounts}
+          statusCounts={statusCounts}
+          priorityCounts={priorityCounts}
           filteredCount={filtered.length}
           totalCount={allTests.length}
         />
@@ -141,6 +251,7 @@ export default function Tests() {
         page={page}
         filteredCount={filtered.length}
         onPageChange={setPage}
+        onClearFilters={handleClearFilters}
       />
     </PageTemplate>
   );
