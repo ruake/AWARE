@@ -445,7 +445,8 @@ export default function Runs() {
         pageSize={PAGE_SIZE}
         onPageChange={setPage}
       >
-        <table className="proof-table" style={{ width: "100%", tableLayout: "auto" }}>
+        <div style={{ overflowX: "auto" }}>
+        <table className="proof-table" style={{ width: "100%", tableLayout: "auto", minWidth: 640 }}>
           <colgroup>
             <col style={{ width: 3 }} />
             <col />
@@ -457,13 +458,13 @@ export default function Runs() {
           </colgroup>
           <thead>
             <tr>
-              <th />
-              <th>Run ID</th>
-              <th>Suite</th>
-              <th>Environment</th>
-              <th>Result</th>
-              <th>Duration</th>
-              <th>When</th>
+              <th aria-hidden="true" />
+              <th scope="col">Run ID</th>
+              <th scope="col">Suite</th>
+              <th scope="col">Environment</th>
+              <th scope="col">Result</th>
+              <th scope="col">Duration</th>
+              <th scope="col">When</th>
             </tr>
           </thead>
           <tbody>
@@ -475,6 +476,7 @@ export default function Runs() {
                   key={run.id}
                   onClick={() => navigate(`/runs/${run.id}`)}
                   role="button"
+                  aria-label={`Run ${run.id} — ${cfg.label}`}
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -484,7 +486,7 @@ export default function Runs() {
                   }}
                   style={{ cursor: "pointer" }}
                 >
-                  <td style={{ padding: 0, width: 3 }}>
+                  <td style={{ padding: 0, width: 3 }} aria-hidden="true">
                     <div
                       style={{
                         width: 3,
@@ -497,15 +499,12 @@ export default function Runs() {
                   </td>
 
                   <td>
-                    <Link
-                      href={`/runs/${run.id}`}
-                      onClick={(e) => e.stopPropagation()}
+                    <span
                       style={{
                         fontFamily: "var(--font-mono)",
                         fontSize: 12,
                         fontWeight: 700,
                         color: "var(--proof-blue-bright)",
-                        textDecoration: "none",
                         display: "flex",
                         alignItems: "center",
                         gap: 5,
@@ -514,11 +513,12 @@ export default function Runs() {
                       {isRunning && (
                         <Loader2
                           size={11}
+                          aria-label="Running"
                           style={{ animation: "spin 1s linear infinite", flexShrink: 0 }}
                         />
                       )}
                       {run.id}
-                    </Link>
+                    </span>
                     <div
                       style={{
                         fontSize: 10,
@@ -611,10 +611,11 @@ export default function Runs() {
                           navigate(`/compare?baseline=${latest?.id ?? ""}&candidate=${run.id}`);
                         }}
                         title="Compare to latest"
+                        aria-label={`Compare run ${run.id} to latest`}
                         className="proof-button-ghost"
                         style={{ padding: "2px 5px", opacity: 0.7 }}
                       >
-                        <GitCompare size={11} />
+                        <GitCompare size={11} aria-hidden="true" />
                       </button>
                     </div>
                   </td>
@@ -623,6 +624,7 @@ export default function Runs() {
             })}
           </tbody>
         </table>
+        </div>
       </PageTemplate>
       {Toast}
     </>

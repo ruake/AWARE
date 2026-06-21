@@ -18,7 +18,12 @@ interface TrendChartProps {
   history: TestRunPoint[];
 }
 
-export function TrendChart({ passRate, flakinessScore, avgDuration, history }: TrendChartProps) {
+export const TrendChart = React.memo(function TrendChart({
+  passRate,
+  flakinessScore,
+  avgDuration,
+  history,
+}: TrendChartProps) {
   const chartData = React.useMemo(() => {
     if (history.length === 0) return [];
     let sum = 0;
@@ -197,4 +202,4 @@ export function TrendChart({ passRate, flakinessScore, avgDuration, history }: T
       </div>
     </div>
   );
-}
+});

@@ -169,9 +169,9 @@
   --proof-active-bg: var(--proof-surface-active);
 
   /* ── Layout ──────────────────────────────────────────────── */
-  --proof-title-bar-height: 38px;
-  --proof-status-bar-height: 22px;
-  --proof-activity-bar-width: 70px;
+  --proof-title-bar-height: 44px;
+  --proof-status-bar-height: 26px;
+  --proof-activity-bar-width: 64px;
   --proof-sidebar-width: 252px;
 }
 
@@ -1573,4 +1573,200 @@ input[type="range"].model-config-slider-purple::-moz-range-thumb {
 .thread-actions button:last-child:hover {
   color: var(--proof-red-bright) !important;
   background: rgba(248, 68, 90, 0.12) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RADICAL UI — GLOW EFFECTS, DEPTH, SHIMMER UPGRADES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Gradient text utility */
+.proof-gradient-text {
+  background: linear-gradient(135deg, var(--proof-blue-bright), var(--proof-purple-bright));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glowing card highlight on hover — used by TierCard/HeroKpiCard */
+@keyframes ring-fill {
+  from { stroke-dasharray: 0 999; }
+  to   { stroke-dasharray: var(--dash) 999; }
+}
+
+/* Pulse ring for critical status */
+@keyframes critical-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(248,68,90,0.4); }
+  70%  { box-shadow: 0 0 0 8px rgba(248,68,90,0); }
+  100% { box-shadow: 0 0 0 0 rgba(248,68,90,0); }
+}
+.proof-critical-pulse {
+  animation: critical-ring 1.8s ease-out infinite;
+}
+
+/* Slide-in from left for sidebar */
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-left {
+  animation: slide-in-left 0.2s cubic-bezier(0.2,0,0,1) both;
+}
+
+/* Slide-in from right */
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.2s cubic-bezier(0.2,0,0,1) both;
+}
+
+/* Staggered list item animation */
+@keyframes list-item-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Toast pop — used for status messages */
+@keyframes toast-pop {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.95); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+.animate-toast-pop {
+  animation: toast-pop 0.2s cubic-bezier(0.2,0,0,1) both;
+}
+
+/* Activity bar nav item — active glow pulse */
+@keyframes nav-active-glow {
+  0%,100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+/* Numeric counter spin */
+@keyframes counter-up {
+  from { transform: translateY(6px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+.animate-counter-up {
+  animation: counter-up 0.3s cubic-bezier(0.2,0,0,1) both;
+}
+
+/* Blinking status cursor (live indicator) */
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+.proof-blink { animation: blink 1.2s step-end infinite; }
+
+/* Live dot */
+.proof-live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--proof-green);
+  box-shadow: 0 0 6px var(--proof-green);
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+/* ── Elevated glass card ──────────────────────────────────────── */
+.proof-glass-card {
+  background: var(--proof-glass-surface);
+  border: 1px solid var(--proof-glass-border);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-radius: var(--proof-radius-xl);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* ── Focus ring — accessible and premium ─────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--proof-blue-bright);
+  outline-offset: 2px;
+  border-radius: var(--proof-radius-sm);
+}
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--proof-blue-bright);
+  outline-offset: 2px;
+}
+
+/* ── Status badge refinements ─────────────────────────────────── */
+.proof-badge-healthy {
+  background: var(--proof-green-bg);
+  border: 1px solid var(--proof-green-border);
+  color: var(--proof-green);
+}
+.proof-badge-degraded {
+  background: var(--proof-yellow-bg);
+  border: 1px solid var(--proof-yellow-border);
+  color: var(--proof-yellow);
+}
+.proof-badge-critical {
+  background: var(--proof-red-bg);
+  border: 1px solid var(--proof-red-border);
+  color: var(--proof-red-bright);
+}
+
+/* ── Number display refinement ────────────────────────────────── */
+.proof-hero-number {
+  font-family: var(--font-mono);
+  font-weight: 900;
+  letter-spacing: -3px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Tier card ring (SVG circle) — animated on mount ─────────── */
+.tier-ring-progress {
+  transition: stroke-dasharray 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Progress bar refinements ─────────────────────────────────── */
+.proof-progress-track {
+  background: var(--proof-bar-track);
+  border-radius: 99px;
+  overflow: hidden;
+  position: relative;
+}
+.proof-progress-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+}
+/* Sheen on progress bars */
+.proof-progress-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+  border-radius: inherit;
+}
+
+/* ── Sidebar recent-runs hover highlight ──────────────────────── */
+.sidebar-run-item {
+  transition: background 120ms ease, border-left-color 120ms ease;
+}
+.sidebar-run-item:hover {
+  background: var(--proof-hover) !important;
+}
+
+/* ── Topbar search pill hover ─────────────────────────────────── */
+.topbar-search-pill:hover {
+  border-color: var(--proof-border-strong) !important;
+  background: var(--proof-surface-3) !important;
+  color: var(--proof-text) !important;
+}
+
+/* ── Responsive shell adjustments ────────────────────────────── */
+@media (max-width: 900px) {
+  :root {
+    --proof-sidebar-width: 220px;
+  }
+}
+@media (max-width: 640px) {
+  :root {
+    --proof-activity-bar-width: 0px;
+  }
 }

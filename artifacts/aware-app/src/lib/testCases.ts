@@ -5,6 +5,7 @@ import { getAutoDiscoveredTests } from "./testDiscovery";
 
 export { subscribeToTestCases };
 
+let _tcRef: TestCase[] | null = null;
 let _tcSnapshot: TestCase[] = [];
 
 export function getTestCasesStore(): TestCase[] {
@@ -13,7 +14,8 @@ export function getTestCasesStore(): TestCase[] {
 
 export function getTestCases(): TestCase[] {
   const current = getAutoDiscoveredTests();
-  if (_tcSnapshot.length !== current.length) {
+  if (_tcRef !== current) {
+    _tcRef = current;
     _tcSnapshot = [...current];
   }
   return _tcSnapshot;

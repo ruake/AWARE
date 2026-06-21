@@ -165,6 +165,10 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
             overflowY: "auto",
             overflowX: "hidden",
             background: "var(--proof-editor-bg)",
+            backgroundImage:
+              "radial-gradient(circle, rgba(99,130,178,0.045) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+            position: "relative",
           }}
         >
           {children}
@@ -178,75 +182,77 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
 
       {/* Live status toast */}
-      {currentToast && (
-        <div
-          onClick={dismissToast}
-          style={{
-            position: "fixed",
-            bottom: 32,
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "6px 14px",
-            borderRadius: 4,
-            zIndex: 50,
-            cursor: "pointer",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
-            border: "1px solid",
-            borderColor:
-              currentToast.type === "success"
-                ? "var(--proof-green)"
-                : currentToast.type === "warning"
-                  ? "var(--proof-yellow)"
-                  : "var(--proof-blue)",
-            background:
-              currentToast.type === "success"
-                ? "var(--proof-green-bg)"
-                : currentToast.type === "warning"
-                  ? "var(--proof-yellow-bg)"
-                  : "var(--proof-blue-bg)",
-            color:
-              currentToast.type === "success"
-                ? "var(--proof-green)"
-                : currentToast.type === "warning"
-                  ? "var(--proof-yellow)"
-                  : "var(--proof-blue)",
-            fontSize: 13,
-            fontWeight: 400,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {currentToast.type === "success" ? (
-            <Check size={14} />
-          ) : currentToast.type === "warning" ? (
-            <AlertTriangle size={14} />
-          ) : (
-            <Activity size={14} />
-          )}
-          {currentToast.message}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              dismissToast();
-            }}
-            aria-label="Close"
+      {currentToast && (() => {
+        const toastColor =
+          currentToast.type === "success"
+            ? "var(--proof-green)"
+            : currentToast.type === "warning"
+              ? "var(--proof-yellow)"
+              : "var(--proof-blue)";
+        const toastBg =
+          currentToast.type === "success"
+            ? "var(--proof-green-bg)"
+            : currentToast.type === "warning"
+              ? "var(--proof-yellow-bg)"
+              : "var(--proof-blue-bg)";
+        const ToastIcon =
+          currentToast.type === "success"
+            ? Check
+            : currentToast.type === "warning"
+              ? AlertTriangle
+              : Activity;
+        return (
+          <div
+            onClick={dismissToast}
             style={{
-              marginLeft: 4,
-              background: "none",
-              border: "none",
+              position: "fixed",
+              bottom: 40,
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "10px 16px",
+              borderRadius: 12,
+              zIndex: 100,
               cursor: "pointer",
-              opacity: 0.6,
-              lineHeight: 1,
-              color: "inherit",
-              padding: 2,
+              boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px ${toastColor}30, 0 0 24px ${toastColor}18`,
+              border: `1px solid ${toastColor}30`,
+              background: `linear-gradient(135deg, ${toastBg}, rgba(13,18,32,0.95))`,
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              color: toastColor,
+              fontSize: 13,
+              fontWeight: 500,
+              whiteSpace: "nowrap",
+              animation: "toast-pop 0.2s cubic-bezier(0.2,0,0,1) both",
             }}
           >
-            <X size={12} />
-          </button>
-        </div>
-      )}
+            <ToastIcon size={14} aria-hidden="true" />
+            {currentToast.message}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                dismissToast();
+              }}
+              aria-label="Close"
+              style={{
+                marginLeft: 4,
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                opacity: 0.5,
+                lineHeight: 1,
+                color: "inherit",
+                padding: 2,
+                display: "flex",
+              }}
+            >
+              <X size={12} />
+            </button>
+          </div>
+        );
+      })()}
     </div>
   );
 }

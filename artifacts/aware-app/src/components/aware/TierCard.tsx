@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   XCircle,
+  Shield,
 } from "lucide-react";
 
 export interface TierEnv {
@@ -62,47 +63,76 @@ export function statusConfig(status: "healthy" | "degraded" | "critical") {
 function TrendBadge({ value }: { value: number }) {
   if (value > 0)
     return (
-      <span
-        style={{
-          color: "var(--proof-green)",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 2,
-          fontSize: 11,
-        }}
-      >
-        <TrendingUp size={12} />+{value}%
+      <span style={{ color: "var(--proof-green)", display: "inline-flex", alignItems: "center", gap: 2, fontSize: 10.5 }}>
+        <TrendingUp size={11} />+{value}%
       </span>
     );
   if (value < 0)
     return (
-      <span
-        style={{
-          color: "var(--proof-red)",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 2,
-          fontSize: 11,
-        }}
-      >
-        <TrendingDown size={12} />
-        {value}%
+      <span style={{ color: "var(--proof-red)", display: "inline-flex", alignItems: "center", gap: 2, fontSize: 10.5 }}>
+        <TrendingDown size={11} />{value}%
       </span>
     );
   return (
-    <span
-      style={{
-        color: "var(--proof-text-muted)",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 2,
-        fontSize: 11,
-      }}
-    >
-      <Minus size={12} />—
+    <span style={{ color: "var(--proof-text-muted)", display: "inline-flex", alignItems: "center", gap: 2, fontSize: 10.5 }}>
+      <Minus size={11} />—
     </span>
   );
 }
+
+/* SVG circular progress ring */
+function RingGauge({ pct, color, size = 64 }: { pct: number; color: string; size?: number }) {
+  const r = (size - 8) / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
+      {/* Track */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke="var(--proof-bar-track)"
+        strokeWidth={5}
+      />
+      {/* Progress */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={5}
+        strokeLinecap="round"
+        strokeDasharray={`${dash} ${circ}`}
+        strokeDashoffset={circ / 4}
+        style={{ transition: "stroke-dasharray 0.6s ease, stroke 0.4s ease" }}
+        filter={`drop-shadow(0 0 4px ${color}60)`}
+      />
+      {/* Center label */}
+      <text
+        x={size / 2}
+        y={size / 2 + 1}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill={color}
+        fontSize={pct >= 100 ? 13 : 14}
+        fontWeight={800}
+        fontFamily="var(--font-mono)"
+        letterSpacing="-1"
+      >
+        {pct}%
+      </text>
+    </svg>
+  );
+}
+
+const TIER_META: Record<string, { color: string; label: string }> = {
+  QA: { color: "var(--proof-blue)", label: "Quality Assurance" },
+  UAT: { color: "var(--proof-purple)", label: "User Acceptance" },
+  PROD: { color: "var(--proof-green)", label: "Production" },
+};
 
 export function TierCard({
   group,
@@ -115,153 +145,156 @@ export function TierCard({
 }) {
   const cfg = statusConfig(group.status);
   const { Icon } = cfg;
-
-  const TIER_COLORS: Record<string, string> = {
-    QA: "var(--proof-blue)",
-    UAT: "var(--proof-purple)",
-    PROD: "var(--proof-green)",
-  };
-  const tierColor = TIER_COLORS[group.tier] ?? "var(--proof-blue)";
+  const meta = TIER_META[group.tier] ?? { color: "var(--proof-blue)", label: group.tier };
+  const [hovered, setHovered] = React.useState(false);
 
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={`${group.tier} tier: ${group.avgPassRate}% avg pass rate, ${cfg.label}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         appearance: "none",
         textAlign: "left",
         width: "100%",
-        background: "var(--proof-surface)",
-        border: `1px solid var(--proof-border)`,
-        borderRadius: "var(--proof-radius-xl)",
+        background: hovered
+          ? `linear-gradient(145deg, var(--proof-surface-2) 0%, ${cfg.glow === "var(--proof-green-glow)" ? "rgba(34,211,160,0.06)" : cfg.glow === "rgba(245,158,11,0.20)" ? "rgba(245,158,11,0.06)" : "rgba(248,68,90,0.06)"} 100%)`
+          : `linear-gradient(145deg, var(--proof-surface) 0%, ${meta.color}06 100%)`,
+        border: `1px solid ${hovered ? cfg.border : "var(--proof-border)"}`,
+        borderRadius: 20,
         overflow: "hidden",
         cursor: "pointer",
-        transition:
-          "border-color var(--proof-transition), box-shadow var(--proof-transition), transform var(--proof-transition)",
-        boxShadow: "var(--proof-shadow-card)",
+        transition: "all 180ms cubic-bezier(0.2,0,0,1)",
+        boxShadow: hovered
+          ? `0 0 0 1px ${cfg.border}, 0 12px 40px rgba(0,0,0,0.55), 0 0 32px ${cfg.glow}`
+          : "0 0 0 1px rgba(99,130,178,0.1), 0 2px 12px rgba(0,0,0,0.4)",
+        transform: hovered ? "translateY(-3px) scale(1.005)" : "none",
         position: "relative",
         display: "flex",
         flexDirection: "column",
         padding: 0,
-        animation: `card-enter 0.35s cubic-bezier(0.2,0,0,1) ${120 + index * 80}ms both`,
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget;
-        el.style.borderColor = cfg.border;
-        el.style.boxShadow = `var(--proof-shadow-card-hover), 0 0 24px ${cfg.glow}`;
-        el.style.transform = "translateY(-2px)";
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget;
-        el.style.borderColor = "var(--proof-border)";
-        el.style.boxShadow = "var(--proof-shadow-card)";
-        el.style.transform = "";
-      }}
-      onMouseDown={(e) => {
-        e.currentTarget.style.transform = "translateY(0) scale(0.985)";
-      }}
-      onMouseUp={(e) => {
-        e.currentTarget.style.transform = "translateY(-2px)";
+        animation: `card-enter 0.4s cubic-bezier(0.2,0,0,1) ${120 + index * 80}ms both`,
       }}
     >
+      {/* Top gradient stripe — tier color → status color */}
       <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
-          height: 2,
-          background: `linear-gradient(90deg, ${tierColor}, ${cfg.color})`,
+          height: 3,
+          background: `linear-gradient(90deg, ${meta.color} 0%, ${cfg.color} 100%)`,
+          opacity: hovered ? 1 : 0.75,
+          transition: "opacity 180ms ease",
         }}
       />
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background: `radial-gradient(ellipse at 80% 0%, ${cfg.glow} 0%, transparent 55%)`,
-          opacity: 0.6,
-        }}
-      />
-      <div style={{ padding: "14px 16px 8px", position: "relative" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 8,
-                background: `${tierColor}18`,
-                border: `1px solid ${tierColor}30`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <span
-                style={{ fontSize: 11, fontWeight: 900, color: tierColor, letterSpacing: "-0.3px" }}
+
+      {/* Main header area */}
+      <div style={{ padding: "16px 18px 14px", position: "relative" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          {/* Left: tier badge + name + status pill */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              {/* Tier badge */}
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 10,
+                  background: `linear-gradient(135deg, ${meta.color}28 0%, ${meta.color}14 100%)`,
+                  border: `1px solid ${meta.color}35`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  boxShadow: `0 0 12px ${meta.color}18`,
+                }}
               >
-                {group.tier}
-              </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 900,
+                    color: meta.color,
+                    letterSpacing: "-0.5px",
+                  }}
+                >
+                  {group.tier}
+                </span>
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    color: "var(--proof-text)",
+                    letterSpacing: "-0.3px",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {meta.label}
+                </div>
+                <div style={{ marginTop: 3 }}>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                      padding: "2px 7px",
+                      borderRadius: 99,
+                      background: cfg.bg,
+                      border: `1px solid ${cfg.border}`,
+                      fontSize: 9.5,
+                      fontWeight: 700,
+                      color: cfg.color,
+                      letterSpacing: "0.3px",
+                    }}
+                  >
+                    <Icon size={9} />
+                    {cfg.label}
+                  </span>
+                </div>
+              </div>
             </div>
-            <span
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: "var(--proof-text)",
-                letterSpacing: "-0.2px",
-              }}
-            >
-              {group.tier === "QA"
-                ? "Quality Assurance"
-                : group.tier === "UAT"
-                  ? "User Acceptance"
-                  : "Production"}
-            </span>
           </div>
-          <span
+
+          {/* Right: circular gauge */}
+          <RingGauge pct={group.avgPassRate} color={cfg.color} size={64} />
+        </div>
+
+        {/* Full-width progress bar */}
+        <div
+          style={{
+            height: 4,
+            borderRadius: 99,
+            background: "var(--proof-bar-track)",
+            overflow: "hidden",
+            marginTop: 4,
+          }}
+        >
+          <div
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 3,
-              padding: "2px 8px",
-              borderRadius: "var(--proof-radius-full)",
-              background: cfg.bg,
-              border: `1px solid ${cfg.border}`,
-              fontSize: 10,
-              fontWeight: 700,
-              color: cfg.color,
-              letterSpacing: "0.1px",
+              width: `${group.avgPassRate}%`,
+              height: "100%",
+              background: `linear-gradient(90deg, ${meta.color}80, ${cfg.color})`,
+              borderRadius: 99,
+              transition: "width 0.6s ease",
+              boxShadow: group.avgPassRate >= 95 ? `0 0 6px ${cfg.glow}` : "none",
             }}
-          >
-            <Icon size={10} />
-            {cfg.label}
-          </span>
-        </div>
-        <div style={{ marginTop: 8, display: "flex", alignItems: "flex-end", gap: 8 }}>
-          <span className="proof-hero-number" style={{ fontSize: 30, color: cfg.bright }}>
-            {group.avgPassRate}%
-          </span>
-          <span style={{ fontSize: 10, color: "var(--proof-text-muted)", marginBottom: 3 }}>
-            avg pass rate
-          </span>
-        </div>
-        <div style={{ marginTop: 8 }}>
-          <div className="proof-progress-track" style={{ height: 5 }}>
-            <div
-              className="proof-progress-bar"
-              style={{
-                width: `${group.avgPassRate}%`,
-                background: `linear-gradient(90deg, ${cfg.color}, ${cfg.bright})`,
-                boxShadow: group.avgPassRate >= 95 ? `0 0 6px ${cfg.glow}` : "none",
-              }}
-            />
-          </div>
+          />
         </div>
       </div>
-      <div style={{ borderTop: "1px solid var(--proof-border)", marginTop: 4 }}>
+
+      {/* Environment rows */}
+      <div
+        style={{
+          borderTop: "1px solid var(--proof-border)",
+          background: "rgba(0,0,0,0.12)",
+        }}
+      >
         {group.envs.map((env, i) => {
           const envCfg = statusConfig(env.status);
           const networkLabel = env.label.split(" / ")[1] ?? env.label;
@@ -271,45 +304,62 @@ export function TierCard({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
-                padding: "8px 16px",
+                gap: 10,
+                padding: "9px 18px",
                 borderBottom:
                   i < group.envs.length - 1 ? "1px solid var(--proof-border-light)" : "none",
-                transition: "background var(--proof-transition-fast)",
+                transition: "background 100ms ease",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "var(--proof-hover-light)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "";
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--proof-hover-light)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = ""; }}
             >
+              {/* Env status dot */}
               <span
-                className="proof-dot"
                 style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
                   background: envCfg.color,
-                  boxShadow: env.status !== "healthy" ? `0 0 5px ${envCfg.color}` : undefined,
+                  flexShrink: 0,
+                  boxShadow: env.status !== "healthy" ? `0 0 6px ${envCfg.color}` : "none",
                 }}
               />
+
+              {/* Network label */}
               <span
                 style={{
                   fontSize: 11.5,
                   color: "var(--proof-text-secondary)",
                   flex: 0,
                   minWidth: 72,
+                  fontWeight: 500,
                 }}
               >
                 {networkLabel}
               </span>
-              <div className="proof-progress-track" style={{ flex: 1, height: 3 }}>
+
+              {/* Progress bar */}
+              <div
+                style={{
+                  flex: 1,
+                  height: 3,
+                  borderRadius: 99,
+                  background: "var(--proof-bar-track)",
+                  overflow: "hidden",
+                }}
+              >
                 <div
-                  className="proof-progress-bar"
                   style={{
                     width: `${env.passRate}%`,
+                    height: "100%",
                     background: envCfg.color,
+                    borderRadius: 99,
+                    transition: "width 0.4s ease",
                   }}
                 />
               </div>
+
+              {/* Pass rate */}
               <span
                 style={{
                   fontSize: 12,
@@ -323,6 +373,8 @@ export function TierCard({
               >
                 {env.passRate}%
               </span>
+
+              {/* Failures */}
               {env.failures > 0 && (
                 <span
                   style={{
@@ -331,12 +383,17 @@ export function TierCard({
                     display: "flex",
                     alignItems: "center",
                     gap: 2,
+                    background: "var(--proof-red-bg)",
+                    border: "1px solid var(--proof-red-border)",
+                    borderRadius: 6,
+                    padding: "1px 5px",
                   }}
                 >
-                  <XCircle size={12} />
+                  <XCircle size={9} />
                   {env.failures}
                 </span>
               )}
+
               <TrendBadge value={env.trend} />
             </div>
           );

@@ -1,15 +1,21 @@
 import React from "react";
 
 interface KpiCardProps {
-  total: number;
-  passRate: number;
-  failedRuns: number;
+  total?: number;
+  passRate?: number;
+  failedRuns?: number;
   chartColor: string;
 }
 
-export function KpiCard({ total, passRate, failedRuns, chartColor }: KpiCardProps) {
-  const displayTotal = total ?? "—";
-  const displayPassRate = passRate !== undefined && passRate !== null ? `${passRate}%` : "—%";
+export const KpiCard = React.memo(function KpiCard({
+  total,
+  passRate,
+  failedRuns,
+  chartColor,
+}: KpiCardProps) {
+  const displayTotal = total !== undefined && total !== null ? total : "—";
+  const hasPassRate = passRate !== undefined && passRate !== null;
+  const displayPassRate = hasPassRate ? `${passRate}%` : "—%";
   const displayFailedRuns = failedRuns ?? 0;
 
   return (
@@ -18,7 +24,13 @@ export function KpiCard({ total, passRate, failedRuns, chartColor }: KpiCardProp
         {displayTotal}
       </span>{" "}
       runs ·{" "}
-      <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: chartColor }}>
+      <span
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontWeight: 700,
+          color: hasPassRate ? chartColor : "var(--proof-text-muted)",
+        }}
+      >
         {displayPassRate}
       </span>{" "}
       avg ·{" "}
@@ -38,4 +50,4 @@ export function KpiCard({ total, passRate, failedRuns, chartColor }: KpiCardProp
       )}
     </span>
   );
-}
+});

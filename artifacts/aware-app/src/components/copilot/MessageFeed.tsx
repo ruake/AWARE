@@ -48,8 +48,13 @@ function MessageFeedInner({ messages, onRetry, onSend }: Props) {
     estimateSize: (index) => {
       const msg = messages[index];
       const base = 80;
-      const contentHeight = Math.min(600, Math.ceil(msg.content.length / 60) * 22);
-      const toolCardHeight = (msg.toolCalls?.length ?? 0) * 80;
+      const content = msg.content ?? "";
+      // Account for markdown formatting: code blocks are tall, tables have rows, plain text wraps
+      const codeBlocks = Math.floor(((content.match(/```/g) ?? []).length) / 2);
+      const tableRows = (content.match(/^\|/gm) ?? []).length;
+      const textLines = Math.ceil(content.length / 60);
+      const contentHeight = Math.min(900, codeBlocks * 140 + tableRows * 26 + textLines * 20);
+      const toolCardHeight = (msg.toolCalls?.length ?? 0) * 90;
       return base + contentHeight + toolCardHeight;
     },
     overscan: 4,

@@ -51,7 +51,7 @@ function messagesToApi(history: Message[]): ApiMessage[] {
           if (tc.result) {
             out.push({
               role: "tool",
-              content: JSON.stringify(tc.result.data).slice(0, 3000),
+              content: JSON.stringify(tc.result.data).slice(0, 12_000),
               tool_call_id: tc.id,
             });
           }
@@ -370,9 +370,24 @@ function executeNode(): AgentNode {
           if (result.tableData) ctx.tables.push(result.tableData);
 
           const resultJson = JSON.stringify(result.data);
+          const MAX_TOOL_CHARS = 12_000;
+          let toolContent: string;
+          if (resultJson.length <= MAX_TOOL_CHARS) {
+            toolContent = resultJson;
+          } else if (Array.isArray(result.data)) {
+            let safe = "[]";
+            for (let k = 0; k < (result.data as unknown[]).length; k++) {
+              const candidate = JSON.stringify((result.data as unknown[]).slice(0, k + 1));
+              if (candidate.length > MAX_TOOL_CHARS) break;
+              safe = candidate;
+            }
+            toolContent = safe;
+          } else {
+            toolContent = resultJson.slice(0, MAX_TOOL_CHARS);
+          }
           ctx.apiMessages.push({
             role: "tool",
-            content: resultJson.length > 4000 ? resultJson.slice(0, 4000) + "…" : resultJson,
+            content: toolContent,
             tool_call_id: tc.id,
           });
 
@@ -439,6 +454,7 @@ function synthesizeNode(): AgentNode {
         return { status: "completed", steps };
       }
 
+      const argBuffers = new Map<string, { name: string; rawArgs: string }>();
       let streamDone = false;
       const synthStep: SubAgentStep = {
         id: uid(),
@@ -463,16 +479,10 @@ function synthesizeNode(): AgentNode {
               ctx.onEvent({ type: "delta", content: delta.content });
             }
             if (delta.toolCallId) {
-              let args: Record<string, unknown> = {};
-              try {
-                args = JSON.parse(delta.toolCallArgsChunk ?? "{}");
-              } catch {
-                /* empty */
-              }
-              ctx.pendingToolCalls.push({
-                id: delta.toolCallId,
-                name: delta.toolCallName ?? "",
-                args,
+              const prev = argBuffers.get(delta.toolCallId) ?? { name: "", rawArgs: "" };
+              argBuffers.set(delta.toolCallId, {
+                name: delta.toolCallName ?? prev.name,
+                rawArgs: prev.rawArgs + (delta.toolCallArgsChunk ?? ""),
               });
             }
             if (delta.done) {
@@ -490,6 +500,19 @@ function synthesizeNode(): AgentNode {
             reject(err);
           });
       });
+
+      // Parse accumulated tool-call argument buffers after stream completes
+      for (const [id, { name, rawArgs }] of argBuffers) {
+        let args: Record<string, unknown> = {};
+        try {
+          args = JSON.parse(rawArgs || "{}");
+        } catch {
+          args = {};
+        }
+        if (!ctx.pendingToolCalls.find((tc) => tc.id === id)) {
+          ctx.pendingToolCalls.push({ id, name, args });
+        }
+      }
 
       synthStep.status = "completed";
       synthStep.detail = ctx.finalContent ? `${ctx.finalContent.length} chars` : "Empty";
@@ -529,7 +552,20 @@ function sessionCarveNode(): AgentNode {
         kept.unshift(rest[i]);
       }
 
-      ctx.apiMessages = sys ? [sys, ...kept] : kept;
+      // Never orphan an assistant tool_call without its matching tool result
+      const keptToolIds = new Set(
+        kept.filter((m) => m.role === "tool" && m.tool_call_id).map((m) => m.tool_call_id as string),
+      );
+      const safeKept = kept.filter((m) => {
+        if (m.role === "assistant" && (m as { tool_calls?: { id: string }[] }).tool_calls?.length) {
+          return (m as { tool_calls: { id: string }[] }).tool_calls.every((tc) =>
+            keptToolIds.has(tc.id),
+          );
+        }
+        return true;
+      });
+
+      ctx.apiMessages = sys ? [sys, ...safeKept] : safeKept;
 
       const saved = rest.length - kept.length;
       steps.push({

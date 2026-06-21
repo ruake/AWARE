@@ -95,7 +95,6 @@ export default function InputBar({
               : "Ask about tests, failures, flakiness, promotion status…"
           }
           rows={1}
-          disabled={busy}
           style={{
             flex: 1,
             resize: "none",
@@ -110,7 +109,8 @@ export default function InputBar({
             maxHeight: 160,
             overflowY: "auto",
             padding: "4px 0",
-            opacity: busy ? 0.5 : 1,
+            opacity: busy ? 0.6 : 1,
+            cursor: busy ? "default" : "text",
           }}
         />
         <button
