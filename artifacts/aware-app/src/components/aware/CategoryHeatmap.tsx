@@ -64,21 +64,15 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
     );
   }
 
-  const cellColor = (status: "PASS" | "FAIL" | "NONE", count: number) => {
-    if (status === "PASS") {
-      const intensity = Math.min(1, count / 10);
-      return `rgba(34,197,94,${0.1 + intensity * 0.6})`;
-    }
-    if (status === "FAIL") {
-      const intensity = Math.min(1, count / 5);
-      return `rgba(239,68,68,${0.1 + intensity * 0.6})`;
-    }
+  const cellColor = (status: "PASS" | "FAIL" | "NONE") => {
+    if (status === "PASS") return "var(--proof-green-bg)";
+    if (status === "FAIL") return "var(--proof-red-bg)";
     return "var(--proof-grey-bg)";
   };
 
   const borderColor = (status: "PASS" | "FAIL" | "NONE") => {
-    if (status === "PASS") return "rgba(34,197,94,0.3)";
-    if (status === "FAIL") return "rgba(239,68,68,0.3)";
+    if (status === "PASS") return "var(--proof-green-border)";
+    if (status === "FAIL") return "var(--proof-red-border)";
     return "var(--proof-border)";
   };
 
@@ -158,7 +152,7 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
                   style={{
                     padding: "6px 8px",
                     borderRadius: 5,
-                    background: cellColor(cell.status, cell.count),
+                    background: cellColor(cell.status),
                     border: `1px solid ${borderColor(cell.status)}`,
                     textAlign: "center",
                     fontWeight: 600,

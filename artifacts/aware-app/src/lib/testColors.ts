@@ -6,10 +6,10 @@ export const PRI_COLORS: Record<string, string> = {
 };
 
 export const PRI_BGS: Record<string, string> = {
-  P0: "rgba(239,68,68,0.12)",
-  P1: "rgba(234,179,8,0.12)",
-  P2: "rgba(59,130,246,0.12)",
-  P3: "rgba(154,160,166,0.08)",
+  P0: "var(--proof-red-bg)",
+  P1: "var(--proof-yellow-bg)",
+  P2: "var(--proof-blue-bg)",
+  P3: "var(--proof-subtle-bg)",
 };
 
 export const TYPE_COLORS: Record<string, string> = {
@@ -22,12 +22,12 @@ export const TYPE_COLORS: Record<string, string> = {
 };
 
 export const TYPE_BGS: Record<string, string> = {
-  web: "rgba(59,130,246,0.12)",
-  api: "rgba(34,197,94,0.12)",
-  http: "rgba(168,85,247,0.12)",
-  edgeworker: "rgba(245,158,11,0.12)",
-  transaction: "rgba(6,182,212,0.12)",
-  pytest: "rgba(234,179,8,0.12)",
+  web: "var(--proof-blue-bg)",
+  api: "var(--proof-green-bg)",
+  http: "var(--proof-purple-bg)",
+  edgeworker: "var(--proof-orange-bg)",
+  transaction: "var(--proof-cyan-bg)",
+  pytest: "var(--proof-yellow-bg)",
 };
 
 export const CAT_COLORS: Record<string, string> = {
@@ -45,17 +45,17 @@ export const CAT_COLORS: Record<string, string> = {
 };
 
 export const CAT_BGS: Record<string, string> = {
-  "geo-match": "rgba(59,130,246,0.1)",
-  caching: "rgba(168,85,247,0.1)",
-  security: "rgba(239,68,68,0.1)",
-  performance: "rgba(34,197,94,0.1)",
-  functional: "rgba(245,158,11,0.1)",
-  general: "rgba(154,160,166,0.1)",
-  network: "rgba(6,182,212,0.1)",
-  screenshots: "rgba(234,179,8,0.1)",
-  "url-health": "rgba(236,72,153,0.1)",
-  "edge-routing": "rgba(99,102,241,0.1)",
-  "http-protocol": "rgba(20,184,166,0.1)",
+  "geo-match": "var(--proof-blue-bg)",
+  caching: "var(--proof-purple-bg)",
+  security: "var(--proof-red-bg)",
+  performance: "var(--proof-green-bg)",
+  functional: "var(--proof-orange-bg)",
+  general: "var(--proof-subtle-bg)",
+  network: "var(--proof-cyan-bg)",
+  screenshots: "var(--proof-yellow-bg)",
+  "url-health": "var(--proof-pink-bg)",
+  "edge-routing": "var(--proof-indigo-bg)",
+  "http-protocol": "var(--proof-teal-bg)",
 };
 
 export const STATUS_COLORS: Record<string, string> = {
@@ -65,7 +65,7 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 export const STATUS_BGS: Record<string, string> = {
-  active: "rgba(34,197,94,0.12)",
-  disabled: "rgba(234,179,8,0.12)",
-  deprecated: "rgba(239,68,68,0.12)",
+  active: "var(--proof-green-bg)",
+  disabled: "var(--proof-yellow-bg)",
+  deprecated: "var(--proof-red-bg)",
 };

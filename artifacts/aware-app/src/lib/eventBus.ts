@@ -9,6 +9,7 @@ type AwareEventMap = {
   "data:phase": { phase: 1 | 2 | 3; done: boolean };
   "anomaly:detected": { runId: string; severity: string };
   "scheduler:updated": void;
+  "diffrows:loaded": { count: number };
 };
 
 export type EventName = keyof AwareEventMap;

@@ -26,10 +26,10 @@ function getIntensity(count: number, max: number): number {
 
 const LEVEL_COLORS = [
   "transparent",
-  "rgba(91,138,245,0.15)",
-  "rgba(91,138,245,0.35)",
-  "rgba(91,138,245,0.55)",
-  "rgba(91,138,245,0.8)",
+  "var(--proof-blue-bg)",
+  "rgba(59,130,246,0.28)",
+  "rgba(59,130,246,0.52)",
+  "var(--proof-blue)",
 ];
 
 const DAY_LABELS = ["Mon", "", "Wed", "", "Fri", "", ""];

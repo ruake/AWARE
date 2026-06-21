@@ -27,14 +27,16 @@ const TOOLTIP_STYLE = {
     color: "var(--proof-text)",
   },
 };
+
 const DEFAULT_COLORS = [
-  "#5b8af5",
-  "#f59e0b",
-  "#22c55e",
-  "#ef4444",
-  "#a855f7",
-  "#06b6d4",
-  "#ec4899",
+  "var(--proof-blue)",
+  "var(--proof-yellow)",
+  "var(--proof-green)",
+  "var(--proof-red)",
+  "var(--proof-purple)",
+  "var(--proof-teal)",
+  "var(--proof-pink)",
+  "var(--proof-orange)",
 ];
 
 interface ChartConfig {
@@ -109,16 +111,24 @@ export function MarkdownChart({ config }: { config: ChartConfig }) {
     </div>
   ) : null;
 
+  const sharedMargin = { top: 4, right: 12, left: -16, bottom: 0 };
+
   if (type === "linechart" || type === "line") {
     return (
       <div style={{ margin: "6px 0" }}>
         {titleEl}
         <ResponsiveContainer width="100%" height={h}>
-          <LineChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" />
-            <XAxis dataKey={headers[0]} tick={TICK_STYLE} />
-            <YAxis tick={TICK_STYLE} />
+          <LineChart data={chartData} margin={sharedMargin}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" vertical={false} />
+            <XAxis dataKey={headers[0]} tick={TICK_STYLE} tickLine={false} axisLine={false} />
+            <YAxis tick={TICK_STYLE} tickLine={false} axisLine={false} width={36} />
             <Tooltip {...TOOLTIP_STYLE} />
+            {yKeys.length > 1 && (
+              <Legend
+                iconSize={8}
+                wrapperStyle={{ fontSize: 10, color: "var(--proof-text-secondary)" }}
+              />
+            )}
             {yKeys.map((k, i) => (
               <Line
                 key={k}
@@ -128,6 +138,7 @@ export function MarkdownChart({ config }: { config: ChartConfig }) {
                 strokeWidth={2}
                 dot={(config.pointSize ?? 0) > 0 ? { r: config.pointSize } : false}
                 activeDot={{ r: 4 }}
+                isAnimationActive={false}
               />
             ))}
           </LineChart>
@@ -141,11 +152,17 @@ export function MarkdownChart({ config }: { config: ChartConfig }) {
       <div style={{ margin: "6px 0" }}>
         {titleEl}
         <ResponsiveContainer width="100%" height={h}>
-          <AreaChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" />
-            <XAxis dataKey={headers[0]} tick={TICK_STYLE} />
-            <YAxis tick={TICK_STYLE} />
+          <AreaChart data={chartData} margin={sharedMargin}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" vertical={false} />
+            <XAxis dataKey={headers[0]} tick={TICK_STYLE} tickLine={false} axisLine={false} />
+            <YAxis tick={TICK_STYLE} tickLine={false} axisLine={false} width={36} />
             <Tooltip {...TOOLTIP_STYLE} />
+            {yKeys.length > 1 && (
+              <Legend
+                iconSize={8}
+                wrapperStyle={{ fontSize: 10, color: "var(--proof-text-secondary)" }}
+              />
+            )}
             {yKeys.map((k, i) => (
               <Area
                 key={k}
@@ -153,9 +170,10 @@ export function MarkdownChart({ config }: { config: ChartConfig }) {
                 dataKey={k}
                 stroke={colors[i % colors.length]}
                 fill={colors[i % colors.length]}
-                fillOpacity={0.08}
+                fillOpacity={0.1}
                 strokeWidth={2}
                 dot={(config.pointSize ?? 0) > 0 ? { r: config.pointSize } : false}
+                isAnimationActive={false}
               />
             ))}
           </AreaChart>
@@ -165,23 +183,26 @@ export function MarkdownChart({ config }: { config: ChartConfig }) {
   }
 
   if (type === "barchart" || type === "bar") {
+    const barHeight = Math.max(h, rows.length * 28);
     return (
-      <div style={{ margin: "6px 0" }}>
+      <div style={{ margin: "6px 0", overflowY: barHeight > 300 ? "auto" : "visible", maxHeight: 300 }}>
         {titleEl}
-        <ResponsiveContainer width="100%" height={Math.max(h, rows.length * 28)}>
+        <ResponsiveContainer width="100%" height={barHeight}>
           <BarChart
             layout="vertical"
             data={chartData}
-            margin={{ top: 4, right: 8, left: 4, bottom: 0 }}
+            margin={{ top: 4, right: 12, left: 4, bottom: 0 }}
             barCategoryGap="20%"
           >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" horizontal={false} />
-            <XAxis type="number" tick={TICK_STYLE} />
+            <XAxis type="number" tick={TICK_STYLE} tickLine={false} axisLine={false} />
             <YAxis
               dataKey={headers[0]}
               type="category"
               width={90}
-              tick={{ ...TICK_STYLE, fontSize: 9 }}
+              tick={{ ...TICK_STYLE, fontSize: 10 }}
+              tickLine={false}
+              axisLine={false}
             />
             <Tooltip {...TOOLTIP_STYLE} />
             {yKeys.map((k, i) => (
@@ -191,6 +212,7 @@ export function MarkdownChart({ config }: { config: ChartConfig }) {
                 fill={colors[i % colors.length]}
                 radius={[0, 3, 3, 0]}
                 stackId={config.isStacked ? "stack" : undefined}
+                isAnimationActive={false}
               />
             ))}
           </BarChart>
@@ -223,6 +245,7 @@ export function MarkdownChart({ config }: { config: ChartConfig }) {
                 percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ""
               }
               labelLine
+              isAnimationActive={false}
             >
               {pieData.map((_, i) => (
                 <Cell key={i} fill={colors[i % colors.length]} />
@@ -245,11 +268,17 @@ export function MarkdownChart({ config }: { config: ChartConfig }) {
     <div style={{ margin: "6px 0" }}>
       {titleEl}
       <ResponsiveContainer width="100%" height={h}>
-        <BarChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" />
-          <XAxis dataKey={headers[0]} tick={TICK_STYLE} />
-          <YAxis tick={TICK_STYLE} />
+        <BarChart data={chartData} margin={sharedMargin}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" vertical={false} />
+          <XAxis dataKey={headers[0]} tick={TICK_STYLE} tickLine={false} axisLine={false} />
+          <YAxis tick={TICK_STYLE} tickLine={false} axisLine={false} width={36} />
           <Tooltip {...TOOLTIP_STYLE} />
+          {yKeys.length > 1 && (
+            <Legend
+              iconSize={8}
+              wrapperStyle={{ fontSize: 10, color: "var(--proof-text-secondary)" }}
+            />
+          )}
           {yKeys.map((k, i) => (
             <Bar
               key={k}
@@ -257,6 +286,7 @@ export function MarkdownChart({ config }: { config: ChartConfig }) {
               fill={colors[i % colors.length]}
               radius={[3, 3, 0, 0]}
               stackId={config.isStacked ? "stack" : undefined}
+              isAnimationActive={false}
             />
           ))}
         </BarChart>
