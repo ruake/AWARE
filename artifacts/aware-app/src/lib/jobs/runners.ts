@@ -35,6 +35,14 @@ export const RUNNER_DEFS: JobRunnerDef[] = [
     defaultSuiteId: "suite_performance",
   },
   {
+    id: "runner_selenium",
+    name: "Selenium",
+    type: "test-run",
+    description: "Cross-browser WebDriver tests via Selenium (compatibility, visual regression)",
+    icon: "globe",
+    defaultSuiteId: "suite_regression_qa",
+  },
+  {
     id: "runner_discovery",
     name: "Test Discovery",
     type: "discovery",

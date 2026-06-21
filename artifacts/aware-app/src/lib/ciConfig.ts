@@ -62,7 +62,7 @@ export function generateCiConfig(): CiConfig {
       const runners = [
         ...new Set(
           suiteTests.map((t) =>
-            t.testType === "pytest" ? "pytest" : t.testType === "web" ? "playwright" : "pytest",
+            t.testType === "pytest" || t.testType === "puppeteer" || t.testType === "selenium" ? "pytest" : t.testType === "web" ? "playwright" : "pytest",
           ),
         ),
       ];
