@@ -1,19 +1,19 @@
 [
   {
-    "id": "suite_continuous-20260621T065327",
+    "id": "suite_continuous-20260621T065407",
     "suite": "suite_continuous",
     "env": "QA",
     "envLabel": "QA / Staging",
     "tier": "QA",
     "network": "staging",
-    "started": "2026-06-21T06:53:27Z",
-    "duration": 4379,
+    "started": "2026-06-21T06:54:07Z",
+    "duration": 0,
     "passed": 0,
-    "failed": 2,
-    "total": 2,
+    "failed": 0,
+    "total": 0,
     "passPct": 0,
-    "failures": 2,
-    "runnerType": "pytest",
-    "ghRunId": "27896485854"
+    "failures": 0,
+    "runnerType": "playwright",
+    "ghRunId": "27896484328"
   }
 ]
