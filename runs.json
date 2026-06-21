@@ -1,19 +1,110 @@
 [
   {
-    "id": "suite_continuous-20260621T063010",
-    "suite": "suite_continuous",
-    "env": "QA",
-    "envLabel": "QA / Staging",
-    "tier": "QA",
-    "network": "staging",
-    "started": "2026-06-21T06:30:10Z",
-    "duration": 0,
-    "passed": 0,
-    "failed": 0,
-    "total": 0,
+    "id": "continuo_pyte_mqnf77bn_7f38",
+    "label": "Continuous — QA / Staging (Every 30min) — QA / Staging (pytest)",
+    "suiteId": "suite_continuous",
+    "envId": "qa_staging",
+    "status": "RUNNING",
+    "conditions": [
+      {
+        "type": "Dispatched",
+        "status": "True",
+        "reason": "WorkflowDispatched",
+        "message": "Dispatched via scheduler",
+        "lastTransitionTime": "2026-06-21T06:43:25.254Z"
+      },
+      {
+        "type": "WorkflowRunning",
+        "status": "True",
+        "reason": "InProgress",
+        "message": "Workflow is executing",
+        "lastTransitionTime": "2026-06-21T06:43:25.254Z"
+      },
+      {
+        "type": "Completed",
+        "status": "False",
+        "reason": "InProgress",
+        "message": "Awaiting completion",
+        "lastTransitionTime": "2026-06-21T06:43:25.254Z"
+      },
+      {
+        "type": "Passed",
+        "status": "Unknown",
+        "reason": "Pending",
+        "message": "Not yet determined",
+        "lastTransitionTime": "2026-06-21T06:43:25.254Z"
+      },
+      {
+        "type": "Reconciled",
+        "status": "True",
+        "reason": "Reconciled",
+        "message": "Initial state set",
+        "lastTransitionTime": "2026-06-21T06:43:25.254Z"
+      }
+    ],
     "passPct": 0,
     "failures": 0,
-    "runnerType": "playwright",
-    "ghRunId": "27895977640"
+    "duration": "—",
+    "durationMs": 0,
+    "started": "2026-06-21T06:43:17.260Z",
+    "build": "fbc8105",
+    "rev": "fbc8105863bf98de72913b8811537a2bffafd2b2",
+    "env": "QA",
+    "network": "staging",
+    "workflowRunId": null
+  },
+  {
+    "id": "continuo_play_mqnf743r_6crc",
+    "label": "Continuous — QA / Staging (Every 30min) — QA / Staging (playwright)",
+    "suiteId": "suite_continuous",
+    "envId": "qa_staging",
+    "status": "RUNNING",
+    "conditions": [
+      {
+        "type": "Dispatched",
+        "status": "True",
+        "reason": "WorkflowDispatched",
+        "message": "Dispatched via scheduler",
+        "lastTransitionTime": "2026-06-21T06:43:21.081Z"
+      },
+      {
+        "type": "WorkflowRunning",
+        "status": "True",
+        "reason": "InProgress",
+        "message": "Workflow is executing",
+        "lastTransitionTime": "2026-06-21T06:43:21.081Z"
+      },
+      {
+        "type": "Completed",
+        "status": "False",
+        "reason": "InProgress",
+        "message": "Awaiting completion",
+        "lastTransitionTime": "2026-06-21T06:43:21.081Z"
+      },
+      {
+        "type": "Passed",
+        "status": "Unknown",
+        "reason": "Pending",
+        "message": "Not yet determined",
+        "lastTransitionTime": "2026-06-21T06:43:21.081Z"
+      },
+      {
+        "type": "Reconciled",
+        "status": "True",
+        "reason": "Reconciled",
+        "message": "Initial state set",
+        "lastTransitionTime": "2026-06-21T06:43:21.081Z"
+      }
+    ],
+    "passPct": 0,
+    "failures": 0,
+    "duration": "—",
+    "durationMs": 0,
+    "started": "2026-06-21T06:43:17.260Z",
+    "build": "fbc8105",
+    "rev": "fbc8105863bf98de72913b8811537a2bffafd2b2",
+    "env": "QA",
+    "network": "staging",
+    "workflowRunId": null
   }
 ]
