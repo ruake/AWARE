@@ -18,6 +18,7 @@ interface PageTemplateProps {
   isEmpty?: boolean;
   emptyMessage?: string;
   emptyAction?: React.ReactNode;
+  topContent?: React.ReactNode;
   error?: Error | null;
   errorLabel?: string;
   sidePanel?: React.ReactNode;
@@ -43,6 +44,7 @@ export function PageTemplate({
   isEmpty = false,
   emptyMessage,
   emptyAction,
+  topContent,
   error = null,
   errorLabel,
   sidePanel,
@@ -89,6 +91,18 @@ export function PageTemplate({
           }}
         >
           {filters}
+        </div>
+      )}
+
+      {topContent && (
+        <div
+          style={{
+            borderBottom: "1px solid var(--proof-border)",
+            flexShrink: 0,
+            background: "var(--proof-surface)",
+          }}
+        >
+          {topContent}
         </div>
       )}
 

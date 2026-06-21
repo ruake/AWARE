@@ -118,7 +118,7 @@ export function StatsDashboard({
         </div>
       </div>
       <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
-        <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
+        <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 200 }}>
           <div
             style={{
               fontSize: 11,
@@ -129,12 +129,16 @@ export function StatsDashboard({
           >
             By Status
           </div>
-          {hasStatusData ? (
+          {!hasStatusData && !stats.total ? (
+            <div style={{ height: 60, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "var(--proof-text-muted)" }}>
+              No data available
+            </div>
+          ) : hasStatusData ? (
             <ResponsiveContainer width="100%" height={60}>
               <BarChart data={statusData} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
                 <XAxis dataKey="status" tick={TICK_STYLE} axisLine={false} tickLine={false} />
                 <YAxis hide domain={[0, "auto"]} />
-                <Tooltip {...TOOLTIP_STYLE} cursor={{ fill: "var(--proof-hover-light)" }} />
+                <Tooltip {...TOOLTIP_STYLE} cursor={{ fill: "var(--proof-subtle-bg)" }} />
                 <Bar
                   dataKey="count"
                   radius={[3, 3, 0, 0]}
@@ -156,7 +160,7 @@ export function StatsDashboard({
             </div>
           )}
         </div>
-        <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
+        <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 200 }}>
           <div
             style={{
               fontSize: 11,
@@ -167,12 +171,16 @@ export function StatsDashboard({
           >
             By Priority
           </div>
-          {hasPriorityData ? (
+          {!hasPriorityData && !stats.total ? (
+            <div style={{ height: 60, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "var(--proof-text-muted)" }}>
+              No data available
+            </div>
+          ) : hasPriorityData ? (
             <ResponsiveContainer width="100%" height={60}>
               <BarChart data={priorityData} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
                 <XAxis dataKey="priority" tick={TICK_STYLE} axisLine={false} tickLine={false} />
                 <YAxis hide domain={[0, "auto"]} />
-                <Tooltip {...TOOLTIP_STYLE} cursor={{ fill: "var(--proof-hover-light)" }} />
+                <Tooltip {...TOOLTIP_STYLE} cursor={{ fill: "var(--proof-subtle-bg)" }} />
                 <Bar
                   dataKey="count"
                   fill="var(--proof-blue)"
@@ -188,7 +196,7 @@ export function StatsDashboard({
             </div>
           )}
         </div>
-        <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
+        <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 200 }}>
           <div
             style={{
               fontSize: 11,
@@ -199,7 +207,11 @@ export function StatsDashboard({
           >
             By Category
           </div>
-          {hasCategoryData ? (
+          {!hasCategoryData && !stats.total ? (
+            <div style={{ height: 80, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "var(--proof-text-muted)" }}>
+              No data available
+            </div>
+          ) : hasCategoryData ? (
             <ResponsiveContainer width="100%" height={80}>
               <PieChart>
                 <Pie
@@ -211,6 +223,7 @@ export function StatsDashboard({
                   outerRadius={35}
                   innerRadius={14}
                   paddingAngle={2}
+                  label={({ percent, name }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 >
                   {catPieData.map((_, i) => (
                     <Cell key={i} fill={catColors[i % catColors.length]} />

@@ -34,19 +34,30 @@ export function RunRibbonCard({
     const ts = run?.started ?? nextDue;
     if (!ts) return "—";
     const diffMs = now - new Date(ts).getTime();
-    const mins = Math.floor(diffMs / 60_000);
-    if (mins < 0) {
-      const futureMins = Math.floor(-diffMs / 60_000);
-      if (futureMins < 60) return `in ${futureMins}m`;
-      const futureHrs = Math.floor(futureMins / 60);
-      if (futureHrs < 24) return `in ${futureHrs}h`;
-      return `in ${Math.floor(futureHrs / 24)}d`;
+    
+    // Future dated (nextDue)
+    if (diffMs < 0) {
+      const futureMs = -diffMs;
+      const days = Math.floor(futureMs / 86400000);
+      if (days > 0) return `In ${days}d`;
+      const hrs = Math.floor(futureMs / 3600000);
+      if (hrs > 0) return `In ${hrs}h`;
+      const mins = Math.floor(futureMs / 60000);
+      return `In ${mins}m`;
     }
+
+    // Past dated
+    const mins = Math.floor(diffMs / 60_000);
     if (mins < 1) return "just now";
     if (mins < 60) return `${mins}m ago`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
+    if (hrs < 24) {
+      if (!run && nextDue) return "Queued"; // If it's nextDue and in the past < 1 day
+      return `${hrs}h ago`;
+    }
+    const days = Math.floor(hrs / 24);
+    if (!run && nextDue && days >= 1) return `Overdue ${days}d`;
+    return `${days}d ago`;
   }, [run?.started, nextDue, now]);
 
   const passColor = run

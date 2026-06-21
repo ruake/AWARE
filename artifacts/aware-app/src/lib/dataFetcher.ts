@@ -1,23 +1,31 @@
 import type { Run } from "./types";
 
-const REPO_OWNER = import.meta.env.VITE_DATA_REPO_OWNER ?? "ruake";
-const REPO_NAME = import.meta.env.VITE_DATA_REPO_NAME ?? "AWARE";
-const DATA_BRANCH = import.meta.env.VITE_DATA_BRANCH ?? "data";
-
-function rawUrl(path: string): string {
-  return `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${DATA_BRANCH}/${path}`;
-}
-
-function devUrl(path: string): string {
+// Static data URL — always resolves relative to the app's base URL.
+// The data/ directory is committed under public/ and co-deployed with the SPA,
+// so this works identically in dev (localhost) and in production (GitHub Pages).
+//
+// If you want to pull live data from a separate GitHub branch instead, set:
+//   VITE_DATA_SOURCE=raw
+//   VITE_DATA_REPO_OWNER, VITE_DATA_REPO_NAME, VITE_DATA_BRANCH
+function staticUrl(path: string): string {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   return `${base}/data/${path}`;
 }
 
+function rawUrl(path: string): string {
+  const owner = import.meta.env.VITE_DATA_REPO_OWNER ?? "ruake";
+  const repo = import.meta.env.VITE_DATA_REPO_NAME ?? "AWARE";
+  const branch = import.meta.env.VITE_DATA_BRANCH ?? "data";
+  return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
+}
+
 export function dataUrl(path: string): string {
-  if (import.meta.env.DEV) {
-    return devUrl(path);
+  // Use raw GitHub content only when explicitly opted in.
+  // Default (and correct for GitHub Pages) is to use the co-deployed static files.
+  if (import.meta.env.VITE_DATA_SOURCE === "raw") {
+    return rawUrl(path);
   }
-  return rawUrl(path);
+  return staticUrl(path);
 }
 
 export interface FetchJsonOptions<T> {

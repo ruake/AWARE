@@ -74,6 +74,8 @@ interface TestFiltersProps {
   onClearSuite: () => void;
   typeCounts: Record<string, number>;
   categoryCounts: Record<string, number>;
+  statusCounts: Record<string, number>;
+  priorityCounts: Record<string, number>;
   filteredCount: number;
   totalCount: number;
 }
@@ -94,6 +96,8 @@ export function TestFilters({
   onClearSuite,
   typeCounts,
   categoryCounts,
+  statusCounts,
+  priorityCounts,
   filteredCount,
   totalCount,
 }: TestFiltersProps) {
@@ -178,10 +182,15 @@ export function TestFilters({
         >
           {TEST_TYPES.map((t) => (
             <option key={t} value={t}>
-              {t}{t !== "All" ? ` (${typeCounts[t] ?? 0})` : ""}
+              {t}{t !== "All" && typeCounts[t] !== undefined ? ` (${typeCounts[t]})` : ""}
             </option>
           ))}
         </select>
+        {testType !== "All" && (
+          <span style={{ fontSize: 10, color: "var(--proof-blue)", fontWeight: 600 }}>
+            {testType} ({filteredCount})
+          </span>
+        )}
       </div>
 
       {/* Category filter */}
@@ -199,10 +208,15 @@ export function TestFilters({
         >
           {TEST_CATEGORIES.map((c) => (
             <option key={c} value={c}>
-              {c}{c !== "All" ? ` (${categoryCounts[c] ?? 0})` : ""}
+              {c}{c !== "All" && categoryCounts[c] !== undefined ? ` (${categoryCounts[c]})` : ""}
             </option>
           ))}
         </select>
+        {category !== "All" && (
+          <span style={{ fontSize: 10, color: "var(--proof-blue)", fontWeight: 600 }}>
+            {category} ({filteredCount})
+          </span>
+        )}
       </div>
 
       {/* Status filter */}
@@ -220,10 +234,15 @@ export function TestFilters({
         >
           {STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {s}{s !== "All" && statusCounts[s] !== undefined ? ` (${statusCounts[s]})` : ""}
             </option>
           ))}
         </select>
+        {status !== "All" && (
+          <span style={{ fontSize: 10, color: "var(--proof-blue)", fontWeight: 600 }}>
+            {status} ({filteredCount})
+          </span>
+        )}
       </div>
 
       {/* Priority filter */}
@@ -241,10 +260,15 @@ export function TestFilters({
         >
           {PRIORITIES.map((p) => (
             <option key={p} value={p}>
-              {p}
+              {p}{p !== "All" && priorityCounts[p] !== undefined ? ` (${priorityCounts[p]})` : ""}
             </option>
           ))}
         </select>
+        {priority !== "All" && (
+          <span style={{ fontSize: 10, color: "var(--proof-blue)", fontWeight: 600 }}>
+            {priority} ({filteredCount})
+          </span>
+        )}
       </div>
 
       {/* Active suite chip */}

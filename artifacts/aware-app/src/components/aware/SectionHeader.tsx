@@ -4,10 +4,11 @@ interface SectionHeaderProps {
   title: string;
   subtitle?: string;
   actions?: React.ReactNode;
+  icon?: React.ReactNode;
   children?: React.ReactNode;
 }
 
-export function SectionHeader({ title, subtitle, actions, children }: SectionHeaderProps) {
+export function SectionHeader({ title, subtitle, actions, icon, children }: SectionHeaderProps) {
   return (
     <div
       style={{
@@ -18,13 +19,16 @@ export function SectionHeader({ title, subtitle, actions, children }: SectionHea
         gap: 12,
       }}
     >
-      <div>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)" }}>{title}</h1>
-        {subtitle && (
-          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 3 }}>
-            {subtitle}
-          </p>
-        )}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {icon}
+        <div>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)" }}>{title}</h1>
+          {subtitle && (
+            <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 3 }}>
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
       <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
         {actions}

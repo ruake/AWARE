@@ -8,6 +8,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  ReferenceLine,
+  ReferenceArea,
 } from "recharts";
 import { TrendingUp, Activity, Clock, Percent } from "lucide-react";
 import type { TestRunPoint } from "@/lib/types";
@@ -44,14 +46,24 @@ export const TrendChart = React.memo(function TrendChart({
     return sortedHistory.map((h, i) => {
       const val = h.status === "PASS" ? 100 : 0;
       sum += val;
+      const prevVal = i > 0 ? (sortedHistory[i - 1].status === "PASS" ? 100 : 0) : val;
+      const isAnomaly = i > 0 && prevVal - val >= 10;
+
       return {
         label: `#${i + 1}`,
         passRate: val,
         rollingAvg: Math.round(sum / (i + 1)),
         runId: h.runId,
+        date: h.date,
+        isAnomaly,
       };
     });
   }, [sortedHistory]);
+
+  const anomalies = React.useMemo(
+    () => chartData.filter((d) => d.isAnomaly),
+    [chartData],
+  );
 
   if (history.length === 0) {
     return (
@@ -108,7 +120,7 @@ export const TrendChart = React.memo(function TrendChart({
                 tick={{ fontSize: 10, fill: "var(--proof-text-muted)" }}
                 tickLine={false}
                 axisLine={false}
-                interval="preserveStartEnd"
+                interval={chartData.length > 10 ? Math.ceil(chartData.length / 10) : "preserveStartEnd"}
                 minTickGap={24}
               />
               <YAxis
@@ -122,10 +134,12 @@ export const TrendChart = React.memo(function TrendChart({
               <Tooltip
                 contentStyle={TOOLTIP_STYLE}
                 labelStyle={{ color: "var(--proof-text-muted)", fontSize: 10, marginBottom: 4 }}
-                formatter={(v: number, name: string) => [
-                  `${v}%`,
-                  name === "passRate" ? "Pass Rate" : "Rolling Avg",
-                ]}
+                formatter={(v: number, name: string, entry: any) => {
+                  const label = name === "passRate" ? "Pass Rate" : "Rolling Avg";
+                  const runInfo = entry.payload.runId ? ` (Run: ${entry.payload.runId})` : '';
+                  const dateInfo = entry.payload.date ? ` on ${entry.payload.date}` : '';
+                  return [`${v}%`, `${label}${runInfo}${dateInfo}`];
+                }}
               />
               <Legend
                 iconType="line"
@@ -133,6 +147,16 @@ export const TrendChart = React.memo(function TrendChart({
                 wrapperStyle={{ fontSize: 10, paddingTop: 2, color: "var(--proof-text-secondary)" }}
                 formatter={(value: string) => (value === "passRate" ? "Pass Rate" : "Rolling Avg")}
               />
+              <ReferenceArea y1={0} y2={95} fill="var(--proof-red)" fillOpacity={0.04} ifOverflow="visible" />
+              {anomalies.map((anom, idx) => (
+                <ReferenceLine
+                  key={idx}
+                  x={anom.label}
+                  stroke="var(--proof-red)"
+                  strokeDasharray="3 3"
+                  label={{ value: "⚠", position: "top", fill: "var(--proof-red)", fontSize: 14 }}
+                />
+              ))}
               <Area
                 type="monotone"
                 dataKey="passRate"

@@ -17,6 +17,8 @@ type StatusType =
 interface StatusBadgeProps {
   status: StatusType | string;
   label?: string;
+  icon?: React.ReactNode;
+  size?: "xs" | "sm" | "md";
 }
 
 const STATUS_MAP: Record<string, string> = {
@@ -29,7 +31,7 @@ const STATUS_MAP: Record<string, string> = {
   PARTIAL: "proof-badge-partial",
   ERROR: "proof-badge-error",
   PENDING: "proof-badge-pending",
-  TIMEOUT: "proof-badge-error",
+  TIMEOUT: "proof-badge-timeout",
   CANCELLED: "proof-badge-skip",
   DISABLED: "proof-badge-skip",
 };
@@ -49,17 +51,47 @@ const STATUS_DISPLAY: Record<string, string> = {
   DISABLED: "Disabled",
 };
 
-export const StatusBadge = React.memo(function StatusBadge({ status, label }: StatusBadgeProps) {
+export const StatusBadge = React.memo(function StatusBadge({
+  status,
+  label,
+  icon,
+  size = "sm",
+}: StatusBadgeProps) {
   const key = String(status).toUpperCase();
   const cls = STATUS_MAP[key] ?? "proof-badge-skip";
   const display = label ?? STATUS_DISPLAY[key] ?? status;
+
+  const sizeStyles: Record<string, React.CSSProperties> = {
+    xs: { fontSize: 9, padding: "1px 4px" },
+    sm: { fontSize: 11, padding: "2px 6px" },
+    md: { fontSize: 12, padding: "3px 8px" },
+  };
+
   return (
     <span
       className={`proof-badge ${cls}`}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        ...sizeStyles[size],
+      }}
       aria-label={display}
       aria-live="polite"
       aria-atomic="true"
     >
+      {key === "RUNNING" && (
+        <span
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: "currentColor",
+            marginRight: 4,
+            animation: "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+          }}
+        />
+      )}
+      {icon && <span style={{ marginRight: 4, display: "flex", alignItems: "center" }}>{icon}</span>}
       {display}
     </span>
   );

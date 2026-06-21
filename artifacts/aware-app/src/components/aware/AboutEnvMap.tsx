@@ -7,25 +7,25 @@ export function AboutEnvMap() {
     <AboutSection
       color="var(--proof-green)"
       title="Environment Map"
-      glow="0 0 8px rgba(34,197,94,0.4)"
+      glow="var(--proof-green-glow)"
     >
       <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
         {[
           {
             tier: "QA",
-            color: "#22c55e",
+            color: "var(--proof-green)",
             desc: "First gate — daily Playwright + pytest",
             envs: ["QA / Staging", "QA / Production"],
           },
           {
             tier: "UAT",
-            color: "#f59e0b",
+            color: "var(--proof-yellow)",
             desc: "Stakeholder acceptance environment",
             envs: ["UAT / Staging", "UAT / Production"],
           },
           {
             tier: "PROD",
-            color: "#ef4444",
+            color: "var(--proof-red)",
             desc: "Live edge — Akamai property active",
             envs: ["PROD / Staging", "PROD / Production"],
           },

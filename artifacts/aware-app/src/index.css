@@ -32,7 +32,7 @@
   --proof-green-bg: rgba(34, 211, 160, 0.09);
   --proof-green-bg-strong: rgba(34, 211, 160, 0.16);
   --proof-green-border: rgba(34, 211, 160, 0.28);
-  --proof-green-glow: rgba(34, 211, 160, 0.3);
+  --proof-green-glow: rgba(34, 211, 160, 0.25);
 
   /* ── Danger / failure ───────────────────────────────────── */
   --proof-red: #f8445a;
@@ -62,15 +62,19 @@
   --proof-purple-border: rgba(167, 139, 250, 0.28);
   --proof-purple-glow: rgba(167, 139, 250, 0.2);
   --proof-cyan-border: rgba(34, 211, 160, 0.28);
+  --proof-pink-border: rgba(244, 114, 182, 0.28);
   --proof-indigo: #818cf8;
   --proof-indigo-bright: #a5b4fc;
   --proof-indigo-bg: rgba(129, 140, 248, 0.1);
+  --proof-indigo-border: rgba(129, 140, 248, 0.28);
   --proof-pink: #f472b6;
   --proof-pink-bright: #f9a8d4;
   --proof-pink-bg: rgba(244, 114, 182, 0.1);
+  --proof-pink-border: rgba(244, 114, 182, 0.28);
   --proof-teal: #2dd4bf;
   --proof-teal-bright: #5eead4;
   --proof-teal-bg: rgba(45, 212, 191, 0.1);
+  --proof-teal-border: rgba(45, 212, 191, 0.28);
 
   /* ── Surfaces — blue-tinted deep dark ───────────────────── */
   --proof-bg: #080c14;
@@ -173,6 +177,8 @@
   --proof-status-bar-height: 26px;
   --proof-activity-bar-width: 64px;
   --proof-sidebar-width: 252px;
+  --proof-green-glow: rgba(34, 211, 160, 0.25);
+  --proof-blue-glow: rgba(59, 130, 246, 0.22);
 }
 
 /* ── Light mode overrides ──────────────────────────────────── */
@@ -254,12 +260,15 @@ html.light {
   --proof-indigo: #4f46e5;
   --proof-indigo-bright: #6366f1;
   --proof-indigo-bg: rgba(79, 70, 229, 0.09);
+  --proof-indigo-border: rgba(79, 70, 229, 0.28);
   --proof-pink: #db2777;
   --proof-pink-bright: #ec4899;
   --proof-pink-bg: rgba(219, 39, 119, 0.09);
+  --proof-pink-border: rgba(219, 39, 119, 0.28);
   --proof-teal: #0f766e;
   --proof-teal-bright: #14b8a6;
   --proof-teal-bg: rgba(15, 118, 110, 0.09);
+  --proof-teal-border: rgba(15, 118, 110, 0.28);
 
   --proof-orange: #ea6c0a;
   --proof-orange-bright: #f97316;
@@ -278,8 +287,8 @@ html.light {
   --proof-red-border: rgba(220, 38, 38, 0.28);
   --proof-yellow-border: rgba(245, 158, 11, 0.28);
 
-  --proof-blue-glow: rgba(37, 99, 235, 0.3);
-  --proof-green-glow: rgba(16, 185, 129, 0.25);
+  --proof-blue-glow: rgba(37, 99, 235, 0.2);
+  --proof-green-glow: rgba(16, 185, 129, 0.2);
   --proof-red-glow: rgba(220, 38, 38, 0.25);
   --proof-yellow-glow: rgba(245, 158, 11, 0.2);
 
@@ -287,6 +296,9 @@ html.light {
   --proof-shadow-glow-green:
     0 0 0 1px var(--proof-green-border), 0 4px 20px var(--proof-green-glow);
   --proof-shadow-glow-red: 0 0 0 1px var(--proof-red-border), 0 4px 20px var(--proof-red-glow);
+
+  --proof-green-glow: rgba(16, 185, 129, 0.2);
+  --proof-blue-glow: rgba(37, 99, 235, 0.2);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -602,6 +614,11 @@ a:hover {
   color: var(--proof-yellow);
   background: var(--proof-yellow-bg);
 }
+.proof-badge-timeout {
+  background: var(--proof-red-bg);
+  color: var(--proof-red);
+  border: 1px solid var(--proof-red-border);
+}
 
 /* ═══════════════════════════════════════════════════════════════════
    STATUS DOT
@@ -888,7 +905,7 @@ a:hover {
 @keyframes slide-down {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
@@ -954,7 +971,7 @@ a:hover {
 @keyframes scale-in {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.94);
   }
   to {
     opacity: 1;
@@ -1040,6 +1057,23 @@ a:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.proof-focus-ring:focus-visible {
+  outline: 2px solid var(--proof-blue);
+  outline-offset: 2px;
+  border-radius: var(--proof-radius);
+}
+.proof-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--proof-subtle-bg);
+  border: 1px solid var(--proof-border);
+  color: var(--proof-text-secondary);
 }
 .font-mono {
   font-family: var(--font-mono);
@@ -1177,9 +1211,7 @@ a:hover {
    TABLE ENHANCEMENTS
    ═══════════════════════════════════════════════════════════════════ */
 .proof-table tbody tr {
-  transition:
-    background var(--proof-transition-fast),
-    box-shadow var(--proof-transition-fast);
+  transition: background 0.1s ease;
 }
 .proof-table tbody tr:hover {
   background: var(--proof-hover) !important;

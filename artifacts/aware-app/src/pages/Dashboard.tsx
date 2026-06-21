@@ -258,6 +258,9 @@ export default function Dashboard() {
         ? "var(--proof-yellow)"
         : "var(--proof-red)";
 
+  // ── Hero KPI row ───────────────────────────────────────
+  const lastSynced = React.useMemo(() => new Date().toLocaleTimeString(), []);
+
   if (filteredRuns.length === 0 || init.loading) {
     return (
       <main
@@ -444,7 +447,7 @@ export default function Dashboard() {
           index={1}
         />
         <RunRibbonCard
-          label="Next Scheduled"
+          label="Upcoming"
           nextDue={nextScheduled?.nextDue}
           icon={<Calendar size={14} style={{ color: "var(--proof-blue)" }} />}
           accent="var(--proof-blue)"
@@ -497,7 +500,12 @@ export default function Dashboard() {
                 flexShrink: 0,
               }}
             />
-            <span className="proof-section-title">Pass Rate Trend</span>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>Pass Rate Trend</div>
+            {kpis.regressions > 0 && (
+              <span className="proof-badge" style={{ background: 'var(--proof-red-bg)', color: 'var(--proof-red)', border: '1px solid var(--proof-red-border)', fontSize: 10 }}>
+                {kpis.regressions} {kpis.regressions === 1 ? 'anomaly' : 'anomalies'} detected
+              </span>
+            )}
             <span className="proof-badge proof-badge-neutral" style={{ fontSize: 10 }}>
               14 days
             </span>
@@ -514,117 +522,135 @@ export default function Dashboard() {
         {/* Chart fills remaining height */}
         <div
           className="proof-chart-area"
-          style={{ flex: 1, minHeight: 0, padding: "12px 8px 8px" }}
+          style={{ flex: 1, minHeight: 0, padding: "12px 8px 8px", position: 'relative' }}
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 8, right: 16, left: 4, bottom: 4 }}>
-              <defs>
-                <linearGradient id="prGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={chartColor} stopOpacity={0.4} />
-                  <stop offset="40%" stopColor={chartColor} stopOpacity={0.15} />
-                  <stop offset="100%" stopColor={chartColor} stopOpacity={0.02} />
-                </linearGradient>
-                <filter id="lineGlow" x="-20%" y="-30%" width="140%" height="160%">
-                  <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-              </defs>
-              <CartesianGrid strokeDasharray="4 6" stroke="var(--proof-border)" vertical={false} />
-              <XAxis
-                dataKey="label"
-                tick={
-                  {
+          {chartData.length === 0 ? (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              color: 'var(--proof-text-muted)'
+            }}>
+              <Activity size={24} style={{ opacity: 0.5 }} />
+              <div style={{ fontSize: 12 }}>No run data for selected filters</div>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 8, right: 16, left: 4, bottom: 4 }}>
+                <defs>
+                  <linearGradient id="prGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={chartColor} stopOpacity={0.4} />
+                    <stop offset="40%" stopColor={chartColor} stopOpacity={0} />
+                  </linearGradient>
+                  <filter id="lineGlow" x="-20%" y="-30%" width="140%" height="160%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={
+                    {
+                      fontSize: 10,
+                      fill: "var(--proof-text-muted)",
+                    } as React.SVGProps<SVGTextElement>
+                  }
+                  tickLine={false}
+                  axisLine={false}
+                  interval="preserveStartEnd"
+                  minTickGap={40}
+                />
+                <YAxis
+                  domain={[
+                    Math.max(
+                      0,
+                      Math.floor(((Math.min(...chartData.map((d) => d.passRate)) || 80) - 5) / 5) * 5,
+                    ),
+                    100,
+                  ]}
+                  tick={
+                    {
+                      fontSize: 10,
+                      fill: "var(--proof-text-muted)",
+                    } as React.SVGProps<SVGTextElement>
+                  }
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v: number) => `${v}%`}
+                />
+                {/* Danger zone — visible */}
+                <ReferenceArea
+                  y1={0}
+                  y2={80}
+                  fill="var(--proof-red)"
+                  fillOpacity={0.07}
+                  ifOverflow="extendDomain"
+                />
+                <ReferenceArea
+                  y1={80}
+                  y2={95}
+                  fill="var(--proof-yellow)"
+                  fillOpacity={0.04}
+                  ifOverflow="extendDomain"
+                />
+                {/* Thresholds — visible labels */}
+                <ReferenceLine
+                  y={80}
+                  stroke="var(--proof-yellow)"
+                  strokeDasharray="4 4"
+                  strokeOpacity={0.4}
+                  label={{
+                    value: "80%",
                     fontSize: 10,
-                    fill: "var(--proof-text-muted)",
-                  } as React.SVGProps<SVGTextElement>
-                }
-                tickLine={false}
-                axisLine={false}
-                interval="preserveStartEnd"
-                minTickGap={40}
-              />
-              <YAxis
-                domain={[
-                  Math.max(
-                    0,
-                    Math.floor(((Math.min(...chartData.map((d) => d.passRate)) || 80) - 5) / 5) * 5,
-                  ),
-                  100,
-                ]}
-                tick={
-                  {
+                    fill: "var(--proof-yellow)",
+                    opacity: 0.7,
+                    position: "insideTopRight",
+                  }}
+                />
+                <ReferenceLine
+                  y={95}
+                  stroke="var(--proof-green)"
+                  strokeDasharray="6 3"
+                  strokeOpacity={0.6}
+                  label={{
+                    value: "95% gate",
                     fontSize: 10,
-                    fill: "var(--proof-text-muted)",
-                  } as React.SVGProps<SVGTextElement>
-                }
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(v: number) => `${v}%`}
-              />
-              {/* Danger zone — visible */}
-              <ReferenceArea
-                y1={0}
-                y2={80}
-                fill="var(--proof-red)"
-                fillOpacity={0.07}
-                ifOverflow="extendDomain"
-              />
-              <ReferenceArea
-                y1={80}
-                y2={95}
-                fill="var(--proof-yellow)"
-                fillOpacity={0.04}
-                ifOverflow="extendDomain"
-              />
-              {/* Thresholds — visible labels */}
-              <ReferenceLine
-                y={80}
-                stroke="var(--proof-yellow)"
-                strokeDasharray="4 4"
-                strokeOpacity={0.4}
-                label={{
-                  value: "80%",
-                  fontSize: 10,
-                  fill: "var(--proof-yellow)",
-                  opacity: 0.7,
-                  position: "insideTopRight",
-                }}
-              />
-              <ReferenceLine
-                y={95}
-                stroke="var(--proof-green)"
-                strokeDasharray="6 3"
-                strokeOpacity={0.6}
-                label={{
-                  value: "95% gate",
-                  fontSize: 10,
-                  fill: "var(--proof-green)",
-                  opacity: 0.85,
-                  position: "insideTopRight",
-                }}
-              />
-              <Tooltip content={<ChartTip />} />
-              <Area
-                type="monotone"
-                dataKey="passRate"
-                stroke={chartColor}
-                strokeWidth={2.5}
-                fill="url(#prGrad)"
-                dot={false}
-                filter="url(#lineGlow)"
-                activeDot={{
-                  r: 5,
-                  fill: chartColor,
-                  stroke: "var(--proof-surface)",
-                  strokeWidth: 2.5,
-                }}
-                isAnimationActive={true}
-                animationDuration={800}
-                animationEasing="ease-out"
-                animationBegin={200}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+                    fill: "var(--proof-green)",
+                    opacity: 0.85,
+                    position: "insideTopRight",
+                  }}
+                />
+                <Tooltip content={<ChartTip />} />
+                <Area
+                  type="monotone"
+                  dataKey="passRate"
+                  stroke={chartColor}
+                  strokeWidth={2.5}
+                  fill="url(#prGrad)"
+                  dot={false}
+                  filter="url(#lineGlow)"
+                  activeDot={{
+                    r: 5,
+                    fill: chartColor,
+                    stroke: "var(--proof-surface)",
+                    strokeWidth: 2.5,
+                  }}
+                  isAnimationActive={true}
+                  animationDuration={800}
+                  animationEasing="ease-out"
+                  animationBegin={200}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--proof-text-muted)', textAlign: 'right', marginTop: 4, paddingRight: 14 }}>
+          Last synced: {lastSynced}
         </div>
       </div>
     </main>

@@ -126,6 +126,7 @@ export interface TestRunPoint {
   status: "PASS" | "FAIL";
   duration: number;
   env: string;
+  date?: string;
 }
 
 export interface TestDetail {
@@ -268,6 +269,8 @@ export interface TestCase {
   assertions: TestAssertion[];
   version: number;
   changelog: TestChangeLogEntry[];
+  assertionsPassed?: number;
+  assertionsFailed?: number;
   createdAt: string;
   updatedAt: string;
   githubPath?: string;

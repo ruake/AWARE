@@ -13,7 +13,52 @@ export function SkeletonBox({
   borderRadius = 4,
   style,
 }: SkeletonBoxProps) {
-  return <div className="proof-skeleton" style={{ width, height, borderRadius, ...style }} />;
+  return (
+    <div className="proof-skeleton" style={{ width, height, borderRadius, ...style }}>
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .proof-skeleton {
+          background: linear-gradient(
+            90deg,
+            var(--proof-surface-2) 25%,
+            var(--proof-surface-3) 50%,
+            var(--proof-surface-2) 75%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite linear;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export function SkeletonStat() {
+  return (
+    <div
+      style={{
+        width: 80,
+        height: 40,
+        padding: "8px 12px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        gap: 4,
+        background: 'var(--proof-surface-2)',
+        borderRadius: 'var(--proof-radius)',
+        border: '1px solid var(--proof-border)'
+      }}
+    >
+      <SkeletonBox width="100%" height={8} />
+      <SkeletonBox width="60%" height={12} />
+    </div>
+  );
+}
+
+export function SkeletonBadge() {
+  return <SkeletonBox width={60} height={20} borderRadius="var(--proof-radius-full)" />;
 }
 
 export function SkeletonText({

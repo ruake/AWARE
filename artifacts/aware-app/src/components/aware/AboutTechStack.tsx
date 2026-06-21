@@ -17,7 +17,7 @@ export function AboutTechStack() {
     <AboutSection
       color="var(--proof-purple)"
       title="Tech Stack"
-      glow="0 0 8px rgba(139,92,246,0.4)"
+      glow="var(--proof-purple-glow)"
     >
       <div
         style={{

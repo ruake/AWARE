@@ -6,9 +6,40 @@ import { useTestData } from "@/hooks/useTestData";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { PageTemplate, FlakinessTable } from "@/components/aware";
 import type { EnrichedHistoryRow } from "@/components/aware/FlakinessTable";
-import { ChevronLeft, ChevronRight, X, Bug, AlertTriangle, Activity, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Bug,
+  AlertTriangle,
+  Activity,
+  Loader2,
+  TrendingUp,
+  Clock,
+  History,
+  ShieldCheck,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 type SortKey = "runId" | "status" | "duration" | "env";
+
+interface TestDetailEntry {
+  history: { runId: string; status: "PASS" | "FAIL"; duration: number; env: string }[];
+  passRate: number;
+  flakinessScore: number;
+  avgDuration: number;
+  name?: string;
+}
 
 function getTestNameForDetail(
   tcs: ReturnType<typeof useTestData>["tcs"],
@@ -49,20 +80,20 @@ export default function TestAnalytics() {
   const params = new URLSearchParams(search);
   const [, navigate] = useLocation();
   const { tcs } = useTestData();
-  const [testDetails, setTestDetails] = React.useState<
-    {
-      history: { runId: string; status: "PASS" | "FAIL"; duration: number; env: string }[];
-      passRate: number;
-      flakinessScore: number;
-      avgDuration: number;
-    }[]
-  >([]);
+  const [testDetails, setTestDetails] = React.useState<TestDetailEntry[]>([]);
   const [detailsLoading, setDetailsLoading] = React.useState(false);
 
   React.useEffect(() => {
     setDetailsLoading(true);
     getTestDetailsAsync()
-      .then(setTestDetails)
+      .then((data) => {
+        // Enriched with names for ranking
+        const withNames = data.map((d, i) => ({
+          ...d,
+          name: DIFF_ROWS[i % DIFF_ROWS.length]?.name ?? `Test ${i}`,
+        }));
+        setTestDetails(withNames);
+      })
       .catch((err: unknown) => {
         console.warn("[AWARE] TestAnalytics: failed to load test details", err);
       })
@@ -100,6 +131,12 @@ export default function TestAnalytics() {
   const [hErrOnly, setHErrOnly] = useSyncedUrlState<boolean>("hErrOnly", false);
   const [hSort, setHSort] = useSyncedUrlState<string>("hSort", "runId");
   const [selectedRow, setSelectedRow] = React.useState<EnrichedHistoryRow | null>(null);
+
+  const topFlakyTests = React.useMemo(() => {
+    return [...testDetails]
+      .sort((a, b) => b.flakinessScore - a.flakinessScore)
+      .slice(0, 10);
+  }, [testDetails]);
 
   const idx =
     diffs.length === 0
@@ -176,6 +213,21 @@ export default function TestAnalytics() {
     [enriched],
   );
 
+  const commonErrors = React.useMemo(() => {
+    if (!enriched.length) return [];
+    const counts = new Map<string, number>();
+    enriched.forEach((r) => {
+      if (r.error) {
+        // Group by message prefix (first 60 chars)
+        const prefix = r.error.slice(0, 60);
+        counts.set(prefix, (counts.get(prefix) ?? 0) + 1);
+      }
+    });
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+  }, [enriched]);
+
   if (detailsLoading) {
     return (
       <div
@@ -225,6 +277,16 @@ export default function TestAnalytics() {
     }
   };
 
+  const navigateTest = (dir: -1 | 1) => {
+    if (isTcMode) {
+      const next = (tcIdx + dir + tcs.length) % tcs.length;
+      navigate(`/analytics?testId=${tcs[next].id}`);
+    } else {
+      const next = (idx + dir + diffs.length) % diffs.length;
+      navigate(`/analytics?diffId=${diffs[next].id}`);
+    }
+  };
+
   return (
     <PageTemplate
       title="Test Analytics"
@@ -233,10 +295,319 @@ export default function TestAnalytics() {
           ? `${testCase.name} · ${tcIdx + 1} of ${tcs.length}`
           : `${testName} · ${idx + 1} of ${diffs.length}`
       }
+      headerActions={
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button
+            onClick={() => navigateTest(-1)}
+            className="proof-button proof-button-xs"
+            title="Previous test"
+          >
+            <ChevronUp size={14} />
+          </button>
+          <button
+            onClick={() => navigateTest(1)}
+            className="proof-button proof-button-xs"
+            title="Next test"
+          >
+            <ChevronDown size={14} />
+          </button>
+        </div>
+      }
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1, minHeight: 0 }}>
+        {/* Summary Stats Row */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          {[
+            {
+              label: "Pass Rate",
+              value: `${detail.passRate}%`,
+              icon: <ShieldCheck size={16} />,
+              color: detail.passRate >= 95 ? "var(--proof-green)" : "var(--proof-red)",
+            },
+            {
+              label: "Avg Duration",
+              value: `${detail.avgDuration}ms`,
+              icon: <Clock size={16} />,
+              color: "var(--proof-blue)",
+            },
+            {
+              label: "Flakiness",
+              value: `${detail.flakinessScore}%`,
+              icon: <AlertTriangle size={16} />,
+              color: detail.flakinessScore > 20 ? "var(--proof-yellow)" : "var(--proof-green)",
+            },
+            {
+              label: "Total Runs",
+              value: detail.history.length,
+              icon: <History size={16} />,
+              color: "var(--proof-text)",
+            },
+          ].map((stat, i) => (
+            <div
+              key={i}
+              className="proof-card"
+              style={{
+                padding: "12px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                background: "var(--proof-surface)",
+              }}
+            >
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: "var(--proof-grey-bg)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: stat.color,
+                }}
+              >
+                {stat.icon}
+              </div>
+              <div>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: "var(--proof-text-secondary)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  {stat.label}
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-text)" }}>
+                  {stat.value}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
-          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              flex: 1,
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              overflowY: "auto",
+              paddingRight: 4,
+            }}
+          >
+            {/* Charts & Error Analysis Section */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="proof-card" style={{ padding: 16 }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    marginBottom: 16,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <TrendingUp size={14} /> Duration Trend (ms)
+                </div>
+                <div style={{ height: 160 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={enriched}>
+                      <CartesianGrid stroke="var(--proof-border)" strokeDasharray="3 3" vertical={false} />
+                      <XAxis
+                        dataKey="runId"
+                        hide
+                      />
+                      <YAxis
+                        fontSize={10}
+                        stroke="var(--proof-text-muted)"
+                        tickFormatter={(val) => `${val}ms`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: "var(--proof-surface)",
+                          border: "1px solid var(--proof-border)",
+                          fontSize: 11,
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="duration"
+                        stroke="var(--proof-blue)"
+                        strokeWidth={2}
+                        dot={{ r: 3, fill: "var(--proof-blue)" }}
+                        activeDot={{ r: 5 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="proof-card" style={{ padding: 16 }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    marginBottom: 12,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <Bug size={14} /> Common Errors
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {commonErrors.length > 0 ? (
+                    commonErrors.map(([msg, count], i) => (
+                      <div
+                        key={i}
+                        style={{
+                          fontSize: 11,
+                          padding: "6px 10px",
+                          borderRadius: 6,
+                          background: "var(--proof-red-bg)",
+                          border: "1px solid var(--proof-red-border)",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: "var(--font-mono)",
+                            color: "var(--proof-red)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            flex: 1,
+                            marginRight: 8,
+                          }}
+                        >
+                          {msg}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            color: "var(--proof-red)",
+                            background: "rgba(239,68,68,0.1)",
+                            padding: "1px 6px",
+                            borderRadius: 10,
+                          }}
+                        >
+                          {count}×
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div
+                      style={{
+                        padding: 24,
+                        textAlign: "center",
+                        fontSize: 12,
+                        color: "var(--proof-text-muted)",
+                      }}
+                    >
+                      No errors detected in recent history
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Top Flaky Tests Table (Global) */}
+            <div className="proof-card" style={{ padding: 16 }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  marginBottom: 12,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <Activity size={14} /> Top Flaky Tests (All)
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {topFlakyTests.map((t, i) => (
+                  <div
+                    key={i}
+                    onClick={() => navigate(`/analytics?diffId=diff_${testDetails.indexOf(t)}`)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "8px 12px",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                      gap: 12,
+                      transition: "background 0.2s",
+                    }}
+                    className="proof-list-item"
+                  >
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: "var(--proof-text-muted)",
+                        width: 16,
+                      }}
+                    >
+                      {i + 1}
+                    </span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 500,
+                          color: "var(--proof-text)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {t.name}
+                      </div>
+                      <div style={{ width: "100%", height: 3, background: "var(--proof-grey-bg)", marginTop: 4, borderRadius: 2 }}>
+                        <div
+                          style={{
+                            height: "100%",
+                            borderRadius: 2,
+                            width: `${t.flakinessScore}%`,
+                            background:
+                              t.flakinessScore > 50
+                                ? "var(--proof-red)"
+                                : t.flakinessScore > 25
+                                  ? "var(--proof-yellow)"
+                                  : "var(--proof-green)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 16, textAlign: "right" }}>
+                      <div style={{ width: 60 }}>
+                        <div style={{ fontSize: 9, color: "var(--proof-text-muted)", textTransform: "uppercase" }}>Flaky</div>
+                        <div style={{ fontSize: 11, fontWeight: 600 }}>{t.flakinessScore}%</div>
+                      </div>
+                      <div style={{ width: 60 }}>
+                        <div style={{ fontSize: 9, color: "var(--proof-text-muted)", textTransform: "uppercase" }}>Pass</div>
+                        <div style={{ fontSize: 11, fontWeight: 600 }}>{t.passRate}%</div>
+                      </div>
+                      <div style={{ width: 60 }}>
+                        <div style={{ fontSize: 9, color: "var(--proof-text-muted)", textTransform: "uppercase" }}>Avg Dur</div>
+                        <div style={{ fontSize: 11, fontWeight: 600 }}>{t.avgDuration}ms</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <FlakinessTable
               filteredHistory={filteredHistory}
               enriched={enriched}

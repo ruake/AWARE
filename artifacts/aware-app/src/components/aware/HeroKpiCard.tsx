@@ -7,6 +7,7 @@ interface HeroKpiCardProps {
   label: string;
   value: number;
   suffix?: string;
+  subtitle?: string;
   delta: number;
   deltaLabel?: string;
   sparkData: number[];
@@ -21,6 +22,7 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
   label,
   value,
   suffix = "",
+  subtitle,
   delta,
   deltaLabel = "vs prev",
   sparkData,
@@ -60,7 +62,7 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
-      aria-label={`${label}: ${value ?? "unknown"}${suffix}`}
+      aria-label={`${label}: ${value ?? "unknown"}${suffix}${subtitle ? ` - ${subtitle}` : ""}`}
       onKeyDown={
         onClick
           ? (e) => {
@@ -85,7 +87,9 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
         padding: "18px 20px 16px",
         cursor: onClick ? "pointer" : "default",
         transition: "all 180ms cubic-bezier(0.2,0,0,1)",
-        boxShadow,
+        boxShadow: hovered
+          ? `0 0 0 1px ${accentColor}40, 0 8px 32px rgba(0,0,0,0.55), 0 0 48px ${accentColor}12`
+          : `0 0 0 1px rgba(99,130,178,0.12), 0 2px 12px rgba(0,0,0,0.4)`,
         transform,
         position: "relative",
         overflow: "hidden",
@@ -177,9 +181,34 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
         </div>
 
         {/* Sparkline — top-right */}
-        {sparkData.length >= 1 && (
-          <SparkLine data={sparkData} color={accentColor} width={64} height={20} />
-        )}
+        {sparkData.length >= 1 && sparkData.some(v => v !== 0) ? (
+          <div style={{ position: 'relative' }}>
+            <SparkLine data={sparkData} color={accentColor} width={64} height={20} />
+            {hovered && (
+              <div style={{
+                position: 'absolute',
+                top: -18,
+                right: 0,
+                fontSize: 9,
+                fontWeight: 700,
+                color: accentColor,
+                background: 'var(--proof-surface-3)',
+                padding: '1px 4px',
+                borderRadius: 3,
+                border: `1px solid ${accentColor}40`,
+                pointerEvents: 'none',
+                zIndex: 10,
+                boxShadow: 'var(--proof-shadow-md)'
+              }}>
+                {sparkData[sparkData.length - 1]}{sparkData.every(v => v <= 100) ? '%' : ''}
+              </div>
+            )}
+          </div>
+        ) : sparkData.length >= 1 ? (
+          <div style={{ width: 64, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3 }}>
+            <div style={{ width: '100%', height: 1, borderTop: '1px dashed var(--proof-text-muted)' }} />
+          </div>
+        ) : null}
       </div>
 
       {/* Big value */}
@@ -220,6 +249,20 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
             {suffix}
           </span>
         )}
+        {subtitle && (
+          <div
+            style={{
+              fontSize: 11,
+              color: "var(--proof-text-muted)",
+              position: "absolute",
+              bottom: -14,
+              left: 0,
+              fontWeight: 500,
+            }}
+          >
+            {subtitle}
+          </div>
+        )}
       </div>
 
       {/* Delta row */}
@@ -251,8 +294,8 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
           {displayDelta}
           {suffix ? "%" : ""}
         </span>
-        <span style={{ fontSize: 10.5, color: "var(--proof-text-muted)", fontWeight: 400 }}>
-          {deltaLabel}
+        <span style={{ fontSize: 10.5, color: "var(--proof-text-muted)", fontWeight: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+          {deltaLabel && deltaLabel.length > 16 ? deltaLabel.substring(0, 16) + "..." : deltaLabel}
         </span>
       </div>
     </div>

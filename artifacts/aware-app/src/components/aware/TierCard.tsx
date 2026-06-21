@@ -1,4 +1,5 @@
 import React from "react";
+import { RUNS } from "@/lib/data";
 import {
   TrendingUp,
   TrendingDown,
@@ -44,7 +45,7 @@ export function statusConfig(status: "healthy" | "degraded" | "critical") {
       bg: "var(--proof-yellow-bg)",
       bgStrong: "var(--proof-yellow-bg-strong)",
       border: "var(--proof-yellow-border)",
-      glow: "rgba(245,158,11,0.20)",
+      glow: "var(--proof-yellow-glow)",
       label: "Degraded",
       Icon: AlertTriangle,
     };
@@ -122,7 +123,7 @@ function RingGauge({ pct, color, size = 64 }: { pct: number; color: string; size
         fontFamily="var(--font-mono)"
         letterSpacing="-1"
       >
-        {pct}%
+        {pct === 0 ? "--" : `${pct}%`}
       </text>
     </svg>
   );
@@ -160,7 +161,7 @@ export function TierCard({
         textAlign: "left",
         width: "100%",
         background: hovered
-          ? `linear-gradient(145deg, var(--proof-surface-2) 0%, ${cfg.glow === "var(--proof-green-glow)" ? "rgba(34,211,160,0.06)" : cfg.glow === "rgba(245,158,11,0.20)" ? "rgba(245,158,11,0.06)" : "rgba(248,68,90,0.06)"} 100%)`
+          ? `linear-gradient(145deg, var(--proof-surface-2) 0%, ${cfg.glow} 100%)`
           : `linear-gradient(145deg, var(--proof-surface) 0%, ${meta.color}06 100%)`,
         border: `1px solid ${hovered ? cfg.border : "var(--proof-border)"}`,
         borderRadius: 20,
@@ -298,6 +299,8 @@ export function TierCard({
         {group.envs.map((env, i) => {
           const envCfg = statusConfig(env.status);
           const networkLabel = env.label.split(" / ")[1] ?? env.label;
+          const last5 = RUNS.filter(r => r.env === env.id).slice(0, 5);
+
           return (
             <div
               key={env.id}
@@ -313,6 +316,23 @@ export function TierCard({
               onMouseEnter={(e) => { e.currentTarget.style.background = "var(--proof-hover-light)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = ""; }}
             >
+              {/* Micro-sparkline */}
+              <div style={{ display: 'flex', gap: 3, width: 42, flexShrink: 0 }}>
+                {last5.map(r => (
+                  <div
+                    key={r.id}
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: r.passPct >= 95 ? 'var(--proof-green)' : 'var(--proof-red)',
+                      boxShadow: `0 0 4px ${r.passPct >= 95 ? 'var(--proof-green)' : 'var(--proof-red)'}40`
+                    }}
+                  />
+                ))}
+                {last5.length === 0 && <div style={{ fontSize: 9, color: 'var(--proof-text-muted)' }}>—</div>}
+              </div>
+
               {/* Env status dot */}
               <span
                 style={{

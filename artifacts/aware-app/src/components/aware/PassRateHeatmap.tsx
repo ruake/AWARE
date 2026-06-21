@@ -11,17 +11,17 @@ interface HeatmapCell {
 
 interface Props {
   data: HeatmapCell[];
-  onCellClick?: (runId: string) => void;
+  onCellClick?: (runId: string, env: string, date: string) => void;
 }
 
 export function PassRateHeatmap({ data, onCellClick }: Props) {
   const [, navigate] = useLocation();
 
-  const handleClick = (runId: string) => {
+  const handleClick = (cell: HeatmapCell) => {
     if (onCellClick) {
-      onCellClick(runId);
+      onCellClick(cell.runId, cell.env, cell.date);
     } else {
-      navigate(`/runs/${runId}`);
+      navigate(`/runs/${cell.runId}`);
     }
   };
 
@@ -43,7 +43,7 @@ export function PassRateHeatmap({ data, onCellClick }: Props) {
   }
 
   return (
-    <>
+    <div style={{ position: "relative" }}>
       <style>{`
         .heatmap-cell {
           width: 18px;
@@ -91,7 +91,29 @@ export function PassRateHeatmap({ data, onCellClick }: Props) {
           );
           border-radius: 3px;
         }
+        .heatmap-header {
+          position: sticky;
+          top: 0;
+          background: var(--proof-surface);
+          z-index: 2;
+          padding: 8px 0;
+          margin-bottom: 8px;
+          border-bottom: 1px solid var(--proof-border);
+          display: flex;
+          gap: 12px;
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--proof-text-secondary);
+        }
       `}</style>
+      
+      {/* Grouping header for sticky environments */}
+      <div className="heatmap-header">
+        {Array.from(new Set(data.map(d => d.env))).map(env => (
+          <span key={env}>{env}</span>
+        ))}
+      </div>
+
       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         {data.map((cell) => {
           const cls =
@@ -105,13 +127,38 @@ export function PassRateHeatmap({ data, onCellClick }: Props) {
             <button
               key={cell.runId}
               className={`heatmap-cell ${cls}`}
-              onClick={() => handleClick(cell.runId)}
+              onClick={() => handleClick(cell)}
               title={label}
               aria-label={label}
+              style={{ padding: 0 }}
             />
           );
         })}
       </div>
-    </>
+
+      <div style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        gap: 12, 
+        marginTop: 12, 
+        fontSize: 10, 
+        color: "var(--proof-text-secondary)",
+        paddingTop: 8,
+        borderTop: "1px solid var(--proof-border)"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div className="heatmap-cell heatmap-cell--pass" style={{ width: 10, height: 10, cursor: 'default' }} />
+          <span>95-100%</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div className="heatmap-cell heatmap-cell--warn" style={{ width: 10, height: 10, cursor: 'default' }} />
+          <span>80-94%</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div className="heatmap-cell heatmap-cell--fail" style={{ width: 10, height: 10, cursor: 'default' }} />
+          <span>&lt;80%</span>
+        </div>
+      </div>
+    </div>
   );
 }
