@@ -6,8 +6,8 @@
     {
       "id": "suite_continuous",
       "name": "Continuous — QA / Staging (Every 10min)",
-      "schedule": "*/10 * * * *",
-      "scheduleDesc": "Every 10 minutes",
+      "schedule": "*/30 * * * *",
+      "scheduleDesc": "Every 30 minutes",
       "due": false,
       "lastDispatched": null,
       "lastConclusion": null,

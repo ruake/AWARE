@@ -11,9 +11,9 @@
 
 suites:
   - id: suite_continuous
-    name: Continuous — QA / Staging (Every 10min)
+    name: Continuous — QA / Staging (Every 30min)
     description: >
-      Lightweight smoke suite running every 10 minutes on QA / Staging
+      Lightweight smoke suite running every 30 minutes on QA / Staging
       to catch regressions fast. Single environment, low parallelism.
     environments:
       - "QA / Staging"
@@ -23,7 +23,7 @@ suites:
     timeoutMinutes: 5
     runners: [playwright, pytest]
     tags: [smoke, continuous]
-    schedule: "*/10 * * * *"
+    schedule: "*/30 * * * *"
 
   - id: suite_smoke
     name: Smoke — All Environments

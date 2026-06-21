@@ -16,7 +16,7 @@
       "timeoutMinutes": 5
     },
     "tags": ["smoke", "continuous"],
-    "schedule": "*/10 * * * *",
+    "schedule": "*/30 * * * *",
     "createdAt": "2026-06-01T08:00:00Z",
     "updatedAt": "2026-06-12T00:00:00Z"
   },
