@@ -248,21 +248,29 @@ async function main() {
   const suiteStatuses = [];
   let totalDispatched = 0;
 
+  // Read baseUrl from environments.yml
+  let baseUrl = "https://www.akamai.com";
+  try {
+    const envCfg = yq(".", join(ROOT, "config", "environments.yml"));
+    if (envCfg?.baseUrl) baseUrl = envCfg.baseUrl;
+  } catch {}
+
+  const forceSuite = process.env.FORCE_SUITE || "";
+  const forceEnv = process.env.FORCE_ENV || "";
+
   for (const suite of suites) {
     const cron = suite.schedule || null;
-    const due = matchCron(cron, now);
-    const parallelism = suite.parallelism || 4;
-    const envs = suite.environments || [];
+    const isForced = forceSuite && forceSuite === suite.id;
+    const due = isForced || matchCron(cron, now);
+    const envs = forceEnv && isForced ? [forceEnv] : (suite.environments || []);
 
     let dispatchAction = null;
     let activeCount = 0;
 
     if (due) {
-      // Check for active runs via GH API
-      const active = []; // simplified — we check via runs.json below
       activeCount = runs.filter((r) => (r.suiteId || r.suite) === suite.id && r.status === "RUNNING").length;
 
-      if (activeCount > 0) {
+      if (activeCount > 0 && !isForced) {
         dispatchAction = `\u23F3 ${activeCount} active run(s)`;
       } else {
         let dispatched = 0;
@@ -275,13 +283,16 @@ async function main() {
             continue;
           }
           for (const env of envs) {
+            const envInfo = ENV_MAP[env] || { id: "qa_staging", target: "QA", network: "staging" };
             const ok = dispatchWorkflow(workflowFile, process.env.GITHUB_REF_NAME || "main", {
-              force_suite: suite.id,
-              force_env: env,
+              suite_id: suite.id,
+              env_label: env,
+              tier: envInfo.target,
+              network: envInfo.network,
+              base_url: baseUrl,
             });
             if (ok) {
               const runId = makeRunId(suite.id, env, runner);
-              const envInfo = ENV_MAP[env] || { id: "qa_staging", target: "QA", network: "staging" };
 
               // Wait for GH to index, then find workflowRunId
               await sleep(2000);
