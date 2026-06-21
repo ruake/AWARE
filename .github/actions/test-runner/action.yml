@@ -120,7 +120,6 @@ runs:
             --shard="${{ inputs.shard }}/${{ inputs.total-shards }}" \
             --output="$RESULTS_DIR" \
             --reporter="json:./$RESULTS_DIR/report.json" \
-            --grep "@${{ inputs.suite-id }}" \
           2>"$RESULTS_DIR/stderr.txt" || true
 
           # Parse results
