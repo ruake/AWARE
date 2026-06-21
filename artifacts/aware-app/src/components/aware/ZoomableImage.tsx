@@ -244,8 +244,9 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
                 backdropFilter: "blur(4px)",
               }}
               title="Reset Zoom"
+              aria-label="Reset zoom"
             >
-              <RotateCcw size={14} />
+              <RotateCcw size={14} aria-hidden="true" />
             </button>
           )}
           <div

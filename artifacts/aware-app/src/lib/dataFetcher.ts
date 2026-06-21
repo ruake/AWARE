@@ -71,15 +71,21 @@ export async function fetchBlob(path: string): Promise<Blob> {
   }
 }
 
-export async function fetchImage(src: string): Promise<string> {
+export async function fetchImage(src: string, timeoutMs = 15000): Promise<string> {
   if (src.startsWith("data:") || src.startsWith("http")) return src;
   const url = dataUrl(src);
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+    }
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  } finally {
+    clearTimeout(timeout);
   }
-  const blob = await res.blob();
-  return URL.createObjectURL(blob);
 }
 
 // ── Type guards for core data shapes ─────────────────────────────────

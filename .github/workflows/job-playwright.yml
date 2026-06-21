@@ -37,7 +37,7 @@ on:
       base_url:
         description: "Target base URL"
         required: true
-        default: "https://your-domain.com"
+        default: "https://CONFIGURE_YOUR_DOMAIN_HERE"
       total_shards:
         description: "Number of parallel shards (1–8)"
         required: false
@@ -66,6 +66,7 @@ jobs:
   shard:
     name: "Shard ${{ matrix.shard }}/${{ inputs.total_shards }}"
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:

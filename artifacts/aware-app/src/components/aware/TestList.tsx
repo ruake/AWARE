@@ -282,6 +282,7 @@ export function TestList({
                             transition: "color 0.1s, background 0.1s",
                           }}
                           title="View source on GitHub"
+                          aria-label="View source on GitHub"
                           onMouseEnter={(e) => {
                             (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
                             (e.currentTarget as HTMLElement).style.background =

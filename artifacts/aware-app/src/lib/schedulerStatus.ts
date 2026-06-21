@@ -22,8 +22,8 @@ export async function loadSchedulerStatus(): Promise<void> {
       suites: [...data.suites],
       recentDispatches: [...data.recentDispatches],
     };
-  } catch {
-    /* fetch failed, keep defaults */
+  } catch (err) {
+    console.warn("[AWARE] scheduler-status.json unavailable — using defaults.", err);
   }
 }
 

@@ -292,6 +292,7 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
       <button
         onClick={toggleTheme}
         title={isDark ? "Light mode" : "Dark mode"}
+        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
         style={{
           width: 28,
           height: 28,

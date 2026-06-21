@@ -187,7 +187,8 @@ export class CustomEndpointProvider implements IProvider {
       throw new Error(`Endpoint ${resp.status}: ${text}`);
     }
 
-    const reader = resp.body!.getReader();
+    if (!resp.body) throw new Error("Streaming response has no body");
+    const reader = resp.body.getReader();
     const decoder = new TextDecoder();
     const accum: Record<number, { id: string; name: string; args: string }> = {};
 

@@ -271,12 +271,14 @@ export default function Runs() {
                 className="proof-input"
                 style={{ paddingLeft: 26, width: 180, height: 26, fontSize: 12 }}
                 placeholder="Search runs…"
+                aria-label="Search runs"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
               {search && (
                 <button
                   onClick={() => setSearch("")}
+                  aria-label="Clear search"
                   style={{
                     position: "absolute",
                     right: 6,
@@ -291,7 +293,7 @@ export default function Runs() {
                     lineHeight: 1,
                   }}
                 >
-                  <X size={10} />
+                  <X size={10} aria-hidden="true" />
                 </button>
               )}
             </div>

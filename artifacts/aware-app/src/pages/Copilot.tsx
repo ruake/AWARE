@@ -61,7 +61,7 @@ import { CopilotSettings as CopilotSettingsPanel } from "@/components/aware/Copi
 import ProviderSelector from "@/components/copilot/ProviderSelector";
 import { useSyncedUrlState } from "@/lib/urlState";
 
-const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const uid = () => crypto.randomUUID().replace(/-/g, "");
 const ESTIMATED_CHARS_PER_TOKEN = 4;
 
 function estimateTokens(messages: Message[]): number {
@@ -360,7 +360,7 @@ export default function CopilotPage() {
         const data = e.target?.result as string;
         const isImage = file.type.startsWith("image/");
         pending.push({
-          id: `att_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          id: `att_${crypto.randomUUID().slice(0, 8)}`,
           name: file.name,
           type: isImage ? "image" : "file",
           data,

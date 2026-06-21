@@ -120,13 +120,17 @@ export function conversationReducer(
           return { ...state, messages: updatedMsgs, busy: false };
         }
 
-        default:
+        default: {
+          const _exhaustiveCheck: never = event;
           return state;
+        }
       }
     }
 
-    default:
+    default: {
+      const _exhaustiveCheck: never = action;
       return state;
+    }
   }
 }
 
