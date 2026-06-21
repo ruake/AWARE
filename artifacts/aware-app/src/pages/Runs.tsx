@@ -471,7 +471,19 @@ export default function Runs() {
               const cfg = STATUS_CFG[run.status] ?? STATUS_CFG.ERROR;
               const isRunning = run.status === "RUNNING";
               return (
-                <tr key={run.id} onClick={() => navigate(`/runs/${run.id}`)}>
+                <tr
+                  key={run.id}
+                  onClick={() => navigate(`/runs/${run.id}`)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/runs/${run.id}`);
+                    }
+                  }}
+                  style={{ cursor: "pointer" }}
+                >
                   <td style={{ padding: 0, width: 3 }}>
                     <div
                       style={{

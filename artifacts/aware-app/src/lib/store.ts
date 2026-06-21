@@ -28,6 +28,14 @@ export function _notify(): void {
   _notifyTS();
 }
 
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === LS_TC_KEY || e.key === LS_SUITE_KEY) {
+      _notify();
+    }
+  });
+}
+
 export function subscribeToTestCases(onChange: () => void): () => void {
   _tcListeners.add(onChange);
   return () => { _tcListeners.delete(onChange); };

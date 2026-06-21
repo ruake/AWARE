@@ -56,6 +56,7 @@ const Compare = React.lazy(() => import("@/pages/Compare"));
 const Tests = React.lazy(() => import("@/pages/Tests"));
 const Trends = React.lazy(() => import("@/pages/TestAnalytics"));
 const About = React.lazy(() => import("@/pages/About"));
+const Settings = React.lazy(() => import("@/pages/Settings"));
 const Copilot = React.lazy(() => import("@/pages/Copilot"));
 const StartRun = React.lazy(() => import("@/pages/StartRun"));
 const Sharing = React.lazy(() => import("@/pages/Sharing"));
@@ -77,6 +78,7 @@ const ROUTE_NAMES: Record<string, string> = {
   "/trends": "Trends",
   "/tests": "Tests",
   "/copilot": "Copilot",
+  "/settings": "Settings",
   "/about": "About",
   "/start": "Start Run",
   "/share": "Share",
@@ -276,6 +278,11 @@ function Router() {
                   <Copilot />
                 </React.Suspense>
               </ErrorBoundary>
+            </Route>
+            <Route path="/settings">
+              <SEB>
+                <Settings />
+              </SEB>
             </Route>
             <Route path="/about">
               <ErrorBoundary>

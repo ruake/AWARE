@@ -27,6 +27,7 @@ function routeLabel(path: string): string {
   if (path.startsWith("/compare")) return "Compare";
   if (path.startsWith("/trends")) return "Trends";
   if (path.startsWith("/copilot")) return "Copilot";
+  if (path.startsWith("/settings")) return "Settings";
   if (path.startsWith("/about")) return "About";
   if (path.startsWith("/tests")) return "Tests";
   return "A.W.A.R.E.";
@@ -238,37 +239,51 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
         }}
       />
 
+      <style>{`
+        .topbar-search-button {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          padding: 3px 10px;
+          font-size: 11.5px;
+          cursor: pointer;
+          border: 1px solid var(--proof-border);
+          border-radius: var(--proof-radius-sm);
+          background: var(--proof-surface-2);
+          color: var(--proof-text-muted);
+          transition: all var(--proof-transition);
+          font-family: var(--font-sans);
+          line-height: 16px;
+        }
+        .topbar-search-button:hover {
+          border-color: var(--proof-border-strong);
+          color: var(--proof-text);
+          background: var(--proof-surface-3);
+        }
+        .topbar-theme-button {
+          width: 28px;
+          height: 28px;
+          padding: 0;
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          color: var(--proof-text-muted);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: var(--proof-radius-sm);
+          transition: all var(--proof-transition);
+        }
+        .topbar-theme-button:hover {
+          color: var(--proof-text);
+          background: var(--proof-hover);
+        }
+      `}</style>
       {/* Search */}
       <button
         onClick={onSearchOpen}
         title="Search (⌘K)"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 5,
-          padding: "3px 10px",
-          fontSize: 11.5,
-          cursor: "pointer",
-          border: "1px solid var(--proof-border)",
-          borderRadius: "var(--proof-radius-sm)",
-          background: "var(--proof-surface-2)",
-          color: "var(--proof-text-muted)",
-          transition: "all var(--proof-transition)",
-          fontFamily: "var(--font-sans)",
-          lineHeight: "16px",
-        }}
-        onMouseEnter={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.borderColor = "var(--proof-border-strong)";
-          el.style.color = "var(--proof-text)";
-          el.style.background = "var(--proof-surface-3)";
-        }}
-        onMouseLeave={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.borderColor = "var(--proof-border)";
-          el.style.color = "var(--proof-text-muted)";
-          el.style.background = "var(--proof-surface-2)";
-        }}
+        className="topbar-search-button"
       >
         <Search size={11} />
         <span>Search</span>
@@ -293,30 +308,7 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
         onClick={toggleTheme}
         title={isDark ? "Light mode" : "Dark mode"}
         aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-        style={{
-          width: 28,
-          height: 28,
-          padding: 0,
-          border: "none",
-          background: "transparent",
-          cursor: "pointer",
-          color: "var(--proof-text-muted)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "var(--proof-radius-sm)",
-          transition: "all var(--proof-transition)",
-        }}
-        onMouseEnter={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.color = "var(--proof-text)";
-          el.style.background = "var(--proof-hover)";
-        }}
-        onMouseLeave={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.color = "var(--proof-text-muted)";
-          el.style.background = "transparent";
-        }}
+        className="topbar-theme-button"
       >
         {isDark ? <Sun size={13} /> : <Moon size={13} />}
       </button>

@@ -17,6 +17,7 @@ import {
   BarChart3,
   Beaker,
   Bot,
+  Settings,
   Info,
 } from "lucide-react";
 
@@ -31,6 +32,7 @@ const ACTIVITY_ITEMS = [
   { id: "trends", icon: BarChart3, label: "Trends", href: "/trends" },
   { id: "tests", icon: Beaker, label: "Tests", href: "/tests" },
   { id: "copilot", icon: Bot, label: "Copilot", href: "/copilot" },
+  { id: "settings", icon: Settings, label: "Settings", href: "/settings" },
   { id: "about", icon: Info, label: "About", href: "/about" },
 ];
 
@@ -42,6 +44,7 @@ function activityIdFromPath(path: string): string {
   if (seg === "trends" || seg === "analytics") return "trends";
   if (seg === "tests") return "tests";
   if (seg === "copilot") return "copilot";
+  if (seg === "settings") return "settings";
   if (seg === "about") return "about";
   return "dashboard";
 }
@@ -88,9 +91,9 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // Auto-hide sidebar on About (no useful sidebar context there)
+  // Auto-hide sidebar on About and Settings (no useful sidebar context there)
   React.useEffect(() => {
-    if (currentActivity === "about") {
+    if (currentActivity === "about" || currentActivity === "settings") {
       const id = setTimeout(() => setSidebarVisible(false), 0);
       return () => clearTimeout(id);
     }
@@ -98,7 +101,7 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
   }, [currentActivity]);
 
   const handleActivityClick = (item: (typeof ACTIVITY_ITEMS)[number]) => {
-    if (item.id === "about") {
+    if (item.id === "about" || item.id === "settings") {
       navigate(item.href);
       setSidebarVisible(false);
     } else if (item.id === currentActivity && sidebarVisible) {

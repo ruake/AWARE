@@ -31,23 +31,25 @@ export function HeroKpiCard({
   delay = 0,
 }: HeroKpiCardProps) {
   const animatedValue = useCountUp(value, 700, delay);
+  const displayValue = value !== undefined && value !== null ? animatedValue : "—";
+  const displayDelta = delta !== undefined && delta !== null ? delta : 0;
 
-  const deltaIsGood = invertDelta ? delta < 0 : delta > 0;
-  const _deltaIsBad = invertDelta ? delta > 0 : delta < 0;
+  const deltaIsGood = invertDelta ? displayDelta < 0 : displayDelta > 0;
+  const _deltaIsBad = invertDelta ? displayDelta > 0 : displayDelta < 0;
   const deltaColor =
-    delta === 0
+    displayDelta === 0
       ? "var(--proof-text-muted)"
       : deltaIsGood
         ? "var(--proof-green)"
         : "var(--proof-red)";
-  const DeltaIcon = delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
+  const DeltaIcon = displayDelta > 0 ? TrendingUp : displayDelta < 0 ? TrendingDown : Minus;
 
   return (
     <div
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
-      aria-label={`${label}: ${value}${suffix}`}
+      aria-label={`${label}: ${value ?? "unknown"}${suffix}`}
       onKeyDown={
         onClick
           ? (e) => {
@@ -154,8 +156,8 @@ export function HeroKpiCard({
       {/* Value */}
       <div style={{ display: "flex", alignItems: "flex-end", gap: 6, position: "relative" }}>
         <span className="proof-hero-number" style={{ fontSize: 44, color: accentColor }}>
-          {animatedValue}
-          {suffix}
+          {displayValue}
+          {value !== undefined && value !== null && suffix}
         </span>
       </div>
 
@@ -177,10 +179,11 @@ export function HeroKpiCard({
             fontWeight: 600,
             color: deltaColor,
           }}
+          aria-label={`${displayDelta > 0 ? "Increased by" : displayDelta < 0 ? "Decreased by" : "No change"} ${Math.abs(displayDelta)}${suffix ? "%" : ""} ${deltaLabel}`}
         >
-          <DeltaIcon size={11} />
-          {delta > 0 ? "+" : ""}
-          {delta}
+          <DeltaIcon size={11} aria-hidden="true" />
+          {displayDelta > 0 ? "+" : ""}
+          {displayDelta}
           {suffix ? "%" : ""}
           <span style={{ color: "var(--proof-text-muted)", fontWeight: 400, marginLeft: 2 }}>
             {deltaLabel}

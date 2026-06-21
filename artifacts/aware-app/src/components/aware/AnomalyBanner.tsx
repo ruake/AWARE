@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
 
 interface AnomalyBannerProps {
   hasAlert: boolean;
@@ -7,6 +7,7 @@ interface AnomalyBannerProps {
   regressions: number;
   degradedTiers: string;
   onInvestigate: () => void;
+  onDismiss?: () => void;
 }
 
 export function AnomalyBanner({
@@ -15,6 +16,7 @@ export function AnomalyBanner({
   regressions,
   degradedTiers,
   onInvestigate,
+  onDismiss,
 }: AnomalyBannerProps) {
   if (!hasAlert && !hasDegradation) return null;
   const isCritical = hasAlert;
@@ -38,8 +40,8 @@ export function AnomalyBanner({
           width: 32,
           height: 32,
           borderRadius: 8,
-          background: isCritical ? "rgba(248,68,90,0.15)" : "rgba(245,158,11,0.15)",
-          border: `1px solid ${isCritical ? "rgba(248,68,90,0.30)" : "rgba(245,158,11,0.30)"}`,
+          background: isCritical ? "var(--proof-red-bg)" : "var(--proof-yellow-bg)",
+          border: `1px solid ${isCritical ? "var(--proof-red-border)" : "var(--proof-yellow-border)"}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -72,6 +74,25 @@ export function AnomalyBanner({
         >
           Investigate →
         </button>
+        {onDismiss && (
+          <button
+            onClick={onDismiss}
+            aria-label="Dismiss banner"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              padding: 4,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: isCritical ? "var(--proof-red-bright)" : "var(--proof-yellow-bright)",
+              opacity: 0.7,
+            }}
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
     </div>
   );

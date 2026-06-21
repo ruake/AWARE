@@ -6,7 +6,7 @@ import { useTestData } from "@/hooks/useTestData";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { PageTemplate, FlakinessTable } from "@/components/aware";
 import type { EnrichedHistoryRow } from "@/components/aware/FlakinessTable";
-import { ChevronLeft, ChevronRight, X, Bug, AlertTriangle, Activity } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Bug, AlertTriangle, Activity, Loader2 } from "lucide-react";
 
 type SortKey = "runId" | "status" | "duration" | "env";
 
@@ -57,11 +57,17 @@ export default function TestAnalytics() {
       avgDuration: number;
     }[]
   >([]);
+  const [detailsLoading, setDetailsLoading] = React.useState(false);
+
   React.useEffect(() => {
+    setDetailsLoading(true);
     getTestDetailsAsync()
       .then(setTestDetails)
       .catch((err: unknown) => {
         console.warn("[AWARE] TestAnalytics: failed to load test details", err);
+      })
+      .finally(() => {
+        setDetailsLoading(false);
       });
   }, []);
 
@@ -170,7 +176,27 @@ export default function TestAnalytics() {
     [enriched],
   );
 
-  if (diffs.length === 0) {
+  if (detailsLoading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          gap: 12,
+        }}
+      >
+        <Loader2 className="animate-spin" size={32} style={{ color: "var(--proof-blue)" }} />
+        <span style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>
+          Loading test details...
+        </span>
+      </div>
+    );
+  }
+
+  if (diffs.length === 0 || (!detailsLoading && testDetails.length === 0)) {
     return (
       <div style={{ textAlign: "center", padding: 64 }}>
         <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>

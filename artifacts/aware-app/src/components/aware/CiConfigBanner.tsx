@@ -39,6 +39,7 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
             downloadCiConfig();
           }}
           className="proof-button-primary proof-button-xs"
+          aria-label="Download updated test configuration file"
         >
           <Download size={12} /> Download Config
         </button>
