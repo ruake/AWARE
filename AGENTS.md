@@ -21,6 +21,8 @@ pnpm test:e2e               # Playwright browser tests
 pnpm verify                 # typecheck + lint + format + test (full pre-commit check)
 ```
 
+> Pre-commit hook runs `pnpm verify` automatically via `simple-git-hooks`. Install hooks with `pnpm install` (runs `prepare` script) or manually with `npx simple-git-hooks`.
+
 ## Architecture
 
 ### Routing (wouter)
@@ -184,6 +186,9 @@ artifacts/aware-app/src/
 - The `data` branch is an orphan branch containing only data files at root (`runs.json`, `scheduler-status.json`, etc.)
 - Scheduler and test workflows push run data to the `data` branch, not `main`
 - Commits to `data` branch include `[skip ci]` to prevent recursive workflow triggers
+
+## Git
+- **Always run `gh auth setup-git` before `git push origin`** to configure GitHub token-based auth
 
 ## Controller / Reconciler Pattern (Kubernetes-inspired)
 
