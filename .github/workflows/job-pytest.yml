@@ -14,7 +14,7 @@ on:
       suite_id:
         description: "Suite ID / pytest marker"
         required: true
-        default: "suite_api"
+        default: "suite_continuous"
       env_label:
         description: "Environment label (e.g. 'UAT / Staging')"
         required: true
@@ -30,7 +30,7 @@ on:
       base_url:
         description: "Target base URL"
         required: true
-        default: "https://CONFIGURE_YOUR_DOMAIN_HERE"
+        default: "https://www.akamai.com"
       parallelism:
         description: "pytest-xdist workers"
         required: false
