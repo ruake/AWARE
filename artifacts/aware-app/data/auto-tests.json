@@ -402,5 +402,121 @@
     "updatedAt": "2026-06-16T10:06:34.783760Z",
     "githubPath": "tests/test_performance.py",
     "repoStatus": "synced"
+  },
+  {
+    "id": "ad_6",
+    "name": "Homepage renders critical assets via Puppeteer",
+    "description": "Verify homepage loads CSS, JS, and favicon assets without errors via headless Chromium.",
+    "testType": "puppeteer",
+    "category": "browser-rendering",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": ["puppeteer", "rendering"],
+    "owner": "auto@puppeteer",
+    "suiteIds": ["suite_smoke", "suite_regression_qa", "suite_regression_uat"],
+    "automated": true,
+    "scriptPath": "e2e/puppeteer/screenshots.spec.ts",
+    "preconditions": "Akamai property must be deployed. Chromium must be available.",
+    "expectedBehavior": "All critical assets (CSS, JS, favicon) must load with HTTP 200.",
+    "documentation": "Verify homepage loads critical assets without errors.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-21T00:00:00Z",
+        "author": "system",
+        "summary": "Initial Puppeteer test case",
+        "changes": ["Added Puppeteer test entry"]
+      }
+    ],
+    "createdAt": "2026-06-21T06:00:00Z",
+    "updatedAt": "2026-06-21T06:00:00Z",
+    "githubPath": "e2e/puppeteer/screenshots.spec.ts",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_7",
+    "name": "Cross-browser login flow via Selenium WebDriver",
+    "description": "Verify login flow works across Chrome, Firefox, and Edge via Selenium WebDriver.",
+    "testType": "selenium",
+    "category": "cross-browser",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": ["selenium", "cross-browser"],
+    "owner": "auto@selenium",
+    "suiteIds": ["suite_regression_qa", "suite_regression_uat"],
+    "automated": true,
+    "scriptPath": "e2e/selenium/login.spec.ts",
+    "preconditions": "Selenium WebDriver and browser drivers must be installed.",
+    "expectedBehavior": "Login flow must complete successfully on all three browsers.",
+    "documentation": "Verify login flow works across Chrome, Firefox, and Edge via Selenium WebDriver.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-21T00:00:00Z",
+        "author": "system",
+        "summary": "Initial Selenium test case",
+        "changes": ["Added Selenium test entry"]
+      }
+    ],
+    "createdAt": "2026-06-21T06:00:00Z",
+    "updatedAt": "2026-06-21T06:00:00Z",
+    "githubPath": "e2e/selenium/login.spec.ts",
+    "repoStatus": "synced"
   }
 ]

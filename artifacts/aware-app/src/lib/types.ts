@@ -244,7 +244,7 @@ export interface TestCase {
   id: string;
   name: string;
   description: string;
-  testType: "web" | "api" | "http" | "edgeworker" | "transaction" | "pytest";
+  testType: "web" | "api" | "http" | "edgeworker" | "transaction" | "pytest" | "puppeteer" | "selenium";
   category: string;
   priority: TestPriority;
   severity: TestSeverity;
