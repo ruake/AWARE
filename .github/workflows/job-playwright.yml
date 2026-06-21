@@ -37,7 +37,7 @@ on:
       base_url:
         description: "Target base URL"
         required: true
-        default: "https://CONFIGURE_YOUR_DOMAIN_HERE"
+        default: "https://www.akamai.com"
       total_shards:
         description: "Number of parallel shards (1–8)"
         required: false
