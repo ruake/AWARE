@@ -8,7 +8,7 @@
 #   4. DISPATCH            → trigger job-playwright.yml / job-pytest.yml
 #   5. PERSIST             → write updated scheduler-status.json via data-writer
 #
-# Like a K8s CronJob controller, this runs every 15 minutes and fires
+# Like a K8s CronJob controller, this runs every 30 minutes and fires
 # exactly the jobs that are overdue — nothing more, nothing less.
 #
 # Manual dispatch supports: dry-run (validate only) and force-suite (bypass cron).
