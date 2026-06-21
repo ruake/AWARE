@@ -26,10 +26,22 @@ describe("navTo", () => {
     expect(pushState).toHaveBeenCalledWith(null, "", "/relative-path");
   });
 
-  it("handles empty path", () => {
+  it("blocks empty path (open-redirect guard)", () => {
     const pushState = vi.spyOn(window.history, "pushState");
     navTo("");
-    expect(pushState).toHaveBeenCalledWith(null, "", "/");
+    expect(pushState).not.toHaveBeenCalled();
+  });
+
+  it("blocks protocol-relative URLs (open-redirect guard)", () => {
+    const pushState = vi.spyOn(window.history, "pushState");
+    navTo("//evil.com");
+    expect(pushState).not.toHaveBeenCalled();
+  });
+
+  it("blocks absolute http URLs (open-redirect guard)", () => {
+    const pushState = vi.spyOn(window.history, "pushState");
+    navTo("https://evil.com/phish");
+    expect(pushState).not.toHaveBeenCalled();
   });
 });
 

@@ -3,4 +3,6 @@ import App from "./App";
 import "./index.css";
 import "./_group.css";
 
-createRoot(document.getElementById("root")!).render(<App />);
+const rootEl = document.getElementById("root");
+if (!rootEl) throw new Error("Fatal: #root element not found in the DOM.");
+createRoot(rootEl).render(<App />);

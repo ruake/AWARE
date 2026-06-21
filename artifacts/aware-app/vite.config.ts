@@ -124,6 +124,19 @@ export default defineConfig({
         ]
       : []),
   ],
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "wouter",
+      "recharts",
+      "@tanstack/react-query",
+      "react-markdown",
+      "remark-gfm",
+      "zustand",
+    ],
+    exclude: ["@mlc-ai/web-llm"],
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),

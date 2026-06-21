@@ -148,7 +148,7 @@ export function createThread(
 ): Thread {
   const now = Date.now();
   return {
-    id: `thread_${now}_${Math.random().toString(36).slice(2, 8)}`,
+    id: `thread_${now}_${crypto.randomUUID().slice(0, 8)}`,
     title,
     messages: messages ?? [],
     createdAt: now,

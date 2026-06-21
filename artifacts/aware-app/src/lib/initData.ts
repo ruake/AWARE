@@ -14,6 +14,7 @@ export interface DataInitState {
 
 let _loading = false;
 let _loaded = false;
+let _activePromise: Promise<void> | null = null;
 let _runsReady = false;
 let _error: unknown = null;
 let _snapshot: DataInitState = {
@@ -59,9 +60,15 @@ async function safeLoad<T>(
   }
 }
 
-export async function loadAllData(): Promise<void> {
-  if (_loaded || _loading) return;
+export function loadAllData(): Promise<void> {
+  if (_loaded) return Promise.resolve();
+  if (_activePromise) return _activePromise;
   _loading = true;
+  _activePromise = _doLoad();
+  return _activePromise;
+}
+
+async function _doLoad(): Promise<void> {
   updateSnapshot();
   notify();
 

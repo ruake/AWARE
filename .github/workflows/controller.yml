@@ -63,6 +63,7 @@ jobs:
   reconcile:
     name: "Reconcile → Dispatch"
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
       dispatched: ${{ steps.reconcile.outputs.dispatched }}
       suites_due: ${{ steps.reconcile.outputs.suites_due }}

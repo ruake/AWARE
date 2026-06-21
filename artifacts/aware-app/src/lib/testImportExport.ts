@@ -4,7 +4,7 @@ import type { TestCase, TestAssertion, TestConfig, FilmstripConfig, Predicate } 
 export type ExportFormat = "json" | "yaml" | "xml";
 
 function generateId(): string {
-  return Math.random().toString(36).slice(2, 10);
+  return crypto.randomUUID().replace(/-/g, "").slice(0, 10);
 }
 
 // ── Export ──────────────────────────────────────────────────────────────────

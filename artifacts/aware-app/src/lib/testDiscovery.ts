@@ -13,8 +13,8 @@ export async function loadAutoDiscoveredTests(): Promise<void> {
   try {
     _autoTests = await fetchJson<TestCase[]>("auto-tests.json");
     _notifyTC();
-  } catch {
-    /* fetch failed, keep defaults */
+  } catch (err) {
+    console.warn("[AWARE] auto-tests.json unavailable — using empty list.", err);
   }
 }
 

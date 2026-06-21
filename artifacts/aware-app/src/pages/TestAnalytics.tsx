@@ -60,7 +60,9 @@ export default function TestAnalytics() {
   React.useEffect(() => {
     getTestDetailsAsync()
       .then(setTestDetails)
-      .catch(() => {});
+      .catch((err: unknown) => {
+        console.warn("[AWARE] TestAnalytics: failed to load test details", err);
+      });
   }, []);
 
   const rawTestId = (() => {

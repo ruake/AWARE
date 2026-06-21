@@ -16,9 +16,10 @@ async function ensureAllResultsLoaded(): Promise<void> {
       }
       _allResultsLoaded = true;
     })
-    .catch(() => {
+    .catch((err: unknown) => {
       _allResultsLoading = null;
       _allResultsLoaded = false;
+      throw err;
     });
   return _allResultsLoading;
 }

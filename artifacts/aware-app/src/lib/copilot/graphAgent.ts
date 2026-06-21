@@ -28,7 +28,7 @@ const MAX_ITERATIONS = 5;
 const STREAM_TIMEOUT_MS = 20_000;
 
 function uid(): string {
-  return Math.random().toString(36).slice(2, 10);
+  return crypto.randomUUID().replace(/-/g, "").slice(0, 10);
 }
 
 function messagesToApi(history: Message[]): ApiMessage[] {

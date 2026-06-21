@@ -28,11 +28,16 @@ const STATUS_MAP: Record<string, string> = {
   PENDING: "proof-badge-skip",
 };
 
-export function StatusBadge({ status, label }: StatusBadgeProps) {
+export const StatusBadge = React.memo(function StatusBadge({ status, label }: StatusBadgeProps) {
   const cls = STATUS_MAP[status] ?? "proof-badge-skip";
   return (
-    <span className={`proof-badge ${cls}`} aria-label={label ?? status}>
+    <span
+      className={`proof-badge ${cls}`}
+      aria-label={label ?? status}
+      aria-live="polite"
+      aria-atomic="true"
+    >
       {label ?? status}
     </span>
   );
-}
+});

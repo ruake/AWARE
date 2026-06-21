@@ -77,6 +77,7 @@ function CustomImage({ src, alt }: { src?: string; alt?: string }) {
 function CustomLink({ href, children }: { href?: string; children: React.ReactNode }) {
   const [, navigate] = useLocation();
   if (!href) return <>{children}</>;
+  if (/^javascript:/i.test(href) || href.startsWith("//")) return <>{children}</>;
   const isExternal = href.startsWith("http://") || href.startsWith("https://");
   if (isExternal) {
     return (

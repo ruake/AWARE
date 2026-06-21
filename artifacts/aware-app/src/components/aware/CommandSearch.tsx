@@ -32,6 +32,7 @@ export function CommandSearch({
         <input
           ref={inputRef}
           type="text"
+          aria-label="Search tests, runs, suites, or type > for actions"
           placeholder="Search tests, runs, suites, or type &gt; for actions..."
           style={{
             flex: 1,

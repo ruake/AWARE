@@ -54,7 +54,9 @@ export default function Compare() {
         setCandResults(cr);
         setComputedRows(computeDiffRows(effectiveBaseline, effectiveCandidate));
       })
-      .catch(() => {});
+      .catch((err: unknown) => {
+        console.warn("[AWARE] Compare: failed to load run results", err);
+      });
   }, [effectiveBaseline, effectiveCandidate]);
 
   const diffs = React.useMemo(() => {
