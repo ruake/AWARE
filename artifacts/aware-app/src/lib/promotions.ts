@@ -26,8 +26,8 @@ export async function loadPromotions(): Promise<void> {
     _promotionDecisions = await fetchJson<PromotionDecision[]>("promotions.json");
     updateSnapshot();
     notify();
-  } catch {
-    /* fetch failed, keep defaults */
+  } catch (err) {
+    console.warn("[AWARE] promotions.json failed to load — promotion gate data unavailable:", err);
   }
 }
 

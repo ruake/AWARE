@@ -6,6 +6,7 @@ import {
   useDashboardKPIs,
   usePassRateChart,
   useSchedulerStatus,
+  useDataInit,
 } from "@/lib/hooks/useData";
 import {
   Activity,
@@ -107,6 +108,7 @@ function ChartTip({
    ══════════════════════════════════════════════════════════════════ */
 export default function Dashboard() {
   const [, navigate] = useLocation();
+  const init = useDataInit();
   const filteredRuns = useFilteredRuns();
   const envHealth = useEnvHealth();
   const kpis = useDashboardKPIs();
@@ -244,72 +246,97 @@ export default function Dashboard() {
         ? "var(--proof-yellow)"
         : "var(--proof-red)";
 
-  if (filteredRuns.length === 0) {
+  if (filteredRuns.length === 0 || init.loading) {
     return (
       <main
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
+          gap: 12,
+          padding: "12px 24px 16px",
           height: "100%",
-          gap: 20,
-          padding: "48px 24px",
-          maxWidth: 520,
-          margin: "0 auto",
-          animation: "page-enter 0.22s ease-out both",
+          boxSizing: "border-box",
         }}
       >
-        <div style={{ display: "flex", gap: 24, marginBottom: 8 }}>
-          {[Activity, Zap, GitCompare].map((Icon, i) => (
-            <div
-              key={i}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                background: "var(--proof-blue-bg)",
-                border: "1px solid var(--proof-blue-border)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                animation: `card-enter 0.3s cubic-bezier(0.2,0,0,1) ${i * 80}ms both`,
-              }}
-            >
-              <Icon size={18} style={{ color: "var(--proof-blue)" }} />
-            </div>
+        <div style={{ height: 32, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+           <div className="proof-skeleton" style={{ width: 300, height: 24, borderRadius: 4 }} />
+           <div className="proof-skeleton" style={{ width: 150, height: 12, borderRadius: 4 }} />
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="proof-skeleton" style={{ height: 100, borderRadius: "var(--proof-radius-lg)" }} />
           ))}
         </div>
-        <div style={{ textAlign: "center" }}>
-          <h2
-            style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)", margin: "0 0 6px" }}
-          >
-            No test runs yet
-          </h2>
-          <p
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="proof-skeleton" style={{ height: 64, borderRadius: "var(--proof-radius-lg)" }} />
+          ))}
+        </div>
+        {!init.loading && filteredRuns.length === 0 && (
+          <div
             style={{
-              fontSize: 13,
-              color: "var(--proof-text-secondary)",
-              margin: 0,
-              lineHeight: 1.5,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: 1,
+              gap: 20,
+              padding: "48px 24px",
+              maxWidth: 520,
+              margin: "0 auto",
             }}
           >
-            Results from your Akamai CDN regression suite will appear here once a test run
-            completes.
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-          <button
-            onClick={() => navigate("/start")}
-            className="proof-button-primary"
-            style={{ gap: 5 }}
-          >
-            <Play size={12} /> Start a Run
-          </button>
-          <button onClick={() => navigate("/compare")} className="proof-button" style={{ gap: 5 }}>
-            <GitCompare size={12} /> Compare Runs
-          </button>
-        </div>
+            <div style={{ display: "flex", gap: 24, marginBottom: 8 }}>
+              {[Activity, Zap, GitCompare].map((Icon, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 12,
+                    background: "var(--proof-blue-bg)",
+                    border: "1px solid var(--proof-blue-border)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon size={18} style={{ color: "var(--proof-blue)" }} />
+                </div>
+              ))}
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <h2
+                style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)", margin: "0 0 6px" }}
+              >
+                No test runs yet
+              </h2>
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "var(--proof-text-secondary)",
+                  margin: 0,
+                  lineHeight: 1.5,
+                }}
+              >
+                Results from your Akamai CDN regression suite will appear here once a test run
+                completes.
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <button
+                onClick={() => navigate("/start")}
+                className="proof-button-primary"
+                style={{ gap: 5 }}
+              >
+                <Play size={12} /> Start a Run
+              </button>
+              <button onClick={() => navigate("/compare")} className="proof-button" style={{ gap: 5 }}>
+                <GitCompare size={12} /> Compare Runs
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     );
   }
@@ -327,66 +354,6 @@ export default function Dashboard() {
         boxSizing: "border-box",
       }}
     >
-      <h1 className="sr-only">Dashboard</h1>
-
-      {/* ── Page header ──────────────────────────────────────── */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <AnomalyBanner
-            hasAlert={hasAlert}
-            hasDegradation={hasDegradation}
-            regressions={kpis.regressions}
-            degradedTiers={tierGroups
-              .filter((t) => t.status === "degraded")
-              .map((t) => t.tier)
-              .join(", ")}
-            onInvestigate={() => navigate("/compare")}
-          />
-          {!hasAlert && !hasDegradation && (
-            <nav aria-label="Quick actions" style={{ display: "flex", gap: 4 }}>
-              <button
-                onClick={() => navigate("/start")}
-                className="proof-button-primary proof-button-sm"
-                style={{ gap: 4 }}
-              >
-                <Play size={11} /> Start Run
-              </button>
-              <button
-                onClick={() => navigate("/compare")}
-                className="proof-button proof-button-sm"
-                style={{ gap: 4 }}
-              >
-                <GitCompare size={11} /> Compare
-              </button>
-              <button
-                onClick={() => navigate("/runs")}
-                className="proof-button-ghost proof-button-sm"
-                style={{ gap: 4 }}
-              >
-                <History size={11} /> All Runs
-              </button>
-              <button
-                onClick={() => navigate("/copilot")}
-                className="proof-button-ghost proof-button-sm"
-                style={{ gap: 4 }}
-              >
-                <Bot size={11} /> Copilot
-              </button>
-            </nav>
-          )}
-        </div>
-        <span style={{ fontSize: 10, color: "var(--proof-text-muted)", whiteSpace: "nowrap" }}>
-          Updated{" "}
-          {latestRun
-            ? new Date(latestRun.started).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "—"}
-        </span>
-      </div>
 
       {/* ── Hero KPI row ─────────────────────────────────────── */}
       <section

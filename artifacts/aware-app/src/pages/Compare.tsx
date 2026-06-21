@@ -38,6 +38,7 @@ export default function Compare() {
   const [computedRows, setComputedRows] = React.useState<DiffRow[]>([]);
   const [baseResults, setBaseResults] = React.useState<TestResult[]>([]);
   const [candResults, setCandResults] = React.useState<TestResult[]>([]);
+  const [resultsLoading, setResultsLoading] = React.useState(false);
   const [diffPage, setDiffPage] = React.useState(1);
   const DIFF_PAGE_SIZE = 25;
   // Derive effective run IDs: use URL param if set, otherwise pick from envRuns
@@ -48,6 +49,7 @@ export default function Compare() {
 
   React.useEffect(() => {
     if (!effectiveBaseline || !effectiveCandidate) return;
+    setResultsLoading(true);
     Promise.all([loadResultsForRun(effectiveBaseline), loadResultsForRun(effectiveCandidate)])
       .then(([br, cr]) => {
         setBaseResults(br);
@@ -56,6 +58,9 @@ export default function Compare() {
       })
       .catch((err: unknown) => {
         console.warn("[AWARE] Compare: failed to load run results", err);
+      })
+      .finally(() => {
+        setResultsLoading(false);
       });
   }, [effectiveBaseline, effectiveCandidate]);
 
@@ -325,9 +330,9 @@ export default function Compare() {
             )}
           </>
         }
-        isEmpty={filtered.length === 0 && !initState.loading}
+        isEmpty={filtered.length === 0 && !initState.loading && !resultsLoading}
         emptyMessage="No tests match your filters"
-        loading={filtered.length === 0 && initState.loading}
+        loading={(filtered.length === 0 && initState.loading) || resultsLoading}
         loadingCols={6}
         sidePanel={
           selectedDiff && selectedName ? (
@@ -356,7 +361,7 @@ export default function Compare() {
             <col />
           </colgroup>
           <thead
-            style={{ position: "sticky", top: 0, zIndex: 10, background: "var(--proof-surface)" }}
+            style={{ position: "sticky", top: 0, zIndex: 4, background: "var(--proof-surface)" }}
           >
             <tr>
               <th>
@@ -460,8 +465,7 @@ export default function Compare() {
                         : d.state === "fixed"
                           ? "rgba(30,142,62,0.04)"
                           : undefined,
-                    outline: isSelected ? "2px solid var(--proof-blue)" : "none",
-                    outlineOffset: -2,
+                    boxShadow: isSelected ? "inset 0 0 0 2px var(--proof-blue)" : "none",
                   }}
                 >
                   <td

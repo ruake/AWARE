@@ -127,6 +127,8 @@ export {
   loadSchedulerStatus,
 } from "./schedulerStatus";
 
+export { PROMOTION_GATE_THRESHOLD } from "./ciConfig";
+
 export { loadAllData, getDataInitState, subscribeToDataInit } from "./initData";
 
 export { getImageSource, preloadImage, revokeAllImages, isExternalImage } from "./images";

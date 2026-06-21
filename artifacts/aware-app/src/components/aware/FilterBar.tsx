@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, X } from "lucide-react";
 
 interface FilterOption {
   label: string;
@@ -14,6 +14,7 @@ interface FilterBarProps {
   searchPlaceholder?: string;
   filters?: FilterOption[];
   resultCount?: { filtered: number; total: number };
+  onClearAll?: () => void;
 }
 
 export function FilterBar({
@@ -22,6 +23,7 @@ export function FilterBar({
   searchPlaceholder = "Search…",
   filters,
   resultCount,
+  onClearAll,
 }: FilterBarProps) {
   return (
     <div
@@ -54,29 +56,59 @@ export function FilterBar({
         />
       </div>
 
-      {filters?.map((filter, i) => (
-        <div
-          key={filter.label}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          {i === 0 && <Filter size={13} style={{ color: "var(--proof-text-secondary)" }} />}
-          <select
-            className="proof-input"
-            value={filter.value}
-            onChange={(e) => filter.onChange(e.target.value)}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        {filters?.map((filter, i) => (
+          <div
+            key={filter.label}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
           >
-            {filter.options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      ))}
+            {i === 0 && <Filter size={13} style={{ color: "var(--proof-text-secondary)" }} />}
+            <select
+              className="proof-input"
+              value={filter.value}
+              onChange={(e) => filter.onChange(e.target.value)}
+              aria-label={`Filter by ${filter.label}`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  // select handles this naturally but we ensure focusability
+                }
+              }}
+            >
+              {filter.options.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
+
+        {onClearAll && (
+          <button
+            onClick={onClearAll}
+            className="proof-button-xs"
+            aria-label="Clear all filters"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              padding: "4px 8px",
+              background: "transparent",
+              border: "1px solid var(--proof-border)",
+              borderRadius: "var(--proof-radius-sm)",
+              color: "var(--proof-text-secondary)",
+              cursor: "pointer",
+            }}
+          >
+            <X size={12} />
+            <span>Clear All</span>
+          </button>
+        )}
+      </div>
 
       {resultCount && (
         <span

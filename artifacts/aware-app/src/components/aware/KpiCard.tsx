@@ -8,17 +8,21 @@ interface KpiCardProps {
 }
 
 export function KpiCard({ total, passRate, failedRuns, chartColor }: KpiCardProps) {
+  const displayTotal = total ?? "—";
+  const displayPassRate = passRate !== undefined && passRate !== null ? `${passRate}%` : "—%";
+  const displayFailedRuns = failedRuns ?? 0;
+
   return (
     <span style={{ fontSize: 11, color: "var(--proof-text-muted)" }}>
       <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--proof-text)" }}>
-        {total}
+        {displayTotal}
       </span>{" "}
       runs ·{" "}
       <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: chartColor }}>
-        {passRate}%
+        {displayPassRate}
       </span>{" "}
       avg ·{" "}
-      {failedRuns > 0 && (
+      {displayFailedRuns > 0 && (
         <span
           style={{
             fontFamily: "var(--font-mono)",
@@ -26,10 +30,10 @@ export function KpiCard({ total, passRate, failedRuns, chartColor }: KpiCardProp
             color: "var(--proof-red-bright)",
           }}
         >
-          {failedRuns} failed
+          {displayFailedRuns} failed
         </span>
       )}
-      {failedRuns === 0 && (
+      {displayFailedRuns === 0 && total !== undefined && total !== null && (
         <span style={{ color: "var(--proof-green)", fontWeight: 600 }}>all passing</span>
       )}
     </span>

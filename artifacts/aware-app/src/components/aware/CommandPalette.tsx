@@ -20,7 +20,7 @@ const ACTION_COMMANDS: SearchResult[] = [
     label: "> Run Full Suite",
     description: "Trigger the full Pytest test suite",
     type: "action",
-    href: "/pulse",
+    href: "/runs",
     icon: "▶",
   },
   {
@@ -36,7 +36,7 @@ const ACTION_COMMANDS: SearchResult[] = [
     label: "> Run Discovery",
     description: "Scans test sources and merges into auto-tests.json",
     type: "action",
-    href: "/pulse",
+    href: "/runs",
     icon: "🔍",
   },
   {
@@ -44,7 +44,7 @@ const ACTION_COMMANDS: SearchResult[] = [
     label: "> Build App",
     description: "pnpm build — validates data, typechecks, produces bundle",
     type: "action",
-    href: "/pulse",
+    href: "/runs",
     icon: "📦",
   },
   {
@@ -52,7 +52,7 @@ const ACTION_COMMANDS: SearchResult[] = [
     label: "> Run Puppeteer Tests",
     description: "Run lightweight browser tests via Puppeteer",
     type: "action",
-    href: "/pulse",
+    href: "/runs",
     icon: "🎭",
   },
   {
@@ -60,7 +60,7 @@ const ACTION_COMMANDS: SearchResult[] = [
     label: "> Run HTTP Tests",
     description: "Run HTTP-level tests (health checks, security headers)",
     type: "action",
-    href: "/pulse",
+    href: "/runs",
     icon: "🌐",
   },
   {
@@ -72,11 +72,11 @@ const ACTION_COMMANDS: SearchResult[] = [
     icon: "🔗",
   },
   {
-    id: "action_go_pulse",
-    label: "> Go to Pulse",
-    description: "Navigate to the Pulse page",
+    id: "action_go_runs",
+    label: "> Go to Runs",
+    description: "Navigate to the Runs page",
     type: "action",
-    href: "/pulse",
+    href: "/runs",
     icon: "📡",
   },
   {
@@ -112,7 +112,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         href: "/suites",
         icon: "📁",
       })),
-      ...testCases.slice(0, 30).map((tc) => ({
+      ...testCases.map((tc) => ({
         id: tc.id,
         label: tc.name,
         description: `${tc.category} · ${tc.priority} · ${tc.status}`,
@@ -128,7 +128,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         href: `/runs/${r.id}`,
         icon: "▶",
       })),
-      ...DIFF_ROWS.slice(0, 8).map((d) => ({
+      ...DIFF_ROWS.map((d) => ({
         id: `compare_${d.id}`,
         label: d.name,
         description: `baseline vs candidate · ${d.state}`,
@@ -229,8 +229,9 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       items = items.filter((r) => r.type === typeFilter);
     }
     if (!q) return items;
-    return fuse
-      .search(q)
+    const results = fuse.search(q);
+    return results
+      .slice(0, 50)
       .map((r) => r.item)
       .filter((r) => !typeFilter || r.type === typeFilter);
   }, [q, typeFilter, fuse, ALL_RESULTS]);
