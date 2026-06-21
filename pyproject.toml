@@ -1,0 +1,10 @@
+[project]
+name = "aware-tests"
+version = "0.1"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31",
+    "pytest>=7.0",
+    "pytest-xdist>=3.0",
+    "pytest-json-report>=1.5",
+]
