@@ -1,20 +1,35 @@
 {
-  "lastRun": "2026-06-12T06:00:00.000Z",
-  "lastRunBy": "ci-bot@aware.dev",
+  "lastRun": null,
+  "lastRunBy": null,
   "status": "healthy",
   "suites": [
+    {
+      "id": "suite_continuous",
+      "name": "Continuous — QA / Staging (Every 10min)",
+      "schedule": "*/10 * * * *",
+      "scheduleDesc": "Every 10 minutes",
+      "due": false,
+      "lastDispatched": null,
+      "lastConclusion": null,
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "idle",
+      "nextDue": null,
+      "environments": ["qa_staging"],
+      "runners": ["playwright", "pytest"]
+    },
     {
       "id": "suite_regression_qa",
       "name": "Full Regression — QA (Staging + Production)",
       "schedule": "0 */2 * * *",
       "scheduleDesc": "Every 2 hours",
       "due": false,
-      "lastDispatched": "2026-06-12T06:00:01.000Z",
-      "lastConclusion": "success",
-      "lastRunUrl": "https://github.com/your-org/your-repo/actions/runs/123",
+      "lastDispatched": null,
+      "lastConclusion": null,
+      "lastRunUrl": null,
       "activeRuns": 0,
       "status": "idle",
-      "nextDue": "2026-06-12T08:00:00.000Z",
+      "nextDue": null,
       "environments": ["qa_staging", "qa_prod"],
       "runners": ["playwright", "pytest"]
     },
@@ -24,12 +39,12 @@
       "schedule": "0 6 * * *",
       "scheduleDesc": "Daily at 06:00 UTC",
       "due": false,
-      "lastDispatched": "2026-06-12T06:00:01.000Z",
-      "lastConclusion": "success",
+      "lastDispatched": null,
+      "lastConclusion": null,
       "lastRunUrl": null,
       "activeRuns": 0,
       "status": "idle",
-      "nextDue": "2026-06-13T06:00:00.000Z",
+      "nextDue": null,
       "environments": ["uat_staging", "uat_prod"],
       "runners": ["playwright", "pytest"]
     },
@@ -39,12 +54,12 @@
       "schedule": "0 2 * * *",
       "scheduleDesc": "Daily at 02:00 UTC",
       "due": false,
-      "lastDispatched": "2026-06-12T02:00:01.000Z",
-      "lastConclusion": "success",
+      "lastDispatched": null,
+      "lastConclusion": null,
       "lastRunUrl": null,
       "activeRuns": 0,
       "status": "idle",
-      "nextDue": "2026-06-13T02:00:00.000Z",
+      "nextDue": null,
       "environments": ["prod_staging", "prod_prod"],
       "runners": ["playwright", "pytest"]
     },
@@ -54,12 +69,12 @@
       "schedule": "0 4 * * 1",
       "scheduleDesc": "Weekly on Monday at 04:00 UTC",
       "due": false,
-      "lastDispatched": "2026-06-08T04:00:01.000Z",
-      "lastConclusion": "success",
+      "lastDispatched": null,
+      "lastConclusion": null,
       "lastRunUrl": null,
       "activeRuns": 0,
       "status": "idle",
-      "nextDue": "2026-06-15T04:00:00.000Z",
+      "nextDue": null,
       "environments": ["qa_prod", "uat_prod", "prod_prod"],
       "runners": ["playwright"]
     },
@@ -94,37 +109,12 @@
       "runners": ["pytest"]
     }
   ],
-  "recentDispatches": [
-    {
-      "timestamp": "2026-06-12T06:00:01.000Z",
-      "suite": "suite_regression_qa",
-      "environments": ["qa_staging", "qa_prod"],
-      "dispatched": 2,
-      "failed": 0,
-      "workflow": "run-tests.yml"
-    },
-    {
-      "timestamp": "2026-06-12T06:00:01.000Z",
-      "suite": "suite_regression_uat",
-      "environments": ["uat_staging", "uat_prod"],
-      "dispatched": 2,
-      "failed": 0,
-      "workflow": "run-tests.yml"
-    },
-    {
-      "timestamp": "2026-06-12T02:00:01.000Z",
-      "suite": "suite_nightly_prod",
-      "environments": ["prod_staging", "prod_prod"],
-      "dispatched": 2,
-      "failed": 0,
-      "workflow": "run-tests.yml"
-    }
-  ],
+  "recentDispatches": [],
   "summary": {
-    "total": 6,
-    "scheduled": 3,
+    "total": 7,
+    "scheduled": 4,
     "due": 0,
-    "dispatched": 6,
+    "dispatched": 0,
     "running": 0
   }
 }
