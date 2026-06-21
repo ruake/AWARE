@@ -38,3 +38,24 @@ export function getPromotionDecision(runId: string): PromotionDecision | undefin
 export function getAllPromotionDecisions(): PromotionDecision[] {
   return _promotionsSnapshot;
 }
+
+export function setPromotionDecision(runId: string, decision: PromotionDecision["decision"]): void {
+  const existingIndex = _promotionDecisions.findIndex((d) => d.runId === runId);
+  if (existingIndex >= 0) {
+    _promotionDecisions[existingIndex] = {
+      ..._promotionDecisions[existingIndex],
+      decision,
+      decidedAt: new Date().toISOString(),
+      decidedBy: "User (Command)",
+    };
+  } else {
+    _promotionDecisions.push({
+      runId,
+      decision,
+      decidedAt: new Date().toISOString(),
+      decidedBy: "User (Command)",
+    });
+  }
+  updateSnapshot();
+  notify();
+}

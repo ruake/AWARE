@@ -1,6 +1,8 @@
 import type { Run, TestResult, TestDetail, TestRunPoint, DiffRow } from "./types";
 import { fetchJson } from "./dataFetcher";
 import { getCachedResults } from "./runsLoader";
+import { bus } from "./eventBus";
+import { memoize } from "./memo";
 
 // ── Notification stores (Zustand vanilla — same interface as pub/sub but managed by Zustand) ────
 import { createStore } from "zustand/vanilla";
@@ -55,6 +57,7 @@ export async function loadRuns(): Promise<void> {
   _runs.push(...data);
   updateRunsSnapshot();
   _runsNotify.setState({});
+  bus.emit("runs:loaded", { count: data.length });
 }
 
 export function getRunIndex(runId: string): number {
@@ -66,6 +69,8 @@ export function getRunById(id: string): Run | undefined {
 }
 
 // ── Dynamic diff computation ───────────────────────────────────────────────
+// Note: not memoized — getCachedResults is lazily populated (and mockable in
+// tests), so a per-call-site cache would return stale empty results.
 export function computeDiffRows(baseRunId: string, candRunId: string): DiffRow[] {
   const baseResults = getCachedResults(baseRunId);
   const candResults = getCachedResults(candRunId);
@@ -103,42 +108,49 @@ export function computeDiffRows(baseRunId: string, candRunId: string): DiffRow[]
   });
 }
 
-export function computeTestDetailForName(name: string): TestDetail {
-  const history: TestRunPoint[] = [];
-  for (const run of RUNS) {
-    const results = getTestResultsForRun(run.id);
-    const match = results.find((r) => {
-      const rn = r.name.toLowerCase();
-      const dn = name.toLowerCase().replace(/_/g, " ");
-      return rn === dn || rn.includes(dn) || dn.includes(rn);
-    });
-    if (match) {
-      history.push({
-        runId: run.id,
-        status: match.status === "PASS" ? "PASS" : "FAIL",
-        duration: match.duration,
-        env: run.env,
+export const computeTestDetailForName = memoize(
+  (name: string): TestDetail => {
+    const history: TestRunPoint[] = [];
+    for (const run of RUNS) {
+      const results = getTestResultsForRun(run.id);
+      const match = results.find((r) => {
+        const rn = r.name.toLowerCase();
+        const dn = name.toLowerCase().replace(/_/g, " ");
+        return rn === dn || rn.includes(dn) || dn.includes(rn);
       });
+      if (match) {
+        history.push({
+          runId: run.id,
+          status: match.status === "PASS" ? "PASS" : "FAIL",
+          duration: match.duration,
+          env: run.env,
+        });
+      }
     }
-  }
-  history.sort((a, b) => {
-    const ra = RUNS.find((r) => r.id === a.runId);
-    const rb = RUNS.find((r) => r.id === b.runId);
-    return new Date(ra?.started ?? 0).getTime() - new Date(rb?.started ?? 0).getTime();
-  });
-  const passCount = history.filter((h) => h.status === "PASS").length;
-  const passRate = history.length > 0 ? Math.round((passCount / history.length) * 100) : 0;
-  let flips = 0;
-  for (let i = 1; i < history.length; i++) {
-    if (history[i].status !== history[i - 1].status) flips++;
-  }
-  const flakinessScore = history.length > 1 ? Math.round((flips / (history.length - 1)) * 100) : 0;
-  const avgDuration =
-    history.length > 0
-      ? Math.round(history.reduce((s, h) => s + h.duration, 0) / history.length)
-      : 0;
-  return { history, passRate, flakinessScore, avgDuration };
-}
+    history.sort((a, b) => {
+      const ra = RUNS.find((r) => r.id === a.runId);
+      const rb = RUNS.find((r) => r.id === b.runId);
+      return new Date(ra?.started ?? 0).getTime() - new Date(rb?.started ?? 0).getTime();
+    });
+    const passCount = history.filter((h) => h.status === "PASS").length;
+    const passRate = history.length > 0 ? Math.round((passCount / history.length) * 100) : 0;
+    let flips = 0;
+    for (let i = 1; i < history.length; i++) {
+      if (history[i].status !== history[i - 1].status) flips++;
+    }
+    const flakinessScore = history.length > 1 ? Math.round((flips / (history.length - 1)) * 100) : 0;
+    const avgDuration =
+      history.length > 0
+        ? Math.round(history.reduce((s, h) => s + h.duration, 0) / history.length)
+        : 0;
+    return { history, passRate, flakinessScore, avgDuration };
+  },
+  (name) => name,
+);
+
+_runsNotify.subscribe(() => {
+  computeTestDetailForName.clear();
+});
 
 // ── ENV_SUMMARY ──────────────────────────────────────────────────────
 export interface EnvSummaryEntry {

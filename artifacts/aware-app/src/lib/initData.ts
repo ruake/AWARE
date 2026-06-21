@@ -4,6 +4,7 @@ import { loadTestSuites } from "./testSuites";
 import { loadPromotions } from "./promotions";
 import { loadSchedulerStatus } from "./schedulerStatus";
 import { loadAutoDiscoveredTests } from "./testDiscovery";
+import { bus } from "./eventBus";
 
 export interface DataInitState {
   loaded: boolean;
@@ -80,6 +81,7 @@ async function _doLoad(): Promise<void> {
   _runsReady = true;
   updateSnapshot();
   notify();
+  bus.emit("data:phase", { phase: 1, done: true });
 
   // ── Phase 2: Load supporting data concurrently ────────────────────────────
   await Promise.all([
@@ -91,10 +93,12 @@ async function _doLoad(): Promise<void> {
   recomputeAll();
   updateSnapshot();
   notify();
+  bus.emit("data:phase", { phase: 2, done: true });
 
   // ── Phase 3: Load full test results last (largest payload) ────────────────
   await safeLoad(loadAllResults, "results", errors);
   recomputeAll();
+  bus.emit("data:phase", { phase: 3, done: true });
 
   if (errors.length > 0) {
     _error = errors.join("; ");
