@@ -16,6 +16,7 @@ interface PageShellProps {
   pageSizeOptions?: number[];
   maxWidth?: string;
   pagination?: "top" | "bottom" | "both";
+  accentColor?: string;
 }
 
 export function PageShell({
@@ -33,6 +34,7 @@ export function PageShell({
   pageSizeOptions,
   maxWidth = "1600px",
   pagination,
+  accentColor = "var(--proof-blue)",
 }: PageShellProps) {
   const showPagination =
     pagination &&
@@ -66,27 +68,48 @@ export function PageShell({
         maxWidth,
         margin: "0 auto",
         width: "100%",
+        animation: "page-enter 0.2s ease-out both",
       }}
     >
       {/* Header */}
       <div
         style={{
           display: "flex",
-          alignItems: "flex-start",
+          alignItems: "center",
           justifyContent: "space-between",
           gap: 12,
-          padding: "16px 20px 0",
+          padding: "18px 24px 14px",
           flexShrink: 0,
+          borderBottom: "1px solid var(--proof-border)",
+          background: "rgba(0,0,0,0.15)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          position: "relative",
         }}
       >
+        {/* Left accent line */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 24,
+            width: 40,
+            height: 2,
+            borderRadius: 99,
+            background: accentColor,
+            opacity: 0.6,
+          }}
+        />
+
         <div style={{ minWidth: 0 }}>
           <h1
             style={{
-              fontSize: 18,
-              fontWeight: 700,
+              fontSize: 19,
+              fontWeight: 800,
               color: "var(--proof-text)",
               margin: 0,
-              lineHeight: 1.3,
+              lineHeight: 1.2,
+              letterSpacing: "-0.5px",
             }}
           >
             {title}
@@ -96,7 +119,7 @@ export function PageShell({
               style={{
                 fontSize: 12,
                 color: "var(--proof-text-secondary)",
-                margin: "2px 0 0",
+                margin: "3px 0 0",
                 lineHeight: 1.4,
               }}
             >
@@ -105,7 +128,9 @@ export function PageShell({
           )}
         </div>
         {headerActions && (
-          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>{headerActions}</div>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
+            {headerActions}
+          </div>
         )}
       </div>
 
@@ -113,8 +138,10 @@ export function PageShell({
       {filters && (
         <div
           style={{
-            padding: "12px 20px 0",
+            padding: "10px 24px",
             flexShrink: 0,
+            borderBottom: "1px solid var(--proof-border-light)",
+            background: "rgba(0,0,0,0.08)",
           }}
         >
           {filters}
@@ -123,7 +150,7 @@ export function PageShell({
 
       {/* Top pagination */}
       {hasPaginationTop && (
-        <div style={{ padding: "8px 20px 0", flexShrink: 0 }}>{renderPagination()}</div>
+        <div style={{ padding: "8px 24px 0", flexShrink: 0 }}>{renderPagination()}</div>
       )}
 
       {/* Content area */}
@@ -133,7 +160,7 @@ export function PageShell({
           minHeight: 0,
           overflowY: "auto",
           overflowX: "hidden",
-          padding: "12px 20px 20px",
+          padding: "16px 24px 24px",
         }}
       >
         {children}
@@ -141,7 +168,7 @@ export function PageShell({
 
       {/* Bottom pagination */}
       {hasPaginationBottom && (
-        <div style={{ padding: "0 20px 12px", flexShrink: 0 }}>{renderPagination()}</div>
+        <div style={{ padding: "0 24px 16px", flexShrink: 0 }}>{renderPagination()}</div>
       )}
     </div>
   );

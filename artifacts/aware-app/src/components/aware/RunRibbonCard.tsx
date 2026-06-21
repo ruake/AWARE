@@ -1,4 +1,5 @@
 import React from "react";
+import { Clock, Calendar, ArrowRight } from "lucide-react";
 
 interface RunRibbonCardProps {
   label: string;
@@ -20,6 +21,8 @@ export function RunRibbonCard({
   index,
 }: RunRibbonCardProps) {
   const [now, setNow] = React.useState(Date.now);
+  const [hovered, setHovered] = React.useState(false);
+
   React.useEffect(() => {
     const tick = () => setNow(Date.now());
     tick();
@@ -46,7 +49,7 @@ export function RunRibbonCard({
     return `${Math.floor(hrs / 24)}d ago`;
   }, [run?.started, nextDue, now]);
 
-  const c = run
+  const passColor = run
     ? run.passPct >= 95
       ? "var(--proof-green)"
       : run.passPct >= 80
@@ -70,110 +73,152 @@ export function RunRibbonCard({
             }
           : undefined
       }
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 10,
-        padding: "10px 14px",
-        borderRadius: "var(--proof-radius-lg)",
-        background: "var(--proof-surface)",
-        border: `1px solid var(--proof-border)`,
+        gap: 12,
+        padding: "12px 16px",
+        borderRadius: 16,
+        background: hovered
+          ? `linear-gradient(90deg, ${accent}10, var(--proof-surface-2))`
+          : `linear-gradient(90deg, ${accent}08, var(--proof-surface))`,
+        border: `1px solid ${hovered ? accent + "30" : "var(--proof-border)"}`,
         borderLeft: `3px solid ${accent}`,
         cursor: onClick ? "pointer" : "default",
-        transition:
-          "border-color var(--proof-transition), background var(--proof-transition), box-shadow var(--proof-transition), transform var(--proof-transition)",
+        transition: "all 160ms cubic-bezier(0.2,0,0,1)",
+        boxShadow: hovered
+          ? `0 0 0 1px ${accent}20, 0 8px 24px rgba(0,0,0,0.5), 0 0 24px ${accent}10`
+          : "0 0 0 1px rgba(99,130,178,0.08), 0 2px 8px rgba(0,0,0,0.3)",
+        transform: hovered ? "translateY(-2px)" : "none",
         minWidth: 0,
-        animation: `card-enter 0.3s cubic-bezier(0.2,0,0,1) ${index * 60}ms both`,
-      }}
-      onMouseEnter={(e) => {
-        if (onClick) {
-          e.currentTarget.style.background = "var(--proof-hover)";
-          e.currentTarget.style.boxShadow = "var(--proof-shadow-card-hover)";
-          e.currentTarget.style.transform = "translateY(-1px)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = "var(--proof-surface)";
-        e.currentTarget.style.boxShadow = "";
-        e.currentTarget.style.transform = "";
-      }}
-      onMouseDown={(e) => {
-        if (onClick) e.currentTarget.style.transform = "scale(0.985)";
-      }}
-      onMouseUp={(e) => {
-        if (onClick) e.currentTarget.style.transform = "translateY(-1px)";
+        animation: `card-enter 0.35s cubic-bezier(0.2,0,0,1) ${index * 60}ms both`,
+        position: "relative",
+        overflow: "hidden",
       }}
     >
+      {/* Icon */}
       <div
         style={{
           flexShrink: 0,
-          width: 28,
-          height: 28,
-          borderRadius: 8,
-          background: `${accent}18`,
+          width: 36,
+          height: 36,
+          borderRadius: 10,
+          background: `linear-gradient(135deg, ${accent}24, ${accent}10)`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           border: `1px solid ${accent}30`,
+          boxShadow: `0 0 12px ${accent}18`,
         }}
       >
         {icon}
       </div>
+
+      {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontSize: 10,
-            fontWeight: 600,
-            color: "var(--proof-text-secondary)",
+            fontSize: 9.5,
+            fontWeight: 700,
+            color: "var(--proof-text-muted)",
             textTransform: "uppercase",
-            letterSpacing: "0.3px",
+            letterSpacing: "0.7px",
+            marginBottom: 3,
           }}
         >
           {label}
         </div>
         <div
           style={{
-            fontSize: 12,
+            fontSize: 12.5,
             fontWeight: 700,
             color: "var(--proof-text)",
             fontFamily: "var(--font-mono)",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
+            letterSpacing: "-0.3px",
           }}
         >
           {run?.id ?? (nextDue ? "Scheduled" : "—")}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
           {run ? (
             <>
-              <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>{run.env}</span>
               <span
                 style={{
-                  width: 2,
-                  height: 2,
-                  borderRadius: "50%",
-                  background: "var(--proof-border-strong)",
-                  display: "inline-block",
+                  fontSize: 10,
+                  color: "var(--proof-text-muted)",
+                  background: "var(--proof-subtle-bg)",
+                  border: "1px solid var(--proof-border-light)",
+                  borderRadius: 5,
+                  padding: "1px 5px",
                 }}
-              />
-              <span style={{ fontSize: 10, color: c, fontWeight: 700 }}>{run.passPct}%</span>
+              >
+                {run.env}
+              </span>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color: passColor,
+                  fontFamily: "var(--font-mono)",
+                  background: `${passColor}14`,
+                  border: `1px solid ${passColor}25`,
+                  borderRadius: 5,
+                  padding: "1px 5px",
+                  letterSpacing: "-0.3px",
+                }}
+              >
+                {run.passPct}%
+              </span>
             </>
           ) : nextDue ? (
-            <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>Next due</span>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 3,
+                fontSize: 10,
+                color: accent,
+                fontWeight: 600,
+              }}
+            >
+              <Calendar size={9} />
+              Next due
+            </span>
           ) : null}
+
           <span
             style={{
-              width: 2,
-              height: 2,
-              borderRadius: "50%",
-              background: "var(--proof-border-strong)",
-              display: "inline-block",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 3,
+              fontSize: 10,
+              color: "var(--proof-text-muted)",
             }}
-          />
-          <span style={{ fontSize: 10, color: "var(--proof-text-muted)" }}>{age}</span>
+          >
+            <Clock size={9} />
+            {age}
+          </span>
         </div>
       </div>
+
+      {/* Hover arrow */}
+      {onClick && (
+        <ArrowRight
+          size={14}
+          style={{
+            color: accent,
+            opacity: hovered ? 0.8 : 0,
+            transition: "opacity 160ms ease, transform 160ms ease",
+            transform: hovered ? "translateX(0)" : "translateX(-4px)",
+            flexShrink: 0,
+          }}
+        />
+      )}
     </div>
   );
 }

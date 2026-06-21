@@ -1,6 +1,6 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
-import { Search, Sun, Moon, WifiOff } from "lucide-react";
+import { Search, Sun, Moon, WifiOff, Zap } from "lucide-react";
 import { useDataInit } from "@/lib/hooks/useData";
 import { EnvTierSelector } from "./EnvTierSelector";
 import { EnvSelector } from "./EnvSelector";
@@ -65,51 +65,73 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
   return (
     <header
       style={{
-        height: "var(--proof-title-bar-height)",
-        minHeight: "var(--proof-title-bar-height)",
+        height: 44,
+        minHeight: 44,
         background: "var(--proof-title-bar-bg)",
         display: "flex",
         alignItems: "center",
         padding: "0 12px",
-        gap: 6,
+        gap: 8,
         flexShrink: 0,
         userSelect: "none",
         borderBottom: "1px solid var(--proof-border)",
+        position: "relative",
       }}
     >
+      {/* Subtle top highlight */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 1,
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.3) 30%, rgba(96,165,250,0.2) 70%, transparent 100%)",
+          pointerEvents: "none",
+        }}
+      />
+
       {/* Logo */}
       <button
         onClick={() => navigate("/")}
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 7,
+          gap: 8,
           flexShrink: 0,
           background: "transparent",
           border: "none",
           cursor: "pointer",
-          padding: "2px 4px",
-          borderRadius: "var(--proof-radius-sm)",
+          padding: "3px 6px",
+          borderRadius: 8,
+          transition: "background 120ms ease",
         }}
         title="Dashboard"
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.background = "transparent";
+        }}
       >
+        {/* Logo icon */}
         <span
           style={{
-            width: 20,
-            height: 20,
-            borderRadius: 6,
-            background:
-              "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-blue-bright) 100%)",
+            width: 24,
+            height: 24,
+            borderRadius: 7,
+            background: "linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.08), 0 2px 6px var(--proof-blue-glow)",
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 2px 8px rgba(59,130,246,0.4)",
           }}
         >
           <svg
-            width="11"
-            height="11"
+            width="13"
+            height="13"
             viewBox="0 0 24 24"
             fill="none"
             stroke="white"
@@ -120,22 +142,21 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
           </svg>
         </span>
+
         <span
           style={{
-            fontSize: 13,
+            fontSize: 13.5,
             fontWeight: 800,
             color: "var(--proof-text)",
-            letterSpacing: "-0.4px",
+            letterSpacing: "-0.5px",
           }}
         >
           A.W.A.R.E.
         </span>
       </button>
 
-      {/* Breadcrumb */}
-      <span
-        style={{ color: "var(--proof-border-strong)", fontSize: 13, fontWeight: 300, opacity: 0.6 }}
-      >
+      {/* Separator + breadcrumb */}
+      <span style={{ color: "var(--proof-border-strong)", fontSize: 16, fontWeight: 300, opacity: 0.4 }}>
         /
       </span>
       <span
@@ -144,36 +165,39 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
           color: "var(--proof-text-secondary)",
           fontWeight: 500,
           letterSpacing: "-0.1px",
+          background: "var(--proof-subtle-bg)",
+          padding: "2px 8px",
+          borderRadius: 6,
+          border: "1px solid var(--proof-border-light)",
         }}
       >
         {label}
       </span>
 
-      {/* Data status */}
+      {/* Loading pill */}
       {dataState.loading && (
         <span
           style={{
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
-            gap: 4,
-            padding: "2px 7px",
-            borderRadius: "var(--proof-radius-full)",
+            gap: 5,
+            padding: "2px 8px",
+            borderRadius: 99,
             background: "var(--proof-blue-bg)",
             border: "1px solid var(--proof-blue-border)",
             fontSize: 10,
             fontWeight: 600,
             color: "var(--proof-blue-bright)",
-            marginLeft: 2,
           }}
         >
           <span
             style={{
-              width: 4,
-              height: 4,
+              width: 5,
+              height: 5,
               borderRadius: "50%",
               background: "var(--proof-blue-bright)",
-              animation: "badge-pulse 1s ease-in-out infinite",
               display: "inline-block",
+              animation: "badge-pulse 1s ease-in-out infinite",
             }}
           />
           Loading…
@@ -182,17 +206,16 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
       {!!dataState.error && !dataState.loading && (
         <span
           style={{
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
-            gap: 4,
-            padding: "2px 7px",
-            borderRadius: "var(--proof-radius-full)",
+            gap: 5,
+            padding: "2px 8px",
+            borderRadius: 99,
             background: "var(--proof-red-bg)",
             border: "1px solid var(--proof-red-border)",
             fontSize: 10,
             fontWeight: 600,
             color: "var(--proof-red-bright)",
-            marginLeft: 2,
           }}
         >
           <WifiOff size={9} />
@@ -202,96 +225,81 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
 
       <div style={{ flex: 1 }} />
 
-      {/* Global env + suite filters */}
-      <EnvSelector
-        currentEnvIds={envSnap.envIds}
-        onEnvChange={setSelectedEnvIds}
-        variant="topbar"
-      />
-      <SuiteSelector
-        currentSuiteIds={suiteSnap.suiteIds}
-        onSuiteChange={setSelectedSuiteIds}
-        variant="topbar"
-      />
-
-      {/* Divider */}
+      {/* Filters cluster */}
       <div
         style={{
-          width: 1,
-          height: 16,
-          background: "var(--proof-border)",
-          margin: "0 4px",
-          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          background: "var(--proof-subtle-bg)",
+          border: "1px solid var(--proof-border)",
+          borderRadius: 10,
+          padding: "3px 6px",
+          height: 32,
         }}
-      />
+      >
+        <EnvSelector
+          currentEnvIds={envSnap.envIds}
+          onEnvChange={setSelectedEnvIds}
+          variant="topbar"
+        />
+        <div style={{ width: 1, height: 14, background: "var(--proof-border)", flexShrink: 0 }} />
+        <SuiteSelector
+          currentSuiteIds={suiteSnap.suiteIds}
+          onSuiteChange={setSelectedSuiteIds}
+          variant="topbar"
+        />
+      </div>
 
-      {/* Env tier selector (includes pass rates) */}
+      {/* Divider */}
+      <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
+
+      {/* Tier selector */}
       <EnvTierSelector />
 
       {/* Divider */}
-      <div
-        style={{
-          width: 1,
-          height: 16,
-          background: "var(--proof-border)",
-          margin: "0 4px",
-          flexShrink: 0,
-        }}
-      />
+      <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
 
-      <style>{`
-        .topbar-search-button {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          padding: 3px 10px;
-          font-size: 11.5px;
-          cursor: pointer;
-          border: 1px solid var(--proof-border);
-          border-radius: var(--proof-radius-sm);
-          background: var(--proof-surface-2);
-          color: var(--proof-text-muted);
-          transition: all var(--proof-transition);
-          font-family: var(--font-sans);
-          line-height: 16px;
-        }
-        .topbar-search-button:hover {
-          border-color: var(--proof-border-strong);
-          color: var(--proof-text);
-          background: var(--proof-surface-3);
-        }
-        .topbar-theme-button {
-          width: 28px;
-          height: 28px;
-          padding: 0;
-          border: none;
-          background: transparent;
-          cursor: pointer;
-          color: var(--proof-text-muted);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: var(--proof-radius-sm);
-          transition: all var(--proof-transition);
-        }
-        .topbar-theme-button:hover {
-          color: var(--proof-text);
-          background: var(--proof-hover);
-        }
-      `}</style>
-      {/* Search */}
+      {/* Search button */}
       <button
         onClick={onSearchOpen}
         title="Search (⌘K)"
-        className="topbar-search-button"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "5px 10px",
+          fontSize: 11.5,
+          cursor: "pointer",
+          border: "1px solid var(--proof-border)",
+          borderRadius: 8,
+          background: "var(--proof-surface-2)",
+          color: "var(--proof-text-muted)",
+          transition: "all 120ms ease",
+          fontFamily: "var(--font-sans)",
+          height: 30,
+          minWidth: 120,
+        }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.borderColor = "var(--proof-border-strong)";
+          el.style.color = "var(--proof-text)";
+          el.style.background = "var(--proof-surface-3)";
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.borderColor = "var(--proof-border)";
+          el.style.color = "var(--proof-text-muted)";
+          el.style.background = "var(--proof-surface-2)";
+        }}
       >
         <Search size={11} />
-        <span>Search</span>
+        <span style={{ flex: 1, textAlign: "left" }}>Search…</span>
         <kbd
           style={{
             fontSize: 9,
             border: "1px solid var(--proof-border-strong)",
-            borderRadius: 3,
+            borderRadius: 4,
             padding: "0 4px",
             fontFamily: "var(--font-mono)",
             lineHeight: "14px",
@@ -308,7 +316,33 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
         onClick={toggleTheme}
         title={isDark ? "Light mode" : "Dark mode"}
         aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-        className="topbar-theme-button"
+        style={{
+          width: 30,
+          height: 30,
+          padding: 0,
+          border: "1px solid var(--proof-border)",
+          background: "var(--proof-surface-2)",
+          cursor: "pointer",
+          color: "var(--proof-text-muted)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 8,
+          transition: "all 120ms ease",
+          flexShrink: 0,
+        }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.color = "var(--proof-text)";
+          el.style.background = "var(--proof-surface-3)";
+          el.style.borderColor = "var(--proof-border-strong)";
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.color = "var(--proof-text-muted)";
+          el.style.background = "var(--proof-surface-2)";
+          el.style.borderColor = "var(--proof-border)";
+        }}
       >
         {isDark ? <Sun size={13} /> : <Moon size={13} />}
       </button>

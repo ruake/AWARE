@@ -262,12 +262,12 @@ export default function Dashboard() {
            <div className="proof-skeleton" style={{ width: 300, height: 24, borderRadius: 4 }} />
            <div className="proof-skeleton" style={{ width: 150, height: 12, borderRadius: 4 }} />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="proof-skeleton" style={{ height: 100, borderRadius: "var(--proof-radius-lg)" }} />
           ))}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
           {[1, 2, 3].map((i) => (
             <div key={i} className="proof-skeleton" style={{ height: 64, borderRadius: "var(--proof-radius-lg)" }} />
           ))}
@@ -360,7 +360,7 @@ export default function Dashboard() {
         aria-label="Key metrics"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
           gap: 10,
         }}
       >
@@ -414,7 +414,7 @@ export default function Dashboard() {
       </section>
 
       {/* ── Run ribbon (temporal context — above tiers) ──────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
         <RunRibbonCard
           label="Latest Run"
           run={latestRun}
@@ -445,7 +445,7 @@ export default function Dashboard() {
         aria-label="Environment tiers"
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
           gap: 10,
         }}
       >

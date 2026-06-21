@@ -48,16 +48,23 @@ export function subscribeToDiffRows(cb: () => void): () => void {
 // Backward-compat
 export const DIFF_ROWS: readonly DiffRow[] = _diffRows;
 
-let _runsLoaded = false;
+let _runsPromise: Promise<void> | null = null;
 export async function loadRuns(): Promise<void> {
-  if (_runsLoaded) return;
-  _runsLoaded = true;
-  const data = await fetchJson<Run[]>("runs.json");
-  _runs.length = 0;
-  _runs.push(...data);
-  updateRunsSnapshot();
-  _runsNotify.setState({});
-  bus.emit("runs:loaded", { count: data.length });
+  if (_runsPromise) return _runsPromise;
+  _runsPromise = (async () => {
+    try {
+      const data = await fetchJson<Run[]>("runs.json");
+      _runs.length = 0;
+      _runs.push(...data);
+      updateRunsSnapshot();
+      _runsNotify.setState({});
+      bus.emit("runs:loaded", { count: data.length });
+    } catch (err) {
+      _runsPromise = null;
+      throw err;
+    }
+  })();
+  return _runsPromise;
 }
 
 export function getRunIndex(runId: string): number {

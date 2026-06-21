@@ -5,17 +5,20 @@ import { _notifyTC, subscribeToTestCases } from "./store";
 export { subscribeToTestCases as subscribeToAutoTests };
 
 let _autoTests: TestCase[] = [];
-let _testsLoaded = false;
+let _testsPromise: Promise<void> | null = null;
 
 export async function loadAutoDiscoveredTests(): Promise<void> {
-  if (_testsLoaded) return;
-  _testsLoaded = true;
-  try {
-    _autoTests = await fetchJson<TestCase[]>("auto-tests.json");
-    _notifyTC();
-  } catch (err) {
-    console.warn("[AWARE] auto-tests.json unavailable — using empty list.", err);
-  }
+  if (_testsPromise) return _testsPromise;
+  _testsPromise = (async () => {
+    try {
+      _autoTests = await fetchJson<TestCase[]>("auto-tests.json");
+      _notifyTC();
+    } catch (err) {
+      _testsPromise = null;
+      console.warn("[AWARE] auto-tests.json unavailable — using empty list.", err);
+    }
+  })();
+  return _testsPromise;
 }
 
 export function getAutoDiscoveredTests(): TestCase[] {

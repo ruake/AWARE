@@ -12,7 +12,7 @@ interface CategoryHeatmapProps {
   data: { env: string; status: "PASS" | "FAIL" }[];
 }
 
-export function CategoryHeatmap({ data }: CategoryHeatmapProps) {
+export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: CategoryHeatmapProps) {
   const grid = React.useMemo(() => {
     const envs = [...new Set(data.map((d) => d.env))].sort();
     const groups: { label: string; cells: HeatmapCell[] }[] = [];
@@ -176,4 +176,4 @@ export function CategoryHeatmap({ data }: CategoryHeatmapProps) {
       </div>
     </div>
   );
-}
+});
