@@ -1,6 +1,7 @@
 import type { TestSuite, SuiteNode } from "./types";
 import { subscribeToTestSuites, _notifyTS } from "./store";
 import { fetchJson } from "./dataFetcher";
+import { SuiteTree } from "./suiteTree";
 
 export { subscribeToTestSuites };
 
@@ -37,4 +38,8 @@ export function buildSuiteTree(): SuiteNode[] {
       .map((c) => ({ suite: c, children: [], depth: 1 })),
     depth: 0,
   }));
+}
+
+export function getSuiteTree(): SuiteTree {
+  return SuiteTree.from(buildSuiteTree());
 }

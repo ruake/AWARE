@@ -1,4 +1,5 @@
 import type { Job, JobStatus, JobType, JobSummary } from "../types";
+import { bus } from "../eventBus";
 
 const STORAGE_KEY = "aware-jobs";
 
@@ -61,6 +62,7 @@ export function createJob(job: Omit<Job, "createdAt">): Job {
   const jobs = getJobs();
   jobs.unshift(full);
   persist();
+  bus.emit("jobs:updated", { jobId: full.id });
   return full;
 }
 
@@ -70,6 +72,7 @@ export function updateJob(id: string, updates: Partial<Job>): Job | undefined {
   if (idx === -1) return;
   jobs[idx] = { ...jobs[idx], ...updates };
   persist();
+  bus.emit("jobs:updated", { jobId: id });
   return jobs[idx];
 }
 
@@ -79,6 +82,7 @@ export function deleteJob(id: string) {
   if (idx !== -1) {
     jobs.splice(idx, 1);
     persist();
+    bus.emit("jobs:updated", { jobId: id });
   }
 }
 
