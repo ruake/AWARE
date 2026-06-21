@@ -177,7 +177,7 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
         </div>
 
         {/* Sparkline — top-right */}
-        {sparkData.length >= 2 && (
+        {sparkData.length >= 1 && (
           <SparkLine data={sparkData} color={accentColor} width={64} height={20} />
         )}
       </div>

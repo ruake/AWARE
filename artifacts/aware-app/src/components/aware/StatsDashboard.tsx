@@ -25,6 +25,12 @@ const TOOLTIP_STYLE = {
   },
 };
 
+const STATUS_BAR_COLORS: Record<string, string> = {
+  active: "var(--proof-green)",
+  disabled: "var(--proof-yellow)",
+  deprecated: "var(--proof-red)",
+};
+
 export function StatsDashboard({
   stats,
   colFilters: _colFilters,
@@ -58,6 +64,10 @@ export function StatsDashboard({
     value: v,
   }));
 
+  const hasStatusData = statusData.length > 0;
+  const hasPriorityData = priorityData.length > 0;
+  const hasCategoryData = catPieData.length > 0;
+
   return (
     <>
       <div
@@ -70,35 +80,41 @@ export function StatsDashboard({
       >
         <div
           className="proof-card"
-          style={{ padding: "8px 14px", cursor: "pointer", flex: 1, minWidth: 100 }}
+          style={{ padding: "8px 14px", cursor: "pointer", flex: 1, minWidth: 90 }}
           onClick={() => onToggleFilter("_clear", "")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && onToggleFilter("_clear", "")}
         >
-          <div style={{ fontSize: 20, fontWeight: 800, color: "var(--proof-blue)" }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: "var(--proof-blue)", lineHeight: 1.2 }}>
             {stats.total}
           </div>
-          <div style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>Total Tests</div>
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>Total Tests</div>
         </div>
         <div
           className="proof-card"
-          style={{ padding: "8px 14px", cursor: "pointer", flex: 1, minWidth: 100 }}
+          style={{ padding: "8px 14px", cursor: "pointer", flex: 1, minWidth: 90 }}
           onClick={() => onToggleFilter("automated", "true")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && onToggleFilter("automated", "true")}
         >
-          <div style={{ fontSize: 20, fontWeight: 800, color: "var(--proof-green)" }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: "var(--proof-green)", lineHeight: 1.2 }}>
             {stats.automated}
           </div>
-          <div style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>Automated</div>
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>Automated</div>
         </div>
-        <div className="proof-card" style={{ padding: "8px 14px", flex: 1, minWidth: 100 }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: "var(--proof-text)" }}>
+        <div className="proof-card" style={{ padding: "8px 14px", flex: 1, minWidth: 90 }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: "var(--proof-text)", lineHeight: 1.2 }}>
             {stats.coverage}%
           </div>
-          <div style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>Coverage</div>
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>Coverage</div>
         </div>
-        <div className="proof-card" style={{ padding: "8px 14px", flex: 1, minWidth: 100 }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: "var(--proof-text)" }}>
+        <div className="proof-card" style={{ padding: "8px 14px", flex: 1, minWidth: 90 }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: "var(--proof-text)", lineHeight: 1.2 }}>
             {stats.avgVersion}
           </div>
-          <div style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>Avg Version</div>
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>Avg Version</div>
         </div>
       </div>
       <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
@@ -108,25 +124,37 @@ export function StatsDashboard({
               fontSize: 11,
               fontWeight: 600,
               color: "var(--proof-text-secondary)",
-              marginBottom: 4,
+              marginBottom: 6,
             }}
           >
             By Status
           </div>
-          <ResponsiveContainer width="100%" height={60}>
-            <BarChart data={statusData} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
-              <XAxis dataKey="status" tick={TICK_STYLE} axisLine={false} tickLine={false} />
-              <YAxis hide domain={[0, "auto"]} />
-              <Tooltip {...TOOLTIP_STYLE} cursor={false} />
-              <Bar
-                dataKey="count"
-                fill="#5b8af5"
-                radius={[3, 3, 0, 0]}
-                onClick={(data) => onToggleFilter("status", String(data.status))}
-                style={{ cursor: "pointer" }}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          {hasStatusData ? (
+            <ResponsiveContainer width="100%" height={60}>
+              <BarChart data={statusData} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
+                <XAxis dataKey="status" tick={TICK_STYLE} axisLine={false} tickLine={false} />
+                <YAxis hide domain={[0, "auto"]} />
+                <Tooltip {...TOOLTIP_STYLE} cursor={{ fill: "var(--proof-hover-light)" }} />
+                <Bar
+                  dataKey="count"
+                  radius={[3, 3, 0, 0]}
+                  onClick={(data) => onToggleFilter("status", String(data.status))}
+                  style={{ cursor: "pointer" }}
+                >
+                  {statusData.map((entry, i) => (
+                    <Cell
+                      key={i}
+                      fill={STATUS_BAR_COLORS[entry.status] ?? "var(--proof-blue)"}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ height: 60, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "var(--proof-text-muted)" }}>
+              No data
+            </div>
+          )}
         </div>
         <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
           <div
@@ -134,25 +162,31 @@ export function StatsDashboard({
               fontSize: 11,
               fontWeight: 600,
               color: "var(--proof-text-secondary)",
-              marginBottom: 4,
+              marginBottom: 6,
             }}
           >
             By Priority
           </div>
-          <ResponsiveContainer width="100%" height={60}>
-            <BarChart data={priorityData} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
-              <XAxis dataKey="priority" tick={TICK_STYLE} axisLine={false} tickLine={false} />
-              <YAxis hide domain={[0, "auto"]} />
-              <Tooltip {...TOOLTIP_STYLE} cursor={false} />
-              <Bar
-                dataKey="count"
-                fill="#5b8af5"
-                radius={[3, 3, 0, 0]}
-                onClick={(data) => onToggleFilter("priority", String(data.priority))}
-                style={{ cursor: "pointer" }}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          {hasPriorityData ? (
+            <ResponsiveContainer width="100%" height={60}>
+              <BarChart data={priorityData} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
+                <XAxis dataKey="priority" tick={TICK_STYLE} axisLine={false} tickLine={false} />
+                <YAxis hide domain={[0, "auto"]} />
+                <Tooltip {...TOOLTIP_STYLE} cursor={{ fill: "var(--proof-hover-light)" }} />
+                <Bar
+                  dataKey="count"
+                  fill="var(--proof-blue)"
+                  radius={[3, 3, 0, 0]}
+                  onClick={(data) => onToggleFilter("priority", String(data.priority))}
+                  style={{ cursor: "pointer" }}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ height: 60, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "var(--proof-text-muted)" }}>
+              No data
+            </div>
+          )}
         </div>
         <div className="proof-card" style={{ padding: "8px 10px", flex: 1, minWidth: 0 }}>
           <div
@@ -160,30 +194,36 @@ export function StatsDashboard({
               fontSize: 11,
               fontWeight: 600,
               color: "var(--proof-text-secondary)",
-              marginBottom: 4,
+              marginBottom: 6,
             }}
           >
             By Category
           </div>
-          <ResponsiveContainer width="100%" height={80}>
-            <PieChart>
-              <Pie
-                data={catPieData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={35}
-                innerRadius={0}
-                paddingAngle={1}
-              >
-                {catPieData.map((_, i) => (
-                  <Cell key={i} fill={catColors[i % catColors.length]} />
-                ))}
-              </Pie>
-              <Tooltip {...TOOLTIP_STYLE} />
-            </PieChart>
-          </ResponsiveContainer>
+          {hasCategoryData ? (
+            <ResponsiveContainer width="100%" height={80}>
+              <PieChart>
+                <Pie
+                  data={catPieData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={35}
+                  innerRadius={14}
+                  paddingAngle={2}
+                >
+                  {catPieData.map((_, i) => (
+                    <Cell key={i} fill={catColors[i % catColors.length]} />
+                  ))}
+                </Pie>
+                <Tooltip {...TOOLTIP_STYLE} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ height: 80, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "var(--proof-text-muted)" }}>
+              No data
+            </div>
+          )}
         </div>
       </div>
     </>

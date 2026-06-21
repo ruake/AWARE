@@ -120,11 +120,11 @@ export function RunRibbonCard({
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontSize: 9.5,
+            fontSize: 11,
             fontWeight: 700,
-            color: "var(--proof-text-muted)",
+            color: "var(--proof-text-secondary)",
             textTransform: "uppercase",
-            letterSpacing: "0.7px",
+            letterSpacing: "0.5px",
             marginBottom: 3,
           }}
         >
@@ -187,7 +187,7 @@ export function RunRibbonCard({
               }}
             >
               <Calendar size={9} />
-              Next due
+              {new Date(nextDue).getTime() > Date.now() ? "Scheduled" : "Queued"}
             </span>
           ) : null}
 

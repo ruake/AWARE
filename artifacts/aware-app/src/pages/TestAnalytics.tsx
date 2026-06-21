@@ -196,7 +196,7 @@ export default function TestAnalytics() {
     );
   }
 
-  if (diffs.length === 0 || (!detailsLoading && testDetails.length === 0)) {
+  if (!detailsLoading && testDetails.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: 64 }}>
         <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>

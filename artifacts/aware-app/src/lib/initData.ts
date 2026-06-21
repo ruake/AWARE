@@ -1,4 +1,4 @@
-import { loadRuns, recomputeAll } from "./runs";
+import { loadRuns, loadDiffRows, recomputeAll } from "./runs";
 import { loadAllResults } from "./runsLoader";
 import { loadTestSuites } from "./testSuites";
 import { loadPromotions } from "./promotions";
@@ -85,6 +85,7 @@ async function _doLoad(): Promise<void> {
 
   // ── Phase 2: Load supporting data concurrently ────────────────────────────
   await Promise.all([
+    safeLoad(loadDiffRows, "diff", errors),
     safeLoad(loadTestSuites, "suites", errors),
     safeLoad(loadPromotions, "promotions", errors),
     safeLoad(loadSchedulerStatus, "scheduler", errors),

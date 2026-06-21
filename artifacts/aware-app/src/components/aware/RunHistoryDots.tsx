@@ -44,16 +44,20 @@ export function RunHistoryDots({ testName }: RunHistoryDotsProps) {
   const visible = dots.slice(0, MAX_DOTS);
   const extra = dots.length - MAX_DOTS;
 
+  const passCount = dots.filter((d) => d.status === "PASS").length;
+  const passRate = Math.round((passCount / dots.length) * 100);
+
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 3,
+        gap: 2,
         flexWrap: "nowrap",
         whiteSpace: "nowrap",
       }}
       onClick={(e) => e.stopPropagation()}
+      title={`${passRate}% pass rate over ${dots.length} runs`}
     >
       {visible.map((d) => (
         <button
@@ -64,30 +68,33 @@ export function RunHistoryDots({ testName }: RunHistoryDotsProps) {
           aria-label={`Run ${d.runId}: ${d.status} on ${new Date(d.date).toLocaleDateString()}`}
           style={{
             appearance: "none",
-            border: "1px solid rgba(0,0,0,0.3)",
+            border: "none",
             padding: 0,
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
+            width: 10,
+            height: 10,
+            borderRadius: d.status === "FAIL" ? "2px" : "50%",
             background: d.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
             cursor: "pointer",
             flexShrink: 0,
-            transition: "transform 0.12s",
+            transition: "transform 0.12s, opacity 0.12s",
+            opacity: 0.8,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.8)";
+            e.currentTarget.style.transform = "scale(1.7)";
+            e.currentTarget.style.opacity = "1";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.opacity = "0.8";
           }}
         />
       ))}
       {extra > 0 && (
         <span
           style={{
-            fontSize: 9,
+            fontSize: 9.5,
             color: "var(--proof-text-muted)",
-            marginLeft: 1,
+            marginLeft: 2,
             fontFamily: "var(--font-mono)",
           }}
           title={`${extra} more runs`}

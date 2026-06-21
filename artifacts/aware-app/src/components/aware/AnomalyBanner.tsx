@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, AlertCircle, X, ArrowRight } from "lucide-react";
 
 interface AnomalyBannerProps {
   hasAlert: boolean;
@@ -20,77 +20,106 @@ export function AnomalyBanner({
 }: AnomalyBannerProps) {
   if (!hasAlert && !hasDegradation) return null;
   const isCritical = hasAlert;
+
+  const color = isCritical ? "var(--proof-red)" : "var(--proof-yellow)";
+  const colorBright = isCritical ? "var(--proof-red-bright)" : "var(--proof-yellow-bright)";
+  const colorBg = isCritical ? "var(--proof-red-bg-strong)" : "var(--proof-yellow-bg)";
+  const colorBorder = isCritical ? "var(--proof-red-border)" : "var(--proof-yellow-border)";
+  const colorIconBg = isCritical ? "var(--proof-red-bg)" : "var(--proof-yellow-bg)";
+  const Icon = isCritical ? AlertCircle : AlertTriangle;
+
+  const message = isCritical
+    ? regressions > 0
+      ? `${regressions} regression${regressions !== 1 ? "s" : ""} detected — immediate action required`
+      : "Critical environment failure — pass rate below minimum threshold"
+    : `${degradedTiers} degraded — pass rate below promotion gate`;
+
   return (
     <div
       role="alert"
+      aria-live="assertive"
       className={isCritical ? "animate-anomaly-glow" : "animate-slide-down"}
       style={{
         display: "flex",
         alignItems: "center",
         gap: 12,
-        padding: "12px 16px",
+        padding: "11px 16px",
         borderRadius: "var(--proof-radius-lg)",
-        background: isCritical ? "var(--proof-red-bg-strong)" : "var(--proof-yellow-bg)",
-        border: `1px solid ${isCritical ? "var(--proof-red-border)" : "var(--proof-yellow-border)"}`,
-        borderLeft: `4px solid ${isCritical ? "var(--proof-red)" : "var(--proof-yellow)"}`,
+        background: colorBg,
+        border: `1px solid ${colorBorder}`,
+        borderLeft: `4px solid ${color}`,
       }}
     >
       <div
         style={{
-          width: 32,
-          height: 32,
+          width: 30,
+          height: 30,
           borderRadius: 8,
-          background: isCritical ? "var(--proof-red-bg)" : "var(--proof-yellow-bg)",
-          border: `1px solid ${isCritical ? "var(--proof-red-border)" : "var(--proof-yellow-border)"}`,
+          background: colorIconBg,
+          border: `1px solid ${colorBorder}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
         }}
       >
-        <AlertTriangle
-          size={16}
-          style={{ color: isCritical ? "var(--proof-red-bright)" : "var(--proof-yellow-bright)" }}
-        />
+        <Icon size={15} style={{ color: colorBright }} />
       </div>
-      <div style={{ flex: 1 }}>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
             fontSize: 13,
             fontWeight: 600,
-            color: isCritical ? "var(--proof-red-bright)" : "var(--proof-yellow-bright)",
+            color: colorBright,
+            lineHeight: 1.4,
           }}
         >
-          {isCritical
-            ? `${regressions > 0 ? `${regressions} regression${regressions !== 1 ? "s" : ""}` : "Critical environment"} detected`
-            : `${degradedTiers} degraded — pass rate below threshold`}
+          {message}
         </div>
+        {isCritical && regressions > 0 && (
+          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>
+            Review the Compare page to identify affected tests and determine root cause.
+          </div>
+        )}
       </div>
-      <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+
+      <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
         <button
           onClick={onInvestigate}
           className="proof-button-primary proof-button-sm"
-          style={{ color: "#fff" }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+          }}
         >
-          Investigate →
+          Investigate <ArrowRight size={11} />
         </button>
         {onDismiss && (
           <button
             onClick={onDismiss}
             aria-label="Dismiss banner"
             style={{
-              background: "transparent",
-              border: "none",
+              background: colorIconBg,
+              border: `1px solid ${colorBorder}`,
+              borderRadius: 6,
               cursor: "pointer",
-              padding: 4,
+              padding: "5px 6px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: isCritical ? "var(--proof-red-bright)" : "var(--proof-yellow-bright)",
-              opacity: 0.7,
+              color: colorBright,
+              transition: "background 0.15s, opacity 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = colorBorder;
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = colorIconBg;
             }}
           >
-            <X size={16} />
+            <X size={14} />
           </button>
         )}
       </div>

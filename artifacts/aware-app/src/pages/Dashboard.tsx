@@ -216,11 +216,23 @@ export default function Dashboard() {
     });
   }, [filteredRuns]);
 
-  // Regressions are computed from diff rows, not per-run — show flat sparkline
-  const regressionSparkData = React.useMemo(
-    () => Array(7).fill(kpis.regressions > 0 ? 1 : 0),
-    [kpis.regressions],
-  );
+  // Regressions sparkline: per-day regression count based on filtered runs delta
+  const regressionSparkData = React.useMemo(() => {
+    const days = 7;
+    const now = new Date();
+    return Array.from({ length: days }, (_, i) => {
+      const dayStart = new Date(now);
+      dayStart.setDate(dayStart.getDate() - (days - 1 - i));
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      const dayRuns = filteredRuns.filter((r) => {
+        const t = new Date(r.started).getTime();
+        return t >= dayStart.getTime() && t < dayEnd.getTime();
+      });
+      return dayRuns.reduce((s, r) => s + (r.failures ?? 0), 0);
+    });
+  }, [filteredRuns]);
 
   // Delta calculations
   const totalDelta = React.useMemo(() => {

@@ -67,6 +67,25 @@ export async function loadRuns(): Promise<void> {
   return _runsPromise;
 }
 
+let _diffRowsPromise: Promise<void> | null = null;
+export async function loadDiffRows(): Promise<void> {
+  if (_diffRowsPromise) return _diffRowsPromise;
+  _diffRowsPromise = (async () => {
+    try {
+      const data = await fetchJson<DiffRow[]>("diff-rows.json");
+      _diffRows.length = 0;
+      _diffRows.push(...data);
+      updateDiffRowsSnapshot();
+      _diffRowsNotify.setState({});
+      bus.emit("diffrows:loaded", { count: data.length });
+    } catch (err) {
+      _diffRowsPromise = null;
+      throw err;
+    }
+  })();
+  return _diffRowsPromise;
+}
+
 export function getRunIndex(runId: string): number {
   return RUNS.findIndex((r) => r.id === runId);
 }

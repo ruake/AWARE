@@ -10,6 +10,9 @@ import {
   Zap,
   ChevronRight,
   ExternalLink,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
 } from "lucide-react";
 import type { TestCase } from "@/lib/types";
 import { ConsolePagination } from "@/components/console";
@@ -28,22 +31,22 @@ import {
 const PAGE_SIZE = 25;
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  web: <Globe size={14} />,
-  api: <Terminal size={14} />,
-  http: <Server size={14} />,
-  edgeworker: <Zap size={14} />,
-  transaction: <Unlink size={14} />,
-  pytest: <TestTube size={14} />,
+  web: <Globe size={13} />,
+  api: <Terminal size={13} />,
+  http: <Server size={13} />,
+  edgeworker: <Zap size={13} />,
+  transaction: <Unlink size={13} />,
+  pytest: <TestTube size={13} />,
 };
 
 const cellStyle: React.CSSProperties = {
-  padding: "8px 12px",
+  padding: "7px 12px",
   fontSize: 12,
   borderBottom: "1px solid var(--proof-border)",
 };
 
 const thStyle: React.CSSProperties = {
-  padding: "10px 12px",
+  padding: "9px 12px",
   fontSize: 11,
   fontWeight: 600,
   textTransform: "uppercase",
@@ -53,7 +56,40 @@ const thStyle: React.CSSProperties = {
   borderBottom: "1px solid var(--proof-border)",
   textAlign: "left",
   whiteSpace: "nowrap",
+  userSelect: "none",
 };
+
+type SortKey = "id" | "name" | "category" | "priority" | "status" | "owner";
+type SortDir = "asc" | "desc";
+
+const PRIORITY_ORDER: Record<string, number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+};
+
+const STATUS_ORDER: Record<string, number> = {
+  active: 0,
+  disabled: 1,
+  deprecated: 2,
+};
+
+function sortTests(tests: TestCase[], key: SortKey, dir: SortDir): TestCase[] {
+  return [...tests].sort((a, b) => {
+    let cmp = 0;
+    if (key === "priority") {
+      cmp = (PRIORITY_ORDER[a.priority] ?? 99) - (PRIORITY_ORDER[b.priority] ?? 99);
+    } else if (key === "status") {
+      cmp = (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99);
+    } else {
+      const av = String(a[key] ?? "").toLowerCase();
+      const bv = String(b[key] ?? "").toLowerCase();
+      cmp = av < bv ? -1 : av > bv ? 1 : 0;
+    }
+    return dir === "asc" ? cmp : -cmp;
+  });
+}
 
 interface TestListProps {
   pageItems: TestCase[];
@@ -66,8 +102,15 @@ interface TestListProps {
   onPageChange: (page: number) => void;
 }
 
+function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+  if (col !== sortKey) return <ChevronsUpDown size={10} style={{ opacity: 0.3 }} />;
+  return sortDir === "asc"
+    ? <ChevronUp size={10} style={{ color: "var(--proof-blue)" }} />
+    : <ChevronDown size={10} style={{ color: "var(--proof-blue)" }} />;
+}
+
 export function TestList({
-  pageItems,
+  pageItems: rawItems,
   hoveredRow,
   onHoverRow,
   detailId,
@@ -77,8 +120,50 @@ export function TestList({
   onPageChange,
 }: TestListProps) {
   const [, navigate] = useLocation();
+  const [sortKey, setSortKey] = React.useState<SortKey>("name");
+  const [sortDir, setSortDir] = React.useState<SortDir>("asc");
+
+  const pageItems = React.useMemo(
+    () => sortTests(rawItems, sortKey, sortDir),
+    [rawItems, sortKey, sortDir],
+  );
+
   const totalPages = Math.max(1, Math.ceil(filteredCount / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const SortableTh = ({
+    col,
+    label,
+    center,
+  }: {
+    col: SortKey;
+    label: string;
+    center?: boolean;
+  }) => (
+    <th
+      style={{
+        ...thStyle,
+        textAlign: center ? "center" : "left",
+        cursor: "pointer",
+      }}
+      onClick={() => handleSort(col)}
+      aria-sort={sortKey === col ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+    >
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+        {label}
+        <SortIcon col={col} sortKey={sortKey} sortDir={sortDir} />
+      </span>
+    </th>
+  );
 
   return (
     <div
@@ -94,13 +179,13 @@ export function TestList({
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>
-              <th style={thStyle}>ID</th>
-              <th style={thStyle}>Name</th>
+              <SortableTh col="id" label="ID" />
+              <SortableTh col="name" label="Name" />
               <th style={{ ...thStyle, textAlign: "center" }}>Type</th>
-              <th style={thStyle}>Category</th>
-              <th style={{ ...thStyle, textAlign: "center" }}>Priority</th>
-              <th style={{ ...thStyle, textAlign: "center" }}>Status</th>
-              <th style={thStyle}>Owner</th>
+              <SortableTh col="category" label="Category" />
+              <SortableTh col="priority" label="Priority" center />
+              <SortableTh col="status" label="Status" center />
+              <SortableTh col="owner" label="Owner" />
               <th style={{ ...thStyle, textAlign: "center" }} />
             </tr>
           </thead>
@@ -126,6 +211,9 @@ export function TestList({
                   >
                     <Search size={24} style={{ opacity: 0.3 }} />
                     <span>No tests match the current filters</span>
+                    <span style={{ fontSize: 11, color: "var(--proof-text-muted)" }}>
+                      Try clearing some filters or broadening your search
+                    </span>
                   </div>
                 </td>
               </tr>
@@ -140,8 +228,14 @@ export function TestList({
                   }}
                   onMouseEnter={() => onHoverRow(test.id)}
                   onMouseLeave={() => onHoverRow(null)}
-                  onClick={() => {
-                    navigate(`/tests?suite=${suiteFilter}&detail=${test.id}`);
+                  onClick={() => navigate(`/tests?suite=${suiteFilter}&detail=${test.id}`)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/tests?suite=${suiteFilter}&detail=${test.id}`);
+                    }
                   }}
                 >
                   <td
@@ -158,8 +252,7 @@ export function TestList({
                   <td
                     style={{
                       ...cellStyle,
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 12,
+                      fontSize: 12.5,
                       fontWeight: 500,
                       color: "var(--proof-text)",
                       maxWidth: 360,
@@ -172,15 +265,6 @@ export function TestList({
                       style={{
                         color: "var(--proof-blue)",
                         transition: "color 0.1s",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.color =
-                          "var(--proof-blue-light, #60a5fa)";
-                        (e.currentTarget as HTMLElement).style.textDecoration = "underline";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = "var(--proof-blue)";
-                        (e.currentTarget as HTMLElement).style.textDecoration = "none";
                       }}
                     >
                       {test.name}
@@ -224,10 +308,10 @@ export function TestList({
                       style={{
                         display: "inline-flex",
                         alignItems: "center",
-                        fontSize: 10,
+                        fontSize: 10.5,
                         fontWeight: 700,
                         fontFamily: "var(--font-mono)",
-                        padding: "1px 7px",
+                        padding: "2px 8px",
                         borderRadius: 99,
                         color: PRI_COLORS[test.priority] || "var(--proof-text-secondary)",
                         background: PRI_BGS[test.priority] || "rgba(154,160,166,0.08)",
@@ -241,9 +325,9 @@ export function TestList({
                       style={{
                         display: "inline-flex",
                         alignItems: "center",
-                        fontSize: 10,
+                        fontSize: 10.5,
                         fontWeight: 600,
-                        padding: "2px 7px",
+                        padding: "2px 8px",
                         borderRadius: 4,
                         color: STATUS_COLORS[test.status] || "var(--proof-text-secondary)",
                         background: STATUS_BGS[test.status] || "rgba(154,160,166,0.08)",
@@ -260,7 +344,7 @@ export function TestList({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {test.owner}
+                    {test.owner ?? "—"}
                   </td>
                   <td style={{ ...cellStyle, textAlign: "right", whiteSpace: "nowrap" }}>
                     <div style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
@@ -276,7 +360,7 @@ export function TestList({
                             background: "none",
                             cursor: "pointer",
                             color: "var(--proof-text-muted)",
-                            padding: "2px 3px",
+                            padding: "2px 4px",
                             display: "inline-flex",
                             borderRadius: 3,
                             transition: "color 0.1s, background 0.1s",
@@ -285,12 +369,10 @@ export function TestList({
                           aria-label="View source on GitHub"
                           onMouseEnter={(e) => {
                             (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-                            (e.currentTarget as HTMLElement).style.background =
-                              "var(--proof-hover)";
+                            (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
                           }}
                           onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.color =
-                              "var(--proof-text-muted)";
+                            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)";
                             (e.currentTarget as HTMLElement).style.background = "none";
                           }}
                         >
@@ -308,12 +390,13 @@ export function TestList({
                           cursor: "pointer",
                           color:
                             detailId === test.id ? "var(--proof-blue)" : "var(--proof-text-muted)",
-                          padding: "2px 3px",
+                          padding: "2px 4px",
                           display: "inline-flex",
                           borderRadius: 3,
                           transition: "color 0.1s, background 0.1s",
                         }}
                         title="Show details"
+                        aria-label="Show test details"
                         onMouseEnter={(e) => {
                           (e.currentTarget as HTMLElement).style.color = "var(--proof-blue)";
                           (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";

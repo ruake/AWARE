@@ -1207,6 +1207,17 @@ a:hover {
   background: var(--proof-red-bg);
   border: 1px solid var(--proof-red-border);
 }
+.proof-badge-warning {
+  color: var(--proof-yellow);
+  background: var(--proof-yellow-bg);
+  border: 1px solid var(--proof-yellow-border);
+}
+.proof-badge-pending {
+  color: var(--proof-text-secondary);
+  background: var(--proof-subtle-bg2);
+  border: 1px solid var(--proof-border);
+  animation: badge-pulse 2s ease-in-out infinite;
+}
 .proof-badge-success {
   color: var(--proof-green-bright);
   background: var(--proof-green-bg);
