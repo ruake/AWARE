@@ -59,26 +59,30 @@ export function PageTemplate({
     currentPage !== undefined &&
     totalPages !== undefined &&
     totalItems !== undefined &&
-    onPageChange;
+    onPageChange !== undefined;
 
   return (
-    <div className="proof-page" style={{ animation: "page-enter 0.3s cubic-bezier(0.2, 0, 0.2, 1) both" }}>
+    <div className="proof-page animate-fade-in" style={{ padding: 0, height: "100%", display: "flex", flexDirection: "column" }}>
+      {/* Header */}
       <div
         className="proof-page-header"
         style={{
-          padding: "24px 32px",
+          padding: "32px 40px",
           borderBottom: "1px solid var(--proof-border)",
-          background: "rgba(0,0,0,0.1)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
+          background: "var(--proof-surface)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 24,
+          flexShrink: 0,
         }}
       >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <h1
               className="proof-page-title"
               style={{
-                fontSize: 17,
+                fontSize: 24,
                 fontWeight: 700,
                 color: "var(--proof-text)",
                 margin: 0,
@@ -93,64 +97,70 @@ export function PageTemplate({
             <p
               className="proof-page-subtitle"
               style={{
-                fontSize: 13,
-                fontWeight: 400,
+                fontSize: 14,
                 color: "var(--proof-text-secondary)",
-                margin: "4px 0 0",
+                margin: 0,
               }}
             >
               {subtitle}
             </p>
           )}
         </div>
+        
         {headerActions && (
-          <div style={{ display: "flex", gap: 10, flexShrink: 0, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
             {headerActions}
           </div>
         )}
       </div>
 
+      {/* Filters */}
       {filters && (
         <div
           style={{
-            padding: "12px 32px",
+            padding: "16px 40px",
             borderBottom: "1px solid var(--proof-border-light)",
-            flexShrink: 0,
+            background: "var(--proof-surface-2)",
             display: "flex",
             alignItems: "center",
-            gap: 12,
-            flexWrap: "nowrap",
+            gap: 16,
+            flexShrink: 0,
             overflowX: "auto",
-            background: "var(--proof-surface-2)",
           }}
         >
           {filters}
         </div>
       )}
 
+      {/* Top Content */}
       {topContent && (
         <div
           style={{
             borderBottom: "1px solid var(--proof-border)",
-            flexShrink: 0,
             background: "var(--proof-surface)",
+            flexShrink: 0,
           }}
         >
           {topContent}
         </div>
       )}
 
+      {/* Main Content Area */}
       <div
         className="proof-page-content"
         style={{
+          flex: 1,
           display: "flex",
-          gap: 0,
-          padding: sidePanel ? "0" : "24px 32px 32px",
+          overflow: "hidden",
+          position: "relative",
+          padding: sidePanel ? 0 : "32px 40px",
         }}
       >
         <PanelErrorBoundary label={errorLabel ?? title}>
           {loading ? (
-            (loadingSkeleton ?? <SkeletonTable rows={loadingRows} cols={loadingCols} />)
+            <div style={{ width: "100%", padding: sidePanel ? "32px 40px" : 0 }}>
+              {loadingSkeleton ?? <SkeletonTable rows={loadingRows} cols={loadingCols} />}
+            </div>
           ) : error ? (
             <div
               style={{
@@ -158,14 +168,16 @@ export function PageTemplate({
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                height: 200,
-                gap: 8,
+                width: "100%",
+                height: "100%",
+                gap: 16,
                 color: "var(--proof-text-muted)",
-                fontSize: 13,
               }}
             >
-              <AlertTriangle size={20} style={{ opacity: 0.4 }} />
-              <span>{error.message}</span>
+              <div style={{ width: 48, height: 48, borderRadius: "50%", background: "var(--proof-red-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <AlertTriangle size={24} style={{ color: "var(--proof-red)" }} />
+              </div>
+              <span style={{ fontSize: 14 }}>{error.message}</span>
             </div>
           ) : isEmpty ? (
             <div
@@ -174,24 +186,32 @@ export function PageTemplate({
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                height: 200,
-                gap: 8,
+                width: "100%",
+                height: "100%",
+                gap: 16,
                 color: "var(--proof-text-muted)",
-                fontSize: 13,
+                background: "var(--proof-subtle-bg)",
+                borderRadius: "var(--proof-radius-lg)",
+                border: "1px dashed var(--proof-border-strong)",
               }}
             >
-              <SlidersHorizontal size={20} style={{ opacity: 0.4 }} />
-              {emptyMessage && <span>{emptyMessage}</span>}
-              {emptyAction}
+              <SlidersHorizontal size={32} style={{ opacity: 0.5 }} />
+              <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
+                {emptyMessage && <span style={{ fontSize: 15, fontWeight: 500, color: "var(--proof-text)" }}>{emptyMessage}</span>}
+                {emptyAction}
+              </div>
             </div>
           ) : sidePanel ? (
-            <div style={{ flex: 1, display: "flex", gap: 0, minHeight: 0 }}>
-              <div style={{ flex: 1, minWidth: 0, overflow: "auto" }}>{children}</div>
+            <div style={{ display: "flex", width: "100%", height: "100%" }}>
+              <div style={{ flex: 1, minWidth: 0, overflow: "auto", padding: "32px 40px" }}>
+                {children}
+              </div>
               <div
                 style={{
                   width: sidePanelWidth,
                   flexShrink: 0,
                   borderLeft: "1px solid var(--proof-border)",
+                  background: "var(--proof-surface-2)",
                   overflow: "auto",
                 }}
               >
@@ -204,13 +224,17 @@ export function PageTemplate({
         </PanelErrorBoundary>
       </div>
 
-      {showPagination && totalPages > 1 && (
+      {/* Pagination Footer */}
+      {showPagination && totalPages > 1 && !loading && !error && !isEmpty && (
         <div
           style={{
-            padding: "8px 20px",
+            padding: "16px 40px",
             borderTop: "1px solid var(--proof-border)",
-            flexShrink: 0,
             background: "var(--proof-surface)",
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <Pagination

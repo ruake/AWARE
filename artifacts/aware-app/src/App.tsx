@@ -6,7 +6,7 @@ import { SkeletonTable, SkeletonChart, SkeletonCard } from "@/components/aware/S
 import { ConsoleShell } from "@/components/console";
 import NotFound from "@/pages/NotFound";
 import { loadAllData, getDataInitState, subscribeToDataInit } from "@/lib/data";
-import { AlertTriangle, RefreshCw, Loader2 } from "lucide-react";
+import { AlertTriangle, RefreshCw, Loader2, Activity } from "lucide-react";
 
 /*
  * ── Navigation Architecture ─────────────────────────────────────────────
@@ -142,15 +142,27 @@ function DataGate({ children }: { children: React.ReactNode }) {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
-          background: "var(--proof-grey-bg)",
+          background: "var(--proof-bg)",
           flexDirection: "column",
           gap: 16,
           padding: 40,
         }}
       >
-        <AlertTriangle size={32} style={{ color: "var(--proof-red)" }} />
-        <span style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text)" }}>
-          Failed to load application data
+        <div style={{
+          width: 64,
+          height: 64,
+          borderRadius: 16,
+          background: "var(--proof-red-bg)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 8px 32px var(--proof-red-glow)",
+          marginBottom: 8
+        }}>
+          <AlertTriangle size={32} style={{ color: "var(--proof-red-bright)" }} />
+        </div>
+        <span style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)", letterSpacing: "-0.5px" }}>
+          Failed to load data
         </span>
         <pre
           style={{
@@ -158,8 +170,13 @@ function DataGate({ children }: { children: React.ReactNode }) {
             color: "var(--proof-text-secondary)",
             maxWidth: 500,
             textAlign: "center",
-            margin: 0,
+            margin: "0 0 16px 0",
             fontFamily: "var(--font-mono)",
+            background: "var(--proof-surface)",
+            border: "1px solid var(--proof-border)",
+            padding: "12px 16px",
+            borderRadius: "var(--proof-radius)",
+            overflowX: "auto"
           }}
         >
           {String(state.error)}
@@ -169,19 +186,7 @@ function DataGate({ children }: { children: React.ReactNode }) {
             triggeredRef.current = false;
             loadAllData().catch(() => {});
           }}
-          style={{
-            padding: "8px 18px",
-            fontSize: 13,
-            fontWeight: 600,
-            background: "var(--proof-blue)",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-          }}
+          className="proof-btn proof-btn-primary"
         >
           <RefreshCw size={14} /> Retry
         </button>
@@ -233,28 +238,33 @@ function DataGate({ children }: { children: React.ReactNode }) {
               animation: "pulse-dot 2s ease-in-out infinite",
             }}
           >
-            <Loader2
+            <Activity
               size={32}
-              style={{ color: "white", animation: "spin 1.5s linear infinite" }}
+              style={{ color: "white" }}
             />
           </div>
         </div>
 
-        <div style={{ textAlign: "center", zIndex: 1 }}>
+        <div style={{ textAlign: "center", zIndex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
           <h2
             style={{
-              fontSize: 17,
+              fontSize: 24,
               fontWeight: 800,
               color: "var(--proof-text)",
-              margin: "0 0 4px",
-              letterSpacing: "-0.5px",
+              margin: "0",
+              letterSpacing: "4px",
             }}
           >
-            AWARE
+            A.W.A.R.E.
           </h2>
-          <span style={{ fontSize: 13, color: "var(--proof-text-secondary)", fontWeight: 500 }}>
+          <span style={{ fontSize: 13, color: "var(--proof-text-secondary)", fontWeight: 500, letterSpacing: "0.5px" }}>
             Initializing command center…
           </span>
+          <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 8 }}>
+             <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--proof-blue)", animation: "blink 1.4s infinite" }} />
+             <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--proof-blue)", animation: "blink 1.4s infinite 0.2s" }} />
+             <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--proof-blue)", animation: "blink 1.4s infinite 0.4s" }} />
+          </div>
         </div>
       </div>
     );
@@ -274,10 +284,8 @@ function Router() {
     <>
       <RouteAnnouncer />
       <ConsoleShell>
-        {/* display:contents means this div is invisible to layout but anchors #main-content */}
-        <div id="main-content" style={{ display: "contents" }}>
-          <Switch>
-            <Route path="/">
+        <Switch>
+          <Route path="/">
               <ErrorBoundary>
                 <React.Suspense fallback={<SkeletonChart />}>
                   <Dashboard />
@@ -365,7 +373,6 @@ function Router() {
             </Route>
             <Route component={NotFound} />
           </Switch>
-        </div>
       </ConsoleShell>
     </>
   );

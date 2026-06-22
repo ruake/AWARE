@@ -19,11 +19,10 @@ import {
   XCircle,
   AlertTriangle,
   ArrowRight,
+  TrendingUp,
 } from "lucide-react";
-import { AnomalyBanner, HeroKpiCard } from "@/components/aware";
-import { TierCard } from "@/components/aware/TierCard";
+import { AnomalyBanner, HeroKpiCard, TierCard, RunRibbonCard } from "@/components/aware";
 import type { TierGroup } from "@/components/aware/TierCard";
-import { RunRibbonCard } from "@/components/aware/RunRibbonCard";
 import {
   AreaChart,
   Area,
@@ -36,7 +35,7 @@ import {
   ReferenceArea,
 } from "recharts";
 
-/* ── Chart tooltip ───────────────────────────────────────────────── */
+/* ── Chart tooltip ─────────────────────────────────────────────── */
 function ChartTip({
   active,
   payload,
@@ -48,209 +47,123 @@ function ChartTip({
 }) {
   if (!active || !payload?.length) return null;
   const v = payload[0]?.value ?? 0;
-  const runId = payload[0]?.payload?.runId;
   const c = v >= 95 ? "var(--proof-green)" : v >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
   return (
-    <div
-      style={{
-        background: "var(--proof-surface-3)",
-        border: "1px solid var(--proof-border-strong)",
-        borderRadius: "var(--proof-radius-lg)",
-        padding: "10px 14px",
-        boxShadow: "var(--proof-shadow-md)",
-        fontSize: 12,
-        animation: "scale-in 0.12s ease-out both",
-        minWidth: 140,
-      }}
-    >
-      <div
-        style={{
-          color: "var(--proof-text-muted)",
-          marginBottom: 4,
-          fontSize: 10,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.4px",
-        }}
-      >
+    <div style={{
+      background: "var(--proof-surface-3)",
+      border: "1px solid var(--proof-border-strong)",
+      borderRadius: "var(--proof-radius-lg)",
+      padding: "10px 14px",
+      boxShadow: "var(--proof-shadow-md)",
+      fontSize: 12,
+      animation: "scale-in 0.12s ease-out both",
+      minWidth: 130,
+    }}>
+      <div style={{
+        color: "var(--proof-text-muted)", marginBottom: 4,
+        fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.4px",
+      }}>
         {label}
       </div>
-      <div
-        style={{
-          fontWeight: 800,
-          fontSize: 22,
-          color: c,
-          fontFamily: "var(--font-mono)",
-          letterSpacing: "-1px",
-          lineHeight: 1,
-        }}
-      >
+      <div style={{ fontWeight: 800, fontSize: 20, color: c, fontFamily: "var(--font-mono)", letterSpacing: "-1px" }}>
         {v}%
       </div>
-      {runId && (
-        <div
-          style={{
-            marginTop: 4,
-            fontSize: 10,
-            color: "var(--proof-blue-bright)",
-            fontFamily: "var(--font-mono)",
-          }}
-        >
-          {runId}
-        </div>
-      )}
     </div>
   );
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   DASHBOARD PAGE — Mission Control
-   ══════════════════════════════════════════════════════════════════ */
+/* ── Section header ────────────────────────────────────────────── */
+function SectionHeader({
+  title,
+  accent,
+  action,
+  badge,
+}: {
+  title: string;
+  accent?: string;
+  action?: React.ReactNode;
+  badge?: React.ReactNode;
+}) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+      {accent && (
+        <div style={{
+          width: 3, height: 16, borderRadius: 99,
+          background: accent, flexShrink: 0,
+          boxShadow: `0 0 8px ${accent}`,
+        }} />
+      )}
+      <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.6px" }}>
+        {title}
+      </span>
+      {badge}
+      <div style={{ flex: 1 }} />
+      {action}
+    </div>
+  );
+}
+
+const itemVariant = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: "easeOut" as const } },
+};
+const containerVariant = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.05 } },
+};
+
 export default function Dashboard() {
   const [, navigate] = useLocation();
-  const init = useDataInit();
-  const filteredRuns = useFilteredRuns();
-  const envHealth = useEnvHealth();
   const kpis = useDashboardKPIs();
+  const envHealthData = useEnvHealth();
   const chartData = usePassRateChart();
+  const filteredRuns = useFilteredRuns();
   const scheduler = useSchedulerStatus();
+  const dataState = useDataInit();
 
-  // Sort runs newest-first for the ribbon
-  const sortedRuns = React.useMemo(
-    () =>
-      [...filteredRuns].sort(
-        (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
-      ),
-    [filteredRuns],
+  const sortedRuns = [...filteredRuns].sort(
+    (a, b) => new Date(b.started).getTime() - new Date(a.started).getTime(),
   );
+  const latestRun = sortedRuns[0] ?? null;
+  const prevRun = sortedRuns[1] ?? null;
 
-  const latestRun = sortedRuns[0];
-  const prevRun = sortedRuns[1];
-
-  // Find the earliest nextDue across all scheduler suites
-  const nextScheduled = React.useMemo(() => {
-    const dues = scheduler.suites
-      .filter((s) => s.nextDue)
-      .map((s) => ({ suite: s.name, nextDue: s.nextDue! }));
-    dues.sort((a, b) => new Date(a.nextDue).getTime() - new Date(b.nextDue).getTime());
-    return dues[0] ?? null;
-  }, [scheduler]);
-
-  // Group envs into 3 tiers
-  const tierGroups = React.useMemo((): TierGroup[] => {
-    const TIERS = [
-      { key: "QA" as const, prefixes: ["qa-", "QA/", "QA "] },
-      { key: "UAT" as const, prefixes: ["uat-", "UAT/", "UAT "] },
-      { key: "PROD" as const, prefixes: ["prod-", "PROD/", "PROD "] },
-    ];
-    return TIERS.map(({ key, prefixes }) => {
-      const envs = envHealth.filter(
-        (e) =>
-          prefixes.some((p) => e.id.toLowerCase().startsWith(p.toLowerCase().replace(" ", "-"))) ||
-          e.label.toUpperCase().startsWith(key),
-      );
-      if (envs.length === 0)
-        return { tier: key, envs: [], avgPassRate: 0, status: "critical" as const };
-      const avg = Math.round(envs.reduce((s, e) => s + e.passRate, 0) / envs.length);
-      const min = Math.min(...envs.map((e) => e.passRate));
-      const status = min >= 95 ? "healthy" : min >= 80 ? "degraded" : "critical";
-      return { tier: key, envs, avgPassRate: avg, status };
-    });
-  }, [envHealth]);
-
-  // Spark data: last 7 days of daily aggregated pass rates
-  const sparkData = React.useMemo(() => {
-    const days = 7;
-    const now = new Date();
-    return Array.from({ length: days }, (_, i) => {
-      const dayStart = new Date(now);
-      dayStart.setDate(dayStart.getDate() - (days - 1 - i));
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(dayStart);
-      dayEnd.setDate(dayEnd.getDate() + 1);
-      const dayRuns = filteredRuns.filter((r) => {
-        const t = new Date(r.started).getTime();
-        return t >= dayStart.getTime() && t < dayEnd.getTime();
+  // Group envs by tier for TierCard
+  const tierMap = new Map<string, TierGroup>();
+  for (const env of envHealthData) {
+    const rawTier = env.tier.toUpperCase();
+    const tier: "QA" | "UAT" | "PROD" =
+      rawTier === "QA" ? "QA" : rawTier === "UAT" ? "UAT" : "PROD";
+    if (!tierMap.has(tier)) {
+      tierMap.set(tier, {
+        tier,
+        envs: [],
+        avgPassRate: env.passRate,
+        status: env.status,
       });
-      return dayRuns.length > 0
-        ? Math.round(dayRuns.reduce((s, r) => s + r.passPct, 0) / dayRuns.length)
-        : 0;
+    }
+    const group = tierMap.get(tier)!;
+    group.envs.push({
+      id: env.id,
+      label: env.label ?? env.id,
+      passRate: env.passRate,
+      trend: env.trend,
+      failures: env.failures,
+      status: env.status,
     });
-  }, [filteredRuns]);
+    // Overall status = worst of all envs in tier
+    const statusPriority = { critical: 2, degraded: 1, healthy: 0 };
+    if ((statusPriority[env.status] ?? 0) > (statusPriority[group.status] ?? 0)) {
+      group.status = env.status;
+    }
+    group.avgPassRate = Math.round(
+      group.envs.reduce((s, e) => s + e.passRate, 0) / group.envs.length,
+    );
+  }
+  const tierGroups: TierGroup[] = [...tierMap.values()];
 
-  // Per-card spark data: differentiated per KPI
-  const runCountSparkData = React.useMemo(() => {
-    const days = 7;
-    const now = new Date();
-    let cumulative = 0;
-    return Array.from({ length: days }, (_, i) => {
-      const dayStart = new Date(now);
-      dayStart.setDate(dayStart.getDate() - (days - 1 - i));
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(dayStart);
-      dayEnd.setDate(dayEnd.getDate() + 1);
-      const dayRuns = filteredRuns.filter((r) => {
-        const t = new Date(r.started).getTime();
-        return t >= dayStart.getTime() && t < dayEnd.getTime();
-      });
-      // eslint-disable-next-line react-hooks/immutability
-      cumulative += dayRuns.length;
-      return cumulative;
-    });
-  }, [filteredRuns]);
+  const hasAlert = kpis.regressions > 0;
+  const hasDegradation = tierGroups.some((t) => t.status !== "healthy");
 
-  const failureSparkData = React.useMemo(() => {
-    const days = 7;
-    const now = new Date();
-    return Array.from({ length: days }, (_, i) => {
-      const dayStart = new Date(now);
-      dayStart.setDate(dayStart.getDate() - (days - 1 - i));
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(dayStart);
-      dayEnd.setDate(dayEnd.getDate() + 1);
-      const dayRuns = filteredRuns.filter((r) => {
-        const t = new Date(r.started).getTime();
-        return t >= dayStart.getTime() && t < dayEnd.getTime();
-      });
-      return dayRuns.reduce((s, r) => s + r.failures, 0);
-    });
-  }, [filteredRuns]);
-
-  // Regressions sparkline: per-day regression count based on filtered runs delta
-  const regressionSparkData = React.useMemo(() => {
-    const days = 7;
-    const now = new Date();
-    return Array.from({ length: days }, (_, i) => {
-      const dayStart = new Date(now);
-      dayStart.setDate(dayStart.getDate() - (days - 1 - i));
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(dayStart);
-      dayEnd.setDate(dayEnd.getDate() + 1);
-      const dayRuns = filteredRuns.filter((r) => {
-        const t = new Date(r.started).getTime();
-        return t >= dayStart.getTime() && t < dayEnd.getTime();
-      });
-      return dayRuns.reduce((s, r) => s + (r.failures ?? 0), 0);
-    });
-  }, [filteredRuns]);
-
-  // Delta calculations
-  const totalDelta = React.useMemo(() => {
-    if (sortedRuns.length < 2) return 0;
-    const latest = sortedRuns[0];
-    const previous = sortedRuns[1];
-    return latest.passPct - previous.passPct;
-  }, [sortedRuns]);
-
-  const failureDelta = React.useMemo(() => {
-    if (sortedRuns.length < 2) return 0;
-    return (latestRun?.failures ?? 0) - (prevRun?.failures ?? 0);
-  }, [sortedRuns, latestRun, prevRun]);
-
-  const regressionDelta = kpis.regressions;
-
-  const hasAlert = kpis.regressions > 0 || tierGroups.some((t) => t.status === "critical");
-  const hasDegradation = !hasAlert && tierGroups.some((t) => t.status === "degraded");
   const chartColor =
     kpis.passRate >= 95
       ? "var(--proof-green)"
@@ -258,145 +171,98 @@ export default function Dashboard() {
         ? "var(--proof-yellow)"
         : "var(--proof-red)";
 
-  // ── Hero KPI row ───────────────────────────────────────
-  const lastSynced = React.useMemo(() => new Date().toLocaleTimeString(), []);
+  const sparkData = chartData.slice(-8).map((d) => d.passRate);
 
-  if (filteredRuns.length === 0 || init.loading) {
+  const failureSparkData = sortedRuns
+    .slice(0, 8)
+    .reverse()
+    .map((r) => r.failures ?? 0);
+  const regressionSparkData = Array(8).fill(0);
+
+  const totalDelta = kpis.passTrend;
+  const failureDelta =
+    sortedRuns.length >= 2
+      ? (sortedRuns[0]?.failures ?? 0) - (sortedRuns[1]?.failures ?? 0)
+      : 0;
+  const regressionDelta = kpis.regressions > 0 ? 1 : 0;
+
+  const nextScheduled = scheduler.suites?.[0] ?? null;
+
+  const lastSynced = React.useMemo(() => {
+    if (!latestRun?.started) return "—";
+    const d = new Date(latestRun.started);
+    const diff = Date.now() - d.getTime();
+    if (diff < 60000) return "just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    return `${Math.floor(diff / 86400000)}d ago`;
+  }, [latestRun]);
+
+  /* ── Empty state ─────────────────────────────────────────────── */
+  if (!dataState.loading && filteredRuns.length === 0) {
     return (
-      <main
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-          padding: "12px 24px 16px",
-          height: "100%",
-          boxSizing: "border-box",
-        }}
-      >
-        <div style={{ height: 32, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-           <div className="proof-skeleton" style={{ width: 300, height: 24, borderRadius: 4 }} />
-           <div className="proof-skeleton" style={{ width: 150, height: 12, borderRadius: 4 }} />
+      <main style={{
+        display: "flex", alignItems: "center", justifyContent: "center",
+        height: "100%", flexDirection: "column", gap: 16, padding: 40,
+      }}>
+        <div style={{
+          width: 52, height: 52, borderRadius: 16,
+          background: "var(--proof-surface-2)",
+          border: "1px solid var(--proof-border)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <Activity size={22} style={{ color: "var(--proof-text-muted)" }} />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="proof-skeleton" style={{ height: 100, borderRadius: "var(--proof-radius-lg)" }} />
-          ))}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="proof-skeleton" style={{ height: 64, borderRadius: "var(--proof-radius-lg)" }} />
-          ))}
-        </div>
-        {!init.loading && filteredRuns.length === 0 && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              flex: 1,
-              gap: 20,
-              padding: "48px 24px",
-              maxWidth: 520,
-              margin: "0 auto",
-            }}
-          >
-            <div style={{ display: "flex", gap: 24, marginBottom: 8 }}>
-              {[Activity, Zap, GitCompare].map((Icon, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 12,
-                    background: "var(--proof-blue-bg)",
-                    border: "1px solid var(--proof-blue-border)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon size={18} style={{ color: "var(--proof-blue)" }} />
-                </div>
-              ))}
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <h2
-                style={{ fontSize: 20, fontWeight: 700, color: "var(--proof-text)", margin: "0 0 6px" }}
-              >
-                No test runs yet
-              </h2>
-              <p
-                style={{
-                  fontSize: 13,
-                  color: "var(--proof-text-secondary)",
-                  margin: 0,
-                  lineHeight: 1.5,
-                }}
-              >
-                Results from your Akamai CDN regression suite will appear here once a test run
-                completes.
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-              <button
-                onClick={() => navigate("/start")}
-                className="proof-button-primary"
-                style={{ gap: 5 }}
-              >
-                <Play size={12} /> Start a Run
-              </button>
-              <button onClick={() => navigate("/compare")} className="proof-button" style={{ gap: 5 }}>
-                <GitCompare size={12} /> Compare Runs
-              </button>
-            </div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: "var(--proof-text)", marginBottom: 6 }}>
+            No runs yet
           </div>
-        )}
+          <div style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>
+            Trigger a CI run to see your first results here.
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+          <button
+            onClick={() => navigate("/runs")}
+            className="proof-btn proof-btn-ghost"
+          >
+            <Play size={12} /> View Runs
+          </button>
+          <button
+            onClick={() => navigate("/compare")}
+            className="proof-btn proof-btn-primary"
+          >
+            <GitCompare size={12} /> Compare Runs
+          </button>
+        </div>
       </main>
     );
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.04,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 8 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-  };
-
   return (
-    <main
+    <motion.main
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
       style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-        padding: "12px 24px 16px",
-        height: "100%",
-        minHeight: 0,
-        boxSizing: "border-box",
-        overflowY: "auto",
+        display: "flex", flexDirection: "column", gap: 16,
+        padding: "20px 24px 24px",
+        minHeight: "100%", boxSizing: "border-box",
       }}
     >
-      {/* ── Anomaly Banner ───────────────────────────────────── */}
+      {/* ── Anomaly banner ─────────────────────────────────────── */}
       {(hasAlert || hasDegradation) && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.25 }}
         >
           <AnomalyBanner
             hasAlert={hasAlert}
             hasDegradation={hasDegradation}
             regressions={kpis.regressions}
             degradedTiers={tierGroups
-              .filter((t) => t.status === "degraded")
+              .filter((t) => t.status !== "healthy")
               .map((t) => t.tier)
               .join(", ")}
             onInvestigate={() => navigate("/compare")}
@@ -404,337 +270,315 @@ export default function Dashboard() {
         </motion.div>
       )}
 
-      {/* ── Hero KPI row ─────────────────────────────────────── */}
-      <motion.section
-        aria-label="Key metrics"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: 10,
-        }}
-      >
-        <motion.div variants={itemVariants}>
-          <HeroKpiCard
-            label="Pass Rate"
-            value={kpis.passRate}
-            suffix="%"
-            delta={totalDelta}
-            deltaLabel="vs prev run"
-            sparkData={sparkData}
-            accentColor={chartColor}
-            icon={<Activity size={12} />}
-            onClick={() => navigate("/trends")}
-            delay={0}
-          />
+      {/* ── KPI cards ──────────────────────────────────────────── */}
+      <section aria-label="Key metrics">
+        <SectionHeader title="Signal" accent="var(--proof-blue)" />
+        <motion.div
+          variants={containerVariant}
+          initial="hidden"
+          animate="show"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+            gap: 10,
+          }}
+        >
+          {[
+            {
+              label: "Pass Rate",
+              value: kpis.passRate,
+              suffix: "%",
+              delta: totalDelta,
+              deltaLabel: "vs prev run",
+              spark: sparkData,
+              accent: chartColor,
+              icon: <Activity size={12} />,
+              href: "/trends",
+            },
+            {
+              label: "Total Runs",
+              value: kpis.total,
+              delta: sortedRuns.length >= 2 ? 1 : 0,
+              deltaLabel: `${sortedRuns.length} total`,
+              spark: sortedRuns.slice(0, 8).reverse().map(() => 1),
+              accent: "var(--proof-blue)",
+              icon: <Zap size={12} />,
+              href: "/runs",
+            },
+            {
+              label: "Failures",
+              value: kpis.failedRuns,
+              delta: failureDelta,
+              deltaLabel: "vs prev run",
+              spark: failureSparkData,
+              accent: kpis.failedRuns > 0 ? "var(--proof-red)" : "var(--proof-green)",
+              icon: <XCircle size={12} />,
+              href: "/runs",
+              invert: true,
+            },
+            {
+              label: "Regressions",
+              value: kpis.regressions,
+              delta: regressionDelta,
+              deltaLabel: "detected",
+              spark: regressionSparkData,
+              accent: kpis.regressions > 0 ? "var(--proof-red)" : "var(--proof-green)",
+              icon: <AlertTriangle size={12} />,
+              href: "/compare",
+              invert: true,
+            },
+          ].map((card, i) => (
+            <motion.div key={card.label} variants={itemVariant}>
+              <HeroKpiCard
+                label={card.label}
+                value={card.value}
+                suffix={card.suffix}
+                delta={card.delta}
+                deltaLabel={card.deltaLabel}
+                sparkData={card.spark}
+                accentColor={card.accent}
+                icon={card.icon}
+                onClick={() => navigate(card.href)}
+                invertDelta={card.invert}
+                delay={0}
+              />
+            </motion.div>
+          ))}
         </motion.div>
-        <motion.div variants={itemVariants}>
-          <HeroKpiCard
-            label="Total Runs"
-            value={kpis.total}
-            delta={sortedRuns.length >= 2 ? 1 : 0}
-            deltaLabel={`${sortedRuns.length} total`}
-            sparkData={runCountSparkData}
-            accentColor="var(--proof-blue)"
-            icon={<Zap size={12} />}
-            onClick={() => navigate("/runs")}
-            delay={0}
-          />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <HeroKpiCard
-            label="Failures"
-            value={kpis.failedRuns}
-            delta={failureDelta}
-            deltaLabel="vs prev run"
-            sparkData={failureSparkData}
-            accentColor={kpis.failedRuns > 0 ? "var(--proof-red)" : "var(--proof-green)"}
-            icon={<XCircle size={12} />}
-            onClick={() => navigate("/runs")}
-            invertDelta
-            delay={0}
-          />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <HeroKpiCard
-            label="Regressions"
-            value={kpis.regressions}
-            delta={regressionDelta}
-            deltaLabel="detected"
-            sparkData={regressionSparkData}
-            accentColor={kpis.regressions > 0 ? "var(--proof-red)" : "var(--proof-green)"}
-            icon={<AlertTriangle size={12} />}
-            onClick={() => navigate("/compare")}
-            invertDelta
-            delay={0}
-          />
-        </motion.div>
-      </motion.section>
+      </section>
 
-      {/* ── Run ribbon ────────────────────────────────────────── */}
-      <motion.section
-        aria-label="Temporal context"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        transition={{ delayChildren: 0.04 }}
-        style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}
-      >
-        <motion.div variants={itemVariants}>
-          <RunRibbonCard
-            label="Latest Run"
-            run={latestRun}
-            icon={<Zap size={14} style={{ color: chartColor }} />}
-            accent={chartColor}
-            onClick={latestRun ? () => navigate(`/runs/${latestRun.id}`) : undefined}
-            index={0}
-          />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <RunRibbonCard
-            label="Previous Run"
-            run={prevRun}
-            icon={<Clock size={14} style={{ color: "var(--proof-text-muted)" }} />}
-            accent="var(--proof-border-strong)"
-            onClick={prevRun ? () => navigate(`/runs/${prevRun.id}`) : undefined}
-            index={0}
-          />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <RunRibbonCard
-            label="Upcoming"
-            nextDue={nextScheduled?.nextDue}
-            icon={<Calendar size={14} style={{ color: "var(--proof-blue)" }} />}
-            accent="var(--proof-blue)"
-            index={0}
-          />
-        </motion.div>
-      </motion.section>
-
-      {/* ── Tier cards (horizontal) ───────────────────────────── */}
-      <motion.section
-        aria-label="Environment tiers"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        transition={{ delayChildren: 0.08 }}
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: 10,
-        }}
-      >
-        {tierGroups.map((group, i) => (
-          <motion.div key={group.tier} variants={itemVariants}>
-            <TierCard
-              group={group}
-              onClick={() => navigate(`/runs?env=${group.tier}`)}
+      {/* ── Run ribbon ──────────────────────────────────────────── */}
+      <section aria-label="Temporal context">
+        <SectionHeader
+          title="Timeline"
+          accent="var(--proof-purple)"
+          action={
+            <button
+              onClick={() => navigate("/runs")}
+              style={{
+                display: "flex", alignItems: "center", gap: 4, background: "transparent",
+                border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600,
+                color: "var(--proof-text-muted)", padding: "3px 6px", borderRadius: "var(--proof-radius-sm)",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--proof-text)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)"; }}
+            >
+              All runs <ArrowRight size={11} />
+            </button>
+          }
+        />
+        <motion.div
+          variants={containerVariant}
+          initial="hidden"
+          animate="show"
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}
+        >
+          <motion.div variants={itemVariant}>
+            <RunRibbonCard
+              label="Latest Run"
+              run={latestRun ?? undefined}
+              icon={<Zap size={14} style={{ color: chartColor }} />}
+              accent={chartColor}
+              onClick={latestRun ? () => navigate(`/runs/${latestRun.id}`) : undefined}
               index={0}
             />
           </motion.div>
-        ))}
-      </motion.section>
+          <motion.div variants={itemVariant}>
+            <RunRibbonCard
+              label="Previous Run"
+              run={prevRun ?? undefined}
+              icon={<Clock size={14} style={{ color: "var(--proof-text-muted)" }} />}
+              accent="var(--proof-border-strong)"
+              onClick={prevRun ? () => navigate(`/runs/${prevRun.id}`) : undefined}
+              index={0}
+            />
+          </motion.div>
+          <motion.div variants={itemVariant}>
+            <RunRibbonCard
+              label="Upcoming"
+              nextDue={nextScheduled?.nextDue ?? undefined}
+              icon={<Calendar size={14} style={{ color: "var(--proof-blue)" }} />}
+              accent="var(--proof-blue)"
+              index={0}
+            />
+          </motion.div>
+        </motion.div>
+      </section>
 
-      {/* ── Trend chart (full width) ────────────────────────── */}
+      {/* ── Tier health cards ───────────────────────────────────── */}
+      <section aria-label="Environment tiers">
+        <SectionHeader
+          title="Environments"
+          accent="var(--proof-green)"
+          badge={
+            <span style={{
+              fontSize: 10, fontWeight: 600, padding: "1px 7px",
+              borderRadius: "var(--proof-radius-full)",
+              background: "var(--proof-subtle-bg)", border: "1px solid var(--proof-border)",
+              color: "var(--proof-text-muted)",
+            }}>
+              QA · UAT · PROD
+            </span>
+          }
+        />
+        <motion.div
+          variants={containerVariant}
+          initial="hidden"
+          animate="show"
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 }}
+        >
+          {tierGroups.map((group) => (
+            <motion.div key={group.tier} variants={itemVariant}>
+              <TierCard
+                group={group}
+                onClick={() => navigate(`/runs?env=${group.tier}`)}
+                index={0}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* ── Pass rate trend ─────────────────────────────────────── */}
       <motion.section
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.12, duration: 0.4 }}
-        className="proof-section-card"
-        style={{ display: "flex", flexDirection: "column", minHeight: 300 }}
+        transition={{ delay: 0.15, duration: 0.35 }}
+        aria-label="Pass rate trend"
+        style={{
+          background: "var(--proof-surface)",
+          border: "1px solid var(--proof-border)",
+          borderRadius: "var(--proof-radius-xl)",
+          boxShadow: "var(--proof-shadow-sm), var(--proof-shadow-inset)",
+          display: "flex", flexDirection: "column", minHeight: 280,
+        }}
       >
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "12px 16px",
-            borderBottom: "1px solid var(--proof-border)",
-            flexShrink: 0,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span
-              style={{
-                width: 3,
-                height: 14,
-                borderRadius: 99,
-                background: chartColor,
-                flexShrink: 0,
-              }}
-            />
-            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>Pass Rate Trend</div>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 18px 12px",
+          borderBottom: "1px solid var(--proof-border)",
+          flexShrink: 0,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <TrendingUp size={14} style={{ color: chartColor }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>
+              Pass Rate Trend
+            </span>
             {kpis.regressions > 0 && (
-              <span className="proof-badge" style={{ background: 'var(--proof-red-bg)', color: 'var(--proof-red)', border: '1px solid var(--proof-red-border)', fontSize: 10, fontWeight: 700 }}>
-                {kpis.regressions} {kpis.regressions === 1 ? 'anomaly' : 'anomalies'} detected
+              <span style={{
+                padding: "2px 8px", borderRadius: "var(--proof-radius-full)",
+                background: "var(--proof-red-bg)", border: "1px solid var(--proof-red-border)",
+                fontSize: 10, fontWeight: 700, color: "var(--proof-red)",
+              }}>
+                {kpis.regressions} anomaly{kpis.regressions !== 1 ? "ies" : ""} detected
               </span>
             )}
-            <span className="proof-badge proof-badge-neutral" style={{ fontSize: 10, fontWeight: 600 }}>
+            <span style={{
+              padding: "2px 8px", borderRadius: "var(--proof-radius-full)",
+              background: "var(--proof-subtle-bg)", border: "1px solid var(--proof-border)",
+              fontSize: 10, fontWeight: 600, color: "var(--proof-text-muted)",
+            }}>
               Last 14 days
             </span>
           </div>
           <button
             onClick={() => navigate("/trends")}
-            className="proof-button-ghost"
-            style={{ fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
+            style={{
+              display: "flex", alignItems: "center", gap: 4,
+              background: "transparent", border: "none", cursor: "pointer",
+              fontSize: 11, fontWeight: 600, color: "var(--proof-text-muted)",
+              padding: "4px 8px", borderRadius: "var(--proof-radius-sm)",
+              transition: "all var(--proof-transition)",
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--proof-text)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)"; }}
           >
-            Full trends <ArrowRight size={12} />
+            Full trends <ArrowRight size={11} />
           </button>
         </div>
 
-        {/* Chart area */}
-        <div
-          className="proof-chart-area"
-          style={{ flex: 1, minHeight: 0, padding: "16px 12px 12px", position: 'relative' }}
-        >
+        {/* Chart */}
+        <div style={{ flex: 1, minHeight: 0, padding: "16px 12px 8px" }}>
           {chartData.length === 0 ? (
             <div style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              color: 'var(--proof-text-muted)'
+              height: "100%", display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", gap: 8,
+              color: "var(--proof-text-muted)",
             }}>
-              <Activity size={24} style={{ opacity: 0.5 }} />
-              <div style={{ fontSize: 12, fontWeight: 500 }}>No run data for selected filters</div>
+              <Activity size={24} style={{ opacity: 0.4 }} />
+              <div style={{ fontSize: 12, fontWeight: 500 }}>No data for selected filters</div>
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 8, right: 16, left: 4, bottom: 4 }}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
                 <defs>
                   <linearGradient id="prGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={chartColor} stopOpacity={0.4} />
-                    <stop offset="40%" stopColor={chartColor} stopOpacity={0} />
+                    <stop offset="0%" stopColor={chartColor === "var(--proof-green)" ? "#00dc82" : chartColor === "var(--proof-yellow)" ? "#f59e0b" : "#ff4d6b"} stopOpacity={0.35} />
+                    <stop offset="70%" stopColor={chartColor === "var(--proof-green)" ? "#00dc82" : chartColor === "var(--proof-yellow)" ? "#f59e0b" : "#ff4d6b"} stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="dangerGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--proof-red)" stopOpacity={0.1} />
-                    <stop offset="100%" stopColor="var(--proof-red)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="warnGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--proof-yellow)" stopOpacity={0.06} />
-                    <stop offset="100%" stopColor="var(--proof-yellow)" stopOpacity={0} />
-                  </linearGradient>
-                  <filter id="lineGlow" x="-20%" y="-30%" width="140%" height="160%">
-                    <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur" />
+                  <filter id="lineGlow">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
                     <feComposite in="SourceGraphic" in2="blur" operator="over" />
                   </filter>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={
-                    {
-                      fontSize: 10,
-                      fontWeight: 500,
-                      fill: "var(--proof-text-muted)",
-                    } as React.SVGProps<SVGTextElement>
-                  }
-                  tickLine={false}
-                  axisLine={false}
-                  interval="preserveStartEnd"
-                  minTickGap={40}
+                  tick={{ fontSize: 10, fontWeight: 500, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>}
+                  tickLine={false} axisLine={false}
+                  interval="preserveStartEnd" minTickGap={40}
                 />
                 <YAxis
-                  domain={[
-                    Math.max(
-                      0,
-                      Math.floor(((Math.min(...chartData.map((d) => d.passRate)) || 80) - 10) / 10) * 10,
-                    ),
-                    100,
-                  ]}
-                  tick={
-                    {
-                      fontSize: 10,
-                      fontWeight: 500,
-                      fill: "var(--proof-text-muted)",
-                    } as React.SVGProps<SVGTextElement>
-                  }
-                  tickLine={false}
-                  axisLine={false}
+                  domain={[Math.max(0, Math.floor(((Math.min(...chartData.map((d) => d.passRate)) || 80) - 10) / 10) * 10), 100]}
+                  tick={{ fontSize: 10, fontWeight: 500, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>}
+                  tickLine={false} axisLine={false}
                   tickFormatter={(v: number) => `${v}%`}
+                  width={36}
                 />
-                {/* Reference Areas with visual labels */}
-                <ReferenceArea
-                  y1={0}
-                  y2={80}
-                  fill="url(#dangerGrad)"
-                  ifOverflow="extendDomain"
+                <ReferenceArea y1={0} y2={80} fill="rgba(255,77,107,0.04)" ifOverflow="extendDomain" />
+                <ReferenceArea y1={80} y2={95} fill="rgba(245,158,11,0.04)" ifOverflow="extendDomain" />
+                <ReferenceLine y={80} stroke="#f59e0b" strokeDasharray="4 4" strokeOpacity={0.4}
+                  label={{ value: "80%", fontSize: 9, fontWeight: 700, fill: "#f59e0b", position: "insideTopRight", dx: -8, dy: 8 }}
                 />
-                <ReferenceArea
-                  y1={80}
-                  y2={95}
-                  fill="url(#warnGrad)"
-                  ifOverflow="extendDomain"
+                <ReferenceLine y={95} stroke="#00dc82" strokeDasharray="6 3" strokeOpacity={0.5}
+                  label={{ value: "Gate 95%", fontSize: 9, fontWeight: 700, fill: "#00dc82", position: "insideTopRight", dx: -8, dy: 8 }}
                 />
-                
-                {/* Threshold lines */}
-                <ReferenceLine
-                  y={80}
-                  stroke="var(--proof-yellow)"
-                  strokeDasharray="4 4"
-                  strokeOpacity={0.5}
-                  label={{
-                    value: "MIN 80%",
-                    fontSize: 9,
-                    fontWeight: 800,
-                    fill: "var(--proof-yellow)",
-                    position: "insideTopRight",
-                    dx: -10,
-                    dy: 10
-                  }}
-                />
-                <ReferenceLine
-                  y={95}
-                  stroke="var(--proof-green)"
-                  strokeDasharray="6 3"
-                  strokeOpacity={0.7}
-                  label={{
-                    value: "GATE 95%",
-                    fontSize: 9,
-                    fontWeight: 800,
-                    fill: "var(--proof-green)",
-                    position: "insideTopRight",
-                    dx: -10,
-                    dy: 10
-                  }}
-                />
-
                 <Tooltip content={<ChartTip />} />
                 <Area
-                  type="monotone"
-                  dataKey="passRate"
-                  stroke={chartColor}
-                  strokeWidth={2.5}
+                  type="monotone" dataKey="passRate"
+                  stroke={chartColor} strokeWidth={2}
                   fill="url(#prGrad)"
                   dot={false}
-                  filter="url(#lineGlow)"
-                  activeDot={{
-                    r: 5,
-                    fill: chartColor,
-                    stroke: "var(--proof-surface)",
-                    strokeWidth: 2,
-                  }}
-                  isAnimationActive={true}
-                  animationDuration={1000}
+                  activeDot={{ r: 4, fill: chartColor === "var(--proof-green)" ? "#00dc82" : chartColor === "var(--proof-yellow)" ? "#f59e0b" : "#ff4d6b", stroke: "var(--proof-surface)", strokeWidth: 2 }}
+                  isAnimationActive animationDuration={900}
                 />
               </AreaChart>
             </ResponsiveContainer>
           )}
         </div>
-        
+
         {/* Footer */}
-        <div style={{ padding: "8px 16px", borderTop: "1px solid var(--proof-border)", display: "flex", justifyContent: "flex-end" }}>
+        <div style={{
+          padding: "8px 18px", borderTop: "1px solid var(--proof-border)",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          flexShrink: 0,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <div style={{ width: 8, height: 2, borderRadius: 1, background: "#00dc82" }} />
+              <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontWeight: 500 }}>Promotion gate 95%</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <div style={{ width: 8, height: 2, borderRadius: 1, background: "#f59e0b" }} />
+              <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontWeight: 500 }}>Warning 80%</span>
+            </div>
+          </div>
           <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontWeight: 500 }}>
             Last synced: {lastSynced}
           </span>
         </div>
       </motion.section>
-    </main>
+    </motion.main>
   );
 }

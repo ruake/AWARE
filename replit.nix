@@ -1,5 +1,7 @@
 {pkgs}: {
   deps = [
+    pkgs.typescript
+    pkgs.iproute2
     pkgs.opencode
     pkgs.lsof
     pkgs.fluxbox

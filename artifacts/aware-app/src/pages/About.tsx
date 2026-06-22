@@ -12,6 +12,20 @@ import { AboutEnvMap } from "@/components/aware/AboutEnvMap";
 import { AboutTechStack } from "@/components/aware/AboutTechStack";
 import { AboutTestCategories } from "@/components/aware/AboutTestCategories";
 import { Database, Copy, Check } from "lucide-react";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { ease: "easeOut" as const, duration: 0.4 } }
+};
 
 export default function About() {
   const liveRuns = useSyncExternalStore(subscribeToRuns, getRuns);
@@ -61,86 +75,107 @@ export default function About() {
   };
 
   return (
-    <div
-      style={{
-        flex: 1,
-        overflowY: "auto",
-        overflowX: "hidden",
-        height: "100%",
-      }}
-    >
-      <div
+    <div className="proof-page" style={{ height: "100%", overflowY: "auto", overflowX: "hidden" }}>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 24,
-          padding: "32px 24px",
+          gap: 28,
+          padding: "var(--proof-page-py) var(--proof-page-px)",
           maxWidth: 1100,
           margin: "0 auto",
-          animation: "page-enter 0.4s ease-out both",
         }}
       >
-        <AboutHero />
+        <motion.div variants={itemVariants}>
+          <AboutHero />
+        </motion.div>
 
         {/* System Status Section */}
-        <div
-          className="proof-card"
-          style={{
-            padding: "16px 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 20,
-            background: "var(--proof-surface)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <Database size={18} style={{ color: "var(--proof-blue)" }} />
-            <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em" }}>System Status</div>
-            <div style={{ height: 16, width: 1, background: "var(--proof-border)" }} />
-            <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--proof-text-secondary)", flexWrap: "wrap" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 500, textTransform: "uppercase", color: "var(--proof-text-muted)" }}>Data:</span>
-                <span style={{ display: "flex", alignItems: "center", gap: 4, color: dataHealthy ? "var(--proof-green)" : "var(--proof-red)", fontWeight: 600 }}>
-                  <div className={`proof-status-dot proof-status-dot-${dataHealthy ? 'pass' : 'fail'}`} />
-                  {dataHealthy ? "Healthy" : "Error"}
-                </span>
-              </div>
-              <div><span style={{ fontSize: 11, fontWeight: 500, textTransform: "uppercase", color: "var(--proof-text-muted)" }}>Runs:</span> <span style={{ color: "var(--proof-text)", fontWeight: 600 }}>{liveRuns.length}</span></div>
-              <div><span style={{ fontSize: 11, fontWeight: 500, textTransform: "uppercase", color: "var(--proof-text-muted)" }}>Latest:</span> <span style={{ color: "var(--proof-text)", fontWeight: 600 }}>{lastRunDate}</span></div>
-              <div><span style={{ fontSize: 11, fontWeight: 500, textTransform: "uppercase", color: "var(--proof-text-muted)" }}>Nodes:</span> <span style={{ color: "var(--proof-text)", fontWeight: 600 }}>{envs.length}</span></div>
-            </div>
-          </div>
-          <button
-            onClick={handleCopyVersion}
-            className="proof-button proof-button-xs proof-button-secondary"
+        <motion.div variants={itemVariants}>
+          <div
+            className="proof-card"
+            style={{
+              padding: "16px 24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 20,
+              background: "var(--proof-surface-2)",
+            }}
           >
-            {copied ? <Check size={12} style={{ color: "var(--proof-green)" }} /> : <Copy size={12} />}
-            {copied ? "Copied!" : "Copy version info"}
-          </button>
-        </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "var(--proof-radius-lg)",
+                  background: "var(--proof-blue-bg)",
+                  border: "1px solid var(--proof-blue-border)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "var(--proof-blue)",
+                }}
+              >
+                <Database size={18} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--proof-text)" }}>System Status</div>
+                <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--proof-text-secondary)", marginTop: 4 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ color: "var(--proof-text-muted)" }}>Data:</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5, color: dataHealthy ? "var(--proof-green)" : "var(--proof-red)", fontWeight: 500 }}>
+                      <span className="proof-live-dot" style={{ backgroundColor: dataHealthy ? "var(--proof-green)" : "var(--proof-red)", boxShadow: `0 0 6px var(--proof-${dataHealthy ? 'green' : 'red'}-glow)` }} />
+                      {dataHealthy ? "Healthy" : "Error"}
+                    </span>
+                  </div>
+                  <div><span style={{ color: "var(--proof-text-muted)" }}>Runs:</span> <span style={{ color: "var(--proof-text)", fontWeight: 500 }}>{liveRuns.length}</span></div>
+                  <div><span style={{ color: "var(--proof-text-muted)" }}>Latest:</span> <span style={{ color: "var(--proof-text)", fontWeight: 500 }}>{lastRunDate}</span></div>
+                  <div><span style={{ color: "var(--proof-text-muted)" }}>Nodes:</span> <span style={{ color: "var(--proof-text)", fontWeight: 500 }}>{envs.length}</span></div>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleCopyVersion}
+              className="proof-btn proof-btn-ghost"
+              style={{ fontSize: 12 }}
+            >
+              {copied ? <Check size={14} style={{ color: "var(--proof-green)" }} /> : <Copy size={14} />}
+              {copied ? "Copied!" : "Copy diagnostic"}
+            </button>
+          </div>
+        </motion.div>
 
-        <AboutStats
-          runs={liveRuns.length}
-          tests={totalTests}
-          suites={suites.length}
-          passRate={overallRate}
-          promoPct={promoPct}
-          runsPerDay={runsPerDay}
-          envCount={envs.length}
-        />
+        <motion.div variants={itemVariants}>
+          <AboutStats
+            runs={liveRuns.length}
+            tests={totalTests}
+            suites={suites.length}
+            passRate={overallRate}
+            promoPct={promoPct}
+            runsPerDay={runsPerDay}
+            envCount={envs.length}
+          />
+        </motion.div>
         
-        <AboutFeatures />
+        <motion.div variants={itemVariants}>
+          <AboutFeatures />
+        </motion.div>
         
-        <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: 24 }}>
+        <motion.div variants={itemVariants} style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: 28 }}>
           <AboutEnvMap />
           <AboutTechStack />
-        </div>
+        </motion.div>
 
         {Object.keys(cats).length > 0 && (
-          <AboutTestCategories categories={cats as Record<string, number>} />
+          <motion.div variants={itemVariants}>
+            <AboutTestCategories categories={cats as Record<string, number>} />
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

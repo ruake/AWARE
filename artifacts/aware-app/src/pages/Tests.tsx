@@ -8,19 +8,9 @@ import {
 } from "@/lib/data";
 import { useTestData } from "@/hooks/useTestData";
 import { useSyncedUrlState } from "@/lib/urlState";
-import { PageTemplate } from "@/components/aware";
 import type { TestSuite } from "@/lib/types";
-import { TestFilters, TestList, SuiteDetailPanel, TestDetailPanel } from "@/components/aware";
-
-function _getSuiteChildren(suite: TestSuite, allSuites: TestSuite[]): TestSuite[] {
-  return allSuites.filter((s) => s.parentId === suite.id);
-}
-
-function _getSuiteDepth(suite: TestSuite, allSuites: TestSuite[], depth = 0): number {
-  if (!suite.parentId) return depth;
-  const parent = allSuites.find((s) => s.id === suite.parentId);
-  return parent ? _getSuiteDepth(parent, allSuites, depth + 1) : depth;
-}
+import { TestFilters, TestList, SuiteDetailPanel, TestDetailPanel, Pagination, SkeletonTable } from "@/components/aware";
+import { Download, Activity, ListChecks, Hash, Zap } from "lucide-react";
 
 export default function Tests() {
   const { tcs, suites } = useTestData();
@@ -128,133 +118,153 @@ export default function Tests() {
     setPriority("All");
   };
 
+  const loading = initState.loading && allTests.length === 0;
+
   return (
-    <PageTemplate
-      title="Tests"
-      subtitle={`${allTests.length} total tests · ${suites.length} suites`}
-      loading={initState.loading && allTests.length === 0}
-      loadingRows={8}
-      loadingCols={5}
-      topContent={
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-            gap: 12,
-            padding: "16px 16px 0 16px",
-          }}
-        >
-          <div className="proof-card" style={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Total Tests
-            </div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--proof-text)' }}>{allTests.length}</div>
+    <div className="proof-page" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', animation: 'page-enter 0.3s cubic-bezier(0.2, 0, 0.2, 1) both' }}>
+      <header
+        style={{
+          padding: "24px 32px",
+          borderBottom: "1px solid var(--proof-border)",
+          background: "rgba(0,0,0,0.1)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          flexShrink: 0
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, color: 'var(--proof-text)', letterSpacing: '-0.02em' }}>
+              Tests Library
+            </h1>
+            <p style={{ margin: '4px 0 0', color: 'var(--proof-text-secondary)', fontSize: 14 }}>
+              Explore and manage your test definitions and suites
+            </p>
           </div>
-          <div className="proof-card" style={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Active
+          <button onClick={handleExportCSV} className="proof-btn proof-btn-ghost">
+            <Download size={14} /> Export CSV
+          </button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginTop: 24 }}>
+          <div className="proof-card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--proof-subtle-bg2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--proof-text-secondary)' }}>
+              <Hash size={20} />
             </div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: "var(--proof-green)" }}>
-              {statusCounts["active"] || 0}
-            </div>
-          </div>
-          <div className="proof-card" style={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Top Types
-            </div>
-            <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--proof-text)', marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {Object.entries(typeCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 3)
-                .map(([k, v]) => (
-                  <span key={k} style={{ background: 'var(--proof-subtle-bg)', padding: '1px 4px', borderRadius: 3, border: '1px solid var(--proof-border)' }}>
-                    {k}: {v}
-                  </span>
-                ))}
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--proof-text-secondary)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Tests</div>
+              <div style={{ fontSize: 24, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{allTests.length}</div>
             </div>
           </div>
-          <div className="proof-card" style={{ padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Avg Priority
+          
+          <div className="proof-card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--proof-green-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--proof-green)' }}>
+              <Activity size={20} />
             </div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--proof-text)' }}>P{avgPriority}</div>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--proof-text-secondary)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Active Tests</div>
+              <div style={{ fontSize: 24, fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--proof-green)' }}>{statusCounts["active"] || 0}</div>
+            </div>
           </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-            }}
-          >
-            <button
-              className="proof-button"
-              onClick={handleExportCSV}
-              style={{ fontSize: 11, height: 32, gap: 6 }}
-            >
-              Export CSV
-            </button>
+          
+          <div className="proof-card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--proof-yellow-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--proof-yellow)' }}>
+              <Zap size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--proof-text-secondary)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Avg Priority</div>
+              <div style={{ fontSize: 24, fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--proof-yellow)' }}>P{avgPriority}</div>
+            </div>
+          </div>
+          
+          <div className="proof-card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--proof-blue-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--proof-blue)' }}>
+              <ListChecks size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--proof-text-secondary)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Test Suites</div>
+              <div style={{ fontSize: 24, fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--proof-blue)' }}>{suites.length}</div>
+            </div>
           </div>
         </div>
-      }
-      filters={
-        <div className="proof-stack">
-          <TestFilters
-            search={search}
-            onSearchChange={setSearch}
-            testType={testType}
-            onTestTypeChange={setTestType}
-            category={category}
-            onCategoryChange={setCategory}
-            status={status}
-            onStatusChange={setStatus}
-            priority={priority}
-            onPriorityChange={setPriority}
-            suiteFilter={suiteFilter}
-            selectedSuite={selectedSuite}
-            onClearSuite={() => navigate("/tests")}
-            typeCounts={typeCounts}
-            categoryCounts={categoryCounts}
-            statusCounts={statusCounts}
-            priorityCounts={priorityCounts}
-            filteredCount={filtered.length}
-            totalCount={allTests.length}
-          />
+      </header>
+
+      <div style={{ padding: "12px 32px", borderBottom: "1px solid var(--proof-border-light)", background: "var(--proof-surface-2)", flexShrink: 0 }}>
+        <TestFilters
+          search={search}
+          onSearchChange={setSearch}
+          testType={testType}
+          onTestTypeChange={setTestType}
+          category={category}
+          onCategoryChange={setCategory}
+          status={status}
+          onStatusChange={setStatus}
+          priority={priority}
+          onPriorityChange={setPriority}
+          suiteFilter={suiteFilter}
+          selectedSuite={selectedSuite}
+          onClearSuite={() => navigate("/tests")}
+          typeCounts={typeCounts}
+          categoryCounts={categoryCounts}
+          statusCounts={statusCounts}
+          priorityCounts={priorityCounts}
+          filteredCount={filtered.length}
+          totalCount={allTests.length}
+        />
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        <div style={{ flex: 1, overflow: 'auto', padding: "24px 32px" }}>
+          {loading ? (
+             <SkeletonTable rows={8} cols={5} />
+          ) : (
+            <>
+              <TestList
+                pageItems={pageItems}
+                hoveredRow={hoveredRow}
+                onHoverRow={setHoveredRow}
+                detailId={detailId}
+                suiteFilter={suiteFilter}
+                page={page}
+                filteredCount={filtered.length}
+                onPageChange={setPage}
+                onClearFilters={handleClearFilters}
+              />
+              
+              {totalPages > 1 && (
+                <div style={{ marginTop: 24, borderTop: '1px solid var(--proof-border)', paddingTop: 16 }}>
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    totalItems={filtered.length}
+                    pageSize={PAGE_SIZE}
+                    onPageChange={setPage}
+                  />
+                </div>
+              )}
+            </>
+          )}
         </div>
-      }
-      sidePanel={
-        selectedTest ? (
-          <TestDetailPanel
-            test={selectedTest}
-            parentSuite={selectedSuite}
-            onClose={() => navigate(`/tests${suiteFilter ? `?suite=${suiteFilter}` : ""}`)}
-          />
-        ) : selectedSuite ? (
-          <SuiteDetailPanel
-            suite={selectedSuite}
-            tests={tcs.filter((t) => selectedSuite.testIds.includes(t.id))}
-            onClose={() => navigate("/tests")}
-            onTestSelect={(testId) => navigate(`/tests?suite=${suiteFilter}&detail=${testId}`)}
-          />
-        ) : undefined
-      }
-      sidePanelWidth={380}
-      currentPage={page}
-      totalPages={totalPages}
-      totalItems={filtered.length}
-      pageSize={PAGE_SIZE}
-      onPageChange={(p) => setPage(p)}
-    >
-      <TestList
-        pageItems={pageItems}
-        hoveredRow={hoveredRow}
-        onHoverRow={setHoveredRow}
-        detailId={detailId}
-        suiteFilter={suiteFilter}
-        page={page}
-        filteredCount={filtered.length}
-        onPageChange={setPage}
-        onClearFilters={handleClearFilters}
-      />
-    </PageTemplate>
+        
+        {(selectedTest || selectedSuite) && (
+          <div style={{ width: 440, borderLeft: "1px solid var(--proof-border)", background: "var(--proof-surface)", flexShrink: 0, overflow: 'auto' }}>
+            {selectedTest ? (
+              <TestDetailPanel
+                test={selectedTest}
+                parentSuite={selectedSuite}
+                onClose={() => navigate(`/tests${suiteFilter ? `?suite=${suiteFilter}` : ""}`)}
+              />
+            ) : selectedSuite ? (
+              <SuiteDetailPanel
+                suite={selectedSuite}
+                tests={tcs.filter((t) => selectedSuite.testIds.includes(t.id))}
+                onClose={() => navigate("/tests")}
+                onTestSelect={(testId) => navigate(`/tests?suite=${suiteFilter}&detail=${testId}`)}
+              />
+            ) : null}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

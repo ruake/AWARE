@@ -8,109 +8,51 @@ import {
 } from "@/lib/data";
 import type { TestResult } from "@/lib/types";
 import {
-  ChevronLeft,
-  ChevronRight,
-  BarChart3,
-  FileText,
-  ChevronDown,
-  X,
-  Copy,
-  Check as CheckIcon,
   ArrowLeft,
   Search,
   CheckCircle2,
   XCircle,
   HelpCircle,
+  ChevronDown,
+  ChevronRight,
+  GitCompare,
+  Clock,
+  TerminalSquare,
+  AlertTriangle,
+  Calendar
 } from "lucide-react";
 import { useSyncedUrlState } from "@/lib/urlState";
-import { useSimpleToast } from "@/hooks/useSimpleToast";
-import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { SkeletonTable, SkeletonText } from "@/components/aware/Skeleton";
-import {
-  TimeWindowProvider,
-  TimeWindowControls,
-  TestHistoryStrip,
-} from "@/components/aware/HistoryTimeline";
 import { AssertionRow } from "@/components/aware/AssertionRow";
-import { EvidenceViewer } from "@/components/aware/EvidenceViewer";
-import { FilmstripViewer } from "@/components/aware/FilmstripViewer";
-import { RunHeader } from "@/components/aware/RunHeader";
+import { envIdToLabel } from "@/lib/envConfig";
+import { TestHistoryStrip } from "@/components/aware/HistoryTimeline";
 
 export default function RunDetail() {
   const params = useParams<{ runId: string }>();
   const [, navigate] = useLocation();
   const urlSearch = useSearch();
   const runId = params.runId ?? "";
-  const { Toast } = useSimpleToast();
 
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const run = getRunById(runId) ?? null;
   const results = run ? getTestResultsForRun(run.id) : [];
+  
   const [search, setSearch] = useSyncedUrlState("q", "");
   const [statusFilter, setStatusFilter] = useSyncedUrlState("status", "all");
   const [catFilter, setCatFilter] = useSyncedUrlState("cat", "all");
-  const [page, setPage] = React.useState(0);
-  const [detailPanelCollapsed, setDetailPanelCollapsed] = React.useState(false);
-  const PAGE_SIZE = 20;
+  const [expandedRows, setExpandedRows] = React.useState<Set<string>>(new Set());
 
-  const filterKey = `${search}|${statusFilter}|${catFilter}`;
-  const prevFilterKeyRef = React.useRef(filterKey);
-  React.useEffect(() => {
-    if (prevFilterKeyRef.current !== filterKey) {
-      prevFilterKeyRef.current = filterKey;
-      setPage(0);
-    }
-  }, [filterKey]);
+  // Auto-expand from URL
   const urlTestId = React.useMemo(() => new URLSearchParams(urlSearch).get("testId"), [urlSearch]);
-  const [selectedResult, setSelectedResult] = React.useState<TestResult | null>(null);
-
-  // Auto-select from URL param or first test on run load
-  const autoSelectedRunRef = React.useRef<string>("");
   React.useEffect(() => {
-    if (!run || results.length === 0) return;
-    if (autoSelectedRunRef.current === run.id && urlTestId) {
-      const match = results.find((r) => r.id === urlTestId);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (match && selectedResult?.id !== match.id) setSelectedResult(match);
-      return;
+    if (urlTestId && !expandedRows.has(urlTestId)) {
+      setExpandedRows(prev => new Set(prev).add(urlTestId));
+      // Try to scroll to it
+      setTimeout(() => {
+        document.getElementById(`row-${urlTestId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
     }
-    if (autoSelectedRunRef.current === run.id) return;
-    autoSelectedRunRef.current = run.id;
-    if (urlTestId) {
-      const match = results.find((r) => r.id === urlTestId);
-      if (match) {
-        setSelectedResult(match);
-        return;
-      }
-    }
-    setSelectedResult(results[0]);
-  }, [run?.id, urlTestId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleKeyDown = (e: React.KeyboardEvent, result: TestResult) => {
-    if (e.key === "Enter") {
-      setSelectedResultSyncUrl(selectedResult?.id === result.id ? null : result);
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      const idx = filtered.findIndex((r) => r.id === result.id);
-      if (idx < filtered.length - 1) {
-        const nextResult = filtered[idx + 1];
-        setSelectedResultSyncUrl(nextResult);
-        // Focus the next row
-        const nextRow = document.querySelector(`[data-row-id="${nextResult.id}"]`) as HTMLElement;
-        nextRow?.focus();
-      }
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      const idx = filtered.findIndex((r) => r.id === result.id);
-      if (idx > 0) {
-        const prevResult = filtered[idx - 1];
-        setSelectedResultSyncUrl(prevResult);
-        // Focus the prev row
-        const prevRow = document.querySelector(`[data-row-id="${prevResult.id}"]`) as HTMLElement;
-        prevRow?.focus();
-      }
-    }
-  };
+  }, [urlTestId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!run) {
     if (initState.loading) {
@@ -131,7 +73,7 @@ export default function RunDetail() {
         </p>
         <button
           onClick={() => navigate("/runs")}
-          className="proof-button"
+          className="proof-btn proof-btn-ghost"
           style={{ fontSize: 13, marginTop: 16 }}
         >
           Back to Runs
@@ -147,698 +89,297 @@ export default function RunDetail() {
     return true;
   });
 
-  const pagedResults = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-
-  const selIdx = selectedResult ? filtered.findIndex((r) => r.id === selectedResult.id) : -1;
-
-  const setSelectedResultSyncUrl = (r: TestResult | null) => {
-    setSelectedResult(r);
-    const base = `/runs/${run.id}`;
-    if (r) navigate(`${base}?testId=${r.id}`, { replace: true });
-    else navigate(base, { replace: true });
+  const toggleRow = (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const newSet = new Set(expandedRows);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setExpandedRows(newSet);
   };
 
-  const navigateDetail = (dir: -1 | 1) => {
-    const next = selIdx + dir;
-    if (next >= 0 && next < filtered.length) setSelectedResultSyncUrl(filtered[next]);
+  const counts = {
+    total: results.length,
+    passed: results.filter((r) => r.status === "PASS").length,
+    failed: results.filter((r) => r.status === "FAIL").length,
+    skipped: results.filter((r) => (r.status as string) === "SKIPPED").length,
   };
 
-  const counts = React.useMemo(() => {
-    return {
-      total: results.length,
-      passed: results.filter((r) => r.status === "PASS").length,
-      failed: results.filter((r) => r.status === "FAIL").length,
-      skipped: results.filter((r) => (r.status as string) === "SKIPPED").length,
-    };
-  }, [results]);
-
-  const catBreakdown = React.useMemo(() => {
-    const map: Record<string, { pass: number; total: number }> = {};
-    results.forEach((r) => {
-      if (!map[r.category]) map[r.category] = { pass: 0, total: 0 };
-      map[r.category].total++;
-      if (r.status === "PASS") map[r.category].pass++;
-    });
-    return Object.entries(map).sort((a, b) => b[1].total - a[1].total);
-  }, [results]);
-
-  const [copiedId, setCopiedId] = React.useState<string | null>(null);
-  const copyTestId = (id: string) => {
-    navigator.clipboard.writeText(id);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+  const getStatusColor = (status: string) => {
+    if (status === "PASS") return "var(--proof-green)";
+    if (status === "FAIL") return "var(--proof-red)";
+    if (status === "SKIPPED") return "var(--proof-text-muted)";
+    if (status === "FLAKY") return "var(--proof-yellow)";
+    return "var(--proof-text-secondary)";
   };
 
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", gap: 16, height: "100%", minHeight: 0 }}
-    >
-      <RunHeader run={run} />
-
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, height: "100%", minHeight: 0 }}>
+      {/* Sticky Header */}
       <div
+        className="proof-card"
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-          gap: 12,
-          padding: "16px",
-          background: "var(--proof-surface)",
-          border: "1px solid var(--proof-border)",
-          borderRadius: "var(--proof-radius)",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: 20,
+          padding: "16px 24px",
+          background: "var(--proof-glass-surface)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid var(--proof-border)",
+          borderRadius: 0,
+          margin: "-24px -28px 0 -28px"
         }}
       >
+        <button 
+          onClick={() => navigate("/runs")}
+          className="proof-btn-ghost"
+          style={{ 
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 32, height: 32, borderRadius: 8, padding: 0,
+            border: '1px solid var(--proof-border)'
+          }}
+        >
+          <ArrowLeft size={16} />
+        </button>
+
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span style={{ fontSize: 11, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Total Tests</span>
-          <span style={{ fontSize: 18, fontWeight: 700 }}>{counts.total}</span>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span style={{ fontSize: 11, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Passed</span>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-green)" }}>{counts.passed}</span>
-            <CheckCircle2 size={14} style={{ color: "var(--proof-green)" }} />
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 700 }}>
+              {run.id.split("-")[0]}
+            </span>
+            <span className={`proof-badge ${run.env === "PROD" ? "proof-badge-critical" : run.env === "UAT" ? "proof-badge-degraded" : "proof-badge-healthy"}`}>
+              {run.env} {run.network}
+            </span>
+            <span className="proof-badge" style={{ color: getStatusColor(run.status), borderColor: getStatusColor(run.status), background: `color-mix(in srgb, ${getStatusColor(run.status)} 10%, transparent)` }}>
+              {run.status}
+            </span>
           </div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span style={{ fontSize: 11, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Failed</span>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-red)" }}>{counts.failed}</span>
-            <XCircle size={14} style={{ color: "var(--proof-red)" }} />
-          </div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span style={{ fontSize: 11, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Skipped</span>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-text-secondary)" }}>{counts.skipped}</span>
-            <HelpCircle size={14} style={{ color: "var(--proof-text-secondary)" }} />
-          </div>
-        </div>
-      </div>
-
-      {/* Chart + results table */}
-      <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
-        <PanelErrorBoundary label="Test results">
-          <div
-            className="proof-card"
-            style={{
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              flex: 1,
-              minWidth: 0,
-            }}
-          >
-            <TimeWindowProvider>
-              <div
-                style={{
-                  padding: "6px 14px",
-                  borderBottom: "1px solid var(--proof-grey)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  flexWrap: "wrap",
-                }}
-              >
-                <TimeWindowControls />
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto" }}>
-                  <div style={{ position: "relative" }}>
-                    <input
-                      className="proof-input"
-                      placeholder="Search tests…"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      style={{ paddingLeft: 22, width: 160, height: 24, fontSize: 11 }}
-                    />
-                    <span
-                      style={{
-                        position: "absolute",
-                        left: 6,
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        color: "var(--proof-text-muted)",
-                        pointerEvents: "none",
-                        fontSize: 11,
-                      }}
-                    >
-                      ⌕
-                    </span>
-                  </div>
-                  <select
-                    className="proof-input"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    style={{ fontSize: 11, height: 24, padding: "0 6px" }}
-                  >
-                    <option value="all">All statuses</option>
-                    <option value="PASS">PASS</option>
-                    <option value="FAIL">FAIL</option>
-                  </select>
-                  <select
-                    className="proof-input"
-                    value={catFilter}
-                    onChange={(e) => setCatFilter(e.target.value)}
-                    style={{ fontSize: 11, height: 24, padding: "0 6px" }}
-                  >
-                    <option value="all">All categories</option>
-                    {[...new Set(results.map((r) => r.category).filter(Boolean))]
-                      .sort()
-                      .map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                  </select>
-                  {(search || statusFilter !== "all" || catFilter !== "all") && (
-                    <button
-                      onClick={() => {
-                        setSearch("");
-                        setStatusFilter("all");
-                        setCatFilter("all");
-                      }}
-                      className="proof-button-ghost"
-                      style={{ fontSize: 10, padding: "2px 6px" }}
-                    >
-                      ✕ Clear
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div style={{ flex: 1, overflowY: "auto" }}>
-                {filtered.length === 0 ? (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      padding: "60px 24px",
-                      color: "var(--proof-text-secondary)",
-                    }}
-                  >
-                    <Search size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
-                    <div style={{ fontSize: 15, fontWeight: 600, color: "var(--proof-text)", marginBottom: 6 }}>
-                      No results found
-                    </div>
-                    <div style={{ fontSize: 13, marginBottom: 20 }}>
-                      Try adjusting your filters or search terms
-                    </div>
-                    <button className="proof-button" onClick={() => { setSearch(""); setStatusFilter("all"); setCatFilter("all"); }}>Clear filters</button>
-                  </div>
-                ) : (
-                  <>
-                    <table className="proof-table">
-                      <thead>
-                        <tr>
-                          <th style={{ width: "30%", fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Test Name</th>
-                          <th style={{ width: 70, fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
-                          <th style={{ width: 100, fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Category</th>
-                          <th style={{ width: "22%", whiteSpace: "nowrap", fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>History</th>
-                          <th style={{ width: 80, textAlign: "right", fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Duration</th>
-                          <th style={{ width: 110, fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {pagedResults.map((r) => (
-                          <tr
-                            key={r.id}
-                            data-row-id={r.id}
-                            tabIndex={0}
-                            onKeyDown={(e) => handleKeyDown(e, r)}
-                            onClick={() =>
-                              setSelectedResultSyncUrl(selectedResult?.id === r.id ? null : r)
-                            }
-                            style={{
-                              cursor: "pointer",
-                              outline: "none",
-                              background:
-                                selectedResult?.id === r.id
-                                  ? "var(--proof-blue-bg)"
-                                  : r.status === "FAIL"
-                                    ? "rgba(217,48,37,0.03)"
-                                    : undefined,
-                              boxShadow:
-                                selectedResult?.id === r.id
-                                  ? "inset 0 0 0 2px var(--proof-blue)"
-                                  : undefined,
-                            }}
-                          >
-                            <td
-                              style={{
-                                fontFamily: "var(--font-mono)",
-                                fontSize: 11,
-                              }}
-                            >
-                              {r.name}
-                            </td>
-                            <td>
-                              <span
-                                className={`proof-badge ${r.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                              >
-                                {r.status}
-                              </span>
-                            </td>
-                            <td>
-                              <span
-                                style={{
-                                  fontSize: 11,
-                                  background: "var(--proof-grey-bg)",
-                                  padding: "2px 7px",
-                                  borderRadius: 4,
-                                  border: "1px solid var(--proof-grey)",
-                                }}
-                              >
-                                {r.category}
-                              </span>
-                            </td>
-                            <td style={{ width: 200, whiteSpace: "nowrap" }}>
-                              <TestHistoryStrip testName={r.name} currentRunId={runId} />
-                            </td>
-                            <td
-                              style={{
-                                textAlign: "right",
-                                fontFamily: "var(--font-mono)",
-                                fontSize: 11,
-                                color: "var(--proof-text-secondary)",
-                              }}
-                            >
-                              {r.duration}ms
-                            </td>
-                            <td onClick={(e) => e.stopPropagation()}>
-                              <button
-                                onClick={() => navigate(`/trends?testId=${r.id}`)}
-                                className="proof-button proof-button-xs"
-                                style={{ padding: "2px 7px" }}
-                              >
-                                Analytics
-                              </button>
-                              <button
-                                onClick={() => navigate(`/tests?q=${r.id}`)}
-                                className="proof-button proof-button-xs"
-                                style={{ padding: "2px 7px", marginLeft: 4 }}
-                              >
-                                <FileText size={10} /> Def
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-
-                    {totalPages > 1 && (
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 12,
-                          padding: "8px 14px",
-                          borderTop: "1px solid var(--proof-border)",
-                          fontSize: 12,
-                        }}
-                      >
-                        <div style={{ display: "flex", gap: 4 }}>
-                          <button
-                            disabled={page === 0}
-                            onClick={() => setPage(0)}
-                            className="proof-button proof-button-xs"
-                            title="First Page"
-                          >
-                            «
-                          </button>
-                          <button
-                            disabled={page === 0}
-                            onClick={() => setPage((p) => Math.max(0, p - 1))}
-                            className="proof-button proof-button-xs"
-                          >
-                            Prev
-                          </button>
-                        </div>
-                        <span
-                          style={{
-                            color: "var(--proof-text-secondary)",
-                            minWidth: 80,
-                            textAlign: "center",
-                          }}
-                        >
-                          Page {page + 1} of {totalPages}
-                        </span>
-                        <div style={{ display: "flex", gap: 4 }}>
-                          <button
-                            disabled={page >= totalPages - 1}
-                            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                            className="proof-button proof-button-xs"
-                          >
-                            Next
-                          </button>
-                          <button
-                            disabled={page >= totalPages - 1}
-                            onClick={() => setPage(totalPages - 1)}
-                            className="proof-button proof-button-xs"
-                            title="Last Page"
-                          >
-                            »
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </TimeWindowProvider>
-          </div>
-        </PanelErrorBoundary>
-
-      {/* Test Detail Panel */}
-      {selectedResult && (
-        <PanelErrorBoundary label="Evidence panel">
-          <div
-            className="proof-card"
-            style={{
-              width: 380,
-              flexShrink: 0,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-              borderLeft: `3px solid ${selectedResult.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-            }}
-          >
-            {/* Panel header */}
-            <div
-              style={{
-                padding: "10px 14px",
-                borderBottom: "1px solid var(--proof-grey)",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                background: "var(--proof-blue-bg)",
-                flexShrink: 0,
-              }}
-            >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    border: "1px solid var(--proof-grey)",
-                    borderRadius: 4,
-                    background: "var(--proof-surface)",
-                  }}
-                >
-                  <button
-                    disabled={selIdx <= 0}
-                    onClick={() => navigateDetail(-1)}
-                    style={{
-                      padding: "4px 7px",
-                      border: "none",
-                      background: "transparent",
-                      cursor: selIdx > 0 ? "pointer" : "not-allowed",
-                      color: selIdx > 0 ? "var(--proof-blue)" : "var(--proof-grey)",
-                    }}
-                  >
-                    <ChevronLeft size={13} />
-                  </button>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      color: "var(--proof-text-secondary)",
-                      padding: "0 4px",
-                    }}
-                  >
-                    {selIdx + 1}/{filtered.length}
-                  </span>
-                  <button
-                    disabled={selIdx >= filtered.length - 1}
-                    onClick={() => navigateDetail(1)}
-                    style={{
-                      padding: "4px 7px",
-                      border: "none",
-                      background: "transparent",
-                      cursor: selIdx < filtered.length - 1 ? "pointer" : "not-allowed",
-                      color:
-                        selIdx < filtered.length - 1 ? "var(--proof-blue)" : "var(--proof-grey)",
-                    }}
-                  >
-                    <ChevronRight size={13} />
-                  </button>
-                </div>
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color:
-                      selectedResult.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
-                    flex: 1,
-                  }}
-                >
-                  {selectedResult.status}
-                </span>
-                <button
-                  onClick={() => setDetailPanelCollapsed((c) => !c)}
-                  aria-label={detailPanelCollapsed ? "Expand" : "Collapse"}
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    cursor: "pointer",
-                    color: "var(--proof-text-secondary)",
-                    display: "flex",
-                    alignItems: "center",
-                    padding: 4,
-                    transform: detailPanelCollapsed ? "rotate(-90deg)" : "rotate(0deg)",
-                    transition: "transform 0.15s",
-                  }}
-                >
-                  <ChevronDown size={14} />
-                </button>
-                <button
-                  onClick={() => setSelectedResultSyncUrl(null)}
-                  aria-label="Close"
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    cursor: "pointer",
-                    color: "var(--proof-text-secondary)",
-                    fontSize: 18,
-                    lineHeight: 1,
-                  }}
-                >
-                  <X size={14} />
-                </button>
-              </div>
-
-              {!detailPanelCollapsed && (
-                <>
-                  <div
-                    style={{
-                      flex: 1,
-                      overflowY: "auto",
-                      padding: 14,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 12,
-                    }}
-                  >
-                    {/* Test name */}
-                    <div>
-                      <div
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 11,
-                          fontWeight: 600,
-                          lineHeight: 1.5,
-                          wordBreak: "break-all",
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: 6,
-                        }}
-                      >
-                        <span style={{ flex: 1 }}>{selectedResult.name}</span>
-                        <button
-                          onClick={() => copyTestId(selectedResult.id)}
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            cursor: "pointer",
-                            padding: 2,
-                            color:
-                              copiedId === selectedResult.id
-                                ? "var(--proof-green)"
-                                : "var(--proof-text-muted)",
-                            display: "flex",
-                            flexShrink: 0,
-                          }}
-                          title="Copy ID"
-                        >
-                          {copiedId === selectedResult.id ? (
-                            <CheckIcon size={12} />
-                          ) : (
-                            <Copy size={12} />
-                          )}
-                        </button>
-                      </div>
-                      <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
-                        <span
-                          style={{
-                            fontSize: 11,
-                            background: "var(--proof-grey-bg)",
-                            padding: "2px 8px",
-                            borderRadius: 4,
-                            border: "1px solid var(--proof-grey)",
-                          }}
-                        >
-                          {selectedResult.category}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: 11,
-                            color: "var(--proof-text-secondary)",
-                            fontFamily: "var(--font-mono)",
-                          }}
-                        >
-                          {selectedResult.duration}ms
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Filmstrip */}
-                    {selectedResult.filmstrip && selectedResult.filmstrip.length > 0 && (
-                      <FilmstripViewer frames={selectedResult.filmstrip} onClose={() => {}} />
-                    )}
-
-                    <EvidenceViewer evidence={selectedResult.evidence} />
-
-                    {/* Category Breakdown */}
-                    <div style={{ marginTop: 4 }}>
-                      <div
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          color: "var(--proof-text-secondary)",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          marginBottom: 8,
-                        }}
-                      >
-                        Category Pass Rates
-                      </div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {catBreakdown.map(([cat, stats]) => (
-                          <div
-                            key={cat}
-                            style={{
-                              fontSize: 10,
-                              background: "var(--proof-surface)",
-                              border: "1px solid var(--proof-border)",
-                              borderRadius: 4,
-                              padding: "2px 6px",
-                              display: "flex",
-                              gap: 6,
-                            }}
-                          >
-                            <span style={{ fontWeight: 600 }}>{cat}</span>
-                            <span
-                              style={{
-                                color:
-                                  stats.pass === stats.total
-                                    ? "var(--proof-green)"
-                                    : stats.pass === 0
-                                      ? "var(--proof-red)"
-                                      : "var(--proof-yellow)",
-                              }}
-                            >
-                              {stats.pass}/{stats.total}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Assertions */}
-                    {selectedResult.assertions && selectedResult.assertions.length > 0 && (
-                      <div>
-                        <div
-                          style={{
-                            fontSize: 10,
-                            fontWeight: 600,
-                            color: "var(--proof-text-secondary)",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.5px",
-                            marginBottom: 6,
-                          }}
-                        >
-                          Assertions
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                          {selectedResult.assertions.map((a, i) => (
-                            <AssertionRow key={i} a={a} />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Error message */}
-                    {selectedResult.error && (
-                      <div>
-                        <div
-                          style={{
-                            fontSize: 10,
-                            fontWeight: 600,
-                            color: "var(--proof-text-secondary)",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.5px",
-                            marginBottom: 6,
-                          }}
-                        >
-                          Error
-                        </div>
-                        <pre
-                          style={{
-                            fontSize: 10,
-                            lineHeight: 1.5,
-                            whiteSpace: "pre-wrap",
-                            wordBreak: "break-all",
-                            background: "var(--proof-red-bg)",
-                            border: "1px solid var(--proof-red)",
-                            borderRadius: 4,
-                            padding: 10,
-                            margin: 0,
-                            color: "var(--proof-red)",
-                            fontFamily: "var(--font-mono)",
-                          }}
-                        >
-                          {selectedResult.error}
-                        </pre>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer actions */}
-                  <div
-                    style={{
-                      padding: "8px 14px",
-                      borderTop: "1px solid var(--proof-grey)",
-                      display: "flex",
-                      gap: 6,
-                      flexShrink: 0,
-                    }}
-                  >
-                    <button
-                      onClick={() => navigate(`/trends?testId=${selectedResult.id}`)}
-                      className="proof-button proof-button-xs"
-                      style={{ flex: 1 }}
-                    >
-                      <BarChart3 size={11} /> Analytics
-                    </button>
-                    <button
-                      onClick={() => navigate(`/tests?q=${selectedResult.id}`)}
-                      className="proof-button proof-button-xs"
-                      style={{ flex: 1 }}
-                    >
-                      <FileText size={11} /> Definition
-                    </button>
-                  </div>
-                </>
-              )}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12, color: "var(--proof-text-secondary)" }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Clock size={12} /> {run.duration}
             </div>
-          </PanelErrorBoundary>
-        )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Calendar size={12} /> {new Date(run.started).toLocaleString()}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        {/* Pass rate progress */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, width: 200 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 600 }}>
+              <span>Pass Rate</span>
+              <span style={{ color: run.passPct >= 95 ? "var(--proof-green)" : run.passPct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)" }}>
+                {run.passPct}%
+              </span>
+            </div>
+            <div className="proof-progress-track" style={{ height: 6 }}>
+              <div 
+                className="proof-progress-bar" 
+                style={{ 
+                  width: `${run.passPct}%`,
+                  background: run.passPct >= 95 ? "var(--proof-green)" : run.passPct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)"
+                }} 
+              />
+            </div>
+          </div>
+        </div>
+
+        <button 
+          className="proof-btn proof-btn-primary"
+          onClick={() => navigate(`/compare?base=${run.id}`)}
+        >
+          <GitCompare size={14} /> Compare
+        </button>
       </div>
-      {Toast}
+
+      {/* Stats row */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+        {[
+          { label: "Total Tests", value: counts.total, icon: TerminalSquare, color: "var(--proof-text)" },
+          { label: "Passed", value: counts.passed, icon: CheckCircle2, color: "var(--proof-green)" },
+          { label: "Failed", value: counts.failed, icon: XCircle, color: "var(--proof-red)" },
+          { label: "Skipped", value: counts.skipped, icon: HelpCircle, color: "var(--proof-text-muted)" }
+        ].map(stat => (
+          <div key={stat.label} className="proof-card" style={{ padding: "16px", display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ 
+              width: 40, height: 40, borderRadius: 10, 
+              background: `color-mix(in srgb, ${stat.color} 10%, transparent)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: stat.color
+            }}>
+              <stat.icon size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                {stat.label}
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: stat.color, lineHeight: 1.2 }}>
+                {stat.value}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Main content table */}
+      <div className="proof-card" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        {/* Filters */}
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--proof-border)", display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ position: "relative", width: 240 }}>
+            <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--proof-text-muted)" }} />
+            <input 
+              className="proof-input" 
+              placeholder="Search tests..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ paddingLeft: 32 }}
+            />
+          </div>
+          
+          <select className="proof-input" style={{ width: 140 }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+            <option value="all">All Status</option>
+            <option value="PASS">Passed</option>
+            <option value="FAIL">Failed</option>
+            <option value="SKIPPED">Skipped</option>
+            <option value="FLAKY">Flaky</option>
+          </select>
+
+          <select className="proof-input" style={{ width: 160 }} value={catFilter} onChange={e => setCatFilter(e.target.value)}>
+            <option value="all">All Categories</option>
+            {[...new Set(results.map((r) => r.category).filter(Boolean))].sort().map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+
+          {(search || statusFilter !== "all" || catFilter !== "all") && (
+            <button onClick={() => { setSearch(""); setStatusFilter("all"); setCatFilter("all"); }} className="proof-btn proof-btn-ghost">
+              Clear Filters
+            </button>
+          )}
+          
+          <div style={{ flex: 1 }} />
+          <div style={{ fontSize: 12, color: "var(--proof-text-muted)" }}>
+            Showing {filtered.length} tests
+          </div>
+        </div>
+
+        {/* Table */}
+        <div style={{ flex: 1, overflowY: "auto" }}>
+          <table className="proof-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead style={{ position: "sticky", top: 0, background: "var(--proof-surface)", zIndex: 5 }}>
+              <tr>
+                <th style={{ width: 40, padding: "12px 16px" }}></th>
+                <th style={{ textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)" }}>TEST</th>
+                <th style={{ width: 120, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)" }}>STATUS</th>
+                <th style={{ width: 140, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)" }}>CATEGORY</th>
+                <th style={{ width: 180, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)" }}>HISTORY</th>
+                <th style={{ width: 100, textAlign: "right", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)" }}>DURATION</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((r) => {
+                const isExpanded = expandedRows.has(r.id);
+                return (
+                  <React.Fragment key={r.id}>
+                    <tr 
+                      id={`row-${r.id}`}
+                      onClick={() => toggleRow(r.id)}
+                      style={{ 
+                        cursor: "pointer", 
+                        borderBottom: "1px solid var(--proof-border-light)",
+                        background: isExpanded ? "var(--proof-surface-2)" : "transparent"
+                      }}
+                    >
+                      <td style={{ padding: "12px 16px", color: "var(--proof-text-muted)" }}>
+                        {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                      </td>
+                      <td style={{ padding: "12px 16px", fontFamily: "var(--font-mono)", fontSize: 13 }}>
+                        {r.name}
+                      </td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <span className="proof-badge" style={{ color: getStatusColor(r.status), borderColor: getStatusColor(r.status) }}>
+                          {r.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: "12px 16px", fontSize: 12, color: "var(--proof-text-secondary)" }}>
+                        {r.category}
+                      </td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <div onClick={e => e.stopPropagation()}>
+                          <TestHistoryStrip testName={r.name} currentRunId={run.id} />
+                        </div>
+                      </td>
+                      <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--proof-text-secondary)" }}>
+                        {r.duration}ms
+                      </td>
+                    </tr>
+                    
+                    {/* Expanded details */}
+                    {isExpanded && (
+                      <tr style={{ background: "var(--proof-surface-2)", borderBottom: "1px solid var(--proof-border)" }}>
+                        <td colSpan={6} style={{ padding: "20px 40px" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                            
+                            {/* Error Details */}
+                            {r.error && (
+                              <div style={{ background: "var(--proof-red-bg)", border: "1px solid var(--proof-red-border)", borderRadius: 8, padding: 16 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--proof-red)", fontWeight: 600, marginBottom: 8, fontSize: 12 }}>
+                                  <AlertTriangle size={14} /> ERROR DETAILS
+                                </div>
+                                <pre style={{ 
+                                  fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--proof-red-bright)", 
+                                  whiteSpace: "pre-wrap", margin: 0 
+                                }}>
+                                  {r.error}
+                                </pre>
+                              </div>
+                            )}
+
+                            {/* Assertions */}
+                            {r.assertions && r.assertions.length > 0 && (
+                              <div>
+                                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", marginBottom: 12 }}>ASSERTIONS</div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                  {r.assertions.map((a, i) => (
+                                    <AssertionRow key={i} a={a} />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Actions */}
+                            <div style={{ display: "flex", gap: 12 }}>
+                              <button onClick={() => navigate(`/trends?testId=${r.id}`)} className="proof-btn proof-btn-ghost">
+                                View Analytics
+                              </button>
+                              <button onClick={() => navigate(`/tests?q=${r.id}`)} className="proof-btn proof-btn-ghost">
+                                View Definition
+                              </button>
+                            </div>
+
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ padding: 64, textAlign: "center", color: "var(--proof-text-secondary)" }}>
+                    No results found matching your filters.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

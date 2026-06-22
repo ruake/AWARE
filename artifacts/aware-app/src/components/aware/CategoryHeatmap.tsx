@@ -56,64 +56,67 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
 
   if (grid.length === 0) {
     return (
-      <div className="proof-card" style={{ padding: "14px 16px" }}>
-        <div style={{ fontSize: 12, color: "var(--proof-text-secondary)", textAlign: "center" }}>
-          No heatmap data available
+      <div className="proof-card" style={{ padding: "14px 16px", minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+          <div style={{ padding: "12px", background: "var(--proof-surface-2)", borderRadius: "50%", color: "var(--proof-text-muted)" }}>
+            <Grid3x3 size={24} />
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 500, color: "var(--proof-text-secondary)" }}>No heatmap data available</div>
         </div>
       </div>
     );
   }
 
   const cellColor = (status: "PASS" | "FAIL" | "NONE") => {
-    if (status === "PASS") return "rgba(16, 185, 129, 0.1)";
-    if (status === "FAIL") return "rgba(239, 68, 68, 0.1)";
+    if (status === "PASS") return "var(--proof-green-bg)";
+    if (status === "FAIL") return "var(--proof-red-bg)";
     return "var(--proof-surface-3)";
   };
 
   const borderColor = (status: "PASS" | "FAIL" | "NONE") => {
-    if (status === "PASS") return "rgba(16, 185, 129, 0.2)";
-    if (status === "FAIL") return "rgba(239, 68, 68, 0.2)";
+    if (status === "PASS") return "var(--proof-green-border)";
+    if (status === "FAIL") return "var(--proof-red-border)";
     return "var(--proof-border)";
   };
 
   const textColor = (status: "PASS" | "FAIL" | "NONE") => {
-    if (status === "PASS") return "var(--proof-green)";
-    if (status === "FAIL") return "var(--proof-red)";
+    if (status === "PASS") return "var(--proof-green-bright)";
+    if (status === "FAIL") return "var(--proof-red-bright)";
     return "var(--proof-text-secondary)";
   };
 
   return (
-    <div className="proof-card" style={{ overflow: "hidden", borderRadius: "16px" }}>
+    <div className="proof-card" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
       <div
         style={{
-          padding: "12px 16px",
+          padding: "16px 20px",
           borderBottom: "1px solid var(--proof-border)",
           background: "var(--proof-surface-2)",
           display: "flex",
           alignItems: "center",
-          gap: 10,
+          gap: 12,
         }}
       >
-        <Grid3x3 size={16} style={{ color: "var(--proof-blue)" }} />
-        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>
+        <Grid3x3 size={18} style={{ color: "var(--proof-blue)" }} />
+        <span style={{ fontSize: 15, fontWeight: 600, color: "var(--proof-text)" }}>
           Environment Heatmap
         </span>
-        <span style={{ fontSize: 11, color: "var(--proof-text-muted)", marginLeft: "auto", fontWeight: 600 }}>
-          {grid.length} ENVIRONMENTS
+        <span style={{ fontSize: 12, color: "var(--proof-text-muted)", marginLeft: "auto", fontWeight: 600, background: "var(--proof-surface-3)", padding: "2px 10px", borderRadius: "12px" }}>
+          {grid.length} ENVS
         </span>
       </div>
 
-      <div style={{ padding: "16px", overflowX: "auto", background: "var(--proof-surface-1)" }}>
+      <div style={{ padding: "20px", overflowX: "auto", background: "var(--proof-surface)", flex: 1 }}>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: `140px repeat(${Math.max(...grid.map((g) => g.cells.length), 1)}, 80px)`,
-            gap: 6,
-            fontSize: 11,
+            gridTemplateColumns: `140px repeat(${Math.max(...grid.map((g) => g.cells.length), 1)}, 1fr)`,
+            gap: 8,
+            fontSize: 12,
           }}
         >
           <div
-            style={{ fontWeight: 700, color: "var(--proof-text-muted)", padding: "4px 8px", textTransform: "uppercase", letterSpacing: "0.5px" }}
+            style={{ fontWeight: 600, color: "var(--proof-text-muted)", padding: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}
           >
             Environment
           </div>
@@ -121,11 +124,11 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
             <div
               key={cell.label}
               style={{
-                fontWeight: 700,
+                fontWeight: 600,
                 color: "var(--proof-text-muted)",
                 textAlign: "center",
-                padding: "4px 8px",
-                fontSize: 10,
+                padding: "8px",
+                fontSize: 11,
                 textTransform: "uppercase",
                 letterSpacing: "0.5px"
               }}
@@ -138,44 +141,47 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
             <React.Fragment key={group.label}>
               <div
                 style={{
-                  padding: "8px 12px",
+                  padding: "12px 16px",
                   fontWeight: 600,
                   color: "var(--proof-text)",
                   display: "flex",
                   alignItems: "center",
-                  fontSize: 12,
+                  fontSize: 13,
                   background: "var(--proof-surface-2)",
-                  borderRadius: "8px 0 0 8px",
+                  borderRadius: "var(--proof-radius) 0 0 var(--proof-radius)",
                   borderLeft: "3px solid var(--proof-blue)"
                 }}
               >
                 {group.label}
               </div>
-              {group.cells.map((cell) => (
+              {group.cells.map((cell, i) => (
                 <div
-                  key={cell.label}
+                  key={`${cell.label}-${i}`}
                   style={{
-                    padding: "8px 12px",
+                    padding: "12px",
                     background: cellColor(cell.status),
                     border: `1px solid ${borderColor(cell.status)}`,
+                    borderRadius: i === group.cells.length - 1 ? "0 var(--proof-radius) var(--proof-radius) 0" : 0,
                     textAlign: "center",
-                    fontWeight: 700,
+                    fontWeight: 600,
                     fontFamily: "var(--font-mono)",
                     color: textColor(cell.status),
-                    fontSize: cell.label === "Rate" ? 14 : 12,
+                    fontSize: cell.label === "Rate" ? 15 : 13,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    transition: "transform 0.2s",
+                    transition: "transform var(--proof-transition)",
                     cursor: "default"
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.05)";
+                    e.currentTarget.style.transform = "scale(1.02)";
                     e.currentTarget.style.zIndex = "1";
+                    e.currentTarget.style.boxShadow = "var(--proof-shadow-sm)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = "scale(1)";
                     e.currentTarget.style.zIndex = "0";
+                    e.currentTarget.style.boxShadow = "none";
                   }}
                 >
                   {cell.label === "Rate" ? `${cell.count}%` : cell.count}

@@ -24,7 +24,6 @@ export function RunRibbonCard({
   compact = false,
 }: RunRibbonCardProps) {
   const [now, setNow] = React.useState(Date.now);
-  const [hovered, setHovered] = React.useState(false);
 
   React.useEffect(() => {
     const tick = () => setNow(Date.now());
@@ -87,89 +86,88 @@ export function RunRibbonCard({
             }
           : undefined
       }
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      initial={{ opacity: 0, x: -10 }}
+      initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.35, delay: (index * 60) / 1000 }}
-      whileHover={{ 
+      transition={{ duration: 0.4, delay: (index * 60) / 1000, ease: "easeOut" }}
+      whileHover={onClick ? { 
         x: 4,
-        background: `linear-gradient(90deg, ${accent}12, var(--proof-surface-2))`,
-        transition: { duration: 0.2 }
-      }}
-      whileTap={{ scale: 0.98 }}
+        background: `linear-gradient(90deg, ${accent}15, var(--proof-surface-hover))`,
+        borderColor: `color-mix(in srgb, ${accent} 40%, transparent)`,
+      } : {}}
+      whileTap={onClick ? { scale: 0.98 } : {}}
       style={{
         display: "flex",
         alignItems: "center",
-        gap: compact ? 10 : 12,
-        padding: compact ? "10px 12px" : "14px 18px",
-        borderRadius: 16,
-        background: `linear-gradient(90deg, ${accent}08, var(--proof-surface))`,
-        border: `1px solid var(--proof-border)`,
-        borderLeft: `4px solid ${accent}`,
+        gap: compact ? 12 : 16,
+        padding: compact ? "12px" : "16px",
+        borderRadius: "var(--proof-radius-lg)",
+        background: "var(--proof-surface)",
+        border: "1px solid var(--proof-border)",
+        borderLeft: `3px solid ${accent}`,
         cursor: onClick ? "pointer" : "default",
-        boxShadow: hovered
-          ? `0 8px 24px rgba(0,0,0,0.5), 0 0 24px ${accent}10, 0 0 0 1px ${accent}20`
-          : "0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(99,130,178,0.08)",
-        minWidth: 0,
+        boxShadow: "var(--proof-shadow-sm)",
         position: "relative",
         overflow: "hidden",
+        transition: "all var(--proof-transition)",
+        minWidth: 0,
       }}
+      className="group"
     >
+      {/* Background glow on hover */}
+      <div 
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: `radial-gradient(100px circle at left center, ${accent}10, transparent)`,
+          opacity: 0,
+          transition: "opacity 0.3s ease",
+          pointerEvents: "none"
+        }}
+        className="group-hover:opacity-100"
+      />
+
       {/* Icon */}
       <div
         style={{
           flexShrink: 0,
-          width: compact ? 32 : 38,
-          height: compact ? 32 : 38,
-          borderRadius: 10,
-          background: `linear-gradient(135deg, ${accent}24, ${accent}10)`,
+          width: compact ? 36 : 42,
+          height: compact ? 36 : 42,
+          borderRadius: "var(--proof-radius-md)",
+          background: `color-mix(in srgb, ${accent} 15%, transparent)`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          border: `1px solid ${accent}30`,
-          boxShadow: `0 0 12px ${accent}14`,
+          border: `1px solid color-mix(in srgb, ${accent} 25%, transparent)`,
+          color: accent
         }}
       >
         {React.isValidElement(icon)
           ? React.cloneElement(
-              icon as React.ReactElement<{ size?: number; style?: React.CSSProperties }>,
-              { size: compact ? 14 : 18, style: { color: accent } },
+              icon as React.ReactElement<{ size?: number; strokeWidth?: number }>,
+              { size: compact ? 18 : 20, strokeWidth: 2.5 }
             )
           : icon}
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 800,
-            color: "var(--proof-text-secondary)",
-            textTransform: "uppercase",
-            letterSpacing: "0.8px",
-            marginBottom: 2,
-          }}
-        >
-          {label}
-        </div>
-        <div
-          style={{
-            fontSize: compact ? 12 : 13,
-            fontWeight: 700,
-            color: "var(--proof-text)",
-            fontFamily: "var(--font-mono)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            letterSpacing: "-0.4px",
-          }}
-        >
-          {run?.id ?? (nextDue ? "Scheduled" : "—")}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-          {run ? (
-            <>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: "var(--proof-text-secondary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+              }}
+            >
+              {label}
+            </span>
+            {run && (
               <span
                 style={{
                   fontSize: 10,
@@ -183,66 +181,86 @@ export function RunRibbonCard({
               >
                 {run.env}
               </span>
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  color: passColor,
-                  fontFamily: "var(--font-mono)",
-                  background: `${passColor}12`,
-                  border: `1px solid ${passColor}20`,
-                  borderRadius: 4,
-                  padding: "1px 6px",
-                  letterSpacing: "-0.3px",
-                }}
-              >
-                {run.passPct}%
-              </span>
-            </>
-          ) : nextDue ? (
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-                fontSize: 10,
-                color: accent,
-                fontWeight: 700,
-              }}
-            >
-              <Calendar size={10} strokeWidth={2.5} />
-              {new Date(nextDue).getTime() > Date.now() ? "Scheduled" : "Queued"}
-            </span>
-          ) : null}
-
+            )}
+          </div>
           <span
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 4,
-              fontSize: 10,
+              fontSize: 11,
               color: "var(--proof-text-muted)",
               fontWeight: 500,
             }}
           >
-            <Clock size={10} />
+            {run ? <Clock size={12} /> : <Calendar size={12} />}
             {age}
           </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
+            style={{
+              fontSize: compact ? 13 : 14,
+              fontWeight: 600,
+              color: "var(--proof-text)",
+              fontFamily: "var(--font-mono)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              flex: 1
+            }}
+          >
+            {run?.id ?? (nextDue ? "Scheduled" : "—")}
+          </div>
+
+          {run ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+              {/* Mini progress bar */}
+              <div style={{ width: 48, height: 4, background: "var(--proof-surface-2)", borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${run.passPct}%`, background: passColor, borderRadius: 2 }} />
+              </div>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: passColor,
+                  fontFamily: "var(--font-mono)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4
+                }}
+              >
+                <div style={{ width: 6, height: 6, borderRadius: 3, background: passColor }} />
+                {run.passPct}%
+              </span>
+            </div>
+          ) : nextDue ? (
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: accent,
+                display: "flex",
+                alignItems: "center",
+                gap: 4
+              }}
+            >
+              <div style={{ width: 6, height: 6, borderRadius: 3, background: accent }} />
+              {new Date(nextDue).getTime() > Date.now() ? "Scheduled" : "Queued"}
+            </span>
+          ) : null}
         </div>
       </div>
 
       {/* Hover arrow */}
       {onClick && (
-        <ArrowRight
-          size={16}
-          style={{
-            color: accent,
-            opacity: hovered ? 1 : 0,
-            transition: "opacity 160ms ease, transform 160ms ease",
-            transform: hovered ? "translateX(0)" : "translateX(-8px)",
-            flexShrink: 0,
-          }}
-        />
+        <div 
+          className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+          style={{ color: accent, flexShrink: 0 }}
+        >
+          <ArrowRight size={18} />
+        </div>
       )}
     </motion.div>
   );

@@ -1,35 +1,94 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { PageTemplate, StateBadge } from "@/components/aware";
 import { CompareSidePanel } from "@/components/aware/CompareSidePanel";
 import { useSyncedUrlState } from "@/lib/urlState";
 import {
-  computeDiffRows,
-  getDataInitState,
-  subscribeToDataInit,
-  subscribeToRuns,
-  getRuns,
-  subscribeToDiffRows,
-  getDiffRows,
+  computeDiffRows, getDataInitState, subscribeToDataInit,
+  subscribeToRuns, getRuns, subscribeToDiffRows, getDiffRows,
 } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { loadResultsForRun } from "@/lib/runsLoader";
 import type { DiffRow, TestResult } from "@/lib/types";
-import { setCompareStats } from "@/lib/sidebarData";
-import { Search, ArrowLeftRight } from "lucide-react";
+import {
+  Search, ArrowLeftRight, CheckCircle2, XCircle, AlertTriangle,
+  Clock, Minus, ChevronLeft, ChevronRight, Loader2, GitCompare, Activity,
+} from "lucide-react";
 import { CompareRunsHeader } from "@/components/aware/CompareSummary";
 import { CompareRunSelector } from "@/components/aware/CompareRunSelector";
+import { Pagination } from "@/components/aware";
+
+const DIFF_STATE_CFG: Record<string, { label: string; color: string; bg: string; border: string; icon: React.ReactNode }> = {
+  regression: { label: "Regression", color: "var(--proof-red)", bg: "var(--proof-red-bg)", border: "var(--proof-red-border)", icon: <AlertTriangle size={12} /> },
+  fixed: { label: "Fixed", color: "var(--proof-green)", bg: "var(--proof-green-bg)", border: "var(--proof-green-border)", icon: <CheckCircle2 size={12} /> },
+  duration: { label: "Slower", color: "var(--proof-yellow)", bg: "var(--proof-yellow-bg)", border: "var(--proof-yellow-border)", icon: <Clock size={12} /> },
+  fishy: { label: "Fishy", color: "var(--proof-orange)", bg: "var(--proof-orange-bg)", border: "var(--proof-orange-border)", icon: <AlertTriangle size={12} /> },
+  unchanged: { label: "Unchanged", color: "var(--proof-text-muted)", bg: "var(--proof-subtle-bg)", border: "var(--proof-border)", icon: <Minus size={12} /> },
+};
+
+function StatePill({ state }: { state: string }) {
+  const cfg = DIFF_STATE_CFG[state] ?? DIFF_STATE_CFG.unchanged;
+  return (
+    <span className="proof-badge" style={{
+      color: cfg.color, background: cfg.bg, borderColor: cfg.border,
+      fontFamily: "var(--font-mono)", fontSize: 10
+    }}>
+      {cfg.icon} {cfg.label}
+    </span>
+  );
+}
+
+function StatusTag({ status }: { status: string }) {
+  if (!status) return <span style={{ color: "var(--proof-text-muted)" }}>—</span>;
+  const isPass = status === "PASS";
+  return (
+    <span className={`proof-badge ${isPass ? 'proof-badge-healthy' : 'proof-badge-critical'}`} style={{ fontFamily: 'var(--font-mono)', fontSize: 10 }}>
+      {status}
+    </span>
+  );
+}
+
+function FilterChip({ label, active, count, onClick }: { label: string; active: boolean; count?: number; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 12px",
+        borderRadius: "var(--proof-radius-full)",
+        border: `1px solid ${active ? "var(--proof-blue-border)" : "var(--proof-border)"}`,
+        background: active ? "var(--proof-blue-bg)" : "var(--proof-surface-2)",
+        color: active ? "var(--proof-blue-bright)" : "var(--proof-text-secondary)",
+        fontSize: 12, fontWeight: active ? 600 : 500, cursor: "pointer",
+        transition: "all var(--proof-transition)", fontFamily: "var(--font-sans)",
+      }}
+      onMouseEnter={(e) => {
+        if (!active) {
+          e.currentTarget.style.background = "var(--proof-hover)";
+          e.currentTarget.style.color = "var(--proof-text)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!active) {
+          e.currentTarget.style.background = "var(--proof-surface-2)";
+          e.currentTarget.style.color = "var(--proof-text-secondary)";
+        }
+      }}
+    >
+      {label}
+      {count !== undefined && count > 0 && (
+        <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.8, fontFamily: "var(--font-mono)", paddingLeft: 2 }}>{count}</span>
+      )}
+    </button>
+  );
+}
 
 export default function Compare() {
   const [, navigate] = useLocation();
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
   const runs = useSyncExternalStore(subscribeToRuns, getRuns);
-  const diffRowsSnapshot = useSyncExternalStore(subscribeToDiffRows, getDiffRows);
 
-  const envRuns =
-    envSnap.envIds.length > 0 ? runs.filter((r) => envSnap.envIds.includes(r.envId)) : runs;
+  const envRuns = envSnap.envIds.length > 0 ? runs.filter((r) => envSnap.envIds.includes(r.envId)) : runs;
   const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
   const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
   const [selectedName, setSelectedName] = useSyncedUrlState<string | null>("sel", null);
@@ -44,7 +103,7 @@ export default function Compare() {
   const [resultsLoading, setResultsLoading] = React.useState(false);
   const [diffPage, setDiffPage] = React.useState(1);
   const DIFF_PAGE_SIZE = 25;
-  // Derive effective run IDs: use URL param if set, otherwise pick from envRuns
+
   const effectiveBaseline = baseline || envRuns[envRuns.length - 1]?.id || "";
   const effectiveCandidate = candidate || envRuns[0]?.id || "";
   const baselineRun = runs.find((r) => r.id === effectiveBaseline);
@@ -59,557 +118,363 @@ export default function Compare() {
         setCandResults(cr);
         setComputedRows(computeDiffRows(effectiveBaseline, effectiveCandidate));
       })
-      .catch((err: unknown) => {
-        console.warn("[AWARE] Compare: failed to load run results", err);
-      })
-      .finally(() => {
-        setResultsLoading(false);
-      });
+      .catch((err: unknown) => console.warn("[AWARE] Compare failed:", err))
+      .finally(() => setResultsLoading(false));
   }, [effectiveBaseline, effectiveCandidate]);
 
   const diffs = React.useMemo(() => {
     const rows = computedRows;
     if (!swapped) return rows;
-    return rows.map((d) => {
-      const state: DiffRow["state"] =
-        d.state === "regression" ? "fixed" : d.state === "fixed" ? "regression" : d.state;
-      return {
-        ...d,
-        state,
-        baseStatus: d.candStatus,
-        candStatus: d.baseStatus,
-        durBase: d.durCand,
-        durCand: d.durBase,
-      };
-    });
+    return rows.map((d) => ({
+      ...d,
+      state: d.state === "regression" ? "fixed" : d.state === "fixed" ? "regression" : d.state,
+      baseStatus: d.candStatus, candStatus: d.baseStatus,
+      durBase: d.durCand, durCand: d.durBase,
+    } as DiffRow));
   }, [computedRows, swapped]);
-
-  const [colFilters, setColFilters] = React.useState<Record<string, string>>({});
-
-  const hasRegressions = diffs.some((d) => d.state === "regression");
 
   const filtered = React.useMemo(() => {
     return diffs.filter((d) => {
       if (searchText && !d.name.toLowerCase().includes(searchText.toLowerCase())) return false;
       if (regressionsOnly && d.state !== "regression") return false;
-      if (activeFilter && d.state !== activeFilter) return false;
-      for (const [field, val] of Object.entries(colFilters)) {
-        if (!val) continue;
-        const cell = String((d as unknown as Record<string, unknown>)[field] ?? "").toLowerCase();
-        if (!cell.includes(val.toLowerCase())) return false;
-      }
+      if (activeFilter && activeFilter !== "total" && d.state !== activeFilter) return false;
       return true;
     });
-  }, [diffs, searchText, regressionsOnly, activeFilter, colFilters]);
+  }, [diffs, searchText, regressionsOnly, activeFilter]);
 
-  const impactScores = React.useMemo(() => {
-    const scores: Record<string, number> = {
-      regression: 10,
-      fixed: -5,
-      duration: 3,
-      unchanged: 0,
-      fishy: 2,
-    };
-    return scores;
-  }, []);
-
-  const sortedFiltered = React.useMemo(() => {
-    return [...filtered].sort((a, b) => {
-      const scoreA = impactScores[a.state] ?? 0;
-      const scoreB = impactScores[b.state] ?? 0;
-      return scoreB - scoreA;
-    });
-  }, [filtered, impactScores]);
+  const impactOrder = { regression: 3, fishy: 2, duration: 1, fixed: 0, unchanged: -1 };
+  const sortedFiltered = React.useMemo(() =>
+    [...filtered].sort((a, b) => ((impactOrder[b.state as keyof typeof impactOrder] ?? 0) - (impactOrder[a.state as keyof typeof impactOrder] ?? 0))),
+    [filtered]);
 
   const diffTotalPages = Math.max(1, Math.ceil(sortedFiltered.length / DIFF_PAGE_SIZE));
   const safeDiffPage = Math.min(diffPage, diffTotalPages);
-  const paginatedDiffs = sortedFiltered.slice(
-    (safeDiffPage - 1) * DIFF_PAGE_SIZE,
-    safeDiffPage * DIFF_PAGE_SIZE,
-  );
+  const paginatedDiffs = sortedFiltered.slice((safeDiffPage - 1) * DIFF_PAGE_SIZE, safeDiffPage * DIFF_PAGE_SIZE);
 
-  const diffStats = React.useMemo(() => {
-    const regressions = diffs.filter((d) => d.state === "regression").length;
-    const fixed = diffs.filter((d) => d.state === "fixed").length;
-    const duration = diffs.filter((d) => d.state === "duration").length;
-    const unchanged = diffs.filter((d) => d.state === "unchanged").length;
-    const fishy = diffs.filter((d) => d.state === "fishy").length;
-    const basePass = baseResults.filter((r) => r.status === "PASS").length;
-    const candPass = candResults.filter((r) => r.status === "PASS").length;
-    const basePct = baseResults.length > 0 ? Math.round((basePass / baseResults.length) * 100) : 0;
-    const candPct = candResults.length > 0 ? Math.round((candPass / candResults.length) * 100) : 0;
-    const delta = candPct - basePct;
-    return [
-      {
-        label: `Total (${diffs.length})`,
-        value: diffs.length.toString(),
-        color: "var(--proof-text-secondary)",
-        key: "total",
-        count: diffs.length,
-      },
-      {
-        label: `Regression (${regressions})`,
-        value: regressions.toString(),
-        color: regressions > 0 ? "var(--proof-red)" : "var(--proof-green)",
-        key: "regression",
-        count: regressions,
-      },
-      {
-        label: `Fixed (${fixed})`,
-        value: fixed.toString(),
-        color: "var(--proof-green)",
-        key: "fixed",
-        count: fixed,
-      },
-      {
-        label: `Duration (${duration})`,
-        value: duration.toString(),
-        color: "var(--proof-yellow)",
-        key: "duration",
-        count: duration,
-      },
-      {
-        label: `Unchanged (${unchanged})`,
-        value: unchanged.toString(),
-        color: "var(--proof-text-muted)",
-        key: "unchanged",
-        count: unchanged,
-      },
-      {
-        label: `Fishy (${fishy})`,
-        value: fishy.toString(),
-        color: "var(--proof-purple)",
-        key: "fishy",
-        count: fishy,
-      },
-      {
-        label: "Pass Rate Δ",
-        value: `${delta >= 0 ? "+" : ""}${delta}%`,
-        color: delta >= 0 ? "var(--proof-green)" : "var(--proof-red)",
-        key: "passRateDelta",
-        count: Math.abs(delta),
-      },
-    ];
-  }, [diffs, baseResults, candResults]);
+  const counts = React.useMemo(() => ({
+    total: diffs.length,
+    regression: diffs.filter((d) => d.state === "regression").length,
+    fixed: diffs.filter((d) => d.state === "fixed").length,
+    duration: diffs.filter((d) => d.state === "duration").length,
+    unchanged: diffs.filter((d) => d.state === "unchanged").length,
+    fishy: diffs.filter((d) => d.state === "fishy").length,
+  }), [diffs]);
 
-  React.useEffect(() => {
-    setCompareStats(diffStats, activeFilter);
-  }, [diffStats, activeFilter]);
+  const basePass = baseResults.filter((r) => r.status === "PASS").length;
+  const candPass = candResults.filter((r) => r.status === "PASS").length;
+  const basePct = baseResults.length > 0 ? Math.round((basePass / baseResults.length) * 100) : (baselineRun?.passPct ?? 0);
+  const candPct = candResults.length > 0 ? Math.round((candPass / candResults.length) * 100) : (candidateRun?.passPct ?? 0);
+  const passRateDelta = candPct - basePct;
 
-  const clampedIdx = selectedIdx >= filtered.length ? -1 : selectedIdx;
+  const selectedRow = selectedIdx >= 0 ? sortedFiltered[selectedIdx] ?? null : null;
+  const selectedTestResult = selectedRow
+    ? candResults.find((r) => r.name === selectedRow.name) ?? baseResults.find((r) => r.name === selectedRow.name) ?? null
+    : null;
 
-  React.useEffect(() => {
-    if (clampedIdx >= 0 && clampedIdx < filtered.length) {
-      setSelectedName(filtered[clampedIdx].name);
-    }
-  }, [clampedIdx, filtered, setSelectedName, selectedIdx]);
-
-  React.useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.target instanceof HTMLSelectElement) return;
-      if (e.key === "j" || e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIdx((i) => Math.min(i + 1, filtered.length - 1));
-      } else if (e.key === "k" || e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIdx((i) => Math.max(i - 1, 0));
-      } else if (e.key === "r") {
-        setRegressionsOnly((p) => !p);
-        setActiveFilter(null);
-      } else if (e.key === "f") {
-        setActiveFilter((p) => (p === "fixed" ? null : "fixed"));
-        setRegressionsOnly(false);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [filtered, navigate, setRegressionsOnly, setActiveFilter, selectedIdx]);
-
-  const handleBaselineChange = (id: string) => {
-    setBaseline(id);
-    navigate(`/compare?baseline=${id}&candidate=${effectiveCandidate}`);
-  };
-
-  const handleCandidateChange = (id: string) => {
-    setCandidate(id);
-    navigate(`/compare?baseline=${effectiveBaseline}&candidate=${id}`);
-  };
-
-  if (envSnap.envIds.length > 0 && envRuns.length < 2) {
-    if (initState.loading) {
-      return (
-        <div style={{ textAlign: "center", padding: 64 }}>
-          <div
-            className="proof-skeleton"
-            style={{ width: 48, height: 48, borderRadius: "50%", margin: "0 auto 16px" }}
-          />
-          <div
-            className="proof-skeleton"
-            style={{ width: 240, height: 16, borderRadius: 4, margin: "0 auto 8px" }}
-          />
-          <div
-            className="proof-skeleton"
-            style={{ width: 160, height: 12, borderRadius: 4, margin: "0 auto" }}
-          />
-          <div style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 16 }}>
-            Loading comparison data...
-          </div>
-        </div>
-      );
-    }
-    return (
-      <div style={{ textAlign: "center", padding: 64 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text)" }}>
-          Not enough runs
-        </h2>
-        <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
-          Need at least 2 runs in the selected environment to compare.
-        </p>
-        <button
-          onClick={() => navigate("/runs")}
-          className="proof-button"
-          style={{ fontSize: 13, marginTop: 16 }}
-        >
-          View Runs
-        </button>
-      </div>
-    );
-  }
-
-  if (!baselineRun || !candidateRun) return null;
-
-  const categories = [...new Set(diffRowsSnapshot.map((d) => d.category))];
-
-  const selectedDiff = selectedName ? (diffs.find((d) => d.name === selectedName) ?? null) : null;
-  const hasActiveFilters = Object.values(colFilters).some((v) => v);
+  const filterLabels = [
+    { key: "total", label: "All" },
+    { key: "regression", label: "Regressions" },
+    { key: "fixed", label: "Fixed" },
+    { key: "duration", label: "Slower" },
+    { key: "fishy", label: "Fishy" },
+    { key: "unchanged", label: "Unchanged" },
+  ];
 
   return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 0,
-        }}
-      >
-        <AnimatePresence>
-          {swapped && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              style={{
-                background: "var(--proof-blue-bg)",
-                color: "var(--proof-blue)",
-                padding: "6px 16px",
-                fontSize: 12,
-                fontWeight: 500,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                borderBottom: "1px solid var(--proof-blue-border)",
-                overflow: "hidden",
-              }}
-            >
-              <ArrowLeftRight size={14} />
-              <span>Runs swapped — Candidate is now the baseline</span>
-            </motion.div>
+    <motion.div 
+      className="proof-page"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ ease: "easeOut", duration: 0.2 }}
+      style={{ padding: "var(--proof-page-py) var(--proof-page-px)", maxWidth: 1600, margin: "0 auto", height: "100%", display: "flex", flexDirection: "column" }}
+    >
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px", color: "var(--proof-text)", margin: "0 0 6px", display: "flex", alignItems: "center", gap: 10 }}>
+          <GitCompare className="text-proof-blue" size={24} />
+          Compare Runs
+        </h1>
+        <p style={{ fontSize: 14, color: "var(--proof-text-secondary)", margin: 0 }}>
+          Side-by-side test result diff
+        </p>
+      </div>
+
+      {/* Run selectors */}
+      <div style={{
+        display: "grid", gridTemplateColumns: "1fr auto 1fr",
+        alignItems: "start", gap: 16, marginBottom: 16,
+      }}>
+        <div className="proof-card" style={{ padding: 20 }}>
+          <CompareRunSelector
+            runs={envRuns}
+            value={effectiveBaseline}
+            onChange={(v) => setBaseline(v)}
+            label="Baseline"
+            labelColor="var(--proof-text-muted)"
+          />
+          {baselineRun && (
+            <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ fontSize: 24, fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--proof-text)" }}>
+                {basePct}%
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>Pass Rate</span>
+                <span style={{ fontSize: 11, color: "var(--proof-text-muted)" }}>{baselineRun.env} • {baselineRun.network}</span>
+              </div>
+            </div>
           )}
-        </AnimatePresence>
-        <div style={{ padding: "20px 24px 16px", background: "var(--proof-surface)", borderBottom: "1px solid var(--proof-border)" }}>
-          <div style={{ display: "flex", gap: 32, alignItems: "flex-end" }}>
-            <div style={{ flex: 1 }}>
-              <CompareRunSelector
-                label="Baseline Run"
-                labelColor="var(--proof-text-secondary)"
-                value={effectiveBaseline}
-                onChange={handleBaselineChange}
-                runs={envRuns}
-                accentColor="var(--proof-blue)"
-              />
+        </div>
+
+        <button
+          onClick={() => {
+            const tmp = baseline;
+            setBaseline(candidate || effectiveCandidate);
+            setCandidate(tmp || effectiveBaseline);
+            setSwapped((p) => !p);
+          }}
+          title="Swap runs"
+          style={{
+            width: 44, height: 44, borderRadius: "50%", alignSelf: "center",
+            background: "var(--proof-surface-2)", border: "1px solid var(--proof-border)",
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            color: "var(--proof-text-muted)", transition: "all var(--proof-transition)",
+            flexShrink: 0, marginTop: 16,
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+            (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
+            (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-strong)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background = "var(--proof-surface-2)";
+            (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)";
+            (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)";
+          }}
+        >
+          <ArrowLeftRight size={18} />
+        </button>
+
+        <div className="proof-card" style={{ padding: 20 }}>
+          <CompareRunSelector
+            runs={envRuns}
+            value={effectiveCandidate}
+            onChange={(v) => setCandidate(v)}
+            label="Candidate"
+            labelColor="var(--proof-text-muted)"
+          />
+          {candidateRun && (
+            <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ fontSize: 24, fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--proof-text)", display: "flex", alignItems: "center", gap: 8 }}>
+                {candPct}%
+                {passRateDelta !== 0 && (
+                  <span style={{ 
+                    fontSize: 14, 
+                    color: passRateDelta > 0 ? "var(--proof-green)" : "var(--proof-red)",
+                    background: passRateDelta > 0 ? "var(--proof-green-bg)" : "var(--proof-red-bg)",
+                    padding: "2px 8px", borderRadius: "var(--proof-radius-full)",
+                  }}>
+                    {passRateDelta > 0 ? "+" : ""}{passRateDelta}pp
+                  </span>
+                )}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>Pass Rate</span>
+                <span style={{ fontSize: 11, color: "var(--proof-text-muted)" }}>{candidateRun.env} • {candidateRun.network}</span>
+              </div>
             </div>
-            <div style={{ paddingBottom: 10 }}>
-              <button
-                onClick={() => setSwapped((s) => !s)}
-                className="proof-button-ghost"
-                title="Swap baseline and candidate"
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "var(--proof-grey-bg)",
-                  border: "1px solid var(--proof-border)",
-                }}
-              >
-                <ArrowLeftRight size={14} />
-              </button>
-            </div>
-            <div style={{ flex: 1 }}>
-              <CompareRunSelector
-                label="Candidate Run"
-                labelColor="var(--proof-text-secondary)"
-                value={effectiveCandidate}
-                onChange={handleCandidateChange}
-                runs={envRuns}
-                accentColor="var(--proof-blue)"
-              />
-            </div>
-          </div>
+          )}
         </div>
       </div>
-      <PageTemplate
-        title="Compare Runs"
-        subtitle={`${baselineRun?.id ?? "—"} vs ${candidateRun?.id ?? "—"} · ${filtered.length}/${diffs.length} tests`}
-        filters={
-          <>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                flex: "1 1 200px",
-                minWidth: 200,
-                background: "var(--proof-grey-bg)",
-                borderRadius: 8,
-                padding: "0 12px",
-                border: "1px solid var(--proof-border)",
-              }}
-            >
-              <Search size={14} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
-              <input
-                className="proof-input"
-                placeholder="Search tests…"
-                aria-label="Search tests"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ border: "none", background: "transparent", padding: "8px 0", width: "100%", fontSize: 13 }}
-              />
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "nowrap", overflowX: "auto", padding: "2px 0" }}>
-              {(["regression", "fixed", "duration", "unchanged"] as const).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setActiveFilter(activeFilter === s ? null : s)}
-                  className={`proof-badge ${activeFilter === s ? `proof-badge-${s === 'regression' ? 'fail' : s === 'fixed' ? 'pass' : s === 'duration' ? 'flaky' : 'skip'}` : ''}`}
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: "full",
-                    border: "1px solid var(--proof-border)",
-                    background: activeFilter === s ? undefined : "var(--proof-surface)",
-                    color: activeFilter === s ? undefined : "var(--proof-text-secondary)",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.1s ease",
-                    whiteSpace: "nowrap"
-                  }}
-                >
-                  {s.charAt(0).toUpperCase() + s.slice(1)} <span style={{ opacity: 0.6, marginLeft: 4 }}>{diffs.filter(d => d.state === s).length}</span>
-                </button>
-              ))}
-            </div>
-            {hasRegressions && activeFilter !== "regression" && (
-              <button
-                onClick={() => {
-                  setActiveFilter("regression");
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className="proof-button-ghost"
-                style={{ fontSize: 11, color: "var(--proof-red)", fontWeight: 700, padding: "4px 8px" }}
-              >
-                Jump to Regressions
-              </button>
-            )}
-            {hasActiveFilters && (
-              <button
-                onClick={() => setColFilters({})}
-                className="proof-button-ghost"
-                style={{ fontSize: 11, color: "var(--proof-red)", fontWeight: 600 }}
-              >
-                Reset
-              </button>
-            )}
-          </>
-        }
-        isEmpty={filtered.length === 0 && !initState.loading && !resultsLoading}
-        emptyMessage="No differences found between these runs. Both runs have identical test outcomes."
-        loading={(sortedFiltered.length === 0 && initState.loading) || resultsLoading}
-        loadingCols={7}
-        sidePanel={
-          selectedDiff && selectedName ? (
-            <CompareSidePanel
-              diff={selectedDiff}
-              diffs={filtered}
-              selectedId={selectedDiff.id}
-              onSelect={(id) =>
-                setSelectedName(id ? (diffs.find((d) => d.id === id)?.name ?? null) : null)
-              }
-              navigate={navigate}
-              baseResult={baseResults.find((r) => r.name === selectedDiff.name) ?? null}
-              candResult={candResults.find((r) => r.name === selectedDiff.name) ?? null}
-            />
-          ) : undefined
-        }
-        sidePanelWidth={480}
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <CompareRunsHeader 
-            diffs={diffs}
-            baseResults={baseResults}
-            candResults={candResults}
-          />
-        </motion.div>
 
-        <div className="proof-card" style={{ overflow: "hidden" }}>
-          <table className="proof-table">
-            <colgroup>
-              <col />
-              <col style={{ width: 120 }} />
-              <col style={{ width: 120 }} />
-              <col style={{ width: 110 }} />
-              <col style={{ width: 100 }} />
-              <col style={{ width: 140 }} />
-              <col style={{ width: 120 }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th style={{ fontSize: 11, fontWeight: 700, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    Test Name
-                  </div>
-                </th>
-                <th style={{ fontSize: 11, fontWeight: 700, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Baseline
-                </th>
-                <th style={{ fontSize: 11, fontWeight: 700, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Candidate
-                </th>
-                <th
-                  style={{
-                    textAlign: "right",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: 'var(--proof-text-muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Δ Duration
-                </th>
-                <th
-                  style={{
-                    textAlign: "right",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: 'var(--proof-text-muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Impact
-                </th>
-                <th style={{ fontSize: 11, fontWeight: 700, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Category
-                </th>
-                <th style={{ fontSize: 11, fontWeight: 700, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  State
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedDiffs.map((d, i) => {
-                const isSel = selectedName === d.name;
-                const rowBg = d.state === 'regression' ? 'var(--proof-red-bg)' : 
-                             d.state === 'fixed' ? 'var(--proof-green-bg)' : 
-                             isSel ? 'var(--proof-blue-bg)' : undefined;
-                
-                return (
-                  <motion.tr
-                    key={d.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: Math.min(i * 0.02, 0.5) }}
-                    onClick={() => {
-                      setSelectedName(d.name);
-                      setSelectedIdx(filtered.findIndex(f => f.name === d.name));
-                    }}
-                    style={{
-                      cursor: "pointer",
-                      background: rowBg,
-                      borderLeft: isSel ? `4px solid var(--proof-blue)` : `4px solid transparent`,
-                      transition: "all 0.15s ease",
-                    }}
-                    className={isSel ? "" : "proof-tr-hover"}
-                  >
-                    <td>
-                      <div style={{ fontWeight: 600, fontSize: 13, color: "var(--proof-text)" }}>{d.name}</div>
-                      <div style={{ fontSize: 11, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", marginTop: 2 }}>{d.id}</div>
-                    </td>
-                    <td>
-                      <StateBadge state={d.baseStatus === "PASS" ? "unchanged" : "regression"} />
-                    </td>
-                    <td>
-                      <StateBadge state={d.candStatus === "PASS" ? "fixed" : "regression"} />
-                    </td>
-                    <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>
-                      <span style={{ 
-                        color: d.durCand - d.durBase > 50 ? "var(--proof-red)" : 
-                               d.durCand - d.durBase < -50 ? "var(--proof-green)" : 
-                               "var(--proof-text-secondary)" 
-                      }}>
-                        {d.durCand - d.durBase > 0 ? "+" : ""}{d.durCand - d.durBase}ms
-                      </span>
-                    </td>
-                    <td style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>
-                        {impactScores[d.state]}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>{d.category}</span>
-                    </td>
-                    <td>
-                      <StateBadge state={d.state} />
-                    </td>
-                  </motion.tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {/* Stats pills */}
+      {diffs.length > 0 && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
+          {[
+            { label: "Regressions", count: counts.regression, color: "var(--proof-red)", bg: "var(--proof-red-bg)", border: "var(--proof-red-border)" },
+            { label: "Fixed", count: counts.fixed, color: "var(--proof-green)", bg: "var(--proof-green-bg)", border: "var(--proof-green-border)" },
+            { label: "Slower", count: counts.duration, color: "var(--proof-yellow)", bg: "var(--proof-yellow-bg)", border: "var(--proof-yellow-border)" },
+            { label: "Fishy", count: counts.fishy, color: "var(--proof-orange)", bg: "var(--proof-orange-bg)", border: "var(--proof-orange-border)" },
+            { label: "Unchanged", count: counts.unchanged, color: "var(--proof-text-muted)", bg: "var(--proof-subtle-bg)", border: "var(--proof-border)" },
+          ].map((s) => s.count > 0 && (
+            <div key={s.label} style={{
+              display: "flex", alignItems: "center", gap: 6, padding: "6px 12px",
+              borderRadius: "var(--proof-radius-full)", border: `1px solid ${s.border}`,
+              background: s.bg, fontSize: 12, fontWeight: 600,
+            }}>
+              <span style={{ color: s.color, fontWeight: 800, fontFamily: "var(--font-mono)", fontSize: 13 }}>{s.count}</span>
+              <span style={{ color: s.color }}>{s.label}</span>
+            </div>
+          ))}
         </div>
+      )}
 
-        {diffTotalPages > 1 && (
-          <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 8, alignItems: "center" }}>
-            <button
-              disabled={safeDiffPage === 1}
-              onClick={() => setDiffPage(p => p - 1)}
-              className="proof-button-ghost"
-              style={{ padding: "6px 12px" }}
-            >
-              Previous
-            </button>
-            <span style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>
-              Page {safeDiffPage} of {diffTotalPages}
-            </span>
-            <button
-              disabled={safeDiffPage === diffTotalPages}
-              onClick={() => setDiffPage(p => p + 1)}
-              className="proof-button-ghost"
-              style={{ padding: "6px 12px" }}
-            >
-              Next
-            </button>
+      {/* Main diff content */}
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+        {resultsLoading ? (
+          <div style={{
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            flex: 1, gap: 16, color: "var(--proof-text-muted)",
+          }}>
+            <Loader2 size={32} className="animate-spin text-proof-blue" />
+            <span style={{ fontSize: 14, fontWeight: 500 }}>Comparing test results…</span>
           </div>
-        )}
-      </PageTemplate>
-    </>
+        ) : diffs.length === 0 && effectiveBaseline && effectiveCandidate ? (
+          <div className="proof-card" style={{
+            flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16,
+          }}>
+            <div style={{ width: 64, height: 64, borderRadius: "50%", background: "var(--proof-subtle-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <GitCompare size={32} style={{ color: "var(--proof-text-muted)" }} />
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 16, fontWeight: 600, color: "var(--proof-text)", marginBottom: 4 }}>No differences found</div>
+              <div style={{ fontSize: 14, color: "var(--proof-text-secondary)" }}>These two runs have completely identical test results.</div>
+            </div>
+          </div>
+        ) : diffs.length > 0 ? (
+          <div style={{ display: "flex", gap: 20, flex: 1, minHeight: 0 }}>
+            {/* Left side: Filters + Table */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, gap: 16 }}>
+              {/* Filter bar */}
+              <div className="proof-card" style={{ padding: "12px 16px", display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
+                <div style={{ position: "relative", flex: "1 1 240px", minWidth: 200 }}>
+                  <Search size={14} style={{
+                    position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
+                    color: "var(--proof-text-muted)", pointerEvents: "none",
+                  }} />
+                  <input
+                    value={searchText} onChange={(e) => setSearchText(e.target.value)}
+                    placeholder="Search test names…"
+                    className="proof-input"
+                    style={{ paddingLeft: 34, height: 36, borderRadius: "var(--proof-radius-full)" }}
+                  />
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {filterLabels.map(({ key, label }) => (
+                    <FilterChip
+                      key={key} label={label}
+                      count={key === "total" ? undefined : counts[key as keyof typeof counts]}
+                      active={activeFilter === key || (key === "total" && !activeFilter)}
+                      onClick={() => setActiveFilter(key === "total" ? null : (activeFilter === key ? null : key))}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="proof-card" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, overflow: "hidden" }}>
+                <div style={{
+                  display: "grid", gridTemplateColumns: "1fr 100px 100px 120px",
+                  padding: "12px 20px", background: "var(--proof-surface-2)",
+                  borderBottom: "1px solid var(--proof-border)",
+                  fontSize: 11, fontWeight: 600, textTransform: "uppercase",
+                  letterSpacing: "0.5px", color: "var(--proof-text-muted)",
+                }}>
+                  <span>Test Name</span>
+                  <span>Baseline</span>
+                  <span>Candidate</span>
+                  <span>State</span>
+                </div>
+
+                <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+                  {paginatedDiffs.length === 0 ? (
+                    <div style={{ padding: "48px 20px", textAlign: "center", color: "var(--proof-text-muted)", fontSize: 14 }}>
+                      No tests match your current filters.
+                    </div>
+                  ) : (
+                    paginatedDiffs.map((row, i) => (
+                      <DiffRow
+                        key={row.name}
+                        row={row}
+                        isSelected={selectedName === row.name}
+                        onClick={() => {
+                          setSelectedName(row.name === selectedName ? null : row.name);
+                          setSelectedIdx(i + (safeDiffPage - 1) * DIFF_PAGE_SIZE);
+                        }}
+                      />
+                    ))
+                  )}
+                </div>
+                
+                {diffTotalPages > 1 && (
+                  <div style={{ padding: "12px 20px", borderTop: "1px solid var(--proof-border)", background: "var(--proof-surface-2)" }}>
+                    <Pagination
+                      currentPage={safeDiffPage}
+                      totalPages={diffTotalPages}
+                      totalItems={sortedFiltered.length}
+                      pageSize={DIFF_PAGE_SIZE}
+                      onPageChange={setDiffPage}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right side: Side panel */}
+            <AnimatePresence>
+              {selectedRow && (
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ ease: "easeOut", duration: 0.2 }}
+                  style={{ width: 320, flexShrink: 0, display: "flex", flexDirection: "column" }}
+                >
+                  <CompareSidePanel
+                    diff={selectedRow}
+                    diffs={sortedFiltered}
+                    selectedId={selectedRow.id ?? selectedRow.name}
+                    onSelect={(id) => {
+                      if (!id) { setSelectedName(null); setSelectedIdx(-1); return; }
+                      const idx = sortedFiltered.findIndex((r) => (r.id ?? r.name) === id);
+                      if (idx >= 0) { setSelectedName(sortedFiltered[idx].name); setSelectedIdx(idx); }
+                    }}
+                    navigate={(href) => { window.location.href = href; }}
+                    baseResult={baseResults.find((r) => r.name === selectedRow.name) ?? null}
+                    candResult={candResults.find((r) => r.name === selectedRow.name) ?? null}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ) : null}
+      </div>
+    </motion.div>
+  );
+}
+
+function DiffRow({ row, isSelected, onClick }: { row: DiffRow; isSelected: boolean; onClick: () => void }) {
+  const isReg = row.state === "regression";
+  const isFixed = row.state === "fixed";
+  
+  return (
+    <div
+      onClick={onClick}
+      className="group"
+      style={{
+        display: "grid", gridTemplateColumns: "1fr 100px 100px 120px",
+        padding: "12px 20px", cursor: "pointer",
+        borderBottom: "1px solid var(--proof-border-light)",
+        background: isSelected ? "var(--proof-surface-active)" : isReg ? "var(--proof-red-bg)" : isFixed ? "var(--proof-green-bg)" : "transparent",
+        transition: "background var(--proof-transition)",
+        alignItems: "center",
+      }}
+      onMouseEnter={(e) => {
+        if (!isSelected && !isReg && !isFixed) e.currentTarget.style.background = "var(--proof-hover)";
+      }}
+      onMouseLeave={(e) => {
+        if (!isSelected && !isReg && !isFixed) e.currentTarget.style.background = "transparent";
+      }}
+    >
+      <div style={{
+        fontSize: 13, fontWeight: 500, color: isSelected ? "var(--proof-blue-bright)" : "var(--proof-text)",
+        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        fontFamily: "var(--font-mono)",
+      }}>
+        {row.name}
+      </div>
+      <div><StatusTag status={row.baseStatus} /></div>
+      <div><StatusTag status={row.candStatus} /></div>
+      <div><StatePill state={row.state} /></div>
+    </div>
   );
 }

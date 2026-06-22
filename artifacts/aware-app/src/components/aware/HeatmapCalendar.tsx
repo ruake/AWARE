@@ -87,15 +87,15 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
   const maxCount = Math.max(1, ...data.map((d) => d.count));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "16px", background: "var(--proof-surface-1)", borderRadius: "16px", border: "1px solid var(--proof-border)" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "24px", background: "var(--proof-surface)", borderRadius: "var(--proof-radius-lg)", border: "1px solid var(--proof-border)", height: "100%", justifyContent: "center" }}>
       <div
         style={{
           display: "flex",
           gap: 0,
           paddingLeft: 36,
-          fontSize: 10,
+          fontSize: 11,
           color: "var(--proof-text-secondary)",
-          height: 14,
+          height: 16,
           fontWeight: 600,
           textTransform: "uppercase",
           letterSpacing: "0.5px"
@@ -107,27 +107,27 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
           const month = midDay.day.getMonth();
           const prevMonth =
             wi > 0 && weeks[wi - 1][Math.floor(weeks[wi - 1].length / 2)]?.day.getMonth();
-          if (month === prevMonth) return <span key={wi} style={{ width: 15 }} />;
+          if (month === prevMonth) return <span key={wi} style={{ width: 16 }} />;
           return (
-            <span key={wi} style={{ width: 15 }}>
+            <span key={wi} style={{ width: 16 }}>
               {MONTH_LABELS[month]}
             </span>
           );
         })}
       </div>
 
-      <div style={{ display: "flex", gap: 6 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 3, paddingRight: 4 }}>
+      <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4, paddingRight: 4 }}>
           {DAY_LABELS.map((label, i) => (
             <div
               key={i}
               style={{
                 height: 12,
-                fontSize: 9,
+                fontSize: 10,
                 lineHeight: "12px",
                 color: "var(--proof-text-muted)",
                 textAlign: "right",
-                fontWeight: 500,
+                fontWeight: 600,
                 visibility: i % 2 === 0 ? "visible" : "hidden"
               }}
             >
@@ -136,9 +136,9 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 3 }}>
+        <div style={{ display: "flex", gap: 4 }}>
           {weeks.map((week, wi) => (
-            <div key={wi} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <div key={wi} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {Array.from({ length: 7 }).map((_, di) => {
                 const day = week[di];
                 if (!day || !day.date) return <div key={di} style={{ width: 12, height: 12 }} />;
@@ -154,10 +154,10 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
                 const cellStyle: React.CSSProperties = {
                   width: 12,
                   height: 12,
-                  borderRadius: 3,
+                  borderRadius: "3px",
                   cursor: onCellClick || day.data ? "pointer" : "default",
                   backgroundColor: LEVEL_COLORS[level],
-                  transition: "all 0.2s",
+                  transition: "all var(--proof-transition)",
                 };
                 if (Tag === "button") {
                   cellStyle.padding = 0;
@@ -175,14 +175,16 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
                     style={cellStyle}
                     className="heatmap-cell"
                     onMouseEnter={(e: any) => {
-                      e.currentTarget.style.transform = "scale(1.3)";
+                      e.currentTarget.style.transform = "scale(1.4)";
                       e.currentTarget.style.zIndex = "10";
                       e.currentTarget.style.boxShadow = "var(--proof-shadow-sm)";
+                      e.currentTarget.style.borderRadius = "4px";
                     }}
                     onMouseLeave={(e: any) => {
                       e.currentTarget.style.transform = "scale(1)";
                       e.currentTarget.style.zIndex = "1";
                       e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.borderRadius = "3px";
                     }}
                   />
                 );
@@ -196,23 +198,25 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 6,
+          gap: 8,
           justifyContent: "flex-end",
-          fontSize: 10,
+          fontSize: 11,
           color: "var(--proof-text-muted)",
           marginTop: 8,
-          fontWeight: 500
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.5px"
         }}
       >
         <span>Less</span>
-        <div style={{ display: "flex", gap: 3 }}>
+        <div style={{ display: "flex", gap: 4 }}>
           {LEVEL_COLORS.map((c, i) => (
             <div
               key={i}
               style={{
-                width: 10,
-                height: 10,
-                borderRadius: 2,
+                width: 12,
+                height: 12,
+                borderRadius: 3,
                 backgroundColor: c,
               }}
             />
