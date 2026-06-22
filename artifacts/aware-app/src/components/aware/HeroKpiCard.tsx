@@ -46,15 +46,15 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
   const renderSparkline = () => {
     if (!sparkData || sparkData.length === 0) return null;
     
-    const max = Math.max(...sparkData);
-    const min = Math.min(...sparkData);
+    const max = sparkData.length > 0 ? Math.max(...sparkData) : 0;
+    const min = sparkData.length > 0 ? Math.min(...sparkData) : 0;
     const range = max - min || 1;
     const width = 80;
     const height = 30;
     
     const points = sparkData.map((val, i) => {
-      const x = (i / (sparkData.length - 1)) * width;
-      const y = height - ((val - min) / range) * height;
+      const x = sparkData.length === 1 ? width / 2 : (i / (sparkData.length - 1)) * width;
+      const y = range === 1 || sparkData.length === 1 ? height / 2 : height - ((val - min) / range) * height;
       return `${x},${y}`;
     }).join(" ");
 
@@ -102,7 +102,7 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
         background: `linear-gradient(145deg, var(--proof-surface) 0%, ${accentColor}0a 100%)`,
         border: `1px solid var(--proof-border)`,
         borderRadius: "var(--proof-radius-xl)",
-        padding: "24px",
+        padding: "16px 20px",
         cursor: onClick ? "pointer" : "default",
         position: "relative",
         overflow: "hidden",
@@ -139,15 +139,15 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
         }}
       />
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", zIndex: 1 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", zIndex: 1, marginBottom: -4 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           <span
             style={{
-              fontSize: "0.875rem",
-              fontWeight: 600,
+              fontSize: "11px",
+              fontWeight: 700,
               color: "var(--proof-text-secondary)",
               textTransform: "uppercase",
-              letterSpacing: "0.05em",
+              letterSpacing: "0.5px",
             }}
           >
             {label}
@@ -155,8 +155,8 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
           <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
             <span
               style={{
-                fontSize: "32px",
-                fontWeight: 700,
+                fontSize: "28px",
+                fontWeight: 800,
                 fontFamily: "var(--font-mono)",
                 letterSpacing: "-0.05em",
                 color: "var(--proof-text)",
@@ -166,7 +166,7 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
               {displayValue}
             </span>
             {suffix && (
-              <span style={{ fontSize: "1.25rem", color: "var(--proof-text-secondary)", fontWeight: 600 }}>
+              <span style={{ fontSize: "1rem", color: "var(--proof-text-secondary)", fontWeight: 700 }}>
                 {suffix}
               </span>
             )}
@@ -176,8 +176,8 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
         {icon && (
           <div
             style={{
-              width: 40,
-              height: 40,
+              width: 32,
+              height: 32,
               borderRadius: "50%",
               background: `${accentColor}1a`,
               display: "flex",
@@ -189,7 +189,7 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
             {React.isValidElement(icon)
               ? React.cloneElement(
                   icon as React.ReactElement<{ size?: number; strokeWidth?: number }>,
-                  { size: 20, strokeWidth: 2.5 }
+                  { size: 16, strokeWidth: 2.5 }
                 )
               : icon}
           </div>
@@ -212,9 +212,7 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
             }}
           >
             <DeltaIcon size={14} strokeWidth={2.5} />
-            {delta > 0 ? "+" : ""}
-            {delta}
-            {suffix === "%" ? "%" : ""}
+            {delta === 0 ? "—" : (delta > 0 ? "+" : "") + delta + (suffix === "%" ? "%" : "")}
           </span>
           <span style={{ fontSize: "0.75rem", color: "var(--proof-text-muted)" }}>
             {deltaLabel}

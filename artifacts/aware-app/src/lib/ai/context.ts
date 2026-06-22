@@ -189,7 +189,7 @@ The Copilot page (/copilot) has:
 - Left sidebar: quick-action buttons (Failure Analysis, Flaky Detection, etc.) 
 - Center: conversation area with Markdown rendering of responses
 - Right panel: Debug log panel (toggle with "Debug" button in top bar)
-- Top bar: Provider selector (Custom Endpoint/WebLLM/Chrome), Configure button, New Chat
+- Top bar: Chrome AI status indicator, Configure button, New Chat
 - Thinking indicator: shows currently executing LangGraph node chain
 - Charts & tables rendered with recharts and HTML inside Markdown blocks
 
@@ -273,11 +273,8 @@ A: The threshold is set in \`.github/workflows/run-tests.yml\` under the \`gate-
 Q: Tests are not being discovered — why?
 A: Check that test files are tagged with the correct tag matching the suite's \`tags\` field in \`test-suites.yml\`. For Playwright, use \`@tag\` in the test name. For pytest, use \`-m tag\` markers.
 
-Q: How do I point the dashboard at a custom API endpoint?
-A: In the Copilot settings panel (gear icon top-right of the Copilot page), set the API URL field to your endpoint. Supports any OpenAI-compatible API (Ollama, LM Studio, etc.).
-
-Q: Can I use a self-hosted LLM?
-A: Yes. Three providers are supported: Custom Endpoint (any OpenAI-compatible server: Ollama, LM Studio, Mistral, vLLM, etc.), WebLLM (runs in the browser via WebGPU, no API key), Chrome Built-in AI (experimental). Configure in Copilot → Settings.
+Q: How does the Copilot AI work?
+A: The Copilot uses Chrome Built-in AI (Gemini Nano), which runs entirely on-device — no API keys, no data sent to external servers. Enable it at chrome://flags/#prompt-api-for-gemini-nano in Chrome 138+.
 `.trim();
 
 export function buildSystemPrompt(context: AIContext): string {

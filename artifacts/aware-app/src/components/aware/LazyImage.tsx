@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { preloadImage } from "@/lib/images";
 import { ImageIcon, AlertCircle } from "lucide-react";
+import { SkeletonBox } from "./Skeleton";
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -114,13 +115,16 @@ export const LazyImage: React.FC<LazyImageProps> = ({
             background: "var(--proof-surface-3)",
           }}
         >
-          <motion.div
-            initial={{ opacity: 0.3 }}
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            <ImageIcon size={24} style={{ color: "var(--proof-blue)", opacity: 0.4 }} />
-          </motion.div>
+          <SkeletonBox width="100%" height="100%" borderRadius={0} />
+          <div style={{ position: "absolute", zIndex: 1 }}>
+            <motion.div
+              initial={{ opacity: 0.3 }}
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              <ImageIcon size={24} style={{ color: "var(--proof-blue)", opacity: 0.4 }} />
+            </motion.div>
+          </div>
         </div>
       )}
 

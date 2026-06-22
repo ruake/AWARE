@@ -14,16 +14,12 @@ import {
 import { TOOLS } from "@/lib/copilot/tools";
 import { runAgent } from "@/lib/copilot/agent";
 import { createProvider } from "@/lib/copilot/providers";
-import type { WebLLMProvider } from "@/lib/copilot/providers";
+import { QUICK_ACTIONS } from "@/lib/copilot/quickActions";
 import {
   loadThreads,
   saveThreads,
   loadSession,
   clearSession,
-  loadProviderType,
-  saveProviderType,
-  loadCustomEndpointConfig,
-  saveCustomEndpointConfig,
   createThread,
   updateThreadInList,
   getActiveThreadId,
@@ -44,6 +40,7 @@ import type {
   ToneOption,
 } from "@/lib/copilot/types";
 import { conversationReducer, INITIAL_CONVERSATION_STATE } from "@/lib/copilot/copilotReducer";
+import LangGraphPanel from "@/components/copilot/LangGraphPanel";
 import MessageFeed from "@/components/copilot/MessageFeed";
 import MessageSearchComp from "@/components/copilot/MessageSearch";
 import EditBranch from "@/components/copilot/EditBranch";
@@ -58,6 +55,7 @@ import ErrorRecovery from "@/components/copilot/ErrorRecovery";
 import OnboardingWizard from "@/components/copilot/OnboardingWizard";
 import StatsPanel from "@/components/copilot/StatsPanel";
 import { CopilotSettings as CopilotSettingsPanel } from "@/components/aware/CopilotSettings";
+import { CopilotSidebar } from "@/components/aware/CopilotSidebar";
 import ProviderSelector from "@/components/copilot/ProviderSelector";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { motion, AnimatePresence } from "framer-motion";
@@ -93,13 +91,8 @@ export default function CopilotPage() {
     messagesRef.current = messages;
   }, [messages]);
 
-  const [providerType, setProviderType] = React.useState<ProviderType>(() => {
-    const session = loadSession();
-    return session?.providerType ?? loadProviderType();
-  });
-  const [providerStatus, setProviderStatus] = React.useState<Record<ProviderType, ProviderStatus>>({
-    webllm: "unavailable",
-    custom: "unavailable",
+  const providerType = "chrome";
+  const [providerStatus, setProviderStatus] = React.useState<Record<"chrome", ProviderStatus>>({
     chrome: "unavailable",
   });
   const [downloadProgress, setDownloadProgress] = React.useState<{
@@ -107,7 +100,6 @@ export default function CopilotPage() {
     text: string;
   } | null>(null);
   const [showSettings, setShowSettings] = React.useState(false);
-  const [customEndpointConfig, setCustomEndpointConfig] = React.useState(loadCustomEndpointConfig);
   const [input, setInput] = React.useState("");
 
   const [threads, setThreads] = React.useState<Thread[]>(() => loadThreads());
@@ -135,24 +127,14 @@ export default function CopilotPage() {
     return messages.find((m) => m.id === editingMessageId) ?? null;
   }, [messages, editingMessageId]);
 
-  const providers = React.useMemo(() => {
-    const wllm = createProvider("webllm") as WebLLMProvider;
-    wllm.onLoadProgress = (progress: number, text: string) => {
-      setDownloadProgress({ progress, text });
-      if (progress >= 1) setTimeout(() => setDownloadProgress(null), 2000);
-    };
-    return { webllm: wllm, custom: createProvider("custom"), chrome: createProvider("chrome") };
-  }, []);
+  const provider = React.useMemo(() => createProvider("chrome"), []);
 
   React.useEffect(() => {
     (async () => {
-      const [webllmStatus, chromeStatus] = await Promise.all([
-        providers.webllm.checkAvailability(),
-        providers.chrome.checkAvailability(),
-      ]);
-      setProviderStatus((prev) => ({ ...prev, webllm: webllmStatus, chrome: chromeStatus }));
+      const chromeStatus = await provider.checkAvailability();
+      setProviderStatus({ chrome: chromeStatus });
     })();
-  }, [providers]);
+  }, [provider]);
 
   React.useEffect(() => {
     if (threads.length > 0) saveThreads(threads);
@@ -242,7 +224,7 @@ export default function CopilotPage() {
       runAgent({
         userContent: content,
         history,
-        provider: providers[providerType],
+        provider,
         tools: TOOLS,
         signal: abort.signal,
         onEvent: handleEvent,
@@ -254,7 +236,7 @@ export default function CopilotPage() {
           });
       });
     },
-    [busy, input, providers, providerType, handleEvent, ensureActiveThread],
+    [busy, input, provider, providerType, handleEvent, ensureActiveThread],
   );
 
   const handleRetry = React.useCallback(
@@ -293,7 +275,7 @@ export default function CopilotPage() {
       runAgent({
         userContent,
         history: slicedHistory,
-        provider: providers[providerType],
+        provider,
         tools: TOOLS,
         signal: abort.signal,
         onEvent: handleEvent,
@@ -305,19 +287,13 @@ export default function CopilotPage() {
           });
       });
     },
-    [busy, providers, providerType, handleEvent],
+    [busy, provider, providerType, handleEvent],
   );
 
   const handleStop = React.useCallback(() => {
     abortRef.current?.abort();
     handleEvent({ type: "done" });
   }, [handleEvent]);
-
-  const handleProviderSwitch = React.useCallback((type: ProviderType) => {
-    setProviderType(type);
-    saveProviderType(type);
-    setShowSettings(false);
-  }, []);
 
   const handleNewChat = React.useCallback(() => {
     abortRef.current?.abort();
@@ -336,9 +312,7 @@ export default function CopilotPage() {
     setTimeout(() => textareaRef.current?.focus(), 0);
   }, [providerType, setThreadUrl]);
 
-  const handleSaveSettings = (cfg: { apiKey: string; apiUrl: string; model: string }) => {
-    setCustomEndpointConfig(cfg);
-    saveCustomEndpointConfig(cfg);
+  const handleSaveSettings = () => {
     setShowSettings(false);
   };
 
@@ -506,8 +480,8 @@ export default function CopilotPage() {
     return () => document.removeEventListener("keydown", handler);
   }, [handleNewChat]);
 
-  const showingOnboarding = messages.length === 0 && !busy && !dismissedOnboarding;
   const erroredMessages = messages.filter((m) => m.role === "assistant" && m.error && !m.streaming);
+  const showingOnboarding = messages.length === 0 && !busy && !dismissedOnboarding;
 
   const ariaStatus = busy
     ? "AI is thinking\u2026"
@@ -599,11 +573,7 @@ export default function CopilotPage() {
               fontWeight: 500,
             }}
           >
-            {providerType === "custom"
-              ? customEndpointConfig.model || "Custom Endpoint"
-              : providerType === "webllm"
-                ? "WebLLM · Llama-3.2"
-                : "Chrome AI · Gemini Nano"}
+            Chrome AI · Gemini Nano
             {messages.length > 0 && ` · $\{messages.length\} messages`}
           </div>
         </div>
@@ -620,10 +590,8 @@ export default function CopilotPage() {
           <ToneSelector currentTone={copilotSettings.tone} onToneChange={handleToneChange} />
 
           <ProviderSelector
-            providerType={providerType}
             providerStatus={providerStatus}
             downloadProgress={downloadProgress}
-            onSwitch={handleProviderSwitch}
           />
 
           <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
@@ -676,12 +644,86 @@ export default function CopilotPage() {
 
       {/* Content area */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
+        <CopilotSidebar
+          onNewChat={handleNewChat}
+          onSend={handleSend}
+          style={{ width: 250, borderRight: "1px solid var(--proof-border)" }}
+        />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
           <MessageFeed
             messages={messages}
             onRetry={handleRetry}
             onSend={handleSend}
           />
+          <div style={{ borderTop: "1px solid var(--proof-border)", background: "rgba(10, 20, 40, 0.4)" }}>
+            {busy && (
+              <div style={{ padding: "8px 16px 0" }}>
+                <LangGraphPanel
+                  nodes={messages[messages.length - 1]?.graphNodes ?? []}
+                  streaming={busy}
+                  providerType={providerType}
+                />
+              </div>
+            )}
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                padding: "10px 16px",
+                overflowX: "auto",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              {QUICK_ACTIONS.map((action) => (
+                <button
+                  key={action.id}
+                  onClick={() => handleSend(action.message)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "6px 12px",
+                    borderRadius: 20,
+                    background: "var(--proof-surface-2)",
+                    border: "1px solid var(--proof-border)",
+                    color: "var(--proof-text-secondary)",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    whiteSpace: "nowrap",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = action.color;
+                    e.currentTarget.style.color = "var(--proof-text)";
+                    e.currentTarget.style.background = "var(--proof-surface-hover)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "var(--proof-border)";
+                    e.currentTarget.style.color = "var(--proof-text-secondary)";
+                    e.currentTarget.style.background = "var(--proof-surface-2)";
+                  }}
+                >
+                  <action.icon size={12} style={{ color: action.color }} />
+                  {action.label}
+                </button>
+              ))}
+            </div>
+            <RichInputBar
+              input={input}
+              busy={busy}
+              textareaRef={textareaRef}
+              onSend={() => handleSend()}
+              onInput={setInput}
+              onStop={handleStop}
+              attachments={attachments}
+              onAttach={handleAttach}
+              onRemoveAttachment={handleRemoveAttachment}
+              onPaste={handlePaste}
+              onTemplateSelect={() => setShowTemplateLibrary(true)}
+            />
+          </div>
         </div>
 
         {/* Overlay panels */}
@@ -745,8 +787,6 @@ export default function CopilotPage() {
             >
               <div onClick={(e) => e.stopPropagation()}>
                 <CopilotSettingsPanel
-                  endpointConfig={customEndpointConfig}
-                  onSave={handleSaveSettings}
                   onClose={() => setShowSettings(false)}
                 />
               </div>
@@ -832,20 +872,6 @@ export default function CopilotPage() {
           />
         ))}
       </div>
-
-      <RichInputBar
-        input={input}
-        busy={busy}
-        textareaRef={textareaRef}
-        onSend={() => handleSend()}
-        onInput={setInput}
-        onStop={handleStop}
-        attachments={attachments}
-        onAttach={handleAttach}
-        onRemoveAttachment={handleRemoveAttachment}
-        onPaste={handlePaste}
-        onTemplateSelect={() => setShowTemplateLibrary(true)}
-      />
     </motion.div>
   );
 }

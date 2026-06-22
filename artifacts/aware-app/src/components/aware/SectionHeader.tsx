@@ -58,21 +58,23 @@ export function SectionHeader({ title, subtitle, actions, icon, children }: Sect
         )}
         <div>
           <h1 style={{ 
-            fontSize: 17, 
+            fontSize: 13, 
             fontWeight: 700, 
             color: "var(--proof-text)", 
             margin: 0,
-            letterSpacing: "-0.5px"
+            letterSpacing: "0.1em",
+            textTransform: "uppercase"
           }}>
             {title}
           </h1>
           {subtitle && (
             <p style={{ 
-              fontSize: 12, 
+              fontSize: 11, 
               color: "var(--proof-text-secondary)", 
               marginTop: 2,
               marginBottom: 0,
-              fontWeight: 500
+              fontWeight: 500,
+              letterSpacing: "0.02em"
             }}>
               {subtitle}
             </p>

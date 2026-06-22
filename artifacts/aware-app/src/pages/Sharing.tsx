@@ -22,35 +22,18 @@ export default function Sharing() {
         animation: "page-enter 0.5s ease-out both"
       }}
     >
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em" }}>Sharing & Permalinks</h1>
-          <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 4 }}>
-            Deep links, export formats, and embeddable status badges.
-          </p>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontSize: 11,
-            fontWeight: 600,
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            color: "var(--proof-text-secondary)",
-            background: "var(--proof-surface-2)",
-            padding: "8px 16px",
-            borderRadius: 100,
-            border: "1px solid var(--proof-border)",
-          }}
-        >
-          <Shield size={14} style={{ color: "var(--proof-blue)" }} /> 
-          Token Encrypted Access
+      <div className="p-12 text-center bg-[var(--proof-surface-2)] border border-[var(--proof-border)] rounded-2xl">
+        <Share2 size={48} className="mx-auto mb-6 text-[var(--proof-blue-bright)] opacity-20" />
+        <h1 className="text-2xl font-bold mb-4">Sharing & Permalinks</h1>
+        <p className="text-[var(--proof-text-secondary)] mb-8 max-w-md mx-auto">
+          Secure deep-linking and report sharing features are being optimized for the next release.
+        </p>
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--proof-blue-bg)] text-[var(--proof-blue-bright)] rounded-full text-xs font-bold uppercase tracking-wider">
+          Coming Soon
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, opacity: 0.5, pointerEvents: "none" }}>
         <div
           className="proof-card"
           style={{ padding: 24, display: "flex", flexDirection: "column", gap: 20 }}

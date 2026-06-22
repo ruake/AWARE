@@ -12,12 +12,13 @@ export function CopilotSidebar({ onNewChat, onSend, style }: CopilotSidebarProps
   return (
     <div
       style={{
-        width: 240,
+        width: 250,
         flexShrink: 0,
         background: "var(--proof-overlay)",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
+        borderRight: "1px solid var(--proof-border)",
         ...style,
       }}
     >

@@ -129,7 +129,7 @@ export function TestDetailPanel({ test, parentSuite, onClose }: TestDetailPanelP
                       width: 8,
                       height: 8,
                       borderRadius: "50%",
-                      background: test.status === "active" ? "var(--proof-green)" : "var(--proof-yellow)",
+                      background: test.status === "active" ? "var(--proof-emerald)" : "var(--proof-text-muted)",
                     }}
                   />
                   <span style={{ fontSize: 13, fontWeight: 600, textTransform: "capitalize" }}>

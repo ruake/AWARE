@@ -74,7 +74,8 @@ export default function RichInputBar({
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onInput(e.target.value);
     e.target.style.height = "auto";
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
+    const newHeight = Math.min(e.target.scrollHeight, 130); // ~5-6 lines
+    e.target.style.height = `${newHeight}px`;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

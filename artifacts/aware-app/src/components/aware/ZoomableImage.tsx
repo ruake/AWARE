@@ -1,5 +1,5 @@
 import React from "react";
-import { Loader2, AlertCircle, ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2 } from "lucide-react";
+import { Loader2, AlertCircle, ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2, ImageOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ZoomableImageProps {
@@ -32,7 +32,7 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
   };
 
   const adjustZoom = (delta: number) => {
-    setZoom((z) => {
+    setZoom((z: number) => {
       const newZoom = Math.max(1, Math.min(10, z * delta));
       if (newZoom === 1) setPan({ x: 0, y: 0 });
       return newZoom;
@@ -138,7 +138,7 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        cursor: loading ? "wait" : error ? "default" : zoom > 1 ? "grab" : "zoom-in",
+        cursor: loading ? "wait" : error ? "help" : zoom > 1 ? "grab" : "zoom-in",
         maxHeight: isFullScreen ? "100vh" : maxHeight,
         width: "100%",
         height: isFullScreen ? "100vh" : "auto",
@@ -186,12 +186,17 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            justifyContent: "center",
             gap: 16,
             padding: 40,
             color: "var(--proof-red)",
+            background: "var(--proof-red-bg)",
+            width: "100%",
+            height: "100%",
+            borderRadius: "inherit",
           }}
         >
-          <AlertCircle size={48} />
+          <ImageOff size={48} strokeWidth={1.5} opacity={0.8} />
           <div style={{ textAlign: "center" }}>
             <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Capture Unavailable</div>
             <div style={{ fontSize: 13, opacity: 0.7 }}>The requested evidence could not be loaded</div>
@@ -202,8 +207,10 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
               setError(false);
               setLoading(true);
             }}
-            className="proof-button proof-button-primary"
+            className="proof-btn proof-btn-primary"
+            style={{ marginTop: 8 }}
           >
+            <RotateCcw size={14} />
             Retry Loading
           </button>
         </div>

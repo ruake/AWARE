@@ -73,11 +73,11 @@ export function CompareRunSelector({
       const q = search.toLowerCase();
       if (
         !r.id.toLowerCase().includes(q) &&
-        !r.env.toLowerCase().includes(q) &&
-        !r.suiteId.toLowerCase().includes(q) &&
-        !r.envId.toLowerCase().includes(q) &&
-        !r.build.toLowerCase().includes(q) &&
-        !r.rev.toLowerCase().includes(q)
+        !(r.env || "").toLowerCase().includes(q) &&
+        !(r.suiteId || "").toLowerCase().includes(q) &&
+        !(r.envId || "").toLowerCase().includes(q) &&
+        !(r.build || "").toLowerCase().includes(q) &&
+        !(r.rev || "").toLowerCase().includes(q)
       )
         return false;
     }

@@ -114,6 +114,9 @@ export function TestFilters({
     onCategoryChange("All");
     onStatusChange("All");
     onPriorityChange("All");
+    if (suiteFilter) {
+      onClearSuite();
+    }
   };
 
   return (
@@ -184,6 +187,7 @@ export function TestFilters({
             height: 32,
             minWidth: 100,
             borderColor: testType !== "All" ? "var(--proof-blue)" : undefined,
+            borderWidth: testType !== "All" ? 2 : 1,
           }}
           aria-label="Filter by type"
         >
@@ -206,6 +210,7 @@ export function TestFilters({
             height: 32,
             minWidth: 120,
             borderColor: category !== "All" ? "var(--proof-blue)" : undefined,
+            borderWidth: category !== "All" ? 2 : 1,
           }}
           aria-label="Filter by category"
         >
@@ -228,6 +233,7 @@ export function TestFilters({
             height: 32,
             minWidth: 100,
             borderColor: status !== "All" ? "var(--proof-blue)" : undefined,
+            borderWidth: status !== "All" ? 2 : 1,
           }}
           aria-label="Filter by status"
         >
@@ -250,6 +256,7 @@ export function TestFilters({
             height: 32,
             minWidth: 100,
             borderColor: priority !== "All" ? "var(--proof-blue)" : undefined,
+            borderWidth: priority !== "All" ? 2 : 1,
           }}
           aria-label="Filter by priority"
         >
@@ -273,7 +280,7 @@ export function TestFilters({
             fontWeight: 600,
             color: "var(--proof-blue)",
             background: "var(--proof-blue-bg)",
-            border: "1px solid var(--proof-blue-border)",
+            border: "2px solid var(--proof-blue)",
             padding: "3px 8px",
             borderRadius: 5,
           }}

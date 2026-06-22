@@ -36,9 +36,16 @@ export function conversationReducer(
           const msgs = state.messages;
           const last = msgs[msgs.length - 1];
           if (!last?.streaming) return state;
+          
+          // Use a functional update style if this were in a hook, 
+          // but in a reducer we just return the new state.
+          // To prevent flicker, we ensure we're not creating unnecessary objects.
+          const newContent = last.content + event.content;
+          if (newContent === last.content) return state;
+
           return {
             ...state,
-            messages: [...msgs.slice(0, -1), { ...last, content: last.content + event.content }],
+            messages: [...msgs.slice(0, -1), { ...last, content: newContent }],
           };
         }
 

@@ -47,6 +47,14 @@ async function baseFetchHandler<T>(req: FetchRequest): Promise<FetchResponse<T>>
 
   try {
     const res = await fetch(url, { signal: controller.signal });
+    if (res.status === 404) {
+      return {
+        data: null as unknown as T,
+        fromCache: false,
+        attempts: 1,
+        durationMs: Date.now() - start,
+      };
+    }
     if (!res.ok) {
       throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
     }
@@ -124,18 +132,18 @@ export function cacheMiddleware<T>(defaultTTLMs = 60000): FetchMiddleware<T> {
 
 export function loggingMiddleware<T>(): FetchMiddleware<T> {
   return async (req, next) => {
-    if (import.meta.env.PROD) return next(req);
+    if (!import.meta.env.DEV) return next(req);
 
     const start = Date.now();
-    console.log(`[FetchPipeline] Request: ${req.path}`);
+    if (import.meta.env.DEV) console.log(`[FetchPipeline] Request: ${req.path}`);
     try {
       const res = await next(req);
-      console.log(
+      if (import.meta.env.DEV) console.log(
         `[FetchPipeline] Success: ${req.path} (${Date.now() - start}ms, cache: ${res.fromCache})`,
       );
       return res;
     } catch (err) {
-      console.error(`[FetchPipeline] Error: ${req.path}`, err);
+      if (import.meta.env.DEV) console.error(`[FetchPipeline] Error: ${req.path}`, err);
       throw err;
     }
   };

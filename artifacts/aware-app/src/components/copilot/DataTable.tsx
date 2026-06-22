@@ -311,9 +311,13 @@ export default function DataTable({ table }: Props) {
                     letterSpacing: "0.5px",
                     cursor: "pointer",
                     whiteSpace: "nowrap",
-                    background: "var(--proof-subtle-bg015)",
+                    background: "var(--proof-surface-2)",
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 10,
                     userSelect: "none",
                     width: col.width ? `${col.width}px` : undefined,
+                    boxShadow: "0 1px 0 var(--proof-border)",
                   }}
                 >
                   {col.label}

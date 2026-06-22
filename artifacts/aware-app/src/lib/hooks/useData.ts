@@ -168,11 +168,7 @@ export function usePassRateChart() {
 
 /** Per-env pass rate data for multi-line chart. */
 export function usePerEnvPassRate() {
-  // Subscribe to both runs and selected-env so callers re-render on any data change.
-  React.useSyncExternalStore(subscribeToRuns, getRuns);
-  const snap = React.useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return React.useMemo(() => getPerEnvPassRate(), [snap]);
+  return React.useSyncExternalStore(subscribeToRuns, getPerEnvPassRate);
 }
 
 /* ─────────────────────────────────────────────────────────────────────

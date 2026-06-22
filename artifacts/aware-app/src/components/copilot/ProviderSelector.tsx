@@ -1,30 +1,11 @@
 import React from "react";
-import { Globe, Cpu, Zap, ChevronDown, Loader2 } from "lucide-react";
-import type { ProviderType, ProviderStatus } from "@/lib/copilot/types";
-
-interface Props {
-  providerType: ProviderType;
-  providerStatus: Record<ProviderType, ProviderStatus>;
-  downloadProgress: { progress: number; text: string } | null;
-  onSwitch: (type: ProviderType) => void;
-}
+import { Zap, ChevronDown, Loader2 } from "lucide-react";
+import type { ProviderStatus } from "@/lib/copilot/types";
 
 const META: Record<
-  ProviderType,
+  "chrome",
   { label: string; icon: React.ReactNode; color: string; description: string }
 > = {
-  custom: {
-    label: "Custom Endpoint",
-    icon: <Globe size={12} />,
-    color: "#10a37f",
-    description: "Any OpenAI-compatible server — configure URL in Settings",
-  },
-  webllm: {
-    label: "WebLLM",
-    icon: <Cpu size={12} />,
-    color: "#8b5cf6",
-    description: "Runs locally — downloads model on first use",
-  },
   chrome: {
     label: "Chrome AI",
     icon: <Zap size={12} />,
@@ -33,7 +14,7 @@ const META: Record<
   },
 };
 
-const ORDER: ProviderType[] = ["webllm", "chrome", "custom"];
+const ORDER: "chrome"[] = ["chrome"];
 
 const STATUS_DOT: Record<ProviderStatus, { color: string; title: string }> = {
   available: { color: "#22c55e", title: "Available" },
@@ -41,21 +22,21 @@ const STATUS_DOT: Record<ProviderStatus, { color: string; title: string }> = {
   unavailable: { color: "#6b7280", title: "Unavailable" },
 };
 
-const UNAVAILABLE_REASON: Record<ProviderType, string> = {
-  webllm: "Your browser may not support WebGPU, which is required for WebLLM",
-  chrome: "Requires Chrome 127+ with Gemini Nano enabled",
-  custom: "Configure an API URL in Settings to enable",
+const UNAVAILABLE_REASON: Record<"chrome", string> = {
+  chrome: "Requires Chrome 128+ with Gemini Nano enabled",
 };
 
 export default function ProviderSelector({
-  providerType,
   providerStatus,
   downloadProgress,
-  onSwitch,
-}: Props) {
+}: {
+  providerStatus: Record<"chrome", ProviderStatus>;
+  downloadProgress: { progress: number; text: string } | null;
+}) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement | null>(null);
 
+  const providerType = "chrome";
   const current = META[providerType];
   const currentStatus = providerStatus[providerType];
 
@@ -154,7 +135,7 @@ export default function ProviderSelector({
               style={{
                 height: "100%",
                 width: `${Math.round(downloadProgress.progress * 100)}%`,
-                background: META.webllm.color,
+                background: current.color,
                 borderRadius: 2,
                 transition: "width 0.3s ease",
               }}
@@ -199,7 +180,6 @@ export default function ProviderSelector({
                 disabled={disabled}
                 onClick={() => {
                   if (!disabled) {
-                    onSwitch(type);
                     setOpen(false);
                   }
                 }}

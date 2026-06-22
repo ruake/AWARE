@@ -147,152 +147,56 @@ function planNode(): AgentNode {
       const steps: SubAgentStep[] = [];
 
       // ── Keyword routing (Chrome AI / Gemini Nano) ─────────────────────────
-      if (ctx.provider.supportsToolCalling === false) {
-        // When intent is "data-query" but no keyword matched, default to query_runs
-        // so natural-language phrasings ("tell me about last test", "how are things?")
-        // always get real data instead of falling through to the generic fallback.
-        const route =
-          routeByKeyword(ctx.query) ??
-          (ctx.plan === "data-query" ? { tool: "query_runs", args: { limit: 10 } } : null);
+      // Always use keyword routing for Chrome AI
+      // When intent is "data-query" but no keyword matched, default to query_runs
+      // so natural-language phrasings ("tell me about last test", "how are things?")
+      // always get real data instead of falling through to the generic fallback.
+      const route =
+        routeByKeyword(ctx.query) ??
+        (ctx.plan === "data-query" ? { tool: "query_runs", args: { limit: 10 } } : null);
 
-        if (route) {
-          const callId = `kw-${uid()}`;
-          ctx.pendingToolCalls.push({ id: callId, name: route.tool, args: route.args });
-          ctx.apiMessages.push({
-            role: "assistant",
-            content: null,
-            tool_calls: [
-              {
-                id: callId,
-                type: "function" as const,
-                function: { name: route.tool, arguments: JSON.stringify(route.args) },
-              },
-            ],
-          });
-          const routeLabel = route === null ? "query_runs (default)" : route.tool;
-          steps.push({
-            id: uid(),
-            label: "Keyword route",
-            status: "completed",
-            detail: routeLabel,
-          });
-          updateNode(ctx, "plan", {
-            status: "completed",
-            detail: routeLabel,
-            completedAt: Date.now(),
-            toolNames: [route.tool],
-          });
-        } else {
-          steps.push({
-            id: uid(),
-            label: "Direct answer",
-            status: "completed",
-            detail: "No tool needed",
-          });
-          updateNode(ctx, "plan", {
-            status: "completed",
-            detail: "direct synthesis",
-            completedAt: Date.now(),
-          });
-        }
-        return { status: "completed", steps };
-      }
-
-      // ── LLM tool-calling path (WebLLM, OpenAI) ────────────────────────────
-      let collectedContent = "";
-      const localPendingCalls: Array<{ id: string; name: string; argsJson: string }> = [];
-      let streamDone = false;
-
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          if (!streamDone) {
-            streamDone = true;
-            resolve();
-          }
-        }, STREAM_TIMEOUT_MS);
-
-        ctx.provider
-          .stream(ctx.apiMessages, ctx.tools, ctx.signal, (delta) => {
-            if (delta.content) {
-              collectedContent += delta.content;
-              ctx.onEvent({ type: "delta", content: delta.content });
-            }
-            if (delta.toolCallId) {
-              localPendingCalls.push({
-                id: delta.toolCallId,
-                name: delta.toolCallName ?? "",
-                argsJson: delta.toolCallArgsChunk ?? "{}",
-              });
-            }
-            if (delta.done) {
-              streamDone = true;
-              clearTimeout(timeout);
-              resolve();
-            }
-          })
-          .then(() => {
-            clearTimeout(timeout);
-            if (!streamDone) resolve();
-          })
-          .catch((err) => {
-            clearTimeout(timeout);
-            reject(err);
-          });
-      });
-
-      if (ctx.signal.aborted) return { status: "completed" };
-
-      if (localPendingCalls.length > 0) {
-        const toolNames = localPendingCalls.map((t) => t.name);
-        steps.push({
-          id: uid(),
-          label: "Tools planned",
-          status: "completed",
-          detail: toolNames.join(", "),
-        });
-
-        for (const tc of localPendingCalls) {
-          let args: Record<string, unknown> = {};
-          try {
-            args = JSON.parse(tc.argsJson);
-          } catch {
-            /* empty args */
-          }
-          ctx.pendingToolCalls.push({ id: tc.id, name: tc.name, args });
-        }
-
+      if (route) {
+        const callId = `kw-${uid()}`;
+        ctx.pendingToolCalls.push({ id: callId, name: route.tool, args: route.args });
         ctx.apiMessages.push({
           role: "assistant",
-          content: collectedContent || null,
-          tool_calls: localPendingCalls.map((tc) => ({
-            id: tc.id,
-            type: "function" as const,
-            function: { name: tc.name, arguments: tc.argsJson },
-          })),
+          content: null,
+          tool_calls: [
+            {
+              id: callId,
+              type: "function" as const,
+              function: { name: route.tool, arguments: JSON.stringify(route.args) },
+            },
+          ],
         });
-
+        const routeLabel = route === null ? "query_runs (default)" : route.tool;
+        steps.push({
+          id: uid(),
+          label: "Keyword route",
+          status: "completed",
+          detail: routeLabel,
+        });
         updateNode(ctx, "plan", {
           status: "completed",
-          detail: toolNames.join(", "),
+          detail: routeLabel,
           completedAt: Date.now(),
-          toolNames,
+          toolNames: [route.tool],
         });
       } else {
         steps.push({
           id: uid(),
           label: "Direct answer",
           status: "completed",
-          detail: "No tools needed",
+          detail: "No tool needed",
         });
-        ctx.finalContent = collectedContent;
         updateNode(ctx, "plan", {
           status: "completed",
           detail: "direct synthesis",
           completedAt: Date.now(),
         });
       }
-
       return { status: "completed", steps };
+
     },
   };
 }
@@ -535,9 +439,9 @@ function sessionCarveNode(): AgentNode {
     label: "Optimize",
     description: "Optimizing context window for next turn",
     async execute(ctx: AgentGraphContext): Promise<AgentNodeResult> {
-      const providerType = ctx.provider.type;
-      const MAX_CHARS = providerType === "webllm" ? 8000 : 40000;
+      const MAX_CHARS = 40000;
       const steps: SubAgentStep[] = [];
+
 
       const sys = ctx.apiMessages.find((m) => m.role === "system");
       const rest = ctx.apiMessages.filter((m) => m.role !== "system");

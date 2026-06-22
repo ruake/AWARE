@@ -177,14 +177,14 @@ export default function Dashboard() {
     .slice(0, 8)
     .reverse()
     .map((r) => r.failures ?? 0);
-  const regressionSparkData = Array(8).fill(0);
+  const regressionSparkData = kpis.latestRun ? [kpis.regressions] : [0];
 
   const totalDelta = kpis.passTrend;
   const failureDelta =
     sortedRuns.length >= 2
       ? (sortedRuns[0]?.failures ?? 0) - (sortedRuns[1]?.failures ?? 0)
       : 0;
-  const regressionDelta = kpis.regressions > 0 ? 1 : 0;
+  const regressionDelta = kpis.regressions;
 
   const nextScheduled = scheduler.suites?.[0] ?? null;
 
@@ -271,7 +271,7 @@ export default function Dashboard() {
       )}
 
       {/* ── KPI cards ──────────────────────────────────────────── */}
-      <section aria-label="Key metrics">
+      <section aria-label="Key metrics" style={{ marginBottom: 0 }}>
         <SectionHeader title="Signal" accent="var(--proof-blue)" />
         <motion.div
           variants={containerVariant}
@@ -279,7 +279,7 @@ export default function Dashboard() {
           animate="show"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+            gridTemplateColumns: "repeat(4, 1fr)",
             gap: 10,
           }}
         >
@@ -348,7 +348,7 @@ export default function Dashboard() {
       </section>
 
       {/* ── Run ribbon ──────────────────────────────────────────── */}
-      <section aria-label="Temporal context">
+      <section aria-label="Temporal context" style={{ marginBottom: 0 }}>
         <SectionHeader
           title="Timeline"
           accent="var(--proof-purple)"
@@ -406,7 +406,7 @@ export default function Dashboard() {
       </section>
 
       {/* ── Tier health cards ───────────────────────────────────── */}
-      <section aria-label="Environment tiers">
+      <section aria-label="Environment tiers" style={{ marginBottom: 0 }}>
         <SectionHeader
           title="Environments"
           accent="var(--proof-green)"
@@ -530,7 +530,12 @@ export default function Dashboard() {
                   interval="preserveStartEnd" minTickGap={40}
                 />
                 <YAxis
-                  domain={[Math.max(0, Math.floor(((Math.min(...chartData.map((d) => d.passRate)) || 80) - 10) / 10) * 10), 100]}
+                  domain={[
+                    chartData.length > 0 
+                      ? Math.max(0, Math.floor(((Math.min(...chartData.map((d) => d.passRate)) || 80) - 10) / 10) * 10)
+                      : 0, 
+                    100
+                  ]}
                   tick={{ fontSize: 10, fontWeight: 500, fill: "var(--proof-text-muted)" } as React.SVGProps<SVGTextElement>}
                   tickLine={false} axisLine={false}
                   tickFormatter={(v: number) => `${v}%`}

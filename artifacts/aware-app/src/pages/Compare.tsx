@@ -7,7 +7,6 @@ import {
   computeDiffRows, getDataInitState, subscribeToDataInit,
   subscribeToRuns, getRuns, subscribeToDiffRows, getDiffRows,
 } from "@/lib/data";
-import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { loadResultsForRun } from "@/lib/runsLoader";
 import type { DiffRow, TestResult } from "@/lib/types";
 import {
@@ -85,10 +84,11 @@ function FilterChip({ label, active, count, onClick }: { label: string; active: 
 export default function Compare() {
   const [, navigate] = useLocation();
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
-  const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
   const runs = useSyncExternalStore(subscribeToRuns, getRuns);
 
-  const envRuns = envSnap.envIds.length > 0 ? runs.filter((r) => envSnap.envIds.includes(r.envId)) : runs;
+  // Compare always shows ALL runs regardless of global env filter
+  // so users can compare runs across different environments
+  const envRuns = runs;
   const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
   const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
   const [selectedName, setSelectedName] = useSyncedUrlState<string | null>("sel", null);
@@ -109,6 +109,14 @@ export default function Compare() {
   const baselineRun = runs.find((r) => r.id === effectiveBaseline);
   const candidateRun = runs.find((r) => r.id === effectiveCandidate);
 
+  const swapRuns = () => {
+    const b = effectiveBaseline;
+    const c = effectiveCandidate;
+    setBaseline(c);
+    setCandidate(b);
+    setSwapped((p) => !p);
+  };
+
   React.useEffect(() => {
     if (!effectiveBaseline || !effectiveCandidate) return;
     setResultsLoading(true);
@@ -118,7 +126,11 @@ export default function Compare() {
         setCandResults(cr);
         setComputedRows(computeDiffRows(effectiveBaseline, effectiveCandidate));
       })
-      .catch((err: unknown) => console.warn("[AWARE] Compare failed:", err))
+      .catch((err: unknown) => {
+        if (import.meta.env.DEV) {
+          console.warn("[AWARE] Compare failed:", err);
+        }
+      })
       .finally(() => setResultsLoading(false));
   }, [effectiveBaseline, effectiveCandidate]);
 
@@ -226,12 +238,7 @@ export default function Compare() {
         </div>
 
         <button
-          onClick={() => {
-            const tmp = baseline;
-            setBaseline(candidate || effectiveCandidate);
-            setCandidate(tmp || effectiveBaseline);
-            setSwapped((p) => !p);
-          }}
+          onClick={swapRuns}
           title="Swap runs"
           style={{
             width: 44, height: 44, borderRadius: "50%", alignSelf: "center",

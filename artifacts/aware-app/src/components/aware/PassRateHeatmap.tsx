@@ -62,13 +62,20 @@ export function PassRateHeatmap({ data, onCellClick }: Props) {
           outline-offset: 2px;
         }
         .heatmap-cell--pass {
-          background-color: var(--proof-green);
+          background-color: var(--proof-emerald);
         }
         .heatmap-cell--warn {
           background-color: var(--proof-yellow);
         }
         .heatmap-cell--fail {
           background-color: var(--proof-red);
+          background-image: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 0, 0, 0.1) 2px,
+            rgba(0, 0, 0, 0.1) 4px
+          );
         }
         .heatmap-header {
           position: sticky;

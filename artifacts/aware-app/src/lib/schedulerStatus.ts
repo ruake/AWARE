@@ -17,13 +17,20 @@ export async function loadSchedulerStatus(): Promise<void> {
   _loaded = true;
   try {
     const data = await fetchJson<SchedulerStatus>("scheduler-status.json");
+    if (!data) return;
     _cached = {
       ...data,
-      suites: [...data.suites],
-      recentDispatches: [...data.recentDispatches],
+      lastRun: data.lastRun ?? null,
+      lastRunBy: data.lastRunBy ?? null,
+      status: data.status ?? "healthy",
+      summary: data.summary ?? _cached.summary,
+      suites: data.suites ? [...data.suites] : [],
+      recentDispatches: data.recentDispatches ? [...data.recentDispatches] : [],
     };
   } catch (err) {
-    console.warn("[AWARE] scheduler-status.json unavailable — using defaults.", err);
+    if (import.meta.env.DEV) {
+      console.warn("[AWARE] scheduler-status.json unavailable — using defaults.", err);
+    }
   }
 }
 

@@ -34,6 +34,8 @@ const STATUS_MAP: Record<string, string> = {
   TIMEOUT: "proof-badge-timeout",
   CANCELLED: "proof-badge-skip",
   DISABLED: "proof-badge-skip",
+  SUCCESS: "proof-badge-pass",
+  REGRESSION: "proof-badge-fail",
 };
 
 const STATUS_DISPLAY: Record<string, string> = {
@@ -49,6 +51,8 @@ const STATUS_DISPLAY: Record<string, string> = {
   TIMEOUT: "Timeout",
   CANCELLED: "Cancelled",
   DISABLED: "Disabled",
+  SUCCESS: "Success",
+  REGRESSION: "Regression",
 };
 
 export const StatusBadge = React.memo(function StatusBadge({

@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import { Play, Github, GitCompare, ExternalLink, Loader2, Copy, Check, Clock } from "lucide-react";
-import { navTo, getRuns } from "@/lib/data";
+import { navTo, getRuns, getTestSuites, getEnvConfigs } from "@/lib/data";
 
 export default function StartRun() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [suite, setSuite] = useState("");
-  const [env, setEnv] = useState("qa-staging");
+  const [suiteId, setSuiteId] = useState("");
+  const [envId, setEnvId] = useState("qa-staging");
   const [copiedUrl, setCopiedUrl] = useState(false);
   const runs = getRuns();
+  const suites = getTestSuites();
+  const envConfigs = getEnvConfigs();
   const recentRuns = [...runs].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()).slice(0, 3);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!suite) {
+    if (!suiteId) {
       setError("Please select a test suite");
       return;
     }
@@ -33,7 +35,7 @@ export default function StartRun() {
     setTimeout(() => setCopiedUrl(false), 2000);
   };
 
-  const recentRunsByEnv = recentRuns.filter(r => !env || r.label.toLowerCase().includes(env.split('-')[0]));
+  const recentRunsByEnv = recentRuns.filter(r => !envId || r.label.toLowerCase().includes(envId.split('-')[0]));
 
   return (
     <div 
@@ -81,9 +83,9 @@ export default function StartRun() {
             </label>
             <select
               id="suite-select"
-              value={suite}
+              value={suiteId}
               onChange={(e) => {
-                setSuite(e.target.value);
+                setSuiteId(e.target.value);
                 if (e.target.value) setError(null);
               }}
               className="proof-select"
@@ -94,10 +96,9 @@ export default function StartRun() {
               aria-label="Select test suite to run"
             >
               <option value="">Select a suite...</option>
-              <option value="smoke">Smoke Tests</option>
-              <option value="full-regression">Full Regression</option>
-              <option value="api-only">API Security</option>
-              <option value="performance">Performance Baseline</option>
+              {suites.map(s => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
             </select>
             {error && <div style={{ color: "var(--proof-red)", fontSize: 11, marginTop: 6, fontWeight: 500 }}>{error}</div>}
           </div>
@@ -111,15 +112,15 @@ export default function StartRun() {
             </label>
             <select
               id="env-select"
-              value={env}
-              onChange={(e) => setEnv(e.target.value)}
+              value={envId}
+              onChange={(e) => setEnvId(e.target.value)}
               className="proof-select"
               style={{ width: "100%" }}
               aria-label="Select target environment"
             >
-              <option value="qa-staging">QA / Staging</option>
-              <option value="uat-staging">UAT / Staging</option>
-              <option value="prod-staging">PROD / Staging</option>
+              {envConfigs.map(e => (
+                <option key={e.id} value={e.id}>{e.label}</option>
+              ))}
             </select>
           </div>
 

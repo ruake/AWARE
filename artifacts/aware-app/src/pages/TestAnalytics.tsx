@@ -41,7 +41,7 @@ import {
 import { HeatmapCalendar } from "@/components/aware/HeatmapCalendar";
 import { CategoryHeatmap } from "@/components/aware/CategoryHeatmap";
 
-type SortKey = "runId" | "status" | "duration" | "env";
+type SortKey = "runId" | "status" | "duration" | "env" | "flakiness";
 
 interface TestDetailEntry {
   history: { runId: string; status: "PASS" | "FAIL"; duration: number; env: string }[];
@@ -96,17 +96,27 @@ export default function TestAnalytics() {
 
   React.useEffect(() => {
     setDetailsLoading(true);
-    getTestDetailsAsync()
+    getTestDetailsAsync("")
       .then((data) => {
         // Enriched with names for ranking
-        const withNames = data.map((d, i) => ({
-          ...d,
-          name: DIFF_ROWS[i % DIFF_ROWS.length]?.name ?? `Test ${i}`,
-        }));
+        const withNames: TestDetailEntry[] = (data as unknown[]).map((d, i) => {
+          const entry = d as Partial<TestDetailEntry>;
+          return {
+            history: [],
+            passRate: 0,
+            flakinessScore: 0,
+            avgDuration: 0,
+            ...entry,
+            // prefer name from data, then from DIFF_ROWS, then fallback
+            name: entry.name ?? DIFF_ROWS[i % DIFF_ROWS.length]?.name ?? `Test ${i}`,
+          };
+        });
         setTestDetails(withNames);
       })
       .catch((err: unknown) => {
-        console.warn("[AWARE] TestAnalytics: failed to load test details", err);
+        if (import.meta.env.DEV) {
+          console.warn("[AWARE] TestAnalytics: failed to load test details", err);
+        }
       })
       .finally(() => {
         setDetailsLoading(false);
@@ -117,10 +127,10 @@ export default function TestAnalytics() {
     const id = params.get("testId") ?? "";
     if (id.startsWith("tr_")) {
       const parts = id.replace("tr_", "").split("_");
-      const runIdx = Math.min(parseInt(parts[0] ?? "0", 10), RUNS.length - 1);
+      const runIdx = RUNS.length > 0 ? Math.min(parseInt(parts[0] ?? "0", 10), RUNS.length - 1) : -1;
       const resultIdx = parseInt(parts[1] ?? "0", 10);
-      const results = getTestResultsForRun(RUNS[runIdx]?.id ?? "");
-      const result = results[Math.min(resultIdx, results.length - 1)];
+      const results = runIdx >= 0 ? getTestResultsForRun(RUNS[runIdx]?.id ?? "") : [];
+      const result = results.length > 0 ? results[Math.min(resultIdx, results.length - 1)] : null;
       if (result) {
         const tc = tcs.find((t) => t.name === result.name);
         if (tc) return tc.id;
@@ -142,25 +152,25 @@ export default function TestAnalytics() {
   const [hErrOnly, setHErrOnly] = useSyncedUrlState<boolean>("hErrOnly", false);
   const [hSort, setHSort] = useSyncedUrlState<string>("hSort", "runId");
   const [selectedRow, setSelectedRow] = React.useState<EnrichedHistoryRow | null>(null);
+  const [selectedTdIdx, setSelectedTdIdx] = React.useState(0);
 
   const topFlakyTests = React.useMemo(() => {
     return [...testDetails]
-      .sort((a, b) => b.flakinessScore - a.flakinessScore)
+      .sort((a, b) => (b.flakinessScore || 0) - (a.flakinessScore || 0))
       .slice(0, 10);
   }, [testDetails]);
 
-  const idx =
-    diffs.length === 0
-      ? 0
-      : isTcMode
-        ? Math.abs(tcIdx % diffs.length)
-        : Math.max(
-            0,
-            diffs.findIndex((d) => d.id === selectedTestId),
-          );
-  const _diff = diffs[Math.min(idx, diffs.length - 1)] ?? diffs[0];
+  // Use diffs for navigation when available; fall back to testDetails
+  const useDiffsNav = diffs.length > 0;
+  const idx = useDiffsNav
+    ? isTcMode
+      ? Math.abs(tcIdx % diffs.length)
+      : Math.max(0, diffs.findIndex((d) => d.id === selectedTestId))
+    : Math.min(selectedTdIdx, Math.max(0, testDetails.length - 1));
+
+  const _diff = useDiffsNav ? (diffs[Math.min(idx, diffs.length - 1)] ?? diffs[0]) : null;
   const detail =
-    diffs.length === 0 || testDetails.length === 0
+    testDetails.length === 0
       ? { history: [], passRate: 0, flakinessScore: 0, avgDuration: 0 }
       : (testDetails[idx % testDetails.length] ?? {
           history: [],
@@ -190,6 +200,12 @@ export default function TestAnalytics() {
       else if (key === "status") cmp = a.status.localeCompare(b.status);
       else if (key === "duration") cmp = a.duration - b.duration;
       else if (key === "env") cmp = a.env.localeCompare(b.env);
+      else if (key === "flakiness") {
+        // Individual rows don't have flakiness, but we might be sorting the history list
+        // by some metric. If we want to sort by flakiness of the test itself, it's a bit
+        // weird in this context. But let's assume it means sorting by assertions failed
+        cmp = b.assertionsFailed - a.assertionsFailed;
+      }
       return dir === "asc" ? cmp : -cmp;
     });
   }, [enriched, hStatus, hEnv, hErrOnly, hSort]);
@@ -295,9 +311,12 @@ export default function TestAnalytics() {
     if (isTcMode) {
       const next = (tcIdx + dir + tcs.length) % tcs.length;
       navigate(`/analytics?testId=${tcs[next].id}`);
-    } else {
+    } else if (useDiffsNav) {
       const next = (idx + dir + diffs.length) % diffs.length;
       navigate(`/analytics?diffId=${diffs[next].id}`);
+    } else {
+      const next = (idx + dir + testDetails.length) % Math.max(1, testDetails.length);
+      setSelectedTdIdx(next);
     }
   };
 
@@ -316,7 +335,9 @@ export default function TestAnalytics() {
       subtitle={
         testCase
           ? `${testCase.name} · ${tcIdx + 1} of ${tcs.length}`
-          : `${testName} · ${idx + 1} of ${diffs.length}`
+          : useDiffsNav
+            ? `${testName} · ${idx + 1} of ${diffs.length}`
+            : `${(detail as TestDetailEntry)?.name ?? testName} · ${idx + 1} of ${testDetails.length}`
       }
       headerActions={
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

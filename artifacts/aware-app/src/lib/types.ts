@@ -404,7 +404,7 @@ export interface AnomalyScore {
 
 // ── LLM / AI Copilot Types ──────────────────────────────────────────
 
-export type LLMProviderType = "custom" | "webllm" | "chrome";
+export type LLMProviderType = "chrome";
 
 export type LLMRole = "system" | "user" | "assistant";
 
@@ -423,8 +423,8 @@ export interface LLMConfig {
 }
 
 export const DEFAULT_LLM_CONFIG: LLMConfig = {
-  provider: "custom",
-  model: "gpt-4o-mini",
+  provider: "chrome",
+  model: "gemini-nano",
   temperature: 0.7,
   maxTokens: 2048,
 };

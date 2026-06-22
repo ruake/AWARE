@@ -111,7 +111,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         label: s.name,
         description: `${s.testIds.length} tests · ${s.envIds.join(", ")}`,
         type: "suite" as const,
-        href: "/suites",
+        href: "/tests",
         icon: "📁",
       })),
       ...testCases.map((tc) => ({
@@ -119,7 +119,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         label: tc.name,
         description: `${tc.category} · ${tc.priority} · ${tc.status}`,
         type: "test" as const,
-        href: `/suites`,
+        href: `/tests?detail=${tc.id}`,
         icon: "🧪",
       })),
       ...RUNS.map((r) => ({

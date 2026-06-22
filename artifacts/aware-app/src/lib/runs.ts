@@ -55,10 +55,12 @@ export async function loadRuns(): Promise<void> {
     try {
       const data = await fetchJson<Run[]>("runs.json");
       _runs.length = 0;
-      _runs.push(...data);
+      if (data) {
+        _runs.push(...data);
+      }
       updateRunsSnapshot();
       _runsNotify.setState({});
-      bus.emit("runs:loaded", { count: data.length });
+      bus.emit("runs:loaded", { count: data?.length ?? 0 });
     } catch (err) {
       _runsPromise = null;
       throw err;
@@ -74,10 +76,12 @@ export async function loadDiffRows(): Promise<void> {
     try {
       const data = await fetchJson<DiffRow[]>("diff-rows.json");
       _diffRows.length = 0;
-      _diffRows.push(...data);
+      if (data) {
+        _diffRows.push(...data);
+      }
       updateDiffRowsSnapshot();
       _diffRowsNotify.setState({});
-      bus.emit("diffrows:loaded", { count: data.length });
+      bus.emit("diffrows:loaded", { count: data?.length ?? 0 });
     } catch (err) {
       _diffRowsPromise = null;
       throw err;
@@ -213,7 +217,7 @@ export function computeEnvSummary(): void {
     const previous = sorted[1];
     const avgPassRate = Math.round(sorted.reduce((s, r) => s + r.passPct, 0) / sorted.length);
     const trend = previous ? Math.round(latest.passPct - previous.passPct) : 0;
-    const color = avgPassRate >= 90 ? "#22c55e" : avgPassRate >= 70 ? "#f59e0b" : "#ef4444";
+    const color = avgPassRate >= 90 ? "var(--proof-emerald)" : avgPassRate >= 70 ? "#f59e0b" : "var(--proof-red)";
     const alert =
       latest.failures > 0
         ? `${latest.failures} failure${latest.failures !== 1 ? "s" : ""} in last run`
@@ -269,14 +273,14 @@ export function getPerEnvPassRate(): PerEnvPassRateEntry[] {
 export const PER_ENV_PASS_RATE: PerEnvPassRateEntry[] = _perEnvPassRate;
 
 const ENV_COLOR_MAP: Record<string, string> = {
-  QA: "#a855f7",
+  QA: "var(--proof-blue)",
   UAT: "#f59e0b",
-  PROD: "#22c55e",
-  "QA / Staging": "#a855f7",
+  PROD: "var(--proof-emerald)",
+  "QA / Staging": "var(--proof-blue)",
   "QA / Production": "#c084fc",
   "UAT / Staging": "#f59e0b",
   "UAT / Production": "#fbbf24",
-  "PROD / Staging": "#22c55e",
+  "PROD / Staging": "var(--proof-emerald)",
   "PROD / Production": "#4ade80",
 };
 

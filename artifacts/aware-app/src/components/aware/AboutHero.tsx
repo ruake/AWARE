@@ -44,11 +44,11 @@ export function AboutHero() {
               width: 52,
               height: 52,
               borderRadius: 14,
-              background: "linear-gradient(135deg, var(--proof-indigo) 0%, var(--proof-blue) 50%, var(--proof-cyan) 100%)",
+              background: "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-emerald) 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "var(--proof-blue-glow)",
+              boxShadow: "0 0 20px var(--proof-blue-glow)",
             }}
           >
             <Activity size={24} style={{ color: "white" }} />

@@ -126,20 +126,80 @@ export default function Runs() {
     return envFilteredRuns.filter((r) => {
       if (statusFilter !== "all" && r.status !== statusFilter) return false;
       if (suiteFilter !== "all" && r.suiteId !== suiteFilter) return false;
-      if (envFilter !== "all" && !r.env?.toUpperCase().startsWith(envFilter.toUpperCase())) return false;
+      if (envFilter !== "all") {
+        const rEnv = (r.env || "").toUpperCase();
+        const fEnv = envFilter.toUpperCase();
+        if (!rEnv.startsWith(fEnv)) return false;
+      }
       if (search) {
         const q = search.toLowerCase();
-        if (!r.id.toLowerCase().includes(q) && !r.env?.toLowerCase().includes(q) && !r.suiteId?.toLowerCase().includes(q)) return false;
+        if (!r.id.toLowerCase().includes(q) && !(r.env || "").toLowerCase().includes(q) && !(r.suiteId || "").toLowerCase().includes(q)) return false;
       }
       return true;
     });
   }, [envFilteredRuns, statusFilter, suiteFilter, envFilter, search]);
 
+  const [sortKey, setSortKey] = React.useState<string>("started");
+  const [sortDir, setSortDir] = React.useState<"asc" | "desc">("desc");
+
+  const sorted = React.useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      let valA: any = a[sortKey as keyof typeof a];
+      let valB: any = b[sortKey as keyof typeof b];
+
+      if (sortKey === "started") {
+        valA = new Date(valA || 0).getTime();
+        valB = new Date(valB || 0).getTime();
+      }
+
+      if (valA < valB) return sortDir === "asc" ? -1 : 1;
+      if (valA > valB) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filtered, sortKey, sortDir]);
+
   const [page, setPage] = React.useState(1);
   const PAGE_SIZE = 30;
-  const totalItems = filtered.length;
+  const totalItems = sorted.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paginated = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const toggleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const handleExportCSV = () => {
+    const escape = (v: any) => {
+      let s = String(v ?? "");
+      // Prevent formula injection: prefix with tab if cell starts with =,+,-,@
+      if (/^[=+\-@]/.test(s)) s = `\t${s}`;
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+    const headers = ["ID", "Env", "Status", "Pass Rate", "Duration", "Started"];
+    const rows = filtered.map(r => [
+      r.id,
+      r.env,
+      r.status,
+      `${r.passPct}%`,
+      r.durationMs ? formatDuration(r.durationMs) : "",
+      r.started
+    ]);
+    const csvContent = [headers, ...rows].map(row => row.map(escape).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `runs_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const filterKey = `${search}|${statusFilter}|${suiteFilter}|${envFilter}`;
   const prevFilterKey = React.useRef(filterKey);
@@ -254,12 +314,18 @@ export default function Runs() {
         
         <div style={{ flex: 1 }} />
         
-        <button
-          onClick={() => navigate("/compare")}
-          className="proof-btn proof-btn-ghost"
-        >
-          <GitCompare size={14} /> Compare Runs
-        </button>
+          <button
+            onClick={handleExportCSV}
+            className="proof-btn proof-btn-ghost"
+          >
+            Export CSV
+          </button>
+          <button
+            onClick={() => navigate("/compare")}
+            className="proof-btn proof-btn-ghost"
+          >
+            <GitCompare size={14} /> Compare Runs
+          </button>
       </div>
 
       {/* Table */}
@@ -289,12 +355,24 @@ export default function Runs() {
             fontSize: "11px", fontWeight: 700, textTransform: "uppercase",
             letterSpacing: "0.5px", color: "var(--proof-text-muted)",
           }}>
-            <span>Run</span>
-            <span>Env</span>
-            <span>Status</span>
-            <span>Pass Rate</span>
-            <span>Duration</span>
-            <span>When</span>
+            <span onClick={() => toggleSort("id")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+              Run {sortKey === "id" && (sortDir === "asc" ? "↑" : "↓")}
+            </span>
+            <span onClick={() => toggleSort("env")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+              Env {sortKey === "env" && (sortDir === "asc" ? "↑" : "↓")}
+            </span>
+            <span onClick={() => toggleSort("status")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+              Status {sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
+            </span>
+            <span onClick={() => toggleSort("passPct")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+              Pass Rate {sortKey === "passPct" && (sortDir === "asc" ? "↑" : "↓")}
+            </span>
+            <span onClick={() => toggleSort("durationMs")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+              Duration {sortKey === "durationMs" && (sortDir === "asc" ? "↑" : "↓")}
+            </span>
+            <span onClick={() => toggleSort("started")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+              When {sortKey === "started" && (sortDir === "asc" ? "↑" : "↓")}
+            </span>
             <span />
           </div>
 

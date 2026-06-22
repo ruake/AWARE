@@ -81,10 +81,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
           <button
             onClick={this.handleRetry}
             className="proof-btn proof-btn-ghost"
-            style={{ marginTop: 8 }}
+            style={{ marginTop: 8, border: "1px solid var(--proof-border)" }}
           >
             <RefreshCw size={14} />
-            Retry
+            Reload Component
           </button>
         </div>
       );
