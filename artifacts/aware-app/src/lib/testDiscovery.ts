@@ -1,3 +1,4 @@
+import { logWarn } from "./ai/debugLogger";
 import type { TestCase } from "./types";
 import { fetchJson } from "./dataFetcher";
 import { _notifyTC, subscribeToTestCases } from "./store";
@@ -15,9 +16,7 @@ export async function loadAutoDiscoveredTests(): Promise<void> {
       _notifyTC();
     } catch (err) {
       _testsPromise = null;
-      if (import.meta.env.DEV) {
-        console.warn("[AWARE] auto-tests.json unavailable — using empty list.", err);
-      }
+      logWarn("testDiscovery", "auto-tests.json unavailable — using empty list", String(err));
     }
   })();
   return _testsPromise;

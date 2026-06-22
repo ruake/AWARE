@@ -112,5 +112,17 @@ export function getRegisteredSkills(): LLMSkillDefinition[] {
   return _skills;
 }
 
+// ── Legacy stubs expected by older test files ────────────────────────────────
+/** Clears the chat history. No-op in the Chrome AI adapter (history is per-session). */
+export function clearChatHistory(): void {
+  // Chrome AI sessions are ephemeral; nothing to clear at this layer.
+}
+
+/** Updates the LLM config. Returns the merged config. */
+export function setLLMConfig(patch: Partial<LLMConfig>): LLMConfig {
+  // Chrome AI uses a fixed config; return a merged view for test/compat purposes.
+  return { ...DEFAULT_LLM_CONFIG, ...patch };
+}
+
 // ── Re-export types for legacy imports ────────────────────────────────────────
 export type { LLMConfig, LLMProviderType, LLMMessage, LLMSkillDefinition };

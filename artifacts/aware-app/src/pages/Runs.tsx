@@ -1,13 +1,14 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
-import { Pagination } from "@/components/aware";
-import { getRuns, subscribeToRuns, getEnvConfigs } from "@/lib/data";
+import { Pagination, StatusBadge, PageTemplate } from "@/components/aware";
+import { getRuns, subscribeToRuns } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { useSyncedUrlState } from "@/lib/urlState";
+import { formatRelativeTime, formatDurationMs } from "@/lib/i18n";
 import type { Run } from "@/lib/types";
 import {
   Play, GitCompare, Loader2, ExternalLink, Search, X, Activity,
-  ChevronRight, CheckCircle2, XCircle, AlertTriangle, Clock, Minus,
+  ChevronRight, Minus,
 } from "lucide-react";
 import { repo } from "@/lib/nav";
 
@@ -18,44 +19,14 @@ function formatDuration(ms: number | string): string {
     if (isNaN(parsed)) return ms;
     ms = parsed;
   }
-  const s = Math.floor((ms / 1000) % 60);
-  const m = Math.floor((ms / 60000) % 60);
-  const h = Math.floor(ms / 3600000);
-  const parts = [];
-  if (h > 0) parts.push(`${h}h`);
-  if (m > 0) parts.push(`${m}m`);
-  if (s > 0 || parts.length === 0) parts.push(`${s}s`);
-  return parts.join(" ");
+  return formatDurationMs(ms);
 }
 
 function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  if (diff < 60000) return "just now";
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-  return `${Math.floor(diff / 86400000)}d ago`;
+  return formatRelativeTime(iso);
 }
 
-const STATUS_CFG: Record<Run["status"], { label: string; icon: React.ReactNode; color: string; bg: string; border: string }> = {
-  PASS: { label: "Pass", icon: <CheckCircle2 size={12} />, color: "var(--proof-green)", bg: "var(--proof-green-bg)", border: "var(--proof-green-border)" },
-  FAIL: { label: "Fail", icon: <XCircle size={12} />, color: "var(--proof-red)", bg: "var(--proof-red-bg)", border: "var(--proof-red-border)" },
-  PARTIAL: { label: "Partial", icon: <AlertTriangle size={12} />, color: "var(--proof-yellow)", bg: "var(--proof-yellow-bg)", border: "var(--proof-yellow-border)" },
-  FLAKY: { label: "Flaky", icon: <AlertTriangle size={12} />, color: "var(--proof-orange)", bg: "var(--proof-orange-bg)", border: "var(--proof-orange-border)" },
-  RUNNING: { label: "Running", icon: <Loader2 size={12} className="animate-spin" />, color: "var(--proof-blue-bright)", bg: "var(--proof-blue-bg)", border: "var(--proof-blue-border)" },
-  PENDING: { label: "Pending", icon: <Clock size={12} />, color: "var(--proof-text-secondary)", bg: "var(--proof-subtle-bg)", border: "var(--proof-border)" },
-  ERROR: { label: "Error", icon: <XCircle size={12} />, color: "var(--proof-red)", bg: "var(--proof-red-bg)", border: "var(--proof-red-border)" },
-};
-
-function StatusBadge({ status }: { status: Run["status"] }) {
-  const cfg = STATUS_CFG[status] ?? STATUS_CFG.PENDING;
-  return (
-    <div className="proof-badge" style={{ color: cfg.color, background: cfg.bg, borderColor: cfg.border }}>
-      {cfg.icon} <span>{cfg.label}</span>
-    </div>
-  );
-}
-
-function TierBadge({ envId }: { envId: string }) {
+const TierBadge = React.memo(function TierBadge({ envId }: { envId: string }) {
   const tier = envId.split("_")[0]?.toUpperCase() ?? envId.toUpperCase();
   const cfg: Record<string, { color: string; bg: string }> = {
     QA: { color: "var(--proof-blue)", bg: "var(--proof-blue-bg)" },
@@ -71,12 +42,19 @@ function TierBadge({ envId }: { envId: string }) {
       {tier}
     </span>
   );
-}
+});
 
-function PassBar({ pct }: { pct: number }) {
+const PassBar = React.memo(function PassBar({ pct }: { pct: number }) {
   const c = pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div 
+      style={{ display: "flex", alignItems: "center", gap: 8 }}
+      role="progressbar"
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`${pct}% passing`}
+    >
       <div className="proof-progress-track" style={{ width: 48, height: 4 }}>
         <div className="proof-progress-bar" style={{ width: `${pct}%`, background: c }} />
       </div>
@@ -85,12 +63,13 @@ function PassBar({ pct }: { pct: number }) {
       </span>
     </div>
   );
-}
+});
 
-function FilterChip({ label, active, onSelect }: { label: string; active: boolean; onSelect: () => void }) {
+const FilterChip = React.memo(function FilterChip({ label, active, onSelect }: { label: string; active: boolean; onSelect: () => void }) {
   return (
     <button
       onClick={onSelect}
+      aria-pressed={active}
       style={{
         display: "inline-flex", alignItems: "center", padding: "4px 12px",
         borderRadius: "var(--proof-radius-full)", cursor: "pointer",
@@ -104,7 +83,7 @@ function FilterChip({ label, active, onSelect }: { label: string; active: boolea
       {label}
     </button>
   );
-}
+});
 
 export default function Runs() {
   const [, navigate] = useLocation();
@@ -139,17 +118,18 @@ export default function Runs() {
     });
   }, [envFilteredRuns, statusFilter, suiteFilter, envFilter, search]);
 
-  const [sortKey, setSortKey] = React.useState<string>("started");
+  type SortableRunKey = "started" | "passPct" | "failures" | "durationMs" | "env" | "id" | "status";
+  const [sortKey, setSortKey] = React.useState<SortableRunKey>("started");
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">("desc");
 
   const sorted = React.useMemo(() => {
     return [...filtered].sort((a, b) => {
-      let valA: any = a[sortKey as keyof typeof a];
-      let valB: any = b[sortKey as keyof typeof b];
+      let valA: string | number = a[sortKey] ?? "";
+      let valB: string | number = b[sortKey] ?? "";
 
       if (sortKey === "started") {
-        valA = new Date(valA || 0).getTime();
-        valB = new Date(valB || 0).getTime();
+        valA = new Date((valA as string) || 0).getTime();
+        valB = new Date((valB as string) || 0).getTime();
       }
 
       if (valA < valB) return sortDir === "asc" ? -1 : 1;
@@ -160,11 +140,16 @@ export default function Runs() {
 
   const [page, setPage] = React.useState(1);
   const PAGE_SIZE = 30;
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, suiteFilter, envFilter, sortKey]);
+
   const totalItems = sorted.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
   const paginated = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const toggleSort = (key: string) => {
+  const toggleSort = (key: SortableRunKey) => {
     if (sortKey === key) {
       setSortDir(sortDir === "asc" ? "desc" : "asc");
     } else {
@@ -174,11 +159,10 @@ export default function Runs() {
   };
 
   const handleExportCSV = () => {
-    const escape = (v: any) => {
+    const escape = (v: unknown): string => {
       let s = String(v ?? "");
-      // Prevent formula injection: prefix with tab if cell starts with =,+,-,@
-      if (/^[=+\-@]/.test(s)) s = `\t${s}`;
-      return `"${s.replace(/"/g, '""')}"`;
+      if (/^[=+\-@\t\r\n|]/.test(s)) s = "'" + s;
+      return '"' + s.replace(/"/g, '""') + '"';
     };
     const headers = ["ID", "Env", "Status", "Pass Rate", "Duration", "Started"];
     const rows = filtered.map(r => [
@@ -211,7 +195,6 @@ export default function Runs() {
   }, [filterKey, page]);
 
   const runningCount = envFilteredRuns.filter((r) => r.status === "RUNNING").length;
-  const failCount = envFilteredRuns.filter((r) => ["FAIL", "PARTIAL", "ERROR", "FLAKY"].includes(r.status)).length;
   const passedCount = filtered.filter((r) => r.status === "PASS").length;
   const failedCount = filtered.filter((r) => ["FAIL", "ERROR"].includes(r.status)).length;
   const partialCount = filtered.filter((r) => r.status === "PARTIAL").length;
@@ -222,18 +205,11 @@ export default function Runs() {
   };
 
   return (
-    <div className="animate-fade-in" style={{ padding: "var(--proof-page-py) var(--proof-page-px)", maxWidth: "1440px", margin: "0 auto" }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "24px" }}>
-        <div>
-          <h1 style={{ fontSize: "24px", fontWeight: 800, letterSpacing: "-0.5px", color: "var(--proof-text)", margin: "0 0 6px" }}>
-            Run History
-          </h1>
-          <p style={{ fontSize: "14px", color: "var(--proof-text-secondary)", margin: 0 }}>
-            {envFilteredRuns.length} runs · Playwright + pytest across all environments
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+    <PageTemplate
+      title="Run History"
+      subtitle={`${envFilteredRuns.length} runs · Playwright + pytest across all environments`}
+      headerActions={(
+        <>
           {runningCount > 0 && (
             <span className="proof-badge" style={{
               color: "var(--proof-blue-bright)", background: "var(--proof-blue-bg)", borderColor: "var(--proof-blue-border)",
@@ -247,24 +223,26 @@ export default function Runs() {
           >
             <Play size={14} /> Start Run <ExternalLink size={12} style={{ opacity: 0.7 }} />
           </button>
-        </div>
-      </div>
-
-      {/* Filters card */}
-      <div className="proof-card" style={{ padding: "16px", marginBottom: "16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+        </>
+      )}
+      filters={(
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", width: "100%" }}>
           {/* Search */}
           <div style={{ position: "relative", flex: "1 1 240px", minWidth: "180px" }}>
+            <label htmlFor="run-search" className="sr-only">Search runs</label>
             <Search size={14} style={{
               position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)",
               color: "var(--proof-text-muted)", pointerEvents: "none",
             }} />
             <input
+              id="run-search"
+              name="q"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search runs by ID, env, or suite…"
               className="proof-input"
               style={{ paddingLeft: "36px" }}
+              maxLength={200}
             />
             {search && (
               <button
@@ -299,8 +277,20 @@ export default function Runs() {
             </button>
           )}
         </div>
-      </div>
-
+      )}
+      currentPage={page}
+      totalPages={totalPages}
+      totalItems={totalItems}
+      pageSize={PAGE_SIZE}
+      onPageChange={setPage}
+      isEmpty={paginated.length === 0}
+      emptyMessage="No runs match your filters"
+      emptyAction={hasFilters ? (
+        <button onClick={resetFilters} className="proof-btn proof-btn-ghost">
+          Clear filters
+        </button>
+      ) : null}
+    >
       {/* Stats row */}
       <div style={{
         display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px",
@@ -314,88 +304,102 @@ export default function Runs() {
         
         <div style={{ flex: 1 }} />
         
-          <button
-            onClick={handleExportCSV}
-            className="proof-btn proof-btn-ghost"
-          >
-            Export CSV
-          </button>
-          <button
-            onClick={() => navigate("/compare")}
-            className="proof-btn proof-btn-ghost"
-          >
-            <GitCompare size={14} /> Compare Runs
-          </button>
+        <button
+          onClick={handleExportCSV}
+          className="proof-btn proof-btn-ghost"
+          aria-label="Export filtered runs as CSV"
+        >
+          Export CSV
+        </button>
+        <button
+          onClick={() => navigate("/compare")}
+          className="proof-btn proof-btn-ghost"
+        >
+          <GitCompare size={14} /> Compare Runs
+        </button>
       </div>
 
       {/* Table */}
-      {paginated.length === 0 ? (
-        <div className="proof-card" style={{
-          padding: "64px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px",
+      <div className="proof-card" style={{ overflow: "hidden" }}>
+        {/* Table header */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "2.5fr 110px 100px 110px 100px 100px 40px",
+          padding: "12px 20px",
+          background: "var(--proof-surface-2)",
+          borderBottom: "1px solid var(--proof-border)",
+          fontSize: "11px", fontWeight: 700, textTransform: "uppercase",
+          letterSpacing: "0.5px", color: "var(--proof-text-muted)",
         }}>
-          <Activity size={32} style={{ color: "var(--proof-text-muted)", opacity: 0.5 }} />
-          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--proof-text-secondary)" }}>
-            No runs match your filters
-          </div>
-          {hasFilters && (
-            <button onClick={resetFilters} className="proof-btn proof-btn-ghost">
-              Clear filters
-            </button>
-          )}
+          <span 
+            onClick={() => toggleSort("id")} 
+            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+            aria-sort={sortKey === "id" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && toggleSort("id")}
+          >
+            Run {sortKey === "id" && (sortDir === "asc" ? "↑" : "↓")}
+          </span>
+          <span 
+            onClick={() => toggleSort("env")} 
+            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+            aria-sort={sortKey === "env" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && toggleSort("env")}
+          >
+            Env {sortKey === "env" && (sortDir === "asc" ? "↑" : "↓")}
+          </span>
+          <span 
+            onClick={() => toggleSort("status")} 
+            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+            aria-sort={sortKey === "status" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && toggleSort("status")}
+          >
+            Status {sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
+          </span>
+          <span 
+            onClick={() => toggleSort("passPct")} 
+            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+            aria-sort={sortKey === "passPct" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && toggleSort("passPct")}
+          >
+            Pass Rate {sortKey === "passPct" && (sortDir === "asc" ? "↑" : "↓")}
+          </span>
+          <span 
+            onClick={() => toggleSort("durationMs")} 
+            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+            aria-sort={sortKey === "durationMs" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && toggleSort("durationMs")}
+          >
+            Duration {sortKey === "durationMs" && (sortDir === "asc" ? "↑" : "↓")}
+          </span>
+          <span 
+            onClick={() => toggleSort("started")} 
+            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+            aria-sort={sortKey === "started" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && toggleSort("started")}
+          >
+            When {sortKey === "started" && (sortDir === "asc" ? "↑" : "↓")}
+          </span>
+          <span />
         </div>
-      ) : (
-        <div className="proof-card" style={{ overflow: "hidden" }}>
-          {/* Table header */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "2.5fr 110px 100px 110px 100px 100px 40px",
-            padding: "12px 20px",
-            background: "var(--proof-surface-2)",
-            borderBottom: "1px solid var(--proof-border)",
-            fontSize: "11px", fontWeight: 700, textTransform: "uppercase",
-            letterSpacing: "0.5px", color: "var(--proof-text-muted)",
-          }}>
-            <span onClick={() => toggleSort("id")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-              Run {sortKey === "id" && (sortDir === "asc" ? "↑" : "↓")}
-            </span>
-            <span onClick={() => toggleSort("env")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-              Env {sortKey === "env" && (sortDir === "asc" ? "↑" : "↓")}
-            </span>
-            <span onClick={() => toggleSort("status")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-              Status {sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
-            </span>
-            <span onClick={() => toggleSort("passPct")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-              Pass Rate {sortKey === "passPct" && (sortDir === "asc" ? "↑" : "↓")}
-            </span>
-            <span onClick={() => toggleSort("durationMs")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-              Duration {sortKey === "durationMs" && (sortDir === "asc" ? "↑" : "↓")}
-            </span>
-            <span onClick={() => toggleSort("started")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-              When {sortKey === "started" && (sortDir === "asc" ? "↑" : "↓")}
-            </span>
-            <span />
-          </div>
 
-          {/* Table rows */}
-          {paginated.map((run) => (
-            <RunRow key={run.id} run={run} onNavigate={(id) => navigate(`/runs/${id}`)} />
-          ))}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div style={{ marginTop: "24px" }}>
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            totalItems={totalItems}
-            pageSize={PAGE_SIZE}
-            onPageChange={setPage}
-          />
-        </div>
-      )}
-    </div>
+        {/* Table rows */}
+        {paginated.map((run) => (
+          <RunRow key={run.id} run={run} onNavigate={(id) => navigate(`/runs/${id}`)} />
+        ))}
+      </div>
+    </PageTemplate>
   );
 }
 

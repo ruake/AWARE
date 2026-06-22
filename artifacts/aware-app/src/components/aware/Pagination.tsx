@@ -56,7 +56,8 @@ export function Pagination({
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
   return (
-    <div
+    <nav
+      aria-label="Pagination"
       style={{
         display: "flex",
         alignItems: "center",
@@ -71,6 +72,7 @@ export function Pagination({
           disabled={currentPage <= 1}
           onClick={() => onPageChange(1)}
           aria-label="First page"
+          aria-disabled={currentPage <= 1 ? "true" : "false"}
           style={{
             ...btnBase,
             padding: "3px 8px",
@@ -85,6 +87,7 @@ export function Pagination({
           disabled={currentPage <= 1}
           onClick={() => onPageChange(currentPage - 1)}
           aria-label="Previous page"
+          aria-disabled={currentPage <= 1 ? "true" : "false"}
           style={{
             ...btnBase,
             padding: "3px 8px",
@@ -117,7 +120,12 @@ export function Pagination({
             }}
           >
             Page{" "}
-            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>{currentPage}</span> of{" "}
+            <span 
+              aria-current="page"
+              style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}
+            >
+              {currentPage}
+            </span> of{" "}
             <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>{totalPages}</span>
           </span>
         </div>
@@ -126,6 +134,7 @@ export function Pagination({
           disabled={currentPage >= totalPages}
           onClick={() => onPageChange(currentPage + 1)}
           aria-label="Next page"
+          aria-disabled={currentPage >= totalPages ? "true" : "false"}
           style={{
             ...btnBase,
             padding: "3px 8px",
@@ -154,6 +163,7 @@ export function Pagination({
           disabled={currentPage >= totalPages}
           onClick={() => onPageChange(totalPages)}
           aria-label="Last page"
+          aria-disabled={currentPage >= totalPages ? "true" : "false"}
           style={{
             ...btnBase,
             padding: "3px 8px",
@@ -175,6 +185,6 @@ export function Pagination({
       >
         Showing {startItem}–{endItem} of {totalItems}
       </span>
-    </div>
+    </nav>
   );
 }

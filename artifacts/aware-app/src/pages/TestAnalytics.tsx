@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation, useSearch } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
+import { logWarn } from "@/lib/ai/debugLogger";
 import { DIFF_ROWS, RUNS, getTestResultsForRun, getTestDetailsAsync } from "@/lib/data";
 import { setTestDetailStat } from "@/lib/sidebarData";
 import { useTestData } from "@/hooks/useTestData";
@@ -114,9 +115,7 @@ export default function TestAnalytics() {
         setTestDetails(withNames);
       })
       .catch((err: unknown) => {
-        if (import.meta.env.DEV) {
-          console.warn("[AWARE] TestAnalytics: failed to load test details", err);
-        }
+        logWarn("TestAnalytics", "failed to load test details", String(err));
       })
       .finally(() => {
         setDetailsLoading(false);

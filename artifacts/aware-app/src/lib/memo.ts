@@ -54,19 +54,19 @@ export function memoize<Args extends unknown[], R>(
   keyFn: (...args: Args) => string,
   maxSize: number = 128
 ): ((...args: Args) => R) & { clear: () => void } {
-  const cache = new LRUCache<string, R>(maxSize);
+  const cache: LRUCache<string, R> = new LRUCache<string, R>(maxSize);
 
   const memoized = (...args: Args): R => {
-    const key = keyFn(...args);
+    const key: string = keyFn(...args);
     if (cache.has(key)) {
       return cache.get(key)!;
     }
-    const result = fn(...args);
+    const result: R = fn(...args);
     cache.set(key, result);
     return result;
   };
 
-  memoized.clear = () => cache.clear();
+  memoized.clear = (): void => cache.clear();
 
   return memoized as ((...args: Args) => R) & { clear: () => void };
 }
@@ -78,23 +78,23 @@ export function memoizeWithTTL<Args extends unknown[], R>(
   ttlMs: number,
   maxSize: number = 128
 ): ((...args: Args) => R) & { clear: () => void } {
-  const cache = new LRUCache<string, { value: R; expires: number }>(maxSize);
+  const cache: LRUCache<string, { value: R; expires: number }> = new LRUCache<string, { value: R; expires: number }>(maxSize);
 
   const memoized = (...args: Args): R => {
-    const key = keyFn(...args);
-    const now = Date.now();
+    const key: string = keyFn(...args);
+    const now: number = Date.now();
     const cached = cache.get(key);
 
     if (cached && cached.expires > now) {
       return cached.value;
     }
 
-    const result = fn(...args);
+    const result: R = fn(...args);
     cache.set(key, { value: result, expires: now + ttlMs });
     return result;
   };
 
-  memoized.clear = () => cache.clear();
+  memoized.clear = (): void => cache.clear();
 
   return memoized as ((...args: Args) => R) & { clear: () => void };
 }

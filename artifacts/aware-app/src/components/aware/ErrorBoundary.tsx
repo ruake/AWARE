@@ -24,6 +24,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return { error };
   }
 
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("[ErrorBoundary]", error, info);
+  }
+
   handleRetry = () => {
     this.setState((s) => ({ error: null, retryKey: s.retryKey + 1 }));
   };
@@ -93,6 +97,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return (
       <div
         className="animate-slide-up"
+        role="alert"
+        aria-live="assertive"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -161,7 +167,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
               padding: "8px",
             }}
           >
-            Show technical details
+            {import.meta.env.DEV ? "Show technical details" : "More information"}
           </summary>
           <pre
             className="proof-mono"
@@ -178,7 +184,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
               lineHeight: 1.6,
             }}
           >
-            {this.state.error.stack}
+            {import.meta.env.DEV 
+              ? this.state.error.stack 
+              : "An unexpected error occurred. Please refresh the page."}
           </pre>
         </details>
       </div>

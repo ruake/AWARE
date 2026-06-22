@@ -92,4 +92,31 @@ describe('StateMachine', () => {
     sm.send('start', { allowed: true });
     expect(sm.state).toBe('running');
   });
+
+  it('should execute onEnter callback', () => {
+    const onEnter = vi.fn();
+    const sm = new StateMachine<State, Event>({
+      initial: 'idle',
+      transitions: [
+        { from: 'idle', event: 'start', to: 'running', onEnter }
+      ]
+    });
+
+    sm.send('start', { some: 'ctx' });
+    expect(onEnter).toHaveBeenCalledWith({ some: 'ctx' });
+  });
+
+  it('should execute global onTransition callback', () => {
+    const onTransition = vi.fn();
+    const sm = new StateMachine<State, Event>({
+      initial: 'idle',
+      transitions: [
+        { from: 'idle', event: 'start', to: 'running' }
+      ],
+      onTransition
+    });
+
+    sm.send('start');
+    expect(onTransition).toHaveBeenCalledWith('idle', 'start', 'running');
+  });
 });

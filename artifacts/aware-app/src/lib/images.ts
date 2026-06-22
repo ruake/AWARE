@@ -1,3 +1,5 @@
+import { logError } from "./ai/debugLogger";
+
 // Simple LRU-ish cache for blob URLs
 const MAX_CACHE_SIZE = 100;
 const _imageCache = new Map<string, { url: string; lastUsed: number }>();
@@ -41,9 +43,7 @@ export async function preloadImage(src: string): Promise<string> {
     _imageCache.set(src, { url, lastUsed: Date.now() });
     return url;
   } catch (error) {
-    if (import.meta.env.DEV) {
-      console.error("Error preloading image:", error);
-    }
+    logError("images", "Error preloading image", String(error));
     throw error;
   }
 }

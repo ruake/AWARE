@@ -18,10 +18,19 @@ function updateRunsSnapshot(): void {
   _runsSnapshot = [..._runs];
 }
 
+/**
+ * @description Returns the current snapshot of all runs.
+ * @returns An array of Run objects.
+ */
 export function getRuns(): Run[] {
   return _runsSnapshot;
 }
 
+/**
+ * @description Subscribes to changes in the runs store.
+ * @param cb - Callback function to execute on change.
+ * @returns A function to unsubscribe.
+ */
 export function subscribeToRuns(cb: () => void): () => void {
   return _runsNotify.subscribe(cb);
 }
@@ -37,10 +46,19 @@ function updateDiffRowsSnapshot(): void {
   _diffRowsSnapshot = [..._diffRows];
 }
 
+/**
+ * @description Returns the current snapshot of all diff rows.
+ * @returns An array of DiffRow objects.
+ */
 export function getDiffRows(): DiffRow[] {
   return _diffRowsSnapshot;
 }
 
+/**
+ * @description Subscribes to changes in the diff rows store.
+ * @param cb - Callback function to execute on change.
+ * @returns A function to unsubscribe.
+ */
 export function subscribeToDiffRows(cb: () => void): () => void {
   return _diffRowsNotify.subscribe(cb);
 }
@@ -48,12 +66,19 @@ export function subscribeToDiffRows(cb: () => void): () => void {
 // Backward-compat
 export const DIFF_ROWS: readonly DiffRow[] = _diffRows;
 
+const isRunArray = (d: unknown): d is Run[] =>
+  Array.isArray(d) && d.every(r => typeof r === "object" && r !== null && "id" in r && "status" in r);
+
 let _runsPromise: Promise<void> | null = null;
+/**
+ * @description Loads runs data from runs.json and updates the runs store.
+ * @returns A promise that resolves when the data is loaded.
+ */
 export async function loadRuns(): Promise<void> {
   if (_runsPromise) return _runsPromise;
   _runsPromise = (async () => {
     try {
-      const data = await fetchJson<Run[]>("runs.json");
+      const data = await fetchJson<Run[]>("runs.json", { validate: isRunArray });
       _runs.length = 0;
       if (data) {
         _runs.push(...data);
@@ -63,13 +88,17 @@ export async function loadRuns(): Promise<void> {
       bus.emit("runs:loaded", { count: data?.length ?? 0 });
     } catch (err) {
       _runsPromise = null;
-      throw err;
+      throw new Error(`Failed to load runs data: ${err instanceof Error ? err.message : String(err)}`);
     }
   })();
   return _runsPromise;
 }
 
 let _diffRowsPromise: Promise<void> | null = null;
+/**
+ * @description Loads diff rows data from diff-rows.json and updates the diff rows store.
+ * @returns A promise that resolves when the data is loaded.
+ */
 export async function loadDiffRows(): Promise<void> {
   if (_diffRowsPromise) return _diffRowsPromise;
   _diffRowsPromise = (async () => {
@@ -84,59 +113,76 @@ export async function loadDiffRows(): Promise<void> {
       bus.emit("diffrows:loaded", { count: data?.length ?? 0 });
     } catch (err) {
       _diffRowsPromise = null;
-      throw err;
+      throw new Error(`Failed to load diff rows data: ${err instanceof Error ? err.message : String(err)}`);
     }
   })();
   return _diffRowsPromise;
 }
 
+/**
+ * @description Returns the index of a run in the runs store.
+ * @param runId The ID of the run to find.
+ * @returns The index of the run, or -1 if not found.
+ */
 export function getRunIndex(runId: string): number {
-  return RUNS.findIndex((r) => r.id === runId);
+  return RUNS.findIndex((r: Run) => r.id === runId);
 }
 
+/**
+ * @description Returns a run by its ID.
+ * @param id The ID of the run to find.
+ * @returns The run object, or undefined if not found.
+ */
 export function getRunById(id: string): Run | undefined {
-  return RUNS.find((r) => r.id === id);
+  return RUNS.find((r: Run) => r.id === id);
 }
 
 // ── Dynamic diff computation ───────────────────────────────────────────────
-// Note: not memoized — getCachedResults is lazily populated (and mockable in
-// tests), so a per-call-site cache would return stale empty results.
-export function computeDiffRows(baseRunId: string, candRunId: string): DiffRow[] {
-  const baseResults = getCachedResults(baseRunId);
-  const candResults = getCachedResults(candRunId);
-  if (baseResults.length === 0 && candResults.length === 0) return [];
+/**
+ * @description Computes the difference between two runs.
+ * @param baseRunId The ID of the base run.
+ * @param candRunId The ID of the candidate run.
+ * @returns An array of diff rows.
+ */
+export const computeDiffRows = memoize(
+  (baseRunId: string, candRunId: string): DiffRow[] => {
+    const baseResults: TestResult[] = getCachedResults(baseRunId);
+    const candResults: TestResult[] = getCachedResults(candRunId);
+    if (baseResults.length === 0 && candResults.length === 0) return [];
 
-  const baseMap = new Map<string, TestResult>(baseResults.map((r) => [r.name, r]));
-  const candMap = new Map<string, TestResult>(candResults.map((r) => [r.name, r]));
-  const allNames = new Set([...baseMap.keys(), ...candMap.keys()]);
+    const baseMap = new Map<string, TestResult>(baseResults.map((r: TestResult) => [r.name, r]));
+    const candMap = new Map<string, TestResult>(candResults.map((r: TestResult) => [r.name, r]));
+    const allNames = new Set<string>([...baseMap.keys(), ...candMap.keys()]);
 
-  return [...allNames].map((name, i) => {
-    const base = baseMap.get(name);
-    const cand = candMap.get(name);
-    const baseStatus: "PASS" | "FAIL" = base?.status === "PASS" ? "PASS" : "FAIL";
-    const candStatus: "PASS" | "FAIL" = cand?.status === "PASS" ? "PASS" : "FAIL";
-    const durBase = base?.duration ?? 0;
-    const durCand = cand?.duration ?? 0;
-    const durDiff = durBase > 0 ? Math.abs(durCand - durBase) / durBase : 0;
+    return [...allNames].map((name: string, i: number): DiffRow => {
+      const base = baseMap.get(name);
+      const cand = candMap.get(name);
+      const baseStatus: "PASS" | "FAIL" = base?.status === "PASS" ? "PASS" : "FAIL";
+      const candStatus: "PASS" | "FAIL" = cand?.status === "PASS" ? "PASS" : "FAIL";
+      const durBase: number = base?.duration ?? 0;
+      const durCand: number = cand?.duration ?? 0;
+      const durDiff: number = durBase > 0 ? Math.abs(durCand - durBase) / durBase : 0;
 
-    let state: DiffRow["state"];
-    if (baseStatus === "PASS" && candStatus === "FAIL") state = "regression";
-    else if (baseStatus === "FAIL" && candStatus === "PASS") state = "fixed";
-    else if (durDiff > 0.25 && baseStatus === candStatus) state = "duration";
-    else state = "unchanged";
+      let state: DiffRow["state"];
+      if (baseStatus === "PASS" && candStatus === "FAIL") state = "regression";
+      else if (baseStatus === "FAIL" && candStatus === "PASS") state = "fixed";
+      else if (durDiff > 0.25 && baseStatus === candStatus) state = "duration";
+      else state = "unchanged";
 
-    return {
-      id: `diff_${i}`,
-      name,
-      baseStatus,
-      candStatus,
-      durBase,
-      durCand,
-      category: base?.category ?? cand?.category ?? "Unknown",
-      state,
-    };
-  });
-}
+      return {
+        id: `diff_${i}`,
+        name,
+        baseStatus,
+        candStatus,
+        durBase,
+        durCand,
+        category: base?.category ?? cand?.category ?? "Unknown",
+        state,
+      };
+    });
+  },
+  (baseRunId, candRunId) => `${baseRunId}:${candRunId}`,
+);
 
 export const computeTestDetailForName = memoize(
   (name: string): TestDetail => {
@@ -180,6 +226,7 @@ export const computeTestDetailForName = memoize(
 
 _runsNotify.subscribe(() => {
   computeTestDetailForName.clear();
+  computeDiffRows.clear();
 });
 
 // ── ENV_SUMMARY ──────────────────────────────────────────────────────
@@ -201,6 +248,9 @@ export function getEnvSummary(): EnvSummaryEntry[] {
 
 export const ENV_SUMMARY: EnvSummaryEntry[] = _envSummary;
 
+/**
+ * @description Computes the summary of test results per environment.
+ */
 export function computeEnvSummary(): void {
   _envSummary.length = 0;
   const groups = new Map<string, Run[]>();
@@ -245,6 +295,9 @@ export function getPassRateChart(): { label: string; passRate: number; runId: st
 
 export const PASS_RATE_CHART: { label: string; passRate: number; runId: string }[] = _passRateChart;
 
+/**
+ * @description Computes data for the global pass rate trend chart.
+ */
 export function computePassRateChart(): void {
   _passRateChart.length = 0;
   const sorted = [..._runs].sort(
@@ -288,6 +341,9 @@ function envColor(label: string): string {
   return ENV_COLOR_MAP[label] ?? "#9aa0a6";
 }
 
+/**
+ * @description Computes pass rate history grouped by environment.
+ */
 export function computePerEnvPassRate(): void {
   _perEnvPassRate.length = 0;
   const groups = new Map<string, { runId: string; label: string; passRate: number }[]>();
@@ -323,6 +379,9 @@ export function getEnvPassRateChart(): EnvPassRateChartEntry[] {
 
 export const ENV_PASS_RATE_CHART: EnvPassRateChartEntry[] = _envPassRateChart;
 
+/**
+ * @description Computes multi-environment pass rate data for comparison charts.
+ */
 export function computeEnvPassRateChart(): void {
   _envPassRateChart.length = 0;
   const byDate = new Map<string, EnvPassRateChartEntry>();
@@ -338,17 +397,26 @@ export function computeEnvPassRateChart(): void {
   _envPassRateChartSnapshot = [..._envPassRateChart];
 }
 
-// ── Per-run test results ──────────────────────────────────────────────
+/**
+ * @description Returns the test results for a given run ID.
+ * @param runId The ID of the run.
+ * @returns An array of test results.
+ */
 export function getTestResultsForRun(runId: string): TestResult[] {
   return getCachedResults(runId);
 }
 
+/**
+ * @description Returns runs filtered by environment IDs.
+ * @param envIds A single environment ID or an array of environment IDs.
+ * @returns An array of filtered runs.
+ */
 export function getRunsByEnv(envIds?: string | string[]): Run[] {
   if (envIds === undefined || (Array.isArray(envIds) && envIds.length === 0)) {
     return [..._runs];
   }
   const ids = Array.isArray(envIds) ? envIds : [envIds];
-  return _runs.filter((r) => ids.includes(r.envId));
+  return _runs.filter((r: Run) => ids.includes(r.envId ?? ""));
 }
 
 // ── Run frequency analysis ────────────────────────────────────────────
@@ -361,6 +429,10 @@ export interface RunFrequency {
   weekly: number;
 }
 
+/**
+ * @description Computes the frequency of runs over time.
+ * @returns A RunFrequency object with stats.
+ */
 export function computeRunFrequency(): RunFrequency {
   if (_runs.length < 2) {
     return {
@@ -393,7 +465,10 @@ export function computeRunFrequency(): RunFrequency {
   };
 }
 
-// ── Master recompute ──────────────────────────────────────────────────
+/**
+ * @description Recomputes all snapshots and derived statistics.
+ * @returns void
+ */
 export function recomputeAll(): void {
   updateRunsSnapshot();
   updateDiffRowsSnapshot();

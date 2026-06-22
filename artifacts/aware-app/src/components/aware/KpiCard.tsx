@@ -1,4 +1,5 @@
 import React from "react";
+import { formatPercent } from "@/lib/i18n";
 
 interface KpiCardProps {
   total?: number;
@@ -17,9 +18,13 @@ export const KpiCard = React.memo(function KpiCard({
   const hasPassRate = passRate !== undefined && passRate !== null;
   const displayPassRate = hasPassRate ? `${passRate}%` : "—%";
   const displayFailedRuns = failedRuns ?? 0;
+  const ariaPassRate = hasPassRate ? formatPercent(passRate) : "unknown";
 
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
+    <div 
+      aria-label={`Pass rate: ${ariaPassRate}, Total runs: ${displayTotal}, Failed runs: ${displayFailedRuns}`}
+      style={{ display: "inline-flex", alignItems: "center", gap: 12 }}
+    >
       <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
         <span style={{ 
           fontSize: 13, 

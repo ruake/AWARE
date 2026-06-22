@@ -33,7 +33,9 @@ export function CommandSearch({
         <input
           ref={inputRef}
           type="text"
-          aria-label="Search tests, runs, suites, or type > for actions"
+          id="command-palette-search"
+          aria-label="Search commands"
+          aria-controls="command-results-list"
           placeholder="Search for anything... (type > for actions)"
           style={{
             flex: 1,

@@ -2,6 +2,7 @@ import React from "react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useCountUp } from "@/hooks/useCountUp";
 import { motion } from "framer-motion";
+import { formatPercent } from "@/lib/i18n";
 
 interface HeroKpiCardProps {
   label: string;
@@ -77,7 +78,7 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
-      aria-label={`${label}: ${value ?? "unknown"}${suffix}`}
+      aria-label={`${label}: ${suffix === "%" ? formatPercent(value) : (value ?? "unknown") + suffix}`}
       onKeyDown={
         onClick
           ? (e) => {

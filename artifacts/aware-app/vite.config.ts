@@ -147,6 +147,7 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
     chunkSizeWarningLimit: 1000,
+    sourcemap: process.env.NODE_ENV !== "production",
     rollupOptions: {
       output: {
         manualChunks(id: string) {
@@ -160,9 +161,14 @@ export default defineConfig({
             )
               return "vendor";
             if (
-              id.includes("/node_modules/recharts/")
+              id.includes("/node_modules/recharts/") ||
+              id.includes("/node_modules/fuse.js/")
             )
               return "charts";
+            if (
+              id.includes("/node_modules/framer-motion/")
+            )
+              return "motion";
             if (
               id.includes("/node_modules/lucide-react/") ||
               id.includes("/node_modules/cmdk/") ||
