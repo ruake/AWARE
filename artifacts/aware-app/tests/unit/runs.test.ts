@@ -77,6 +77,11 @@ describe("getRunById", () => {
 });
 
 describe("computeDiffRows", () => {
+  beforeEach(() => {
+    // Clear memoize cache so each test gets a fresh computation
+    (computeDiffRows as unknown as { clear: () => void }).clear?.();
+  });
+
   const baseResultPass: TestResult = {
     id: "t1", testCaseId: "tc1", runId: "run_001", name: "test_alpha",
     status: "PASS", duration: 100, category: "Security", suite: "suite_a",

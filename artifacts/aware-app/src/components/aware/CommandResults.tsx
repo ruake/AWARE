@@ -33,7 +33,11 @@ export function CommandResults({
 }) {
   return (
     <>
-      <div style={{ maxHeight: 420, overflowY: "auto", padding: "8px 0" }}>
+      <div 
+        id="command-results-list"
+        role="listbox"
+        style={{ maxHeight: 420, overflowY: "auto", padding: "8px 0" }}
+      >
         {filtered.length === 0 ? (
           <div
             style={{
@@ -58,6 +62,8 @@ export function CommandResults({
               <motion.div
                 key={r.id}
                 initial={false}
+                role="option"
+                aria-selected={isActive}
                 animate={{ 
                   background: isActive ? "var(--proof-surface-2)" : "transparent",
                   x: isActive ? 4 : 0

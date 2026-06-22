@@ -59,14 +59,26 @@ const _layoutStore = createStore<LayoutSettings>()(() =>
 
 // ── Env public API ───────────────────────────────────────────────────
 
+/**
+ * @description Returns the list of currently selected environment IDs.
+ * @returns Array of environment ID strings.
+ */
 export function getSelectedEnvIds(): string[] {
   return _envStore.getState().envIds;
 }
 
-export function getSelectedEnvSnapshot(): { envIds: string[] } {
+/**
+ * @description Returns a snapshot of the environment selection state.
+ * @returns EnvState object containing selected IDs.
+ */
+export function getSelectedEnvSnapshot(): EnvState {
   return _envStore.getState();
 }
 
+/**
+ * @description Sets the selected environment IDs and persists them to localStorage.
+ * @param envIds - Array of environment ID strings to select.
+ */
 export function setSelectedEnvIds(envIds: string[]): void {
   try {
     localStorage.setItem(ENV_STORAGE_KEY, JSON.stringify(envIds));
@@ -76,26 +88,47 @@ export function setSelectedEnvIds(envIds: string[]): void {
   _envStore.setState({ envIds });
 }
 
+/**
+ * @description Toggles the selection state of a single environment ID.
+ * @param envId - The environment ID to toggle.
+ */
 export function toggleSelectedEnvId(envId: string): void {
   const current = _envStore.getState().envIds;
   const next = current.includes(envId) ? current.filter((id) => id !== envId) : [...current, envId];
   setSelectedEnvIds(next);
 }
 
+/**
+ * @description Subscribes to changes in environment selection.
+ * @param cb - Callback function to execute on change.
+ * @returns A function to unsubscribe.
+ */
 export function subscribeToSelectedEnv(cb: () => void): () => void {
   return _envStore.subscribe(cb);
 }
 
 // ── Suite public API ─────────────────────────────────────────────────
 
+/**
+ * @description Returns the list of currently selected suite IDs.
+ * @returns Array of suite ID strings.
+ */
 export function getSelectedSuiteIds(): string[] {
   return _suiteStore.getState().suiteIds;
 }
 
-export function getSelectedSuiteSnapshot(): { suiteIds: string[] } {
+/**
+ * @description Returns a snapshot of the suite selection state.
+ * @returns SuiteState object containing selected IDs.
+ */
+export function getSelectedSuiteSnapshot(): SuiteState {
   return _suiteStore.getState();
 }
 
+/**
+ * @description Sets the selected suite IDs and persists them to localStorage.
+ * @param suiteIds - Array of suite ID strings to select.
+ */
 export function setSelectedSuiteIds(suiteIds: string[]): void {
   try {
     localStorage.setItem(SUITE_STORAGE_KEY, JSON.stringify(suiteIds));
@@ -105,6 +138,10 @@ export function setSelectedSuiteIds(suiteIds: string[]): void {
   _suiteStore.setState({ suiteIds });
 }
 
+/**
+ * @description Toggles the selection state of a single suite ID.
+ * @param suiteId - The suite ID to toggle.
+ */
 export function toggleSelectedSuiteId(suiteId: string): void {
   const current = _suiteStore.getState().suiteIds;
   const next = current.includes(suiteId)
@@ -113,10 +150,20 @@ export function toggleSelectedSuiteId(suiteId: string): void {
   setSelectedSuiteIds(next);
 }
 
+/**
+ * @description Subscribes to changes in suite selection.
+ * @param cb - Callback function to execute on change.
+ * @returns A function to unsubscribe.
+ */
 export function subscribeToSelectedSuites(cb: () => void): () => void {
   return _suiteStore.subscribe(cb);
 }
 
+/**
+ * @description Subscribes to changes in both environment and suite filters.
+ * @param cb - Callback function to execute on change.
+ * @returns A function to unsubscribe.
+ */
 export function subscribeToFilters(cb: () => void): () => void {
   const unsubEnv = _envStore.subscribe(cb);
   const unsubSuite = _suiteStore.subscribe(cb);
@@ -128,14 +175,26 @@ export function subscribeToFilters(cb: () => void): () => void {
 
 // ── Layout public API ────────────────────────────────────────────────
 
+/**
+ * @description Returns the current layout settings.
+ * @returns LayoutSettings object.
+ */
 export function getLayoutSettings(): LayoutSettings {
   return _layoutStore.getState();
 }
 
+/**
+ * @description Returns a snapshot of the current layout settings.
+ * @returns LayoutSettings object.
+ */
 export function getLayoutSnapshot(): LayoutSettings {
   return _layoutStore.getState();
 }
 
+/**
+ * @description Updates the layout settings and persists them to localStorage.
+ * @param partial - Partial layout settings to update.
+ */
 export function setLayoutSettings(partial: Partial<LayoutSettings>): void {
   const next = { ..._layoutStore.getState(), ...partial };
   try {
@@ -146,6 +205,11 @@ export function setLayoutSettings(partial: Partial<LayoutSettings>): void {
   _layoutStore.setState(next);
 }
 
+/**
+ * @description Subscribes to changes in layout settings.
+ * @param cb - Callback function to execute on change.
+ * @returns A function to unsubscribe.
+ */
 export function subscribeToLayout(cb: () => void): () => void {
   return _layoutStore.subscribe(cb);
 }

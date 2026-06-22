@@ -449,13 +449,16 @@ const components = {
   code: MarkdownCode,
   a: ({ href, children }: { href?: string; children?: React.ReactNode }) => {
     const isInternal = !!href && href.startsWith("/");
-    const isSafe = !!href && !href.startsWith("javascript:") && !href.startsWith("data:") && !href.startsWith("//");
-    const safeHref = isSafe ? href : "#";
+    const isSafe = !!href && (href.startsWith("https:") || href.startsWith("http:") || href.startsWith("mailto:") || isInternal);
+    
+    if (!isSafe) {
+      return <span>{children}</span>;
+    }
 
     if (isInternal) {
       return (
         <Link
-          href={safeHref}
+          href={href}
           style={{ color: "var(--proof-blue)", textDecoration: "underline", fontWeight: 500 }}
         >
           {children}
@@ -464,7 +467,7 @@ const components = {
     }
     return (
       <a
-        href={safeHref}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         style={{ color: "var(--proof-blue)", textDecoration: "underline", fontWeight: 500 }}

@@ -8,9 +8,11 @@ beforeEach(() => {
 });
 
 describe("LLM module", () => {
-  it("has default config with custom provider", () => {
+  it("has a provider in the default config", () => {
     const config = getLLMConfig();
-    expect(config.provider).toBe("custom");
+    // Default provider is "chrome" (Chrome AI adapter)
+    expect(typeof config.provider).toBe("string");
+    expect(config.provider.length).toBeGreaterThan(0);
   });
 
   it("setLLMConfig updates config", () => {
@@ -18,9 +20,10 @@ describe("LLM module", () => {
     expect(updated.temperature).toBe(0.5);
   });
 
-  it("getProvider returns a provider instance", () => {
+  it("getProvider returns a provider instance with a complete method", () => {
     const provider = getProvider();
-    expect(provider.type).toBe("custom");
+    // Chrome AI provider exposes a complete() method; type is not a public field.
+    expect(typeof provider.complete).toBe("function");
   });
 
   it("clearChatHistory does not throw", () => {

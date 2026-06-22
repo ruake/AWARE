@@ -1,3 +1,4 @@
+import { logWarn } from "./ai/debugLogger";
 import type { PromotionDecision } from "./types";
 import { fetchJson } from "./dataFetcher";
 
@@ -27,9 +28,7 @@ export async function loadPromotions(): Promise<void> {
     updateSnapshot();
     notify();
   } catch (err) {
-    if (import.meta.env.DEV) {
-      console.warn("[AWARE] promotions.json failed to load — promotion gate data unavailable:", err);
-    }
+    logWarn("promotions", "promotions.json failed to load — promotion gate data unavailable", String(err));
   }
 }
 

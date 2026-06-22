@@ -7,9 +7,10 @@ interface SectionHeaderProps {
   actions?: React.ReactNode;
   icon?: React.ReactNode;
   children?: React.ReactNode;
+  as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 }
 
-export function SectionHeader({ title, subtitle, actions, icon, children }: SectionHeaderProps) {
+export function SectionHeader({ title, subtitle, actions, icon, children, as: Tag = "h1" }: SectionHeaderProps) {
   return (
     <div
       style={{
@@ -57,7 +58,7 @@ export function SectionHeader({ title, subtitle, actions, icon, children }: Sect
           </div>
         )}
         <div>
-          <h1 style={{ 
+          <Tag style={{ 
             fontSize: 13, 
             fontWeight: 700, 
             color: "var(--proof-text)", 
@@ -66,7 +67,7 @@ export function SectionHeader({ title, subtitle, actions, icon, children }: Sect
             textTransform: "uppercase"
           }}>
             {title}
-          </h1>
+          </Tag>
           {subtitle && (
             <p style={{ 
               fontSize: 11, 

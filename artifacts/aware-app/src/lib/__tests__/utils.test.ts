@@ -43,11 +43,17 @@ describe("cleanScriptPath", () => {
     const tc = {} as TestCase;
     expect(cleanScriptPath(tc)).toBe("");
   });
+
+  it("handles null/undefined gracefully", () => {
+    expect(cleanScriptPath(null as any)).toBe("");
+    expect(cleanScriptPath(undefined as any)).toBe("");
+  });
 });
 
 describe("getGitHubUrl", () => {
-  it("builds correct GitHub URL from githubPath", () => {
+  it("builds correct GitHub URL using default env vars", () => {
     const tc = { githubPath: "src/tests/foo.spec.ts" } as TestCase;
+    // By default it should use ruake/AWARE
     expect(getGitHubUrl(tc)).toBe(
       "https://github.com/ruake/AWARE/blob/main/artifacts/aware-app/src/tests/foo.spec.ts",
     );

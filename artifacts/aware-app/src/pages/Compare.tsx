@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { CompareSidePanel } from "@/components/aware/CompareSidePanel";
 import { useSyncedUrlState } from "@/lib/urlState";
+import { logWarn } from "@/lib/ai/debugLogger";
 import {
   computeDiffRows, getDataInitState, subscribeToDataInit,
   subscribeToRuns, getRuns, subscribeToDiffRows, getDiffRows,
@@ -127,9 +128,7 @@ export default function Compare() {
         setComputedRows(computeDiffRows(effectiveBaseline, effectiveCandidate));
       })
       .catch((err: unknown) => {
-        if (import.meta.env.DEV) {
-          console.warn("[AWARE] Compare failed:", err);
-        }
+        logWarn("Compare", "Compare failed", String(err));
       })
       .finally(() => setResultsLoading(false));
   }, [effectiveBaseline, effectiveCandidate]);

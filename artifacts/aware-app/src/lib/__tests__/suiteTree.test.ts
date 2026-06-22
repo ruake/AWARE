@@ -63,4 +63,29 @@ describe('SuiteTree', () => {
     tree.walk((node) => visited.push(node.suite.id));
     expect(visited).toEqual(['root1', 'child1.1', 'root2']);
   });
+
+  it('should get ancestors', () => {
+    const tree = SuiteTree.from(roots);
+    const ancestors = tree.getAncestors('child1.1');
+    expect(ancestors.map(a => a.suite.id)).toEqual(['root1']);
+  });
+
+  it('should get descendants', () => {
+    const tree = SuiteTree.from(roots);
+    const descendants = tree.getDescendants('root1');
+    expect(descendants.map(d => d.suite.id)).toEqual(['child1.1']);
+  });
+
+  it('should filter tree', () => {
+    const tree = SuiteTree.from(roots);
+    const filtered = tree.filter(s => s.id === 'child1.1');
+    expect(filtered.countSuites()).toBe(2); // root1 (because it's an ancestor) and child1.1
+    expect(filtered.findById('child1.1')).toBeDefined();
+    expect(filtered.findById('root2')).toBeUndefined();
+  });
+
+  it('should get max depth', () => {
+    const tree = SuiteTree.from(roots);
+    expect(tree.getMaxDepth()).toBe(1); // root=0, child=1
+  });
 });

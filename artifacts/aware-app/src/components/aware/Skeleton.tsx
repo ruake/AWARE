@@ -6,6 +6,10 @@ interface SkeletonBoxProps {
   borderRadius?: string | number;
   style?: React.CSSProperties;
   className?: string;
+  role?: string;
+  "aria-busy"?: string | boolean;
+  "aria-label"?: string;
+  "aria-hidden"?: string | boolean;
 }
 
 export function SkeletonBox({
@@ -32,6 +36,9 @@ export function SkeletonStat() {
   return (
     <div
       className="proof-card"
+      role="status"
+      aria-busy="true"
+      aria-label="Loading..."
       style={{
         padding: "16px 20px",
         display: "flex",
@@ -51,6 +58,9 @@ export function SkeletonBadge() {
       width={64}
       height={24}
       borderRadius="var(--proof-radius-full)"
+      role="status"
+      aria-busy="true"
+      aria-label="Loading..."
     />
   );
 }
@@ -63,7 +73,12 @@ export function SkeletonText({
   lastLineWidth?: string;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div 
+      style={{ display: "flex", flexDirection: "column", gap: 12 }}
+      role="status"
+      aria-busy="true"
+      aria-label="Loading..."
+    >
       {Array.from({ length: lines }).map((_, i) => (
         <SkeletonBox
           key={i}
@@ -90,6 +105,9 @@ export function SkeletonCard({
         gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
         gap: 16,
       }}
+      role="status"
+      aria-busy="true"
+      aria-label="Loading..."
     >
       {Array.from({ length: count }).map((_, i) => (
         <div
@@ -125,6 +143,9 @@ export function SkeletonTable({
   return (
     <div
       className="proof-card"
+      role="status"
+      aria-busy="true"
+      aria-label="Loading..."
       style={{
         padding: 0,
         overflow: "hidden",
@@ -168,6 +189,9 @@ export function SkeletonChart({ height = 300 }: { height?: number }) {
   return (
     <div
       className="proof-card"
+      role="status"
+      aria-busy="true"
+      aria-label="Loading..."
       style={{
         padding: 24,
         minHeight: height,

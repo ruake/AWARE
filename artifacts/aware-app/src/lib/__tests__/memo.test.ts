@@ -95,4 +95,20 @@ describe('memoizeWithTTL', () => {
       Date.now = originalNow;
     }
   });
+
+  it('should handle concurrent calls with same key (deduplication)', async () => {
+    let calls = 0;
+    const fn = async (x: number) => {
+      calls++;
+      await new Promise(resolve => setTimeout(resolve, 50));
+      return x * 2;
+    };
+    const memoized = memoize(fn, (x) => String(x));
+
+    const [r1, r2] = await Promise.all([memoized(2), memoized(2)]);
+    
+    expect(r1).toBe(4);
+    expect(r2).toBe(4);
+    expect(calls).toBe(1);
+  });
 });

@@ -283,6 +283,7 @@ function Router() {
   return (
     <>
       <RouteAnnouncer />
+      <a href="#main-content" className="sr-only focus:not-sr-only" style={{ position: 'absolute', zIndex: 9999, background: 'var(--proof-blue)', color: 'white', padding: '8px 16px', borderRadius: '0 0 4px 4px' }}>Skip to main content</a>
       <ConsoleShell>
         <Switch>
           <Route path="/">

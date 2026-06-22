@@ -23,13 +23,18 @@ export async function loadResultsForRun(runId: string): Promise<TestResult[]> {
 export async function loadAllResults(): Promise<void> {
   if (_bulkLoaded) return;
   _bulkLoaded = true;
-  const data = await fetchJson<Record<string, TestResult[]>>("test-results.json");
-  if (data && typeof data === "object" && !Array.isArray(data)) {
-    for (const [runId, results] of Object.entries(data)) {
-      if (Array.isArray(results)) {
-        _cache.set(runId, results);
+  try {
+    const data = await fetchJson<Record<string, TestResult[]>>("test-results.json");
+    if (data && typeof data === "object" && !Array.isArray(data)) {
+      for (const [runId, results] of Object.entries(data)) {
+        if (Array.isArray(results)) {
+          _cache.set(runId, results);
+        }
       }
     }
+  } catch (err) {
+    _bulkLoaded = false;
+    throw new Error(`Failed to load test results data: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
 

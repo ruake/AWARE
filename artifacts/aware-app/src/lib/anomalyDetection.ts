@@ -6,6 +6,10 @@ export type AnomalyDetectionResult = AnomalyResult;
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
+/**
+ * @description Detects performance and failure anomalies in recent test results.
+ * @returns An array of AnomalyResult objects.
+ */
 export function detectAnomalies(): AnomalyDetectionResult[] {
   const now = Date.now();
   const cutoff = now - SEVEN_DAYS_MS;
@@ -38,6 +42,10 @@ export function detectAnomalies(): AnomalyDetectionResult[] {
   return detector.detectAll(testEntries);
 }
 
+/**
+ * @description Returns the latest anomaly for display in the global banner.
+ * @returns The most recent AnomalyResult or null if none found.
+ */
 export function getLatestAnomalyBanner(): AnomalyDetectionResult | null {
   const anomalies = detectAnomalies();
   return anomalies.length > 0 ? anomalies[0] : null;

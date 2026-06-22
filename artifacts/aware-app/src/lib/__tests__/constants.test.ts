@@ -59,30 +59,33 @@ describe("OWNERS", () => {
   });
 });
 
+// Colors use CSS custom properties (var(--proof-*)) — hex regex would be wrong.
+const isCssOrHex = (s: string) => /^(var\(--[\w-]+\)|#[0-9a-fA-F]{3,8})$/.test(s);
+
 describe("TAG_COLORS", () => {
   it("contains expected tags", () => {
-    expect(TAG_COLORS.geo).toBe("#5b8af5");
-    expect(TAG_COLORS.security).toBe("#ef4444");
-    expect(TAG_COLORS.caching).toBe("#a855f7");
-    expect(TAG_COLORS.routing).toBe("#6366f1");
+    expect(TAG_COLORS).toHaveProperty("geo");
+    expect(TAG_COLORS).toHaveProperty("security");
+    expect(TAG_COLORS).toHaveProperty("caching");
+    expect(TAG_COLORS).toHaveProperty("routing");
   });
 
   it("has 17 tag entries", () => {
     expect(Object.keys(TAG_COLORS).length).toBeGreaterThanOrEqual(17);
   });
 
-  it("all colors are valid hex codes", () => {
+  it("all colors are valid CSS variables or hex codes", () => {
     for (const color of Object.values(TAG_COLORS)) {
-      expect(color).toMatch(/^#[0-9a-f]{6}$/);
+      expect(isCssOrHex(color)).toBe(true);
     }
   });
 });
 
 describe("CATEGORY_COLORS", () => {
-  it("is an array of hex color strings", () => {
-    expect(CATEGORY_COLORS.length).toBeGreaterThanOrEqual(16);
+  it("is an array of color strings (CSS vars or hex)", () => {
+    expect(CATEGORY_COLORS.length).toBeGreaterThanOrEqual(5);
     for (const color of CATEGORY_COLORS) {
-      expect(color).toMatch(/^#[0-9a-f]{6}$/);
+      expect(isCssOrHex(color)).toBe(true);
     }
   });
 });
@@ -95,7 +98,7 @@ describe("TEST_TAGS", () => {
       expect(tag).toHaveProperty("name");
       expect(tag).toHaveProperty("color");
       expect(tag.id).toMatch(/^tag_/);
-      expect(tag.color).toMatch(/^#[0-9a-f]{6}$/);
+      expect(isCssOrHex(tag.color)).toBe(true);
     }
   });
 

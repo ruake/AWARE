@@ -1,3 +1,4 @@
+import { logError } from "./ai/debugLogger";
 import { loadRuns, loadDiffRows, recomputeAll } from "./runs";
 import { loadAllResults } from "./runsLoader";
 import { loadTestSuites } from "./testSuites";
@@ -10,6 +11,11 @@ export interface DataInitState {
   loaded: boolean;
   loading: boolean;
   runsReady: boolean;
+  suitesReady: boolean;
+  promotionsReady: boolean;
+  schedulerReady: boolean;
+  discoveryReady: boolean;
+  resultsReady: boolean;
   error: unknown;
 }
 
@@ -17,11 +23,21 @@ let _loading = false;
 let _loaded = false;
 let _activePromise: Promise<void> | null = null;
 let _runsReady = false;
+let _suitesReady = false;
+let _promotionsReady = false;
+let _schedulerReady = false;
+let _discoveryReady = false;
+let _resultsReady = false;
 let _error: unknown = null;
 let _snapshot: DataInitState = {
   loaded: false,
   loading: false,
   runsReady: false,
+  suitesReady: false,
+  promotionsReady: false,
+  schedulerReady: false,
+  discoveryReady: false,
+  resultsReady: false,
   error: null,
 };
 const _listeners = new Set<() => void>();
@@ -35,6 +51,11 @@ function updateSnapshot(): void {
     loaded: _loaded,
     loading: _loading,
     runsReady: _runsReady,
+    suitesReady: _suitesReady,
+    promotionsReady: _promotionsReady,
+    schedulerReady: _schedulerReady,
+    discoveryReady: _discoveryReady,
+    resultsReady: _resultsReady,
     error: _error,
   };
 }
@@ -86,11 +107,30 @@ async function _doLoad(): Promise<void> {
 
     // ── Phase 2: Load supporting data concurrently ────────────────────────────
     await Promise.all([
-      safeLoad(loadDiffRows, "diff", errors),
-      safeLoad(loadTestSuites, "suites", errors),
-      safeLoad(loadPromotions, "promotions", errors),
-      safeLoad(loadSchedulerStatus, "scheduler", errors),
-      safeLoad(loadAutoDiscoveredTests, "discovery", errors),
+      safeLoad(loadDiffRows, "diff", errors).then(() => {
+        updateSnapshot();
+        notify();
+      }),
+      safeLoad(loadTestSuites, "suites", errors).then(() => {
+        _suitesReady = true;
+        updateSnapshot();
+        notify();
+      }),
+      safeLoad(loadPromotions, "promotions", errors).then(() => {
+        _promotionsReady = true;
+        updateSnapshot();
+        notify();
+      }),
+      safeLoad(loadSchedulerStatus, "scheduler", errors).then(() => {
+        _schedulerReady = true;
+        updateSnapshot();
+        notify();
+      }),
+      safeLoad(loadAutoDiscoveredTests, "discovery", errors).then(() => {
+        _discoveryReady = true;
+        updateSnapshot();
+        notify();
+      }),
     ]);
     recomputeAll();
     updateSnapshot();
@@ -99,14 +139,15 @@ async function _doLoad(): Promise<void> {
 
     // ── Phase 3: Load full test results last (largest payload) ────────────────
     await safeLoad(loadAllResults, "results", errors);
+    _resultsReady = true;
     recomputeAll();
+    updateSnapshot();
+    notify();
     bus.emit("data:phase", { phase: 3, done: true });
 
     if (errors.length > 0) {
       _error = errors.join("; ");
-      if (import.meta.env.DEV) {
-        console.error("Data load errors:", errors);
-      }
+      logError("initData", "Data load errors", JSON.stringify(errors));
     }
 
     _loaded = true;
@@ -118,9 +159,7 @@ async function _doLoad(): Promise<void> {
     _loading = false;
     updateSnapshot();
     notify();
-    if (import.meta.env.DEV) {
-      console.error("Critical data load failure:", err);
-    }
+    logError("initData", "Critical data load failure", String(err));
   } finally {
     _activePromise = null;
   }

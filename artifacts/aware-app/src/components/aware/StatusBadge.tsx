@@ -74,12 +74,13 @@ export const StatusBadge = React.memo(function StatusBadge({
   return (
     <span
       className={`proof-badge ${cls}`}
+      role="status"
       style={{
         display: "inline-flex",
         alignItems: "center",
         ...sizeStyles[size],
       }}
-      aria-label={display}
+      aria-label={`${display} status`}
       aria-live="polite"
       aria-atomic="true"
     >
@@ -93,9 +94,10 @@ export const StatusBadge = React.memo(function StatusBadge({
             marginRight: 4,
             animation: "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
           }}
+          aria-hidden="true"
         />
       )}
-      {icon && <span style={{ marginRight: 4, display: "flex", alignItems: "center" }}>{icon}</span>}
+      {icon && <span style={{ marginRight: 4, display: "flex", alignItems: "center" }} aria-hidden="true">{icon}</span>}
       {display}
     </span>
   );

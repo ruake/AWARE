@@ -1,3 +1,4 @@
+import { logWarn } from "./ai/debugLogger";
 import type { SchedulerStatus } from "./types";
 import { fetchJson } from "./dataFetcher";
 
@@ -28,9 +29,7 @@ export async function loadSchedulerStatus(): Promise<void> {
       recentDispatches: data.recentDispatches ? [...data.recentDispatches] : [],
     };
   } catch (err) {
-    if (import.meta.env.DEV) {
-      console.warn("[AWARE] scheduler-status.json unavailable — using defaults.", err);
-    }
+    logWarn("schedulerStatus", "scheduler-status.json unavailable — using defaults", String(err));
   }
 }
 

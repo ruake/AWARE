@@ -1,3 +1,4 @@
+import { logInfo, logError } from "./ai/debugLogger";
 import { dataUrl } from "./dataFetcher";
 
 export interface FetchRequest {
@@ -132,18 +133,17 @@ export function cacheMiddleware<T>(defaultTTLMs = 60000): FetchMiddleware<T> {
 
 export function loggingMiddleware<T>(): FetchMiddleware<T> {
   return async (req, next) => {
-    if (!import.meta.env.DEV) return next(req);
-
     const start = Date.now();
-    if (import.meta.env.DEV) console.log(`[FetchPipeline] Request: ${req.path}`);
+    logInfo("FetchPipeline", `Request: ${req.path}`);
     try {
       const res = await next(req);
-      if (import.meta.env.DEV) console.log(
-        `[FetchPipeline] Success: ${req.path} (${Date.now() - start}ms, cache: ${res.fromCache})`,
+      logInfo(
+        "FetchPipeline",
+        `Success: ${req.path} (${Date.now() - start}ms, cache: ${res.fromCache})`,
       );
       return res;
     } catch (err) {
-      if (import.meta.env.DEV) console.error(`[FetchPipeline] Error: ${req.path}`, err);
+      logError("FetchPipeline", `Error: ${req.path}`, String(err));
       throw err;
     }
   };

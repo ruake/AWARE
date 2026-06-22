@@ -85,6 +85,10 @@
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", monospace;
 
+  /* RTL Groundwork: If [dir="rtl"] is applied to html, we would swap 
+     margins, paddings, and absolute positions here if not using logical properties.
+     Tailwind already supports ltr/rtl via 'start' and 'end' utilities. */
+
   /* Text Colors */
   --proof-text: #f8fafc;
   --proof-text-secondary: #94a3b8;

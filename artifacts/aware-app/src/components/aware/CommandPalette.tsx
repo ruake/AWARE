@@ -313,6 +313,9 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -20 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Command palette"
           style={{
             position: "relative",
             width: "min(680px, 92vw)",

@@ -49,9 +49,20 @@ function messagesToApi(history: Message[]): ApiMessage[] {
         });
         for (const tc of m.toolCalls) {
           if (tc.result) {
+            let content: string;
+            const resultJson = JSON.stringify(tc.result.data);
+            if (resultJson.length <= 12_000) {
+              content = resultJson;
+            } else {
+              content = JSON.stringify({
+                truncated: true,
+                preview: resultJson.slice(0, 8000),
+                note: "Result truncated for context window",
+              });
+            }
             out.push({
               role: "tool",
-              content: JSON.stringify(tc.result.data).slice(0, 12_000),
+              content,
               tool_call_id: tc.id,
             });
           }
@@ -65,12 +76,12 @@ function messagesToApi(history: Message[]): ApiMessage[] {
 }
 
 // ── Graph node event helpers ──────────────────────────────────────────────────
-function emitNode(ctx: AgentGraphContext, node: GraphNodeState) {
+function emitNode(ctx: AgentGraphContext, node: GraphNodeState): void {
   ctx.graphNodes.push(node);
   ctx.onEvent({ type: "graph_node", node });
 }
 
-function updateNode(ctx: AgentGraphContext, id: GraphNodeId, patch: Partial<GraphNodeState>) {
+function updateNode(ctx: AgentGraphContext, id: GraphNodeId, patch: Partial<GraphNodeState>): void {
   const existing = ctx.graphNodes.find((n) => n.id === id);
   if (existing) {
     Object.assign(existing, patch);
@@ -278,16 +289,12 @@ function executeNode(): AgentNode {
           let toolContent: string;
           if (resultJson.length <= MAX_TOOL_CHARS) {
             toolContent = resultJson;
-          } else if (Array.isArray(result.data)) {
-            let safe = "[]";
-            for (let k = 0; k < (result.data as unknown[]).length; k++) {
-              const candidate = JSON.stringify((result.data as unknown[]).slice(0, k + 1));
-              if (candidate.length > MAX_TOOL_CHARS) break;
-              safe = candidate;
-            }
-            toolContent = safe;
           } else {
-            toolContent = resultJson.slice(0, MAX_TOOL_CHARS);
+            toolContent = JSON.stringify({
+              truncated: true,
+              preview: resultJson.slice(0, 8000),
+              note: "Result truncated for context window",
+            });
           }
           ctx.apiMessages.push({
             role: "tool",
@@ -409,7 +416,7 @@ function synthesizeNode(): AgentNode {
       for (const [id, { name, rawArgs }] of argBuffers) {
         let args: Record<string, unknown> = {};
         try {
-          args = JSON.parse(rawArgs || "{}");
+          args = JSON.parse(rawArgs || "{}") as Record<string, unknown>;
         } catch {
           args = {};
         }
