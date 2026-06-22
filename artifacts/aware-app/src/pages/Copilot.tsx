@@ -523,9 +523,11 @@ export default function CopilotPage() {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
+        position: "absolute",
+        inset: 0,
         overflow: "hidden",
         background: "var(--proof-editor-bg)",
+        zIndex: 10,
       }}
     >
       {/* ARIA live region — announces busy start/end to screen readers */}

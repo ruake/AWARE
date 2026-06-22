@@ -123,7 +123,7 @@ export const TrendChart = React.memo(function TrendChart({
               <CartesianGrid strokeDasharray="3 3" stroke="var(--proof-border)" vertical={false} strokeOpacity={0.5} />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 10, fill: "var(--proof-text-muted)", fontWeight: 500 }}
+                tick={{ fontSize: 10, fill: "var(--proof-text-muted)", fontWeight: 500 } as React.SVGProps<SVGTextElement>}
                 tickLine={false}
                 axisLine={false}
                 interval={chartData.length > 10 ? Math.ceil(chartData.length / 10) : "preserveStartEnd"}
@@ -132,7 +132,7 @@ export const TrendChart = React.memo(function TrendChart({
               />
               <YAxis
                 domain={[0, 100]}
-                tick={{ fontSize: 10, fill: "var(--proof-text-muted)", fontWeight: 500 }}
+                tick={{ fontSize: 10, fill: "var(--proof-text-muted)", fontWeight: 500 } as React.SVGProps<SVGTextElement>}
                 tickLine={false}
                 axisLine={false}
                 unit="%"

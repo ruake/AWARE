@@ -72,8 +72,9 @@ export function FlakinessTable({
 
   if (filteredHistory.length === 0 && enriched.length === 0) {
     return (
-      <div className="proof-card" style={{ padding: "24px", textAlign: "center" }}>
-        <div style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>
+      <div className="proof-card" style={{ padding: "32px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+        <Filter size={32} style={{ color: "var(--proof-text-muted)" }} />
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--proof-text-secondary)" }}>
           No run history data available
         </div>
       </div>
@@ -90,8 +91,8 @@ export function FlakinessTable({
 
   const sortIcon = (key: SortKey) => {
     const clean = hSort.startsWith("-") ? hSort.slice(1) : hSort;
-    if (clean !== key) return <ArrowUpDown size={11} style={{ opacity: 0.3 }} />;
-    return hSort.startsWith("-") ? <ArrowDown size={11} /> : <ArrowUp size={11} />;
+    if (clean !== key) return <ArrowUpDown size={12} style={{ opacity: 0.3 }} />;
+    return hSort.startsWith("-") ? <ArrowDown size={12} /> : <ArrowUp size={12} />;
   };
 
   return (
@@ -107,20 +108,20 @@ export function FlakinessTable({
       >
         <div
           style={{
-            padding: "12px 16px",
+            padding: "16px 20px",
             borderBottom: "1px solid var(--proof-border)",
             background: "var(--proof-surface-2)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: 12,
+            gap: 16,
           }}
         >
           <h3
             style={{
-              fontSize: 14,
-              fontWeight: 700,
+              fontSize: 15,
+              fontWeight: 600,
               color: "var(--proof-text)",
               display: "flex",
               alignItems: "center",
@@ -128,19 +129,19 @@ export function FlakinessTable({
               margin: 0,
             }}
           >
-            <Filter size={16} style={{ color: "var(--proof-blue)" }} /> Flakiness Leaderboard
-            <span style={{ fontSize: 11, fontWeight: 500, color: "var(--proof-text-muted)", background: "var(--proof-surface-3)", padding: "2px 8px", borderRadius: "10px" }}>
+            <Filter size={18} style={{ color: "var(--proof-blue)" }} /> Flakiness Leaderboard
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", background: "var(--proof-surface-3)", padding: "2px 10px", borderRadius: "12px", marginLeft: 8 }}>
               {filteredHistory.length} of {enriched.length}
             </span>
           </h3>
-          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
             <div
               style={{
                 display: "flex",
                 gap: 2,
                 background: "var(--proof-surface-3)",
-                borderRadius: 8,
-                padding: 2,
+                borderRadius: "var(--proof-radius-md)",
+                padding: 4,
                 border: "1px solid var(--proof-border)",
               }}
             >
@@ -151,13 +152,14 @@ export function FlakinessTable({
                   style={{
                     border: "none",
                     cursor: "pointer",
-                    padding: "4px 12px",
-                    fontSize: 11,
+                    padding: "6px 14px",
+                    fontSize: 12,
                     fontWeight: 600,
-                    borderRadius: 6,
-                    background: hStatus === s ? "var(--proof-blue)" : "transparent",
-                    color: hStatus === s ? "white" : "var(--proof-text-secondary)",
-                    transition: "all 0.2s",
+                    borderRadius: "var(--proof-radius-sm)",
+                    background: hStatus === s ? "var(--proof-surface)" : "transparent",
+                    color: hStatus === s ? "var(--proof-text)" : "var(--proof-text-secondary)",
+                    boxShadow: hStatus === s ? "var(--proof-shadow-xs)" : "none",
+                    transition: "all var(--proof-transition)",
                   }}
                 >
                   {s === "all" ? "All" : s}
@@ -165,12 +167,12 @@ export function FlakinessTable({
               ))}
             </div>
             <select
-              className="proof-select"
+              className="proof-input"
               value={hEnv}
               onChange={(e) => setHEnv(e.target.value)}
-              style={{ fontSize: 11, padding: "5px 10px", height: "auto", minWidth: 120 }}
+              style={{ fontSize: 13, height: 32, minWidth: 140 }}
             >
-              <option value="all">All envs</option>
+              <option value="all">All Environments</option>
               {uniqueEnvs.map((e) => (
                 <option key={e} value={e}>
                   {e}
@@ -182,51 +184,52 @@ export function FlakinessTable({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 8,
                 cursor: "pointer",
-                padding: "6px 12px",
-                borderRadius: 8,
-                fontSize: 11,
+                padding: "0 16px",
+                height: 32,
+                borderRadius: "var(--proof-radius-md)",
+                fontSize: 13,
                 fontWeight: 600,
                 border: "1px solid var(--proof-border)",
-                background: hErrOnly ? "rgba(234, 179, 8, 0.15)" : "var(--proof-surface-3)",
-                color: hErrOnly ? "var(--proof-yellow)" : "var(--proof-text-secondary)",
-                transition: "all 0.2s",
+                background: hErrOnly ? "var(--proof-yellow-bg)" : "var(--proof-surface-3)",
+                color: hErrOnly ? "var(--proof-yellow-bright)" : "var(--proof-text-secondary)",
+                transition: "all var(--proof-transition)",
               }}
             >
-              <Bug size={12} /> Errors only
+              <Bug size={14} /> Errors only
             </button>
           </div>
         </div>
-        <div style={{ overflowX: "auto" }}>
-          <table className="proof-table">
+        <div style={{ overflowX: "auto", flex: 1 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
             <thead>
-              <tr>
+              <tr style={{ borderBottom: "1px solid var(--proof-border)", background: "var(--proof-surface)", color: "var(--proof-text-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
                 <th
                   onClick={() => toggleSort("runId")}
-                  style={{ cursor: "pointer", userSelect: "none" }}
+                  style={{ padding: "16px 20px", cursor: "pointer", userSelect: "none", width: "14%" }}
                 >
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                     Run ID {sortIcon("runId")}
                   </span>
                 </th>
                 <th
                   onClick={() => toggleSort("status")}
-                  style={{ cursor: "pointer", userSelect: "none" }}
+                  style={{ padding: "16px 20px", cursor: "pointer", userSelect: "none", width: "12%" }}
                 >
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                     Status {sortIcon("status")}
                   </span>
                 </th>
                 <th
                   onClick={() => toggleSort("duration")}
-                  style={{ textAlign: "right", cursor: "pointer", userSelect: "none" }}
+                  style={{ padding: "16px 20px", textAlign: "right", cursor: "pointer", userSelect: "none", width: "12%" }}
                 >
                   <span
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
-                      gap: 3,
+                      gap: 6,
                       justifyContent: "flex-end",
                     }}
                   >
@@ -235,22 +238,22 @@ export function FlakinessTable({
                 </th>
                 <th
                   onClick={() => toggleSort("env")}
-                  style={{ cursor: "pointer", userSelect: "none" }}
+                  style={{ padding: "16px 20px", cursor: "pointer", userSelect: "none", width: "14%" }}
                 >
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                     Environment {sortIcon("env")}
                   </span>
                 </th>
-                <th style={{ textAlign: "right" }}>Flakiness</th>
-                <th>Error</th>
-                <th>Actions</th>
+                <th style={{ padding: "16px 20px", textAlign: "right", width: "12%" }}>Flakiness</th>
+                <th style={{ padding: "16px 20px", width: "24%" }}>Error</th>
+                <th style={{ padding: "16px 20px", width: "12%", textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredHistory.map((h) => {
                 const isSlow = h.duration > avgDuration * 2;
                 const isWarn = h.duration > avgDuration * 1.5;
-                const flakiness = enriched.length > 0 ? (enriched.filter(e => e.status !== enriched[0].status).length / (enriched.length - 1 || 1)) * 100 : 0; // Simplified flakiness for the row
+                const flakiness = enriched.length > 0 ? (enriched.filter(e => e.status !== enriched[0].status).length / (enriched.length - 1 || 1)) * 100 : 0; 
                 
                 return (
                   <tr
@@ -258,10 +261,18 @@ export function FlakinessTable({
                     onClick={() => setSelectedRow(h)}
                     style={{
                       cursor: "pointer",
-                      background: selectedRow?.runId === h.runId ? "var(--proof-blue-bg)" : undefined,
+                      borderBottom: "1px solid var(--proof-border-light)",
+                      background: selectedRow?.runId === h.runId ? "var(--proof-surface-active)" : "var(--proof-surface)",
+                      transition: "background var(--proof-transition)"
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedRow?.runId !== h.runId) e.currentTarget.style.background = "var(--proof-surface-hover)";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedRow?.runId !== h.runId) e.currentTarget.style.background = "var(--proof-surface)";
                     }}
                   >
-                    <td>
+                    <td style={{ padding: "16px 20px" }}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -269,7 +280,8 @@ export function FlakinessTable({
                         }}
                         style={{
                           fontFamily: "var(--font-mono)",
-                          fontSize: 11,
+                          fontSize: 13,
+                          fontWeight: 500,
                           color: "var(--proof-blue)",
                           background: "none",
                           border: "none",
@@ -280,19 +292,18 @@ export function FlakinessTable({
                         {h.runId}
                       </button>
                     </td>
-                    <td>
-                      <span
-                        className={`proof-badge ${h.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                      >
+                    <td style={{ padding: "16px 20px" }}>
+                      <span className={`proof-badge ${h.status === "PASS" ? "proof-badge-healthy" : "proof-badge-critical"}`}>
                         {h.status}
                       </span>
                       {h.assertionsFailed > 0 && (
                         <span
                           style={{
-                            fontSize: 10,
-                            marginLeft: 4,
+                            fontSize: 11,
+                            marginLeft: 8,
                             color: "var(--proof-red)",
                             fontFamily: "var(--font-mono)",
+                            fontWeight: 600
                           }}
                         >
                           {h.assertionsFailed}✗
@@ -301,50 +312,61 @@ export function FlakinessTable({
                     </td>
                     <td
                       style={{
+                        padding: "16px 20px",
                         textAlign: "right",
                         fontFamily: "var(--font-mono)",
-                        fontSize: 11,
-                        color: isSlow ? "var(--proof-red)" : isWarn ? "var(--proof-yellow)" : "var(--proof-text-secondary)",
+                        fontSize: 13,
+                        color: isSlow ? "var(--proof-red-bright)" : isWarn ? "var(--proof-yellow-bright)" : "var(--proof-text)",
                         fontWeight: isSlow || isWarn ? 600 : 400,
                       }}
                     >
                       {h.duration}ms
                     </td>
-                    <td style={{ fontSize: 12 }}>{h.env}</td>
-                    <td style={{ textAlign: "right", width: 80 }}>
-                      <div style={{ width: "100%", height: 4, background: "var(--proof-grey-bg)", borderRadius: 2, overflow: "hidden" }}>
-                        <div style={{ 
-                          height: "100%", 
-                          width: `${flakiness}%`, 
-                          background: flakiness > 50 ? "var(--proof-red)" : flakiness > 25 ? "var(--proof-yellow)" : "var(--proof-green)" 
-                        }} />
+                    <td style={{ padding: "16px 20px", fontSize: 13, color: "var(--proof-text)" }}>{h.env}</td>
+                    <td style={{ padding: "16px 20px" }}>
+                      <div style={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>
+                        <div style={{ width: "80px", height: 6, background: "var(--proof-surface-3)", borderRadius: "var(--proof-radius-full)", overflow: "hidden" }}>
+                          <div style={{ 
+                            height: "100%", 
+                            width: `${flakiness}%`, 
+                            background: flakiness > 50 ? "var(--proof-red)" : flakiness > 25 ? "var(--proof-yellow)" : "var(--proof-green)" 
+                          }} />
+                        </div>
                       </div>
                     </td>
-                    <td style={{ fontSize: 11 }}>
+                    <td style={{ padding: "16px 20px", fontSize: 13 }}>
                       {h.error ? (
                         <span
                           style={{
-                            color: "var(--proof-red)",
+                            color: "var(--proof-red-bright)",
                             fontFamily: "var(--font-mono)",
-                            fontSize: 10,
+                            fontSize: 12,
+                            display: "inline-block",
+                            maxWidth: "100%",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap"
                           }}
+                          title={h.error}
                         >
-                          {h.error.length > 80 ? h.error.slice(0, 80) + "..." : h.error}
+                          {h.error}
                         </span>
                       ) : h.status === "FAIL" ? (
-                        <span style={{ color: "var(--proof-text-secondary)", fontSize: 10 }}>
+                        <span style={{ color: "var(--proof-text-secondary)", fontSize: 12, fontStyle: "italic" }}>
                           no error message
                         </span>
-                      ) : null}
+                      ) : (
+                        <span style={{ color: "var(--proof-text-disabled)", fontSize: 12 }}>—</span>
+                      )}
                     </td>
-                    <td>
+                    <td style={{ padding: "16px 20px", textAlign: "right" }}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedRow(h);
                         }}
-                        className="proof-button proof-button-xs"
-                        style={{ padding: "2px 7px" }}
+                        className="proof-btn proof-btn-ghost"
+                        style={{ padding: "4px 12px", fontSize: 12 }}
                       >
                         Detail
                       </button>
@@ -358,8 +380,8 @@ export function FlakinessTable({
                     colSpan={7}
                     style={{
                       textAlign: "center",
-                      padding: 24,
-                      fontSize: 12,
+                      padding: 48,
+                      fontSize: 14,
                       color: "var(--proof-text-secondary)",
                     }}
                   >

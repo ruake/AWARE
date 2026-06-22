@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AlertTriangle, AlertCircle, X, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -21,15 +21,24 @@ export function AnomalyBanner({
   onDismiss,
   count,
 }: AnomalyBannerProps) {
-  const [dismissed, setDismissed] = React.useState(false);
+  const [dismissed, setDismissed] = useState(true);
+
+  const sessionKey = `aware-anomaly-dismissed-${hasAlert ? "alert" : "deg"}-${regressions}-${degradedTiers}`;
+
+  useEffect(() => {
+    const isDismissed = sessionStorage.getItem(sessionKey) === "true";
+    setDismissed(isDismissed);
+  }, [sessionKey]);
+
   if ((!hasAlert && !hasDegradation) || dismissed) return null;
+
   const isCritical = hasAlert;
 
   const color = isCritical ? "var(--proof-red)" : "var(--proof-yellow)";
   const colorBright = isCritical ? "var(--proof-red-bright)" : "var(--proof-yellow-bright)";
-  const colorBg = isCritical ? "var(--proof-red-bg-strong)" : "var(--proof-yellow-bg)";
+  const colorBg = isCritical ? "var(--proof-red-bg)" : "var(--proof-yellow-bg)";
   const colorBorder = isCritical ? "var(--proof-red-border)" : "var(--proof-yellow-border)";
-  const colorIconBg = isCritical ? "var(--proof-red-bg)" : "var(--proof-yellow-bg)";
+  const colorIconBg = isCritical ? "var(--proof-red-glow)" : "var(--proof-yellow-glow)";
   const Icon = isCritical ? AlertCircle : AlertTriangle;
 
   const message = isCritical
@@ -40,6 +49,7 @@ export function AnomalyBanner({
 
   const handleDismiss = () => {
     setDismissed(true);
+    sessionStorage.setItem(sessionKey, "true");
     if (onDismiss) {
       setTimeout(onDismiss, 300);
     }
@@ -51,139 +61,138 @@ export function AnomalyBanner({
         <motion.div
           role="alert"
           aria-live="assertive"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] }}
+          initial={{ opacity: 0, y: -20, height: 0 }}
+          animate={{ opacity: 1, y: 0, height: "auto" }}
+          exit={{ opacity: 0, y: -20, height: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            padding: "12px 16px",
-            borderRadius: 16,
-            background: colorBg,
-            border: `1px solid ${colorBorder}`,
-            borderLeft: `5px solid ${color}`,
-            boxShadow: isCritical 
-              ? `0 8px 32px rgba(239, 68, 68, 0.15), 0 0 0 1px ${colorBorder}`
-              : `0 8px 32px rgba(245, 158, 11, 0.1), 0 0 0 1px ${colorBorder}`,
-            position: "relative",
-            zIndex: 10,
+            overflow: "hidden"
           }}
         >
-          {/* Pulsing indicator for critical */}
-          {isCritical && (
-            <motion.div
-              animate={{ opacity: [0.4, 0.8, 0.4] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              style={{
-                position: "absolute",
-                top: -1,
-                left: -1,
-                right: -1,
-                bottom: -1,
-                borderRadius: 16,
-                border: `1px solid ${color}`,
-                pointerEvents: "none",
-              }}
-            />
-          )}
-
           <div
             style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: colorIconBg,
-              border: `1px solid ${colorBorder}`,
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              boxShadow: `0 2px 8px ${color}20`,
+              gap: 16,
+              padding: "16px 20px",
+              background: colorBg,
+              borderBottom: `1px solid ${colorBorder}`,
+              borderLeft: `4px solid ${color}`,
+              position: "relative",
+              zIndex: 10,
+              width: "100%",
             }}
           >
-            <Icon size={16} strokeWidth={2.5} style={{ color: colorBright }} />
-          </div>
+            {isCritical && (
+              <motion.div
+                animate={{ opacity: [0.3, 0.7, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: -4,
+                  bottom: 0,
+                  width: 4,
+                  background: colorBright,
+                  pointerEvents: "none",
+                }}
+              />
+            )}
 
-          <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                fontSize: 13.5,
-                fontWeight: 700,
-                color: colorBright,
-                lineHeight: 1.2,
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: colorIconBg,
+                border: `1px solid ${colorBorder}`,
                 display: "flex",
                 alignItems: "center",
-                gap: 6,
+                justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: `0 2px 12px ${color}30`,
               }}
             >
-              {count && count > 0 ? (
-                <span style={{ 
-                  background: colorBright, 
-                  color: "white", 
-                  fontSize: 10, 
-                  padding: "1px 6px", 
-                  borderRadius: 99,
-                  fontWeight: 900
-                }}>
-                  {count}
-                </span>
-              ) : null}
-              {message}
+              <Icon size={20} strokeWidth={2.5} style={{ color: colorBright }} />
             </div>
-            {isCritical && (
-              <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 4, fontWeight: 500 }}>
-                Review the Compare page to identify affected tests and determine root cause.
-              </div>
-            )}
-          </div>
 
-          <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onInvestigate}
-              style={{
-                background: colorBright,
-                color: isCritical ? "white" : "var(--proof-surface)",
-                border: "none",
-                borderRadius: 8,
-                padding: "6px 14px",
-                fontSize: 12,
-                fontWeight: 800,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                boxShadow: `0 4px 12px ${color}30`,
-              }}
-            >
-              Investigate <ArrowRight size={12} strokeWidth={3} />
-            </motion.button>
-            
-            {onDismiss && (
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: "var(--proof-text)",
+                  lineHeight: 1.4,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                {count && count > 0 ? (
+                  <span style={{ 
+                    background: colorBright, 
+                    color: "#000", 
+                    fontSize: 11, 
+                    padding: "2px 8px", 
+                    borderRadius: 99,
+                    fontWeight: 800
+                  }}>
+                    {count}
+                  </span>
+                ) : null}
+                {message}
+              </div>
+              {isCritical && (
+                <div style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 2, fontWeight: 400 }}>
+                  Review the Compare page to identify affected tests and determine root cause.
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", gap: 12, flexShrink: 0, alignItems: "center" }}>
               <motion.button
-                whileHover={{ background: colorBorder }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onInvestigate}
+                style={{
+                  background: colorBright,
+                  color: "#000",
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "8px 16px",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  boxShadow: `0 4px 12px ${color}30`,
+                }}
+              >
+                Investigate <ArrowRight size={14} strokeWidth={2.5} />
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ background: "var(--proof-hover)" }}
                 onClick={handleDismiss}
                 aria-label="Dismiss banner"
                 style={{
                   background: "transparent",
-                  border: `1px solid ${colorBorder}`,
-                  borderRadius: 8,
+                  border: `1px solid transparent`,
+                  borderRadius: 6,
                   cursor: "pointer",
-                  width: 28,
-                  height: 28,
+                  width: 32,
+                  height: 32,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: colorBright,
-                  transition: "background 0.15s",
+                  color: "var(--proof-text-secondary)",
+                  transition: "background 0.15s, color 0.15s",
                 }}
               >
-                <X size={14} strokeWidth={2.5} />
+                <X size={16} strokeWidth={2.5} />
               </motion.button>
-            )}
+            </div>
           </div>
         </motion.div>
       )}

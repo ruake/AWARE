@@ -27,17 +27,11 @@ export function PassRateHeatmap({ data, onCellClick }: Props) {
 
   if (data.length === 0) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-          fontSize: 12,
-          color: "var(--proof-text-muted)",
-        }}
-      >
-        No run data
+      <div className="proof-card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "48px 24px", gap: "12px", minHeight: 200 }}>
+        <div style={{ padding: "12px", background: "var(--proof-surface-2)", borderRadius: "50%", color: "var(--proof-text-muted)" }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--proof-text-secondary)" }}>No run data available</div>
       </div>
     );
   }
