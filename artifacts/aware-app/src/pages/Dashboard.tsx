@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation } from "wouter";
+import { motion } from "framer-motion";
 import {
   useFilteredRuns,
   useEnvHealth,
@@ -15,10 +16,9 @@ import {
   Calendar,
   Play,
   GitCompare,
-  History,
-  Bot,
   XCircle,
   AlertTriangle,
+  ArrowRight,
 } from "lucide-react";
 import { AnomalyBanner, HeroKpiCard } from "@/components/aware";
 import { TierCard } from "@/components/aware/TierCard";
@@ -356,108 +356,170 @@ export default function Dashboard() {
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.04,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 8 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  };
+
   return (
     <main
       style={{
-        display: "grid",
-        gridTemplateRows: `${hasAlert || hasDegradation ? "auto " : ""}auto auto auto 1fr`,
+        display: "flex",
+        flexDirection: "column",
         gap: 12,
         padding: "12px 24px 16px",
         height: "100%",
         minHeight: 0,
-        animation: "page-enter 0.22s ease-out both",
         boxSizing: "border-box",
+        overflowY: "auto",
       }}
     >
+      {/* ── Anomaly Banner ───────────────────────────────────── */}
+      {(hasAlert || hasDegradation) && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <AnomalyBanner
+            hasAlert={hasAlert}
+            hasDegradation={hasDegradation}
+            regressions={kpis.regressions}
+            degradedTiers={tierGroups
+              .filter((t) => t.status === "degraded")
+              .map((t) => t.tier)
+              .join(", ")}
+            onInvestigate={() => navigate("/compare")}
+          />
+        </motion.div>
+      )}
 
       {/* ── Hero KPI row ─────────────────────────────────────── */}
-      <section
+      <motion.section
         aria-label="Key metrics"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
           gap: 10,
         }}
       >
-        <HeroKpiCard
-          label="Pass Rate"
-          value={kpis.passRate}
-          suffix="%"
-          delta={totalDelta}
-          deltaLabel="vs prev run"
-          sparkData={sparkData}
-          accentColor={chartColor}
-          icon={<Activity size={12} />}
-          onClick={() => navigate("/trends")}
-          delay={0}
-        />
-        <HeroKpiCard
-          label="Total Runs"
-          value={kpis.total}
-          delta={sortedRuns.length >= 2 ? 1 : 0}
-          deltaLabel={`${sortedRuns.length} total`}
-          sparkData={runCountSparkData}
-          accentColor="var(--proof-blue)"
-          icon={<Zap size={12} />}
-          onClick={() => navigate("/runs")}
-          delay={60}
-        />
-        <HeroKpiCard
-          label="Failures"
-          value={kpis.failedRuns}
-          delta={failureDelta}
-          deltaLabel="vs prev run"
-          sparkData={failureSparkData}
-          accentColor={kpis.failedRuns > 0 ? "var(--proof-red)" : "var(--proof-green)"}
-          icon={<XCircle size={12} />}
-          onClick={() => navigate("/runs")}
-          invertDelta
-          delay={120}
-        />
-        <HeroKpiCard
-          label="Regressions"
-          value={kpis.regressions}
-          delta={regressionDelta}
-          deltaLabel="detected"
-          sparkData={regressionSparkData}
-          accentColor={kpis.regressions > 0 ? "var(--proof-red)" : "var(--proof-green)"}
-          icon={<AlertTriangle size={12} />}
-          onClick={() => navigate("/compare")}
-          invertDelta
-          delay={180}
-        />
-      </section>
+        <motion.div variants={itemVariants}>
+          <HeroKpiCard
+            label="Pass Rate"
+            value={kpis.passRate}
+            suffix="%"
+            delta={totalDelta}
+            deltaLabel="vs prev run"
+            sparkData={sparkData}
+            accentColor={chartColor}
+            icon={<Activity size={12} />}
+            onClick={() => navigate("/trends")}
+            delay={0}
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <HeroKpiCard
+            label="Total Runs"
+            value={kpis.total}
+            delta={sortedRuns.length >= 2 ? 1 : 0}
+            deltaLabel={`${sortedRuns.length} total`}
+            sparkData={runCountSparkData}
+            accentColor="var(--proof-blue)"
+            icon={<Zap size={12} />}
+            onClick={() => navigate("/runs")}
+            delay={0}
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <HeroKpiCard
+            label="Failures"
+            value={kpis.failedRuns}
+            delta={failureDelta}
+            deltaLabel="vs prev run"
+            sparkData={failureSparkData}
+            accentColor={kpis.failedRuns > 0 ? "var(--proof-red)" : "var(--proof-green)"}
+            icon={<XCircle size={12} />}
+            onClick={() => navigate("/runs")}
+            invertDelta
+            delay={0}
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <HeroKpiCard
+            label="Regressions"
+            value={kpis.regressions}
+            delta={regressionDelta}
+            deltaLabel="detected"
+            sparkData={regressionSparkData}
+            accentColor={kpis.regressions > 0 ? "var(--proof-red)" : "var(--proof-green)"}
+            icon={<AlertTriangle size={12} />}
+            onClick={() => navigate("/compare")}
+            invertDelta
+            delay={0}
+          />
+        </motion.div>
+      </motion.section>
 
-      {/* ── Run ribbon (temporal context — above tiers) ──────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
-        <RunRibbonCard
-          label="Latest Run"
-          run={latestRun}
-          icon={<Zap size={14} style={{ color: chartColor }} />}
-          accent={chartColor}
-          onClick={latestRun ? () => navigate(`/runs/${latestRun.id}`) : undefined}
-          index={0}
-        />
-        <RunRibbonCard
-          label="Previous Run"
-          run={prevRun}
-          icon={<Clock size={14} style={{ color: "var(--proof-text-muted)" }} />}
-          accent="var(--proof-border-strong)"
-          onClick={prevRun ? () => navigate(`/runs/${prevRun.id}`) : undefined}
-          index={1}
-        />
-        <RunRibbonCard
-          label="Upcoming"
-          nextDue={nextScheduled?.nextDue}
-          icon={<Calendar size={14} style={{ color: "var(--proof-blue)" }} />}
-          accent="var(--proof-blue)"
-          index={2}
-        />
-      </div>
+      {/* ── Run ribbon ────────────────────────────────────────── */}
+      <motion.section
+        aria-label="Temporal context"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        transition={{ delayChildren: 0.04 }}
+        style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}
+      >
+        <motion.div variants={itemVariants}>
+          <RunRibbonCard
+            label="Latest Run"
+            run={latestRun}
+            icon={<Zap size={14} style={{ color: chartColor }} />}
+            accent={chartColor}
+            onClick={latestRun ? () => navigate(`/runs/${latestRun.id}`) : undefined}
+            index={0}
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <RunRibbonCard
+            label="Previous Run"
+            run={prevRun}
+            icon={<Clock size={14} style={{ color: "var(--proof-text-muted)" }} />}
+            accent="var(--proof-border-strong)"
+            onClick={prevRun ? () => navigate(`/runs/${prevRun.id}`) : undefined}
+            index={0}
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <RunRibbonCard
+            label="Upcoming"
+            nextDue={nextScheduled?.nextDue}
+            icon={<Calendar size={14} style={{ color: "var(--proof-blue)" }} />}
+            accent="var(--proof-blue)"
+            index={0}
+          />
+        </motion.div>
+      </motion.section>
 
       {/* ── Tier cards (horizontal) ───────────────────────────── */}
-      <section
+      <motion.section
         aria-label="Environment tiers"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        transition={{ delayChildren: 0.08 }}
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
@@ -465,19 +527,23 @@ export default function Dashboard() {
         }}
       >
         {tierGroups.map((group, i) => (
-          <TierCard
-            key={group.tier}
-            group={group}
-            onClick={() => navigate(`/runs?env=${group.tier}`)}
-            index={i}
-          />
+          <motion.div key={group.tier} variants={itemVariants}>
+            <TierCard
+              group={group}
+              onClick={() => navigate(`/runs?env=${group.tier}`)}
+              index={0}
+            />
+          </motion.div>
         ))}
-      </section>
+      </motion.section>
 
       {/* ── Trend chart (full width) ────────────────────────── */}
-      <div
+      <motion.section
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.12, duration: 0.4 }}
         className="proof-section-card"
-        style={{ display: "flex", flexDirection: "column", minHeight: 200 }}
+        style={{ display: "flex", flexDirection: "column", minHeight: 300 }}
       >
         {/* Header */}
         <div
@@ -485,7 +551,7 @@ export default function Dashboard() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "10px 14px",
+            padding: "12px 16px",
             borderBottom: "1px solid var(--proof-border)",
             flexShrink: 0,
           }}
@@ -494,35 +560,35 @@ export default function Dashboard() {
             <span
               style={{
                 width: 3,
-                height: 13,
+                height: 14,
                 borderRadius: 99,
                 background: chartColor,
                 flexShrink: 0,
               }}
             />
-            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>Pass Rate Trend</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>Pass Rate Trend</div>
             {kpis.regressions > 0 && (
-              <span className="proof-badge" style={{ background: 'var(--proof-red-bg)', color: 'var(--proof-red)', border: '1px solid var(--proof-red-border)', fontSize: 10 }}>
+              <span className="proof-badge" style={{ background: 'var(--proof-red-bg)', color: 'var(--proof-red)', border: '1px solid var(--proof-red-border)', fontSize: 10, fontWeight: 700 }}>
                 {kpis.regressions} {kpis.regressions === 1 ? 'anomaly' : 'anomalies'} detected
               </span>
             )}
-            <span className="proof-badge proof-badge-neutral" style={{ fontSize: 10 }}>
-              14 days
+            <span className="proof-badge proof-badge-neutral" style={{ fontSize: 10, fontWeight: 600 }}>
+              Last 14 days
             </span>
           </div>
           <button
             onClick={() => navigate("/trends")}
             className="proof-button-ghost"
-            style={{ fontSize: 11 }}
+            style={{ fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
           >
-            Full trends →
+            Full trends <ArrowRight size={12} />
           </button>
         </div>
 
-        {/* Chart fills remaining height */}
+        {/* Chart area */}
         <div
           className="proof-chart-area"
-          style={{ flex: 1, minHeight: 0, padding: "12px 8px 8px", position: 'relative' }}
+          style={{ flex: 1, minHeight: 0, padding: "16px 12px 12px", position: 'relative' }}
         >
           {chartData.length === 0 ? (
             <div style={{
@@ -536,7 +602,7 @@ export default function Dashboard() {
               color: 'var(--proof-text-muted)'
             }}>
               <Activity size={24} style={{ opacity: 0.5 }} />
-              <div style={{ fontSize: 12 }}>No run data for selected filters</div>
+              <div style={{ fontSize: 12, fontWeight: 500 }}>No run data for selected filters</div>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -545,6 +611,14 @@ export default function Dashboard() {
                   <linearGradient id="prGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={chartColor} stopOpacity={0.4} />
                     <stop offset="40%" stopColor={chartColor} stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="dangerGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--proof-red)" stopOpacity={0.1} />
+                    <stop offset="100%" stopColor="var(--proof-red)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="warnGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--proof-yellow)" stopOpacity={0.06} />
+                    <stop offset="100%" stopColor="var(--proof-yellow)" stopOpacity={0} />
                   </linearGradient>
                   <filter id="lineGlow" x="-20%" y="-30%" width="140%" height="160%">
                     <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur" />
@@ -557,6 +631,7 @@ export default function Dashboard() {
                   tick={
                     {
                       fontSize: 10,
+                      fontWeight: 500,
                       fill: "var(--proof-text-muted)",
                     } as React.SVGProps<SVGTextElement>
                   }
@@ -569,13 +644,14 @@ export default function Dashboard() {
                   domain={[
                     Math.max(
                       0,
-                      Math.floor(((Math.min(...chartData.map((d) => d.passRate)) || 80) - 5) / 5) * 5,
+                      Math.floor(((Math.min(...chartData.map((d) => d.passRate)) || 80) - 10) / 10) * 10,
                     ),
                     100,
                   ]}
                   tick={
                     {
                       fontSize: 10,
+                      fontWeight: 500,
                       fill: "var(--proof-text-muted)",
                     } as React.SVGProps<SVGTextElement>
                   }
@@ -583,48 +659,52 @@ export default function Dashboard() {
                   axisLine={false}
                   tickFormatter={(v: number) => `${v}%`}
                 />
-                {/* Danger zone — visible */}
+                {/* Reference Areas with visual labels */}
                 <ReferenceArea
                   y1={0}
                   y2={80}
-                  fill="var(--proof-red)"
-                  fillOpacity={0.07}
+                  fill="url(#dangerGrad)"
                   ifOverflow="extendDomain"
                 />
                 <ReferenceArea
                   y1={80}
                   y2={95}
-                  fill="var(--proof-yellow)"
-                  fillOpacity={0.04}
+                  fill="url(#warnGrad)"
                   ifOverflow="extendDomain"
                 />
-                {/* Thresholds — visible labels */}
+                
+                {/* Threshold lines */}
                 <ReferenceLine
                   y={80}
                   stroke="var(--proof-yellow)"
                   strokeDasharray="4 4"
-                  strokeOpacity={0.4}
+                  strokeOpacity={0.5}
                   label={{
-                    value: "80%",
-                    fontSize: 10,
+                    value: "MIN 80%",
+                    fontSize: 9,
+                    fontWeight: 800,
                     fill: "var(--proof-yellow)",
-                    opacity: 0.7,
                     position: "insideTopRight",
+                    dx: -10,
+                    dy: 10
                   }}
                 />
                 <ReferenceLine
                   y={95}
                   stroke="var(--proof-green)"
                   strokeDasharray="6 3"
-                  strokeOpacity={0.6}
+                  strokeOpacity={0.7}
                   label={{
-                    value: "95% gate",
-                    fontSize: 10,
+                    value: "GATE 95%",
+                    fontSize: 9,
+                    fontWeight: 800,
                     fill: "var(--proof-green)",
-                    opacity: 0.85,
                     position: "insideTopRight",
+                    dx: -10,
+                    dy: 10
                   }}
                 />
+
                 <Tooltip content={<ChartTip />} />
                 <Area
                   type="monotone"
@@ -638,21 +718,23 @@ export default function Dashboard() {
                     r: 5,
                     fill: chartColor,
                     stroke: "var(--proof-surface)",
-                    strokeWidth: 2.5,
+                    strokeWidth: 2,
                   }}
                   isAnimationActive={true}
-                  animationDuration={800}
-                  animationEasing="ease-out"
-                  animationBegin={200}
+                  animationDuration={1000}
                 />
               </AreaChart>
             </ResponsiveContainer>
           )}
         </div>
-        <div style={{ fontSize: 11, color: 'var(--proof-text-muted)', textAlign: 'right', marginTop: 4, paddingRight: 14 }}>
-          Last synced: {lastSynced}
+        
+        {/* Footer */}
+        <div style={{ padding: "8px 16px", borderTop: "1px solid var(--proof-border)", display: "flex", justifyContent: "flex-end" }}>
+          <span style={{ fontSize: 10, color: "var(--proof-text-muted)", fontWeight: 500 }}>
+            Last synced: {lastSynced}
+          </span>
         </div>
-      </div>
+      </motion.section>
     </main>
   );
 }

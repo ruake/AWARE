@@ -118,34 +118,38 @@ export function TestFilters({
 
   return (
     <div
+      className="proof-filter-bar"
       style={{
         display: "flex",
         alignItems: "center",
         gap: 8,
         padding: "8px 16px",
-        background: "var(--proof-sidebar-bg)",
+        background: "var(--proof-surface)",
         borderBottom: "1px solid var(--proof-border)",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
+        overflowX: "auto",
         flexShrink: 0,
+        scrollbarWidth: 'none'
       }}
     >
       {/* Search */}
-      <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+      <div style={{ position: "relative", display: "flex", alignItems: "center", flexShrink: 0 }}>
         <Search
           size={13}
           style={{
             position: "absolute",
-            left: 8,
+            left: 10,
             color: "var(--proof-text-muted)",
             pointerEvents: "none",
           }}
         />
         <input
           type="text"
+          className="proof-input"
           placeholder="Search tests…"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          style={{ ...inputStyle, paddingLeft: 28 }}
+          style={{ paddingLeft: 30, width: 220, height: 32 }}
           aria-label="Search tests"
         />
         {search && (
@@ -154,7 +158,7 @@ export function TestFilters({
             aria-label="Clear search"
             style={{
               position: "absolute",
-              right: 6,
+              right: 8,
               background: "none",
               border: "none",
               cursor: "pointer",
@@ -163,112 +167,99 @@ export function TestFilters({
               padding: 0,
             }}
           >
-            <X size={11} />
+            <X size={12} />
           </button>
         )}
       </div>
 
+      <div style={{ width: 1, height: 20, background: 'var(--proof-border)', margin: '0 4px', flexShrink: 0 }} />
+
       {/* Type filter */}
-      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-        <span style={labelStyle}>Type</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
         <select
+          className="proof-select"
           value={testType}
           onChange={(e) => onTestTypeChange(e.target.value)}
           style={{
-            ...selectStyle,
-            borderColor: testType !== "All" ? "var(--proof-blue-border)" : undefined,
+            height: 32,
+            minWidth: 100,
+            borderColor: testType !== "All" ? "var(--proof-blue)" : undefined,
           }}
           aria-label="Filter by type"
         >
-          {TEST_TYPES.map((t) => (
+          <option value="All">All Types</option>
+          {TEST_TYPES.filter(t => t !== "All").map((t) => (
             <option key={t} value={t}>
-              {t}{t !== "All" && typeCounts[t] !== undefined ? ` (${typeCounts[t]})` : ""}
+              {t} ({typeCounts[t] || 0})
             </option>
           ))}
         </select>
-        {testType !== "All" && (
-          <span style={{ fontSize: 10, color: "var(--proof-blue)", fontWeight: 600 }}>
-            {testType} ({filteredCount})
-          </span>
-        )}
       </div>
 
       {/* Category filter */}
-      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-        <span style={labelStyle}>Category</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
         <select
+          className="proof-select"
           value={category}
           onChange={(e) => onCategoryChange(e.target.value)}
           style={{
-            ...selectStyle,
+            height: 32,
             minWidth: 120,
-            borderColor: category !== "All" ? "var(--proof-blue-border)" : undefined,
+            borderColor: category !== "All" ? "var(--proof-blue)" : undefined,
           }}
           aria-label="Filter by category"
         >
-          {TEST_CATEGORIES.map((c) => (
+          <option value="All">All Categories</option>
+          {TEST_CATEGORIES.filter(c => c !== "All").map((c) => (
             <option key={c} value={c}>
-              {c}{c !== "All" && categoryCounts[c] !== undefined ? ` (${categoryCounts[c]})` : ""}
+              {c} ({categoryCounts[c] || 0})
             </option>
           ))}
         </select>
-        {category !== "All" && (
-          <span style={{ fontSize: 10, color: "var(--proof-blue)", fontWeight: 600 }}>
-            {category} ({filteredCount})
-          </span>
-        )}
       </div>
 
       {/* Status filter */}
-      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-        <span style={labelStyle}>Status</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
         <select
+          className="proof-select"
           value={status}
           onChange={(e) => onStatusChange(e.target.value)}
           style={{
-            ...selectStyle,
-            minWidth: 95,
-            borderColor: status !== "All" ? "var(--proof-blue-border)" : undefined,
+            height: 32,
+            minWidth: 100,
+            borderColor: status !== "All" ? "var(--proof-blue)" : undefined,
           }}
           aria-label="Filter by status"
         >
-          {STATUSES.map((s) => (
+          <option value="All">All Statuses</option>
+          {STATUSES.filter(s => s !== "All").map((s) => (
             <option key={s} value={s}>
-              {s}{s !== "All" && statusCounts[s] !== undefined ? ` (${statusCounts[s]})` : ""}
+              {s} ({statusCounts[s] || 0})
             </option>
           ))}
         </select>
-        {status !== "All" && (
-          <span style={{ fontSize: 10, color: "var(--proof-blue)", fontWeight: 600 }}>
-            {status} ({filteredCount})
-          </span>
-        )}
       </div>
 
       {/* Priority filter */}
-      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-        <span style={labelStyle}>Priority</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
         <select
+          className="proof-select"
           value={priority}
           onChange={(e) => onPriorityChange(e.target.value)}
           style={{
-            ...selectStyle,
-            minWidth: 80,
-            borderColor: priority !== "All" ? "var(--proof-blue-border)" : undefined,
+            height: 32,
+            minWidth: 100,
+            borderColor: priority !== "All" ? "var(--proof-blue)" : undefined,
           }}
           aria-label="Filter by priority"
         >
-          {PRIORITIES.map((p) => (
+          <option value="All">All Priorities</option>
+          {PRIORITIES.filter(p => p !== "All").map((p) => (
             <option key={p} value={p}>
-              {p}{p !== "All" && priorityCounts[p] !== undefined ? ` (${priorityCounts[p]})` : ""}
+              {p} ({priorityCounts[p] || 0})
             </option>
           ))}
         </select>
-        {priority !== "All" && (
-          <span style={{ fontSize: 10, color: "var(--proof-blue)", fontWeight: 600 }}>
-            {priority} ({filteredCount})
-          </span>
-        )}
       </div>
 
       {/* Active suite chip */}
@@ -345,13 +336,12 @@ export function TestFilters({
       )}
 
       {/* Result count */}
-      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ width: 1, height: 20, background: 'var(--proof-border)', flexShrink: 0 }} />
         <span
+          className="proof-meta"
           style={{
-            fontSize: 11,
             color: filteredCount < totalCount ? "var(--proof-blue)" : "var(--proof-text-secondary)",
-            fontFamily: "var(--font-mono)",
-            whiteSpace: "nowrap",
             fontWeight: filteredCount < totalCount ? 600 : 400,
           }}
         >

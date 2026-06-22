@@ -73,63 +73,53 @@ export default function About() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 20,
-          padding: "20px 24px",
+          gap: 24,
+          padding: "32px 24px",
           maxWidth: 1100,
           margin: "0 auto",
-          animation: "page-enter 0.22s ease-out both",
+          animation: "page-enter 0.4s ease-out both",
         }}
       >
+        <AboutHero />
+
         {/* System Status Section */}
         <div
+          className="proof-card"
           style={{
-            background: "var(--proof-surface)",
-            border: "1px solid var(--proof-border)",
-            borderRadius: 16,
             padding: "16px 24px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             gap: 20,
+            background: "var(--proof-surface)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <Database size={18} style={{ color: "var(--proof-blue)" }} />
-            <div style={{ fontSize: 13, fontWeight: 600 }}>System Status</div>
+            <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em" }}>System Status</div>
             <div style={{ height: 16, width: 1, background: "var(--proof-border)" }} />
-            <div style={{ display: "flex", gap: 16, fontSize: 12, color: "var(--proof-text-secondary)", flexWrap: "wrap" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                Data Loaded: <span style={{ color: dataHealthy ? "var(--proof-green)" : "var(--proof-red)" }}>{dataHealthy ? "✓" : "✗"}</span>
+            <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--proof-text-secondary)", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 11, fontWeight: 500, textTransform: "uppercase", color: "var(--proof-text-muted)" }}>Data:</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 4, color: dataHealthy ? "var(--proof-green)" : "var(--proof-red)", fontWeight: 600 }}>
+                  <div className={`proof-status-dot proof-status-dot-${dataHealthy ? 'pass' : 'fail'}`} />
+                  {dataHealthy ? "Healthy" : "Error"}
+                </span>
               </div>
-              <div>Runs: <span style={{ color: "var(--proof-text)" }}>{liveRuns.length}</span></div>
-              <div>Last Run: <span style={{ color: "var(--proof-text)" }}>{lastRunDate}</span></div>
-              <div>Environments: <span style={{ color: "var(--proof-text)" }}>{envs.length}</span></div>
+              <div><span style={{ fontSize: 11, fontWeight: 500, textTransform: "uppercase", color: "var(--proof-text-muted)" }}>Runs:</span> <span style={{ color: "var(--proof-text)", fontWeight: 600 }}>{liveRuns.length}</span></div>
+              <div><span style={{ fontSize: 11, fontWeight: 500, textTransform: "uppercase", color: "var(--proof-text-muted)" }}>Latest:</span> <span style={{ color: "var(--proof-text)", fontWeight: 600 }}>{lastRunDate}</span></div>
+              <div><span style={{ fontSize: 11, fontWeight: 500, textTransform: "uppercase", color: "var(--proof-text-muted)" }}>Nodes:</span> <span style={{ color: "var(--proof-text)", fontWeight: 600 }}>{envs.length}</span></div>
             </div>
           </div>
           <button
             onClick={handleCopyVersion}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 11,
-              fontWeight: 600,
-              padding: "4px 10px",
-              borderRadius: 6,
-              border: "1px solid var(--proof-border)",
-              background: "var(--proof-subtle-bg)",
-              color: "var(--proof-text-secondary)",
-              cursor: "pointer",
-              transition: "all 0.1s",
-            }}
-            className="proof-focus-ring"
+            className="proof-button proof-button-xs proof-button-secondary"
           >
             {copied ? <Check size={12} style={{ color: "var(--proof-green)" }} /> : <Copy size={12} />}
             {copied ? "Copied!" : "Copy version info"}
           </button>
         </div>
 
-        <AboutHero />
         <AboutStats
           runs={liveRuns.length}
           tests={totalTests}
@@ -139,11 +129,14 @@ export default function About() {
           runsPerDay={runsPerDay}
           envCount={envs.length}
         />
+        
         <AboutFeatures />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        
+        <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: 24 }}>
           <AboutEnvMap />
           <AboutTechStack />
         </div>
+
         {Object.keys(cats).length > 0 && (
           <AboutTestCategories categories={cats as Record<string, number>} />
         )}

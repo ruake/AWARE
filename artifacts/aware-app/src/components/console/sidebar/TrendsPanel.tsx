@@ -1,5 +1,6 @@
 import React, { useSyncExternalStore } from "react";
 import { Link, useLocation, useSearch } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DIFF_ROWS,
   getTestDetailsAsync,
@@ -22,6 +23,9 @@ import {
   X,
   TrendingUp,
   Grid3x3,
+  Activity,
+  History,
+  Info,
 } from "lucide-react";
 
 function selectorLabel(item: { id: string; name: string }, query: string): React.ReactNode {
@@ -32,7 +36,7 @@ function selectorLabel(item: { id: string; name: string }, query: string): React
   return (
     <>
       {item.name.slice(0, idx)}
-      <strong style={{ background: "var(--proof-blue-bg)", color: "var(--proof-blue)" }}>
+      <strong style={{ background: "var(--proof-blue-bg)", color: "var(--proof-blue-bright)" }}>
         {item.name.slice(idx, idx + query.length)}
       </strong>
       {item.name.slice(idx + query.length)}
@@ -45,32 +49,9 @@ function TestSelector() {
   const params = new URLSearchParams(search);
   const [, navigate] = useLocation();
   const { tcs } = useTestData();
-  const [, setTestDetails] = React.useState<
-    {
-      history: { runId: string; status: "PASS" | "FAIL"; duration: number; env: string }[];
-      passRate: number;
-      flakinessScore: number;
-      avgDuration: number;
-    }[]
-  >([]);
-  React.useEffect(() => {
-    getTestDetailsAsync()
-      .then(setTestDetails)
-      .catch(() => {});
-  }, []);
-
+  
   const rawTestId = params.get("testId") ?? "";
   const isTcMode = rawTestId !== "" && tcs.some((t) => t.id === rawTestId);
-  const _diff =
-    DIFF_ROWS[
-      Math.min(
-        Math.max(
-          0,
-          DIFF_ROWS.findIndex((d) => d.id === (params.get("diffId") ?? "diff_0")),
-        ),
-        DIFF_ROWS.length - 1,
-      )
-    ] ?? DIFF_ROWS[0];
 
   const selectorItems = isTcMode
     ? tcs.map((t) => ({ id: t.id, name: t.name }))
@@ -108,43 +89,45 @@ function TestSelector() {
   }, []);
 
   return (
-    <div style={{ padding: "8px 10px", borderBottom: "1px solid var(--proof-border)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-        <Link
-          href={isTcMode ? "/suites" : "/compare"}
+    <div style={{ padding: "12px", borderBottom: "1px solid var(--proof-border)", background: "var(--proof-surface-subtle)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+        <button
+          onClick={() => navigate(isTcMode ? "/suites" : "/compare")}
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: 3,
+            gap: 4,
             fontSize: 10,
             fontWeight: 600,
             color: "var(--proof-text-secondary)",
-            textDecoration: "none",
-            padding: "2px 6px",
-            borderRadius: 3,
+            padding: "4px 8px",
+            borderRadius: 6,
             border: "1px solid var(--proof-border)",
+            background: "var(--proof-surface)",
+            cursor: "pointer",
           }}
         >
-          <ArrowLeft size={10} /> Back
-        </Link>
-        <ChevronRight size={11} style={{ color: "var(--proof-text-secondary)" }} />
-        <span style={{ fontSize: 10, color: "var(--proof-text-secondary)", fontWeight: 500 }}>
-          Analytics
-        </span>
+          <ArrowLeft size={12} /> Back
+        </button>
+        <div style={{ fontSize: 10, color: "var(--proof-text-tertiary)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          Analysis Explorer
+        </div>
       </div>
       <div ref={selRef} style={{ position: "relative" }}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 4,
-            border: "1px solid var(--proof-grey)",
-            borderRadius: 4,
-            padding: "3px 6px",
-            background: selOpen ? "var(--proof-surface)" : "transparent",
+            gap: 8,
+            border: "1px solid var(--proof-border)",
+            borderRadius: 8,
+            padding: "6px 10px",
+            background: selOpen ? "var(--proof-surface-active)" : "var(--proof-surface)",
+            transition: "all 0.2s ease",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
           }}
         >
-          <Search size={11} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
+          <Search size={14} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
           <input
             value={selSearch}
             onChange={(e) => {
@@ -167,11 +150,11 @@ function TestSelector() {
                 setSelSearch("");
               }
             }}
-            placeholder={isTcMode ? "Search tests..." : "Search diffs..."}
+            placeholder={isTcMode ? "Search tests..." : "Search results..."}
             style={{
               border: "none",
               outline: "none",
-              fontSize: 10,
+              fontSize: 12,
               background: "transparent",
               flex: 1,
               minWidth: 0,
@@ -180,239 +163,104 @@ function TestSelector() {
             }}
           />
           {selSearch && (
-            <button
-              onClick={() => {
-                setSelSearch("");
-                setSelActiveIdx(0);
-              }}
-              style={{
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                color: "var(--proof-text-secondary)",
-                padding: 0,
-                display: "flex",
-              }}
-            >
-              <X size={10} />
-            </button>
+            <X size={12} onClick={() => setSelSearch("")} style={{ color: "var(--proof-text-muted)", cursor: "pointer" }} />
           )}
         </div>
-        {selOpen && filteredSelector.length > 0 && (
-          <div
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              right: 0,
-              zIndex: 100,
-              background: "var(--proof-surface)",
-              border: "1px solid var(--proof-grey)",
-              borderRadius: 4,
-              marginTop: 2,
-              maxHeight: 220,
-              overflow: "auto",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            }}
-          >
-            {filteredSelector.map((item, i) => (
-              <div
-                key={item.id}
-                onClick={() => handleSelectNavigate(item.id)}
-                onMouseEnter={() => setSelActiveIdx(i)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "5px 8px",
-                  cursor: "pointer",
-                  background: i === selActiveIdx ? "var(--proof-blue-bg)" : "transparent",
-                  borderBottom:
-                    i < filteredSelector.length - 1 ? "1px solid var(--proof-grey)" : undefined,
-                }}
-              >
-                <span
+        
+        <AnimatePresence>
+          {selOpen && filteredSelector.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                zIndex: 100,
+                background: "var(--proof-surface-active)",
+                border: "1px solid var(--proof-border-strong)",
+                borderRadius: 8,
+                marginTop: 6,
+                maxHeight: 260,
+                overflow: "auto",
+                boxShadow: "0 12px 32px rgba(0,0,0,0.25)",
+              }}
+            >
+              {filteredSelector.map((item, i) => (
+                <div
+                  key={item.id}
+                  onClick={() => handleSelectNavigate(item.id)}
+                  onMouseEnter={() => setSelActiveIdx(i)}
                   style={{
-                    fontSize: 9,
-                    fontWeight: 600,
-                    flexShrink: 0,
-                    color: "var(--proof-text-secondary)",
-                    fontFamily: "var(--font-mono)",
-                    minWidth: 36,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    background: i === selActiveIdx ? "var(--proof-blue-bg)" : "transparent",
+                    borderBottom: "1px solid var(--proof-border-subtle)",
                   }}
                 >
-                  {item.id}
-                </span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {selectorLabel(item, selSearch)}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      flexShrink: 0,
+                      color: i === selActiveIdx ? "var(--proof-blue-bright)" : "var(--proof-text-muted)",
+                      fontFamily: "var(--font-mono)",
+                      minWidth: 44,
+                    }}
+                  >
+                    {item.id}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 500,
+                      color: i === selActiveIdx ? "var(--proof-text)" : "var(--proof-text-secondary)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {selectorLabel(item, selSearch)}
+                  </span>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
 }
 
-function TestHeader() {
-  const search = useSearch();
-  const params = new URLSearchParams(search);
-  const [, navigate] = useLocation();
-  const { tcs } = useTestData();
-  const rawTestId = params.get("testId") ?? "";
-  const isTcMode = rawTestId !== "" && tcs.some((t) => t.id === rawTestId);
-  const testCase = isTcMode ? (tcs.find((t) => t.id === rawTestId) ?? null) : null;
-  const rawDiffId = params.get("diffId") ?? "diff_0";
-  const idx = Math.max(
-    0,
-    DIFF_ROWS.findIndex((d) => d.id === (isTcMode ? rawTestId : rawDiffId)),
-  );
-  const diff = DIFF_ROWS[Math.min(idx, DIFF_ROWS.length - 1)] ?? DIFF_ROWS[0];
-
-  const testName = isTcMode && testCase ? testCase.name : (diff?.name ?? "Unknown");
-
-  if (!DIFF_ROWS.length) return null;
-
-  const category = isTcMode && testCase ? testCase.category : diff.category;
-  const catIdx = CATEGORIES.indexOf(category) % CATEGORY_COLORS.length;
-  const catColor = CATEGORY_COLORS[catIdx] ?? "#9aa0a6";
+function MiniSparkline({ data, color }: { data: number[], color: string }) {
+  if (!data || data.length < 2) return null;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const width = 60;
+  const height = 16;
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * width;
+    const y = height - ((v - min) / range) * height;
+    return `${x},${y}`;
+  }).join(' ');
 
   return (
-    <div style={{ padding: "8px 10px", borderBottom: "1px solid var(--proof-border)" }}>
-      <div
-        style={{
-          fontSize: 12,
-          fontWeight: 700,
-          color: "var(--proof-text)",
-          lineHeight: 1.3,
-          wordBreak: "break-word",
-          marginBottom: 4,
-        }}
-      >
-        {testName}
-      </div>
-      <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 4 }}>
-        <span
-          style={{
-            fontSize: 9,
-            padding: "1px 6px",
-            borderRadius: 3,
-            fontWeight: 600,
-            background: catColor + "20",
-            border: `1px solid ${catColor}40`,
-            color: catColor,
-          }}
-        >
-          {category}
-        </span>
-        {isTcMode && testCase && (
-          <span
-            style={{
-              fontSize: 9,
-              fontWeight: 600,
-              color:
-                testCase.priority === "P0" ? "var(--proof-red)" : "var(--proof-text-secondary)",
-            }}
-          >
-            {testCase.priority}
-          </span>
-        )}
-      </div>
-      <div style={{ display: "flex", gap: 4 }}>
-        {isTcMode && testCase && (
-          <button
-            onClick={() => navigate(`/tests?q=${testCase.id}`)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              padding: "2px 6px",
-              borderRadius: 3,
-              border: "1px solid var(--proof-border)",
-              background: "var(--proof-surface)",
-              cursor: "pointer",
-              color: "var(--proof-text-secondary)",
-              fontSize: 8,
-            }}
-          >
-            <FileText size={9} /> Def
-          </button>
-        )}
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText(window.location.href);
-          }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            padding: "2px 6px",
-            borderRadius: 3,
-            border: "1px solid var(--proof-border)",
-            background: "var(--proof-surface)",
-            cursor: "pointer",
-            color: "var(--proof-text-secondary)",
-            fontSize: 8,
-          }}
-        >
-          <Share2 size={9} /> Share
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function TrendAlert() {
-  const { tcs } = useTestData();
-  const search = useSearch();
-  const params = new URLSearchParams(search);
-  const rawTestId = params.get("testId") ?? "";
-  const _isTcMode = rawTestId !== "" && tcs.some((t) => t.id === rawTestId);
-  const _rawDiffId = params.get("diffId") ?? "diff_0";
-  const detail = {
-    history: [] as { runId: string; status: "PASS" | "FAIL"; duration: number; env: string }[],
-    passRate: 0,
-    flakinessScore: 0,
-    avgDuration: 0,
-  };
-
-  const recent = detail.history.slice(-3);
-  const trend =
-    recent.length < 3
-      ? "insufficient"
-      : recent.every((h) => h.status === "FAIL")
-        ? "degrading"
-        : "stable";
-
-  if (trend !== "degrading") return null;
-
-  return (
-    <div style={{ padding: "6px 10px", borderBottom: "1px solid var(--proof-border)" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "6px 8px",
-          borderRadius: 4,
-          background: "var(--proof-red-bg)",
-          border: "1px solid var(--proof-red)",
-          fontSize: 10,
-          color: "var(--proof-red)",
-        }}
-      >
-        <AlertTriangle size={11} style={{ flexShrink: 0 }} />
-        <span style={{ flex: 1 }}>Degrading trend</span>
-      </div>
-    </div>
+    <svg width={width} height={height} style={{ overflow: 'visible' }}>
+      <polyline
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={points}
+      />
+    </svg>
   );
 }
 
@@ -864,8 +712,6 @@ export function TrendsPanel() {
       <CompactTrendChart />
       <CompactCategoryHeatmap />
       <TestSelector />
-      <TestHeader />
-      <TrendAlert />
     </>
   );
 }

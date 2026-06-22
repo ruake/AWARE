@@ -1,5 +1,6 @@
 import React from "react";
 import { AlertTriangle, AlertCircle, X, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AnomalyBannerProps {
   hasAlert: boolean;
@@ -45,101 +46,147 @@ export function AnomalyBanner({
   };
 
   return (
-    <div
-      role="alert"
-      aria-live="assertive"
-      className={isCritical ? "animate-anomaly-glow" : "animate-slide-down"}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        padding: "11px 16px",
-        borderRadius: "var(--proof-radius-lg)",
-        background: colorBg,
-        border: `1px solid ${colorBorder}`,
-        borderLeft: `4px solid ${color}`,
-        maxHeight: dismissed ? 0 : 500,
-        opacity: dismissed ? 0 : 1,
-        overflow: dismissed ? "hidden" : "visible",
-        transition: "max-height 0.3s ease-in-out, opacity 0.3s ease-in-out",
-      }}
-    >
-      <div
-        style={{
-          width: 30,
-          height: 30,
-          borderRadius: 8,
-          background: colorIconBg,
-          border: `1px solid ${colorBorder}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
-        <Icon size={15} style={{ color: colorBright }} />
-      </div>
-
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
+    <AnimatePresence>
+      {!dismissed && (
+        <motion.div
+          role="alert"
+          aria-live="assertive"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] }}
           style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: colorBright,
-            lineHeight: 1.4,
-          }}
-        >
-          {count && count > 0 ? (
-            <span style={{ fontWeight: 800 }}>{count} anomalies detected • </span>
-          ) : null}
-          {message}
-        </div>
-        {isCritical && regressions > 0 && (
-          <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 2 }}>
-            Review the Compare page to identify affected tests and determine root cause.
-          </div>
-        )}
-      </div>
-
-      <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
-        <button
-          onClick={onInvestigate}
-          className="proof-button-primary proof-button-sm"
-          style={{
-            display: "inline-flex",
+            display: "flex",
             alignItems: "center",
-            gap: 4,
+            gap: 12,
+            padding: "12px 16px",
+            borderRadius: 16,
+            background: colorBg,
+            border: `1px solid ${colorBorder}`,
+            borderLeft: `5px solid ${color}`,
+            boxShadow: isCritical 
+              ? `0 8px 32px rgba(239, 68, 68, 0.15), 0 0 0 1px ${colorBorder}`
+              : `0 8px 32px rgba(245, 158, 11, 0.1), 0 0 0 1px ${colorBorder}`,
+            position: "relative",
+            zIndex: 10,
           }}
         >
-          Investigate <ArrowRight size={11} />
-        </button>
-        {onDismiss && (
-          <button
-            onClick={handleDismiss}
-            aria-label="Dismiss banner"
+          {/* Pulsing indicator for critical */}
+          {isCritical && (
+            <motion.div
+              animate={{ opacity: [0.4, 0.8, 0.4] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              style={{
+                position: "absolute",
+                top: -1,
+                left: -1,
+                right: -1,
+                bottom: -1,
+                borderRadius: 16,
+                border: `1px solid ${color}`,
+                pointerEvents: "none",
+              }}
+            />
+          )}
+
+          <div
             style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
               background: colorIconBg,
               border: `1px solid ${colorBorder}`,
-              borderRadius: 6,
-              cursor: "pointer",
-              padding: "5px 6px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: colorBright,
-              transition: "background 0.15s, opacity 0.15s",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = colorBorder;
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = colorIconBg;
+              flexShrink: 0,
+              boxShadow: `0 2px 8px ${color}20`,
             }}
           >
-            <X size={14} />
-          </button>
-        )}
-      </div>
-    </div>
+            <Icon size={16} strokeWidth={2.5} style={{ color: colorBright }} />
+          </div>
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 13.5,
+                fontWeight: 700,
+                color: colorBright,
+                lineHeight: 1.2,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              {count && count > 0 ? (
+                <span style={{ 
+                  background: colorBright, 
+                  color: "white", 
+                  fontSize: 10, 
+                  padding: "1px 6px", 
+                  borderRadius: 99,
+                  fontWeight: 900
+                }}>
+                  {count}
+                </span>
+              ) : null}
+              {message}
+            </div>
+            {isCritical && (
+              <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginTop: 4, fontWeight: 500 }}>
+                Review the Compare page to identify affected tests and determine root cause.
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onInvestigate}
+              style={{
+                background: colorBright,
+                color: isCritical ? "white" : "var(--proof-surface)",
+                border: "none",
+                borderRadius: 8,
+                padding: "6px 14px",
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                boxShadow: `0 4px 12px ${color}30`,
+              }}
+            >
+              Investigate <ArrowRight size={12} strokeWidth={3} />
+            </motion.button>
+            
+            {onDismiss && (
+              <motion.button
+                whileHover={{ background: colorBorder }}
+                onClick={handleDismiss}
+                aria-label="Dismiss banner"
+                style={{
+                  background: "transparent",
+                  border: `1px solid ${colorBorder}`,
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  width: 28,
+                  height: 28,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: colorBright,
+                  transition: "background 0.15s",
+                }}
+              >
+                <X size={14} strokeWidth={2.5} />
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

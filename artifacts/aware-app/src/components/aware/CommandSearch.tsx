@@ -23,23 +23,25 @@ export function CommandSearch({
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 10,
-          padding: "14px 18px",
-          borderBottom: "1px solid var(--proof-grey)",
+          gap: 12,
+          padding: "16px 20px",
+          borderBottom: "1px solid var(--proof-border)",
+          background: "var(--proof-surface-2)",
         }}
       >
-        <span style={{ fontSize: 16, color: "var(--proof-text-secondary)" }}>🔍</span>
+        <span style={{ fontSize: 18, color: "var(--proof-blue)", opacity: 0.8 }}>🔍</span>
         <input
           ref={inputRef}
           type="text"
           aria-label="Search tests, runs, suites, or type > for actions"
-          placeholder="Search tests, runs, suites, or type &gt; for actions..."
+          placeholder="Search for anything... (type > for actions)"
           style={{
             flex: 1,
             background: "transparent",
             border: "none",
             outline: "none",
-            fontSize: 15,
+            fontSize: 16,
+            fontWeight: 500,
             color: "var(--proof-text)",
             fontFamily: "var(--font-sans)",
           }}
@@ -49,27 +51,31 @@ export function CommandSearch({
           }}
           onKeyDown={onKeyDown}
         />
-        <kbd
-          style={{
-            fontSize: 11,
-            padding: "2px 6px",
-            background: "var(--proof-grey-bg)",
-            border: "1px solid var(--proof-grey)",
-            borderRadius: 4,
-            color: "var(--proof-text-secondary)",
-            fontFamily: "var(--font-mono)",
-          }}
-        >
-          ESC
-        </kbd>
+        <div style={{ display: "flex", gap: 6 }}>
+          <kbd
+            style={{
+              fontSize: 10,
+              padding: "3px 8px",
+              background: "var(--proof-surface-3)",
+              border: "1px solid var(--proof-border)",
+              borderRadius: 6,
+              color: "var(--proof-text-secondary)",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 700,
+              boxShadow: "0 2px 0 var(--proof-border)",
+            }}
+          >
+            ESC
+          </kbd>
+        </div>
       </div>
       <div
         style={{
           display: "flex",
-          gap: 6,
-          padding: "8px 18px",
-          borderBottom: "1px solid var(--proof-grey)",
-          background: "var(--proof-grey-bg)",
+          gap: 8,
+          padding: "10px 20px",
+          borderBottom: "1px solid var(--proof-border)",
+          background: "var(--proof-surface-2)",
           flexWrap: "wrap",
         }}
       >
@@ -77,29 +83,22 @@ export function CommandSearch({
           <button
             key={type}
             onClick={() => onTypeFilterChange(typeFilter === type ? null : type)}
+            className="proof-button"
             style={{
               fontSize: 11,
-              padding: "3px 10px",
-              borderRadius: 12,
-              fontWeight: 600,
-              cursor: "pointer",
-              border: "1px solid",
+              padding: "4px 12px",
+              borderRadius: 20,
+              fontWeight: 700,
+              border: "1px solid var(--proof-border)",
               background: typeFilter === type ? "var(--proof-blue)" : "var(--proof-surface)",
               color: typeFilter === type ? "white" : "var(--proof-text-secondary)",
-              borderColor: typeFilter === type ? "var(--proof-blue)" : "var(--proof-grey)",
-              transition: "all 0.15s",
+              borderColor: typeFilter === type ? "var(--proof-blue)" : "var(--proof-border)",
+              transition: "all 0.2s",
+              minWidth: "auto",
             }}
           >
-            {type === "test"
-              ? "Tests"
-              : type === "run"
-                ? "Runs"
-                : type === "compare"
-                  ? "Compare"
-                  : type === "action"
-                    ? "Actions"
-                    : "Suites"}{" "}
-            ({typeCounts[type]})
+            {type.charAt(0).toUpperCase() + type.slice(1)}s
+            <span style={{ marginLeft: 6, opacity: 0.6 }}>{typeCounts[type]}</span>
           </button>
         ))}
         {typeFilter && (

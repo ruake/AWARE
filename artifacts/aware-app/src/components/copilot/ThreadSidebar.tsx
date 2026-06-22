@@ -233,10 +233,10 @@ function ThreadItem({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 6,
-        padding: "7px 10px",
+        gap: 8,
+        padding: "8px 12px",
         cursor: "pointer",
-        borderRadius: 7,
+        borderRadius: 12,
         background: isActive
           ? "var(--proof-blue-bg)"
           : isPinned
@@ -247,10 +247,11 @@ function ThreadItem({
           : isFocused
             ? "1px solid var(--proof-border-focus)"
             : "1px solid transparent",
-        transition: "background 0.1s, border-color 0.1s",
+        transition: "all 0.2s",
         position: "relative",
         userSelect: "none",
         outline: "none",
+        margin: "0 4px",
       }}
       onMouseEnter={(e) => {
         if (!isActive) {

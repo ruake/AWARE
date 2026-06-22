@@ -1,6 +1,7 @@
 import React from "react";
 import { Network } from "lucide-react";
 import { AboutSection } from "./AboutSection";
+import { motion } from "framer-motion";
 
 export function AboutEnvMap() {
   return (
@@ -30,8 +31,9 @@ export function AboutEnvMap() {
             envs: ["PROD / Staging", "PROD / Production"],
           },
         ].map((t) => (
-          <div
+          <motion.div
             key={t.tier}
+            whileHover={{ x: 4, borderColor: "var(--proof-border-accent)" }}
             style={{
               display: "flex",
               flexDirection: "column",
@@ -40,10 +42,23 @@ export function AboutEnvMap() {
               borderRadius: 10,
               border: "1px solid var(--proof-border)",
               background: "var(--proof-subtle-bg)",
+              transition: "border-color 0.2s",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: t.color }} />
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [1, 0.7, 1],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: t.tier === "QA" ? 0 : t.tier === "UAT" ? 0.6 : 1.2,
+                }}
+                style={{ width: 7, height: 7, borderRadius: "50%", background: t.color }}
+              />
               <span style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>
                 {t.tier}
               </span>
@@ -72,7 +87,7 @@ export function AboutEnvMap() {
                 </span>
               ))}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </AboutSection>

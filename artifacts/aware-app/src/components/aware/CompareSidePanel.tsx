@@ -109,7 +109,8 @@ export function CompareSidePanel({
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        borderLeft: `3px solid ${diff.state === "regression" ? "var(--proof-red)" : diff.state === "fixed" ? "var(--proof-green)" : "var(--proof-blue)"}`,
+        borderLeft: `4px solid ${diff.state === "regression" ? "var(--proof-red)" : diff.state === "fixed" ? "var(--proof-green)" : "var(--proof-blue)"}`,
+        animation: "proof-slide-up 0.3s ease-out",
       }}
     >
       {/* Header */}

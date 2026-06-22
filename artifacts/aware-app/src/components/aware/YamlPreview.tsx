@@ -47,10 +47,12 @@ export function YamlPreview({ yaml }: { yaml: string }) {
   return (
     <div
       style={{
-        borderBottom: "1px solid var(--proof-grey)",
+        border: "1px solid var(--proof-border)",
+        borderRadius: 12,
         background: "var(--proof-surface)",
         color: "var(--proof-text)",
-        padding: 16,
+        overflow: "hidden",
+        boxShadow: "var(--proof-shadow-sm)",
       }}
     >
       <div
@@ -58,49 +60,76 @@ export function YamlPreview({ yaml }: { yaml: string }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 8,
+          padding: "10px 16px",
+          background: "var(--proof-surface-2)",
+          borderBottom: "1px solid var(--proof-border)",
         }}
       >
-        <span
-          style={{
-            fontSize: 11,
-            textTransform: "uppercase",
-            letterSpacing: "0.5px",
-            color: "var(--proof-text-secondary)",
-          }}
-        >
-          GitHub Actions Workflow
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "var(--proof-blue)",
+            }}
+          />
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              color: "var(--proof-text-secondary)",
+            }}
+          >
+            GitHub Actions Workflow
+          </span>
+        </div>
         <button
           onClick={() => {
             navigator.clipboard.writeText(yaml);
-            show("YAML copied");
+            show("YAML configuration copied to clipboard");
           }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            fontSize: 12,
-            color: "var(--proof-blue)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-          }}
+          className="proof-button proof-button-sm"
+          style={{ padding: "4px 10px" }}
         >
-          <Copy size={12} /> Copy
+          <Copy size={12} /> Copy YAML
         </button>
       </div>
       <pre
         style={{
-          fontSize: 11,
+          fontSize: 12,
           fontFamily: "var(--font-mono)",
           lineHeight: 1.6,
           overflow: "auto",
-          maxHeight: 200,
+          maxHeight: 400,
           whiteSpace: "pre-wrap",
+          padding: 20,
+          margin: 0,
+          background: "var(--proof-surface)",
+          color: "var(--proof-text)",
         }}
       >
-        {yaml}
+        {yaml.split("\n").map((line, i) => {
+          const isComment = line.trim().startsWith("#");
+          const isKey = line.includes(":") && !line.startsWith("-");
+          
+          return (
+            <div key={i} style={{ display: "flex", gap: 16 }}>
+              <span style={{ width: 24, textAlign: "right", opacity: 0.3, userSelect: "none" }}>{i + 1}</span>
+              <span style={{ 
+                color: isComment 
+                  ? "var(--proof-text-secondary)" 
+                  : isKey 
+                    ? "var(--proof-blue)" 
+                    : "var(--proof-text)" 
+              }}>
+                {line}
+              </span>
+            </div>
+          );
+        })}
       </pre>
       {Toast}
     </div>

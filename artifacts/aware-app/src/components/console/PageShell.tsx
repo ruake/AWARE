@@ -78,10 +78,10 @@ export function PageShell({
           alignItems: "center",
           justifyContent: "space-between",
           gap: 12,
-          padding: "18px 24px 14px",
+          padding: "24px 32px",
           flexShrink: 0,
           borderBottom: "1px solid var(--proof-border)",
-          background: "rgba(0,0,0,0.15)",
+          background: "rgba(0,0,0,0.1)",
           backdropFilter: "blur(8px)",
           WebkitBackdropFilter: "blur(8px)",
           position: "relative",
@@ -91,25 +91,26 @@ export function PageShell({
         <div
           style={{
             position: "absolute",
-            bottom: 0,
-            left: 24,
-            width: 40,
+            bottom: -1,
+            left: 32,
+            width: 48,
             height: 2,
             borderRadius: 99,
             background: accentColor,
-            opacity: 0.6,
+            boxShadow: `0 0 12px ${accentColor}`,
+            zIndex: 1,
           }}
         />
 
         <div style={{ minWidth: 0 }}>
           <h1
             style={{
-              fontSize: 19,
-              fontWeight: 800,
+              fontSize: 17,
+              fontWeight: 700,
               color: "var(--proof-text)",
               margin: 0,
               lineHeight: 1.2,
-              letterSpacing: "-0.5px",
+              letterSpacing: "-0.02em",
             }}
           >
             {title}
@@ -117,9 +118,9 @@ export function PageShell({
           {subtitle && (
             <p
               style={{
-                fontSize: 12,
+                fontSize: 13,
                 color: "var(--proof-text-secondary)",
-                margin: "3px 0 0",
+                margin: "4px 0 0",
                 lineHeight: 1.4,
               }}
             >
@@ -128,7 +129,7 @@ export function PageShell({
           )}
         </div>
         {headerActions && (
-          <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 10, flexShrink: 0, alignItems: "center" }}>
             {headerActions}
           </div>
         )}
@@ -138,10 +139,10 @@ export function PageShell({
       {filters && (
         <div
           style={{
-            padding: "10px 24px",
+            padding: "12px 32px",
             flexShrink: 0,
             borderBottom: "1px solid var(--proof-border-light)",
-            background: "rgba(0,0,0,0.08)",
+            background: "var(--proof-surface-2)",
           }}
         >
           {filters}
@@ -150,7 +151,7 @@ export function PageShell({
 
       {/* Top pagination */}
       {hasPaginationTop && (
-        <div style={{ padding: "8px 24px 0", flexShrink: 0 }}>{renderPagination()}</div>
+        <div style={{ padding: "12px 32px 0", flexShrink: 0 }}>{renderPagination()}</div>
       )}
 
       {/* Content area */}
@@ -160,7 +161,7 @@ export function PageShell({
           minHeight: 0,
           overflowY: "auto",
           overflowX: "hidden",
-          padding: "16px 24px 24px",
+          padding: "24px 32px 32px",
         }}
       >
         {children}
@@ -168,7 +169,7 @@ export function PageShell({
 
       {/* Bottom pagination */}
       {hasPaginationBottom && (
-        <div style={{ padding: "0 24px 16px", flexShrink: 0 }}>{renderPagination()}</div>
+        <div style={{ padding: "0 32px 24px", flexShrink: 0 }}>{renderPagination()}</div>
       )}
     </div>
   );

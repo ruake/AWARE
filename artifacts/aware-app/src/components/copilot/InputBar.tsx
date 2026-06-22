@@ -118,6 +118,20 @@ export default function InputBar({
           disabled={!canSend}
           title={busy ? "Generating…" : canSend ? "Send (Enter)" : "Type a message"}
           className={`copilot-send-btn ${canSend ? "copilot-send-btn-active" : "copilot-send-btn-inactive"}`}
+          style={{
+            background: canSend ? "var(--proof-blue)" : "var(--proof-surface-3)",
+            color: canSend ? "#fff" : "var(--proof-text-muted)",
+            border: "none",
+            borderRadius: 8,
+            width: 32,
+            height: 32,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: canSend ? "pointer" : "not-allowed",
+            transition: "all 0.2s",
+            boxShadow: canSend ? "0 0 12px var(--proof-blue-glow)" : "none",
+          }}
         >
           <Send size={15} />
         </button>

@@ -133,20 +133,19 @@ function Columns({ children }: { children: string[] }) {
       style={{
         display: "grid",
         gridTemplateColumns: `repeat(${Math.min(children.length, 3)}, 1fr)`,
-        gap: 14,
-        margin: "10px 0",
+        gap: 20,
+        margin: "20px 0",
       }}
     >
       {children.map((col, i) => (
         <div
           key={i}
+          className="proof-card"
           style={{
             minWidth: 0,
             overflow: "hidden",
-            background: "var(--proof-surface)",
-            borderRadius: 8,
-            border: "1px solid var(--proof-border)",
-            padding: 12,
+            padding: 20,
+            background: "var(--proof-surface-2)",
           }}
         >
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
@@ -509,10 +508,10 @@ const components = {
   h1: ({ children }: { children: React.ReactNode }) => (
     <h1
       style={{
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: 700,
-        margin: "16px 0 8px",
-        paddingBottom: 6,
+        margin: "24px 0 12px",
+        paddingBottom: 8,
         borderBottom: "2px solid var(--proof-blue)",
         color: "var(--proof-text)",
       }}
@@ -523,10 +522,10 @@ const components = {
   h2: ({ children }: { children: React.ReactNode }) => (
     <h2
       style={{
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: 700,
-        margin: "14px 0 6px",
-        paddingBottom: 4,
+        margin: "20px 0 10px",
+        paddingBottom: 6,
         borderBottom: "1px solid var(--proof-border)",
         color: "var(--proof-text)",
       }}
@@ -535,19 +534,19 @@ const components = {
     </h2>
   ),
   h3: ({ children }: { children: React.ReactNode }) => (
-    <h3 style={{ fontSize: 13, fontWeight: 600, margin: "12px 0 4px", color: "var(--proof-blue)" }}>
+    <h3 style={{ fontSize: 13, fontWeight: 600, margin: "16px 0 8px", color: "var(--proof-blue)" }}>
       {children}
     </h3>
   ),
   h4: ({ children }: { children: React.ReactNode }) => (
     <h4
       style={{
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: 600,
-        margin: "10px 0 3px",
+        margin: "12px 0 6px",
         textTransform: "uppercase",
-        letterSpacing: "0.06em",
-        color: "var(--proof-text-muted)",
+        letterSpacing: "0.1em",
+        color: "var(--proof-text-secondary)",
       }}
     >
       {children}

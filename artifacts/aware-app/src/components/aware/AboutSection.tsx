@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 export function AboutSection({
   color,
@@ -14,7 +15,11 @@ export function AboutSection({
   children: React.ReactNode;
 }) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
       style={{
         background: "var(--proof-surface)",
         border: "1px solid var(--proof-border)",
@@ -31,7 +36,15 @@ export function AboutSection({
           gap: 10,
         }}
       >
-        <div
+        <motion.div
+          animate={{
+            opacity: [1, 0.6, 1],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
           style={{
             width: 3,
             height: 18,
@@ -66,6 +79,6 @@ export function AboutSection({
         )}
       </div>
       {children}
-    </div>
+    </motion.div>
   );
 }

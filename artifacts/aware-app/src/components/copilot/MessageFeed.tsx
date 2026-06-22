@@ -112,30 +112,31 @@ function MessageFeedInner({ messages, onRetry, onSend }: Props) {
         >
           <div
             style={{
-              width: 56,
-              height: 56,
-              borderRadius: 16,
+              width: 64,
+              height: 64,
+              borderRadius: 20,
               background: "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1))",
               border: "1px solid rgba(59,130,246,0.25)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              boxShadow: "0 0 20px var(--proof-blue-glow)",
             }}
           >
-            <span style={{ fontSize: 24 }}>🤖</span>
+            <span style={{ fontSize: 28 }}>🤖</span>
           </div>
           <div style={{ textAlign: "center" }}>
             <div
-              style={{ fontSize: 15, fontWeight: 700, color: "var(--proof-text)", marginBottom: 4 }}
+              style={{ fontSize: 17, fontWeight: 700, color: "var(--proof-text)", marginBottom: 8 }}
             >
               A.W.A.R.E. Copilot
             </div>
             <div
               style={{
-                fontSize: 12,
-                color: "var(--proof-text-muted)",
-                maxWidth: 340,
-                lineHeight: 1.5,
+                fontSize: 13,
+                color: "var(--proof-text-secondary)",
+                maxWidth: 400,
+                lineHeight: 1.6,
               }}
             >
               Ask about test failures, flakiness, promotion status, or analyze runs.
@@ -146,8 +147,9 @@ function MessageFeedInner({ messages, onRetry, onSend }: Props) {
               display: "flex",
               flexWrap: "wrap",
               justifyContent: "center",
-              gap: 8,
-              maxWidth: 400,
+              gap: 10,
+              maxWidth: 500,
+              marginTop: 12,
             }}
           >
             {QUICK_ACTIONS.map((action) => {
@@ -159,29 +161,33 @@ function MessageFeedInner({ messages, onRetry, onSend }: Props) {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 5,
-                    padding: "6px 12px",
-                    borderRadius: 8,
-                    fontSize: 11.5,
+                    gap: 6,
+                    padding: "8px 16px",
+                    borderRadius: 999,
+                    fontSize: 12,
                     fontWeight: 600,
                     cursor: "pointer",
                     border: "1px solid var(--proof-border)",
-                    background: "rgba(255,255,255,0.03)",
+                    background: "var(--proof-surface-2)",
                     color: "var(--proof-text-secondary)",
-                    transition: "all 0.15s",
+                    transition: "all 0.2s",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)";
+                    (e.currentTarget as HTMLElement).style.background = "var(--proof-surface-hover)";
                     (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-                    (e.currentTarget as HTMLElement).style.borderColor = action.color + "40";
+                    (e.currentTarget as HTMLElement).style.borderColor = action.color + "80";
+                    (e.currentTarget as HTMLElement).style.boxShadow = `0 0 12px ${action.color}33`;
+                    (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
+                    (e.currentTarget as HTMLElement).style.background = "var(--proof-surface-2)";
                     (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
                     (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                    (e.currentTarget as HTMLElement).style.transform = "none";
                   }}
                 >
-                  <Icon size={12} style={{ color: action.color }} />
+                  <Icon size={14} style={{ color: action.color }} />
                   {action.label}
                 </button>
               );

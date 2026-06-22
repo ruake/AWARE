@@ -1,11 +1,14 @@
 import React from "react";
 import type { SearchResult } from "./CommandPalette";
 
+import { motion } from "framer-motion";
+
 function typeColor(type: string) {
   if (type === "test") return { bg: "rgba(168,85,247,0.15)", color: "var(--proof-purple)" };
   if (type === "suite") return { bg: "rgba(245,158,11,0.15)", color: "var(--proof-yellow)" };
   if (type === "run") return { bg: "rgba(91,138,245,0.15)", color: "var(--proof-blue)" };
-  return { bg: "rgba(34,197,94,0.15)", color: "var(--proof-green)" };
+  if (type === "action") return { bg: "rgba(34,197,94,0.15)", color: "var(--proof-green)" };
+  return { bg: "rgba(154,160,166,0.15)", color: "var(--proof-text-secondary)" };
 }
 
 const FOOTER_KEYS: [string, string][] = [
@@ -30,50 +33,60 @@ export function CommandResults({
 }) {
   return (
     <>
-      <div style={{ maxHeight: 360, overflowY: "auto" }}>
+      <div style={{ maxHeight: 420, overflowY: "auto", padding: "8px 0" }}>
         {filtered.length === 0 ? (
           <div
             style={{
-              padding: "40px 18px",
+              padding: "60px 20px",
               textAlign: "center",
               color: "var(--proof-text-secondary)",
-              fontSize: 13,
             }}
           >
-            {query.startsWith(">")
-              ? `No actions for "${query.slice(1).trim()}"`
-              : `No results for "${query}"`}
+            <div style={{ fontSize: 24, marginBottom: 12, opacity: 0.5 }}>∅</div>
+            <div style={{ fontSize: 14, fontWeight: 500 }}>
+              {query.startsWith(">")
+                ? `No actions matching "${query.slice(1).trim()}"`
+                : `No results found for "${query}"`}
+            </div>
+            <div style={{ fontSize: 12, marginTop: 4, opacity: 0.7 }}>Try a different search term</div>
           </div>
         ) : (
           filtered.map((r, i) => {
             const tc = typeColor(r.type);
+            const isActive = i === activeIdx;
             return (
-              <div
+              <motion.div
                 key={r.id}
+                initial={false}
+                animate={{ 
+                  background: isActive ? "var(--proof-surface-2)" : "transparent",
+                  x: isActive ? 4 : 0
+                }}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 10,
-                  padding: "10px 18px",
+                  gap: 12,
+                  padding: "10px 20px",
                   cursor: "pointer",
-                  background: i === activeIdx ? "var(--proof-blue-bg)" : "transparent",
-                  transition: "background 0.1s",
+                  margin: "0 8px",
+                  borderRadius: 8,
                 }}
                 onClick={() => onSelect(r)}
                 onMouseEnter={() => onHover(i)}
               >
                 <div
                   style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 6,
-                    background: tc.bg,
-                    color: tc.color,
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    background: isActive ? "var(--proof-blue)" : tc.bg,
+                    color: isActive ? "white" : tc.color,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: 14,
+                    fontSize: 16,
                     flexShrink: 0,
+                    transition: "all 0.2s",
                   }}
                 >
                   {r.icon}
@@ -82,8 +95,8 @@ export function CommandResults({
                   <div
                     style={{
                       fontSize: 13,
-                      fontWeight: 500,
-                      color: "var(--proof-text)",
+                      fontWeight: 600,
+                      color: isActive ? "var(--proof-blue)" : "var(--proof-text)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -98,6 +111,7 @@ export function CommandResults({
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
+                      opacity: 0.8,
                     }}
                   >
                     {r.description}
@@ -106,46 +120,52 @@ export function CommandResults({
                 <span
                   style={{
                     fontSize: 10,
-                    padding: "2px 7px",
-                    borderRadius: 4,
-                    fontWeight: 600,
-                    background: tc.bg,
-                    color: tc.color,
+                    padding: "2px 8px",
+                    borderRadius: 10,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    background: isActive ? "rgba(91, 138, 245, 0.2)" : tc.bg,
+                    color: isActive ? "var(--proof-blue)" : tc.color,
                     flexShrink: 0,
                   }}
                 >
                   {r.type}
                 </span>
-              </div>
+              </motion.div>
             );
           })
         )}
       </div>
       <div
         style={{
-          padding: "8px 18px",
-          borderTop: "1px solid var(--proof-grey)",
+          padding: "12px 20px",
+          borderTop: "1px solid var(--proof-border)",
           display: "flex",
-          gap: 14,
+          justifyContent: "center",
+          gap: 20,
           fontSize: 11,
           color: "var(--proof-text-secondary)",
+          background: "var(--proof-surface-2)",
         }}
       >
         {FOOTER_KEYS.map(([key, label]) => (
-          <span key={key}>
+          <span key={key} style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <kbd
               style={{
-                padding: "1px 5px",
-                background: "var(--proof-grey-bg)",
-                border: "1px solid var(--proof-grey)",
-                borderRadius: 3,
+                padding: "2px 6px",
+                background: "var(--proof-surface-3)",
+                border: "1px solid var(--proof-border)",
+                borderRadius: 4,
                 fontFamily: "var(--font-mono)",
                 fontSize: 10,
+                fontWeight: 700,
+                color: "var(--proof-text)",
               }}
             >
               {key}
-            </kbd>{" "}
-            {label}
+            </kbd>
+            <span style={{ opacity: 0.7 }}>{label}</span>
           </span>
         ))}
       </div>

@@ -25,8 +25,8 @@ export function ActivityBar({
   return (
     <aside
       style={{
-        width: 64,
-        minWidth: 64,
+        width: 72,
+        minWidth: 72,
         background: "var(--proof-activity-bar-bg)",
         display: "flex",
         flexDirection: "column",
@@ -35,9 +35,9 @@ export function ActivityBar({
         flexShrink: 0,
         height: "100%",
         userSelect: "none",
-        paddingTop: 8,
-        paddingBottom: 8,
-        gap: 2,
+        paddingTop: 12,
+        paddingBottom: 12,
+        gap: 6,
         position: "relative",
         zIndex: 10,
       }}
@@ -57,21 +57,21 @@ export function ActivityBar({
             onMouseLeave={() => setHoveredId(null)}
             style={{
               position: "relative",
-              width: 48,
-              height: 48,
+              width: 52,
+              height: 52,
               border: "none",
-              borderRadius: 12,
+              borderRadius: 14,
               cursor: "pointer",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               gap: 4,
-              transition: "all 150ms cubic-bezier(0.2,0,0,1)",
+              transition: "all 200ms cubic-bezier(0.2,0,0,1)",
               background: isActive
-                ? "linear-gradient(135deg, rgba(59,130,246,0.22) 0%, rgba(96,165,250,0.12) 100%)"
+                ? "linear-gradient(135deg, rgba(59,130,246,0.25) 0%, rgba(96,165,250,0.15) 100%)"
                 : isHovered
-                  ? "var(--proof-hover)"
+                  ? "var(--proof-surface-3)"
                   : "transparent",
               color: isActive
                 ? "var(--proof-blue-bright)"
@@ -79,9 +79,9 @@ export function ActivityBar({
                   ? "var(--proof-text)"
                   : "var(--proof-text-muted)",
               boxShadow: isActive
-                ? "inset 0 0 0 1px rgba(59,130,246,0.25), 0 0 0 1px rgba(59,130,246,0.1)"
+                ? "inset 0 0 0 1px rgba(59,130,246,0.3), 0 4px 12px var(--proof-blue-glow)"
                 : "none",
-              transform: isHovered && !isActive ? "scale(1.05)" : "scale(1)",
+              transform: isHovered && !isActive ? "scale(1.05) translateX(2px)" : "scale(1)",
               flexShrink: 0,
             }}
           >
@@ -90,14 +90,15 @@ export function ActivityBar({
               <span
                 style={{
                   position: "absolute",
-                  left: -8,
+                  left: -6,
                   top: "50%",
                   transform: "translateY(-50%)",
-                  width: 3,
-                  height: 28,
-                  borderRadius: "0 3px 3px 0",
+                  width: 4,
+                  height: 32,
+                  borderRadius: "0 4px 4px 0",
                   background: "linear-gradient(180deg, var(--proof-blue-bright), var(--proof-blue))",
-                  boxShadow: "0 0 8px var(--proof-blue-glow)",
+                  boxShadow: "0 0 12px var(--proof-blue-glow)",
+                  zIndex: 2,
                 }}
               />
             )}
@@ -108,35 +109,36 @@ export function ActivityBar({
                 style={{
                   position: "absolute",
                   inset: 0,
-                  borderRadius: 12,
+                  borderRadius: 14,
                   background:
-                    "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.25) 0%, transparent 70%)",
+                    "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.3) 0%, transparent 70%)",
                   pointerEvents: "none",
                 }}
               />
             )}
 
             <Icon
-              size={18}
+              size={20}
               style={{
-                transition: "transform 150ms ease",
+                transition: "transform 200ms ease",
                 transform: isHovered ? "scale(1.1)" : "scale(1)",
                 flexShrink: 0,
               }}
             />
             <span
               style={{
-                fontSize: 8.5,
-                fontWeight: isActive ? 700 : 500,
-                letterSpacing: "0.1px",
+                fontSize: 9,
+                fontWeight: isActive ? 700 : 600,
+                letterSpacing: "0.2px",
                 textTransform: "uppercase",
                 lineHeight: 1,
-                opacity: isActive ? 1 : 0.7,
-                maxWidth: 48,
+                opacity: isActive ? 1 : 0.6,
+                maxWidth: 52,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
                 textAlign: "center",
+                transition: "opacity 200ms ease",
               }}
             >
               {item.label}

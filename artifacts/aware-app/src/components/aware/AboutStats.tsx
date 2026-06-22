@@ -1,6 +1,7 @@
 import React from "react";
 import { Activity, CheckCircle2, Layers, TrendingUp, Shield, Clock, Globe } from "lucide-react";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
+import { motion } from "framer-motion";
 
 function useCountUp(target: number): string {
   const [v, setV] = React.useState(0);
@@ -32,7 +33,8 @@ function StatCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -4, borderColor: "var(--proof-border-accent)" }}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -41,15 +43,7 @@ function StatCard({
         background: "var(--proof-surface)",
         border: "1px solid var(--proof-border)",
         borderRadius: 14,
-        transition: "border-color 0.15s, transform 0.15s",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-accent)";
-        (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border)";
-        (e.currentTarget as HTMLElement).style.transform = "none";
+        transition: "border-color 0.15s",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -92,9 +86,24 @@ function StatCard({
       >
         {value}
       </div>
-    </div>
+    </motion.div>
   );
 }
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, scale: 0.95 },
+  show: { opacity: 1, scale: 1 },
+};
 
 export function AboutStats({
   runs,
@@ -120,54 +129,75 @@ export function AboutStats({
 
   return (
     <PanelErrorBoundary label="Live stats">
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-        <StatCard
-          label="Total Runs"
-          value={cRuns}
-          color="var(--proof-blue)"
-          icon={<Activity size={14} />}
-        />
-        <StatCard
-          label="Tests"
-          value={cTests}
-          color="var(--proof-green)"
-          icon={<CheckCircle2 size={14} />}
-        />
-        <StatCard
-          label="Suites"
-          value={cSuites}
-          color="var(--proof-yellow)"
-          icon={<Layers size={14} />}
-        />
-        <StatCard
-          label="Avg Pass Rate"
-          value={`${cRate}%`}
-          color="var(--proof-green)"
-          icon={<TrendingUp size={14} />}
-        />
-      </div>
-      <div
-        style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginTop: 12 }}
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
       >
-        <StatCard
-          label="Promotions"
-          value={`${promoPct}%`}
-          color="var(--proof-purple)"
-          icon={<Shield size={14} />}
-        />
-        <StatCard
-          label="Run Frequency"
-          value={runsPerDay}
-          color="var(--proof-text-secondary)"
-          icon={<Clock size={14} />}
-        />
-        <StatCard
-          label="Environments"
-          value={envCount}
-          color="var(--proof-cyan)"
-          icon={<Globe size={14} />}
-        />
-      </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          <motion.div variants={item}>
+            <StatCard
+              label="Total Runs"
+              value={cRuns}
+              color="var(--proof-blue)"
+              icon={<Activity size={14} />}
+            />
+          </motion.div>
+          <motion.div variants={item}>
+            <StatCard
+              label="Tests"
+              value={cTests}
+              color="var(--proof-green)"
+              icon={<CheckCircle2 size={14} />}
+            />
+          </motion.div>
+          <motion.div variants={item}>
+            <StatCard
+              label="Suites"
+              value={cSuites}
+              color="var(--proof-yellow)"
+              icon={<Layers size={14} />}
+            />
+          </motion.div>
+          <motion.div variants={item}>
+            <StatCard
+              label="Avg Pass Rate"
+              value={`${cRate}%`}
+              color="var(--proof-green)"
+              icon={<TrendingUp size={14} />}
+            />
+          </motion.div>
+        </div>
+        <div
+          style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginTop: 12 }}
+        >
+          <motion.div variants={item}>
+            <StatCard
+              label="Promotions"
+              value={`${promoPct}%`}
+              color="var(--proof-purple)"
+              icon={<Shield size={14} />}
+            />
+          </motion.div>
+          <motion.div variants={item}>
+            <StatCard
+              label="Run Frequency"
+              value={runsPerDay}
+              color="var(--proof-text-secondary)"
+              icon={<Clock size={14} />}
+            />
+          </motion.div>
+          <motion.div variants={item}>
+            <StatCard
+              label="Environments"
+              value={envCount}
+              color="var(--proof-cyan)"
+              icon={<Globe size={14} />}
+            />
+          </motion.div>
+        </div>
+      </motion.div>
     </PanelErrorBoundary>
   );
 }

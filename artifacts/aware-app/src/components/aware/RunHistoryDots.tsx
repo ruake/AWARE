@@ -52,9 +52,13 @@ export function RunHistoryDots({ testName }: RunHistoryDotsProps) {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 2,
+        gap: 3,
         flexWrap: "nowrap",
         whiteSpace: "nowrap",
+        padding: "4px 8px",
+        background: "var(--proof-surface-2)",
+        borderRadius: "20px",
+        border: "1px solid var(--proof-border)",
       }}
       onClick={(e) => e.stopPropagation()}
       title={`${passRate}% pass rate over ${dots.length} runs`}
@@ -70,31 +74,34 @@ export function RunHistoryDots({ testName }: RunHistoryDotsProps) {
             appearance: "none",
             border: "none",
             padding: 0,
-            width: 10,
-            height: 10,
-            borderRadius: d.status === "FAIL" ? "2px" : "50%",
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
             background: d.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
             cursor: "pointer",
             flexShrink: 0,
-            transition: "transform 0.12s, opacity 0.12s",
-            opacity: 0.8,
+            transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+            boxShadow: `0 0 0 1px rgba(0,0,0,0.1), 0 0 4px ${d.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}40`,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.7)";
-            e.currentTarget.style.opacity = "1";
+            e.currentTarget.style.transform = "scale(1.8) translateY(-1px)";
+            e.currentTarget.style.zIndex = "10";
+            e.currentTarget.style.boxShadow = `0 4px 8px rgba(0,0,0,0.3), 0 0 8px ${d.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}80`;
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.opacity = "0.8";
+            e.currentTarget.style.zIndex = "1";
+            e.currentTarget.style.boxShadow = `0 0 0 1px rgba(0,0,0,0.1), 0 0 4px ${d.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}40`;
           }}
         />
       ))}
       {extra > 0 && (
         <span
           style={{
-            fontSize: 9.5,
+            fontSize: 9,
+            fontWeight: 700,
             color: "var(--proof-text-muted)",
-            marginLeft: 2,
+            marginLeft: 4,
             fontFamily: "var(--font-mono)",
           }}
           title={`${extra} more runs`}

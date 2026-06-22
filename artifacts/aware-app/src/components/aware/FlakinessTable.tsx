@@ -107,40 +107,41 @@ export function FlakinessTable({
       >
         <div
           style={{
-            padding: "10px 14px",
-            borderBottom: "1px solid var(--proof-grey)",
-            background: "var(--proof-grey-bg)",
+            padding: "12px 16px",
+            borderBottom: "1px solid var(--proof-border)",
+            background: "var(--proof-surface-2)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: 8,
+            gap: 12,
           }}
         >
           <h3
             style={{
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 14,
+              fontWeight: 700,
               color: "var(--proof-text)",
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 8,
+              margin: 0,
             }}
           >
-            <Filter size={13} /> Flakiness Leaderboard
-            <span style={{ fontSize: 11, fontWeight: 400, color: "var(--proof-text-secondary)" }}>
-              ({filteredHistory.length} of {enriched.length})
+            <Filter size={16} style={{ color: "var(--proof-blue)" }} /> Flakiness Leaderboard
+            <span style={{ fontSize: 11, fontWeight: 500, color: "var(--proof-text-muted)", background: "var(--proof-surface-3)", padding: "2px 8px", borderRadius: "10px" }}>
+              {filteredHistory.length} of {enriched.length}
             </span>
           </h3>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             <div
               style={{
                 display: "flex",
                 gap: 2,
-                background: "var(--proof-surface)",
-                borderRadius: 4,
-                border: "1px solid var(--proof-grey)",
-                overflow: "hidden",
+                background: "var(--proof-surface-3)",
+                borderRadius: 8,
+                padding: 2,
+                border: "1px solid var(--proof-border)",
               }}
             >
               {(["all", "PASS", "FAIL"] as const).map((s) => (
@@ -150,11 +151,13 @@ export function FlakinessTable({
                   style={{
                     border: "none",
                     cursor: "pointer",
-                    padding: "3px 10px",
+                    padding: "4px 12px",
                     fontSize: 11,
-                    fontWeight: 500,
+                    fontWeight: 600,
+                    borderRadius: 6,
                     background: hStatus === s ? "var(--proof-blue)" : "transparent",
                     color: hStatus === s ? "white" : "var(--proof-text-secondary)",
+                    transition: "all 0.2s",
                   }}
                 >
                   {s === "all" ? "All" : s}
@@ -162,10 +165,10 @@ export function FlakinessTable({
               ))}
             </div>
             <select
-              className="proof-input"
+              className="proof-select"
               value={hEnv}
               onChange={(e) => setHEnv(e.target.value)}
-              style={{ fontSize: 11, padding: "3px 6px", maxWidth: 120 }}
+              style={{ fontSize: 11, padding: "5px 10px", height: "auto", minWidth: 120 }}
             >
               <option value="all">All envs</option>
               {uniqueEnvs.map((e) => (
@@ -179,18 +182,19 @@ export function FlakinessTable({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 4,
+                gap: 6,
                 cursor: "pointer",
-                padding: "3px 8px",
-                borderRadius: 4,
+                padding: "6px 12px",
+                borderRadius: 8,
                 fontSize: 11,
-                fontWeight: 500,
-                border: hErrOnly ? "1px solid var(--proof-yellow)" : "1px solid var(--proof-grey)",
-                background: hErrOnly ? "var(--proof-yellow-bg)" : "var(--proof-surface)",
+                fontWeight: 600,
+                border: "1px solid var(--proof-border)",
+                background: hErrOnly ? "rgba(234, 179, 8, 0.15)" : "var(--proof-surface-3)",
                 color: hErrOnly ? "var(--proof-yellow)" : "var(--proof-text-secondary)",
+                transition: "all 0.2s",
               }}
             >
-              <Bug size={11} /> Errors only
+              <Bug size={12} /> Errors only
             </button>
           </div>
         </div>

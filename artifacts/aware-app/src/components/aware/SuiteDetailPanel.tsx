@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { FolderTree, X, Settings, PlayCircle, Beaker, TrendingUp } from "lucide-react";
+import { FolderTree, X, Settings, PlayCircle, Beaker, Calendar, Layers, Activity } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { TestSuite, TestCase } from "@/lib/types";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
 import { RUNS, getTestResultsForRun } from "@/lib/data";
@@ -17,7 +18,7 @@ import {
 } from "recharts";
 
 function formatSchedule(sched: string | null): string {
-  if (!sched) return "Manual";
+  if (!sched) return "Manual Only";
   const p = sched.split(" ");
   if (p.length !== 5) return sched;
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -32,14 +33,14 @@ function formatSchedule(sched: string | null): string {
 }
 
 const PRIORITY_COLORS: Record<string, string> = {
-  P0: "#ef4444",
-  P1: "#f97316",
-  P2: "#5b8af5",
-  P3: "#9aa0a6",
+  P0: "var(--proof-red)",
+  P1: "var(--proof-orange)",
+  P2: "var(--proof-blue)",
+  P3: "var(--proof-text-secondary)",
 };
 
 interface SuiteDetailPanelProps {
-  suite: TestSuite;
+  suite: TestSuite | null;
   tests: TestCase[];
   onClose: () => void;
   onTestSelect: (id: string) => void;
@@ -49,6 +50,7 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
   const [, navigate] = useLocation();
 
   const suitePassRate = React.useMemo(() => {
+    if (!suite) return null;
     const recentRuns = [...RUNS].slice(0, 5);
     let totalTests = 0;
     let passedTests = 0;
@@ -61,10 +63,13 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
     }
 
     return totalTests > 0 ? (passedTests / totalTests) * 100 : null;
-  }, [suite.id, suite.testIds]);
+  }, [suite]);
+
+  if (!suite) return null;
 
   const cats = [...new Set(tests.map((t) => t.category))];
   const activeCount = tests.filter((t) => t.status === "active").length;
+  
   const priorityCounts: Record<string, number> = {};
   tests.forEach((t) => {
     priorityCounts[t.priority] = (priorityCounts[t.priority] || 0) + 1;
@@ -72,6 +77,7 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
   const priorityChart = Object.entries(priorityCounts)
     .sort()
     .map(([k, v]) => ({ priority: k, count: v }));
+
   const catCounts: Record<string, number> = {};
   tests.forEach((t) => {
     catCounts[t.category] = (catCounts[t.category] || 0) + 1;
@@ -81,395 +87,311 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
     .map(([k, v]) => ({ category: k, count: v }));
 
   return (
-    <div
-      style={{
-        width: 380,
-        flexShrink: 0,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        background: "var(--proof-surface)",
-        borderLeft: "1px solid var(--proof-border)",
-        borderTop: "1px solid var(--proof-border)",
-      }}
-    >
-      <div
+    <AnimatePresence>
+      <motion.div
+        initial={{ x: 400 }}
+        animate={{ x: 0 }}
+        exit={{ x: 400 }}
+        transition={{ type: "spring", damping: 25, stiffness: 200 }}
         style={{
-          padding: "12px 14px",
-          borderBottom: "1px solid var(--proof-border)",
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
+          width: 400,
           flexShrink: 0,
-        }}
-      >
-        <div style={{ minWidth: 0 }}>
-          <h3
-            style={{
-              fontSize: 14,
-              fontWeight: 700,
-              margin: 0,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <FolderTree size={14} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {suite.name}
-            </span>
-          </h3>
-          <p
-            style={{
-              fontSize: 11,
-              color: "var(--proof-text-secondary)",
-              margin: "2px 0 0 0",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            {suite.id}
-          </p>
-        </div>
-        <button
-          onClick={onClose}
-          style={{
-            border: "none",
-            background: "none",
-            cursor: "pointer",
-            color: "var(--proof-text-secondary)",
-            padding: 2,
-            flexShrink: 0,
-          }}
-        >
-          <X size={16} />
-        </button>
-      </div>
-      <div
-        style={{
-          flex: 1,
-          overflow: "auto",
-          padding: 12,
           display: "flex",
           flexDirection: "column",
-          gap: 10,
+          overflow: "hidden",
+          background: "var(--proof-surface)",
+          borderLeft: "1px solid var(--proof-border)",
+          zIndex: 10,
         }}
       >
-        {suite.description && (
-          <p
-            style={{
-              fontSize: 12,
-              color: "var(--proof-text-secondary)",
-              margin: 0,
-              lineHeight: 1.5,
-            }}
-          >
-            {suite.description}
-          </p>
-        )}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          {[
-            { label: "Tests", value: tests.length, color: "var(--proof-blue)" },
-            { label: "Active", value: activeCount, color: "var(--proof-green)" },
-            {
-              label: "Pass Rate",
-              value: suitePassRate !== null ? `${suitePassRate.toFixed(0)}%` : "--",
-              color:
-                suitePassRate === null
-                  ? "var(--proof-text)"
-                  : suitePassRate >= 95
-                    ? "var(--proof-green)"
-                    : suitePassRate >= 80
-                      ? "var(--proof-yellow)"
-                      : "var(--proof-red)",
-            },
-            {
-              label: "Parallelism",
-              value: `${suite.config.parallelism}x`,
-              color: "var(--proof-text)",
-            },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className="proof-card"
-              style={{ padding: "8px", textAlign: "center" }}
+        {/* Header */}
+        <div
+          style={{
+            padding: "16px 20px",
+            borderBottom: "1px solid var(--proof-border)",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            background: "var(--proof-surface-2)",
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <h3
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                color: "var(--proof-text)",
+              }}
             >
-              <div style={{ fontSize: 18, fontWeight: 700, color: s.color }}>{s.value}</div>
-              <div
-                style={{
-                  fontSize: 9,
-                  color: "var(--proof-text-secondary)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.3px",
-                }}
-              >
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-          <span
-            className="proof-badge proof-badge-pass"
-            style={{ fontSize: 10, textTransform: "uppercase" }}
-          >
-            {suite.envIds.join(", ")}
-          </span>
-          <span
-            className="proof-badge proof-badge-skip"
-            style={{ fontSize: 10, textTransform: "capitalize" }}
-          >
-            {suite.runners.join(", ")}
-          </span>
-          {cats.map((cat) => {
-            const ci = CATEGORIES.indexOf(cat) % CATEGORY_COLORS.length;
-            return (
-              <span
-                key={cat}
-                style={{
-                  fontSize: 9,
-                  padding: "1px 5px",
-                  borderRadius: 3,
-                  textTransform: "capitalize",
-                  background: CATEGORY_COLORS[ci] + "18",
-                  border: `1px solid ${CATEGORY_COLORS[ci]}30`,
-                  color: CATEGORY_COLORS[ci],
-                }}
-              >
-                {cat}
+              <FolderTree size={16} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {suite.name}
               </span>
-            );
-          })}
-        </div>
-        <div className="proof-card" style={{ padding: 10 }}>
-          <h4
-            style={{
-              fontSize: 9,
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              color: "var(--proof-text-secondary)",
-              fontWeight: 600,
-              margin: "0 0 6px 0",
-            }}
-          >
-            Priority Breakdown
-          </h4>
-          <div style={{ height: 80 }}>
-            {priorityChart.length > 0 && (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={priorityChart}>
-                  <XAxis
-                    dataKey="priority"
-                    tick={{ fontSize: 9, fill: "var(--proof-text-secondary)" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis hide />
-                  <Tooltip
-                    contentStyle={{
-                      background: "var(--proof-surface)",
-                      border: "1px solid var(--proof-border)",
-                      borderRadius: 6,
-                      fontSize: 11,
-                    }}
-                    formatter={(val: number) => [val, "Tests"]}
-                  />
-                  <Bar dataKey="count" radius={[3, 3, 0, 0]}>
-                    {priorityChart.map((e) => (
-                      <Cell key={e.priority} fill={PRIORITY_COLORS[e.priority] || "#9aa0a6"} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+            </h3>
+            <p
+              style={{
+                fontSize: 11,
+                color: "var(--proof-text-secondary)",
+                margin: "4px 0 0 0",
+                fontFamily: "var(--font-mono)",
+                opacity: 0.7,
+              }}
+            >
+              {suite.id}
+            </p>
           </div>
+          <button
+            onClick={onClose}
+            className="proof-button"
+            style={{ padding: 6, borderRadius: "50%", minWidth: "auto" }}
+          >
+            <X size={18} />
+          </button>
         </div>
-        <div className="proof-card" style={{ padding: 10 }}>
-          <h4
-            style={{
-              fontSize: 9,
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              color: "var(--proof-text-secondary)",
-              fontWeight: 600,
-              margin: "0 0 6px 0",
-            }}
-          >
-            Category
-          </h4>
-          <div
-            style={{ height: 80, display: "flex", alignItems: "center", justifyContent: "center" }}
-          >
-            {catChart.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={catChart}
-                    dataKey="count"
-                    nameKey="category"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={16}
-                    outerRadius={32}
-                  >
-                    {catChart.map((e) => {
-                      const ci = CATEGORIES.indexOf(e.category) % CATEGORY_COLORS.length;
-                      return <Cell key={e.category} fill={CATEGORY_COLORS[ci]} />;
-                    })}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: "var(--proof-surface)",
-                      border: "1px solid var(--proof-border)",
-                      borderRadius: 6,
-                      fontSize: 11,
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>No data</span>
-            )}
-          </div>
-        </div>
-        <div className="proof-card" style={{ padding: 10 }}>
-          <h4
-            style={{
-              fontSize: 9,
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              color: "var(--proof-text-secondary)",
-              fontWeight: 600,
-              margin: "0 0 6px 0",
-              display: "flex",
-              alignItems: "center",
-              gap: 3,
-            }}
-          >
-            <Settings size={10} /> Configuration
-          </h4>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "4px 10px",
-              fontSize: 11,
-            }}
-          >
+
+        <div
+          style={{
+            flex: 1,
+            overflow: "auto",
+            padding: 20,
+            display: "flex",
+            flexDirection: "column",
+            gap: 20,
+          }}
+        >
+          {suite.description && (
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--proof-text-secondary)",
+                margin: 0,
+                lineHeight: 1.6,
+              }}
+            >
+              {suite.description}
+            </p>
+          )}
+
+          {/* Stats Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {[
-              ["Env IDs", suite.envIds.join(", ")],
-              ["Runners", suite.runners.join(", ")],
-              ["Parallelism", `${suite.config.parallelism}x`],
-              ["Retries", String(suite.config.retries)],
-              ["Timeout", `${suite.config.timeoutMinutes}m`],
-              ["Fail Fast", suite.config.failFast ? "Yes" : "No"],
-              ["Schedule", formatSchedule(suite.schedule)],
-            ].map(([l, v]) => (
-              <div key={l!}>
-                <span
-                  style={{ fontSize: 9, color: "var(--proof-text-secondary)", display: "block" }}
-                >
-                  {l}
-                </span>
-                <span style={{ fontWeight: 600 }}>{v}</span>
+              { label: "Total Tests", value: tests.length, icon: <Beaker size={14} />, color: "var(--proof-blue)" },
+              { label: "Active", value: activeCount, icon: <Activity size={14} />, color: "var(--proof-green)" },
+              {
+                label: "Pass Rate (Last 5)",
+                value: suitePassRate !== null ? `${suitePassRate.toFixed(0)}%` : "--",
+                icon: <Activity size={14} />,
+                color:
+                  suitePassRate === null
+                    ? "var(--proof-text-secondary)"
+                    : suitePassRate >= 95
+                      ? "var(--proof-green)"
+                      : suitePassRate >= 80
+                        ? "var(--proof-yellow)"
+                        : "var(--proof-red)",
+              },
+              {
+                label: "Parallelism",
+                value: `${suite.config.parallelism}x`,
+                icon: <Layers size={14} />,
+                color: "var(--proof-text)",
+              },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="proof-card"
+                style={{ padding: "14px 12px", display: "flex", flexDirection: "column", gap: 4 }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  {s.icon} {s.label}
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: s.color }}>{s.value}</div>
               </div>
             ))}
           </div>
-        </div>
-        <div>
-          <h4
-            style={{
-              fontSize: 9,
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              color: "var(--proof-text-secondary)",
-              fontWeight: 600,
-              margin: "0 0 6px 0",
-              display: "flex",
-              alignItems: "center",
-              gap: 3,
-            }}
-          >
-            <Beaker size={10} /> Tests ({tests.length})
-          </h4>
-          <div className="proof-card" style={{ overflow: "hidden" }}>
-            <table className="proof-table" style={{ width: "100%" }}>
-              <colgroup>
-                <col style={{ width: 20 }} />
-                <col />
-                <col />
-              </colgroup>
-              <thead
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  background: "var(--proof-surface)",
-                  zIndex: 1,
-                }}
-              >
-                <tr>
-                  <th />
-                  <th>Name</th>
-                  <th>Pri</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tests.slice(0, 20).map((tc) => (
-                  <tr key={tc.id} style={{ cursor: "pointer" }} onClick={() => onTestSelect(tc.id)}>
-                    <td>
-                      <span
-                        style={{
-                          width: 7,
-                          height: 7,
-                          borderRadius: "50%",
-                          display: "inline-block",
-                          background:
-                            tc.status === "active"
-                              ? "var(--proof-green)"
-                              : tc.status === "disabled"
-                                ? "var(--proof-yellow)"
-                                : "var(--proof-red)",
-                        }}
-                      />
-                    </td>
-                    <td style={{ fontSize: 12 }}>{tc.name}</td>
-                    <td
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: PRIORITY_COLORS[tc.priority] || "var(--proof-text-secondary)",
-                      }}
-                    >
-                      {tc.priority}
-                    </td>
-                  </tr>
-                ))}
-                {tests.length > 20 && (
-                  <tr>
-                    <td
-                      colSpan={3}
-                      style={{
-                        textAlign: "center",
-                        fontSize: 11,
-                        color: "var(--proof-text-secondary)",
-                        padding: "8px 0",
-                      }}
-                    >
-                      +{tests.length - 20} more
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+
+          {/* Quick Info Badges */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {suite.envIds.map(env => (
+              <span key={env} className="proof-badge" style={{ background: "rgba(91, 138, 245, 0.1)", color: "var(--proof-blue)", border: "1px solid rgba(91, 138, 245, 0.2)" }}>
+                {env}
+              </span>
+            ))}
+            {suite.runners.map(runner => (
+              <span key={runner} className="proof-badge" style={{ background: "rgba(154, 160, 166, 0.1)", color: "var(--proof-text-secondary)", border: "1px solid rgba(154, 160, 166, 0.2)" }}>
+                {runner}
+              </span>
+            ))}
+            {suite.schedule && (
+              <span className="proof-badge" style={{ background: "rgba(245, 158, 11, 0.1)", color: "var(--proof-yellow)", border: "1px solid rgba(245, 158, 11, 0.2)", display: "flex", alignItems: "center", gap: 4 }}>
+                <Calendar size={10} /> {formatSchedule(suite.schedule)}
+              </span>
+            )}
           </div>
+
+          {/* Priority Distribution */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Priority Distribution
+            </div>
+            <div className="proof-card" style={{ padding: "16px 12px", height: 120 }}>
+              {priorityChart.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={priorityChart} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                    <XAxis
+                      dataKey="priority"
+                      tick={{ fontSize: 10, fill: "var(--proof-text-secondary)" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis hide />
+                    <Tooltip
+                      cursor={{ fill: 'var(--proof-surface-2)' }}
+                      contentStyle={{
+                        background: "var(--proof-surface)",
+                        border: "1px solid var(--proof-border)",
+                        borderRadius: 8,
+                        fontSize: 11,
+                        boxShadow: "var(--proof-shadow-md)"
+                      }}
+                      itemStyle={{ color: 'var(--proof-text)' }}
+                      labelStyle={{ fontWeight: 700, marginBottom: 4 }}
+                    />
+                    <Bar dataKey="count" radius={[4, 4, 0, 0]} barSize={32}>
+                      {priorityChart.map((e) => (
+                        <Cell key={e.priority} fill={PRIORITY_COLORS[e.priority] || "var(--proof-text-secondary)"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 12, color: "var(--proof-text-secondary)" }}>
+                  No priority data
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Configuration List */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              <Settings size={12} /> Configuration
+            </div>
+            <div className="proof-card" style={{ padding: 0, overflow: "hidden" }}>
+              {[
+                ["Retries", String(suite.config.retries)],
+                ["Timeout", `${suite.config.timeoutMinutes}m`],
+                ["Fail Fast", suite.config.failFast ? "Yes" : "No"],
+                ["Total Tests", String(tests.length)],
+              ].map(([l, v], i) => (
+                <div
+                  key={l}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "10px 16px",
+                    fontSize: 13,
+                    borderBottom: i < 3 ? "1px solid var(--proof-border)" : "none",
+                  }}
+                >
+                  <span style={{ color: "var(--proof-text-secondary)" }}>{l}</span>
+                  <span style={{ fontWeight: 600 }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Test List Section */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Test List ({tests.length})
+            </div>
+            <div className="proof-card" style={{ padding: 0, overflow: "hidden" }}>
+              <table className="proof-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "var(--proof-surface-2)" }}>
+                    <th style={{ width: 40, padding: "10px 12px" }}></th>
+                    <th style={{ textAlign: "left", padding: "10px 12px", fontSize: 11 }}>NAME</th>
+                    <th style={{ textAlign: "right", padding: "10px 12px", fontSize: 11 }}>PRIORITY</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tests.slice(0, 15).map((tc) => (
+                    <tr
+                      key={tc.id}
+                      style={{ cursor: "pointer", transition: "background 0.15s" }}
+                      onClick={() => onTestSelect(tc.id)}
+                      onMouseEnter={(e) => e.currentTarget.style.background = "var(--proof-surface-2)"}
+                      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                    >
+                      <td style={{ padding: "8px 12px", textAlign: "center" }}>
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            background:
+                              tc.status === "active"
+                                ? "var(--proof-green)"
+                                : tc.status === "disabled"
+                                  ? "var(--proof-yellow)"
+                                  : "var(--proof-red)",
+                            margin: "0 auto"
+                          }}
+                        />
+                      </td>
+                      <td style={{ padding: "8px 12px", fontSize: 13, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {tc.name}
+                      </td>
+                      <td
+                        style={{
+                          padding: "8px 12px",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          textAlign: "right",
+                          color: PRIORITY_COLORS[tc.priority] || "var(--proof-text-secondary)",
+                        }}
+                      >
+                        {tc.priority}
+                      </td>
+                    </tr>
+                  ))}
+                  {tests.length > 15 && (
+                    <tr>
+                      <td
+                        colSpan={3}
+                        style={{
+                          textAlign: "center",
+                          fontSize: 12,
+                          color: "var(--proof-text-secondary)",
+                          padding: "12px 0",
+                          fontStyle: "italic",
+                          background: "var(--proof-surface-2)"
+                        }}
+                      >
+                        Showing 15 of {tests.length} tests
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <button
+            onClick={() => navigate(`/start?suite=${suite.id}`)}
+            className="proof-button proof-button-primary"
+            style={{ padding: "12px", fontSize: 14, marginTop: 10 }}
+          >
+            <PlayCircle size={18} />
+            Launch Regression Suite
+          </button>
         </div>
-        <button
-          onClick={() => navigate(`/start?suite=${suite.id}`)}
-          className="proof-button proof-button-primary"
-          style={{ width: "100%", justifyContent: "center" }}
-        >
-          <PlayCircle size={14} /> Run Suite
-        </button>
-      </div>
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

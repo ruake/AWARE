@@ -149,13 +149,23 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
         />
 
         {/* Sidebar */}
-        {sidebarVisible && (
-          <ConsoleSidebar
-            activePanel={currentActivity}
-            visible={sidebarVisible}
-            onClose={() => setSidebarVisible(false)}
-          />
-        )}
+        <div
+          style={{
+            display: "flex",
+            transition: "all 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+            width: sidebarVisible ? "auto" : 0,
+            overflow: "hidden",
+            flexShrink: 0,
+          }}
+        >
+          {sidebarVisible && (
+            <ConsoleSidebar
+              activePanel={currentActivity}
+              visible={sidebarVisible}
+              onClose={() => setSidebarVisible(false)}
+            />
+          )}
+        </div>
 
         {/* Main content */}
         <main
@@ -211,24 +221,36 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
               transform: "translateX(-50%)",
               display: "flex",
               alignItems: "center",
-              gap: 10,
-              padding: "10px 16px",
-              borderRadius: 12,
-              zIndex: 100,
+              gap: 12,
+              padding: "12px 20px",
+              borderRadius: 16,
+              zIndex: 1000,
               cursor: "pointer",
-              boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px ${toastColor}30, 0 0 24px ${toastColor}18`,
-              border: `1px solid ${toastColor}30`,
-              background: `linear-gradient(135deg, ${toastBg}, rgba(13,18,32,0.95))`,
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
+              boxShadow: `0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px ${toastColor}40, 0 0 32px ${toastColor}20`,
+              border: `1px solid ${toastColor}40`,
+              background: `linear-gradient(135deg, ${toastBg}, rgba(13,24,42,0.98))`,
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
               color: toastColor,
-              fontSize: 13,
-              fontWeight: 500,
+              fontSize: 14,
+              fontWeight: 600,
               whiteSpace: "nowrap",
-              animation: "toast-pop 0.2s cubic-bezier(0.2,0,0,1) both",
+              animation: "page-enter 0.3s cubic-bezier(0.2,0,0,1) both",
             }}
           >
-            <ToastIcon size={14} aria-hidden="true" />
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 24,
+                height: 24,
+                borderRadius: "50%",
+                background: `${toastColor}20`,
+              }}
+            >
+              <ToastIcon size={14} aria-hidden="true" />
+            </span>
             {currentToast.message}
             <button
               onClick={(e) => {
@@ -237,18 +259,21 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
               }}
               aria-label="Close"
               style={{
-                marginLeft: 4,
-                background: "none",
+                marginLeft: 8,
+                background: "var(--proof-surface-3)",
                 border: "none",
+                borderRadius: "50%",
                 cursor: "pointer",
-                opacity: 0.5,
-                lineHeight: 1,
+                opacity: 0.8,
                 color: "inherit",
-                padding: 2,
+                padding: 4,
                 display: "flex",
+                transition: "all 0.2s",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.8")}
             >
-              <X size={12} />
+              <X size={14} />
             </button>
           </div>
         );

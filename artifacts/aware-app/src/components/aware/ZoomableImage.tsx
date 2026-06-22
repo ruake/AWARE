@@ -1,5 +1,6 @@
 import React from "react";
-import { Loader2, AlertCircle, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { Loader2, AlertCircle, ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ZoomableImageProps {
   src: string;
@@ -15,6 +16,7 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(false);
   const [isDragging, setIsDragging] = React.useState(false);
+  const [isFullScreen, setIsFullScreen] = React.useState(false);
   const dragStart = React.useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const lastPinchDist = React.useRef(0);
 
@@ -22,6 +24,20 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
     setZoom(1);
     setPan({ x: 0, y: 0 });
   }, []);
+
+  const toggleFullScreen = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setIsFullScreen(!isFullScreen);
+    resetView();
+  };
+
+  const adjustZoom = (delta: number) => {
+    setZoom((z) => {
+      const newZoom = Math.max(1, Math.min(10, z * delta));
+      if (newZoom === 1) setPan({ x: 0, y: 0 });
+      return newZoom;
+    });
+  };
 
   // Update bounds to prevent panning out of view
   const clampPan = (newPan: { x: number; y: number }, currentZoom: number) => {
@@ -38,13 +54,11 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
   };
 
   const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom((z) => {
-      const newZoom = Math.max(1, Math.min(10, z * delta));
-      if (newZoom === 1) setPan({ x: 0, y: 0 });
-      return newZoom;
-    });
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      adjustZoom(delta);
+    }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -104,11 +118,7 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
       );
       const delta = dist / (lastPinchDist.current || dist);
       lastPinchDist.current = dist;
-      setZoom((z) => {
-        const newZoom = Math.max(1, Math.min(10, z * delta));
-        if (newZoom === 1) setPan({ x: 0, y: 0 });
-        return newZoom;
-      });
+      adjustZoom(delta);
     }
   };
 
@@ -117,21 +127,25 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
     resetView();
   };
 
-  return (
+  const content = (
     <div
       ref={containerRef}
       style={{
-        position: "relative",
+        position: isFullScreen ? "fixed" : "relative",
+        inset: isFullScreen ? 0 : "auto",
+        zIndex: isFullScreen ? 1000 : 1,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
         cursor: loading ? "wait" : error ? "default" : zoom > 1 ? "grab" : "zoom-in",
-        maxHeight,
+        maxHeight: isFullScreen ? "100vh" : maxHeight,
         width: "100%",
-        backgroundColor: "var(--proof-surface-2)",
-        borderRadius: 4,
+        height: isFullScreen ? "100vh" : "auto",
+        backgroundColor: isFullScreen ? "rgba(0,0,0,0.95)" : "var(--proof-surface-2)",
+        borderRadius: isFullScreen ? 0 : 8,
         userSelect: "none",
+        border: isFullScreen ? "none" : "1px solid var(--proof-border)",
       }}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
@@ -143,23 +157,28 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
     >
-      {loading && !error && (
-        <div
-          style={{
-            position: "absolute",
-            zIndex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
-          <Loader2 className="animate-spin text-proof-blue" size={32} />
-          <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>
-            Loading Image...
-          </span>
-        </div>
-      )}
+      <AnimatePresence>
+        {loading && !error && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "absolute",
+              zIndex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
+            <Loader2 className="animate-spin" style={{ color: "var(--proof-blue)" }} size={40} />
+            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--proof-text-secondary)" }}>
+              Processing Evidence...
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {error && (
         <div
@@ -167,15 +186,15 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 12,
+            gap: 16,
             padding: 40,
             color: "var(--proof-red)",
           }}
         >
-          <AlertCircle size={40} />
+          <AlertCircle size={48} />
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontWeight: 600, fontSize: 14 }}>Failed to load image</div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>The image could not be retrieved</div>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Capture Unavailable</div>
+            <div style={{ fontSize: 13, opacity: 0.7 }}>The requested evidence could not be loaded</div>
           </div>
           <button
             onClick={(e) => {
@@ -183,9 +202,9 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
               setError(false);
               setLoading(true);
             }}
-            className="proof-button proof-button-sm"
+            className="proof-button proof-button-primary"
           >
-            Retry
+            Retry Loading
           </button>
         </div>
       )}
@@ -203,12 +222,13 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
         style={{
           display: loading || error ? "none" : "block",
           maxWidth: "100%",
-          maxHeight,
-          borderRadius: 4,
+          maxHeight: isFullScreen ? "100%" : maxHeight,
+          borderRadius: isFullScreen ? 0 : 4,
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-          transition: isDragging ? "none" : "transform 0.1s ease-out",
+          transition: isDragging ? "none" : "transform 0.2s cubic-bezier(0.2, 0, 0.2, 1)",
           transformOrigin: "center center",
           pointerEvents: "none",
+          boxShadow: isFullScreen ? "none" : "0 4px 24px rgba(0,0,0,0.2)",
         }}
       />
 
@@ -216,61 +236,62 @@ export function ZoomableImage({ src, alt = "", maxHeight = "70vh" }: ZoomableIma
         <div
           style={{
             position: "absolute",
-            bottom: 12,
-            right: 12,
+            bottom: 20,
+            left: "50%",
+            transform: "translateX(-50%)",
             display: "flex",
             alignItems: "center",
-            gap: 8,
+            gap: 12,
             zIndex: 10,
+            padding: "8px 16px",
+            background: "rgba(15, 23, 42, 0.8)",
+            backdropFilter: "blur(8px)",
+            borderRadius: 32,
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
           }}
+          onClick={e => e.stopPropagation()}
         >
-          {zoom !== 1 && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                resetView();
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 28,
-                height: 28,
-                borderRadius: "50%",
-                background: "rgba(0,0,0,0.6)",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
-                backdropFilter: "blur(4px)",
-              }}
-              title="Reset Zoom"
-              aria-label="Reset zoom"
-            >
-              <RotateCcw size={14} aria-hidden="true" />
-            </button>
-          )}
-          <div
-            style={{
-              height: 28,
-              padding: "0 10px",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 11,
-              fontWeight: 600,
-              fontFamily: "var(--font-mono)",
-              color: "#fff",
-              background: "rgba(0,0,0,0.6)",
-              borderRadius: 14,
-              backdropFilter: "blur(4px)",
-              pointerEvents: "none",
-            }}
+          <button
+            onClick={() => adjustZoom(0.8)}
+            style={{ background: "none", border: "none", color: "white", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", opacity: zoom > 1 ? 1 : 0.5 }}
+            disabled={zoom <= 1}
           >
-            {zoom > 1 ? <ZoomIn size={12} /> : <ZoomOut size={12} />}
+            <ZoomOut size={18} />
+          </button>
+          
+          <div style={{ color: "white", fontSize: 12, fontWeight: 700, minWidth: 44, textAlign: "center", fontFamily: "var(--font-mono)" }}>
             {Math.round(zoom * 100)}%
           </div>
+
+          <button
+            onClick={() => adjustZoom(1.2)}
+            style={{ background: "none", border: "none", color: "white", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+          >
+            <ZoomIn size={18} />
+          </button>
+
+          <div style={{ width: 1, height: 16, background: "rgba(255,255,255,0.2)" }} />
+
+          <button
+            onClick={resetView}
+            style={{ background: "none", border: "none", color: "white", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+            title="Reset View"
+          >
+            <RotateCcw size={16} />
+          </button>
+
+          <button
+            onClick={toggleFullScreen}
+            style={{ background: "none", border: "none", color: "white", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+            title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
+          >
+            {isFullScreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+          </button>
         </div>
       )}
     </div>
   );
+
+  return content;
 }

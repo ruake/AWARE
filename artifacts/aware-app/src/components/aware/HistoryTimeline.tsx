@@ -76,29 +76,33 @@ export function TimeWindowControls() {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 4,
+        gap: 8,
         flexShrink: 0,
+        background: "var(--proof-surface-2)",
+        padding: "4px 8px",
+        borderRadius: 8,
+        border: "1px solid var(--proof-border)"
       }}
     >
       <button onClick={() => shiftWindow(-window.sizeDays)} title="Skip back" style={navBtnStyle}>
-        <SkipBack size={12} />
+        <SkipBack size={14} />
       </button>
       <button
         onClick={() => shiftWindow(-Math.ceil(window.sizeDays / 4))}
         title="Back"
         style={navBtnStyle}
       >
-        <ChevronLeft size={12} />
+        <ChevronLeft size={14} />
       </button>
       <span
         style={{
-          fontSize: 10,
-          fontWeight: 600,
-          color: "var(--proof-text-secondary)",
+          fontSize: 11,
+          fontWeight: 700,
+          color: "var(--proof-text)",
           fontFamily: "var(--font-mono)",
           whiteSpace: "nowrap",
-          padding: "0 4px",
-          minWidth: 140,
+          padding: "0 8px",
+          minWidth: 160,
           textAlign: "center",
         }}
       >
@@ -109,47 +113,51 @@ export function TimeWindowControls() {
         title="Forward"
         style={navBtnStyle}
       >
-        <ChevronRight size={12} />
+        <ChevronRight size={14} />
       </button>
       <button onClick={() => shiftWindow(window.sizeDays)} title="Skip forward" style={navBtnStyle}>
-        <SkipForward size={12} />
+        <SkipForward size={14} />
       </button>
-      <div style={{ width: 1, height: 16, background: "var(--proof-border)", margin: "0 4px" }} />
-      {ZOOM_PRESETS.map((p) => (
-        <button
-          key={p.label}
-          onClick={() => setZoom(p.days)}
-          style={{
-            ...zoomBtnStyle,
-            background:
-              window.sizeDays === p.days ? "var(--proof-blue)" : "var(--proof-surface-hover)",
-            color: window.sizeDays === p.days ? "#fff" : "var(--proof-text-secondary)",
-          }}
-        >
-          {p.label}
-        </button>
-      ))}
+      <div style={{ width: 1, height: 16, background: "var(--proof-border)", margin: "0 8px" }} />
+      <div style={{ display: 'flex', gap: 4 }}>
+        {ZOOM_PRESETS.map((p) => (
+          <button
+            key={p.label}
+            onClick={() => setZoom(p.days)}
+            style={{
+              ...zoomBtnStyle,
+              background:
+                window.sizeDays === p.days ? "var(--proof-blue)" : "var(--proof-surface-3)",
+              color: window.sizeDays === p.days ? "#fff" : "var(--proof-text-secondary)",
+              boxShadow: window.sizeDays === p.days ? "var(--proof-shadow-sm)" : "none",
+              border: window.sizeDays === p.days ? "none" : "1px solid var(--proof-border)"
+            }}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
 
 const navBtnStyle: React.CSSProperties = {
-  border: "none",
-  background: "var(--proof-surface-hover)",
+  background: "var(--proof-surface-3)",
   cursor: "pointer",
-  padding: "3px 5px",
-  borderRadius: 3,
+  padding: "4px 6px",
+  borderRadius: 6,
   color: "var(--proof-text-secondary)",
   display: "flex",
   alignItems: "center",
-  transition: "all 0.1s",
+  transition: "all 0.2s",
+  border: "1px solid var(--proof-border)"
 };
 
 const zoomBtnStyle: React.CSSProperties = {
   ...navBtnStyle,
-  fontSize: 9,
+  fontSize: 10,
   fontWeight: 700,
-  padding: "2px 6px",
+  padding: "3px 8px",
 };
 
 // ── Per-Test History Strip ───────────────────────────────────────────────────
@@ -241,146 +249,158 @@ export function TestHistoryStrip({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 2,
+        gap: 4,
         flexWrap: "nowrap",
         whiteSpace: "nowrap",
         overflow: "hidden",
         maxWidth: "100%",
+        padding: "8px 12px",
+        background: "var(--proof-surface-1)",
+        borderRadius: "12px",
+        border: "1px solid var(--proof-border)"
       }}
       onClick={(e) => e.stopPropagation()}
     >
       {hasOlder && (
         <span
           style={{
-            fontSize: 7,
+            fontSize: 9,
             color: "var(--proof-text-muted)",
             fontFamily: "var(--font-mono)",
-            marginRight: 1,
+            marginRight: 4,
+            fontWeight: 800
           }}
         >
-          ◀
+          &laquo;
         </span>
       )}
-      {visible.map((g) => {
-        const pct = g.items.filter((i) => i.status === "PASS").length / g.items.length;
-        const allPass = pct === 1;
-        const allFail = pct === 0;
-        const isDense = g.items.length > 1;
-        return (
-          <div
-            key={g.day}
-            title={
-              `${g.day}\n${g.items.length} run${g.items.length > 1 ? "s" : ""}\n` +
-              g.items
-                .map(
-                  (i) =>
-                    `  ${i.status} · ${new Date(i.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
-                )
-                .join("\n")
-            }
-            onClick={(e) => {
-              e.stopPropagation();
-              if (g.items.length === 1) {
-                navigate(`/runs/${g.items[0].runId}?testId=${g.items[0].resultId}`);
+      <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+        {visible.map((g) => {
+          const pct = g.items.filter((i) => i.status === "PASS").length / g.items.length;
+          const allPass = pct === 1;
+          const allFail = pct === 0;
+          const isDense = g.items.length > 1;
+          return (
+            <div
+              key={g.day}
+              title={
+                `${g.day}\n${g.items.length} run${g.items.length > 1 ? "s" : ""}\n` +
+                g.items
+                  .map(
+                    (i) =>
+                      `  ${i.status} · ${new Date(i.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+                  )
+                  .join("\n")
               }
-            }}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: isDense ? 1 : 0,
-              cursor: "pointer",
-              flexShrink: 0,
-              transition: "transform 0.12s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.15)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-            }}
-          >
-            {/* Dot */}
-            {isDense ? (
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  minWidth: 14,
-                  height: 14,
-                  borderRadius: 3,
-                  fontSize: 8,
-                  fontWeight: 700,
-                  fontFamily: "var(--font-mono)",
-                  background: allPass
-                    ? "var(--proof-green)"
-                    : allFail
-                      ? "var(--proof-red)"
-                      : "var(--proof-yellow)",
-                  color: allPass || allFail ? "#fff" : "#000",
-                  padding: "0 2px",
-                  lineHeight: "14px",
-                }}
-              >
-                {g.items.length}
-              </span>
-            ) : (
-              (() => {
-                const color =
-                  g.items[0].status === "PASS" ? "var(--proof-green)" : "var(--proof-red)";
-                const isSelected = currentRunId && g.items[0].runId === currentRunId;
-                return (
-                  <div
-                    style={{
-                      position: "relative",
-                      width: isSelected ? 18 : 10,
-                      height: isSelected ? 18 : 10,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {isSelected && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          width: 16,
-                          height: 16,
-                          borderRadius: "50%",
-                          border: `2px solid ${color}`,
-                          background: "transparent",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    )}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (g.items.length === 1) {
+                  navigate(`/runs/${g.items[0].runId}?testId=${g.items[0].resultId}`);
+                }
+              }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: isDense ? 1 : 0,
+                cursor: "pointer",
+                flexShrink: 0,
+                transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.4) translateY(-2px)";
+                e.currentTarget.style.zIndex = "10";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.zIndex = "1";
+              }}
+            >
+              {/* Dot */}
+              {isDense ? (
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minWidth: 16,
+                    height: 16,
+                    borderRadius: 4,
+                    fontSize: 9,
+                    fontWeight: 800,
+                    fontFamily: "var(--font-mono)",
+                    background: allPass
+                      ? "var(--proof-green)"
+                      : allFail
+                        ? "var(--proof-red)"
+                        : "var(--proof-yellow)",
+                    color: "white",
+                    padding: "0 3px",
+                    lineHeight: "16px",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                  }}
+                >
+                  {g.items.length}
+                </span>
+              ) : (
+                (() => {
+                  const color =
+                    g.items[0].status === "PASS" ? "var(--proof-green)" : "var(--proof-red)";
+                  const isSelected = currentRunId && g.items[0].runId === currentRunId;
+                  return (
                     <div
                       style={{
-                        width: isSelected ? 8 : 10,
-                        height: isSelected ? 8 : 10,
-                        borderRadius: "50%",
-                        background: color,
+                        position: "relative",
+                        width: isSelected ? 20 : 12,
+                        height: isSelected ? 20 : 12,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         flexShrink: 0,
-                        border: "1px solid rgba(0,0,0,0.25)",
                       }}
-                    />
-                  </div>
-                );
-              })()
-            )}
-          </div>
-        );
-      })}
+                    >
+                      {isSelected && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            borderRadius: "50%",
+                            border: `2px solid ${color}`,
+                            background: "transparent",
+                            boxSizing: "border-box",
+                            animation: "pulse-dot 2s infinite"
+                          }}
+                        />
+                      )}
+                      <div
+                        style={{
+                          width: isSelected ? 10 : 12,
+                          height: isSelected ? 10 : 12,
+                          borderRadius: "50%",
+                          background: color,
+                          flexShrink: 0,
+                          border: "1px solid rgba(0,0,0,0.15)",
+                          boxShadow: "0 1px 2px rgba(0,0,0,0.1)"
+                        }}
+                      />
+                    </div>
+                  );
+                })()
+              )}
+            </div>
+          );
+        })}
+      </div>
       {hasNewer && (
         <span
           style={{
-            fontSize: 7,
+            fontSize: 9,
             color: "var(--proof-text-muted)",
             fontFamily: "var(--font-mono)",
-            marginLeft: 1,
+            marginLeft: 4,
+            fontWeight: 800
           }}
         >
-          ▶
+          &raquo;
         </span>
       )}
     </div>
