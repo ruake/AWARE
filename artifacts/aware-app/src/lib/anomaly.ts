@@ -35,7 +35,7 @@ export function computeAnomalyScores(): AnomalyScore[] {
         0,
         passRateZ * 0.4 +
           durationZ * 0.3 +
-          (run.failures / (Math.max(...RUNS.map((r) => r.failures)) || 1)) * 0.3,
+          (run.failures / (RUNS.length > 0 ? (Math.max(...RUNS.map((r) => r.failures)) || 1) : 1)) * 0.3,
       ),
     );
 

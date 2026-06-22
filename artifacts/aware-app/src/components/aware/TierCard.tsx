@@ -110,7 +110,7 @@ export function TierCard({
       whileHover={{ y: -4, scale: 1.01 }}
       className="relative flex flex-col w-full text-left bg-[var(--proof-surface)] border border-[var(--proof-border)] rounded-xl overflow-hidden cursor-pointer shadow-[var(--proof-shadow-sm)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-200"
       onClick={onClick}
-      style={{ borderLeft: `3px solid ${cfg.color}` }}
+      style={{ borderLeft: `3px solid ${cfg.color}`, width: "100%" }}
     >
       <div className="p-4 flex flex-col gap-4">
         {/* Header */}

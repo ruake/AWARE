@@ -44,15 +44,23 @@ export class DataValidationError extends Error {
   }
 }
 
-export async function fetchJson<T>(path: string, options?: FetchJsonOptions<T>): Promise<T> {
+export async function fetchJson<T>(path: string, options?: FetchJsonOptions<T>): Promise<T | null> {
   const { validate, timeoutMs = 15000 } = options ?? {};
   const url = dataUrl(path);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(url, { signal: controller.signal });
+    if (res.status === 404) {
+      return null;
+    }
     if (!res.ok) {
       throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+    }
+    // Guard against SPA fallback returning HTML with status 200 (e.g. Vite dev server)
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("json") && !ct.includes("text/plain")) {
+      return null;
     }
     const data: unknown = await res.json();
     if (validate !== undefined && !validate(data)) {

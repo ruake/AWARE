@@ -41,7 +41,9 @@ export async function preloadImage(src: string): Promise<string> {
     _imageCache.set(src, { url, lastUsed: Date.now() });
     return url;
   } catch (error) {
-    console.error("Error preloading image:", error);
+    if (import.meta.env.DEV) {
+      console.error("Error preloading image:", error);
+    }
     throw error;
   }
 }

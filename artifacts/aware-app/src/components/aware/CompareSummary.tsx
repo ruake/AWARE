@@ -182,6 +182,7 @@ export function CompareRunsHeader({
   candResults: TestResult[];
 }) {
   const regressions = diffs.filter(d => d.state === 'regression').length;
+  const fixed = diffs.filter(d => d.state === 'fixed').length;
   const totalDurationChange = diffs.reduce((acc, d) => acc + (d.durCand - d.durBase), 0);
 
   return (
@@ -204,7 +205,29 @@ export function CompareRunsHeader({
             Regressions
           </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: regressions > 0 ? 'var(--proof-red)' : 'var(--proof-green)' }}>
-            {regressions === 0 ? 'All clear 🎉' : regressions}
+            {regressions}
+          </div>
+        </div>
+      </div>
+      <div className="proof-card" style={{ flex: 1, padding: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ 
+          width: 32, 
+          height: 32, 
+          borderRadius: '50%', 
+          background: 'var(--proof-green-bg)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 16
+        }}>
+          ✨
+        </div>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase' }}>
+            Fixed
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--proof-green)' }}>
+            {fixed}
           </div>
         </div>
       </div>

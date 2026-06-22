@@ -11,11 +11,13 @@ export async function loadAutoDiscoveredTests(): Promise<void> {
   if (_testsPromise) return _testsPromise;
   _testsPromise = (async () => {
     try {
-      _autoTests = await fetchJson<TestCase[]>("auto-tests.json");
+      _autoTests = (await fetchJson<TestCase[]>("auto-tests.json")) || [];
       _notifyTC();
     } catch (err) {
       _testsPromise = null;
-      console.warn("[AWARE] auto-tests.json unavailable — using empty list.", err);
+      if (import.meta.env.DEV) {
+        console.warn("[AWARE] auto-tests.json unavailable — using empty list.", err);
+      }
     }
   })();
   return _testsPromise;

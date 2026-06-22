@@ -11,6 +11,7 @@ import { AboutFeatures } from "@/components/aware/AboutFeatures";
 import { AboutEnvMap } from "@/components/aware/AboutEnvMap";
 import { AboutTechStack } from "@/components/aware/AboutTechStack";
 import { AboutTestCategories } from "@/components/aware/AboutTestCategories";
+import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { Database, Copy, Check } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -38,13 +39,13 @@ export default function About() {
 
   const promoteCount = promos.filter((p) => p.decision === "promote").length;
   const promoPct = promos.length > 0 ? Math.round((promoteCount / promos.length) * 100) : 0;
-  const totalTests = testCases.length > 0 ? testCases.length : autoTests.length;
+  const totalTests = (testCases.length || autoTests.length) || 0;
   const recentRuns = [...liveRuns]
     .sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())
     .slice(0, 20);
   const overallRate =
     recentRuns.length > 0
-      ? Math.round(recentRuns.reduce((s, r) => s + r.passPct, 0) / recentRuns.length)
+      ? Math.round(recentRuns.reduce((s, r) => s + (r.passPct || 0), 0) / recentRuns.length)
       : 0;
   const envs = getEnvConfigs();
   const summary = getAutoDiscoverySummary();
@@ -166,7 +167,9 @@ export default function About() {
         </motion.div>
         
         <motion.div variants={itemVariants} style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: 28 }}>
-          <AboutEnvMap />
+          <PanelErrorBoundary label="Environment Map">
+            <AboutEnvMap />
+          </PanelErrorBoundary>
           <AboutTechStack />
         </motion.div>
 

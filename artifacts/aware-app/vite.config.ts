@@ -135,7 +135,6 @@ export default defineConfig({
       "remark-gfm",
       "zustand",
     ],
-    exclude: ["@mlc-ai/web-llm"],
   },
   resolve: {
     alias: {

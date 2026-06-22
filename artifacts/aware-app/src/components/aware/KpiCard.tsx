@@ -59,7 +59,7 @@ export const KpiCard = React.memo(function KpiCard({
                 fontSize: 13,
                 fontWeight: 800,
                 fontFamily: "var(--font-mono)",
-                color: "var(--proof-red-bright)",
+                color: "var(--proof-red)",
                 letterSpacing: "-0.5px"
               }}
             >

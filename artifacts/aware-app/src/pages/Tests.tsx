@@ -82,15 +82,21 @@ export default function Tests() {
 
   const handleExportCSV = () => {
     const headers = ["ID", "Name", "Type", "Category", "Priority", "Status"];
+    const escape = (v: any) => {
+      let s = String(v ?? "");
+      if (/^[=+\-@]/.test(s)) s = `\t${s}`;
+      return '"' + s.replace(/"/g, '""') + '"';
+    };
+    
     const rows = filtered.map((t) => [
-      t.id,
-      t.name,
-      t.testType,
-      t.category,
-      t.priority,
-      t.status,
+      escape(t.id),
+      escape(t.name),
+      escape(t.testType),
+      escape(t.category),
+      escape(t.priority),
+      escape(t.status),
     ]);
-    const csvContent = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const csvContent = [headers.map(escape), ...rows].map((r) => r.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

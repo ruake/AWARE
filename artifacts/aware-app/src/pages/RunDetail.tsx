@@ -24,7 +24,7 @@ import {
 import { useSyncedUrlState } from "@/lib/urlState";
 import { SkeletonTable, SkeletonText } from "@/components/aware/Skeleton";
 import { AssertionRow } from "@/components/aware/AssertionRow";
-import { envIdToLabel } from "@/lib/envConfig";
+import { Pagination } from "@/components/aware/Pagination";
 import { TestHistoryStrip } from "@/components/aware/HistoryTimeline";
 
 export default function RunDetail() {
@@ -40,19 +40,78 @@ export default function RunDetail() {
   const [search, setSearch] = useSyncedUrlState("q", "");
   const [statusFilter, setStatusFilter] = useSyncedUrlState("status", "all");
   const [catFilter, setCatFilter] = useSyncedUrlState("cat", "all");
-  const [expandedRows, setExpandedRows] = React.useState<Set<string>>(new Set());
+  const filtered = React.useMemo(() => {
+    return results.filter((r) => {
+      if (statusFilter !== "all" && r.status !== statusFilter) return false;
+      if (catFilter !== "all" && r.category !== catFilter) return false;
+      if (search && !r.name.toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    });
+  }, [results, statusFilter, catFilter, search]);
 
-  // Auto-expand from URL
-  const urlTestId = React.useMemo(() => new URLSearchParams(urlSearch).get("testId"), [urlSearch]);
+  const [page, setPage] = React.useState(1);
+  const [expandedRows, setExpandedRows] = React.useState<Set<string>>(new Set());
+  const PAGE_SIZE = 25;
+
   React.useEffect(() => {
-    if (urlTestId && !expandedRows.has(urlTestId)) {
-      setExpandedRows(prev => new Set(prev).add(urlTestId));
-      // Try to scroll to it
-      setTimeout(() => {
-        document.getElementById(`row-${urlTestId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
+    setPage(1);
+  }, [search, statusFilter, catFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginatedResults = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const toggleRow = (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const newSet = new Set(expandedRows);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setExpandedRows(newSet);
+  };
+
+  const counts = {
+    total: results.length,
+    passed: results.filter((r) => r.status === "PASS").length,
+    failed: results.filter((r) => r.status === "FAIL").length,
+    skipped: results.filter((r) => (r.status as string) === "SKIPPED").length,
+  };
+
+  const getStatusColor = (status: string) => {
+    if (status === "PASS") return "var(--proof-emerald)";
+    if (status === "FAIL") return "var(--proof-red)";
+    if (status === "SKIPPED") return "var(--proof-text-muted)";
+    if (status === "FLAKY") return "var(--proof-yellow)";
+    if (status === "TIMEOUT") return "var(--proof-orange)";
+    return "var(--proof-text-secondary)";
+  };
+
+  const [sortKey, setSortKey] = React.useState<string>("name");
+  const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
+
+  const sortedResults = React.useMemo(() => {
+    return [...paginatedResults].sort((a, b) => {
+      let valA: any = a[sortKey as keyof typeof a];
+      let valB: any = b[sortKey as keyof typeof b];
+      if (valA < valB) return sortDir === "asc" ? -1 : 1;
+      if (valA > valB) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [paginatedResults, sortKey, sortDir]);
+
+  const toggleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
     }
-  }, [urlTestId]); // eslint-disable-line react-hooks/exhaustive-deps
+  };
+
+  const handleKeyDownSort = (e: React.KeyboardEvent, key: string) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggleSort(key);
+    }
+  };
 
   if (!run) {
     if (initState.loading) {
@@ -81,36 +140,6 @@ export default function RunDetail() {
       </div>
     );
   }
-
-  const filtered = results.filter((r) => {
-    if (statusFilter !== "all" && r.status !== statusFilter) return false;
-    if (catFilter !== "all" && r.category !== catFilter) return false;
-    if (search && !r.name.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
-
-  const toggleRow = (id: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    const newSet = new Set(expandedRows);
-    if (newSet.has(id)) newSet.delete(id);
-    else newSet.add(id);
-    setExpandedRows(newSet);
-  };
-
-  const counts = {
-    total: results.length,
-    passed: results.filter((r) => r.status === "PASS").length,
-    failed: results.filter((r) => r.status === "FAIL").length,
-    skipped: results.filter((r) => (r.status as string) === "SKIPPED").length,
-  };
-
-  const getStatusColor = (status: string) => {
-    if (status === "PASS") return "var(--proof-green)";
-    if (status === "FAIL") return "var(--proof-red)";
-    if (status === "SKIPPED") return "var(--proof-text-muted)";
-    if (status === "FLAKY") return "var(--proof-yellow)";
-    return "var(--proof-text-secondary)";
-  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16, height: "100%", minHeight: 0 }}>
@@ -274,15 +303,43 @@ export default function RunDetail() {
             <thead style={{ position: "sticky", top: 0, background: "var(--proof-surface)", zIndex: 5 }}>
               <tr>
                 <th style={{ width: 40, padding: "12px 16px" }}></th>
-                <th style={{ textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)" }}>TEST</th>
-                <th style={{ width: 120, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)" }}>STATUS</th>
-                <th style={{ width: 140, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)" }}>CATEGORY</th>
+                <th 
+                  onClick={() => toggleSort("name")}
+                  onKeyDown={(e) => handleKeyDownSort(e, "name")}
+                  tabIndex={0}
+                  style={{ textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer" }}
+                >
+                  TEST {sortKey === "name" && (sortDir === "asc" ? "↑" : "↓")}
+                </th>
+                <th 
+                  onClick={() => toggleSort("status")}
+                  onKeyDown={(e) => handleKeyDownSort(e, "status")}
+                  tabIndex={0}
+                  style={{ width: 120, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer" }}
+                >
+                  STATUS {sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
+                </th>
+                <th 
+                  onClick={() => toggleSort("category")}
+                  onKeyDown={(e) => handleKeyDownSort(e, "category")}
+                  tabIndex={0}
+                  style={{ width: 140, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer" }}
+                >
+                  CATEGORY {sortKey === "category" && (sortDir === "asc" ? "↑" : "↓")}
+                </th>
                 <th style={{ width: 180, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)" }}>HISTORY</th>
-                <th style={{ width: 100, textAlign: "right", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)" }}>DURATION</th>
+                <th 
+                  onClick={() => toggleSort("duration")}
+                  onKeyDown={(e) => handleKeyDownSort(e, "duration")}
+                  tabIndex={0}
+                  style={{ width: 100, textAlign: "right", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer" }}
+                >
+                  DURATION {sortKey === "duration" && (sortDir === "asc" ? "↑" : "↓")}
+                </th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r) => {
+              {sortedResults.map((r) => {
                 const isExpanded = expandedRows.has(r.id);
                 return (
                   <React.Fragment key={r.id}>
@@ -379,6 +436,18 @@ export default function RunDetail() {
             </tbody>
           </table>
         </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div style={{ padding: "12px 16px", borderTop: "1px solid var(--proof-border)" }}>
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={filtered.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

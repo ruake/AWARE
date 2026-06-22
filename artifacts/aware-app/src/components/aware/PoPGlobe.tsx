@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
+import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 
 function cssVar(name: string): string {
   if (typeof document === "undefined") return "#3b82f6";
@@ -163,7 +164,7 @@ function GlobeGroup({ onMarkerClick }: { onMarkerClick?: (index: number) => void
   );
 }
 
-export default function PoPGlobe({
+function PoPGlobeContent({
   size = 200,
   interactive = true,
   className,
@@ -173,8 +174,6 @@ export default function PoPGlobe({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(true);
 
-  // ── P-03: Pause Three.js render loop when the globe is scrolled offscreen ──
-  // This prevents the GPU from burning cycles on an invisible canvas.
   useEffect(() => {
     const el = containerRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
@@ -204,5 +203,13 @@ export default function PoPGlobe({
         {interactive && <OrbitControls enableZoom={false} enablePan={false} />}
       </Canvas>
     </div>
+  );
+}
+
+export default function PoPGlobe(props: PoPGlobeProps) {
+  return (
+    <PanelErrorBoundary label="Globe Viz">
+      <PoPGlobeContent {...props} />
+    </PanelErrorBoundary>
   );
 }

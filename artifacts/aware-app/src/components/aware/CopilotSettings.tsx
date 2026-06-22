@@ -1,78 +1,43 @@
 import React from "react";
-import { X } from "lucide-react";
+import { X, Info, ExternalLink, Zap, CheckCircle, AlertCircle } from "lucide-react";
 
 interface CopilotSettingsProps {
-  endpointConfig: { apiKey: string; apiUrl: string; model: string };
-  onSave: (cfg: { apiKey: string; apiUrl: string; model: string }) => void;
   onClose: () => void;
 }
 
-function SettingsForm({
-  config,
-  onSave,
-}: {
-  config: { apiKey: string; apiUrl: string; model: string };
-  onSave: (cfg: { apiKey: string; apiUrl: string; model: string }) => void;
-}) {
-  const [apiKey, setApiKey] = React.useState(config.apiKey);
-  const [apiUrl, setApiUrl] = React.useState(config.apiUrl);
-  const [model, setModel] = React.useState(config.model);
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <label style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontWeight: 600 }}>
-          API Key
-        </label>
-        <input
-          type="password"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-          placeholder="sk-..."
-          className="proof-input"
-          style={{ fontSize: 12 }}
-        />
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <label style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontWeight: 600 }}>
-          API URL
-        </label>
-        <input
-          value={apiUrl}
-          onChange={(e) => setApiUrl(e.target.value)}
-          placeholder="http://localhost:11434/v1  (Ollama, LM Studio, …)"
-          className="proof-input"
-          style={{ fontSize: 12 }}
-        />
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <label style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontWeight: 600 }}>
-          Model
-        </label>
-        <input
-          value={model}
-          onChange={(e) => setModel(e.target.value)}
-          placeholder="llama3, mistral, phi3 … (leave blank for server default)"
-          className="proof-input"
-          style={{ fontSize: 12 }}
-        />
-      </div>
-      <button
-        onClick={() => onSave({ apiKey, apiUrl, model })}
-        className="proof-button-primary"
-        style={{ alignSelf: "flex-end", padding: "6px 16px", fontSize: 12 }}
-      >
-        Save Settings
-      </button>
-    </div>
-  );
-}
+export function CopilotSettings({ onClose }: CopilotSettingsProps) {
+  const [status, setStatus] = React.useState<"checking" | "available" | "unavailable" | "downloading">("checking");
 
-export function CopilotSettings({ endpointConfig, onSave, onClose }: CopilotSettingsProps) {
+  const checkStatus = React.useCallback(async () => {
+    setStatus("checking");
+    // Simple availability check
+    if (typeof (window as any).LanguageModel?.availability === "function") {
+      const res = await (window as any).LanguageModel.availability();
+      setStatus(res === "downloadable" || res === "downloading" ? "downloading" : res);
+    } else if (typeof (window as any).ai?.languageModel?.capabilities === "function") {
+      const cap = await (window as any).ai.languageModel.capabilities();
+      const avail = typeof cap === "object" ? cap.available : cap;
+      if (avail === "readily") setStatus("available");
+      else if (avail === "after-download") setStatus("downloading");
+      else setStatus("unavailable");
+    } else {
+      setStatus("unavailable");
+    }
+  }, []);
+
+  React.useEffect(() => {
+    checkStatus();
+  }, [checkStatus]);
+
+  const copyFlag = () => {
+    navigator.clipboard.writeText("chrome://flags/#prompt-api-for-gemini-nano");
+  };
+
   return (
     <div
       style={{
         borderBottom: "1px solid var(--proof-border)",
-        padding: "14px 18px",
+        padding: "16px 20px",
         background: "var(--proof-overlay)",
         backdropFilter: "blur(10px)",
         flexShrink: 0,
@@ -84,12 +49,15 @@ export function CopilotSettings({ endpointConfig, onSave, onClose }: CopilotSett
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 12,
+          marginBottom: 16,
         }}
       >
-        <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--proof-text)" }}>
-          Custom Endpoint Settings
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Zap size={16} style={{ color: "var(--proof-blue)" }} />
+          <span style={{ fontSize: 14, fontWeight: 700, color: "var(--proof-text)" }}>
+            Chrome AI (Gemini Nano)
+          </span>
+        </div>
         <button
           onClick={onClose}
           style={{
@@ -101,10 +69,171 @@ export function CopilotSettings({ endpointConfig, onSave, onClose }: CopilotSett
             alignItems: "center",
           }}
         >
-          <X size={14} />
+          <X size={16} />
         </button>
       </div>
-      <SettingsForm config={endpointConfig} onSave={onSave} />
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Status Badge */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>Status:</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "4px 10px",
+              borderRadius: 20,
+              fontSize: 11,
+              fontWeight: 600,
+              background:
+                status === "available"
+                  ? "rgba(0, 220, 130, 0.1)"
+                  : status === "unavailable"
+                    ? "rgba(255, 77, 107, 0.1)"
+                    : "rgba(91, 138, 255, 0.1)",
+              color:
+                status === "available"
+                  ? "var(--proof-emerald)"
+                  : status === "unavailable"
+                    ? "var(--proof-red)"
+                    : "var(--proof-blue)",
+              border: `1px solid ${
+                status === "available"
+                  ? "rgba(0, 220, 130, 0.2)"
+                  : status === "unavailable"
+                    ? "rgba(255, 77, 107, 0.2)"
+                    : "rgba(91, 138, 255, 0.2)"
+              }`,
+            }}
+          >
+            {status === "available" && <CheckCircle size={12} />}
+            {status === "unavailable" && <AlertCircle size={12} />}
+            {status === "checking" && (
+              <Zap size={12} style={{ animation: "pulse 1.5s infinite" }} />
+            )}
+            {status === "downloading" && (
+              <Zap size={12} style={{ animation: "pulse 1.5s infinite" }} />
+            )}
+            {status.toUpperCase()}
+          </div>
+          <button
+            onClick={checkStatus}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 11,
+              color: "var(--proof-blue)",
+              textDecoration: "underline",
+              padding: 0,
+            }}
+          >
+            Refresh
+          </button>
+        </div>
+
+        {status === "unavailable" && (
+          <div
+            style={{
+              padding: 12,
+              borderRadius: 8,
+              background: "rgba(255, 77, 107, 0.05)",
+              border: "1px solid rgba(255, 77, 107, 0.15)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                fontWeight: 600,
+                color: "var(--proof-red)",
+              }}
+            >
+              <Info size={14} /> Setup Required
+            </div>
+            <p style={{ fontSize: 11, color: "var(--proof-text-secondary)", lineHeight: 1.5, margin: 0 }}>
+              To enable on-device AI, you must be using Chrome 128+ and enable the following flags:
+            </p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "rgba(0,0,0,0.2)",
+                padding: "6px 10px",
+                borderRadius: 4,
+                fontSize: 10,
+                fontFamily: "var(--font-mono)",
+                color: "var(--proof-text)",
+              }}
+            >
+              <span>chrome://flags/#prompt-api-for-gemini-nano</span>
+              <button
+                onClick={copyFlag}
+                style={{
+                  background: "var(--proof-blue)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 3,
+                  padding: "2px 6px",
+                  fontSize: 9,
+                  cursor: "pointer",
+                }}
+              >
+                Copy
+              </button>
+            </div>
+            <a
+              href="https://developer.chrome.com/docs/ai/built-in"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: 11,
+                color: "var(--proof-blue)",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                marginTop: 4,
+              }}
+            >
+              Learn more <ExternalLink size={10} />
+            </a>
+          </div>
+        )}
+
+        {status === "available" && (
+          <div
+            style={{
+              padding: 12,
+              borderRadius: 8,
+              background: "rgba(0, 220, 130, 0.05)",
+              border: "1px solid rgba(0, 220, 130, 0.15)",
+              fontSize: 11,
+              color: "var(--proof-text-secondary)",
+              lineHeight: 1.5,
+            }}
+          >
+            Ready to use! Gemini Nano is running locally on your machine. No data leaves your browser.
+          </div>
+        )}
+
+        <button
+          onClick={() => {
+            const ev = new CustomEvent("copilot-ping");
+            window.dispatchEvent(ev);
+          }}
+          className="proof-button-primary"
+          style={{ width: "100%", height: 36, fontSize: 12 }}
+        >
+          Test Connection
+        </button>
+      </div>
     </div>
   );
 }

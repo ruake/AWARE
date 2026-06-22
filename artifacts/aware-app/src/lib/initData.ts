@@ -70,44 +70,58 @@ export function loadAllData(): Promise<void> {
 }
 
 async function _doLoad(): Promise<void> {
-  updateSnapshot();
-  notify();
+  try {
+    updateSnapshot();
+    notify();
 
-  const errors: unknown[] = [];
+    const errors: unknown[] = [];
 
-  // ── Phase 1: Load runs first — unblocks the run list UI immediately ───────
-  await safeLoad(loadRuns, "runs", errors);
-  recomputeAll();
-  _runsReady = true;
-  updateSnapshot();
-  notify();
-  bus.emit("data:phase", { phase: 1, done: true });
+    // ── Phase 1: Load runs first — unblocks the run list UI immediately ───────
+    await safeLoad(loadRuns, "runs", errors);
+    recomputeAll();
+    _runsReady = true;
+    updateSnapshot();
+    notify();
+    bus.emit("data:phase", { phase: 1, done: true });
 
-  // ── Phase 2: Load supporting data concurrently ────────────────────────────
-  await Promise.all([
-    safeLoad(loadDiffRows, "diff", errors),
-    safeLoad(loadTestSuites, "suites", errors),
-    safeLoad(loadPromotions, "promotions", errors),
-    safeLoad(loadSchedulerStatus, "scheduler", errors),
-    safeLoad(loadAutoDiscoveredTests, "discovery", errors),
-  ]);
-  recomputeAll();
-  updateSnapshot();
-  notify();
-  bus.emit("data:phase", { phase: 2, done: true });
+    // ── Phase 2: Load supporting data concurrently ────────────────────────────
+    await Promise.all([
+      safeLoad(loadDiffRows, "diff", errors),
+      safeLoad(loadTestSuites, "suites", errors),
+      safeLoad(loadPromotions, "promotions", errors),
+      safeLoad(loadSchedulerStatus, "scheduler", errors),
+      safeLoad(loadAutoDiscoveredTests, "discovery", errors),
+    ]);
+    recomputeAll();
+    updateSnapshot();
+    notify();
+    bus.emit("data:phase", { phase: 2, done: true });
 
-  // ── Phase 3: Load full test results last (largest payload) ────────────────
-  await safeLoad(loadAllResults, "results", errors);
-  recomputeAll();
-  bus.emit("data:phase", { phase: 3, done: true });
+    // ── Phase 3: Load full test results last (largest payload) ────────────────
+    await safeLoad(loadAllResults, "results", errors);
+    recomputeAll();
+    bus.emit("data:phase", { phase: 3, done: true });
 
-  if (errors.length > 0) {
-    _error = errors.join("; ");
-    console.error("Data load errors:", errors);
+    if (errors.length > 0) {
+      _error = errors.join("; ");
+      if (import.meta.env.DEV) {
+        console.error("Data load errors:", errors);
+      }
+    }
+
+    _loaded = true;
+    _loading = false;
+    updateSnapshot();
+    notify();
+  } catch (err) {
+    _error = err;
+    _loading = false;
+    updateSnapshot();
+    notify();
+    if (import.meta.env.DEV) {
+      console.error("Critical data load failure:", err);
+    }
+  } finally {
+    _activePromise = null;
   }
-
-  _loaded = true;
-  _loading = false;
-  updateSnapshot();
-  notify();
 }

@@ -1,158 +1,48 @@
 import React from "react";
-import { AlertTriangle, Download, X } from "lucide-react";
+import { Info, ExternalLink } from "lucide-react";
 
-interface WebLLMWarningProps {
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-export function WebLLMWarning({ onConfirm, onCancel }: WebLLMWarningProps) {
+export function WebLLMWarning() {
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="webllm-warning-title"
       style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.7)",
+        padding: 16,
+        background: "var(--proof-blue-bg)",
+        border: "1px solid var(--proof-blue-border)",
+        borderRadius: 8,
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-        padding: 24,
+        gap: 12,
+        marginBottom: 20,
       }}
     >
-      <div
-        style={{
-          background: "var(--proof-surface-2)",
-          border: "1px solid var(--proof-border-strong)",
-          borderRadius: "var(--proof-radius-xl)",
-          padding: 32,
-          maxWidth: 480,
-          width: "100%",
-          boxShadow: "var(--proof-shadow-xl)",
-          position: "relative",
-        }}
-      >
-        <button
-          onClick={onCancel}
-          aria-label="Close"
-          style={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--proof-text-muted)",
-            padding: 4,
-            borderRadius: 4,
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <X size={16} />
-        </button>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            marginBottom: 20,
-          }}
-        >
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: "var(--proof-yellow-bg)",
-              border: "1px solid var(--proof-yellow-border)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <AlertTriangle size={20} style={{ color: "var(--proof-yellow)" }} />
-          </div>
-          <h2
-            id="webllm-warning-title"
-            style={{
-              fontSize: 17,
-              fontWeight: 700,
-              color: "var(--proof-text)",
-              margin: 0,
-            }}
-          >
-            Large Download Required
-          </h2>
-        </div>
-
-        <p
-          style={{
-            fontSize: 14,
-            color: "var(--proof-text-secondary)",
-            lineHeight: 1.6,
-            marginBottom: 12,
-          }}
-        >
-          Running the AI model locally requires downloading{" "}
-          <strong style={{ color: "var(--proof-text)" }}>~4 GB</strong> of model weights to your
-          browser. This is a one-time download that enables fully private, offline AI processing —
-          no data leaves your device.
+      <Info size={20} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
+      <div>
+        <h4 style={{ margin: "0 0 4px 0", fontSize: 14, fontWeight: 600, color: "var(--proof-text)" }}>
+          Chrome AI Required
+        </h4>
+        <p style={{ margin: 0, fontSize: 13, color: "var(--proof-text-secondary)", lineHeight: 1.5 }}>
+          This copilot uses Gemini Nano via Chrome's built-in AI API. 
+          Please ensure you are using <strong>Chrome 138+</strong> and have the Prompt API enabled in 
+          <code style={{ background: "var(--proof-surface-3)", padding: "2px 4px", borderRadius: 4, marginLeft: 4 }}>
+            chrome://flags/#prompt-api-for-gemini-nano
+          </code>.
         </p>
-
-        <p
-          style={{
-            fontSize: 13,
-            color: "var(--proof-text-muted)",
-            lineHeight: 1.5,
-            marginBottom: 24,
+        <a 
+          href="https://developer.chrome.com/docs/ai/built-in-ai" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ 
+            display: "inline-flex", 
+            alignItems: "center", 
+            gap: 4, 
+            marginTop: 8, 
+            fontSize: 12, 
+            color: "var(--proof-blue)", 
+            textDecoration: "none",
+            fontWeight: 500
           }}
         >
-          The download will be cached locally. Requires WebGPU support (Chrome 113+, Edge 113+).
-          Alternatively, use <strong>Custom Endpoint</strong> mode with an OpenAI-compatible server.
-        </p>
-
-        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button
-            onClick={onCancel}
-            style={{
-              padding: "8px 18px",
-              fontSize: 13,
-              fontWeight: 600,
-              background: "var(--proof-surface-3)",
-              color: "var(--proof-text-secondary)",
-              border: "1px solid var(--proof-border)",
-              borderRadius: 8,
-              cursor: "pointer",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            style={{
-              padding: "8px 18px",
-              fontSize: 13,
-              fontWeight: 600,
-              background: "var(--proof-blue)",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Download size={14} />
-            Download & Enable (~4 GB)
-          </button>
-        </div>
+          Setup Instructions <ExternalLink size={12} />
+        </a>
       </div>
     </div>
   );

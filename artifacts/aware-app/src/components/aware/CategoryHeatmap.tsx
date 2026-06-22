@@ -68,19 +68,26 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
   }
 
   const cellColor = (status: "PASS" | "FAIL" | "NONE") => {
-    if (status === "PASS") return "var(--proof-green-bg)";
+    if (status === "PASS") return "var(--proof-emerald-bg)";
     if (status === "FAIL") return "var(--proof-red-bg)";
     return "var(--proof-surface-3)";
   };
 
+  const cellImage = (status: "PASS" | "FAIL" | "NONE") => {
+    if (status === "FAIL") {
+      return "repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px)";
+    }
+    return "none";
+  };
+
   const borderColor = (status: "PASS" | "FAIL" | "NONE") => {
-    if (status === "PASS") return "var(--proof-green-border)";
+    if (status === "PASS") return "var(--proof-emerald-border)";
     if (status === "FAIL") return "var(--proof-red-border)";
     return "var(--proof-border)";
   };
 
   const textColor = (status: "PASS" | "FAIL" | "NONE") => {
-    if (status === "PASS") return "var(--proof-green-bright)";
+    if (status === "PASS") return "var(--proof-emerald-bright)";
     if (status === "FAIL") return "var(--proof-red-bright)";
     return "var(--proof-text-secondary)";
   };
@@ -110,7 +117,7 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: `140px repeat(${Math.max(...grid.map((g) => g.cells.length), 1)}, 1fr)`,
+            gridTemplateColumns: `140px repeat(${grid.length > 0 ? Math.max(...grid.map((g) => g.cells.length), 1) : 1}, 1fr)`,
             gap: 8,
             fontSize: 12,
           }}
@@ -160,6 +167,7 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
                   style={{
                     padding: "12px",
                     background: cellColor(cell.status),
+                    backgroundImage: cellImage(cell.status),
                     border: `1px solid ${borderColor(cell.status)}`,
                     borderRadius: i === group.cells.length - 1 ? "0 var(--proof-radius) var(--proof-radius) 0" : 0,
                     textAlign: "center",

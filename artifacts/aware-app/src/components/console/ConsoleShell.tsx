@@ -86,6 +86,7 @@ function routeLabel(path: string): string {
   const labels: Record<string, string> = {
     "/runs": "Runs", "/compare": "Compare", "/trends": "Trends",
     "/tests": "Tests", "/copilot": "Copilot", "/settings": "Settings", "/about": "About",
+    "/start": "Start Run", "/share": "Share",
   };
   const seg = "/" + path.split("/")[1];
   return labels[seg] ?? "A.W.A.R.E.";
@@ -131,12 +132,12 @@ function SidebarNavItem({ item, isActive, collapsed }: {
         borderRadius: "var(--proof-radius)",
         fontSize: 13,
         fontWeight: isActive ? 600 : 500,
-        color: isActive ? "var(--proof-blue-bright)" : "var(--proof-text-secondary)",
+        color: isActive ? "var(--proof-emerald)" : "var(--proof-text-secondary)",
         cursor: "pointer",
-        transition: "all var(--proof-transition)",
+        transition: "all 150ms ease",
         textDecoration: "none",
-        border: `1px solid ${isActive ? "var(--proof-blue-border)" : "transparent"}`,
-        background: isActive ? "var(--proof-blue-bg)" : "transparent",
+        borderLeft: isActive ? "3px solid var(--proof-emerald)" : "3px solid transparent",
+        background: isActive ? "var(--proof-surface-active)" : "transparent",
         justifyContent: collapsed ? "center" : "flex-start",
         position: "relative",
         whiteSpace: "nowrap",
@@ -169,7 +170,7 @@ function SidebarNavItem({ item, isActive, collapsed }: {
   );
 }
 
-export function ConsoleShell({ children }: ConsoleShellProps) {
+export function ConsoleShell({ children, fullBleed }: ConsoleShellProps & { fullBleed?: boolean }) {
   const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
@@ -320,6 +321,21 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
         </div>
 
         <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 8px" }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: 9, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>QA</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-blue-bright)" }}>47%</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: 9, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>UAT</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-yellow)" }}>94%</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: 9, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>PROD</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-emerald)" }}>58%</span>
+          </div>
+        </div>
+        <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
         <EnvTierSelector />
         <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
 
@@ -440,7 +456,7 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
                       <div style={{
                         fontSize: 10, fontWeight: 700, textTransform: "uppercase",
                         letterSpacing: "0.7px", color: "var(--proof-text-muted)",
-                        padding: "6px 10px 3px",
+                        padding: "12px 10px 4px",
                       }}>
                         {group.label}
                       </div>
@@ -479,11 +495,14 @@ export function ConsoleShell({ children }: ConsoleShellProps) {
         <main
           id="main-content"
           style={{
-            flex: 1, minWidth: 0, overflowY: "auto", overflowX: "hidden",
+            flex: 1, minWidth: 0, 
+            overflowY: fullBleed ? "hidden" : "auto", 
+            overflowX: "hidden",
             background: "var(--proof-editor-bg)",
             backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.028) 1px, transparent 1px)",
             backgroundSize: "22px 22px",
             position: "relative",
+            padding: fullBleed ? 0 : undefined,
           }}
         >
           {children}

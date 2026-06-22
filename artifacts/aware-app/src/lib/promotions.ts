@@ -23,11 +23,13 @@ export async function loadPromotions(): Promise<void> {
   if (_promotionsLoaded) return;
   _promotionsLoaded = true;
   try {
-    _promotionDecisions = await fetchJson<PromotionDecision[]>("promotions.json");
+    _promotionDecisions = (await fetchJson<PromotionDecision[]>("promotions.json")) || [];
     updateSnapshot();
     notify();
   } catch (err) {
-    console.warn("[AWARE] promotions.json failed to load — promotion gate data unavailable:", err);
+    if (import.meta.env.DEV) {
+      console.warn("[AWARE] promotions.json failed to load — promotion gate data unavailable:", err);
+    }
   }
 }
 

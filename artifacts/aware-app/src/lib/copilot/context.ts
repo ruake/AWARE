@@ -1,7 +1,7 @@
 import type { ApiMessage, ProviderType } from "./types";
 import { RUNS } from "@/lib/runs";
 
-// Compact system prompt (~500 tokens) — sized for WebLLM's 4096-token context window.
+// Compact system prompt (~500 tokens) — sized for Chrome AI's context window.
 // Every token saved here is a token available for conversation history + tool results.
 export function buildSystemPrompt(): string {
   const latestByEnv: Record<string, number> = {};
@@ -43,13 +43,13 @@ Behavior rules:
 }
 
 // Truncate message history to fit context window.
-// WebLLM: ~4096 tokens total. System: ~500. Reserve 800 for response. = ~2796 for history.
+// Chrome AI (Gemini Nano): ~40k char budget. System: ~500 tokens. Reserve ~800 for response.
 // Very rough estimate: 1 token ≈ 4 chars.
 export function truncateMessages(
   messages: ApiMessage[],
   providerType: ProviderType,
 ): ApiMessage[] {
-  const MAX_CHARS = providerType === "webllm" ? 8000 : 40000;
+  const MAX_CHARS = 40000; // Chrome AI context window
   let total = 0;
   const result: ApiMessage[] = [];
 

@@ -276,7 +276,7 @@ function TrendsOverviewStats() {
   }, [runs]);
   const flakyCount = React.useMemo(() => {
     try {
-      return getTestDetailsSync().filter((d) => d.flakinessScore > 20).length;
+      return getTestDetailsSync("").filter((d) => Number((d as unknown as Record<string, unknown>).flakinessScore ?? 0) > 20).length;
     } catch {
       return 0;
     }

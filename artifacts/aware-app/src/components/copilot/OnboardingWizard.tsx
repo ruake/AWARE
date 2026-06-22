@@ -52,13 +52,13 @@ const PROMPTS = [
 const STEPS = [
   {
     icon: <Cpu size={14} />,
-    title: "Select a provider",
-    desc: "Choose WebLLM, Chrome AI, or a custom endpoint",
+    title: "Chrome AI (Gemini Nano)",
+    desc: "On-device AI — no API keys, no data leaves your browser",
   },
   {
     icon: <Settings size={14} />,
-    title: "Configure your settings",
-    desc: "Set API keys or download models",
+    title: "Enable in Chrome flags",
+    desc: "chrome://flags/#prompt-api-for-gemini-nano → Enabled",
   },
   {
     icon: <MessageSquare size={14} />,

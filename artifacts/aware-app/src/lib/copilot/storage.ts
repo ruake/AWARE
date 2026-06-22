@@ -48,53 +48,11 @@ export function clearSession(): void {
 }
 
 export function loadProviderType(): ProviderType {
-  try {
-    const raw = localStorage.getItem("aware_copilot_provider_v1");
-    if (raw === "webllm" || raw === "chrome" || raw === "custom") return raw;
-    if (raw === "openai") return "custom";
-  } catch {
-    /* empty */
-  }
   return "chrome";
 }
 
-export function saveProviderType(type: ProviderType): void {
-  try {
-    localStorage.setItem("aware_copilot_provider_v1", type);
-  } catch {
-    /* empty */
-  }
-}
-
-export function loadCustomEndpointConfig(): { apiKey: string; apiUrl: string; model: string } {
-  try {
-    const raw =
-      localStorage.getItem("aware_custom_endpoint_v1") ||
-      localStorage.getItem("aware_openai_config_v1");
-    if (raw) {
-      const parsed = JSON.parse(raw) as { apiKey?: string; apiUrl?: string; model?: string };
-      return {
-        apiKey: parsed.apiKey ?? "",
-        apiUrl: parsed.apiUrl && parsed.apiUrl !== "https://api.openai.com/v1" ? parsed.apiUrl : "",
-        model: parsed.model ?? "",
-      };
-    }
-  } catch {
-    /* empty */
-  }
-  return { apiKey: "", apiUrl: "", model: "" };
-}
-
-export function saveCustomEndpointConfig(cfg: {
-  apiKey: string;
-  apiUrl: string;
-  model: string;
-}): void {
-  try {
-    localStorage.setItem("aware_custom_endpoint_v1", JSON.stringify(cfg));
-  } catch {
-    /* empty */
-  }
+export function saveProviderType(_type: ProviderType): void {
+  // Always chrome, no need to save
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

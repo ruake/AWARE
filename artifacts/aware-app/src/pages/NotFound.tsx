@@ -1,4 +1,4 @@
-import { AlertTriangle, Home, Ghost } from "lucide-react";
+import { AlertTriangle, Home, Ghost, ShieldAlert } from "lucide-react";
 import { navTo } from "@/lib/nav";
 
 export default function NotFound() {
@@ -31,6 +31,11 @@ export default function NotFound() {
       />
       
       <div style={{ position: "relative" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, marginBottom: -20 }}>
+          <ShieldAlert size={40} className="text-[var(--proof-red)] opacity-50" />
+          <div style={{ width: 60, height: 2, background: "var(--proof-border)" }} />
+          <ShieldAlert size={40} className="text-[var(--proof-blue)] opacity-50" />
+        </div>
         <h1 
           className="proof-mono"
           style={{ 

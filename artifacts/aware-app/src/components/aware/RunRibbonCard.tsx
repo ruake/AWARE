@@ -158,7 +158,7 @@ export function RunRibbonCard({
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 600,
                 color: "var(--proof-text-secondary)",
                 textTransform: "uppercase",
@@ -249,7 +249,9 @@ export function RunRibbonCard({
               <div style={{ width: 6, height: 6, borderRadius: 3, background: accent }} />
               {new Date(nextDue).getTime() > Date.now() ? "Scheduled" : "Queued"}
             </span>
-          ) : null}
+          ) : (
+            <div style={{ width: 6, height: 6, borderRadius: 3, background: "var(--proof-text-muted)" }} />
+          )}
         </div>
       </div>
 

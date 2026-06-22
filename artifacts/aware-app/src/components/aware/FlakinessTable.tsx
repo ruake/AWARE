@@ -18,7 +18,7 @@ export interface EnrichedHistoryRow {
   assertionsFailed: number;
 }
 
-type SortKey = "runId" | "status" | "duration" | "env";
+type SortKey = "runId" | "status" | "duration" | "env" | "flakiness";
 
 interface FlakinessTableProps {
   filteredHistory: EnrichedHistoryRow[];
@@ -244,7 +244,14 @@ export function FlakinessTable({
                     Environment {sortIcon("env")}
                   </span>
                 </th>
-                <th style={{ padding: "16px 20px", textAlign: "right", width: "12%" }}>Flakiness</th>
+                <th
+                  onClick={() => toggleSort("flakiness")}
+                  style={{ padding: "16px 20px", textAlign: "right", cursor: "pointer", userSelect: "none", width: "12%" }}
+                >
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
+                    Pass Rate {sortIcon("flakiness")}
+                  </span>
+                </th>
                 <th style={{ padding: "16px 20px", width: "24%" }}>Error</th>
                 <th style={{ padding: "16px 20px", width: "12%", textAlign: "right" }}>Actions</th>
               </tr>
@@ -253,7 +260,7 @@ export function FlakinessTable({
               {filteredHistory.map((h) => {
                 const isSlow = h.duration > avgDuration * 2;
                 const isWarn = h.duration > avgDuration * 1.5;
-                const flakiness = enriched.length > 0 ? (enriched.filter(e => e.status !== enriched[0].status).length / (enriched.length - 1 || 1)) * 100 : 0; 
+                const passRate = enriched.length > 0 ? (enriched.filter(e => e.status === "PASS").length / enriched.length) * 100 : 0; 
                 
                 return (
                   <tr
@@ -324,12 +331,15 @@ export function FlakinessTable({
                     </td>
                     <td style={{ padding: "16px 20px", fontSize: 13, color: "var(--proof-text)" }}>{h.env}</td>
                     <td style={{ padding: "16px 20px" }}>
-                      <div style={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>
-                        <div style={{ width: "80px", height: 6, background: "var(--proof-surface-3)", borderRadius: "var(--proof-radius-full)", overflow: "hidden" }}>
+                      <div style={{ display: "flex", justifyContent: "flex-end", width: "100%", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--proof-text-muted)" }}>
+                          {Math.round(passRate)}%
+                        </span>
+                        <div style={{ width: "60px", height: 6, background: "var(--proof-surface-3)", borderRadius: "var(--proof-radius-full)", overflow: "hidden" }}>
                           <div style={{ 
                             height: "100%", 
-                            width: `${flakiness}%`, 
-                            background: flakiness > 50 ? "var(--proof-red)" : flakiness > 25 ? "var(--proof-yellow)" : "var(--proof-green)" 
+                            width: `${passRate}%`, 
+                            background: passRate >= 95 ? "var(--proof-green)" : passRate >= 80 ? "var(--proof-yellow)" : "var(--proof-red)" 
                           }} />
                         </div>
                       </div>

@@ -319,11 +319,6 @@ function Router() {
                 <Tests />
               </SEB>
             </Route>
-            {/* Redirect /tests/:testId → /tests?detail=id (no history stack pollution) */}
-            <Route path="/tests/:testId">
-              {({ testId }: { testId: string }) => <Redirect to={`/tests?detail=${testId}`} />}
-            </Route>
-            {/* Redirect /suites → /tests */}
             <Route path="/suites">
               <Redirect to="/tests" />
             </Route>
@@ -346,17 +341,6 @@ function Router() {
                 </React.Suspense>
               </ErrorBoundary>
             </Route>
-            {/* Permanent redirects from old route names — preserve deep-links (Nielsen #4) */}
-            <Route path="/activity">
-              <Redirect to="/runs" />
-            </Route>
-            <Route path="/pulse">
-              <Redirect to="/runs" />
-            </Route>
-            <Route path="/analytics">
-              <Redirect to="/trends" />
-            </Route>
-            {/* Thin utility pages — not in main nav (progressive disclosure) */}
             <Route path="/start">
               <ErrorBoundary>
                 <React.Suspense fallback={<SkeletonCard />}>
@@ -371,6 +355,7 @@ function Router() {
                 </React.Suspense>
               </ErrorBoundary>
             </Route>
+            {/* Catch-all 404 */}
             <Route component={NotFound} />
           </Switch>
       </ConsoleShell>

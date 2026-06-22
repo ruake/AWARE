@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   getEnvConfigs, getTestSuites, loadAllData,
   PROMOTION_GATE_THRESHOLD, getDataInitState,
 } from "@/lib/data";
 import {
-  Database, Layers, Beaker, Info, RefreshCw, Check,
+  Database, Layers, Beaker, Info, RefreshCw, Check, Monitor, Cpu, ExternalLink,
 } from "lucide-react";
+import { ChromeProvider } from "@/lib/copilot/providers";
+import { ProviderStatus } from "@/lib/copilot/types";
 
 const SETTINGS_KEY = "aware-settings-v1";
 interface AwareSettings { promotionThreshold: number }
@@ -41,7 +43,7 @@ function SettingsCard({ icon: Icon, title, colorClass, children }: {
 function Row({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 py-3 border-b border-[var(--proof-border-light)] last:border-0 last:pb-0 first:pt-0">
-      <div>
+      <div className="flex-1">
         <div className="text-[13px] font-semibold text-[var(--proof-text)] mb-0.5">{label}</div>
         {hint && <div className="text-[11.5px] text-[var(--proof-text-muted)]">{hint}</div>}
       </div>
@@ -54,9 +56,28 @@ export default function Settings() {
   const [settings, setSettings] = useState<AwareSettings>(getSettings);
   const [saved, setSaved] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [chromeAiStatus, setChromeAiStatus] = useState<ProviderStatus>("unavailable");
+  const [checkingAi, setCheckingAi] = useState(false);
 
   const envConfigs = getEnvConfigs();
   const suites = getTestSuites();
+
+  useEffect(() => {
+    checkChromeAi();
+  }, []);
+
+  const checkChromeAi = async () => {
+    setCheckingAi(true);
+    try {
+      const provider = new ChromeProvider();
+      const status = await provider.checkAvailability();
+      setChromeAiStatus(status);
+    } catch {
+      setChromeAiStatus("unavailable");
+    } finally {
+      setCheckingAi(false);
+    }
+  };
 
   const handleSave = () => {
     saveSettings(settings);
@@ -67,6 +88,20 @@ export default function Settings() {
   const handleSync = async () => {
     setSyncing(true);
     try { await loadAllData(); } finally { setTimeout(() => setSyncing(false), 600); }
+  };
+
+  // App uses `.light` class for light mode; absence = dark mode (default)
+  const isDarkMode = !document.documentElement.classList.contains("light");
+  const toggleTheme = () => {
+    const wasLight = document.documentElement.classList.contains("light");
+    if (wasLight) {
+      document.documentElement.classList.remove("light");
+      localStorage.setItem("proof-theme", "dark");
+    } else {
+      document.documentElement.classList.add("light");
+      localStorage.setItem("proof-theme", "light");
+    }
+    window.dispatchEvent(new Event("storage"));
   };
 
   return (
@@ -89,6 +124,64 @@ export default function Settings() {
       </div>
 
       <div className="flex flex-col gap-4">
+        {/* Appearance */}
+        <SettingsCard icon={Monitor} title="Appearance" colorClass="bg-[var(--proof-blue-bg)] border border-[var(--proof-blue-border)] text-[var(--proof-blue-bright)]">
+          <Row label="Theme" hint="Switch between dark (Midnight Observatory) and light modes">
+            <button 
+              onClick={toggleTheme}
+              className="proof-btn proof-btn-ghost"
+            >
+              {isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            </button>
+          </Row>
+        </SettingsCard>
+
+        {/* Chrome AI */}
+        <SettingsCard icon={Cpu} title="Chrome AI (Gemini Nano)" colorClass="bg-[var(--proof-emerald-bg)] border border-[var(--proof-emerald-border)] text-[var(--proof-emerald)]">
+          <Row label="Status" hint="On-device AI status for Copilot features">
+            <div className="flex items-center gap-3">
+              <span className={`text-[11px] font-bold uppercase px-2 py-0.5 rounded-[4px] ${
+                chromeAiStatus === "available" ? "bg-[var(--proof-green-bg)] text-[var(--proof-green)]" :
+                chromeAiStatus === "downloading" ? "bg-[var(--proof-yellow-bg)] text-[var(--proof-yellow)]" :
+                "bg-[var(--proof-red-bg)] text-[var(--proof-red)]"
+              }`}>
+                {chromeAiStatus}
+              </span>
+              <button
+                onClick={checkChromeAi}
+                disabled={checkingAi}
+                className="proof-btn proof-btn-ghost px-2 py-1 h-auto text-[11px]"
+              >
+                {checkingAi ? "Checking..." : "Check Availability"}
+              </button>
+            </div>
+          </Row>
+          {chromeAiStatus !== "available" && (
+            <div className="mt-4 p-4 rounded-[var(--proof-radius)] bg-[var(--proof-surface-2)] border border-[var(--proof-border)]">
+              <h4 className="text-[13px] font-bold text-[var(--proof-text)] mb-2 flex items-center gap-2">
+                <Info size={14} className="text-[var(--proof-blue-bright)]" />
+                How to enable Chrome AI
+              </h4>
+              <ol className="text-[12px] text-[var(--proof-text-secondary)] space-y-2 list-decimal ml-4">
+                <li>Ensure you are using <strong>Chrome Canary</strong> or <strong>Dev</strong> (v138+).</li>
+                <li>Go to <code className="bg-[var(--proof-surface-3)] px-1 py-0.5 rounded text-[var(--proof-blue-bright)]">chrome://flags/#prompt-api-for-gemini-nano</code> and set to <strong>Enabled</strong>.</li>
+                <li>Go to <code className="bg-[var(--proof-surface-3)] px-1 py-0.5 rounded text-[var(--proof-blue-bright)]">chrome://flags/#optimization-guide-on-device-model</code> and set to <strong>Enabled BypassPerfRequirement</strong>.</li>
+                <li>Relaunch Chrome and wait for the model to download (check <code className="bg-[var(--proof-surface-3)] px-1 py-0.5 rounded text-[var(--proof-blue-bright)]">chrome://components</code> for "Optimization Guide On Device Model").</li>
+              </ol>
+              <div className="mt-4 flex gap-3">
+                <a 
+                  href="https://developer.chrome.com/docs/ai/built-in" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-[var(--proof-blue-bright)] hover:underline flex items-center gap-1"
+                >
+                  Developer Docs <ExternalLink size={10} />
+                </a>
+              </div>
+            </div>
+          )}
+        </SettingsCard>
+
         {/* Promotion gate */}
         <SettingsCard icon={Layers} title="Promotion Gate" colorClass="bg-[var(--proof-green-bg)] border border-[var(--proof-green-border)] text-[var(--proof-green)]">
           <Row label="Pass Rate Threshold" hint="Minimum pass rate required to promote from UAT → PROD">
@@ -186,3 +279,4 @@ export default function Settings() {
     </div>
   );
 }
+

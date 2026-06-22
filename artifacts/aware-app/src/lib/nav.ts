@@ -4,7 +4,9 @@
  * without a full page reload (which would destroy React state).
  */
 export function navTo(path: string) {
-  if (!path || /^(?:https?:|\/\/)/i.test(path)) return;
+  if (!path) return;
+  // block external URLs
+  if (/^(?:https?:|\/\/)/i.test(path)) return;
   const resolved = path.startsWith("/") ? path : `/${path}`;
   window.history.pushState(null, "", resolved);
   window.dispatchEvent(new PopStateEvent("popstate", { state: null }));

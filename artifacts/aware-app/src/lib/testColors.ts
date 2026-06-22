@@ -59,13 +59,21 @@ export const CAT_BGS: Record<string, string> = {
 };
 
 export const STATUS_COLORS: Record<string, string> = {
-  active: "var(--proof-green)",
-  disabled: "var(--proof-yellow)",
-  deprecated: "var(--proof-red)",
+  active: "var(--proof-emerald)",
+  disabled: "var(--proof-text-muted)",
+  deprecated: "var(--proof-text-muted)",
+  PASS: "var(--proof-emerald)",
+  FAIL: "var(--proof-red)",
+  SKIP: "var(--proof-text-muted)",
+  TIMEOUT: "var(--proof-orange)",
 };
 
 export const STATUS_BGS: Record<string, string> = {
-  active: "var(--proof-green-bg)",
-  disabled: "var(--proof-yellow-bg)",
-  deprecated: "var(--proof-red-bg)",
+  active: "rgba(0, 220, 130, 0.1)",
+  disabled: "rgba(255, 255, 255, 0.05)",
+  deprecated: "rgba(255, 255, 255, 0.05)",
+  PASS: "rgba(0, 220, 130, 0.1)",
+  FAIL: "rgba(255, 77, 107, 0.1)",
+  SKIP: "rgba(255, 255, 255, 0.05)",
+  TIMEOUT: "rgba(255, 165, 0, 0.1)",
 };

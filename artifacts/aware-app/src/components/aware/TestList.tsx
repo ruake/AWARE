@@ -118,6 +118,10 @@ export function TestList({
   const totalPages = Math.max(1, Math.ceil(filteredCount / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages);
 
+  React.useEffect(() => {
+    onPageChange(1);
+  }, [sortKey, sortDir]);
+
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -152,11 +156,21 @@ export function TestList({
         position: "sticky",
         top: 0,
         zIndex: 10,
+        outline: "none",
       }}
       onClick={() => handleSort(col)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleSort(col);
+        }
+      }}
+      tabIndex={0}
       aria-sort={sortKey === col ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
     >
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+      <span 
+        style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+      >
         {label}
         <SortIcon col={col} sortKey={sortKey} sortDir={sortDir} />
       </span>

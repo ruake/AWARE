@@ -230,6 +230,55 @@ html, body {
   background: var(--proof-surface-2);
 }
 
+.proof-badge-pass {
+  background: var(--proof-green-bg);
+  color: var(--proof-green);
+  border-color: var(--proof-green-border);
+}
+
+.proof-badge-fail {
+  background: var(--proof-red-bg);
+  color: var(--proof-red);
+  border-color: var(--proof-red-border);
+}
+
+.proof-badge-warning {
+  background: var(--proof-yellow-bg);
+  color: var(--proof-yellow);
+  border-color: var(--proof-yellow-border);
+}
+
+.proof-badge-pending {
+  background: var(--proof-subtle-bg);
+  color: var(--proof-text-muted);
+  border-color: var(--proof-border);
+}
+
+.proof-badge-timeout {
+  background: var(--proof-orange-bg);
+  color: var(--proof-orange);
+  border-color: var(--proof-orange-border);
+}
+
+.proof-badge-flaky {
+  background: var(--proof-purple-bg);
+  color: var(--proof-purple);
+  border-color: var(--proof-purple-border);
+}
+
+.proof-badge-running {
+  background: var(--proof-blue-bg);
+  color: var(--proof-blue);
+  border-color: var(--proof-blue-border);
+  animation: badge-pulse 2s infinite;
+}
+
+.proof-badge-skip {
+  background: var(--proof-subtle-bg);
+  color: var(--proof-text-muted);
+  border-color: var(--proof-border);
+}
+
 .proof-section {
   padding: 2rem 0;
 }

@@ -582,8 +582,9 @@ const getDurationTrends: ToolDefinition = {
 
     const avgDuration =
       rows.length > 0 ? Math.round(rows.reduce((s, r) => s + r.durationSec, 0) / rows.length) : 0;
-    const maxDur = Math.max(...rows.map((r) => r.durationSec));
-    const minDur = Math.min(...rows.map((r) => r.durationSec));
+    const durs = rows.map((r) => r.durationSec);
+    const maxDur = durs.length ? Math.max(...durs) : 0;
+    const minDur = durs.length ? Math.min(...durs) : 0;
 
     const tableData: TableData = {
       title: `Execution Duration Trends — Last ${rows.length} Runs`,

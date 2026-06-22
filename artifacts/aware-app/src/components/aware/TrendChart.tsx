@@ -132,7 +132,7 @@ export const TrendChart = React.memo(function TrendChart({
               />
               <YAxis
                 domain={[0, 100]}
-                tick={{ fontSize: 10, fill: "var(--proof-text-muted)", fontWeight: 500 } as React.SVGProps<SVGTextElement>}
+                tick={{ fontSize: 10, fill: "var(--proof-text-muted)", fontWeight: 500, fontFamily: "var(--font-mono)" } as React.SVGProps<SVGTextElement>}
                 tickLine={false}
                 axisLine={false}
                 unit="%"
@@ -155,7 +155,11 @@ export const TrendChart = React.memo(function TrendChart({
                 iconType="circle"
                 iconSize={8}
                 wrapperStyle={{ fontSize: 11, paddingBottom: 20, color: "var(--proof-text-secondary)", fontWeight: 500 }}
-                formatter={(value: string) => (value === "passRate" ? "Pass Rate" : "Rolling Avg")}
+                formatter={(value: string) => (
+                  <span style={{ fontFamily: "var(--font-mono)" }}>
+                    {value === "passRate" ? "Pass Rate" : "Rolling Avg"}
+                  </span>
+                )}
               />
               <ReferenceArea y1={95} y2={100} fill="var(--proof-green)" fillOpacity={0.05} label={{ position: 'insideRight', value: 'Optimal', fill: 'var(--proof-green)', fontSize: 9, fontWeight: 600, opacity: 0.5 }} />
               <ReferenceArea y1={80} y2={95} fill="var(--proof-yellow)" fillOpacity={0.05} label={{ position: 'insideRight', value: 'Warning', fill: 'var(--proof-yellow)', fontSize: 9, fontWeight: 600, opacity: 0.5 }} />

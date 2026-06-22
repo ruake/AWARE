@@ -20,31 +20,33 @@ export function SparkLine({
 }: SparkLineProps) {
   const [hovered, setHovered] = React.useState(false);
 
-  if (data.length === 0) return null;
+  if (!data || data.length === 0) return null;
 
   const lastValue = data[data.length - 1];
 
   if (data.length === 1) {
     const chartData = [{ v: data[0] }, { v: data[0] }];
     return (
-      <LineChart
-        width={width}
-        height={height}
-        data={chartData}
-        margin={{ top: 2, right: 0, left: 0, bottom: 2 }}
-      >
-        <Line
-          type="monotone"
-          dataKey="v"
-          stroke={color}
-          strokeWidth={strokeWidth}
-          strokeDasharray="3 3"
-          strokeOpacity={0.5}
-          dot={false}
-          activeDot={false}
-          isAnimationActive={false}
-        />
-      </LineChart>
+      <div style={{ display: 'flex', alignItems: 'center', height }}>
+        <LineChart
+          width={width}
+          height={height}
+          data={chartData}
+          margin={{ top: height / 2, right: 0, left: 0, bottom: height / 2 }}
+        >
+          <Line
+            type="monotone"
+            dataKey="v"
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeDasharray="3 3"
+            strokeOpacity={0.5}
+            dot={false}
+            activeDot={false}
+            isAnimationActive={false}
+          />
+        </LineChart>
+      </div>
     );
   }
 

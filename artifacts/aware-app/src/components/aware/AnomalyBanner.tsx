@@ -21,7 +21,7 @@ export function AnomalyBanner({
   onDismiss,
   count,
 }: AnomalyBannerProps) {
-  const [dismissed, setDismissed] = useState(true);
+  const [dismissed, setDismissed] = useState(false);
 
   const sessionKey = `aware-anomaly-dismissed-${hasAlert ? "alert" : "deg"}-${regressions}-${degradedTiers}`;
 
