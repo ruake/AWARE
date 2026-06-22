@@ -85,18 +85,39 @@ export function StatusBar() {
 
       {/* Left — env + status */}
       <StatusChip>
-        <span
+        <div
           style={{
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: healthColor,
-            boxShadow: healthState !== "unknown" ? `0 0 6px ${healthColor}` : "none",
-            display: "inline-block",
+            position: "relative",
+            width: 8,
+            height: 8,
             flexShrink: 0,
-            animation: healthState === "healthy" ? "none" : "badge-pulse 2s ease-in-out infinite",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
-        />
+        >
+          <span
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              borderRadius: "50%",
+              background: healthColor,
+              opacity: healthState !== "unknown" ? 0.4 : 0,
+              animation: healthState === "healthy" ? "none" : "pulse-dot 2s ease-in-out infinite",
+            }}
+          />
+          <span
+            style={{
+              position: "relative",
+              width: 5,
+              height: 5,
+              borderRadius: "50%",
+              background: healthColor,
+              boxShadow: healthState !== "unknown" ? `0 0 8px ${healthColor}` : "none",
+            }}
+          />
+        </div>
         {activeEnvLabel}
       </StatusChip>
 
@@ -104,9 +125,9 @@ export function StatusBar() {
 
       {/* Right cluster */}
       {totalRuns > 0 && (
-        <>
+        <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
           <StatusChip>
-            <span style={{ opacity: 0.5, marginRight: 2 }}>⬡</span>
+            <span style={{ opacity: 0.4, marginRight: 2, fontSize: 12 }}>⬡</span>
             {totalRuns} run{totalRuns !== 1 ? "s" : ""}
           </StatusChip>
 
@@ -120,9 +141,9 @@ export function StatusBar() {
               }}
             >
               {healthState === "healthy" ? (
-                <Wifi size={9} aria-hidden="true" />
+                <Wifi size={10} aria-hidden="true" style={{ opacity: 0.8 }} />
               ) : (
-                <WifiOff size={9} aria-hidden="true" />
+                <WifiOff size={10} aria-hidden="true" style={{ opacity: 0.8 }} />
               )}
               {passPct}% pass
             </StatusChip>
@@ -132,14 +153,15 @@ export function StatusBar() {
             <StatusChip
               style={{
                 color: "var(--proof-red-bright)",
-                background: "rgba(248,68,90,0.07)",
+                background: "rgba(248,68,90,0.08)",
                 borderLeft: "1px solid var(--proof-border)",
+                fontWeight: 600,
               }}
             >
-              ✕ {failedRuns} failed
+              <span style={{ fontSize: 12, marginRight: 2 }}>✕</span> {failedRuns} failed
             </StatusChip>
           )}
-        </>
+        </div>
       )}
 
       {/* Version tag */}

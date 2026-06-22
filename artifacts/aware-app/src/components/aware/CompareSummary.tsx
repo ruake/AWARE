@@ -12,61 +12,82 @@ export function CompareSummary({
 }) {
   const isLarge = size === "large";
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 12, marginBottom: 8 }}>
       <div
         style={{
-          padding: isLarge ? "10px 14px" : 8,
-          borderRadius: 6,
-          border: `1px solid ${diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-          background: diff.baseStatus === "PASS" ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
+          padding: isLarge ? "12px 16px" : 10,
+          borderRadius: 12,
+          border: `1px solid ${diff.baseStatus === "PASS" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}`,
+          background: diff.baseStatus === "PASS" ? "rgba(34,197,94,0.03)" : "rgba(239,68,68,0.03)",
+          position: "relative",
+          overflow: "hidden"
         }}
       >
+        <div style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 3,
+          background: diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"
+        }} />
         <div
           style={{
-            fontSize: isLarge ? 10 : 9,
+            fontSize: isLarge ? 11 : 10,
             fontWeight: 700,
-            color: diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
+            color: "var(--proof-text-secondary)",
             textTransform: "uppercase",
-            letterSpacing: "0.3px",
-            marginBottom: isLarge ? 4 : 3,
+            letterSpacing: "0.05em",
+            marginBottom: isLarge ? 6 : 4,
           }}
         >
           Baseline
         </div>
-        <span
-          className={`proof-badge ${diff.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-          style={{ fontSize: isLarge ? 11 : 10 }}
-        >
-          {diff.baseStatus}
-        </span>
-        <div
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: isLarge ? 13 : 11,
-            color: "var(--proof-text)",
-            marginTop: isLarge ? 6 : 4,
-            fontWeight: 600,
-          }}
-        >
-          {diff.durBase}ms
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span
+            className={`proof-badge ${diff.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
+            style={{ fontSize: isLarge ? 11 : 10, padding: '2px 8px' }}
+          >
+            {diff.baseStatus}
+          </span>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: isLarge ? 14 : 12,
+              color: "var(--proof-text)",
+              fontWeight: 700,
+            }}
+          >
+            {diff.durBase}ms
+          </div>
         </div>
       </div>
       <div
         style={{
-          padding: isLarge ? "10px 14px" : 8,
-          borderRadius: 6,
-          border: `1px solid ${diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-          background: diff.candStatus === "PASS" ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
+          padding: isLarge ? "12px 16px" : 10,
+          borderRadius: 12,
+          border: `1px solid ${diff.candStatus === "PASS" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}`,
+          background: diff.candStatus === "PASS" ? "rgba(34,197,94,0.03)" : "rgba(239,68,68,0.03)",
+          position: "relative",
+          overflow: "hidden"
         }}
       >
+        <div style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 3,
+          background: diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"
+        }} />
         <div
           style={{
-            fontSize: isLarge ? 10 : 9,
+            fontSize: isLarge ? 11 : 10,
             fontWeight: 700,
-            color: diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)",
+            color: "var(--proof-text-secondary)",
             textTransform: "uppercase",
-            letterSpacing: "0.3px",
-            marginBottom: isLarge ? 4 : 3,
+            letterSpacing: "0.05em",
+            marginBottom: isLarge ? 6 : 4,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -78,41 +99,42 @@ export function CompareSummary({
               style={{
                 fontSize: isLarge ? 10 : 9,
                 color: diff.candStatus === diff.baseStatus ? "var(--proof-text-muted)" : (diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"),
-                fontWeight: 600,
+                fontWeight: 700,
               }}
             >
               {diff.candStatus === "PASS" && diff.baseStatus === "FAIL" ? "+100%pp" : diff.candStatus === "FAIL" && diff.baseStatus === "PASS" ? "-100%pp" : "0pp"}
             </span>
           )}
         </div>
-        <span
-          className={`proof-badge ${diff.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-          style={{ fontSize: isLarge ? 11 : 10 }}
-        >
-          {diff.candStatus}
-        </span>
-        <div
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: isLarge ? 13 : 11,
-            color: "var(--proof-text)",
-            marginTop: isLarge ? 6 : 4,
-            fontWeight: 600,
-          }}
-        >
-          {diff.durCand}ms
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span
+            className={`proof-badge ${diff.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
+            style={{ fontSize: isLarge ? 11 : 10, padding: '2px 8px' }}
+          >
+            {diff.candStatus}
+          </span>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: isLarge ? 14 : 12,
+              color: "var(--proof-text)",
+              fontWeight: 700,
+            }}
+          >
+            {diff.durCand}ms
+          </div>
         </div>
       </div>
       <div
         style={{
-          padding: isLarge ? "8px 12px" : "6px 8px",
-          borderRadius: 6,
-          border: "1px solid var(--proof-grey)",
-          background: "var(--proof-grey-bg)",
+          padding: isLarge ? "10px 14px" : "8px 10px",
+          borderRadius: 12,
+          border: "1px solid var(--proof-border)",
+          background: "var(--proof-surface-hover)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          minWidth: isLarge ? 100 : 80,
+          minWidth: isLarge ? 110 : 90,
         }}
       >
         <div
@@ -121,17 +143,17 @@ export function CompareSummary({
             fontWeight: 700,
             color: "var(--proof-text-secondary)",
             textTransform: "uppercase",
-            letterSpacing: "0.3px",
-            marginBottom: isLarge ? 3 : 2,
+            letterSpacing: "0.05em",
+            marginBottom: isLarge ? 4 : 2,
           }}
         >
-          Δ
+          Difference
         </div>
         <div
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: isLarge ? 13 : 11,
-            fontWeight: 700,
+            fontSize: isLarge ? 14 : 12,
+            fontWeight: 800,
             color:
               deltaMs > 20
                 ? "var(--proof-red)"
@@ -142,11 +164,8 @@ export function CompareSummary({
         >
           {Math.abs(deltaMs) > 20 ? `${deltaMs > 0 ? "+" : ""}${deltaMs}ms` : "~0ms"}
         </div>
-        <div style={{ fontSize: isLarge ? 10 : 9, color: "var(--proof-text-muted)" }}>
+        <div style={{ fontSize: isLarge ? 10 : 9, color: "var(--proof-text-muted)", fontWeight: 500 }}>
           {diff.durBase > 0 ? `${deltaMs > 0 ? "+" : ""}${((deltaMs / diff.durBase) * 100).toFixed(1)}%` : "0%"}
-        </div>
-        <div style={{ fontSize: isLarge ? 10 : 9, color: "var(--proof-text-muted)" }}>
-          {diff.baseStatus !== diff.candStatus ? `${diff.baseStatus}→${diff.candStatus}` : "same"}
         </div>
       </div>
     </div>

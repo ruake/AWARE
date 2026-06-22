@@ -25,14 +25,14 @@ function getIntensity(count: number, max: number): number {
 }
 
 const LEVEL_COLORS = [
-  "transparent",
-  "var(--proof-blue-bg)",
-  "rgba(59,130,246,0.28)",
-  "rgba(59,130,246,0.52)",
+  "var(--proof-surface-3)",
+  "color-mix(in srgb, var(--proof-blue), transparent 75%)",
+  "color-mix(in srgb, var(--proof-blue), transparent 50%)",
+  "color-mix(in srgb, var(--proof-blue), transparent 25%)",
   "var(--proof-blue)",
 ];
 
-const DAY_LABELS = ["Mon", "", "Wed", "", "Fri", "", ""];
+const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_LABELS = [
   "Jan",
   "Feb",
@@ -87,15 +87,18 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
   const maxCount = Math.max(1, ...data.map((d) => d.count));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "16px", background: "var(--proof-surface-1)", borderRadius: "16px", border: "1px solid var(--proof-border)" }}>
       <div
         style={{
           display: "flex",
           gap: 0,
-          paddingLeft: 32,
+          paddingLeft: 36,
           fontSize: 10,
           color: "var(--proof-text-secondary)",
           height: 14,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.5px"
         }}
       >
         {weeks.map((week, wi) => {
@@ -104,26 +107,28 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
           const month = midDay.day.getMonth();
           const prevMonth =
             wi > 0 && weeks[wi - 1][Math.floor(weeks[wi - 1].length / 2)]?.day.getMonth();
-          if (month === prevMonth) return <span key={wi} style={{ width: 14 }} />;
+          if (month === prevMonth) return <span key={wi} style={{ width: 15 }} />;
           return (
-            <span key={wi} style={{ width: 14, fontSize: 9 }}>
-              {MONTH_LABELS[month].slice(0, 1)}
+            <span key={wi} style={{ width: 15 }}>
+              {MONTH_LABELS[month]}
             </span>
           );
         })}
       </div>
 
-      <div style={{ display: "flex", gap: 2 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2, paddingRight: 4 }}>
+      <div style={{ display: "flex", gap: 6 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 3, paddingRight: 4 }}>
           {DAY_LABELS.map((label, i) => (
             <div
               key={i}
               style={{
-                height: 14,
-                fontSize: 10,
-                lineHeight: "14px",
-                color: "var(--proof-text-secondary)",
+                height: 12,
+                fontSize: 9,
+                lineHeight: "12px",
+                color: "var(--proof-text-muted)",
                 textAlign: "right",
+                fontWeight: 500,
+                visibility: i % 2 === 0 ? "visible" : "hidden"
               }}
             >
               {label}
@@ -131,12 +136,12 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 2 }}>
+        <div style={{ display: "flex", gap: 3 }}>
           {weeks.map((week, wi) => (
-            <div key={wi} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <div key={wi} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
               {Array.from({ length: 7 }).map((_, di) => {
                 const day = week[di];
-                if (!day || !day.date) return <div key={di} style={{ width: 14, height: 14 }} />;
+                if (!day || !day.date) return <div key={di} style={{ width: 12, height: 12 }} />;
                 const level = day.data ? getIntensity(day.data.count, maxCount) : 0;
                 const handleClick = () => {
                   if (onCellClick && day.date) {
@@ -147,25 +152,38 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
                 };
                 const Tag = onCellClick ? "button" : "div";
                 const cellStyle: React.CSSProperties = {
-                  width: 14,
-                  height: 14,
-                  borderRadius: 2,
+                  width: 12,
+                  height: 12,
+                  borderRadius: 3,
                   cursor: onCellClick || day.data ? "pointer" : "default",
                   backgroundColor: LEVEL_COLORS[level],
-                  transition: "background-color 0.1s",
+                  transition: "all 0.2s",
                 };
                 if (Tag === "button") {
                   cellStyle.padding = 0;
-                  cellStyle.border = level === 0 ? "1px solid var(--proof-grey)" : "none";
+                  cellStyle.border = "none";
+                  cellStyle.outline = "none";
                 } else {
-                  cellStyle.border = level === 0 ? "1px solid var(--proof-grey)" : "none";
+                  cellStyle.border = "none";
                 }
+                
                 return (
                   <Tag
                     key={di}
                     title={day.data ? `${day.date}: ${day.data.count} runs` : day.date}
                     onClick={handleClick}
                     style={cellStyle}
+                    className="heatmap-cell"
+                    onMouseEnter={(e: any) => {
+                      e.currentTarget.style.transform = "scale(1.3)";
+                      e.currentTarget.style.zIndex = "10";
+                      e.currentTarget.style.boxShadow = "var(--proof-shadow-sm)";
+                    }}
+                    onMouseLeave={(e: any) => {
+                      e.currentTarget.style.transform = "scale(1)";
+                      e.currentTarget.style.zIndex = "1";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
                   />
                 );
               })}
@@ -178,26 +196,28 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 4,
+          gap: 6,
           justifyContent: "flex-end",
           fontSize: 10,
-          color: "var(--proof-text-secondary)",
-          marginTop: 4,
+          color: "var(--proof-text-muted)",
+          marginTop: 8,
+          fontWeight: 500
         }}
       >
         <span>Less</span>
-        {LEVEL_COLORS.map((c, i) => (
-          <div
-            key={i}
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 2,
-              backgroundColor: c || "transparent",
-              border: i === 0 ? "1px solid var(--proof-grey)" : "none",
-            }}
-          />
-        ))}
+        <div style={{ display: "flex", gap: 3 }}>
+          {LEVEL_COLORS.map((c, i) => (
+            <div
+              key={i}
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 2,
+                backgroundColor: c,
+              }}
+            />
+          ))}
+        </div>
         <span>More</span>
       </div>
     </div>

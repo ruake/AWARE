@@ -1,5 +1,6 @@
 import React from "react";
 import { AboutSection } from "./AboutSection";
+import { motion } from "framer-motion";
 
 const STACK = [
   { label: "React 19", sub: "UI framework", color: "var(--proof-blue)" },
@@ -12,6 +13,21 @@ const STACK = [
   { label: "wouter", sub: "Routing", color: "var(--proof-red)" },
 ];
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, scale: 0.9 },
+  show: { opacity: 1, scale: 1 },
+};
+
 export function AboutTechStack() {
   return (
     <AboutSection
@@ -19,7 +35,11 @@ export function AboutTechStack() {
       title="Tech Stack"
       glow="var(--proof-purple-glow)"
     >
-      <div
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
         style={{
           padding: "16px 20px",
           display: "grid",
@@ -28,8 +48,10 @@ export function AboutTechStack() {
         }}
       >
         {STACK.map((s) => (
-          <div
+          <motion.div
             key={s.label}
+            variants={item}
+            whileHover={{ scale: 1.02, backgroundColor: "var(--proof-subtle-bg2)" }}
             style={{
               display: "flex",
               flexDirection: "column",
@@ -38,13 +60,14 @@ export function AboutTechStack() {
               borderRadius: 8,
               border: "1px solid var(--proof-border)",
               background: "var(--proof-subtle-bg)",
+              transition: "background-color 0.2s",
             }}
           >
             <span style={{ fontSize: 12.5, fontWeight: 700, color: s.color }}>{s.label}</span>
             <span style={{ fontSize: 11, color: "var(--proof-text-muted)" }}>{s.sub}</span>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </AboutSection>
   );
 }

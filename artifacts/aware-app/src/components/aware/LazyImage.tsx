@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { preloadImage } from "@/lib/images";
 import { ImageIcon, AlertCircle } from "lucide-react";
 
@@ -101,7 +102,6 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     <div ref={containerRef} style={containerStyle} className={className}>
       {!loaded && !error && (
         <div
-          className="proof-skeleton"
           style={{
             position: "absolute",
             top: 0,
@@ -111,9 +111,16 @@ export const LazyImage: React.FC<LazyImageProps> = ({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            background: "var(--proof-surface-3)",
           }}
         >
-          <ImageIcon size={20} style={{ color: "var(--proof-text-muted)", opacity: 0.2 }} />
+          <motion.div
+            initial={{ opacity: 0.3 }}
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <ImageIcon size={24} style={{ color: "var(--proof-blue)", opacity: 0.4 }} />
+          </motion.div>
         </div>
       )}
 

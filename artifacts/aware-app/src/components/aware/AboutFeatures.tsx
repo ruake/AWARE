@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { AboutSection } from "./AboutSection";
+import { motion } from "framer-motion";
 
 const FEATURES = [
   {
@@ -63,6 +64,21 @@ const FEATURES = [
   },
 ];
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 },
+};
+
 export function AboutFeatures() {
   return (
     <PanelErrorBoundary label="Features">
@@ -72,7 +88,11 @@ export function AboutFeatures() {
         badge={`${FEATURES.length} modules`}
         glow="0 0 8px var(--proof-blue-glow)"
       >
-        <div
+        <motion.div
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
           style={{
             padding: "20px",
             display: "grid",
@@ -83,7 +103,20 @@ export function AboutFeatures() {
           {FEATURES.map((f) => {
             const I = f.icon;
             return (
-              <div key={f.title} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <motion.div
+                key={f.title}
+                variants={item}
+                whileHover={{ y: -2 }}
+                style={{
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "flex-start",
+                  padding: "12px",
+                  borderRadius: 12,
+                  background: "var(--proof-subtle-bg)",
+                  border: "1px solid var(--proof-border)",
+                }}
+              >
                 <div
                   style={{
                     width: 34,
@@ -121,10 +154,10 @@ export function AboutFeatures() {
                     {f.desc}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </AboutSection>
     </PanelErrorBoundary>
   );

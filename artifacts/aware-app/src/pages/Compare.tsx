@@ -1,5 +1,6 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import { PageTemplate, StateBadge } from "@/components/aware";
 import { CompareSidePanel } from "@/components/aware/CompareSidePanel";
 import { useSyncedUrlState } from "@/lib/urlState";
@@ -18,6 +19,7 @@ import type { DiffRow, TestResult } from "@/lib/types";
 import { setCompareStats } from "@/lib/sidebarData";
 import { Search, ArrowLeftRight } from "lucide-react";
 import { CompareRunsHeader } from "@/components/aware/CompareSummary";
+import { CompareRunSelector } from "@/components/aware/CompareRunSelector";
 
 export default function Compare() {
   const [, navigate] = useLocation();
@@ -28,8 +30,8 @@ export default function Compare() {
 
   const envRuns =
     envSnap.envIds.length > 0 ? runs.filter((r) => envSnap.envIds.includes(r.envId)) : runs;
-  const [baseline] = useSyncedUrlState("baseline", "");
-  const [candidate] = useSyncedUrlState("candidate", "");
+  const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
+  const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
   const [selectedName, setSelectedName] = useSyncedUrlState<string | null>("sel", null);
   const [searchText, setSearchText] = useSyncedUrlState("q", "");
   const [regressionsOnly, setRegressionsOnly] = useSyncedUrlState("regressions", false);
@@ -224,6 +226,16 @@ export default function Compare() {
     return () => window.removeEventListener("keydown", handler);
   }, [filtered, navigate, setRegressionsOnly, setActiveFilter, selectedIdx]);
 
+  const handleBaselineChange = (id: string) => {
+    setBaseline(id);
+    navigate(`/compare?baseline=${id}&candidate=${effectiveCandidate}`);
+  };
+
+  const handleCandidateChange = (id: string) => {
+    setCandidate(id);
+    navigate(`/compare?baseline=${effectiveBaseline}&candidate=${id}`);
+  };
+
   if (envSnap.envIds.length > 0 && envRuns.length < 2) {
     if (initState.loading) {
       return (
@@ -281,78 +293,70 @@ export default function Compare() {
           gap: 0,
         }}
       >
-        {swapped && (
-          <div
-            style={{
-              background: "var(--proof-blue-bg)",
-              color: "var(--proof-blue)",
-              padding: "6px 16px",
-              fontSize: 12,
-              fontWeight: 500,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              borderBottom: "1px solid var(--proof-blue-border)",
-            }}
-          >
-            <span>⇄</span>
-            <span>Runs swapped — Candidate is now the baseline</span>
-          </div>
-        )}
-        <div style={{ padding: "16px 20px 8px" }}>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <AnimatePresence>
+          {swapped && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              style={{
+                background: "var(--proof-blue-bg)",
+                color: "var(--proof-blue)",
+                padding: "6px 16px",
+                fontSize: 12,
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                borderBottom: "1px solid var(--proof-blue-border)",
+                overflow: "hidden",
+              }}
+            >
+              <ArrowLeftRight size={14} />
+              <span>Runs swapped — Candidate is now the baseline</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <div style={{ padding: "20px 24px 16px", background: "var(--proof-surface)", borderBottom: "1px solid var(--proof-border)" }}>
+          <div style={{ display: "flex", gap: 32, alignItems: "flex-end" }}>
             <div style={{ flex: 1 }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "var(--proof-text-secondary)",
-                  textTransform: "uppercase",
-                  marginBottom: 4,
-                }}
-              >
-                Baseline Run
-              </label>
-              <select
-                className="proof-input"
+              <CompareRunSelector
+                label="Baseline Run"
+                labelColor="var(--proof-text-secondary)"
                 value={effectiveBaseline}
-                onChange={(e) => navigate(`/compare?baseline=${e.target.value}&candidate=${effectiveCandidate}`)}
-                style={{ width: "100%", fontSize: 12 }}
-              >
-                {envRuns.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.id} — {Math.round(r.passPct)}% — {new Date(r.started).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                  </option>
-                ))}
-              </select>
+                onChange={handleBaselineChange}
+                runs={envRuns}
+                accentColor="var(--proof-blue)"
+              />
             </div>
-            <div style={{ fontSize: 18, color: "var(--proof-text-muted)", paddingTop: 16 }}>vs</div>
-            <div style={{ flex: 1 }}>
-              <label
+            <div style={{ paddingBottom: 10 }}>
+              <button
+                onClick={() => setSwapped((s) => !s)}
+                className="proof-button-ghost"
+                title="Swap baseline and candidate"
                 style={{
-                  display: "block",
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "var(--proof-text-secondary)",
-                  textTransform: "uppercase",
-                  marginBottom: 4,
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "var(--proof-grey-bg)",
+                  border: "1px solid var(--proof-border)",
                 }}
               >
-                Candidate Run
-              </label>
-              <select
-                className="proof-input"
+                <ArrowLeftRight size={14} />
+              </button>
+            </div>
+            <div style={{ flex: 1 }}>
+              <CompareRunSelector
+                label="Candidate Run"
+                labelColor="var(--proof-text-secondary)"
                 value={effectiveCandidate}
-                onChange={(e) => navigate(`/compare?baseline=${effectiveBaseline}&candidate=${e.target.value}`)}
-                style={{ width: "100%", fontSize: 12 }}
-              >
-                {envRuns.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.id} — {Math.round(r.passPct)}% — {new Date(r.started).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                  </option>
-                ))}
-              </select>
+                onChange={handleCandidateChange}
+                runs={envRuns}
+                accentColor="var(--proof-blue)"
+              />
             </div>
           </div>
         </div>
@@ -366,41 +370,45 @@ export default function Compare() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 8,
                 flex: "1 1 200px",
-                minWidth: 140,
+                minWidth: 200,
+                background: "var(--proof-grey-bg)",
+                borderRadius: 8,
+                padding: "0 12px",
+                border: "1px solid var(--proof-border)",
               }}
             >
-              <Search size={13} style={{ color: "var(--proof-text-secondary)", flexShrink: 0 }} />
+              <Search size={14} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
               <input
                 className="proof-input"
                 placeholder="Search tests…"
                 aria-label="Search tests"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                style={{ flex: 1, minWidth: 0, fontSize: 13 }}
+                style={{ border: "none", background: "transparent", padding: "8px 0", width: "100%", fontSize: 13 }}
               />
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "nowrap", overflowX: "auto", padding: "2px 0" }}>
               {(["regression", "fixed", "duration", "unchanged"] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => setActiveFilter(activeFilter === s ? null : s)}
+                  className={`proof-badge ${activeFilter === s ? `proof-badge-${s === 'regression' ? 'fail' : s === 'fixed' ? 'pass' : s === 'duration' ? 'flaky' : 'skip'}` : ''}`}
                   style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    padding: "4px 12px",
-                    borderRadius: 6,
-                    border: `1px solid ${activeFilter === s ? "var(--proof-blue)" : "var(--proof-border)"}`,
-                    background: activeFilter === s ? "var(--proof-blue)" : "transparent",
-                    color: activeFilter === s ? "white" : "var(--proof-text-secondary)",
+                    padding: "6px 12px",
+                    borderRadius: "full",
+                    border: "1px solid var(--proof-border)",
+                    background: activeFilter === s ? undefined : "var(--proof-surface)",
+                    color: activeFilter === s ? undefined : "var(--proof-text-secondary)",
                     fontSize: 12,
-                    fontWeight: 500,
+                    fontWeight: 600,
                     cursor: "pointer",
                     transition: "all 0.1s ease",
+                    whiteSpace: "nowrap"
                   }}
                 >
-                  {s.charAt(0).toUpperCase() + s.slice(1)} ({diffs.filter(d => d.state === s).length})
+                  {s.charAt(0).toUpperCase() + s.slice(1)} <span style={{ opacity: 0.6, marginLeft: 4 }}>{diffs.filter(d => d.state === s).length}</span>
                 </button>
               ))}
             </div>
@@ -411,41 +419,19 @@ export default function Compare() {
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 className="proof-button-ghost"
-                style={{ fontSize: 11, color: "var(--proof-red)", fontWeight: 600 }}
+                style={{ fontSize: 11, color: "var(--proof-red)", fontWeight: 700, padding: "4px 8px" }}
               >
                 Jump to Regressions
               </button>
             )}
-            <button
-              onClick={() => setSwapped((s) => !s)}
-              className="proof-button-ghost"
-              title="Swap baseline and candidate"
-              style={{
-                fontSize: 11,
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
-              ⇄ Swap
-            </button>
             {hasActiveFilters && (
               <button
                 onClick={() => setColFilters({})}
                 className="proof-button-ghost"
-                style={{ fontSize: 11, color: "var(--proof-red)" }}
+                style={{ fontSize: 11, color: "var(--proof-red)", fontWeight: 600 }}
               >
-                Clear column filters
+                Reset
               </button>
-            )}
-            {diffStats.length > 0 && (
-              <span
-                style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginLeft: "auto" }}
-              >
-                {filtered.length}/{diffs.length} tests
-              </span>
             )}
           </>
         }
@@ -468,252 +454,162 @@ export default function Compare() {
             />
           ) : undefined
         }
-        sidePanelWidth={440}
+        sidePanelWidth={480}
       >
-        <CompareRunsHeader 
-          diffs={diffs}
-          baseResults={baseResults}
-          candResults={candResults}
-        />
-        <table className="proof-table">
-          <colgroup>
-            <col />
-            <col style={{ width: 100 }} />
-            <col style={{ width: 100 }} />
-            <col style={{ width: 100 }} />
-            <col style={{ width: 100 }} />
-            <col style={{ width: 120 }} />
-            <col style={{ width: 120 }} />
-          </colgroup>
-          <thead
-            style={{ position: "sticky", top: 0, zIndex: 4, background: "var(--proof-surface)" }}
-          >
-            <tr>
-              <th style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                <input
-                  className="proof-input"
-                  placeholder="Name"
-                  aria-label="Filter by test name"
-                  value={colFilters.name ?? ""}
-                  onChange={(e) => setColFilters((f) => ({ ...f, name: e.target.value }))}
-                  style={{ width: "100%", fontSize: 10, padding: "2px 6px" }}
-                />
-              </th>
-              <th style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                <select
-                  className="proof-input"
-                  style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
-                  aria-label="Filter by baseline status"
-                  value={colFilters.baseStatus ?? ""}
-                  onChange={(e) => setColFilters((f) => ({ ...f, baseStatus: e.target.value }))}
-                >
-                  <option value="">Baseline</option>
-                  <option value="PASS">PASS</option>
-                  <option value="FAIL">FAIL</option>
-                </select>
-              </th>
-              <th style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                <select
-                  className="proof-input"
-                  style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
-                  aria-label="Filter by candidate status"
-                  value={colFilters.candStatus ?? ""}
-                  onChange={(e) => setColFilters((f) => ({ ...f, candStatus: e.target.value }))}
-                >
-                  <option value="">Candidate</option>
-                  <option value="PASS">PASS</option>
-                  <option value="FAIL">FAIL</option>
-                </select>
-              </th>
-              <th
-                style={{
-                  textAlign: "right",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: 'var(--proof-text-muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Δ Duration
-              </th>
-              <th
-                style={{
-                  textAlign: "right",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: 'var(--proof-text-muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Impact
-              </th>
-              <th style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                <select
-                  className="proof-input"
-                  style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
-                  aria-label="Filter by category"
-                  value={colFilters.category ?? ""}
-                  onChange={(e) => setColFilters((f) => ({ ...f, category: e.target.value }))}
-                >
-                  <option value="">Category</option>
-                  {categories.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </th>
-              <th style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                <select
-                  className="proof-input"
-                  style={{ fontSize: 10, padding: "2px 6px", width: "100%" }}
-                  aria-label="Filter by state"
-                  value={colFilters.state ?? ""}
-                  onChange={(e) => setColFilters((f) => ({ ...f, state: e.target.value }))}
-                >
-                  <option value="">State</option>
-                  <option value="regression">Regression</option>
-                  <option value="fixed">Fixed</option>
-                  <option value="duration">Duration ↑</option>
-                  <option value="unchanged">Unchanged</option>
-                </select>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedDiffs.map((d, i) => {
-              const absIdx = (safeDiffPage - 1) * DIFF_PAGE_SIZE + i;
-              const isSelected = selectedName === d.name;
-              const deltams = d.durCand - d.durBase;
-              const impact = impactScores[d.state] ?? 0;
-              return (
-                <tr
-                  key={d.id}
-                  onClick={() => {
-                    setSelectedName(isSelected ? null : d.name);
-                    setSelectedIdx(isSelected ? -1 : absIdx);
-                  }}
-                  style={{
-                    cursor: "pointer",
-                    background: isSelected
-                      ? "var(--proof-blue-bg)"
-                      : d.state === "regression"
-                        ? "rgba(217,48,37,0.04)"
-                        : d.state === "fixed"
-                          ? "rgba(30,142,62,0.04)"
-                          : undefined,
-                    boxShadow: isSelected ? "inset 0 0 0 2px var(--proof-blue)" : "none",
-                  }}
-                >
-                  <td
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 11,
-                      color: "var(--proof-blue)",
-                      fontWeight: 500,
-                      maxWidth: 280,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                    title={d.name}
-                  >
-                    {d.name}
-                  </td>
-                  <td>
-                    <span
-                      className={`proof-badge ${d.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                    >
-                      {d.baseStatus}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`proof-badge ${d.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                    >
-                      {d.candStatus}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 11 }}>
-                    {Math.abs(deltams) > 20 ? (
-                      <span
-                        style={{
-                          color: deltams > 0 ? "var(--proof-red)" : "var(--proof-green)",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {deltams > 0 ? "+" : ""}
-                        {deltams}ms
-                      </span>
-                    ) : (
-                      <span style={{ color: "var(--proof-text-secondary)" }}>~0ms</span>
-                    )}
-                  </td>
-                  <td
-                    style={{
-                      textAlign: "right",
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color:
-                        impact > 0
-                          ? "var(--proof-red)"
-                          : impact < 0
-                            ? "var(--proof-green)"
-                            : "var(--proof-text-muted)",
-                    }}
-                  >
-                    {impact > 0 ? "+" : ""}
-                    {impact}
-                  </td>
-                  <td>
-                    <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>
-                      {d.category}
-                    </span>
-                  </td>
-                  <td>
-                    <StateBadge state={d.state} />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </PageTemplate>
-      {diffTotalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            padding: "8px 0 4px",
-            fontSize: 12,
-          }}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          <button
-            disabled={safeDiffPage <= 1}
-            onClick={() => setDiffPage((p) => Math.max(1, p - 1))}
-            className="proof-button proof-button-xs"
-          >
-            Prev
-          </button>
-          <span style={{ color: "var(--proof-text-secondary)" }}>
-            Page {safeDiffPage} of {diffTotalPages}
-          </span>
-          <button
-            disabled={safeDiffPage >= diffTotalPages}
-            onClick={() => setDiffPage((p) => Math.min(diffTotalPages, p + 1))}
-            className="proof-button proof-button-xs"
-          >
-            Next
-          </button>
+          <CompareRunsHeader 
+            diffs={diffs}
+            baseResults={baseResults}
+            candResults={candResults}
+          />
+        </motion.div>
+
+        <div className="proof-card" style={{ overflow: "hidden" }}>
+          <table className="proof-table">
+            <colgroup>
+              <col />
+              <col style={{ width: 120 }} />
+              <col style={{ width: 120 }} />
+              <col style={{ width: 110 }} />
+              <col style={{ width: 100 }} />
+              <col style={{ width: 140 }} />
+              <col style={{ width: 120 }} />
+            </colgroup>
+            <thead>
+              <tr>
+                <th style={{ fontSize: 11, fontWeight: 700, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    Test Name
+                  </div>
+                </th>
+                <th style={{ fontSize: 11, fontWeight: 700, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Baseline
+                </th>
+                <th style={{ fontSize: 11, fontWeight: 700, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Candidate
+                </th>
+                <th
+                  style={{
+                    textAlign: "right",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: 'var(--proof-text-muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  Δ Duration
+                </th>
+                <th
+                  style={{
+                    textAlign: "right",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: 'var(--proof-text-muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  Impact
+                </th>
+                <th style={{ fontSize: 11, fontWeight: 700, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Category
+                </th>
+                <th style={{ fontSize: 11, fontWeight: 700, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  State
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedDiffs.map((d, i) => {
+                const isSel = selectedName === d.name;
+                const rowBg = d.state === 'regression' ? 'var(--proof-red-bg)' : 
+                             d.state === 'fixed' ? 'var(--proof-green-bg)' : 
+                             isSel ? 'var(--proof-blue-bg)' : undefined;
+                
+                return (
+                  <motion.tr
+                    key={d.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: Math.min(i * 0.02, 0.5) }}
+                    onClick={() => {
+                      setSelectedName(d.name);
+                      setSelectedIdx(filtered.findIndex(f => f.name === d.name));
+                    }}
+                    style={{
+                      cursor: "pointer",
+                      background: rowBg,
+                      borderLeft: isSel ? `4px solid var(--proof-blue)` : `4px solid transparent`,
+                      transition: "all 0.15s ease",
+                    }}
+                    className={isSel ? "" : "proof-tr-hover"}
+                  >
+                    <td>
+                      <div style={{ fontWeight: 600, fontSize: 13, color: "var(--proof-text)" }}>{d.name}</div>
+                      <div style={{ fontSize: 11, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", marginTop: 2 }}>{d.id}</div>
+                    </td>
+                    <td>
+                      <StateBadge state={d.baseStatus === "PASS" ? "unchanged" : "regression"} />
+                    </td>
+                    <td>
+                      <StateBadge state={d.candStatus === "PASS" ? "fixed" : "regression"} />
+                    </td>
+                    <td style={{ textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 600 }}>
+                      <span style={{ 
+                        color: d.durCand - d.durBase > 50 ? "var(--proof-red)" : 
+                               d.durCand - d.durBase < -50 ? "var(--proof-green)" : 
+                               "var(--proof-text-secondary)" 
+                      }}>
+                        {d.durCand - d.durBase > 0 ? "+" : ""}{d.durCand - d.durBase}ms
+                      </span>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>
+                        {impactScores[d.state]}
+                      </div>
+                    </td>
+                    <td>
+                      <span className="proof-badge proof-badge-skip" style={{ fontSize: 10 }}>{d.category}</span>
+                    </td>
+                    <td>
+                      <StateBadge state={d.state} />
+                    </td>
+                  </motion.tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
-      )}
+
+        {diffTotalPages > 1 && (
+          <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 8, alignItems: "center" }}>
+            <button
+              disabled={safeDiffPage === 1}
+              onClick={() => setDiffPage(p => p - 1)}
+              className="proof-button-ghost"
+              style={{ padding: "6px 12px" }}
+            >
+              Previous
+            </button>
+            <span style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>
+              Page {safeDiffPage} of {diffTotalPages}
+            </span>
+            <button
+              disabled={safeDiffPage === diffTotalPages}
+              onClick={() => setDiffPage(p => p + 1)}
+              className="proof-button-ghost"
+              style={{ padding: "6px 12px" }}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </PageTemplate>
     </>
   );
 }

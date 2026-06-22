@@ -41,25 +41,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   pytest: <TestTube size={13} />,
 };
 
-const cellStyle: React.CSSProperties = {
-  padding: "7px 12px",
-  fontSize: 12,
-  borderBottom: "1px solid var(--proof-border)",
-};
-
-const thStyle: React.CSSProperties = {
-  padding: "9px 12px",
-  fontSize: 11,
-  fontWeight: 600,
-  textTransform: "uppercase",
-  letterSpacing: "0.3px",
-  color: "var(--proof-text-secondary)",
-  background: "var(--proof-surface-hover)",
-  borderBottom: "1px solid var(--proof-border)",
-  textAlign: "left",
-  whiteSpace: "nowrap",
-  userSelect: "none",
-};
+import { motion, AnimatePresence } from "framer-motion";
 
 type SortKey = "id" | "name" | "category" | "priority" | "status" | "owner";
 type SortDir = "asc" | "desc";
@@ -163,8 +145,8 @@ export function TestList({
     center?: boolean;
   }) => (
     <th
+      className="proof-th"
       style={{
-        ...thStyle,
         textAlign: center ? "center" : "left",
         cursor: "pointer",
         position: "sticky",
@@ -194,36 +176,36 @@ export function TestList({
       <div style={{ overflowX: "auto", flex: 1, minHeight: 0 }}>
         <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
           <colgroup>
+            <col style={{ width: 4 }} />
             <col style={{ width: 120 }} />
             <col />
-            <col style={{ width: 100 }} />
-            <col style={{ width: 120 }} />
-            <col style={{ width: 100 }} />
-            <col style={{ width: 100 }} />
-            <col style={{ width: 100 }} />
-            <col style={{ width: 100 }} />
+            <col style={{ width: 110 }} />
+            <col style={{ width: 130 }} />
+            <col style={{ width: 90 }} />
+            <col style={{ width: 110 }} />
+            <col style={{ width: 110 }} />
             <col style={{ width: 80 }} />
           </colgroup>
           <thead>
-            <tr>
+            <tr className="proof-tr">
+              <th className="proof-th" style={{ width: 4, padding: 0 }} />
               <SortableTh col="id" label="ID" />
               <SortableTh col="name" label="Name" />
-              <th style={{ ...thStyle, textAlign: "center", position: "sticky", top: 0, zIndex: 10 }}>
+              <th className="proof-th" style={{ textAlign: "center", position: "sticky", top: 0, zIndex: 10 }}>
                 Type
               </th>
               <SortableTh col="category" label="Category" />
-              <SortableTh col="priority" label="Priority" center />
+              <SortableTh col="priority" label="Pri" center />
               <SortableTh col="status" label="Status" center />
-              <th style={{ ...thStyle, textAlign: "center", position: "sticky", top: 0, zIndex: 10 }}>
+              <th className="proof-th" style={{ textAlign: "center", position: "sticky", top: 0, zIndex: 10 }}>
                 Coverage
               </th>
-              <SortableTh col="owner" label="Owner" />
-              <th style={{ ...thStyle, textAlign: "center", position: "sticky", top: 0, zIndex: 10 }} />
+              <th className="proof-th" style={{ textAlign: "center", position: "sticky", top: 0, zIndex: 10 }} />
             </tr>
           </thead>
           <tbody>
             {pageItems.length === 0 ? (
-              <tr>
+              <tr className="proof-tr">
                 <td
                   colSpan={9}
                   style={{
@@ -233,67 +215,61 @@ export function TestList({
                     fontSize: 13,
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <Search size={24} style={{ opacity: 0.3 }} />
-                    <span>No tests match the current filters</span>
+                  <div className="proof-empty-state">
+                    <Search size={32} style={{ opacity: 0.3, marginBottom: 12 }} />
+                    <p style={{ fontWeight: 600, margin: '0 0 8px 0' }}>No tests match the current filters</p>
                     <button
                       className="proof-button"
                       onClick={onClearFilters}
-                      style={{ fontSize: 11, marginTop: 8 }}
+                      style={{ fontSize: 11 }}
                     >
-                      Clear filters
+                      Clear all filters
                     </button>
                   </div>
                 </td>
               </tr>
             ) : (
-              pageItems.map((test) => {
+              pageItems.map((test, index) => {
                 const isExpanded = expandedIds.has(test.id);
 
                 return (
                   <React.Fragment key={test.id}>
-                    <tr
+                    <motion.tr
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: (index % 10) * 0.03 }}
+                      className="proof-tr"
                       style={{
                         cursor: "pointer",
-                        background: hoveredRow === test.id ? "var(--proof-hover)" : "transparent",
                         transition: "background 0.1s",
-                        height: 44,
+                        height: 48,
                       }}
                       onMouseEnter={() => onHoverRow(test.id)}
                       onMouseLeave={() => onHoverRow(null)}
                       onClick={(e) => toggleExpand(test.id, e)}
                       role="button"
                       tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          toggleExpand(test.id, e as any);
-                        }
-                      }}
                     >
+                      <td className="proof-td" style={{ 
+                        padding: 0, 
+                        background: CAT_COLORS[test.category] || "transparent",
+                        width: 4 
+                      }} />
                       <td
+                        className="proof-td"
                         style={{
-                          ...cellStyle,
                           fontFamily: "var(--font-mono)",
                           fontSize: 11,
-                          color: "var(--proof-text-secondary)",
+                          color: "var(--proof-text-muted)",
                           whiteSpace: "nowrap",
                         }}
                       >
                         {test.id}
                       </td>
                       <td
+                        className="proof-td"
                         style={{
-                          ...cellStyle,
-                          fontSize: 12.5,
-                          fontWeight: 500,
+                          fontWeight: 600,
                           color: "var(--proof-text)",
                           maxWidth: "100%",
                           overflow: "hidden",
@@ -301,87 +277,86 @@ export function TestList({
                           whiteSpace: "nowrap",
                         }}
                       >
-                        <span
-                          style={{
-                            color: "var(--proof-blue)",
-                            transition: "color 0.1s",
-                          }}
-                        >
+                        <span style={{ color: hoveredRow === test.id ? "var(--proof-blue)" : "inherit" }}>
                           {test.name}
                         </span>
                       </td>
-                      <td style={{ ...cellStyle, textAlign: "center" }}>
+                      <td className="proof-td" style={{ textAlign: "center" }}>
                         <span
+                          className="proof-badge"
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
                             gap: 4,
-                            fontSize: 11,
-                            fontWeight: 600,
-                            padding: "2px 8px",
-                            borderRadius: 4,
+                            fontSize: 10,
+                            fontWeight: 700,
                             color: TYPE_COLORS[test.testType] || "var(--proof-text-secondary)",
-                            background: TYPE_BGS[test.testType] || "rgba(154,160,166,0.08)",
+                            background: TYPE_BGS[test.testType] || "var(--proof-subtle-bg)",
+                            border: `1px solid ${TYPE_COLORS[test.testType]}40`
                           }}
                         >
-                          {TYPE_ICONS[test.testType] || null} {test.testType}
+                          {TYPE_ICONS[test.testType] || null} {test.testType.toUpperCase()}
                         </span>
                       </td>
-                      <td style={cellStyle}>
+                      <td className="proof-td">
                         <span
+                          className="proof-badge"
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
-                            fontSize: 11,
-                            fontWeight: 600,
-                            padding: "2px 8px",
-                            borderRadius: 4,
+                            fontSize: 10,
+                            fontWeight: 700,
                             color: CAT_COLORS[test.category] || "var(--proof-text-secondary)",
-                            background: CAT_BGS[test.category] || "rgba(154,160,166,0.08)",
+                            background: CAT_BGS[test.category] || "var(--proof-subtle-bg)",
+                            border: `1px solid ${CAT_COLORS[test.category]}40`
                           }}
                         >
                           {test.category}
                         </span>
                       </td>
-                      <td style={{ ...cellStyle, textAlign: "center" }}>
+                      <td className="proof-td" style={{ textAlign: "center" }}>
                         <span
+                          className="proof-badge"
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
-                            fontSize: 10.5,
-                            fontWeight: 700,
+                            fontSize: 10,
+                            fontWeight: 800,
                             fontFamily: "var(--font-mono)",
-                            padding: "2px 8px",
-                            borderRadius: 99,
                             color: PRI_COLORS[test.priority] || "var(--proof-text-secondary)",
-                            background: PRI_BGS[test.priority] || "rgba(154,160,166,0.08)",
+                            background: PRI_BGS[test.priority] || "var(--proof-subtle-bg)",
+                            border: `1px solid ${PRI_COLORS[test.priority]}40`,
+                            minWidth: 32,
+                            justifyContent: 'center'
                           }}
                         >
                           {test.priority}
                         </span>
                       </td>
-                      <td style={{ ...cellStyle, textAlign: "center" }}>
+                      <td className="proof-td" style={{ textAlign: "center" }}>
                         <span
+                          className="proof-badge"
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
-                            fontSize: 10.5,
-                            fontWeight: 600,
-                            padding: "2px 8px",
-                            borderRadius: 4,
+                            gap: 4,
+                            fontSize: 10,
+                            fontWeight: 700,
                             color: STATUS_COLORS[test.status] || "var(--proof-text-secondary)",
-                            background: STATUS_BGS[test.status] || "rgba(154,160,166,0.08)",
+                            background: STATUS_BGS[test.status] || "var(--proof-subtle-bg)",
+                            border: `1px solid ${STATUS_COLORS[test.status]}40`
                           }}
                         >
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor' }} />
                           {test.status}
                         </span>
                       </td>
-                      <td style={{ ...cellStyle, textAlign: "center" }}>
+                      <td className="proof-td" style={{ textAlign: "center" }}>
                         {(() => {
                           const coverage = test.assertionsPassed != null && test.assertionsFailed != null 
                             ? test.assertionsPassed / (test.assertionsPassed + test.assertionsFailed)
                             : null;
-                          if (coverage === null || isNaN(coverage)) return <span style={{ color: "var(--proof-text-muted)" }}>--</span>;
+                          if (coverage === null || isNaN(coverage)) return <span className="proof-meta">--</span>;
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 60 }}>
                               <div style={{ 
@@ -391,30 +366,23 @@ export function TestList({
                                 borderRadius: 2,
                                 overflow: 'hidden'
                               }}>
-                                <div style={{ 
-                                  width: `${coverage * 100}%`, 
-                                  height: '100%', 
-                                  background: coverage >= 0.95 ? 'var(--proof-green)' : coverage >= 0.8 ? 'var(--proof-yellow)' : 'var(--proof-red)'
-                                }} />
+                                <motion.div 
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${coverage * 100}%` }}
+                                  style={{ 
+                                    height: '100%', 
+                                    background: coverage >= 0.95 ? 'var(--proof-green)' : coverage >= 0.8 ? 'var(--proof-yellow)' : 'var(--proof-red)'
+                                  }} 
+                                />
                               </div>
-                              <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--proof-text-secondary)' }}>
+                              <span className="proof-meta">
                                 {Math.round(coverage * 100)}%
                               </span>
                             </div>
                           );
                         })()}
                       </td>
-                      <td
-                        style={{
-                          ...cellStyle,
-                          fontSize: 11,
-                          color: "var(--proof-text-secondary)",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {test.owner ?? "—"}
-                      </td>
-                      <td style={{ ...cellStyle, textAlign: "right", whiteSpace: "nowrap" }}>
+                      <td className="proof-td" style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                         <div style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
                           {test.scriptPath && (
                             <button
@@ -423,30 +391,12 @@ export function TestList({
                                 const filePath = test.scriptPath?.split("::")[0];
                                 if (filePath) window.open(`${repo}/blob/main/${filePath}`, "_blank");
                               }}
-                              style={{
-                                border: "none",
-                                background: "none",
-                                cursor: "pointer",
-                                color: "var(--proof-text-muted)",
-                                padding: "2px 4px",
-                                display: "inline-flex",
-                                borderRadius: 3,
-                                transition: "color 0.1s, background 0.1s",
-                              }}
+                              className="proof-button-xs"
+                              style={{ background: 'transparent', border: 'none', padding: 4 }}
                               title="View source on GitHub"
                               aria-label="View source on GitHub"
-                              onMouseEnter={(e) => {
-                                (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-                                (e.currentTarget as HTMLElement).style.background =
-                                  "var(--proof-hover)";
-                              }}
-                              onMouseLeave={(e) => {
-                                (e.currentTarget as HTMLElement).style.color =
-                                  "var(--proof-text-muted)";
-                                (e.currentTarget as HTMLElement).style.background = "none";
-                              }}
                             >
-                              <ExternalLink size={11} />
+                              <ExternalLink size={14} />
                             </button>
                           )}
                           <button
@@ -454,70 +404,58 @@ export function TestList({
                               e.stopPropagation();
                               navigate(`/tests?suite=${suiteFilter}&detail=${test.id}`);
                             }}
-                            style={{
-                              border: "none",
-                              background: "none",
-                              cursor: "pointer",
-                              color:
-                                detailId === test.id
-                                  ? "var(--proof-blue)"
-                                  : "var(--proof-text-muted)",
-                              padding: "2px 4px",
-                              display: "inline-flex",
-                              borderRadius: 3,
-                              transition: "color 0.1s, background 0.1s",
+                            className="proof-button-xs"
+                            style={{ 
+                              background: 'transparent', 
+                              border: 'none', 
+                              padding: 4,
+                              color: detailId === test.id ? "var(--proof-blue)" : undefined
                             }}
                             title="Show details"
                             aria-label="Show test details"
-                            onMouseEnter={(e) => {
-                              (e.currentTarget as HTMLElement).style.color = "var(--proof-blue)";
-                              (e.currentTarget as HTMLElement).style.background =
-                                "var(--proof-hover)";
-                            }}
-                            onMouseLeave={(e) => {
-                              (e.currentTarget as HTMLElement).style.color =
-                                detailId === test.id
-                                  ? "var(--proof-blue)"
-                                  : "var(--proof-text-muted)";
-                              (e.currentTarget as HTMLElement).style.background = "none";
-                            }}
                           >
-                            <ChevronRight size={13} />
+                            <ChevronRight size={16} />
                           </button>
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
+                    <AnimatePresence>
                     {isExpanded && (
-                      <tr>
+                      <motion.tr
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        <td className="proof-td" style={{ padding: 0, background: CAT_COLORS[test.category] || "transparent" }} />
                         <td
-                          colSpan={9}
+                          colSpan={8}
+                          className="proof-td"
                           style={{
-                            background: "var(--proof-subtle-bg)",
-                            borderBottom: "1px solid var(--proof-border)",
-                            padding: "12px 16px",
+                            background: "var(--proof-surface-hover)",
+                            padding: "16px 24px",
                           }}
                         >
-                          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                             <div
                               style={{
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: "var(--proof-text-secondary)",
-                                lineHeight: 1.5,
+                                lineHeight: 1.6,
+                                maxWidth: 800
                               }}
                             >
                               {test.description || "No description provided."}
                             </div>
                             {test.tags && test.tags.length > 0 && (
-                              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                                 {test.tags.map((tag) => (
                                   <span
                                     key={tag}
+                                    className="proof-badge"
                                     style={{
                                       fontSize: 10,
                                       background: "var(--proof-surface)",
-                                      border: "1px solid var(--proof-border)",
-                                      padding: "1px 6px",
-                                      borderRadius: 4,
+                                      borderColor: "var(--proof-border)",
                                       color: "var(--proof-text-secondary)",
                                     }}
                                   >
@@ -526,48 +464,29 @@ export function TestList({
                                 ))}
                               </div>
                             )}
-                            <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
+                            <div style={{ display: "flex", gap: 16, marginTop: 4 }}>
                               <button
                                 onClick={() => navigate(`/analytics?testId=${test.id}`)}
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 4,
-                                  fontSize: 11,
-                                  color: "var(--proof-blue)",
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  padding: 0,
-                                  fontWeight: 600,
-                                }}
+                                className="proof-button-xs"
+                                style={{ gap: 6 }}
                               >
-                                <ChartIcon size={12} /> View analytics
+                                <ChartIcon size={14} /> View Historical Analytics
                               </button>
                               <button
                                 onClick={() =>
                                   navigate(`/tests?suite=${suiteFilter}&detail=${test.id}`)
                                 }
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 4,
-                                  fontSize: 11,
-                                  color: "var(--proof-text-secondary)",
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  padding: 0,
-                                  fontWeight: 600,
-                                }}
+                                className="proof-button-xs"
+                                style={{ gap: 6, background: 'transparent' }}
                               >
-                                <Info size={12} /> More details
+                                <Info size={14} /> Full Test Configuration
                               </button>
                             </div>
                           </div>
                         </td>
-                      </tr>
+                      </motion.tr>
                     )}
+                    </AnimatePresence>
                   </React.Fragment>
                 );
               })
@@ -575,7 +494,7 @@ export function TestList({
           </tbody>
         </table>
       </div>
-      <div style={{ padding: "0 16px", flexShrink: 0 }}>
+      <div style={{ padding: "12px 16px", flexShrink: 0, borderTop: '1px solid var(--proof-border)' }}>
         <ConsolePagination
           currentPage={clampedPage}
           totalPages={totalPages}
@@ -583,7 +502,6 @@ export function TestList({
           pageSize={PAGE_SIZE}
           onPageChange={onPageChange}
           onPageSizeChange={() => {}}
-          pageSizeOptions={[PAGE_SIZE]}
         />
       </div>
     </div>

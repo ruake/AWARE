@@ -1,6 +1,7 @@
 import React from "react";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 import { AboutSection } from "./AboutSection";
+import { motion } from "framer-motion";
 
 export function AboutTestCategories({ categories }: { categories: Record<string, number> }) {
   const total = Object.values(categories).reduce((s, c) => s + c, 0);
@@ -54,10 +55,13 @@ export function AboutTestCategories({ categories }: { categories: Record<string,
                     overflow: "hidden",
                   }}
                 >
-                  <div
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${pct}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    viewport={{ once: true }}
                     style={{
                       height: "100%",
-                      width: `${pct}%`,
                       background: "var(--proof-blue)",
                       borderRadius: 99,
                     }}

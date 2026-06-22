@@ -18,6 +18,9 @@ import {
   Check as CheckIcon,
   ArrowLeft,
   Search,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
 } from "lucide-react";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
@@ -195,33 +198,39 @@ export default function RunDetail() {
 
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-          padding: "8px 16px",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gap: 12,
+          padding: "16px",
           background: "var(--proof-surface)",
           border: "1px solid var(--proof-border)",
           borderRadius: "var(--proof-radius)",
-          fontSize: 12,
         }}
       >
-        <div style={{ fontWeight: 600 }}>Total: {counts.total}</div>
-        <div style={{ color: "var(--proof-border)" }}>|</div>
-        <div style={{ color: "var(--proof-green)", display: "flex", alignItems: "center", gap: 4 }}>
-          ✓ {counts.passed} passed
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <span style={{ fontSize: 11, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Total Tests</span>
+          <span style={{ fontSize: 18, fontWeight: 700 }}>{counts.total}</span>
         </div>
-        <div style={{ color: "var(--proof-red)", display: "flex", alignItems: "center", gap: 4 }}>
-          ✗ {counts.failed} failed
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <span style={{ fontSize: 11, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Passed</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-green)" }}>{counts.passed}</span>
+            <CheckCircle2 size={14} style={{ color: "var(--proof-green)" }} />
+          </div>
         </div>
-        <div
-          style={{
-            color: "var(--proof-text-secondary)",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-          }}
-        >
-          ~ {counts.skipped} skipped
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <span style={{ fontSize: 11, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Failed</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-red)" }}>{counts.failed}</span>
+            <XCircle size={14} style={{ color: "var(--proof-red)" }} />
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <span style={{ fontSize: 11, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Skipped</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-text-secondary)" }}>{counts.skipped}</span>
+            <HelpCircle size={14} style={{ color: "var(--proof-text-secondary)" }} />
+          </div>
         </div>
       </div>
 

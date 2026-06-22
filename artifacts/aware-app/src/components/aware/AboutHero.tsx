@@ -1,9 +1,13 @@
 import React from "react";
 import { Activity, Github, ExternalLink, ArrowUpRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 export function AboutHero() {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       style={{
         padding: "32px 36px",
         background: "var(--proof-surface)",
@@ -13,19 +17,29 @@ export function AboutHero() {
         overflow: "hidden",
       }}
     >
-      <div
+      <motion.div
+        animate={{
+          opacity: [0.3, 0.5, 0.3],
+          scale: [1, 1.05, 1],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
         style={{
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          opacity: 0.5,
           background:
             "radial-gradient(ellipse at top right, var(--proof-blue-glow) 0%, transparent 60%), radial-gradient(ellipse at bottom left, var(--proof-purple-glow) 0%, transparent 60%)",
         }}
       />
       <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div
+          <motion.div
+            whileHover={{ scale: 1.05, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
             style={{
               width: 52,
               height: 52,
@@ -38,7 +52,7 @@ export function AboutHero() {
             }}
           >
             <Activity size={24} style={{ color: "white" }} />
-          </div>
+          </motion.div>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span
@@ -47,6 +61,9 @@ export function AboutHero() {
                   fontWeight: 900,
                   color: "var(--proof-text)",
                   letterSpacing: "-1px",
+                  background: "linear-gradient(to right, var(--proof-text), var(--proof-text-secondary))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
                 }}
               >
                 A.W.A.R.E.
@@ -94,7 +111,9 @@ export function AboutHero() {
           before each tier advances.
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <a
+          <motion.a
+            whileHover={{ y: -2, backgroundColor: "var(--proof-blue-bg)", borderColor: "var(--proof-border-accent)" }}
+            whileTap={{ scale: 0.98 }}
             href="https://github.com"
             target="_blank"
             rel="noopener noreferrer"
@@ -112,18 +131,12 @@ export function AboutHero() {
               textDecoration: "none",
               transition: "border-color 0.13s, background 0.13s",
             }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-accent)";
-              (e.currentTarget as HTMLElement).style.background = "var(--proof-blue-bg)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-strong)";
-              (e.currentTarget as HTMLElement).style.background = "var(--proof-subtle-bg2)";
-            }}
           >
             <Github size={14} /> GitHub Repo <ExternalLink size={10} style={{ opacity: 0.6 }} />
-          </a>
-          <a
+          </motion.a>
+          <motion.a
+            whileHover={{ y: -2, borderColor: "var(--proof-blue)" }}
+            whileTap={{ scale: 0.98 }}
             href="https://github.com"
             target="_blank"
             rel="noopener noreferrer"
@@ -141,17 +154,11 @@ export function AboutHero() {
               textDecoration: "none",
               transition: "border-color 0.13s",
             }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-blue)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "var(--proof-border-accent)";
-            }}
           >
             CI Workflow <ArrowUpRight size={12} />
-          </a>
+          </motion.a>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

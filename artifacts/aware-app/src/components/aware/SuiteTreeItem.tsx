@@ -1,6 +1,7 @@
 import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { TestSuite, TestCase } from "@/lib/types";
-import { FolderTree, Bug, ChevronDown, ChevronRight, Clock } from "lucide-react";
+import { FolderTree, Bug, ChevronDown, ChevronRight, Clock, Shield, Zap, Terminal } from "lucide-react";
 
 function matchesFilter(
   suite: TestSuite,
@@ -24,6 +25,14 @@ function matchesFilter(
     .filter((c) => c.parentId === suite.id)
     .some((child) => matchesFilter(child, q, allSuites, testCases));
 }
+
+const getCategoryIcon = (category: string) => {
+  const cat = category.toLowerCase();
+  if (cat.includes("security")) return <Shield size={12} />;
+  if (cat.includes("perf")) return <Zap size={12} />;
+  if (cat.includes("api")) return <Terminal size={12} />;
+  return <Bug size={12} />;
+};
 
 export function SuiteTreeItem({
   suite,
@@ -74,48 +83,75 @@ export function SuiteTreeItem({
 
   if (filter && !hasVisibleContent) return null;
 
+  const isSelected = selectedId === suite.id;
+
   return (
-    <div>
-      <div
+    <div style={{ marginBottom: 2 }}>
+      <motion.div
+        whileHover={{ x: 2 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          padding: "10px 12px",
+          gap: 10,
+          padding: "8px 12px",
           cursor: "pointer",
           borderRadius: 8,
-          paddingLeft: `${12 + depth * 20}px`,
-          background: selectedId === suite.id ? "var(--proof-blue-bg)" : "transparent",
-          boxShadow: selectedId === suite.id ? "inset 0 0 0 1px var(--proof-blue)" : "none",
-          transition: "background 0.15s",
+          marginLeft: depth > 0 ? depth * 20 : 0,
+          background: isSelected ? "var(--proof-blue-bg)" : "transparent",
+          boxShadow: isSelected ? "inset 0 0 0 1px var(--proof-blue)" : "none",
+          transition: "background 0.2s, box-shadow 0.2s",
         }}
         onClick={() => onSelect(suite)}
+        onMouseEnter={(e) => {
+          if (!isSelected) e.currentTarget.style.background = "var(--proof-surface-2)";
+        }}
+        onMouseLeave={(e) => {
+          if (!isSelected) e.currentTarget.style.background = "transparent";
+        }}
       >
-        {hasChildren ? (
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle(suite.id);
-            }}
-            style={{
-              padding: 2,
-              color: "var(--proof-text-secondary)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          </span>
-        ) : (
-          <span style={{ width: 14 }} />
-        )}
-        <FolderTree size={14} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (hasChildren) onToggle(suite.id);
+          }}
+          style={{
+            width: 18,
+            height: 18,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--proof-text-secondary)",
+            opacity: hasChildren ? 1 : 0.3,
+            cursor: hasChildren ? "pointer" : "default",
+          }}
+        >
+          {hasChildren && (expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />)}
+        </div>
+        
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 6,
+            background: isSelected ? "var(--proof-blue)" : "rgba(91, 138, 245, 0.1)",
+            color: isSelected ? "white" : "var(--proof-blue)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            transition: "all 0.2s",
+          }}
+        >
+          <FolderTree size={14} />
+        </div>
+
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
               fontSize: 13,
-              fontWeight: 500,
+              fontWeight: 600,
+              color: isSelected ? "var(--proof-blue)" : "var(--proof-text)",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -129,84 +165,119 @@ export function SuiteTreeItem({
               color: "var(--proof-text-secondary)",
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 8,
               marginTop: 1,
+              opacity: 0.7,
             }}
           >
             <span>{suite.testIds.length} tests</span>
             {suite.schedule && (
-              <span style={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
                 <Clock size={10} />
-                {suite.schedule}
+                {suite.schedule.split(" ").slice(0, 5).join(" ")}
               </span>
             )}
           </div>
         </div>
-      </div>
-      {expanded && (
-        <>
-          {filteredTests.map((tc) => (
-            <div
-              key={tc.id}
-              onClick={() => onTestSelect?.(tc.id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 12px",
-                cursor: "pointer",
-                paddingLeft: `${26 + depth * 20}px`,
-                background: selectedId === tc.id ? "var(--proof-blue-bg)" : "transparent",
-                fontSize: 12,
-                color: "var(--proof-text-secondary)",
-                borderRadius: 6,
-              }}
-              onMouseEnter={(e) => {
-                if (selectedId !== tc.id) e.currentTarget.style.background = "var(--proof-grey-bg)";
-              }}
-              onMouseLeave={(e) => {
-                if (selectedId !== tc.id) e.currentTarget.style.background = "transparent";
-              }}
-            >
-              <Bug size={12} style={{ flexShrink: 0, color: "var(--proof-text-secondary)" }} />
-              <span
-                style={{
-                  flex: 1,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {tc.name}
-              </span>
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  flexShrink: 0,
-                  background: tc.status === "active" ? "var(--proof-green)" : "var(--proof-yellow)",
-                }}
+
+        {suite.testIds.length > 0 && !isSelected && (
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              padding: "2px 6px",
+              borderRadius: "var(--proof-radius-full)",
+              background: "var(--proof-surface-3)",
+              color: "var(--proof-text-secondary)",
+            }}
+          >
+            {suite.testIds.length}
+          </div>
+        )}
+      </motion.div>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ overflow: "hidden" }}
+          >
+            {filteredTests.map((tc) => {
+              const isTestSelected = selectedId === tc.id;
+              return (
+                <motion.div
+                  key={tc.id}
+                  whileHover={{ x: 2 }}
+                  onClick={() => onTestSelect?.(tc.id)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "6px 12px",
+                    cursor: "pointer",
+                    marginLeft: (depth + 1) * 20 + 12,
+                    background: isTestSelected ? "var(--proof-blue-bg)" : "transparent",
+                    color: isTestSelected ? "var(--proof-blue)" : "var(--proof-text-secondary)",
+                    borderRadius: 6,
+                    fontSize: 12,
+                    marginTop: 1,
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isTestSelected) e.currentTarget.style.background = "var(--proof-surface-2)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isTestSelected) e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <div style={{ flexShrink: 0, opacity: 0.7 }}>
+                    {getCategoryIcon(tc.category)}
+                  </div>
+                  <span
+                    style={{
+                      flex: 1,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      fontWeight: isTestSelected ? 600 : 400,
+                    }}
+                  >
+                    {tc.name}
+                  </span>
+                  <div
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      background: tc.status === "active" ? "var(--proof-green)" : "var(--proof-yellow)",
+                      boxShadow: tc.status === "active" ? "0 0 4px var(--proof-green)" : "none",
+                    }}
+                  />
+                </motion.div>
+              );
+            })}
+            {filteredChildren.map((child) => (
+              <SuiteTreeItem
+                key={child.id}
+                suite={child}
+                depth={depth + 1}
+                allSuites={allSuites}
+                testCases={testCases}
+                onSelect={onSelect}
+                selectedId={selectedId}
+                onTestSelect={onTestSelect}
+                filter={filter}
+                expandedIds={expandedIds}
+                onToggle={onToggle}
               />
-            </div>
-          ))}
-          {filteredChildren.map((child) => (
-            <SuiteTreeItem
-              key={child.id}
-              suite={child}
-              depth={depth + 1}
-              allSuites={allSuites}
-              testCases={testCases}
-              onSelect={onSelect}
-              selectedId={selectedId}
-              onTestSelect={onTestSelect}
-              filter={filter}
-              expandedIds={expandedIds}
-              onToggle={onToggle}
-            />
-          ))}
-        </>
-      )}
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

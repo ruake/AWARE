@@ -60,6 +60,7 @@ import StatsPanel from "@/components/copilot/StatsPanel";
 import { CopilotSettings as CopilotSettingsPanel } from "@/components/aware/CopilotSettings";
 import ProviderSelector from "@/components/copilot/ProviderSelector";
 import { useSyncedUrlState } from "@/lib/urlState";
+import { motion, AnimatePresence } from "framer-motion";
 
 const uid = () => crypto.randomUUID().replace(/-/g, "");
 const ESTIMATED_CHARS_PER_TOKEN = 4;
@@ -163,6 +164,7 @@ export default function CopilotPage() {
       if (t) {
         dispatch({ type: "SET_MESSAGES", payload: t.messages });
         setActiveThreadId(t.id);
+        setThreadUrl(t.id);
         return;
       }
     }
@@ -176,7 +178,7 @@ export default function CopilotPage() {
         return;
       }
     }
-  }, [threadUrl, threads]);
+  }, [threadUrl, threads, setThreadUrl]);
 
   const ensureActiveThread = React.useCallback(
     (msgs: Message[]) => {
@@ -360,7 +362,7 @@ export default function CopilotPage() {
         const data = e.target?.result as string;
         const isImage = file.type.startsWith("image/");
         pending.push({
-          id: `att_${crypto.randomUUID().slice(0, 8)}`,
+          id: `att_$\{crypto.randomUUID().slice(0, 8)\}`,
           name: file.name,
           type: isImage ? "image" : "file",
           data,
@@ -414,7 +416,7 @@ export default function CopilotPage() {
     if (idx < 0) return;
     const branchMsgs = messages.slice(0, idx + 1);
     const t = createThread(
-      `Branch: ${branchMsgs[0]?.content.slice(0, 40) || "Chat"}`,
+      `Branch: $\{branchMsgs[0]?.content.slice(0, 40) || "Chat"\}`,
       branchMsgs,
       providerType,
     );
@@ -514,14 +516,16 @@ export default function CopilotPage() {
       : "";
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
       style={{
         display: "flex",
         flexDirection: "column",
         height: "100%",
         overflow: "hidden",
         background: "var(--proof-editor-bg)",
-        animation: "page-enter 0.22s ease-out both",
       }}
     >
       {/* ARIA live region — announces busy start/end to screen readers */}
@@ -548,380 +552,299 @@ export default function CopilotPage() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          padding: "8px 16px",
+          gap: 12,
+          padding: "10px 20px",
           borderBottom: "1px solid var(--proof-border)",
-          background: "var(--proof-overlay)",
+          background: "rgba(10, 20, 40, 0.7)",
           backdropFilter: "blur(20px)",
           flexShrink: 0,
-          zIndex: 10,
-          minHeight: 44,
+          zIndex: 100,
+          minHeight: 56,
         }}
       >
         <div
           style={{
-            width: 28,
-            height: 28,
-            borderRadius: 8,
-            background: "linear-gradient(135deg, rgba(59,130,246,0.2), rgba(59,130,246,0.1))",
-            border: "1px solid rgba(59,130,246,0.3)",
+            width: 32,
+            height: 32,
+            borderRadius: 10,
+            background: "linear-gradient(135deg, var(--proof-blue), var(--proof-purple))",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
+            boxShadow: "0 0 15px rgba(59,130,246,0.3)",
           }}
         >
-          <Bot size={14} style={{ color: "var(--proof-blue)" }} />
+          <Bot size={18} style={{ color: "white" }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: 12.5,
+              fontSize: 15,
               fontWeight: 700,
-              letterSpacing: "-0.2px",
+              letterSpacing: "-0.3px",
               color: "var(--proof-text)",
               lineHeight: 1.2,
             }}
           >
-            Copilot
+            AWARE Copilot
           </div>
-          <div style={{ fontSize: 11, color: "var(--proof-text-muted)", lineHeight: 1.2 }}>
+          <div
+            style={{
+              fontSize: 11,
+              color: "var(--proof-text-muted)",
+              lineHeight: 1.2,
+              fontWeight: 500,
+            }}
+          >
             {providerType === "custom"
               ? customEndpointConfig.model || "Custom Endpoint"
               : providerType === "webllm"
                 ? "WebLLM · Llama-3.2"
                 : "Chrome AI · Gemini Nano"}
-            {messages.length > 0 && ` · ${messages.length} messages`}
+            {messages.length > 0 && ` · $\{messages.length\} messages`}
           </div>
         </div>
 
-        <ContextIndicator
-          usedTokens={estimateTokens(messages)}
-          maxTokens={copilotSettings.contextWindow}
-          messageCount={messages.length}
-        />
-
-        <ToneSelector currentTone={copilotSettings.tone} onToneChange={handleToneChange} />
-
-        <ProviderSelector
-          providerType={providerType}
-          providerStatus={providerStatus}
-          downloadProgress={downloadProgress}
-          onSwitch={handleProviderSwitch}
-        />
-
-        <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <IconBtn
-            icon={<Search size={13} />}
-            title="Search (Cmd+F)"
-            active={showSearch}
-            onClick={() => setShowSearch((p) => !p)}
-          />
-          <IconBtn
-            icon={<Download size={13} />}
-            title="Export (Cmd+Shift+S)"
-            onClick={() => setShowExport(true)}
-          />
-          <IconBtn
-            icon={<BarChart3 size={13} />}
-            title="Stats"
-            active={showStats}
-            onClick={() => setShowStats((p) => !p)}
-          />
-          <IconBtn
-            icon={<Sliders size={13} />}
-            title="Model Config"
-            active={showModelConfig}
-            onClick={() => setShowModelConfig((p) => !p)}
-          />
-          <IconBtn
-            icon={<Keyboard size={13} />}
-            title="Shortcuts"
-            onClick={() => setShowKeyboardShortcuts(true)}
-          />
-          <IconBtn
-            icon={<Settings size={13} />}
-            title="Settings"
-            active={showSettings}
-            onClick={() => setShowSettings((p) => !p)}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <ContextIndicator
+            usedTokens={estimateTokens(messages)}
+            maxTokens={copilotSettings.contextWindow}
+            messageCount={messages.length}
           />
 
-          <button
-            onClick={handleNewChat}
-            title="New Chat (Cmd+N)"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              padding: "4px 9px",
-              borderRadius: 6,
-              fontSize: 10.5,
-              fontWeight: 600,
-              cursor: "pointer",
-              border: "1px solid var(--proof-border)",
-              background: "rgba(255,255,255,0.03)",
-              color: "var(--proof-text-secondary)",
-              transition: "all 0.15s",
-              marginLeft: 4,
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)";
-              (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
-              (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
-            }}
-          >
-            <Plus size={11} /> New
-          </button>
+          <div style={{ width: 1, height: 24, background: "var(--proof-border)" }} />
 
-          {busy && (
+          <ToneSelector currentTone={copilotSettings.tone} onToneChange={handleToneChange} />
+
+          <ProviderSelector
+            providerType={providerType}
+            providerStatus={providerStatus}
+            downloadProgress={downloadProgress}
+            onSwitch={handleProviderSwitch}
+          />
+
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            <IconBtn
+              icon={<Search size={16} />}
+              title="Search (Cmd+F)"
+              active={showSearch}
+              onClick={() => setShowSearch((p) => !p)}
+            />
+            <IconBtn
+              icon={<Download size={16} />}
+              title="Export (Cmd+Shift+S)"
+              onClick={() => setShowExport(true)}
+            />
+            <IconBtn
+              icon={<BarChart3 size={16} />}
+              title="Stats"
+              active={showStats}
+              onClick={() => setShowStats((p) => !p)}
+            />
+            <IconBtn
+              icon={<Sliders size={16} />}
+              title="Model Config"
+              active={showModelConfig}
+              onClick={() => setShowModelConfig((p) => !p)}
+            />
+            <IconBtn
+              icon={<Settings size={16} />}
+              title="Settings"
+              active={showSettings}
+              onClick={() => setShowSettings((p) => !p)}
+            />
+
             <button
-              onClick={handleStop}
+              onClick={handleNewChat}
+              className="proof-button-primary"
+              title="New Chat (Cmd+N)"
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                padding: "4px 9px",
-                borderRadius: 6,
-                fontSize: 10.5,
-                fontWeight: 600,
-                cursor: "pointer",
-                border: "1px solid var(--proof-red-border)",
-                background: "var(--proof-red-bg)",
-                color: "var(--proof-red)",
-                transition: "all 0.15s",
-                marginLeft: 4,
+                height: 32,
+                fontSize: 12,
+                padding: "0 12px",
+                marginLeft: 8,
               }}
             >
-              <Square size={9} fill="currentColor" /> Stop
+              <Plus size={16} /> New Chat
             </button>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* ── Settings panel ─────────────────────────────────────── */}
-      {showSettings && (
-        <CopilotSettingsPanel
-          endpointConfig={customEndpointConfig}
-          onSave={handleSaveSettings}
-          onClose={() => setShowSettings(false)}
-        />
-      )}
-
-      {/* ── Agent step strip ────────────────────────────────────── */}
-      {agentSteps.length > 0 && busy && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "4px 16px",
-            borderBottom: "1px solid var(--proof-border)",
-            background: "rgba(59,130,246,0.04)",
-            fontSize: 10,
-            color: "var(--proof-text-muted)",
-            flexShrink: 0,
-          }}
-        >
-          <Loader2
-            size={8}
-            style={{
-              animation: "spin 0.8s linear infinite",
-              color: "var(--proof-blue)",
-              flexShrink: 0,
-            }}
+      {/* Content area */}
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <MessageFeed
+            messages={messages}
+            onRetry={handleRetry}
+            onSend={handleSend}
           />
-          {agentSteps.slice(-4).map((s, i) => (
-            <React.Fragment key={s.id}>
-              {i > 0 && <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>}
-              <span
-                style={{
-                  color:
-                    s.status === "completed"
-                      ? "var(--proof-green)"
-                      : s.status === "running"
-                        ? "var(--proof-blue)"
-                        : "var(--proof-text-muted)",
-                  fontWeight: s.status === "running" ? 600 : 400,
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                {s.label}
-                {s.detail ? ` (${s.detail})` : ""}
-              </span>
-            </React.Fragment>
-          ))}
         </div>
-      )}
 
-      {/* ── Messages area ───────────────────────────────────────── */}
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          overflow: "hidden",
-          minHeight: 0,
-          flexDirection: "column",
-          position: "relative",
-        }}
-      >
-        <div
-          style={{
-            flex: 1,
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-          }}
-        >
-          {showSearch ? (
-            <MessageSearchComp
-              threads={threads}
-              onResultSelect={handleResultSelect}
-              onClose={() => setShowSearch(false)}
-            />
-          ) : showingOnboarding ? (
-            <OnboardingWizard
-              onStartChat={handleSend}
-              onDismiss={() => setDismissedOnboarding(true)}
-            />
-          ) : (
-            <MessageFeed messages={messages} onRetry={handleRetry} onSend={handleSend} />
+        {/* Overlay panels */}
+        <AnimatePresence>
+          {showStats && (
+            <motion.div
+              initial={{ x: 320 }}
+              animate={{ x: 0 }}
+              exit={{ x: 320 }}
+              style={{
+                position: "absolute",
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: 320,
+                zIndex: 110,
+                background: "var(--proof-surface)",
+                borderLeft: "1px solid var(--proof-border)",
+                boxShadow: "-8px 0 24px rgba(0,0,0,0.2)",
+              }}
+            >
+              <StatsPanel thread={null} onClose={() => setShowStats(false)} />
+            </motion.div>
           )}
-        </div>
 
-        {erroredMessages.map((msg) => (
-          <div key={msg.id} style={{ padding: "0 16px", flexShrink: 0 }}>
-            <ErrorRecovery message={msg} onRetry={handleRetry} onDismiss={handleDismissError} />
-          </div>
+          {showSearch && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              style={{
+                position: "absolute",
+                top: 70,
+                right: 20,
+                width: 400,
+                maxHeight: "80%",
+                zIndex: 120,
+              }}
+            >
+              <MessageSearchComp
+                threads={threads}
+                onResultSelect={handleResultSelect}
+                onClose={() => setShowSearch(false)}
+              />
+            </motion.div>
+          )}
+
+          {showSettings && (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.5)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
+                backdropFilter: "blur(4px)",
+              }}
+              onClick={() => setShowSettings(false)}
+            >
+              <div onClick={(e) => e.stopPropagation()}>
+                <CopilotSettingsPanel
+                  endpointConfig={customEndpointConfig}
+                  onSave={handleSaveSettings}
+                  onClose={() => setShowSettings(false)}
+                />
+              </div>
+            </div>
+          )}
+
+          {showExport && (
+            <ExportDialog
+              thread={null}
+              onClose={() => setShowExport(false)}
+            />
+          )}
+
+          {showModelConfig && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              style={{
+                position: "absolute",
+                top: 70,
+                right: 180,
+                zIndex: 115,
+              }}
+            >
+              <ModelConfigPanel
+                settings={copilotSettings}
+                onSettingsChange={handleSettingsChange}
+                onClose={() => setShowModelConfig(false)}
+              />
+            </motion.div>
+          )}
+
+          {showKeyboardShortcuts && (
+            <KeyboardShortcutsComp onClose={() => setShowKeyboardShortcuts(false)} />
+          )}
+
+          {editingMessageId && editingMessage && (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.5)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              <div style={{ width: 600 }}>
+                <EditBranch
+                  message={editingMessage}
+                  onSave={handleEditSave}
+                  onCancel={handleEditCancel}
+                  onBranch={handleEditBranch}
+                />
+              </div>
+            </div>
+          )}
+
+          {showTemplateLibrary && (
+            <TemplateLibrary
+              onSelect={handleTemplateSelect}
+              onClose={() => setShowTemplateLibrary(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        {showingOnboarding && (
+          <OnboardingWizard
+            onStartChat={() => setDismissedOnboarding(true)}
+            onDismiss={() => setDismissedOnboarding(true)}
+          />
+        )}
+
+        {erroredMessages.map((m) => (
+          <ErrorRecovery
+            key={m.id}
+            message={m}
+            onRetry={(id) => handleRetry(id)}
+            onDismiss={(id) => handleDismissError(id)}
+          />
         ))}
       </div>
 
-      {/* ── Edit branch ─────────────────────────────────────────── */}
-      {editingMessage && (
-        <EditBranch
-          message={editingMessage}
-          onSave={handleEditSave}
-          onCancel={handleEditCancel}
-          onBranch={handleEditBranch}
-        />
-      )}
-
-      {/* ── Download progress ────────────────────────────────────── */}
-      {downloadProgress && (
-        <div
-          style={{
-            padding: "6px 18px",
-            borderTop: "1px solid var(--proof-border)",
-            background: "rgba(59,130,246,0.05)",
-            flexShrink: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: 5,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              fontSize: 10.5,
-              color: "var(--proof-blue-bright)",
-            }}
-          >
-            <span style={{ fontWeight: 600 }}>Loading WebLLM model\u2026</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9 }}>
-              {Math.round((downloadProgress.progress ?? 0) * 100)}%
-            </span>
-          </div>
-          <div
-            style={{
-              height: 2,
-              background: "rgba(255,255,255,0.05)",
-              borderRadius: 99,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${Math.round((downloadProgress.progress ?? 0) * 100)}%`,
-                background: "linear-gradient(90deg, var(--proof-blue-hover), var(--proof-blue))",
-                borderRadius: 99,
-                transition: "width 0.3s",
-              }}
-            />
-          </div>
-          <div style={{ fontSize: 9, color: "var(--proof-text-muted)" }}>
-            {downloadProgress.text}
-          </div>
-        </div>
-      )}
-
-      {/* ── Input bar ──────────────────────────────────────────── */}
-      <div
-        style={{
-          maxWidth: 860,
-          width: "100%",
-          alignSelf: "center",
-          flexShrink: 0,
-        }}
-      >
-        <RichInputBar
-          input={input}
-          busy={busy}
-          textareaRef={textareaRef}
-          attachments={attachments}
-          onSend={() => handleSend()}
-          onStop={handleStop}
-          onInput={setInput}
-          onAttach={handleAttach}
-          onRemoveAttachment={handleRemoveAttachment}
-          onPaste={handlePaste}
-          onTemplateSelect={() => setShowTemplateLibrary(true)}
-        />
-      </div>
-
-      {/* ── Overlays ───────────────────────────────────────────── */}
-      {showExport &&
-        (() => {
-          const activeId = getActiveThreadId();
-          const exportThread = activeId ? threads.find((th) => th.id === activeId) : null;
-          return exportThread ? (
-            <ExportDialog thread={exportThread} onClose={() => setShowExport(false)} />
-          ) : null;
-        })()}
-
-      {showTemplateLibrary && (
-        <TemplateLibrary
-          onSelect={handleTemplateSelect}
-          onClose={() => setShowTemplateLibrary(false)}
-        />
-      )}
-
-      {showModelConfig && (
-        <ModelConfigPanel
-          settings={copilotSettings}
-          onSettingsChange={handleSettingsChange}
-          onClose={() => setShowModelConfig(false)}
-        />
-      )}
-
-      {showKeyboardShortcuts && (
-        <KeyboardShortcutsComp onClose={() => setShowKeyboardShortcuts(false)} />
-      )}
-
-      {showStats &&
-        (() => {
-          const activeId = getActiveThreadId();
-          const statsThread = activeId ? threads.find((th) => th.id === activeId) : null;
-          return statsThread ? (
-            <StatsPanel thread={statsThread} onClose={() => setShowStats(false)} />
-          ) : null;
-        })()}
-    </div>
+      <RichInputBar
+        input={input}
+        busy={busy}
+        textareaRef={textareaRef}
+        onSend={() => handleSend()}
+        onInput={setInput}
+        onStop={handleStop}
+        attachments={attachments}
+        onAttach={handleAttach}
+        onRemoveAttachment={handleRemoveAttachment}
+        onPaste={handlePaste}
+        onTemplateSelect={() => setShowTemplateLibrary(true)}
+      />
+    </motion.div>
   );
 }
 

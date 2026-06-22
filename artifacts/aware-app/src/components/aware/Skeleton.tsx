@@ -1,37 +1,39 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 interface SkeletonBoxProps {
   width?: string | number;
   height?: string | number;
   borderRadius?: string | number;
   style?: React.CSSProperties;
+  className?: string;
 }
 
 export function SkeletonBox({
   width = "100%",
   height = 16,
-  borderRadius = 4,
+  borderRadius = 8,
   style,
+  className = "",
 }: SkeletonBoxProps) {
   return (
-    <div className="proof-skeleton" style={{ width, height, borderRadius, ...style }}>
-      <style>{`
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-        .proof-skeleton {
-          background: linear-gradient(
-            90deg,
-            var(--proof-surface-2) 25%,
-            var(--proof-surface-3) 50%,
-            var(--proof-surface-2) 75%
-          );
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite linear;
-        }
-      `}</style>
-    </div>
+    <motion.div
+      initial={{ opacity: 0.5 }}
+      animate={{ opacity: [0.5, 0.8, 0.5] }}
+      transition={{
+        duration: 1.5,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+      className={`proof-skeleton ${className}`}
+      style={{
+        width,
+        height,
+        borderRadius,
+        background: "var(--proof-surface-3)",
+        ...style,
+      }}
+    />
   );
 }
 
@@ -39,26 +41,31 @@ export function SkeletonStat() {
   return (
     <div
       style={{
-        width: 80,
-        height: 40,
-        padding: "8px 12px",
+        width: "100%",
+        padding: "12px 16px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        gap: 4,
-        background: 'var(--proof-surface-2)',
-        borderRadius: 'var(--proof-radius)',
-        border: '1px solid var(--proof-border)'
+        gap: 6,
+        background: "var(--proof-surface-2)",
+        borderRadius: "var(--proof-radius)",
+        border: "1px solid var(--proof-border)",
       }}
     >
-      <SkeletonBox width="100%" height={8} />
-      <SkeletonBox width="60%" height={12} />
+      <SkeletonBox width="40%" height={10} />
+      <SkeletonBox width="70%" height={24} />
     </div>
   );
 }
 
 export function SkeletonBadge() {
-  return <SkeletonBox width={60} height={20} borderRadius="var(--proof-radius-full)" />;
+  return (
+    <SkeletonBox
+      width={64}
+      height={20}
+      borderRadius="var(--proof-radius-full)"
+    />
+  );
 }
 
 export function SkeletonText({
@@ -69,7 +76,7 @@ export function SkeletonText({
   lastLineWidth?: string;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {Array.from({ length: lines }).map((_, i) => (
         <SkeletonBox
           key={i}
@@ -82,23 +89,38 @@ export function SkeletonText({
   );
 }
 
-export function SkeletonCard({ height = 120, count = 1 }: { height?: number; count?: number }) {
+export function SkeletonCard({
+  height = 120,
+  count = 1,
+}: {
+  height?: number;
+  count?: number;
+}) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+        gap: 16,
+      }}
+    >
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
           className="proof-card"
           style={{
-            padding: 16,
+            padding: 20,
             display: "flex",
             flexDirection: "column",
-            gap: 12,
+            gap: 14,
             minHeight: height,
           }}
         >
-          <SkeletonBox width="40%" height={14} />
-          <SkeletonBox width="100%" height={height > 80 ? 40 : 20} />
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <SkeletonBox width="30%" height={14} />
+            <SkeletonBadge />
+          </div>
+          <SkeletonBox width="100%" height={height > 100 ? 40 : 20} />
           <SkeletonText lines={2} lastLineWidth="80%" />
         </div>
       ))}
@@ -106,15 +128,18 @@ export function SkeletonCard({ height = 120, count = 1 }: { height?: number; cou
   );
 }
 
-export function SkeletonTable({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
+export function SkeletonTable({
+  rows = 5,
+  cols = 4,
+}: {
+  rows?: number;
+  cols?: number;
+}) {
   return (
     <div
+      className="proof-card"
       style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 0,
-        border: "1px solid var(--proof-grey)",
-        borderRadius: 6,
+        padding: 0,
         overflow: "hidden",
       }}
     >
@@ -122,14 +147,14 @@ export function SkeletonTable({ rows = 5, cols = 4 }: { rows?: number; cols?: nu
       <div
         style={{
           display: "flex",
-          gap: 12,
-          padding: "10px 12px",
-          background: "var(--proof-grey-bg)",
-          borderBottom: "1px solid var(--proof-grey)",
+          gap: 16,
+          padding: "12px 16px",
+          background: "var(--proof-surface-2)",
+          borderBottom: "1px solid var(--proof-border)",
         }}
       >
         {Array.from({ length: cols }).map((_, i) => (
-          <SkeletonBox key={i} width={`${80 / cols}%`} height={12} />
+          <SkeletonBox key={i} width={`${90 / cols}%`} height={12} />
         ))}
       </div>
       {/* Rows */}
@@ -138,13 +163,13 @@ export function SkeletonTable({ rows = 5, cols = 4 }: { rows?: number; cols?: nu
           key={r}
           style={{
             display: "flex",
-            gap: 12,
-            padding: "10px 12px",
-            borderBottom: r < rows - 1 ? "1px solid var(--proof-grey)" : "none",
+            gap: 16,
+            padding: "12px 16px",
+            borderBottom: r < rows - 1 ? "1px solid var(--proof-border)" : "none",
           }}
         >
           {Array.from({ length: cols }).map((_, c) => (
-            <SkeletonBox key={c} width={`${80 / cols}%`} height={12} />
+            <SkeletonBox key={c} width={`${90 / cols}%`} height={12} />
           ))}
         </div>
       ))}
@@ -152,14 +177,35 @@ export function SkeletonTable({ rows = 5, cols = 4 }: { rows?: number; cols?: nu
   );
 }
 
-export function SkeletonChart({ height = 200 }: { height?: number }) {
+export function SkeletonChart({ height = 240 }: { height?: number }) {
   return (
     <div
       className="proof-card"
-      style={{ padding: 16, minHeight: height, display: "flex", flexDirection: "column", gap: 12 }}
+      style={{
+        padding: 20,
+        minHeight: height,
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+      }}
     >
-      <SkeletonBox width="30%" height={14} />
-      <SkeletonBox width="100%" height={height - 80} borderRadius={6} />
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <SkeletonBox width="25%" height={18} />
+        <div style={{ display: "flex", gap: 8 }}>
+          <SkeletonBox width={60} height={18} />
+          <SkeletonBox width={60} height={18} />
+        </div>
+      </div>
+      <div style={{ flex: 1, display: "flex", alignItems: "flex-end", gap: 12 }}>
+        {Array.from({ length: 12 }).map((_, i) => (
+          <SkeletonBox
+            key={i}
+            width="100%"
+            height={`${Math.max(20, Math.random() * 100)}%`}
+            borderRadius="4px 4px 0 0"
+          />
+        ))}
+      </div>
     </div>
   );
 }

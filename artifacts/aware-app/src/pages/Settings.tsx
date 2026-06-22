@@ -116,73 +116,40 @@ export default function Settings() {
     }
   };
 
-  const sectionStyle: React.CSSProperties = {
-    background: "var(--proof-surface)",
-    border: "1px solid var(--proof-border)",
-    borderRadius: "var(--proof-radius-lg)",
-    padding: "20px",
-    marginBottom: "20px",
-    boxShadow: "var(--proof-shadow-card)",
-  };
-
-  const headerStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    marginBottom: "16px",
-    fontSize: "15px",
-    fontWeight: 600,
-    color: "var(--proof-text)",
-  };
-
-  const labelStyle: React.CSSProperties = {
-    fontSize: "12px",
-    color: "var(--proof-text-secondary)",
-    marginBottom: "6px",
-    display: "block",
-  };
-
-  const inputStyle: React.CSSProperties = {
-    background: "var(--proof-surface-2)",
-    border: "1px solid var(--proof-border-strong)",
-    borderRadius: "var(--proof-radius-sm)",
-    color: "var(--proof-text)",
-    padding: "6px 10px",
-    fontSize: "13px",
-    width: "100%",
-    maxWidth: "200px",
-  };
-
-  const tableHeaderStyle: React.CSSProperties = {
-    fontSize: "11px",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    color: "var(--proof-text-muted)",
-    textAlign: "left",
-    padding: "8px 12px",
-    borderBottom: "1px solid var(--proof-border)",
-  };
-
-  const tableCellStyle: React.CSSProperties = {
-    fontSize: "12px",
-    color: "var(--proof-text-secondary)",
-    padding: "10px 12px",
-    borderBottom: "1px solid var(--proof-border-light)",
-  };
-
   return (
     <PageShell title="Settings" subtitle="Configure application behavior and view environment state">
-      <div style={{ maxWidth: "1000px", display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div 
+        style={{ 
+          maxWidth: "1000px", 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 20,
+          animation: "page-enter 0.4s ease-out both"
+        }}
+      >
         
         {/* Section 1: Promotion Gate */}
-        <section style={sectionStyle}>
+        <section className="proof-card" style={{ padding: "24px" }}>
           <SectionHeader icon={Check} title="Promotion Gate" color="var(--proof-green)" />
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <p style={{ fontSize: "13px", color: "var(--proof-text-secondary)", margin: 0 }}>
               Threshold for automatic promotion between environments. Runs below this pass rate will be flagged.
             </p>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: "var(--proof-text-secondary)", marginBottom: 6, display: 'block' }} htmlFor="promotionThreshold">Pass Rate Threshold (%)</label>
+              <label 
+                style={{ 
+                  fontSize: 11, 
+                  fontWeight: 600, 
+                  color: "var(--proof-text-secondary)", 
+                  marginBottom: 6, 
+                  display: 'block',
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em"
+                }} 
+                htmlFor="promotionThreshold"
+              >
+                Pass Rate Threshold (%)
+              </label>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <input 
                   id="promotionThreshold"
@@ -192,10 +159,10 @@ export default function Settings() {
                   min="0"
                   max="100"
                   className="proof-input"
-                  style={{ maxWidth: 200, fontSize: 13 }}
+                  style={{ maxWidth: 120, fontSize: 13 }}
                   aria-label="Promotion gate pass rate threshold percentage"
                 />
-                <span style={{ fontSize: "12px", color: "var(--proof-text-muted)" }}>
+                <span style={{ fontSize: "11px", color: "var(--proof-text-muted)" }}>
                   Default: {PROMOTION_GATE_THRESHOLD * 100}%
                 </span>
                 {savedKey === 'promotionThreshold' && (
@@ -221,18 +188,42 @@ export default function Settings() {
         </section>
 
         {/* Section 2: Data Source */}
-        <section style={sectionStyle}>
+        <section className="proof-card" style={{ padding: "24px" }}>
           <SectionHeader icon={Database} title="Data Source" color="var(--proof-blue)" />
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
               <div>
-                <label style={labelStyle}>Source Mode</label>
+                <label 
+                  style={{ 
+                    fontSize: 11, 
+                    fontWeight: 600, 
+                    color: "var(--proof-text-secondary)", 
+                    marginBottom: 6, 
+                    display: 'block',
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em"
+                  }}
+                >
+                  Source Mode
+                </label>
                 <div style={{ fontSize: "13px", color: "var(--proof-text)", fontWeight: 500 }}>
                   {import.meta.env.DEV ? "Local Development" : "Static Production"}
                 </div>
               </div>
               <div>
-                <label style={labelStyle}>Base URL</label>
+                <label 
+                  style={{ 
+                    fontSize: 11, 
+                    fontWeight: 600, 
+                    color: "var(--proof-text-secondary)", 
+                    marginBottom: 6, 
+                    display: 'block',
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em"
+                  }}
+                >
+                  Base URL
+                </label>
                 <div style={{ fontSize: "13px", color: "var(--proof-text)", fontWeight: 500, fontFamily: "var(--font-mono)" }}>
                   {import.meta.env.VITE_DATA_BASE_URL || "/data"}
                 </div>
@@ -263,31 +254,31 @@ export default function Settings() {
         </section>
 
         {/* Section 3: Environment Quick View */}
-        <section style={sectionStyle}>
+        <section className="proof-card" style={{ padding: "24px" }}>
           <SectionHeader icon={Layers} title="Environment Quick View" color="var(--proof-purple)" />
-          <div style={{ overflowX: "auto", margin: "0 -20px", padding: "0 20px" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <div style={{ overflowX: "auto", margin: "0 -24px", padding: "0 24px" }}>
+            <table className="proof-table" style={{ width: "100%" }}>
               <thead>
-                <tr>
-                  <th style={tableHeaderStyle}>ID</th>
-                  <th style={tableHeaderStyle}>Label</th>
-                  <th style={tableHeaderStyle}>Target</th>
-                  <th style={tableHeaderStyle}>Network</th>
-                  <th style={tableHeaderStyle}>Base URL</th>
-                  <th style={tableHeaderStyle}>Property</th>
-                  <th style={tableHeaderStyle}>Ver</th>
+                <tr className="proof-tr">
+                  <th className="proof-th">ID</th>
+                  <th className="proof-th">Label</th>
+                  <th className="proof-th">Target</th>
+                  <th className="proof-th">Network</th>
+                  <th className="proof-th">Base URL</th>
+                  <th className="proof-th">Property</th>
+                  <th className="proof-th">Ver</th>
                 </tr>
               </thead>
               <tbody>
                 {envConfigs.map((env) => (
-                  <tr key={env.id}>
-                    <td style={{ ...tableCellStyle, fontFamily: "var(--font-mono)", fontSize: "11px" }}>{env.id}</td>
-                    <td style={{ ...tableCellStyle, fontWeight: 500 }}>{env.label}</td>
-                    <td style={tableCellStyle}>{env.target}</td>
-                    <td style={tableCellStyle}>
+                  <tr key={env.id} className="proof-tr">
+                    <td className="proof-td" style={{ fontFamily: "var(--font-mono)", fontSize: "11px" }}>{env.id}</td>
+                    <td className="proof-td" style={{ fontWeight: 600 }}>{env.label}</td>
+                    <td className="proof-td">{env.target}</td>
+                    <td className="proof-td">
                       <span style={{ 
-                        padding: "2px 6px", 
-                        borderRadius: "4px", 
+                        padding: "2px 8px", 
+                        borderRadius: "100px", 
                         background: env.network === "production" ? "var(--proof-red-bg)" : "var(--proof-blue-bg)",
                         color: env.network === "production" ? "var(--proof-red-bright)" : "var(--proof-blue-bright)",
                         fontSize: "10px",
@@ -297,11 +288,11 @@ export default function Settings() {
                         {env.network}
                       </span>
                     </td>
-                    <td style={{ ...tableCellStyle, maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <td className="proof-td" style={{ maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {env.baseUrl}
                     </td>
-                    <td style={tableCellStyle}>{env.property}</td>
-                    <td style={tableCellStyle}>{env.propertyVersion}</td>
+                    <td className="proof-td">{env.property}</td>
+                    <td className="proof-td">{env.propertyVersion}</td>
                   </tr>
                 ))}
               </tbody>
@@ -310,37 +301,34 @@ export default function Settings() {
         </section>
 
         {/* Section 4: Test Suite Overview */}
-        <section style={sectionStyle}>
+        <section className="proof-card" style={{ padding: "24px" }}>
           <SectionHeader icon={Beaker} title="Test Suite Overview" color="var(--proof-cyan)" />
-          <div style={{ overflowX: "auto", margin: "0 -20px", padding: "0 20px" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <div style={{ overflowX: "auto", margin: "0 -24px", padding: "0 24px" }}>
+            <table className="proof-table" style={{ width: "100%" }}>
               <thead>
-                <tr>
-                  <th style={tableHeaderStyle}>Suite Name</th>
-                  <th style={tableHeaderStyle}>Tests</th>
-                  <th style={tableHeaderStyle}>Environments</th>
-                  <th style={tableHeaderStyle}>Schedule</th>
+                <tr className="proof-tr">
+                  <th className="proof-th">Suite Name</th>
+                  <th className="proof-th">Tests</th>
+                  <th className="proof-th">Environments</th>
+                  <th className="proof-th">Schedule</th>
                 </tr>
               </thead>
               <tbody>
                 {testSuites.map((suite) => (
-                  <tr key={suite.id}>
-                    <td style={{ ...tableCellStyle, fontWeight: 500 }}>{suite.name}</td>
-                    <td style={tableCellStyle}>{suite.testIds?.length || 0}</td>
-                    <td style={tableCellStyle}>
+                  <tr key={suite.id} className="proof-tr">
+                    <td className="proof-td" style={{ fontWeight: 600 }}>{suite.name}</td>
+                    <td className="proof-td">{suite.testIds?.length || 0}</td>
+                    <td className="proof-td">
                       <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
                         {["QA", "UAT", "PROD"].map(tier => (
-                          <span key={tier} style={{ 
+                          <span key={tier} className="proof-badge" style={{ 
                             fontSize: "10px", 
-                            padding: "1px 4px", 
-                            background: "var(--proof-surface-3)",
-                            borderRadius: "3px",
                             opacity: 0.8
                           }}>{tier}</span>
                         ))}
                       </div>
                     </td>
-                    <td style={{ ...tableCellStyle, fontFamily: "var(--font-mono)", fontSize: "11px" }}>
+                    <td className="proof-td" style={{ fontFamily: "var(--font-mono)", fontSize: "11px" }}>
                       {suite.schedule || "Every 15m"}
                     </td>
                   </tr>
@@ -351,28 +339,52 @@ export default function Settings() {
         </section>
 
         {/* Section 5: Appearance */}
-        <section style={sectionStyle}>
+        <section className="proof-card" style={{ padding: "24px" }}>
           <SectionHeader icon={Palette} title="Appearance" color="var(--proof-orange)" />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "30px" }}>
             <div>
-              <label style={labelStyle}>Theme</label>
+              <label 
+                style={{ 
+                  fontSize: 11, 
+                  fontWeight: 600, 
+                  color: "var(--proof-text-secondary)", 
+                  marginBottom: 6, 
+                  display: 'block',
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em"
+                }}
+              >
+                Theme
+              </label>
               <p style={{ fontSize: "12px", color: "var(--proof-text-muted)", marginBottom: "12px" }}>
                 Use the toggle in the top bar to switch between Light and Dark modes.
               </p>
             </div>
             <div>
-              <label style={labelStyle}>Pass Rate Thresholds (Read-only)</label>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "var(--proof-green)" }}></div>
+              <label 
+                style={{ 
+                  fontSize: 11, 
+                  fontWeight: 600, 
+                  color: "var(--proof-text-secondary)", 
+                  marginBottom: 6, 
+                  display: 'block',
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em"
+                }}
+              >
+                Pass Rate Thresholds (Read-only)
+              </label>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div className="proof-status-dot proof-status-dot-pass"></div>
                   <span style={{ fontSize: "12px", color: "var(--proof-text-secondary)" }}>Healthy: ≥ 95%</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "var(--proof-yellow)" }}></div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div className="proof-status-dot proof-status-dot-degraded"></div>
                   <span style={{ fontSize: "12px", color: "var(--proof-text-secondary)" }}>Degraded: 80% - 95%</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "var(--proof-red)" }}></div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div className="proof-status-dot proof-status-dot-fail"></div>
                   <span style={{ fontSize: "12px", color: "var(--proof-text-secondary)" }}>Failure: &lt; 80%</span>
                 </div>
               </div>
@@ -381,26 +393,50 @@ export default function Settings() {
         </section>
 
         {/* Section 6: About / Version */}
-        <section style={sectionStyle}>
+        <section className="proof-card" style={{ padding: "24px" }}>
           <SectionHeader icon={Info} title="About / Version" color="var(--proof-text-muted)" />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--proof-text)" }}>A.W.A.R.E.</div>
-              <div style={{ fontSize: "12px", color: "var(--proof-text-muted)", marginBottom: "12px" }}>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--proof-text)", letterSpacing: "-0.01em" }}>A.W.A.R.E.</div>
+              <div style={{ fontSize: "11px", color: "var(--proof-text-muted)", marginBottom: "16px", textTransform: "uppercase", letterSpacing: "0.02em" }}>
                 Akamai Web Analytics Regression Engine
               </div>
-              <div style={{ display: "flex", gap: "20px" }}>
+              <div style={{ display: "flex", gap: "24px" }}>
                 <div>
-                  <label style={labelStyle}>Version</label>
-                  <div style={{ fontSize: "13px", color: "var(--proof-text)" }}>3.0.4-stable</div>
+                  <label 
+                    style={{ 
+                      fontSize: 11, 
+                      fontWeight: 600, 
+                      color: "var(--proof-text-secondary)", 
+                      marginBottom: 4, 
+                      display: 'block',
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em"
+                    }}
+                  >
+                    Version
+                  </label>
+                  <div style={{ fontSize: "13px", color: "var(--proof-text)", fontWeight: 500 }}>3.0.4-stable</div>
                 </div>
                 <div>
-                  <label style={labelStyle}>Build</label>
+                  <label 
+                    style={{ 
+                      fontSize: 11, 
+                      fontWeight: 600, 
+                      color: "var(--proof-text-secondary)", 
+                      marginBottom: 4, 
+                      display: 'block',
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em"
+                    }}
+                  >
+                    Build
+                  </label>
                   <div style={{ fontSize: "13px", color: "var(--proof-text)", fontFamily: "var(--font-mono)" }}>2025.02.15</div>
                 </div>
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <a 
                 href="https://github.com" 
                 target="_blank" 
@@ -411,7 +447,8 @@ export default function Settings() {
                   gap: "6px", 
                   fontSize: "12px",
                   color: "var(--proof-blue-bright)",
-                  textDecoration: "none"
+                  textDecoration: "none",
+                  fontWeight: 500
                 }}
               >
                 GitHub Repository <ExternalLink size={12} />
@@ -424,7 +461,8 @@ export default function Settings() {
                   gap: "6px", 
                   fontSize: "12px",
                   color: "var(--proof-blue-bright)",
-                  textDecoration: "none"
+                  textDecoration: "none",
+                  fontWeight: 500
                 }}
               >
                 Documentation <ChevronRight size={12} />

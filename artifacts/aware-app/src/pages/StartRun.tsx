@@ -36,24 +36,32 @@ export default function StartRun() {
   const recentRunsByEnv = recentRuns.filter(r => !env || r.label.toLowerCase().includes(env.split('-')[0]));
 
   return (
-    <div style={{ maxWidth: 600, margin: "60px auto", padding: "0 20px" }}>
-      <div style={{ textAlign: "center", marginBottom: 32 }}>
+    <div 
+      style={{ 
+        maxWidth: 600, 
+        margin: "60px auto", 
+        padding: "0 20px",
+        animation: "page-enter 0.5s ease-out both"
+      }}
+    >
+      <div style={{ textAlign: "center", marginBottom: 40 }}>
         <div
           style={{
-            width: 52,
-            height: 52,
+            width: 64,
+            height: 64,
             background: "var(--proof-blue-bg)",
-            borderRadius: 12,
+            borderRadius: 16,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            margin: "0 auto 16px",
+            margin: "0 auto 20px",
+            boxShadow: "var(--proof-shadow-sm)",
           }}
         >
-          <Play size={26} style={{ color: "var(--proof-blue)" }} />
+          <Play size={32} style={{ color: "var(--proof-blue)", marginLeft: 4 }} />
         </div>
-        <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Start a New Test Run</h1>
-        <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", lineHeight: 1.6 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 12, letterSpacing: "-0.02em" }}>Start New Test Run</h1>
+        <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", lineHeight: 1.6, maxWidth: 460, margin: "0 auto" }}>
           Trigger a new regression test run through GitHub Actions. Results appear in the Runs table
           once complete.
         </p>
@@ -61,12 +69,12 @@ export default function StartRun() {
 
       <div
         className="proof-card"
-        style={{ padding: 24, display: "flex", flexDirection: "column", gap: 20, marginBottom: 32 }}
+        style={{ padding: 32, display: "flex", flexDirection: "column", gap: 24, marginBottom: 40 }}
       >
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <div>
             <label 
-              style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 6 }}
+              style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}
               htmlFor="suite-select"
             >
               Test Suite
@@ -78,14 +86,10 @@ export default function StartRun() {
                 setSuite(e.target.value);
                 if (e.target.value) setError(null);
               }}
+              className="proof-select"
               style={{
                 width: "100%",
-                padding: "8px 12px",
-                borderRadius: 6,
-                border: error ? "1px solid var(--proof-red)" : "1px solid var(--proof-border)",
-                background: "var(--proof-surface-2)",
-                color: "var(--proof-text)",
-                fontSize: 13,
+                border: error ? "1px solid var(--proof-red)" : undefined,
               }}
               aria-label="Select test suite to run"
             >
@@ -95,12 +99,12 @@ export default function StartRun() {
               <option value="api-only">API Security</option>
               <option value="performance">Performance Baseline</option>
             </select>
-            {error && <div style={{ color: "var(--proof-red)", fontSize: 11, marginTop: 4 }}>{error}</div>}
+            {error && <div style={{ color: "var(--proof-red)", fontSize: 11, marginTop: 6, fontWeight: 500 }}>{error}</div>}
           </div>
 
           <div>
             <label 
-              style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 6 }}
+              style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}
               htmlFor="env-select"
             >
               Target Environment
@@ -109,15 +113,8 @@ export default function StartRun() {
               id="env-select"
               value={env}
               onChange={(e) => setEnv(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: 6,
-                border: "1px solid var(--proof-border)",
-                background: "var(--proof-surface-2)",
-                color: "var(--proof-text)",
-                fontSize: 13,
-              }}
+              className="proof-select"
+              style={{ width: "100%" }}
               aria-label="Select target environment"
             >
               <option value="qa-staging">QA / Staging</option>
@@ -133,8 +130,8 @@ export default function StartRun() {
             style={{ 
               width: "100%", 
               justifyContent: "center", 
-              padding: "10px", 
-              fontSize: 14,
+              padding: "12px", 
+              fontSize: 15,
               marginTop: 8,
               opacity: isSubmitting ? 0.7 : 1
             }}
@@ -151,14 +148,24 @@ export default function StartRun() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 12,
-              padding: 12,
-              borderRadius: 6,
+              gap: 16,
+              padding: 16,
+              borderRadius: 8,
               border: "1px solid var(--proof-border)",
-              background: "var(--proof-subtle-bg)",
+              background: "var(--proof-surface-2)",
             }}
           >
-            <Github size={20} style={{ color: "var(--proof-text-secondary)" }} />
+            <div style={{ 
+              width: 36, 
+              height: 36, 
+              borderRadius: 8, 
+              background: "var(--proof-surface-3)", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center" 
+            }}>
+              <Github size={20} style={{ color: "var(--proof-text)" }} />
+            </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>
                 GitHub Actions Dispatch
@@ -167,22 +174,23 @@ export default function StartRun() {
                 Trigger manually from the repository
               </div>
             </div>
-            <div style={{ display: "flex", gap: 6 }}>
+            <div style={{ display: "flex", gap: 8 }}>
               <button
                 onClick={copyWorkflowUrl}
-                className="proof-button proof-button-sm"
+                className="proof-button proof-button-sm proof-button-secondary"
                 title="Copy Workflow URL"
+                style={{ width: 32, height: 32, padding: 0, justifyContent: "center" }}
               >
-                {copiedUrl ? <Check size={12} /> : <Copy size={12} />}
+                {copiedUrl ? <Check size={14} /> : <Copy size={14} />}
               </button>
               <a
                 href="https://github.com/ruake/AWARE/actions"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="proof-button proof-button-sm"
-                style={{ textDecoration: "none" }}
+                className="proof-button proof-button-sm proof-button-secondary"
+                style={{ textDecoration: "none", width: 32, height: 32, padding: 0, justifyContent: "center" }}
               >
-                Open <ExternalLink size={12} />
+                <ExternalLink size={14} />
               </a>
             </div>
           </div>
@@ -190,44 +198,40 @@ export default function StartRun() {
       </div>
 
       {/* Recent Runs Section */}
-      <div style={{ marginBottom: 40 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-          <Clock size={16} style={{ color: "var(--proof-text-secondary)" }} />
-          <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>Recent Runs</h3>
+      <div style={{ marginBottom: 48 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, paddingLeft: 4 }}>
+          <Clock size={16} style={{ color: "var(--proof-text-muted)" }} />
+          <h3 style={{ fontSize: 12, fontWeight: 600, margin: 0, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--proof-text-secondary)" }}>Recent Environment Runs</h3>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {recentRunsByEnv.map(run => (
             <div 
               key={run.id}
+              className="proof-card"
               style={{ 
                 display: "flex", 
                 alignItems: "center", 
                 justifyContent: "space-between",
-                padding: "10px 14px",
-                background: "var(--proof-surface)",
-                border: "1px solid var(--proof-border)",
-                borderRadius: 8,
-                fontSize: 12
+                padding: "12px 16px",
+                fontSize: 13,
+                border: "1px solid var(--proof-border-light)"
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ 
-                  width: 8, 
-                  height: 8, 
-                  borderRadius: "50%", 
-                  background: run.passPct >= 95 ? "var(--proof-green)" : run.passPct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)"
-                }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div className={`proof-status-dot proof-status-dot-${run.passPct >= 95 ? 'pass' : run.passPct >= 80 ? 'degraded' : 'fail'}`} />
                 <span style={{ fontWeight: 600 }}>{run.label}</span>
                 <span style={{ color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", fontSize: 11 }}>{run.id}</span>
               </div>
-              <div style={{ color: "var(--proof-text-secondary)" }}>
-                {run.passPct}% • {new Date(run.started).toLocaleDateString()}
+              <div style={{ color: "var(--proof-text-secondary)", fontSize: 12, fontWeight: 500 }}>
+                <span style={{ color: run.passPct >= 95 ? "var(--proof-green)" : run.passPct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)" }}>{run.passPct}%</span>
+                <span style={{ margin: "0 8px", color: "var(--proof-border-strong)" }}>|</span>
+                {new Date(run.started).toLocaleDateString()}
               </div>
             </div>
           ))}
-          {recentRuns.length === 0 && (
-            <div style={{ textAlign: "center", padding: 20, color: "var(--proof-text-muted)", fontSize: 12, border: "1px dashed var(--proof-border)", borderRadius: 8 }}>
-              No recent runs found.
+          {recentRunsByEnv.length === 0 && (
+            <div className="proof-empty-state" style={{ padding: "24px", fontSize: 13 }}>
+              No recent runs found for this environment.
             </div>
           )}
         </div>
@@ -240,14 +244,19 @@ export default function StartRun() {
             background: "none", 
             border: "none", 
             color: "var(--proof-blue-bright)", 
-            fontSize: 12, 
+            fontSize: 13, 
+            fontWeight: 500,
             cursor: "pointer",
             display: "inline-flex",
             alignItems: "center",
-            gap: 4
+            gap: 6,
+            padding: "8px 16px",
+            borderRadius: 8,
+            transition: "all 0.2s"
           }}
+          className="proof-focus-ring"
         >
-          <GitCompare size={14} /> Compare existing runs instead
+          <GitCompare size={16} /> Compare existing runs instead
         </button>
       </div>
     </div>

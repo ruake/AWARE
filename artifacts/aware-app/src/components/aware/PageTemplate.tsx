@@ -62,32 +62,66 @@ export function PageTemplate({
     onPageChange;
 
   return (
-    <div className="proof-page" style={{ animation: "page-enter 0.22s ease-out both" }}>
-      <div className="proof-page-header">
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <h1 className="proof-page-title">{title}</h1>
+    <div className="proof-page" style={{ animation: "page-enter 0.3s cubic-bezier(0.2, 0, 0.2, 1) both" }}>
+      <div
+        className="proof-page-header"
+        style={{
+          padding: "24px 32px",
+          borderBottom: "1px solid var(--proof-border)",
+          background: "rgba(0,0,0,0.1)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <h1
+              className="proof-page-title"
+              style={{
+                fontSize: 17,
+                fontWeight: 700,
+                color: "var(--proof-text)",
+                margin: 0,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {title}
+            </h1>
             {badges}
           </div>
-          {subtitle && <p className="proof-page-subtitle">{subtitle}</p>}
+          {subtitle && (
+            <p
+              className="proof-page-subtitle"
+              style={{
+                fontSize: 13,
+                fontWeight: 400,
+                color: "var(--proof-text-secondary)",
+                margin: "4px 0 0",
+              }}
+            >
+              {subtitle}
+            </p>
+          )}
         </div>
         {headerActions && (
-          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>{headerActions}</div>
+          <div style={{ display: "flex", gap: 10, flexShrink: 0, alignItems: "center" }}>
+            {headerActions}
+          </div>
         )}
       </div>
 
       {filters && (
         <div
           style={{
-            padding: "8px 20px",
-            borderBottom: "1px solid var(--proof-border)",
+            padding: "12px 32px",
+            borderBottom: "1px solid var(--proof-border-light)",
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
-            gap: 8,
+            gap: 12,
             flexWrap: "nowrap",
             overflowX: "auto",
-            background: "var(--proof-surface)",
+            background: "var(--proof-surface-2)",
           }}
         >
           {filters}
@@ -111,7 +145,7 @@ export function PageTemplate({
         style={{
           display: "flex",
           gap: 0,
-          padding: sidePanel ? "0" : undefined,
+          padding: sidePanel ? "0" : "24px 32px 32px",
         }}
       >
         <PanelErrorBoundary label={errorLabel ?? title}>

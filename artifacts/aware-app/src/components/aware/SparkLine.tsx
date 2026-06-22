@@ -84,7 +84,8 @@ export function SparkLine({
           strokeWidth={strokeWidth}
           dot={false}
           activeDot={false}
-          isAnimationActive={false}
+          isAnimationActive={true}
+          animationDuration={800}
         />
       </LineChart>
       

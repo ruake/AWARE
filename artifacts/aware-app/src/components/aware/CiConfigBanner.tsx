@@ -1,19 +1,24 @@
 import React from "react";
 import { Download, FileText, GitCompare, ChevronDown, TerminalSquare, X } from "lucide-react";
 import { downloadCiConfig } from "@/lib/ciConfig";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: () => void }) {
   const [expanded, setExpanded] = React.useState(false);
   if (!show) return null;
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
       style={{
         background: "var(--proof-blue-bg)",
         border: "1px solid var(--proof-blue)",
-        borderRadius: 6,
+        borderRadius: 8,
         overflow: "hidden",
         marginBottom: 14,
+        boxShadow: "0 4px 12px rgba(0, 102, 255, 0.1)",
       }}
     >
       {/* Header row */}
@@ -53,16 +58,18 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
             cursor: "pointer",
             color: "var(--proof-blue)",
             padding: 4,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
           title="Show instructions"
         >
-          <ChevronDown
-            size={14}
-            style={{
-              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.15s",
-            }}
-          />
+          <motion.div
+            animate={{ rotate: expanded ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChevronDown size={14} />
+          </motion.div>
         </button>
         <button
           onClick={onDismiss}
@@ -75,6 +82,9 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
             padding: 4,
             fontSize: 16,
             lineHeight: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <X size={14} />
@@ -82,102 +92,114 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
       </div>
 
       {/* Expanded instructions */}
-      {expanded && (
-        <div
-          style={{
-            padding: "0 14px 12px",
-            borderTop: "1px solid var(--proof-blue-border)",
-            marginTop: 0,
-          }}
-        >
-          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", paddingTop: 10 }}>
-            <div style={{ flex: "1 1 280px" }}>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "var(--proof-text-secondary)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.3px",
-                  marginBottom: 6,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                }}
-              >
-                <TerminalSquare size={12} /> Where to commit
-              </div>
-              <div
-                style={{
-                  background: "var(--proof-surface)",
-                  borderRadius: 4,
-                  padding: "8px 12px",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  lineHeight: 1.8,
-                  color: "var(--proof-text)",
-                }}
-              >
-                <div>
-                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> mv
-                  ~/Downloads/proof-test-config-*.yml config/proof-test-config.yml
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            style={{
+              overflow: "hidden",
+              borderTop: "1px solid var(--proof-blue-border)",
+            }}
+          >
+            <div
+              style={{
+                padding: "0 14px 12px",
+                marginTop: 0,
+              }}
+            >
+              <div style={{ display: "flex", gap: 20, flexWrap: "wrap", paddingTop: 10 }}>
+                <div style={{ flex: "1 1 280px" }}>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: "var(--proof-text-secondary)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.3px",
+                      marginBottom: 6,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <TerminalSquare size={12} /> Where to commit
+                  </div>
+                  <div
+                    style={{
+                      background: "var(--proof-surface)",
+                      borderRadius: 4,
+                      padding: "8px 12px",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10,
+                      lineHeight: 1.8,
+                      color: "var(--proof-text)",
+                    }}
+                  >
+                    <div>
+                      <span style={{ color: "var(--proof-blue-bright)" }}>$</span> mv
+                      ~/Downloads/proof-test-config-*.yml config/proof-test-config.yml
+                    </div>
+                    <div>
+                      <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git add
+                      config/proof-test-config.yml
+                    </div>
+                    <div>
+                      <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git commit -m "update
+                      proof test config from AWARE"
+                    </div>
+                    <div>
+                      <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git push
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git add
-                  config/proof-test-config.yml
-                </div>
-                <div>
-                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git commit -m "update
-                  proof test config from AWARE"
-                </div>
-                <div>
-                  <span style={{ color: "var(--proof-blue-bright)" }}>$</span> git push
+                <div style={{ flex: "1 1 280px" }}>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: "var(--proof-text-secondary)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.3px",
+                      marginBottom: 6,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <GitCompare size={12} /> How GHA reads it
+                  </div>
+                  <div
+                    style={{
+                      background: "var(--proof-surface)",
+                      borderRadius: 4,
+                      padding: "8px 12px",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10,
+                      lineHeight: 1.8,
+                      color: "var(--proof-text)",
+                    }}
+                  >
+                    <div style={{ color: "var(--proof-yellow)" }}>.github/workflows/controller.yml</div>
+                    <div style={{ color: "var(--proof-text-muted)" }}> └─ workflow_dispatch inputs</div>
+                    <div style={{ color: "var(--proof-text-muted)" }}>
+                      {" "}
+                      ├─ suite (reads from config)
+                    </div>
+                    <div style={{ color: "var(--proof-text-muted)" }}> ├─ target (Prod | UAT)</div>
+                    <div style={{ color: "var(--proof-text-muted)" }}>
+                      {" "}
+                      └─ environment (Production | Staging)
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div style={{ flex: "1 1 280px" }}>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "var(--proof-text-secondary)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.3px",
-                  marginBottom: 6,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                }}
-              >
-                <GitCompare size={12} /> How GHA reads it
-              </div>
-              <div
-                style={{
-                  background: "var(--proof-surface)",
-                  borderRadius: 4,
-                  padding: "8px 12px",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  lineHeight: 1.8,
-                  color: "var(--proof-text)",
-                }}
-              >
-                <div style={{ color: "var(--proof-yellow)" }}>.github/workflows/controller.yml</div>
-                <div style={{ color: "var(--proof-text-muted)" }}> └─ workflow_dispatch inputs</div>
-                <div style={{ color: "var(--proof-text-muted)" }}>
-                  {" "}
-                  ├─ suite (reads from config)
-                </div>
-                <div style={{ color: "var(--proof-text-muted)" }}> ├─ target (Prod | UAT)</div>
-                <div style={{ color: "var(--proof-text-muted)" }}>
-                  {" "}
-                  └─ environment (Production | Staging)
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

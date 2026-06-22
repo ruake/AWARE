@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation, useSearch } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import { DIFF_ROWS, RUNS, getTestResultsForRun, getTestDetailsAsync } from "@/lib/data";
 import { setTestDetailStat } from "@/lib/sidebarData";
 import { useTestData } from "@/hooks/useTestData";
@@ -20,6 +21,9 @@ import {
   ShieldCheck,
   ChevronUp,
   ChevronDown,
+  Calendar,
+  BarChart3,
+  Search
 } from "lucide-react";
 import {
   LineChart,
@@ -29,7 +33,11 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Area,
+  AreaChart,
 } from "recharts";
+import { HeatmapCalendar } from "@/components/aware/HeatmapCalendar";
+import { CategoryHeatmap } from "@/components/aware/CategoryHeatmap";
 
 type SortKey = "runId" | "status" | "duration" | "env";
 
@@ -287,6 +295,8 @@ export default function TestAnalytics() {
     }
   };
 
+  const heatmapData = enriched.map(h => ({ env: h.env, status: h.status }));
+
   return (
     <PageTemplate
       title="Test Analytics"
@@ -299,67 +309,78 @@ export default function TestAnalytics() {
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <button
             onClick={() => navigateTest(-1)}
-            className="proof-button proof-button-xs"
+            className="proof-button-ghost"
+            style={{ width: 32, height: 32, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--proof-grey-bg)", border: "1px solid var(--proof-border)" }}
             title="Previous test"
           >
-            <ChevronUp size={14} />
+            <ChevronUp size={16} />
           </button>
           <button
             onClick={() => navigateTest(1)}
-            className="proof-button proof-button-xs"
+            className="proof-button-ghost"
+            style={{ width: 32, height: 32, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--proof-grey-bg)", border: "1px solid var(--proof-border)" }}
             title="Next test"
           >
-            <ChevronDown size={14} />
+            <ChevronDown size={16} />
           </button>
         </div>
       }
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1, minHeight: 0 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minHeight: 0 }}>
         {/* Summary Stats Row */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}
+        >
           {[
             {
               label: "Pass Rate",
               value: `${detail.passRate}%`,
-              icon: <ShieldCheck size={16} />,
+              icon: <ShieldCheck size={18} />,
               color: detail.passRate >= 95 ? "var(--proof-green)" : "var(--proof-red)",
             },
             {
               label: "Avg Duration",
               value: `${detail.avgDuration}ms`,
-              icon: <Clock size={16} />,
+              icon: <Clock size={18} />,
               color: "var(--proof-blue)",
             },
             {
               label: "Flakiness",
               value: `${detail.flakinessScore}%`,
-              icon: <AlertTriangle size={16} />,
+              icon: <AlertTriangle size={18} />,
               color: detail.flakinessScore > 20 ? "var(--proof-yellow)" : "var(--proof-green)",
             },
             {
               label: "Total Runs",
               value: detail.history.length,
-              icon: <History size={16} />,
-              color: "var(--proof-text)",
+              icon: <History size={18} />,
+              color: "var(--proof-text-secondary)",
             },
           ].map((stat, i) => (
-            <div
+            <motion.div
               key={i}
               className="proof-card"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
               style={{
-                padding: "12px 16px",
+                padding: "20px",
                 display: "flex",
                 alignItems: "center",
-                gap: 12,
+                gap: 16,
                 background: "var(--proof-surface)",
+                border: "1px solid var(--proof-border)",
+                borderRadius: "16px"
               }}
             >
               <div
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: "var(--proof-grey-bg)",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  background: `${stat.color}15`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -371,53 +392,61 @@ export default function TestAnalytics() {
               <div>
                 <div
                   style={{
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: 700,
-                    color: "var(--proof-text-secondary)",
+                    color: "var(--proof-text-muted)",
                     textTransform: "uppercase",
                     letterSpacing: "0.5px",
+                    marginBottom: 2
                   }}
                 >
                   {stat.label}
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-text)" }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: "var(--proof-text)" }}>
                   {stat.value}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        <div style={{ display: "flex", gap: 14, flex: 1, minHeight: 0 }}>
+        <div style={{ display: "flex", gap: 16, flex: 1, minHeight: 0 }}>
           <div
             style={{
               flex: 1,
               minWidth: 0,
               display: "flex",
               flexDirection: "column",
-              gap: 12,
+              gap: 16,
               overflowY: "auto",
               paddingRight: 4,
             }}
           >
-            {/* Charts & Error Analysis Section */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div className="proof-card" style={{ padding: 16 }}>
+            {/* Charts Section */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div className="proof-card" style={{ padding: 20, borderRadius: 16 }}>
                 <div
                   style={{
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: 600,
-                    marginBottom: 16,
+                    marginBottom: 20,
                     display: "flex",
                     alignItems: "center",
-                    gap: 6,
+                    gap: 8,
+                    color: "var(--proof-text)"
                   }}
                 >
-                  <TrendingUp size={14} /> Duration Trend (ms)
+                  <TrendingUp size={16} /> Duration Trend (ms)
                 </div>
-                <div style={{ height: 160 }}>
+                <div style={{ height: 200 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={enriched}>
+                    <AreaChart data={enriched}>
+                      <defs>
+                        <linearGradient id="colorDuration" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="var(--proof-blue)" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="var(--proof-blue)" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid stroke="var(--proof-border)" strokeDasharray="3 3" vertical={false} />
                       <XAxis
                         dataKey="runId"
@@ -427,51 +456,56 @@ export default function TestAnalytics() {
                         fontSize={10}
                         stroke="var(--proof-text-muted)"
                         tickFormatter={(val) => `${val}ms`}
+                        axisLine={false}
+                        tickLine={false}
                       />
                       <Tooltip
                         contentStyle={{
                           background: "var(--proof-surface)",
                           border: "1px solid var(--proof-border)",
-                          fontSize: 11,
+                          borderRadius: 8,
+                          fontSize: 12,
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.2)"
                         }}
                       />
-                      <Line
+                      <Area
                         type="monotone"
                         dataKey="duration"
                         stroke="var(--proof-blue)"
                         strokeWidth={2}
-                        dot={{ r: 3, fill: "var(--proof-blue)" }}
-                        activeDot={{ r: 5 }}
+                        fillOpacity={1}
+                        fill="url(#colorDuration)"
                       />
-                    </LineChart>
+                    </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              <div className="proof-card" style={{ padding: 16 }}>
+              <div className="proof-card" style={{ padding: 20, borderRadius: 16 }}>
                 <div
                   style={{
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: 600,
-                    marginBottom: 12,
+                    marginBottom: 20,
                     display: "flex",
                     alignItems: "center",
-                    gap: 6,
+                    gap: 8,
+                    color: "var(--proof-text)"
                   }}
                 >
-                  <Bug size={14} /> Common Errors
+                  <Bug size={16} /> Common Errors
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {commonErrors.length > 0 ? (
                     commonErrors.map(([msg, count], i) => (
                       <div
                         key={i}
                         style={{
-                          fontSize: 11,
-                          padding: "6px 10px",
-                          borderRadius: 6,
-                          background: "var(--proof-red-bg)",
-                          border: "1px solid var(--proof-red-border)",
+                          fontSize: 12,
+                          padding: "10px 14px",
+                          borderRadius: 8,
+                          background: "rgba(239,68,68,0.05)",
+                          border: "1px solid rgba(239,68,68,0.1)",
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
@@ -485,19 +519,19 @@ export default function TestAnalytics() {
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
                             flex: 1,
-                            marginRight: 8,
+                            marginRight: 12,
                           }}
                         >
                           {msg}
                         </span>
                         <span
                           style={{
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: 700,
-                            color: "var(--proof-red)",
-                            background: "rgba(239,68,68,0.1)",
-                            padding: "1px 6px",
-                            borderRadius: 10,
+                            color: "white",
+                            background: "var(--proof-red)",
+                            padding: "2px 8px",
+                            borderRadius: 12,
                           }}
                         >
                           {count}×
@@ -507,9 +541,9 @@ export default function TestAnalytics() {
                   ) : (
                     <div
                       style={{
-                        padding: 24,
+                        padding: 40,
                         textAlign: "center",
-                        fontSize: 12,
+                        fontSize: 13,
                         color: "var(--proof-text-muted)",
                       }}
                     >
@@ -520,91 +554,24 @@ export default function TestAnalytics() {
               </div>
             </div>
 
-            {/* Top Flaky Tests Table (Global) */}
-            <div className="proof-card" style={{ padding: 16 }}>
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  marginBottom: 12,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <Activity size={14} /> Top Flaky Tests (All)
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {topFlakyTests.map((t, i) => (
-                  <div
-                    key={i}
-                    onClick={() => navigate(`/analytics?diffId=diff_${testDetails.indexOf(t)}`)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "8px 12px",
-                      borderRadius: 6,
-                      cursor: "pointer",
-                      gap: 12,
-                      transition: "background 0.2s",
-                    }}
-                    className="proof-list-item"
-                  >
-                    <span
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        color: "var(--proof-text-muted)",
-                        width: 16,
-                      }}
-                    >
-                      {i + 1}
-                    </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 500,
-                          color: "var(--proof-text)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {t.name}
-                      </div>
-                      <div style={{ width: "100%", height: 3, background: "var(--proof-grey-bg)", marginTop: 4, borderRadius: 2 }}>
-                        <div
-                          style={{
-                            height: "100%",
-                            borderRadius: 2,
-                            width: `${t.flakinessScore}%`,
-                            background:
-                              t.flakinessScore > 50
-                                ? "var(--proof-red)"
-                                : t.flakinessScore > 25
-                                  ? "var(--proof-yellow)"
-                                  : "var(--proof-green)",
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 16, textAlign: "right" }}>
-                      <div style={{ width: 60 }}>
-                        <div style={{ fontSize: 9, color: "var(--proof-text-muted)", textTransform: "uppercase" }}>Flaky</div>
-                        <div style={{ fontSize: 11, fontWeight: 600 }}>{t.flakinessScore}%</div>
-                      </div>
-                      <div style={{ width: 60 }}>
-                        <div style={{ fontSize: 9, color: "var(--proof-text-muted)", textTransform: "uppercase" }}>Pass</div>
-                        <div style={{ fontSize: 11, fontWeight: 600 }}>{t.passRate}%</div>
-                      </div>
-                      <div style={{ width: 60 }}>
-                        <div style={{ fontSize: 9, color: "var(--proof-text-muted)", textTransform: "uppercase" }}>Avg Dur</div>
-                        <div style={{ fontSize: 11, fontWeight: 600 }}>{t.avgDuration}ms</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+            {/* Visualizations Section */}
+            <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 16 }}>
+              <CategoryHeatmap data={heatmapData} />
+              <div className="proof-card" style={{ padding: 20, borderRadius: 16 }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    marginBottom: 20,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    color: "var(--proof-text)"
+                  }}
+                >
+                  <Calendar size={16} /> History Calendar
+                </div>
+                <HeatmapCalendar data={enriched.map(e => ({ date: e.runId, count: 1, envs: {} }))} />
               </div>
             </div>
 
@@ -626,487 +593,148 @@ export default function TestAnalytics() {
             />
           </div>
 
-          {selectedRow && (
-            <div
-              className="proof-card"
-              style={{
-                width: 380,
-                flexShrink: 0,
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                borderLeft: `3px solid ${selectedRow.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
-              }}
-            >
-              {(() => {
-                const run = RUNS.find((r) => r.id === selectedRow.runId);
-                const allResults = getTestResultsForRun(selectedRow.runId);
-                const testResult = allResults.find((r) => {
-                  const rn = r.name.toLowerCase();
-                  const tn = testName.toLowerCase().replace(/_/g, " ");
-                  return rn === tn || rn.includes(tn) || tn.includes(rn);
-                });
-                const assertions = testResult?.assertions ?? testResult?.evidence?.assertions ?? [];
-                const passed = assertions.filter((a) => a.passed).length;
-                const failed = assertions.filter((a) => !a.passed).length;
-                const evidence = testResult?.evidence;
+          <AnimatePresence>
+            {selectedRow && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="proof-card"
+                style={{
+                  width: 400,
+                  flexShrink: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                  borderLeft: `4px solid ${selectedRow.status === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}`,
+                  borderRadius: 16
+                }}
+              >
+                {(() => {
+                  const results = getTestResultsForRun(selectedRow.runId);
+                  const result = results.find((r) => {
+                    const rn = r.name.toLowerCase();
+                    const tn = testName.toLowerCase().replace(/_/g, " ");
+                    return rn === tn || rn.includes(tn) || tn.includes(rn);
+                  });
 
-                return (
-                  <>
-                    <div
-                      style={{
-                        padding: "10px 14px",
-                        borderBottom: "1px solid var(--proof-grey)",
-                        background: "var(--proof-blue-bg)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        flexShrink: 0,
-                      }}
-                    >
+                  return (
+                    <>
                       <div
                         style={{
+                          padding: "16px 20px",
+                          borderBottom: "1px solid var(--proof-border)",
                           display: "flex",
                           alignItems: "center",
-                          gap: 1,
-                          border: "1px solid var(--proof-grey)",
-                          borderRadius: 4,
-                          background: "var(--proof-surface)",
+                          justifyContent: "space-between",
+                          background: "var(--proof-grey-bg)",
                         }}
                       >
-                        <button
-                          disabled={selIdx <= 0}
-                          onClick={() => navigateDetail(-1)}
-                          style={{
-                            padding: "4px 7px",
-                            border: "none",
-                            background: "transparent",
-                            cursor: selIdx > 0 ? "pointer" : "not-allowed",
-                            color: selIdx > 0 ? "var(--proof-blue)" : "var(--proof-grey)",
-                          }}
-                        >
-                          <ChevronLeft size={13} />
-                        </button>
-                        <span
-                          style={{
-                            fontSize: 10,
-                            color: "var(--proof-text-secondary)",
-                            padding: "0 4px",
-                          }}
-                        >
-                          {selIdx + 1}/{filteredHistory.length}
-                        </span>
-                        <button
-                          disabled={selIdx >= filteredHistory.length - 1}
-                          onClick={() => navigateDetail(1)}
-                          style={{
-                            padding: "4px 7px",
-                            border: "none",
-                            background: "transparent",
-                            cursor: selIdx < filteredHistory.length - 1 ? "pointer" : "not-allowed",
-                            color:
-                              selIdx < filteredHistory.length - 1
-                                ? "var(--proof-blue)"
-                                : "var(--proof-grey)",
-                          }}
-                        >
-                          <ChevronRight size={13} />
-                        </button>
-                      </div>
-                      <span
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 600,
-                          color:
-                            selectedRow.status === "PASS"
-                              ? "var(--proof-green)"
-                              : "var(--proof-red)",
-                          flex: 1,
-                        }}
-                      >
-                        {selectedRow.status}
-                      </span>
-                      <button
-                        onClick={() => setSelectedRow(null)}
-                        aria-label="Close"
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                          color: "var(--proof-text-secondary)",
-                          fontSize: 18,
-                          lineHeight: 1,
-                        }}
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-
-                    <div
-                      style={{
-                        flex: 1,
-                        overflowY: "auto",
-                        padding: 14,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 12,
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 11,
-                          fontWeight: 600,
-                          lineHeight: 1.5,
-                          wordBreak: "break-all",
-                        }}
-                      >
-                        {testName}
-                      </div>
-
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                        {[
-                          {
-                            label: "Run ID",
-                            value: selectedRow.runId,
-                            mono: true,
-                            color: "var(--proof-blue)",
-                          },
-                          { label: "Environment", value: selectedRow.env, mono: false },
-                          { label: "Duration", value: `${selectedRow.duration}ms`, mono: true },
-                          {
-                            label: "Started",
-                            value: run
-                              ? new Date(run.started).toLocaleString(undefined, {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })
-                              : "\u2014",
-                            mono: false,
-                          },
-                        ].map(({ label, value, mono, color }) => (
-                          <div
-                            key={label}
-                            style={{
-                              padding: "6px 8px",
-                              borderRadius: 6,
-                              background: "var(--proof-grey-bg)",
-                              border: "1px solid var(--proof-border)",
-                            }}
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <button
+                            onClick={() => navigateDetail(-1)}
+                            disabled={selIdx <= 0}
+                            className="proof-button-ghost"
+                            style={{ padding: 4, borderRadius: 4 }}
                           >
-                            <div
-                              style={{
-                                fontSize: 9,
-                                fontWeight: 700,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.5px",
-                                color: "var(--proof-text-secondary)",
-                                marginBottom: 2,
-                              }}
-                            >
-                              {label}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: 11,
-                                fontFamily: mono ? "var(--font-mono)" : undefined,
-                                color: color ?? "var(--proof-text)",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {value}
+                            <ChevronLeft size={16} />
+                          </button>
+                          <span style={{ fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)" }}>
+                            {selectedRow.runId}
+                          </span>
+                          <button
+                            onClick={() => navigateDetail(1)}
+                            disabled={selIdx >= filteredHistory.length - 1}
+                            className="proof-button-ghost"
+                            style={{ padding: 4, borderRadius: 4 }}
+                          >
+                            <ChevronRight size={16} />
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => setSelectedRow(null)}
+                          className="proof-button-ghost"
+                          style={{ padding: 4, borderRadius: 4 }}
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      <div style={{ flex: 1, overflowY: "auto", padding: 20, display: "flex", flexDirection: "column", gap: 20 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span
+                            className={`proof-badge ${selectedRow.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
+                            style={{ fontSize: 12, padding: "4px 12px" }}
+                          >
+                            {selectedRow.status}
+                          </span>
+                          <div style={{ textAlign: "right" }}>
+                            <div style={{ fontSize: 11, color: "var(--proof-text-muted)", textTransform: "uppercase", fontWeight: 700 }}>Duration</div>
+                            <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "var(--font-mono)" }}>{selectedRow.duration}ms</div>
+                          </div>
+                        </div>
+
+                        {selectedRow.error && (
+                          <div style={{ 
+                            background: "rgba(239,68,68,0.05)", 
+                            border: "1px solid rgba(239,68,68,0.1)", 
+                            borderRadius: 12, 
+                            padding: 16 
+                          }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-red)", marginBottom: 8, textTransform: "uppercase" }}>Error Message</div>
+                            <div style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--proof-red)", wordBreak: "break-all" }}>
+                              {selectedRow.error}
                             </div>
                           </div>
-                        ))}
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          padding: "8px 10px",
-                          borderRadius: 7,
-                          background:
-                            selectedRow.status === "PASS"
-                              ? "rgba(34,197,94,0.07)"
-                              : "rgba(239,68,68,0.07)",
-                          border: `1px solid ${selectedRow.status === "PASS" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}`,
-                        }}
-                      >
-                        <span
-                          className={`proof-badge ${selectedRow.status === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-                        >
-                          {selectedRow.status}
-                        </span>
-                        {assertions.length > 0 && (
-                          <span
-                            style={{
-                              fontSize: 11,
-                              fontFamily: "var(--font-mono)",
-                              color: "var(--proof-text-secondary)",
-                              marginLeft: 4,
-                            }}
-                          >
-                            <span style={{ color: "var(--proof-green)" }}>{passed}\u2713</span>
-                            {" / "}
-                            <span
-                              style={{
-                                color:
-                                  failed > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)",
-                              }}
-                            >
-                              {failed}\u2717
-                            </span>
-                            {" assertions"}
-                          </span>
                         )}
-                        {run && (
-                          <span
-                            style={{
-                              marginLeft: "auto",
-                              fontSize: 10,
-                              fontFamily: "var(--font-mono)",
-                              color: "var(--proof-text-tertiary)",
-                              background: "var(--proof-grey-bg)",
-                              padding: "1px 5px",
-                              borderRadius: 3,
-                            }}
-                          >
-                            {run.build?.slice(0, 7)}
-                          </span>
-                        )}
-                      </div>
 
-                      {assertions.length > 0 && (
                         <div>
-                          <div
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 700,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.5px",
-                              color: "var(--proof-text-secondary)",
-                              marginBottom: 6,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 5,
-                            }}
-                          >
-                            <Bug size={11} /> Assertions ({assertions.length})
-                          </div>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                            {assertions.map((a, i) => (
-                              <div
-                                key={i}
-                                style={{
-                                  padding: "6px 8px",
-                                  borderRadius: 5,
-                                  background: a.passed
-                                    ? "rgba(34,197,94,0.05)"
-                                    : "rgba(239,68,68,0.06)",
-                                  border: `1px solid ${a.passed ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.2)"}`,
-                                  borderLeft: `3px solid ${a.passed ? "var(--proof-green)" : "var(--proof-red)"}`,
-                                }}
-                              >
+                          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-text-muted)", marginBottom: 12, textTransform: "uppercase" }}>Assertions</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            {result?.assertions && result.assertions.length > 0 ? (
+                              result.assertions.map((a, i) => (
                                 <div
+                                  key={i}
                                   style={{
-                                    fontSize: 10,
-                                    fontWeight: 600,
-                                    color: a.passed ? "var(--proof-green)" : "var(--proof-red)",
-                                    marginBottom: 3,
+                                    padding: "10px 12px",
+                                    borderRadius: 8,
+                                    fontSize: 12,
+                                    background: a.passed ? "rgba(34,197,94,0.05)" : "rgba(239,68,68,0.05)",
+                                    border: `1px solid ${a.passed ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)"}`,
                                     display: "flex",
-                                    alignItems: "center",
-                                    gap: 4,
+                                    gap: 10,
                                   }}
                                 >
-                                  {a.passed ? "\u2713" : "\u2717"} {a.assertion}
+                                  <span style={{ color: a.passed ? "var(--proof-green)" : "var(--proof-red)", fontWeight: 700 }}>
+                                    {a.passed ? "✓" : "✗"}
+                                  </span>
+                                  <span style={{ flex: 1, color: "var(--proof-text)" }}>{a.assertion}</span>
                                 </div>
-                                {!a.passed && (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      gap: 2,
-                                      fontSize: 9,
-                                      fontFamily: "var(--font-mono)",
-                                    }}
-                                  >
-                                    <div>
-                                      <span style={{ color: "var(--proof-text-secondary)" }}>
-                                        expected:{" "}
-                                      </span>
-                                      <span style={{ color: "var(--proof-green)" }}>
-                                        {a.expected}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <span style={{ color: "var(--proof-text-secondary)" }}>
-                                        actual:{" "}
-                                      </span>
-                                      <span style={{ color: "var(--proof-red)" }}>{a.actual}</span>
-                                    </div>
-                                  </div>
-                                )}
+                              ))
+                            ) : (
+                              <div style={{ fontSize: 12, color: "var(--proof-text-muted)", textAlign: "center", padding: 20 }}>
+                                No assertions recorded
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {selectedRow.error && (
-                        <div>
-                          <div
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 700,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.5px",
-                              color: "var(--proof-red)",
-                              marginBottom: 6,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 5,
-                            }}
-                          >
-                            <AlertTriangle size={11} /> Error Output
-                          </div>
-                          <pre
-                            style={{
-                              fontSize: 10,
-                              color: "var(--proof-red)",
-                              fontFamily: "var(--font-mono)",
-                              background: "rgba(239,68,68,0.06)",
-                              border: "1px solid rgba(239,68,68,0.15)",
-                              borderRadius: 6,
-                              padding: "8px 10px",
-                              whiteSpace: "pre-wrap",
-                              wordBreak: "break-all",
-                              margin: 0,
-                              lineHeight: 1.55,
-                            }}
-                          >
-                            {selectedRow.error}
-                          </pre>
-                        </div>
-                      )}
-
-                      {evidence && (
-                        <div>
-                          <div
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 700,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.5px",
-                              color: "var(--proof-text-secondary)",
-                              marginBottom: 6,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 5,
-                            }}
-                          >
-                            <Activity size={11} /> HTTP Evidence
-                          </div>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                            <div
-                              style={{
-                                padding: "5px 8px",
-                                borderRadius: 5,
-                                background: "var(--proof-grey-bg)",
-                                border: "1px solid var(--proof-border)",
-                                fontSize: 10,
-                                fontFamily: "var(--font-mono)",
-                              }}
-                            >
-                              <span style={{ color: "var(--proof-blue)", fontWeight: 600 }}>
-                                {evidence.request.method}
-                              </span>{" "}
-                              <span
-                                style={{
-                                  color: "var(--proof-text)",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                  display: "inline-block",
-                                  maxWidth: 280,
-                                }}
-                              >
-                                {evidence.request.url}
-                              </span>
-                            </div>
-                            {evidence.response.body && (
-                              <details style={{ fontSize: 10 }}>
-                                <summary
-                                  style={{
-                                    cursor: "pointer",
-                                    color: "var(--proof-text-secondary)",
-                                    padding: "3px 0",
-                                    userSelect: "none",
-                                  }}
-                                >
-                                  Response body
-                                </summary>
-                                <pre
-                                  style={{
-                                    fontFamily: "var(--font-mono)",
-                                    fontSize: 9,
-                                    color: "var(--proof-text-secondary)",
-                                    background: "var(--proof-grey-bg)",
-                                    border: "1px solid var(--proof-border)",
-                                    borderRadius: 4,
-                                    padding: "6px 8px",
-                                    whiteSpace: "pre-wrap",
-                                    wordBreak: "break-all",
-                                    margin: "4px 0 0",
-                                    lineHeight: 1.5,
-                                    maxHeight: 140,
-                                    overflow: "auto",
-                                  }}
-                                >
-                                  {evidence.response.body.length > 400
-                                    ? evidence.response.body.slice(0, 400) + "\n\u2026"
-                                    : evidence.response.body}
-                                </pre>
-                              </details>
                             )}
                           </div>
                         </div>
-                      )}
-                    </div>
 
-                    <div
-                      style={{
-                        padding: "8px 14px",
-                        borderTop: "1px solid var(--proof-grey)",
-                        display: "flex",
-                        gap: 6,
-                        flexShrink: 0,
-                      }}
-                    >
-                      <button
-                        onClick={() => navigate(`/runs/${selectedRow.runId}`)}
-                        className="proof-button proof-button-xs"
-                        style={{ flex: 1, justifyContent: "center" }}
-                      >
-                        View Full Run \u2192
-                      </button>
-                      <button
-                        onClick={() => setSelectedRow(null)}
-                        className="proof-button proof-button-xs"
-                      >
-                        Close
-                      </button>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-          )}
+                        <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 8 }}>
+                          <button
+                            onClick={() => navigate(`/run/${selectedRow.runId}?test=${selectedTestId}`)}
+                            className="proof-button"
+                            style={{ width: "100%", justifyContent: "center" }}
+                          >
+                            <BarChart3 size={14} /> Full Run Evidence
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </PageTemplate>

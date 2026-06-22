@@ -65,17 +65,20 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
   return (
     <header
       style={{
-        height: 44,
-        minHeight: 44,
+        height: 48,
+        minHeight: 48,
         background: "var(--proof-title-bar-bg)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
         display: "flex",
         alignItems: "center",
-        padding: "0 12px",
-        gap: 8,
+        padding: "0 16px",
+        gap: 12,
         flexShrink: 0,
         userSelect: "none",
         borderBottom: "1px solid var(--proof-border)",
         position: "relative",
+        zIndex: 50,
       }}
     >
       {/* Subtle top highlight */}
@@ -98,44 +101,48 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          gap: 10,
           flexShrink: 0,
           background: "transparent",
           border: "none",
           cursor: "pointer",
-          padding: "3px 6px",
+          padding: "4px 8px",
           borderRadius: 8,
-          transition: "background 120ms ease",
+          transition: "all 150ms ease",
         }}
         title="Dashboard"
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
+          const el = e.currentTarget as HTMLElement;
+          el.style.background = "var(--proof-surface-3)";
+          el.style.transform = "translateY(-1px)";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.background = "transparent";
+          const el = e.currentTarget as HTMLElement;
+          el.style.background = "transparent";
+          el.style.transform = "translateY(0)";
         }}
       >
         {/* Logo icon */}
         <span
           style={{
-            width: 24,
-            height: 24,
-            borderRadius: 7,
-            background: "linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)",
+            width: 26,
+            height: 26,
+            borderRadius: 8,
+            background: "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-blue-bright) 100%)",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 2px 8px rgba(59,130,246,0.4)",
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 4px 12px var(--proof-blue-glow)",
           }}
         >
           <svg
-            width="13"
-            height="13"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
             fill="none"
             stroke="white"
-            strokeWidth="2.5"
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
@@ -144,31 +151,36 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
         </span>
 
         <span
+          className="proof-logo-text"
           style={{
-            fontSize: 13.5,
+            fontSize: 15,
             fontWeight: 800,
-            color: "var(--proof-text)",
+            background: "linear-gradient(to right, var(--proof-text), var(--proof-text-secondary))",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
             letterSpacing: "-0.5px",
           }}
         >
-          A.W.A.R.E.
+          AWARE
         </span>
       </button>
 
       {/* Separator + breadcrumb */}
-      <span style={{ color: "var(--proof-border-strong)", fontSize: 16, fontWeight: 300, opacity: 0.4 }}>
+      <span style={{ color: "var(--proof-border-strong)", fontSize: 16, fontWeight: 300, opacity: 0.3 }}>
         /
       </span>
       <span
         style={{
-          fontSize: 12.5,
+          fontSize: 11,
           color: "var(--proof-text-secondary)",
-          fontWeight: 500,
-          letterSpacing: "-0.1px",
-          background: "var(--proof-subtle-bg)",
-          padding: "2px 8px",
-          borderRadius: 6,
-          border: "1px solid var(--proof-border-light)",
+          fontWeight: 600,
+          letterSpacing: "0.2px",
+          textTransform: "uppercase",
+          background: "var(--proof-surface-2)",
+          padding: "2px 10px",
+          borderRadius: 99,
+          border: "1px solid var(--proof-border)",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
         }}
       >
         {label}
@@ -230,12 +242,13 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 4,
-          background: "var(--proof-subtle-bg)",
+          gap: 6,
+          background: "var(--proof-surface-2)",
           border: "1px solid var(--proof-border)",
-          borderRadius: 10,
-          padding: "3px 6px",
+          borderRadius: 8,
+          padding: "2px 6px",
           height: 32,
+          boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
         }}
       >
         <EnvSelector

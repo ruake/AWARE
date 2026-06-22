@@ -145,27 +145,42 @@ export function UserBubble({ message }: BubbleProps) {
       style={{
         display: "flex",
         justifyContent: "flex-end",
-        gap: 10,
-        padding: "4px 0",
-        alignItems: "flex-end",
+        gap: 12,
+        padding: "8px 0",
+        alignItems: "flex-start",
       }}
     >
-      <div className="copilot-user-bubble">{message.content}</div>
+      <div 
+        className="copilot-user-bubble"
+        style={{
+          background: "var(--proof-blue)",
+          color: "#fff",
+          borderRadius: "18px 4px 18px 18px",
+          padding: "10px 16px",
+          fontSize: 13.5,
+          lineHeight: 1.5,
+          maxWidth: "85%",
+          boxShadow: "0 2px 8px rgba(59, 130, 246, 0.15)",
+        }}
+      >
+        {message.content}
+      </div>
       <div
         aria-label="You"
         style={{
-          width: 30,
-          height: 30,
+          width: 32,
+          height: 32,
           borderRadius: "50%",
           background: "linear-gradient(135deg, #1e3a5f, #2d4f7f)",
-          border: "2px solid rgba(59,130,246,0.25)",
+          border: "2px solid rgba(59,130,246,0.3)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
+          marginTop: 2,
         }}
       >
-        <User size={13} style={{ color: "#60a5fa" }} />
+        <User size={14} style={{ color: "#60a5fa" }} />
       </div>
     </div>
   );
@@ -281,7 +296,7 @@ function AssistantBubbleInner({ message, onRetry, providerType = "chrome" }: Bub
         {(hasContent || (isStreaming && hasToolCalls)) && (
           <div
             style={{
-              background: hasError ? "rgba(239,68,68,0.06)" : "rgba(15,31,56,0.5)",
+              background: hasError ? "rgba(239,68,68,0.06)" : "var(--proof-surface-2)",
               border: `1px solid ${hasError ? "rgba(248,113,113,0.2)" : "var(--proof-border)"}`,
               borderRadius: "4px 18px 18px 18px",
               padding: "12px 16px",
@@ -289,6 +304,7 @@ function AssistantBubbleInner({ message, onRetry, providerType = "chrome" }: Bub
               lineHeight: 1.65,
               color: "var(--proof-text)",
               backdropFilter: "blur(8px)",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
             }}
           >
             {hasContent && (

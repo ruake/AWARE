@@ -1,5 +1,6 @@
 import React from "react";
 import { Clock, Calendar, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface RunRibbonCardProps {
   label: string;
@@ -9,6 +10,7 @@ interface RunRibbonCardProps {
   accent: string;
   onClick?: () => void;
   index: number;
+  compact?: boolean;
 }
 
 export function RunRibbonCard({
@@ -19,6 +21,7 @@ export function RunRibbonCard({
   accent,
   onClick,
   index,
+  compact = false,
 }: RunRibbonCardProps) {
   const [now, setNow] = React.useState(Date.now);
   const [hovered, setHovered] = React.useState(false);
@@ -69,7 +72,7 @@ export function RunRibbonCard({
     : "var(--proof-text-muted)";
 
   return (
-    <div
+    <motion.div
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
@@ -86,25 +89,29 @@ export function RunRibbonCard({
       }
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.35, delay: (index * 60) / 1000 }}
+      whileHover={{ 
+        x: 4,
+        background: `linear-gradient(90deg, ${accent}12, var(--proof-surface-2))`,
+        transition: { duration: 0.2 }
+      }}
+      whileTap={{ scale: 0.98 }}
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 12,
-        padding: "12px 16px",
+        gap: compact ? 10 : 12,
+        padding: compact ? "10px 12px" : "14px 18px",
         borderRadius: 16,
-        background: hovered
-          ? `linear-gradient(90deg, ${accent}10, var(--proof-surface-2))`
-          : `linear-gradient(90deg, ${accent}08, var(--proof-surface))`,
-        border: `1px solid ${hovered ? accent + "30" : "var(--proof-border)"}`,
-        borderLeft: `3px solid ${accent}`,
+        background: `linear-gradient(90deg, ${accent}08, var(--proof-surface))`,
+        border: `1px solid var(--proof-border)`,
+        borderLeft: `4px solid ${accent}`,
         cursor: onClick ? "pointer" : "default",
-        transition: "all 160ms cubic-bezier(0.2,0,0,1)",
         boxShadow: hovered
-          ? `0 0 0 1px ${accent}20, 0 8px 24px rgba(0,0,0,0.5), 0 0 24px ${accent}10`
-          : "0 0 0 1px rgba(99,130,178,0.08), 0 2px 8px rgba(0,0,0,0.3)",
-        transform: hovered ? "translateY(-2px)" : "none",
+          ? `0 8px 24px rgba(0,0,0,0.5), 0 0 24px ${accent}10, 0 0 0 1px ${accent}20`
+          : "0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(99,130,178,0.08)",
         minWidth: 0,
-        animation: `card-enter 0.35s cubic-bezier(0.2,0,0,1) ${index * 60}ms both`,
         position: "relative",
         overflow: "hidden",
       }}
@@ -113,59 +120,65 @@ export function RunRibbonCard({
       <div
         style={{
           flexShrink: 0,
-          width: 36,
-          height: 36,
+          width: compact ? 32 : 38,
+          height: compact ? 32 : 38,
           borderRadius: 10,
           background: `linear-gradient(135deg, ${accent}24, ${accent}10)`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           border: `1px solid ${accent}30`,
-          boxShadow: `0 0 12px ${accent}18`,
+          boxShadow: `0 0 12px ${accent}14`,
         }}
       >
-        {icon}
+        {React.isValidElement(icon)
+          ? React.cloneElement(
+              icon as React.ReactElement<{ size?: number; style?: React.CSSProperties }>,
+              { size: compact ? 14 : 18, style: { color: accent } },
+            )
+          : icon}
       </div>
 
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontSize: 11,
-            fontWeight: 700,
+            fontSize: 10,
+            fontWeight: 800,
             color: "var(--proof-text-secondary)",
             textTransform: "uppercase",
-            letterSpacing: "0.5px",
-            marginBottom: 3,
+            letterSpacing: "0.8px",
+            marginBottom: 2,
           }}
         >
           {label}
         </div>
         <div
           style={{
-            fontSize: 12.5,
+            fontSize: compact ? 12 : 13,
             fontWeight: 700,
             color: "var(--proof-text)",
             fontFamily: "var(--font-mono)",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            letterSpacing: "-0.3px",
+            letterSpacing: "-0.4px",
           }}
         >
           {run?.id ?? (nextDue ? "Scheduled" : "—")}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
           {run ? (
             <>
               <span
                 style={{
                   fontSize: 10,
                   color: "var(--proof-text-muted)",
-                  background: "var(--proof-subtle-bg)",
+                  background: "var(--proof-surface-2)",
                   border: "1px solid var(--proof-border-light)",
-                  borderRadius: 5,
-                  padding: "1px 5px",
+                  borderRadius: 4,
+                  padding: "1px 6px",
+                  fontWeight: 600,
                 }}
               >
                 {run.env}
@@ -176,10 +189,10 @@ export function RunRibbonCard({
                   fontWeight: 800,
                   color: passColor,
                   fontFamily: "var(--font-mono)",
-                  background: `${passColor}14`,
-                  border: `1px solid ${passColor}25`,
-                  borderRadius: 5,
-                  padding: "1px 5px",
+                  background: `${passColor}12`,
+                  border: `1px solid ${passColor}20`,
+                  borderRadius: 4,
+                  padding: "1px 6px",
                   letterSpacing: "-0.3px",
                 }}
               >
@@ -191,13 +204,13 @@ export function RunRibbonCard({
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 3,
+                gap: 4,
                 fontSize: 10,
                 color: accent,
-                fontWeight: 600,
+                fontWeight: 700,
               }}
             >
-              <Calendar size={9} />
+              <Calendar size={10} strokeWidth={2.5} />
               {new Date(nextDue).getTime() > Date.now() ? "Scheduled" : "Queued"}
             </span>
           ) : null}
@@ -206,12 +219,13 @@ export function RunRibbonCard({
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 3,
+              gap: 4,
               fontSize: 10,
               color: "var(--proof-text-muted)",
+              fontWeight: 500,
             }}
           >
-            <Clock size={9} />
+            <Clock size={10} />
             {age}
           </span>
         </div>
@@ -220,16 +234,16 @@ export function RunRibbonCard({
       {/* Hover arrow */}
       {onClick && (
         <ArrowRight
-          size={14}
+          size={16}
           style={{
             color: accent,
-            opacity: hovered ? 0.8 : 0,
+            opacity: hovered ? 1 : 0,
             transition: "opacity 160ms ease, transform 160ms ease",
-            transform: hovered ? "translateX(0)" : "translateX(-4px)",
+            transform: hovered ? "translateX(0)" : "translateX(-8px)",
             flexShrink: 0,
           }}
         />
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -198,17 +198,64 @@ function DataGate({ children }: { children: React.ReactNode }) {
           justifyContent: "center",
           minHeight: "100vh",
           flexDirection: "column",
-          gap: 12,
+          gap: 24,
           background: "var(--proof-bg)",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <Loader2
-          size={28}
-          style={{ color: "var(--proof-blue)", animation: "spin 1s linear infinite" }}
+        {/* Animated background glow */}
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            height: 400,
+            background: "radial-gradient(circle, var(--proof-blue-glow) 0%, transparent 70%)",
+            opacity: 0.15,
+            pointerEvents: "none",
+          }}
         />
-        <span style={{ fontSize: 13, color: "var(--proof-text-secondary)", fontWeight: 500 }}>
-          Loading A.W.A.R.E. data…
-        </span>
+
+        <div style={{ position: "relative" }}>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 16,
+              background: "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-blue-bright) 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 8px 32px var(--proof-blue-glow)",
+              animation: "pulse-dot 2s ease-in-out infinite",
+            }}
+          >
+            <Loader2
+              size={32}
+              style={{ color: "white", animation: "spin 1.5s linear infinite" }}
+            />
+          </div>
+        </div>
+
+        <div style={{ textAlign: "center", zIndex: 1 }}>
+          <h2
+            style={{
+              fontSize: 17,
+              fontWeight: 800,
+              color: "var(--proof-text)",
+              margin: "0 0 4px",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            AWARE
+          </h2>
+          <span style={{ fontSize: 13, color: "var(--proof-text-secondary)", fontWeight: 500 }}>
+            Initializing command center…
+          </span>
+        </div>
       </div>
     );
   }

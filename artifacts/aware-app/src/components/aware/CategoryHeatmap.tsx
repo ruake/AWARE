@@ -65,14 +65,14 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
   }
 
   const cellColor = (status: "PASS" | "FAIL" | "NONE") => {
-    if (status === "PASS") return "var(--proof-green-bg)";
-    if (status === "FAIL") return "var(--proof-red-bg)";
-    return "var(--proof-grey-bg)";
+    if (status === "PASS") return "rgba(16, 185, 129, 0.1)";
+    if (status === "FAIL") return "rgba(239, 68, 68, 0.1)";
+    return "var(--proof-surface-3)";
   };
 
   const borderColor = (status: "PASS" | "FAIL" | "NONE") => {
-    if (status === "PASS") return "var(--proof-green-border)";
-    if (status === "FAIL") return "var(--proof-red-border)";
+    if (status === "PASS") return "rgba(16, 185, 129, 0.2)";
+    if (status === "FAIL") return "rgba(239, 68, 68, 0.2)";
     return "var(--proof-border)";
   };
 
@@ -83,37 +83,37 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
   };
 
   return (
-    <div className="proof-card" style={{ overflow: "hidden" }}>
+    <div className="proof-card" style={{ overflow: "hidden", borderRadius: "16px" }}>
       <div
         style={{
-          padding: "10px 14px",
-          borderBottom: "1px solid var(--proof-grey)",
-          background: "var(--proof-grey-bg)",
+          padding: "12px 16px",
+          borderBottom: "1px solid var(--proof-border)",
+          background: "var(--proof-surface-2)",
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          gap: 10,
         }}
       >
-        <Grid3x3 size={14} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>
+        <Grid3x3 size={16} style={{ color: "var(--proof-blue)" }} />
+        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>
           Environment Heatmap
         </span>
-        <span style={{ fontSize: 11, color: "var(--proof-text-secondary)", marginLeft: "auto" }}>
-          {grid.length} environments
+        <span style={{ fontSize: 11, color: "var(--proof-text-muted)", marginLeft: "auto", fontWeight: 600 }}>
+          {grid.length} ENVIRONMENTS
         </span>
       </div>
 
-      <div style={{ padding: "12px 14px", overflowX: "auto" }}>
+      <div style={{ padding: "16px", overflowX: "auto", background: "var(--proof-surface-1)" }}>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: `120px repeat(${Math.max(...grid.map((g) => g.cells.length), 1)}, 72px)`,
-            gap: 3,
+            gridTemplateColumns: `140px repeat(${Math.max(...grid.map((g) => g.cells.length), 1)}, 80px)`,
+            gap: 6,
             fontSize: 11,
           }}
         >
           <div
-            style={{ fontWeight: 600, color: "var(--proof-text-secondary)", padding: "4px 6px" }}
+            style={{ fontWeight: 700, color: "var(--proof-text-muted)", padding: "4px 8px", textTransform: "uppercase", letterSpacing: "0.5px" }}
           >
             Environment
           </div>
@@ -121,11 +121,13 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
             <div
               key={cell.label}
               style={{
-                fontWeight: 600,
-                color: "var(--proof-text-secondary)",
+                fontWeight: 700,
+                color: "var(--proof-text-muted)",
                 textAlign: "center",
-                padding: "4px 6px",
+                padding: "4px 8px",
                 fontSize: 10,
+                textTransform: "uppercase",
+                letterSpacing: "0.5px"
               }}
             >
               {cell.label}
@@ -136,12 +138,15 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
             <React.Fragment key={group.label}>
               <div
                 style={{
-                  padding: "6px 8px",
+                  padding: "8px 12px",
                   fontWeight: 600,
                   color: "var(--proof-text)",
                   display: "flex",
                   alignItems: "center",
-                  fontSize: 11,
+                  fontSize: 12,
+                  background: "var(--proof-surface-2)",
+                  borderRadius: "8px 0 0 8px",
+                  borderLeft: "3px solid var(--proof-blue)"
                 }}
               >
                 {group.label}
@@ -150,15 +155,27 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
                 <div
                   key={cell.label}
                   style={{
-                    padding: "6px 8px",
-                    borderRadius: 5,
+                    padding: "8px 12px",
                     background: cellColor(cell.status),
                     border: `1px solid ${borderColor(cell.status)}`,
                     textAlign: "center",
-                    fontWeight: 600,
-                    fontFamily: cell.label === "Rate" ? "var(--font-mono)" : undefined,
+                    fontWeight: 700,
+                    fontFamily: "var(--font-mono)",
                     color: textColor(cell.status),
-                    fontSize: cell.label === "Rate" ? 13 : 11,
+                    fontSize: cell.label === "Rate" ? 14 : 12,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "transform 0.2s",
+                    cursor: "default"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "scale(1.05)";
+                    e.currentTarget.style.zIndex = "1";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.zIndex = "0";
                   }}
                 >
                   {cell.label === "Rate" ? `${cell.count}%` : cell.count}

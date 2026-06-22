@@ -18,14 +18,15 @@ export function DiffRowItem({
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr 1fr",
-        gap: 4,
-        padding: "3px 0",
-        borderBottom: "1px solid rgba(255,255,255,0.03)",
-        background: changed ? "rgba(239,68,68,0.04)" : "transparent",
-        borderRadius: changed ? 3 : 0,
-        fontSize: 10,
+        gap: 12,
+        padding: "6px 8px",
+        borderBottom: "1px solid var(--proof-border)",
+        background: changed ? (label.toLowerCase().includes('fail') || label.toLowerCase().includes('error') ? "rgba(239,68,68,0.06)" : "rgba(59,130,246,0.06)") : "transparent",
+        borderRadius: changed ? 6 : 0,
+        fontSize: 11,
         fontFamily: "var(--font-mono)",
-        marginLeft: indent ? 8 : 0,
+        marginLeft: indent ? 12 : 0,
+        transition: "background 0.2s ease",
       }}
     >
       <span
@@ -34,7 +35,7 @@ export function DiffRowItem({
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
-          fontWeight: changed ? 600 : 400,
+          fontWeight: changed ? 700 : 500,
         }}
       >
         {label}
@@ -45,16 +46,18 @@ export function DiffRowItem({
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
+          opacity: changed ? 1 : 0.8,
         }}
       >
         {base}
       </span>
       <span
         style={{
-          color: changed ? "var(--proof-red)" : "var(--proof-text)",
+          color: changed ? "var(--proof-green)" : "var(--proof-text)",
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
+          fontWeight: changed ? 600 : 400,
         }}
       >
         {cand}

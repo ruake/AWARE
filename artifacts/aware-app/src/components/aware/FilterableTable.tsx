@@ -90,17 +90,13 @@ export function FilterableTable({
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, height }}>
-      {title && (
-        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text-secondary)" }}>
-          {title}
-        </div>
-      )}
+    <div className="proof-stack" style={{ gap: 12, height }}>
+      {title && <div className="proof-section-title">{title}</div>}
       {/* Filters row */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+      <div className="proof-filter-bar" style={{ padding: "8px 12px" }}>
         <input
           className="proof-input"
-          style={{ width: 200, fontSize: 11, padding: "4px 8px" }}
+          style={{ width: 220, height: 32 }}
           placeholder={searchPlaceholder}
           value={globalSearch}
           onChange={(e) => setGlobalSearch(e.target.value)}
@@ -110,8 +106,8 @@ export function FilterableTable({
           .map((col) => (
             <select
               key={col.field}
-              className="proof-input"
-              style={{ fontSize: 11, padding: "4px 8px", width: "auto" }}
+              className="proof-select"
+              style={{ height: 32, width: "auto" }}
               value={filters[col.field] || ""}
               onChange={(e) => setFilters((f) => ({ ...f, [col.field]: e.target.value }))}
             >
@@ -125,14 +121,9 @@ export function FilterableTable({
           ))}
         {Object.keys(filters).some((k) => filters[k]) && (
           <button
+            className="proof-button-xs"
             onClick={() => setFilters({})}
-            style={{
-              fontSize: 11,
-              color: "var(--proof-red)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-            }}
+            style={{ color: "var(--proof-red)" }}
           >
             Clear filters
           </button>
@@ -140,39 +131,32 @@ export function FilterableTable({
       </div>
       {/* HTML table with sort */}
       <div
+        className="proof-card"
         style={{
           flex: 1,
           overflow: "auto",
-          borderRadius: 8,
-          border: "1px solid var(--proof-border)",
+          padding: 0,
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+        <table className="proof-table" style={{ fontSize: 13 }}>
           <thead>
-            <tr
-              style={{
-                background: "var(--proof-grey-bg)",
-                fontWeight: 600,
-                position: "sticky",
-                top: 0,
-              }}
-            >
+            <tr className="proof-tr">
               {columns.map((col, i) => (
                 <th
                   key={col.field}
+                  className="proof-th"
                   onClick={() => toggleSort(i)}
                   style={{
-                    padding: "6px 10px",
-                    textAlign: "left",
                     cursor: "pointer",
-                    whiteSpace: "nowrap",
-                    borderBottom: "1px solid var(--proof-border)",
-                    color: "var(--proof-text)",
                     userSelect: "none",
                   }}
                 >
-                  {col.label}
-                  {sortCol === i ? (sortAsc ? " \u25B2" : " \u25BC") : ""}
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    {col.label}
+                    <span style={{ fontSize: 10, opacity: sortCol === i ? 1 : 0.3 }}>
+                      {sortCol === i ? (sortAsc ? "▲" : "▼") : "↕"}
+                    </span>
+                  </div>
                 </th>
               ))}
             </tr>
@@ -180,14 +164,7 @@ export function FilterableTable({
           <tbody>
             {pagedRows.length === 0 ? (
               <tr>
-                <td
-                  colSpan={columns.length}
-                  style={{
-                    textAlign: "center",
-                    padding: 20,
-                    color: "var(--proof-text-muted)",
-                  }}
-                >
+                <td colSpan={columns.length} className="proof-empty-state" style={{ padding: 48 }}>
                   No matching rows
                 </td>
               </tr>
@@ -195,23 +172,16 @@ export function FilterableTable({
               pagedRows.map((row, ri) => (
                 <tr
                   key={ri}
+                  className="proof-tr"
                   onClick={() => onRowClick?.(row)}
                   style={{
-                    background: ri % 2 === 0 ? "transparent" : "var(--proof-grey-bg)",
                     cursor: onRowClick ? "pointer" : undefined,
                   }}
                 >
                   {columns.map((col) => {
                     const val = row[col.field];
                     return (
-                      <td
-                        key={col.field}
-                        style={{
-                          padding: "4px 10px",
-                          borderBottom: "1px solid var(--proof-border)",
-                          color: "var(--proof-text)",
-                        }}
-                      >
+                      <td key={col.field} className="proof-td">
                         {col.format ? col.format(val) : String(val ?? "")}
                       </td>
                     );
@@ -224,43 +194,25 @@ export function FilterableTable({
       </div>
       {/* Pagination */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 10, color: "var(--proof-text-secondary)" }}>
+        <span className="proof-meta">
           Showing {pagedRows.length} of {sortedRows.length} rows
         </span>
         {totalPages > 1 && (
-          <div style={{ display: "flex", gap: 4 }}>
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
             <button
+              className="proof-button-xs"
               disabled={page <= 0}
               onClick={() => setPage((p) => Math.max(0, p - 1))}
-              style={{
-                padding: "2px 8px",
-                fontSize: 10,
-                borderRadius: 4,
-                border: "1px solid var(--proof-border)",
-                background: "var(--proof-grey-bg)",
-                cursor: page <= 0 ? "default" : "pointer",
-                opacity: page <= 0 ? 0.4 : 1,
-              }}
             >
               Prev
             </button>
-            <span
-              style={{ fontSize: 10, padding: "2px 6px", color: "var(--proof-text-secondary)" }}
-            >
+            <span className="proof-meta">
               {page + 1} / {totalPages}
             </span>
             <button
+              className="proof-button-xs"
               disabled={page >= totalPages - 1}
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-              style={{
-                padding: "2px 8px",
-                fontSize: 10,
-                borderRadius: 4,
-                border: "1px solid var(--proof-border)",
-                background: "var(--proof-grey-bg)",
-                cursor: page >= totalPages - 1 ? "default" : "pointer",
-                opacity: page >= totalPages - 1 ? 0.4 : 1,
-              }}
             >
               Next
             </button>

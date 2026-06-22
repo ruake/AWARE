@@ -197,27 +197,29 @@ export default function Tests() {
         </div>
       }
       filters={
-        <TestFilters
-          search={search}
-          onSearchChange={setSearch}
-          testType={testType}
-          onTestTypeChange={setTestType}
-          category={category}
-          onCategoryChange={setCategory}
-          status={status}
-          onStatusChange={setStatus}
-          priority={priority}
-          onPriorityChange={setPriority}
-          suiteFilter={suiteFilter}
-          selectedSuite={selectedSuite}
-          onClearSuite={() => navigate("/tests")}
-          typeCounts={typeCounts}
-          categoryCounts={categoryCounts}
-          statusCounts={statusCounts}
-          priorityCounts={priorityCounts}
-          filteredCount={filtered.length}
-          totalCount={allTests.length}
-        />
+        <div className="proof-stack">
+          <TestFilters
+            search={search}
+            onSearchChange={setSearch}
+            testType={testType}
+            onTestTypeChange={setTestType}
+            category={category}
+            onCategoryChange={setCategory}
+            status={status}
+            onStatusChange={setStatus}
+            priority={priority}
+            onPriorityChange={setPriority}
+            suiteFilter={suiteFilter}
+            selectedSuite={selectedSuite}
+            onClearSuite={() => navigate("/tests")}
+            typeCounts={typeCounts}
+            categoryCounts={categoryCounts}
+            statusCounts={statusCounts}
+            priorityCounts={priorityCounts}
+            filteredCount={filtered.length}
+            totalCount={allTests.length}
+          />
+        </div>
       }
       sidePanel={
         selectedTest ? (

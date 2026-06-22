@@ -166,6 +166,13 @@
   --proof-transition-slow: 250ms cubic-bezier(0.2, 0, 0, 1);
   --proof-transition-fast: 70ms cubic-bezier(0.2, 0, 0, 1);
 
+  /* ── Framer Motion Animations ────────────────────────────── */
+  --animate-page-enter: page-enter 0.4s cubic-bezier(0.2, 0, 0, 1) forwards;
+  --animate-card-enter: card-enter 0.5s cubic-bezier(0.2, 0, 0, 1) forwards;
+  --animate-slide-up: slide-up 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
+  --animate-fade-in: fade-in 0.3s ease-out forwards;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+
   /* ── Alias shims (backward compat) ──────────────────────── */
   --proof-grey: rgba(99, 130, 178, 0.24);
   --proof-grey-bg: rgba(99, 130, 178, 0.06);
@@ -336,21 +343,148 @@ a:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-page-enter {
+  animation: var(--animate-page-enter);
+}
+.animate-card-enter {
+  animation: var(--animate-card-enter);
+}
+.animate-slide-up {
+  animation: var(--animate-slide-up);
+}
+.animate-fade-in {
+  animation: var(--animate-fade-in);
+}
+.animate-pulse-dot {
+  animation: var(--animate-pulse-dot);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    SCROLLBAR
    ═══════════════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--proof-border-strong);
-  border-radius: 99px;
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--proof-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════ */
+.proof-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.proof-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.proof-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--proof-text-muted);
+  background: var(--proof-subtle-bg015);
+  border: 1px dashed var(--proof-border);
+  border-radius: var(--proof-radius-lg);
+}
+
+.proof-empty-state-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.proof-empty-state-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--proof-text-secondary);
+  margin-bottom: 8px;
+}
+
+.proof-empty-state-description {
+  font-size: 13px;
+  max-width: 320px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -400,6 +534,83 @@ a:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   INPUTS + SELECTS
+   ═══════════════════════════════════════════════════════════════════ */
+.proof-input,
+.proof-select {
+  background: var(--proof-surface-2);
+  border: 1px solid var(--proof-border);
+  border-radius: var(--proof-radius);
+  color: var(--proof-text);
+  padding: 6px 12px;
+  font-size: 13px;
+  transition: all var(--proof-transition);
+  outline: none;
+}
+
+.proof-input:focus,
+.proof-select:focus {
+  border-color: var(--proof-border-focus);
+  box-shadow: 0 0 0 3px var(--proof-blue-bg);
+  background: var(--proof-surface-3);
+}
+
+.proof-input::placeholder {
+  color: var(--proof-text-muted);
+}
+
+.proof-select {
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234e6285' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TABLES
+   ═══════════════════════════════════════════════════════════════════ */
+.proof-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.proof-tr {
+  transition: background var(--proof-transition);
+}
+
+.proof-tr:hover {
+  background: var(--proof-hover-light);
+}
+
+.proof-th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--proof-text-muted);
+  border-bottom: 1px solid var(--proof-border);
+  background: var(--proof-surface-2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.proof-td {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--proof-text-secondary);
+  border-bottom: 1px solid var(--proof-border-light);
+}
+
+.proof-tr:last-child .proof-td {
+  border-bottom: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    CARDS + SECTION CARDS
    ═══════════════════════════════════════════════════════════════════ */
 .proof-card {
@@ -417,11 +628,13 @@ a:hover {
   overflow: hidden;
   transition:
     border-color var(--proof-transition),
-    box-shadow var(--proof-transition);
+    box-shadow var(--proof-transition),
+    transform var(--proof-transition);
 }
 .proof-section-card:hover {
   border-color: var(--proof-border-strong);
   box-shadow: var(--proof-shadow-card-hover);
+  transform: translateY(-2px);
 }
 
 .proof-section-card-header {
@@ -460,55 +673,57 @@ a:hover {
 .proof-button-primary {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 13px;
-  font-size: 12.5px;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
   font-weight: 600;
   font-family: var(--font-sans);
   color: #fff;
   background: var(--proof-blue);
-  border: 1px solid transparent;
-  border-radius: var(--proof-radius);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   cursor: pointer;
-  transition:
-    background var(--proof-transition),
-    box-shadow var(--proof-transition),
-    transform var(--proof-transition);
-  line-height: 1.4;
+  transition: all var(--proof-transition);
+  line-height: 1;
   white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 .proof-button-primary:hover {
   background: var(--proof-blue-hover);
-  box-shadow: 0 0 0 3px var(--proof-blue-bg);
+  box-shadow: 0 4px 12px var(--proof-blue-bg-strong);
+  transform: translateY(-1px);
 }
 .proof-button-primary:active {
-  transform: translateY(1px) scale(0.98);
+  transform: translateY(0) scale(0.98);
 }
 
 .proof-button {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 11px;
-  font-size: 12px;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
   font-weight: 500;
   font-family: var(--font-sans);
   color: var(--proof-text-secondary);
   background: var(--proof-surface-2);
   border: 1px solid var(--proof-border);
-  border-radius: var(--proof-radius);
+  border-radius: 8px;
   cursor: pointer;
   transition: all var(--proof-transition);
-  line-height: 1.4;
+  line-height: 1;
   white-space: nowrap;
 }
 .proof-button:hover {
   background: var(--proof-surface-3);
   border-color: var(--proof-border-strong);
   color: var(--proof-text);
+  transform: translateY(-1px);
 }
 .proof-button:active {
-  transform: translateY(1px);
+  transform: translateY(0);
   background: var(--proof-surface-active);
 }
 

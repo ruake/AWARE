@@ -2,6 +2,7 @@ import React from "react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { SparkLine } from "./SparkLine";
 import { useCountUp } from "@/hooks/useCountUp";
+import { motion } from "framer-motion";
 
 interface HeroKpiCardProps {
   label: string;
@@ -35,8 +36,6 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
   const animatedValue = useCountUp(value, 700, delay);
   const displayValue = value !== undefined && value !== null ? animatedValue : "—";
   const displayDelta = delta !== undefined && delta !== null ? delta : 0;
-  const [hovered, setHovered] = React.useState(false);
-  const [pressed, setPressed] = React.useState(false);
 
   const deltaIsGood = invertDelta ? displayDelta < 0 : displayDelta > 0;
   const deltaColor =
@@ -47,18 +46,8 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
         : "var(--proof-red)";
   const DeltaIcon = displayDelta > 0 ? TrendingUp : displayDelta < 0 ? TrendingDown : Minus;
 
-  const boxShadow = hovered
-    ? `0 0 0 1px ${accentColor}40, 0 8px 32px rgba(0,0,0,0.55), 0 0 48px ${accentColor}12`
-    : `0 0 0 1px rgba(99,130,178,0.12), 0 2px 12px rgba(0,0,0,0.4)`;
-
-  const transform = pressed
-    ? "translateY(1px) scale(0.978)"
-    : hovered
-      ? "translateY(-3px) scale(1.01)"
-      : "none";
-
   return (
-    <div
+    <motion.div
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
@@ -73,30 +62,27 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
             }
           : undefined
       }
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => {
-        setHovered(false);
-        setPressed(false);
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: delay / 1000, ease: [0.2, 0, 0, 1] }}
+      whileHover={{ 
+        y: -4,
+        scale: 1.01,
+        transition: { duration: 0.2 }
       }}
-      onMouseDown={() => setPressed(true)}
-      onMouseUp={() => setPressed(false)}
+      whileTap={{ scale: 0.98 }}
       style={{
         background: `linear-gradient(145deg, var(--proof-surface) 0%, ${accentColor}08 100%)`,
-        border: `1px solid ${hovered ? accentColor + "38" : "var(--proof-border)"}`,
-        borderRadius: 20,
-        padding: "18px 20px 16px",
+        border: `1px solid var(--proof-border)`,
+        borderRadius: 16,
+        padding: "20px",
         cursor: onClick ? "pointer" : "default",
-        transition: "all 180ms cubic-bezier(0.2,0,0,1)",
-        boxShadow: hovered
-          ? `0 0 0 1px ${accentColor}40, 0 8px 32px rgba(0,0,0,0.55), 0 0 48px ${accentColor}12`
-          : `0 0 0 1px rgba(99,130,178,0.12), 0 2px 12px rgba(0,0,0,0.4)`,
-        transform,
         position: "relative",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         gap: 8,
-        animation: `card-enter 0.4s cubic-bezier(0.2,0,0,1) ${delay}ms both`,
+        boxShadow: "0 2px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(99,130,178,0.12)",
       }}
     >
       {/* Top gradient stripe */}
@@ -108,9 +94,8 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
           right: 0,
           height: 3,
           background: `linear-gradient(90deg, ${accentColor} 0%, ${accentColor}60 50%, transparent 100%)`,
-          borderRadius: "20px 20px 0 0",
-          opacity: hovered ? 1 : 0.7,
-          transition: "opacity 180ms ease",
+          borderRadius: "16px 16px 0 0",
+          opacity: 0.8,
         }}
       />
 
@@ -123,57 +108,42 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
           width: 120,
           height: 120,
           borderRadius: "50%",
-          background: `radial-gradient(circle, ${accentColor}22 0%, transparent 70%)`,
-          pointerEvents: "none",
-          transition: "opacity 180ms ease",
-          opacity: hovered ? 1.4 : 1,
-        }}
-      />
-
-      {/* Bottom-left subtle wash */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          width: 80,
-          height: 60,
-          background: `radial-gradient(ellipse at 0% 100%, ${accentColor}10 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${accentColor}18 0%, transparent 70%)`,
           pointerEvents: "none",
         }}
       />
 
       {/* Label + icon row */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", zIndex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div
             style={{
-              width: 26,
-              height: 26,
+              width: 28,
+              height: 28,
               borderRadius: 8,
-              background: `linear-gradient(135deg, ${accentColor}28 0%, ${accentColor}14 100%)`,
-              border: `1px solid ${accentColor}35`,
+              background: `linear-gradient(135deg, ${accentColor}24 0%, ${accentColor}10 100%)`,
+              border: `1px solid ${accentColor}30`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
-              boxShadow: `0 0 12px ${accentColor}18`,
+              boxShadow: `0 0 12px ${accentColor}14`,
             }}
           >
             {React.isValidElement(icon)
               ? React.cloneElement(
                   icon as React.ReactElement<{ size?: number; style?: React.CSSProperties }>,
-                  { size: 13, style: { color: accentColor } },
+                  { size: 14, style: { color: accentColor } },
                 )
               : icon}
           </div>
           <span
             style={{
-              fontSize: 10.5,
+              fontSize: 11,
               fontWeight: 700,
               color: "var(--proof-text-secondary)",
               textTransform: "uppercase",
-              letterSpacing: "0.7px",
+              letterSpacing: "0.8px",
             }}
           >
             {label}
@@ -182,30 +152,11 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
 
         {/* Sparkline — top-right */}
         {sparkData.length >= 1 && sparkData.some(v => v !== 0) ? (
-          <div style={{ position: 'relative' }}>
-            <SparkLine data={sparkData} color={accentColor} width={64} height={20} />
-            {hovered && (
-              <div style={{
-                position: 'absolute',
-                top: -18,
-                right: 0,
-                fontSize: 9,
-                fontWeight: 700,
-                color: accentColor,
-                background: 'var(--proof-surface-3)',
-                padding: '1px 4px',
-                borderRadius: 3,
-                border: `1px solid ${accentColor}40`,
-                pointerEvents: 'none',
-                zIndex: 10,
-                boxShadow: 'var(--proof-shadow-md)'
-              }}>
-                {sparkData[sparkData.length - 1]}{sparkData.every(v => v <= 100) ? '%' : ''}
-              </div>
-            )}
+          <div style={{ position: 'relative', marginTop: -2 }}>
+            <SparkLine data={sparkData} color={accentColor} width={70} height={24} strokeWidth={2} />
           </div>
         ) : sparkData.length >= 1 ? (
-          <div style={{ width: 64, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3 }}>
+          <div style={{ width: 70, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2 }}>
             <div style={{ width: '100%', height: 1, borderTop: '1px dashed var(--proof-text-muted)' }} />
           </div>
         ) : null}
@@ -219,18 +170,19 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
           gap: 4,
           position: "relative",
           lineHeight: 1,
+          marginTop: 4,
+          zIndex: 1,
         }}
       >
         <span
           style={{
-            fontSize: 52,
+            fontSize: 48,
             fontWeight: 800,
             fontFamily: "var(--font-mono)",
-            letterSpacing: "-3px",
-            color: accentColor,
-            textShadow: `0 0 40px ${accentColor}40`,
+            letterSpacing: "-2.5px",
+            color: "var(--proof-text)",
+            textShadow: `0 0 30px ${accentColor}30`,
             lineHeight: 1,
-            transition: "text-shadow 180ms ease",
           }}
         >
           {displayValue}
@@ -238,30 +190,16 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
         {value !== undefined && value !== null && suffix && (
           <span
             style={{
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: 700,
-              color: accentColor,
-              opacity: 0.7,
-              letterSpacing: "-1px",
-              marginBottom: 4,
+              color: "var(--proof-text-secondary)",
+              opacity: 0.8,
+              letterSpacing: "-0.5px",
+              marginLeft: 2,
             }}
           >
             {suffix}
           </span>
-        )}
-        {subtitle && (
-          <div
-            style={{
-              fontSize: 11,
-              color: "var(--proof-text-muted)",
-              position: "absolute",
-              bottom: -14,
-              left: 0,
-              fontWeight: 500,
-            }}
-          >
-            {subtitle}
-          </div>
         )}
       </div>
 
@@ -270,34 +208,51 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 6,
+          gap: 8,
           position: "relative",
+          marginTop: 2,
+          zIndex: 1,
         }}
       >
         <span
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: 3,
-            fontSize: 11.5,
-            fontWeight: 600,
+            gap: 4,
+            fontSize: 11,
+            fontWeight: 700,
             color: deltaColor,
-            background: `${deltaColor}14`,
-            border: `1px solid ${deltaColor}25`,
-            borderRadius: 6,
-            padding: "2px 7px",
+            background: `${deltaColor}12`,
+            border: `1px solid ${deltaColor}20`,
+            borderRadius: 99,
+            padding: "2px 8px",
+            boxShadow: `0 2px 4px rgba(0,0,0,0.1)`,
           }}
           aria-label={`${displayDelta > 0 ? "Increased by" : displayDelta < 0 ? "Decreased by" : "No change"} ${Math.abs(displayDelta)}${suffix ? "%" : ""} ${deltaLabel}`}
         >
-          <DeltaIcon size={11} aria-hidden="true" />
+          <DeltaIcon size={12} strokeWidth={2.5} aria-hidden="true" />
           {displayDelta > 0 ? "+" : ""}
           {displayDelta}
           {suffix ? "%" : ""}
         </span>
-        <span style={{ fontSize: 10.5, color: "var(--proof-text-muted)", fontWeight: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
-          {deltaLabel && deltaLabel.length > 16 ? deltaLabel.substring(0, 16) + "..." : deltaLabel}
+        <span style={{ fontSize: 11, color: "var(--proof-text-muted)", fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+          {deltaLabel}
         </span>
       </div>
-    </div>
+      
+      {subtitle && (
+        <div
+          style={{
+            fontSize: 11,
+            color: "var(--proof-text-muted)",
+            marginTop: 4,
+            fontWeight: 400,
+            zIndex: 1,
+          }}
+        >
+          {subtitle}
+        </div>
+      )}
+    </motion.div>
   );
 });

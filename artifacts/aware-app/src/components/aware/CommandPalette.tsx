@@ -5,6 +5,8 @@ import { getTestCases, getTestSuites, RUNS, DIFF_ROWS } from "@/lib/data";
 import { CommandSearch } from "./CommandSearch";
 import { CommandResults } from "./CommandResults";
 
+import { motion, AnimatePresence } from "framer-motion";
+
 export type SearchResult = {
   id: string;
   label: string;
@@ -291,51 +293,58 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
   });
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        paddingTop: "12vh",
-        background: "var(--proof-overlay-dark)",
-      }}
-      onClick={onClose}
-    >
+    <AnimatePresence>
       <div
         style={{
-          position: "relative",
-          width: "min(640px, 92vw)",
-          background: "var(--proof-surface)",
-          borderRadius: 12,
-          boxShadow: "var(--proof-shadow-xl)",
-          border: "1px solid var(--proof-grey)",
-          overflow: "hidden",
+          position: "fixed",
+          inset: 0,
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "center",
+          paddingTop: "12vh",
+          background: "var(--proof-overlay-dark)",
+          backdropFilter: "blur(4px)",
         }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={onClose}
       >
-        <CommandSearch
-          query={query}
-          typeFilter={typeFilter}
-          typeCounts={typeCounts}
-          inputRef={inputRef}
-          onQueryChange={(value) => {
-            setQuery(value);
-            setActiveIdx(0);
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -20 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          style={{
+            position: "relative",
+            width: "min(680px, 92vw)",
+            background: "var(--proof-surface)",
+            borderRadius: 16,
+            boxShadow: "var(--proof-shadow-xl)",
+            border: "1px solid var(--proof-border)",
+            overflow: "hidden",
           }}
-          onTypeFilterChange={setTypeFilter}
-          onKeyDown={handleKey}
-        />
-        <CommandResults
-          filtered={filtered}
-          query={query}
-          activeIdx={safeActiveIdx}
-          onSelect={handleSelect}
-          onHover={setActiveIdx}
-        />
+          onClick={(e) => e.stopPropagation()}
+        >
+          <CommandSearch
+            query={query}
+            typeFilter={typeFilter}
+            typeCounts={typeCounts}
+            inputRef={inputRef}
+            onQueryChange={(value) => {
+              setQuery(value);
+              setActiveIdx(0);
+            }}
+            onTypeFilterChange={setTypeFilter}
+            onKeyDown={handleKey}
+          />
+          <CommandResults
+            filtered={filtered}
+            query={query}
+            activeIdx={safeActiveIdx}
+            onSelect={handleSelect}
+            onHover={setActiveIdx}
+          />
+        </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 }

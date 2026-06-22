@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 interface KpiCardProps {
   total?: number;
@@ -19,35 +20,66 @@ export const KpiCard = React.memo(function KpiCard({
   const displayFailedRuns = failedRuns ?? 0;
 
   return (
-    <span style={{ fontSize: 11, color: "var(--proof-text-muted)" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--proof-text)" }}>
-        {displayTotal}
-      </span>{" "}
-      runs ·{" "}
-      <span
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontWeight: 700,
-          color: hasPassRate ? chartColor : "var(--proof-text-muted)",
-        }}
-      >
-        {displayPassRate}
-      </span>{" "}
-      avg ·{" "}
-      {displayFailedRuns > 0 && (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
+        <span style={{ 
+          fontSize: 13, 
+          fontWeight: 800, 
+          fontFamily: "var(--font-mono)", 
+          color: "var(--proof-text)",
+          letterSpacing: "-0.5px"
+        }}>
+          {displayTotal}
+        </span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-muted)", textTransform: "uppercase" }}>runs</span>
+      </div>
+
+      <div style={{ width: 1, height: 10, background: "var(--proof-border-light)" }} />
+
+      <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
         <span
           style={{
+            fontSize: 13,
+            fontWeight: 800,
             fontFamily: "var(--font-mono)",
-            fontWeight: 700,
-            color: "var(--proof-red-bright)",
+            color: hasPassRate ? chartColor : "var(--proof-text-muted)",
+            letterSpacing: "-0.5px"
           }}
         >
-          {displayFailedRuns} failed
+          {displayPassRate}
         </span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-text-muted)", textTransform: "uppercase" }}>avg</span>
+      </div>
+
+      {displayFailedRuns > 0 && (
+        <>
+          <div style={{ width: 1, height: 10, background: "var(--proof-border-light)" }} />
+          <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 800,
+                fontFamily: "var(--font-mono)",
+                color: "var(--proof-red-bright)",
+                letterSpacing: "-0.5px"
+              }}
+            >
+              {displayFailedRuns}
+            </span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--proof-red)", textTransform: "uppercase" }}>failed</span>
+          </div>
+        </>
       )}
+
       {displayFailedRuns === 0 && total !== undefined && total !== null && (
-        <span style={{ color: "var(--proof-green)", fontWeight: 600 }}>all passing</span>
+        <>
+          <div style={{ width: 1, height: 10, background: "var(--proof-border-light)" }} />
+          <span style={{ fontSize: 10, color: "var(--proof-green)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            100% Pass
+          </span>
+        </>
       )}
-    </span>
+    </div>
   );
 });
+

@@ -49,46 +49,54 @@ export class ErrorBoundary extends React.Component<Props, State> {
             alignItems: "center",
             justifyContent: "center",
             minHeight: this.props.height || 200,
-            gap: 8,
-            padding: 16,
+            gap: 12,
+            padding: 24,
             background: "var(--proof-surface)",
-            borderRadius: 6,
-            border: "1px solid var(--proof-grey)",
+            borderRadius: "var(--proof-radius)",
+            border: "1px solid var(--proof-border)",
+            boxShadow: "var(--proof-shadow-sm)",
           }}
         >
-          <AlertTriangle size={20} style={{ color: "var(--proof-yellow)" }} />
-          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text-secondary)" }}>
-            {this.props.label || "Panel error"}
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "rgba(245, 158, 11, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <AlertTriangle size={20} style={{ color: "var(--proof-yellow)" }} />
           </div>
           <div
             style={{
-              fontSize: 11,
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--proof-text)",
+            }}
+          >
+            {this.props.label || "Panel encounterd an error"}
+          </div>
+          <div
+            style={{
+              fontSize: 12,
               color: "var(--proof-text-secondary)",
-              maxWidth: 300,
+              maxWidth: 320,
               textAlign: "center",
+              lineHeight: 1.5,
             }}
           >
             {this.state.error.message}
           </div>
           <button
             onClick={this.handleRetry}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "6px 14px",
-              fontSize: 12,
-              fontWeight: 500,
-              background: "var(--proof-blue)",
-              color: "white",
-              border: "none",
-              borderRadius: 4,
-              cursor: "pointer",
-              marginTop: 4,
-            }}
+            className="proof-button proof-button-primary"
+            style={{ marginTop: 8 }}
           >
-            <RefreshCw size={12} />
-            Retry
+            <RefreshCw size={14} />
+            Retry Component
           </button>
         </div>
       );
@@ -101,105 +109,97 @@ export class ErrorBoundary extends React.Component<Props, State> {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: 400,
-          gap: 16,
-          padding: 32,
+          minHeight: "60vh",
+          gap: 20,
+          padding: 40,
         }}
       >
         <div
           style={{
-            width: 56,
-            height: 56,
+            width: 80,
+            height: 80,
             borderRadius: "50%",
-            background: "var(--proof-red-bg)",
+            background: "rgba(239, 68, 68, 0.1)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            marginBottom: 8,
           }}
         >
-          <AlertTriangle size={28} style={{ color: "var(--proof-red)" }} />
+          <AlertTriangle size={40} style={{ color: "var(--proof-red)" }} />
         </div>
-        <h2
-          style={{
-            fontSize: 18,
-            fontWeight: 600,
-            color: "var(--proof-text)",
-            margin: 0,
-          }}
-        >
-          {this.props.label ?? "Something went wrong"}
-        </h2>
-        <p
-          style={{
-            fontSize: 13,
-            color: "var(--proof-text-secondary)",
-            maxWidth: 400,
-            textAlign: "center",
-            margin: 0,
-          }}
-        >
-          {this.state.error.message}
-        </p>
-        <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-          <button
-            onClick={this.handleRetry}
+        <div style={{ textAlign: "center" }}>
+          <h2
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 18px",
-              fontSize: 13,
-              fontWeight: 500,
-              background: "var(--proof-blue)",
-              color: "white",
-              border: "none",
-              borderRadius: 6,
-              cursor: "pointer",
+              fontSize: 20,
+              fontWeight: 700,
+              color: "var(--proof-text)",
+              margin: "0 0 8px 0",
             }}
           >
-            <RefreshCw size={14} />
-            Retry
+            {this.props.label ?? "Application Error"}
+          </h2>
+          <p
+            style={{
+              fontSize: 14,
+              color: "var(--proof-text-secondary)",
+              maxWidth: 480,
+              textAlign: "center",
+              margin: 0,
+              lineHeight: 1.6,
+            }}
+          >
+            {this.state.error.message}
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 12, marginTop: 12 }}>
+          <button
+            onClick={this.handleRetry}
+            className="proof-button proof-button-primary"
+            style={{ padding: "10px 24px" }}
+          >
+            <RefreshCw size={16} />
+            Try Again
           </button>
           <button
             onClick={this.handleHome}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 18px",
-              fontSize: 13,
-              fontWeight: 500,
-              background: "transparent",
-              color: "var(--proof-text-secondary)",
-              border: "1px solid var(--proof-border)",
-              borderRadius: 6,
-              cursor: "pointer",
-            }}
+            className="proof-button"
+            style={{ padding: "10px 24px" }}
           >
-            <Home size={14} />
-            Dashboard
+            <Home size={16} />
+            Back to Dashboard
           </button>
         </div>
-        <details style={{ marginTop: 16, width: "100%", maxWidth: 512 }}>
+        <details
+          style={{
+            marginTop: 32,
+            width: "100%",
+            maxWidth: 640,
+          }}
+        >
           <summary
             style={{
               fontSize: 12,
               color: "var(--proof-text-secondary)",
               cursor: "pointer",
+              textAlign: "center",
+              opacity: 0.7,
             }}
           >
-            Stack trace
+            Show technical details
           </summary>
           <pre
             style={{
-              marginTop: 8,
-              fontSize: 12,
+              marginTop: 12,
+              fontSize: 11,
+              fontFamily: "var(--font-mono)",
               color: "var(--proof-text-secondary)",
-              background: "var(--proof-surface)",
-              padding: 12,
-              borderRadius: 6,
+              background: "var(--proof-surface-2)",
+              padding: 16,
+              borderRadius: 8,
+              border: "1px solid var(--proof-border)",
               overflow: "auto",
-              maxHeight: 192,
+              maxHeight: 240,
             }}
           >
             {this.state.error.stack}

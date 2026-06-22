@@ -1,6 +1,6 @@
 import React, { useSyncExternalStore } from "react";
 import { Link, useLocation } from "wouter";
-import { PageTemplate } from "@/components/aware";
+import { PageTemplate, Pagination } from "@/components/aware";
 import { getRuns, subscribeToRuns, getEnvConfigs } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { useSyncedUrlState } from "@/lib/urlState";
@@ -299,164 +299,161 @@ export default function Runs() {
           </div>
         </div>
 
-        <div className="proof-card" style={{ padding: "10px 14px", marginBottom: 20, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", borderBottom: "1px solid var(--proof-border)", borderRadius: 0, borderLeft: 'none', borderRight: 'none', borderTop: 'none', background: 'transparent' }}>
-          <div style={{ position: "relative", flexShrink: 0, display: "flex", alignItems: "center", gap: 6, flex: "1 1 200px", minWidth: 160 }}>
-            <Search
-              size={13}
-              style={{
-                color: "var(--proof-text-muted)",
-                flexShrink: 0,
-              }}
-            />
-            <input
-              className="proof-input"
-              style={{ flex: 1, minWidth: 0, fontSize: 13 }}
-              placeholder="Search runs…"
-              aria-label="Search runs"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                aria-label="Clear search"
+        <div className="proof-card" style={{ padding: "16px", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ position: "relative", flex: "1 1 300px", minWidth: 200 }}>
+              <Search
+                size={14}
                 style={{
                   position: "absolute",
-                  right: 8,
+                  left: 10,
                   top: "50%",
                   transform: "translateY(-50%)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
                   color: "var(--proof-text-muted)",
-                  padding: 1,
-                  display: "flex",
-                  lineHeight: 1,
+                  pointerEvents: "none",
                 }}
-              >
-                <X size={12} aria-hidden="true" />
-              </button>
-            )}
-          </div>
+              />
+              <input
+                className="proof-input"
+                style={{ width: "100%", paddingLeft: 32, fontSize: 13 }}
+                placeholder="Search runs by ID, environment, or suite…"
+                aria-label="Search runs"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  aria-label="Clear search"
+                  style={{
+                    position: "absolute",
+                    right: 8,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--proof-text-muted)",
+                    padding: 4,
+                    display: "flex",
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <span
-              style={{
-                fontSize: 10,
-                color: "var(--proof-text-muted)",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.4px",
-                flexShrink: 0,
-              }}
-            >
-              Status:
-            </span>
-            {(["PASS", "FAIL", "PARTIAL", "FLAKY", "RUNNING"] as Run["status"][]).map((s) => (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(statusFilter === s ? "all" : s)}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "4px 12px",
-                  borderRadius: 6,
-                  border: `1px solid ${statusFilter === s ? "var(--proof-blue)" : "var(--proof-border)"}`,
-                  background: statusFilter === s ? "var(--proof-blue)" : "transparent",
-                  color: statusFilter === s ? "white" : "var(--proof-text-secondary)",
-                  fontSize: 12,
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "all 0.1s ease",
-                }}
-              >
-                {STATUS_CFG[s].label}
-              </button>
-            ))}
-
-            <div
-              style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0, margin: '0 4px' }}
-            />
-
-            <select
-              className="proof-input"
-              value={suiteFilter}
-              onChange={(e) => setSuiteFilter(e.target.value)}
-              aria-label="Filter by suite"
-              style={{
-                fontSize: 12,
-                height: 28,
-                padding: "2px 8px",
-              }}
-            >
-              <option value="all">All suites</option>
-              {suites.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+              {(["PASS", "FAIL", "PARTIAL", "FLAKY", "RUNNING"] as Run["status"][]).map((s) => (
+                <FilterChip
+                  key={s}
+                  label={STATUS_CFG[s].label}
+                  value={s}
+                  active={statusFilter === s}
+                  onSelect={setStatusFilter}
+                />
               ))}
-            </select>
+            </div>
 
-            <select
-              className="proof-input"
-              value={envFilter}
-              onChange={(e) => setEnvFilter(e.target.value)}
-              aria-label="Filter by environment"
-              style={{
-                fontSize: 12,
-                height: 28,
-                padding: "2px 8px",
-              }}
-            >
-              <option value="all">All envs</option>
-              {envConfigs.map((e) => (
-                <option key={e.id} value={e.target}>
-                  {e.label}
-                </option>
-              ))}
-            </select>
+            <div style={{ display: "flex", gap: 8 }}>
+              <select
+                className="proof-select"
+                value={suiteFilter}
+                onChange={(e) => setSuiteFilter(e.target.value)}
+                aria-label="Filter by suite"
+                style={{ fontSize: 12, height: 28 }}
+              >
+                <option value="all">All suites</option>
+                {suites.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                className="proof-select"
+                value={envFilter}
+                onChange={(e) => setEnvFilter(e.target.value)}
+                aria-label="Filter by environment"
+                style={{ fontSize: 12, height: 28 }}
+              >
+                <option value="all">All envs</option>
+                {envConfigs.map((e) => (
+                  <option key={e.id} value={e.target}>
+                    {e.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {(search || statusFilter !== "all" || suiteFilter !== "all" || envFilter !== "all") && (
               <button
                 onClick={resetFilters}
-                className="proof-button proof-button-xs proof-button-secondary"
-                style={{ fontSize: 11 }}
+                className="proof-button-secondary"
+                style={{ fontSize: 11, padding: "4px 8px", height: 28 }}
               >
-                <X size={10} /> Clear filters
+                <X size={10} /> Clear
               </button>
             )}
           </div>
         </div>
 
         {paginated.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 24px", color: "var(--proof-text-secondary)" }}>
-            <Activity size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
-            <div style={{ fontSize: 15, fontWeight: 600, color: "var(--proof-text)", marginBottom: 6 }}>No runs match your filters</div>
-            <div style={{ fontSize: 13, marginBottom: 20 }}>Try adjusting the status, suite, or environment filters</div>
-            <button className="proof-button" onClick={resetFilters}>Clear all filters</button>
+          <div
+            className="proof-card"
+            style={{
+              textAlign: "center",
+              padding: "80px 24px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "transparent",
+            }}
+          >
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                background: "var(--proof-hover)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 20,
+              }}
+            >
+              <Activity size={32} style={{ color: "var(--proof-text-muted)" }} />
+            </div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 8 }}>No runs found</h3>
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--proof-text-secondary)",
+                maxWidth: 400,
+                marginBottom: 24,
+              }}
+            >
+              We couldn't find any runs matching your current search and filters. Try adjusting them
+              to see more results.
+            </p>
+            <button className="proof-button-primary" onClick={resetFilters}>
+              Clear all filters
+            </button>
           </div>
         ) : (
           <>
-            <div style={{ overflowX: "auto" }}>
-              <table className="proof-table" style={{ width: "100%", tableLayout: "auto", minWidth: 640 }}>
-                <colgroup>
-                  <col style={{ width: 3 }} />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                </colgroup>
-                <thead style={{ position: "sticky", top: 0, zIndex: 10, background: "var(--proof-surface)" }}>
+            <div style={{ overflowX: "auto", margin: "0 -16px", padding: "0 16px" }}>
+              <table className="proof-table" style={{ width: "100%", tableLayout: "auto", minWidth: 800 }}>
+                <thead>
                   <tr>
-                    <th aria-hidden="true" style={{ padding: 0 }} />
-                    <th scope="col" style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Run ID</th>
-                    <th scope="col" style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Suite</th>
-                    <th scope="col" style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Environment</th>
-                    <th scope="col" style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Result</th>
-                    <th scope="col" style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Duration</th>
-                    <th scope="col" style={{ fontSize: 11, fontWeight: 600, color: 'var(--proof-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>When</th>
+                    <th scope="col" style={{ width: 120 }}>Run ID</th>
+                    <th scope="col">Suite</th>
+                    <th scope="col">Environment</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" style={{ width: 140 }}>Duration</th>
+                    <th scope="col" style={{ width: 150 }}>When</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -467,70 +464,59 @@ export default function Runs() {
                       <tr
                         key={run.id}
                         onClick={() => navigate(`/runs/${run.id}`)}
-                        role="button"
-                        aria-label={`Run ${run.id} — ${cfg.label}`}
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            navigate(`/runs/${run.id}`);
-                          }
-                        }}
+                        className="proof-tr"
                         style={{ cursor: "pointer" }}
                       >
-                        <td style={{ padding: 0, width: 3 }} aria-hidden="true">
-                          <div
-                            style={{
-                              width: 3,
-                              height: "100%",
-                              minHeight: 40,
-                              background: cfg.color,
-                              borderRadius: "0 2px 2px 0",
-                            }}
-                          />
-                        </td>
-
                         <td>
-                          <span
-                            style={{
-                              fontFamily: "var(--font-mono)",
-                              fontSize: 12,
-                              fontWeight: 700,
-                              color: "var(--proof-blue-bright)",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 5,
-                            }}
-                          >
-                            {isRunning && (
-                              <Loader2
-                                size={11}
-                                aria-label="Running"
-                                style={{ animation: "spin 1s linear infinite", flexShrink: 0 }}
-                              />
-                            )}
-                            {run.id}
-                          </span>
-                          <div
-                            style={{
-                              fontSize: 10,
-                              color: "var(--proof-text-muted)",
-                              marginTop: 2,
-                              fontFamily: "var(--font-mono)",
-                            }}
-                          >
-                            {run.build}
-                            {run.rev ? ` · ${run.rev.slice(0, 7)}` : ""}
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div
+                              style={{
+                                width: 3,
+                                height: 24,
+                                background: cfg.color,
+                                borderRadius: 4,
+                                flexShrink: 0,
+                              }}
+                            />
+                            <div style={{ minWidth: 0 }}>
+                              <div
+                                style={{
+                                  fontFamily: "var(--font-mono)",
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  color: "var(--proof-blue-bright)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 5,
+                                }}
+                              >
+                                {isRunning && (
+                                  <Loader2
+                                    size={11}
+                                    style={{ animation: "spin 1s linear infinite" }}
+                                  />
+                                )}
+                                {run.id.slice(0, 8)}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: 10,
+                                  color: "var(--proof-text-muted)",
+                                  fontFamily: "var(--font-mono)",
+                                }}
+                              >
+                                {run.build}
+                              </div>
+                            </div>
                           </div>
                         </td>
 
                         <td>
                           <span
                             style={{
-                              fontSize: 12,
-                              fontFamily: "var(--font-mono)",
-                              color: "var(--proof-text-secondary)",
-                              fontWeight: 500,
+                              fontSize: 13,
+                              fontWeight: 600,
+                              color: "var(--proof-text-primary)",
                             }}
                           >
                             {run.suiteId}
@@ -538,39 +524,35 @@ export default function Runs() {
                         </td>
 
                         <td>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <EnvBadge env={run.env} />
-                            <span style={{ fontSize: 11.5, color: "var(--proof-text-secondary)" }}>
+                            <span style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>
                               {run.env}
                             </span>
                           </div>
                         </td>
 
                         <td>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                             <span
                               style={{
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: 4,
-                                padding: "2px 8px",
+                                gap: 6,
+                                padding: "2px 10px",
                                 borderRadius: "var(--proof-radius-full)",
-                                fontSize: 10.5,
+                                fontSize: 11,
                                 fontWeight: 700,
-                                letterSpacing: "0.1px",
                                 color: cfg.color,
                                 background: cfg.bg,
                                 border: `1px solid ${cfg.border}`,
-                                width: "fit-content",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.02em",
                               }}
                             >
-                              {isRunning && (
-                                <Loader2 size={9} style={{ animation: "spin 1s linear infinite" }} />
-                              )}
-                              {run.status === "FLAKY" ? `Flaky (${run.passPct}%)` : cfg.label}
+                              {cfg.label}
                             </span>
                             {!isRunning && <PassBar pct={run.passPct} />}
-                            {isRunning && run.passPct > 0 && <PassBar pct={run.passPct} />}
                           </div>
                         </td>
 
@@ -584,13 +566,13 @@ export default function Runs() {
                                 : "var(--proof-text-secondary)",
                             }}
                           >
-                            {isRunning ? "…" : formatDuration(run.duration)}
+                            {isRunning ? "Running…" : formatDuration(run.duration)}
                           </span>
                         </td>
 
                         <td>
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <span style={{ fontSize: 11.5, color: "var(--proof-text-muted)" }}>
+                            <span style={{ fontSize: 12, color: "var(--proof-text-muted)" }}>
                               {timeAgo(run.started)}
                             </span>
                             <button
@@ -618,44 +600,14 @@ export default function Runs() {
               </table>
             </div>
 
-            <div style={{ marginTop: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 11, color: "var(--proof-text-muted)" }}>
-                Page {page} of {totalPages}
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  className="proof-button-ghost"
-                  disabled={page === 1}
-                  onClick={() => setPage(1)}
-                  style={{ fontSize: 11 }}
-                >
-                  First
-                </button>
-                <button
-                  className="proof-button"
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                  style={{ fontSize: 11 }}
-                >
-                  Prev
-                </button>
-                <button
-                  className="proof-button"
-                  disabled={page === totalPages}
-                  onClick={() => setPage(page + 1)}
-                  style={{ fontSize: 11 }}
-                >
-                  Next
-                </button>
-                <button
-                  className="proof-button-ghost"
-                  disabled={page === totalPages}
-                  onClick={() => setPage(totalPages)}
-                  style={{ fontSize: 11 }}
-                >
-                  Last
-                </button>
-              </div>
+            <div style={{ marginTop: 24 }}>
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setPage}
+              />
             </div>
           </>
         )}

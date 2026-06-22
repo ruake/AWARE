@@ -65,7 +65,17 @@ export default function ToolCallCard({ toolCall }: Props) {
   const displayedRaw = rawJson !== null ? rawJson.slice(0, RAW_DATA_CHAR_LIMIT) : null;
 
   return (
-    <div className="copilot-tool-card">
+    <div 
+      className="copilot-tool-card"
+      style={{
+        background: "var(--proof-surface)",
+        border: "1px solid var(--proof-border)",
+        borderRadius: 12,
+        overflow: "hidden",
+        marginBottom: 8,
+        transition: "all 0.2s",
+      }}
+    >
       {/* Header */}
       <button
         onClick={() => isDone && setExpanded((p) => !p)}
