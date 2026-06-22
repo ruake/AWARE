@@ -1,0 +1,1 @@
+import{j as n}from"./vendor-8rlM3cnJ.js";import{G as t}from"./index-D88g3rEC.js";function i({children:r,label:o,height:a}){return n.jsx(t,{label:o,variant:"panel",height:a,children:r})}export{i as P};

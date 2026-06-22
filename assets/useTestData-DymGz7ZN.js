@@ -1,0 +1,1 @@
+import{b as s}from"./vendor-8rlM3cnJ.js";import{q as a,w as r,x as o,y as u}from"./index-D88g3rEC.js";function i(){const e=s.useSyncExternalStore(a,r),t=s.useSyncExternalStore(o,u);return{tcs:e,suites:t}}export{i as u};

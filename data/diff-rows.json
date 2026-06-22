@@ -1,0 +1,202 @@
+[
+  {
+    "id": "diff_geo_01",
+    "name": "US East users resolve to IAD PoP",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 680,
+    "durCand": 986,
+    "category": "geo-match",
+    "state": "duration"
+  },
+  {
+    "id": "diff_geo_02",
+    "name": "EU West users resolve to DUB PoP",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 892,
+    "durCand": 1003,
+    "category": "geo-match",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_geo_03",
+    "name": "AP Southeast users resolve to SIN PoP",
+    "baseStatus": "FAIL",
+    "candStatus": "PASS",
+    "durBase": 783,
+    "durCand": 887,
+    "category": "geo-match",
+    "state": "fixed"
+  },
+  {
+    "id": "diff_geo_04",
+    "name": "Primary PoP failover within 5 seconds",
+    "baseStatus": "FAIL",
+    "candStatus": "PASS",
+    "durBase": 3486,
+    "durCand": 4998,
+    "category": "geo-match",
+    "state": "fixed"
+  },
+  {
+    "id": "diff_cache_01",
+    "name": "Cache hit ratio exceeds 80% for static assets",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 323,
+    "durCand": 364,
+    "category": "caching",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_cache_02",
+    "name": "Cache TTL respects origin Cache-Control max-age",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 246,
+    "durCand": 235,
+    "category": "caching",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_cache_03",
+    "name": "CDN purge invalidates cached objects within 5s",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1890,
+    "durCand": 2106,
+    "category": "caching",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_cache_04",
+    "name": "Stale cache serves during origin 5xx timeout",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 2058,
+    "durCand": 2310,
+    "category": "caching",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_sec_01",
+    "name": "WAF blocks SQL injection attempts",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 546,
+    "durCand": 620,
+    "category": "security",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_sec_02",
+    "name": "Rate limiter triggers at 100 RPS threshold",
+    "baseStatus": "PASS",
+    "candStatus": "FAIL",
+    "durBase": 2754,
+    "durCand": 3162,
+    "category": "security",
+    "state": "regression"
+  },
+  {
+    "id": "diff_sec_03",
+    "name": "TLS 1.3 negotiated on all edge endpoints",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1015,
+    "durCand": 979,
+    "category": "security",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_sec_04",
+    "name": "HSTS header present with max-age ≥ 31536000",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 391,
+    "durCand": 443,
+    "category": "security",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_edge_01",
+    "name": "HTTP to HTTPS redirect returns 301",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1276,
+    "durCand": 1232,
+    "category": "edge-routing",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_edge_02",
+    "name": "Custom 404 error page served by edge",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 1256,
+    "durCand": 1418,
+    "category": "edge-routing",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_edge_03",
+    "name": "Signed URL access control enforced",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 817,
+    "durCand": 931,
+    "category": "edge-routing",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_edge_04",
+    "name": "EdgeWorker rewrites X-Forwarded-Host header",
+    "baseStatus": "FAIL",
+    "candStatus": "PASS",
+    "durBase": 1904,
+    "durCand": 1840,
+    "category": "edge-routing",
+    "state": "fixed"
+  },
+  {
+    "id": "diff_http_01",
+    "name": "Homepage returns HTTP 200 in all regions",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 204,
+    "durCand": 229,
+    "category": "http-protocol",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_http_02",
+    "name": "API health endpoint returns 200 OK",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 162,
+    "durCand": 184,
+    "category": "http-protocol",
+    "state": "unchanged"
+  },
+  {
+    "id": "diff_http_03",
+    "name": "Gzip compression enabled on text assets",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 216,
+    "durCand": 309,
+    "category": "http-protocol",
+    "state": "duration"
+  },
+  {
+    "id": "diff_http_04",
+    "name": "CORS headers present on API routes",
+    "baseStatus": "PASS",
+    "candStatus": "PASS",
+    "durBase": 195,
+    "durCand": 218,
+    "category": "http-protocol",
+    "state": "unchanged"
+  }
+]
