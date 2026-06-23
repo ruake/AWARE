@@ -116,7 +116,7 @@ export default function Dashboard() {
 
       {/* Trend Chart Area */}
       <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="w-full">
-        <TrendChart passRate={kpis.passRate} flakinessScore={12} avgDuration={1450} history={chartData.map((d, i) => ({ runId: `R-${i}`, status: d.passRate > 80 ? "PASS" : "FAIL", passRate: d.passRate, date: d.label, duration: 1000 }))} />
+        <TrendChart passRate={kpis.passRate} flakinessScore={12} avgDuration={1450} history={chartData.map((d, i) => ({ runId: `R-${i}`, status: d.passRate > 80 ? "PASS" : "FAIL", env: "QA", passRate: d.passRate, date: d.label, duration: 1000 }))} />
       </motion.section>
     </motion.main>
   );

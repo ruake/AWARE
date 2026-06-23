@@ -24,7 +24,7 @@ export { CTAStatCard } from "./CTAStatCard";
 export { ErrorBoundary } from "./ErrorBoundary";
 export { KpiCard } from "./KpiCard";
 export { Markdown } from "./Markdown";
-export { MarkdownCode, STATUS_COLORS } from "./MarkdownCode";
+export { MarkdownCode } from "./MarkdownCode";
 export { MarkdownChart } from "./MarkdownChart";
 export { EvidenceViewer } from "./EvidenceViewer";
 export { FilterBar } from "./FilterBar";
