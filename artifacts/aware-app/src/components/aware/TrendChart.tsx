@@ -5,7 +5,7 @@ import type { TestRunPoint } from "@/lib/types";
 interface TrendChartProps { passRate: number; flakinessScore: number; avgDuration: number; history: TestRunPoint[]; }
 
 export const TrendChart = React.memo(function TrendChart({ history }: TrendChartProps) {
-  const data = history.slice(-20).map(h => ({ pass: h.passRate }));
+  const data = history.slice(-20).map(h => ({ pass: "env" in h && typeof (h as any).passRate === "number" ? (h as any).passRate : h.status === "PASS" ? 100 : 0 }));
   return (
     <div className="glass-panel flex h-48 w-full flex-col justify-end overflow-hidden rounded-2xl border border-[var(--proof-border)]">
       <div className="p-4 pb-0 text-sm font-bold uppercase tracking-widest text-[var(--proof-text-secondary)] z-10">Pass Rate Trend</div>
