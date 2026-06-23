@@ -1,6 +1,6 @@
 import React from "react";
 import { copyToClipboard } from "@/lib/nav";
-import { Link2, Copy, Check, Github, Shield, Share2 } from "lucide-react";
+import { Link2, Copy, Check, Share2 } from "lucide-react";
 
 export default function Sharing() {
   const copy = (text: string) => {

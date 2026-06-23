@@ -8,7 +8,7 @@ import { TestCard } from "@/components/aware/TestCard";
 import { TestDetailPanel } from "@/components/aware/TestDetailPanel";
 
 export default function Tests() {
-  const { tcs, suites } = useTestData();
+  const { tcs } = useTestData();
   const [, navigate] = useLocation();
   const [search, setSearch] = useSyncedUrlState("q", "");
   const [detailId] = useSyncedUrlState("detail", "");

@@ -48,14 +48,11 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-r
 export function Pagination({
   currentPage,
   totalPages,
-  totalItems,
-  pageSize,
+  totalItems: _totalItems,
+  pageSize: _pageSize,
   onPageChange,
 }: PaginationProps) {
   if (totalPages <= 1) return null;
-
-  const startItem = (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, totalItems);
 
   const pages = pageNumbers(currentPage, totalPages);
 

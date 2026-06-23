@@ -11,7 +11,7 @@ import {
   getActiveThreadId,
   setActiveThreadId} from "@/lib/copilot/storage";
 import type { Thread } from "@/lib/copilot/types";
-import { Plus, Bot, Zap, MessageSquare, Trash2, Edit3, Check, X, Search, Clock, ChevronRight, PlusCircle, History } from "lucide-react";
+import { Zap, MessageSquare, Trash2, Edit3, X, Search, Clock, ChevronRight, PlusCircle, History } from "lucide-react";
 
 function relTime(ts: number): string {
   const diff = Date.now() - ts;

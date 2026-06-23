@@ -1,7 +1,7 @@
 import { Tag } from "lucide-react";
 import { TEST_TAGS, TAG_COLORS } from "@/lib/constants";
 import type { TestCase, TestPriority } from "@/lib/types";
-import { PRI_COLORS, PRI_BGS } from "@/lib/testColors";
+import { PRI_COLORS } from "@/lib/testColors";
 
 export function TagBadge({ tagId }: { tagId: string }) {
   const tag = TEST_TAGS.find((t) => t.id === tagId);
@@ -64,7 +64,7 @@ export function TestCaseStatusBadge({ s }: { s: TestCase["status"] }) {
 }
 
 export function TestCard({ test, onClick }: { test: TestCase; onClick?: () => void }) {
-  const flakinessScore = Math.random(); // Mocking flakiness score for demo
+  const flakinessScore = test ? ((test.id?.length || 0) * 7 % 100) / 100 : 0.12;
   const flakinessColor = flakinessScore > 0.2 ? "var(--proof-red)" : flakinessScore > 0.05 ? "var(--proof-yellow)" : "var(--proof-green)";
 
   return (
@@ -99,9 +99,10 @@ export function TestCard({ test, onClick }: { test: TestCase; onClick?: () => vo
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ display: "flex", gap: 2 }}>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: Math.random() > 0.2 ? "var(--proof-green)" : "var(--proof-red)", boxShadow: `0 0 4px ${Math.random() > 0.2 ? "var(--proof-green)" : "var(--proof-red)"}` }} />
-            ))}
+            {Array.from({ length: 5 }).map((_, i) => {
+              const isPass = ((i * 13 + 7) % 100) / 100 > 0.2;
+              return <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: isPass ? "var(--proof-green)" : "var(--proof-red)", boxShadow: `0 0 4px ${isPass ? "var(--proof-green)" : "var(--proof-red)"}` }} />;
+            })}
           </span>
           <span style={{ fontSize: 11, fontWeight: 600, color: flakinessColor, fontFamily: "var(--font-mono)", display: "flex", alignItems: "center", gap: 4 }}>
              <span style={{ width: 6, height: 6, borderRadius: "50%", background: flakinessColor, boxShadow: `0 0 8px ${flakinessColor}` }} />

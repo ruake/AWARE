@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { FolderTree, X, Settings, PlayCircle, Beaker, Calendar, Layers, Activity } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { TestSuite, TestCase } from "@/lib/types";
-import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
+
 import { RUNS, getTestResultsForRun } from "@/lib/data";
 import {
   BarChart,
@@ -12,8 +12,6 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
   Cell,
 } from "recharts";
 
@@ -67,7 +65,7 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
 
   if (!suite) return null;
 
-  const cats = [...new Set(tests.map((t) => t.category))];
+  const _cats = [...new Set(tests.map((t) => t.category))];
   const activeCount = tests.filter((t) => t.status === "active").length;
   
   const priorityCounts: Record<string, number> = {};
@@ -82,7 +80,7 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
   tests.forEach((t) => {
     catCounts[t.category] = (catCounts[t.category] || 0) + 1;
   });
-  const catChart = Object.entries(catCounts)
+  const _catChart = Object.entries(catCounts)
     .sort(([, a], [, b]) => b - a)
     .map(([k, v]) => ({ category: k, count: v }));
 

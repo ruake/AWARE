@@ -53,8 +53,8 @@ export function CompareSummary({
 
 export function CompareRunsHeader({ 
   diffs,
-  baseResults,
-  candResults
+  baseResults: _baseResults,
+  candResults: _candResults,
 }: { 
   diffs: DiffRow[];
   baseResults: TestResult[];

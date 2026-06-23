@@ -1,12 +1,11 @@
 import React, { useSyncExternalStore } from "react";
-import { useParams, useLocation, useSearch } from "wouter";
+import { useParams, useLocation } from "wouter";
 import {
   getRunById,
   getTestResultsForRun,
   getDataInitState,
   subscribeToDataInit,
 } from "@/lib/data";
-import type { TestResult } from "@/lib/types";
 import {
   ArrowLeft,
   Search,
@@ -30,12 +29,11 @@ import { TestHistoryStrip } from "@/components/aware/HistoryTimeline";
 export default function RunDetail() {
   const params = useParams<{ runId: string }>();
   const [, navigate] = useLocation();
-  const urlSearch = useSearch();
   const runId = params.runId ?? "";
 
   const initState = useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const run = getRunById(runId) ?? null;
-  const results = run ? getTestResultsForRun(run.id) : [];
+  const results = React.useMemo(() => run ? getTestResultsForRun(run.id) : [], [run]);
   
   const [search, setSearch] = useSyncedUrlState("q", "");
   const [statusFilter, setStatusFilter] = useSyncedUrlState("status", "all");
@@ -53,12 +51,9 @@ export default function RunDetail() {
   const [expandedRows, setExpandedRows] = React.useState<Set<string>>(new Set());
   const PAGE_SIZE = 25;
 
-  React.useEffect(() => {
-    setPage(1);
-  }, [search, statusFilter, catFilter]);
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginatedResults = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const safePage = Math.min(page, totalPages);
+  const paginatedResults = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const toggleRow = (id: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -89,8 +84,8 @@ export default function RunDetail() {
 
   const sortedResults = React.useMemo(() => {
     return [...paginatedResults].sort((a, b) => {
-      let valA: any = a[sortKey as keyof typeof a];
-      let valB: any = b[sortKey as keyof typeof b];
+      const valA: string | number = a[sortKey as keyof typeof a] as string | number;
+      const valB: string | number = b[sortKey as keyof typeof b] as string | number;
       if (valA < valB) return sortDir === "asc" ? -1 : 1;
       if (valA > valB) return sortDir === "asc" ? 1 : -1;
       return 0;
@@ -484,7 +479,7 @@ export default function RunDetail() {
         {totalPages > 1 && (
           <div style={{ padding: "12px 16px", borderTop: "1px solid var(--proof-border)" }}>
             <Pagination
-              currentPage={page}
+              currentPage={safePage}
               totalPages={totalPages}
               totalItems={filtered.length}
               pageSize={PAGE_SIZE}

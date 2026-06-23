@@ -25,10 +25,9 @@ export function TimeWindowProvider({ children }: { children: React.ReactNode }) 
 
 function useTimeWindow() {
   const ctx = React.useContext(TimeWindowCtx);
+  const [fallback, setFallback] = React.useState<TimeWindowState>({ end: new Date(), sizeDays: 30 });
   if (!ctx) {
-    // Graceful fallback when used outside a TimeWindowProvider
-    const [window, setWindow] = React.useState<TimeWindowState>({ end: new Date(), sizeDays: 30 });
-    return { window, setWindow };
+    return { window: fallback, setWindow: setFallback };
   }
   return ctx;
 }

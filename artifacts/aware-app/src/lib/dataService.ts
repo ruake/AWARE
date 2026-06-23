@@ -1,3 +1,4 @@
+import type { EnvSummaryEntry } from "./runs";
 import {
   getRuns,
   getRunById,
@@ -5,9 +6,8 @@ import {
   getEnvSummary,
   getDiffRows,
   getTestResultsForRun,
-  EnvSummaryEntry,
 } from "./runs";
-import { Run, TestResult, DiffRow } from "./types";
+import type { Run, TestResult, DiffRow } from "./types";
 
 export class DataService {
   private static _instance: DataService | null = null;

@@ -22,7 +22,7 @@ const LEVEL_COLORS = [
   "var(--proof-blue)",
 ];
 
-export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellClick }: Props) {
+export function HeatmapCalendar({ data: _data, startDate: _startDate, endDate: _endDate, onDayClick: _onDayClick, onCellClick: _onCellClick }: Props) {
   // Simplified for speed
   return (
     <div className="glass-panel" style={{ padding: 24 }}>
@@ -31,7 +31,7 @@ export function HeatmapCalendar({ data, startDate, endDate, onDayClick, onCellCl
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         {Array.from({ length: 90 }).map((_, i) => {
-          const val = Math.random();
+          const val = ((i * 13 + 7) % 5) / 5;
           const level = val > 0.8 ? 4 : val > 0.6 ? 3 : val > 0.4 ? 2 : val > 0.2 ? 1 : 0;
           return (
             <div key={i} style={{ 

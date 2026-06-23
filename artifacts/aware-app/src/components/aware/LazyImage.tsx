@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { preloadImage } from "@/lib/images";
 import { ImageIcon, AlertCircle } from "lucide-react";
-import { SkeletonBox } from "./Skeleton";
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;

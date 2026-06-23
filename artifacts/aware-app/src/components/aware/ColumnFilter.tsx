@@ -161,7 +161,6 @@ export function ColumnFilter({
                 padding: 0,
                 color: "var(--proof-text)",
                 fontFamily: "var(--font-sans)",
-                outline: "none"
               }}
             />
             {filter.text && (

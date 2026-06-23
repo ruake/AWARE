@@ -1,10 +1,9 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation, useParams } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { getRunById, getTestResultsForRun, subscribeToRuns, getRuns } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
-import { useRelativeTime } from "@/lib/hooks/useData";
+
 import type { Run, TestResult } from "@/lib/types";
 import { repo } from "@/lib/nav";
 
@@ -20,10 +19,7 @@ import {
   ArrowLeft,
   Share2,
   ChevronDown,
-  Calendar,
-  Filter,
-  History,
-  Tag} from "lucide-react";
+  } from "lucide-react";
 
 const GH_ACTIONS_URL = `${repo}/actions`;
 

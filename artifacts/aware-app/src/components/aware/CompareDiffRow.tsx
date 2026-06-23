@@ -1,4 +1,5 @@
 import React from "react";
+import type { TestCookie } from "@/lib/types";
 
 export function DiffRowItem({
   label,
@@ -53,8 +54,8 @@ export function compareHeaders(
 }
 
 export function compareCookies(
-  base: any[] | undefined,
-  cand: any[] | undefined,
+  base: TestCookie[] | undefined,
+  cand: TestCookie[] | undefined,
 ) {
   const allNames = [
     ...new Set([...(base ?? []).map((c) => c.name), ...(cand ?? []).map((c) => c.name)]),

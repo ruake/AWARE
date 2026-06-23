@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Play, Github, GitCompare, ExternalLink, Loader2, Copy, Check, Clock, Rocket } from "lucide-react";
+import { Play, Loader2, Clock, Rocket } from "lucide-react";
 import { navTo, getRuns, getTestSuites, getEnvConfigs } from "@/lib/data";
 
 export default function StartRun() {
@@ -7,7 +7,6 @@ export default function StartRun() {
   const [error, setError] = useState<string | null>(null);
   const [suiteId, setSuiteId] = useState("");
   const [envId, setEnvId] = useState("qa-staging");
-  const [copiedUrl, setCopiedUrl] = useState(false);
   const runs = getRuns();
   const suites = getTestSuites();
   const envConfigs = getEnvConfigs();
@@ -25,13 +24,6 @@ export default function StartRun() {
       setIsSubmitting(false);
       navTo("/runs");
     }, 1500);
-  };
-
-  const copyWorkflowUrl = () => {
-    const url = "https://github.com/ruake/AWARE/actions/workflows/regression.yml";
-    navigator.clipboard.writeText(url);
-    setCopiedUrl(true);
-    setTimeout(() => setCopiedUrl(false), 2000);
   };
 
   const recentRunsByEnv = recentRuns.filter(r => !envId || r.label.toLowerCase().includes(envId.split('-')[0]));

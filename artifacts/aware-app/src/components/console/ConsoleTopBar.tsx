@@ -1,6 +1,6 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
-import { Search, Sun, Moon, WifiOff, Zap } from "lucide-react";
+import { Search, Sun, Moon, WifiOff } from "lucide-react";
 import { useDataInit } from "@/lib/hooks/useData";
 import { EnvTierSelector } from "./EnvTierSelector";
 import { EnvSelector } from "./EnvSelector";

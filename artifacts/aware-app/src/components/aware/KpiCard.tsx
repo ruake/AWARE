@@ -1,16 +1,16 @@
 import React from "react";
 
-export function KpiCard({ total, passRate, failedRuns, chartColor }: any) {
+export function KpiCard({ total, passRate, _failedRuns, chartColor }: any) {
   return (
-    <div className="glass-panel flex flex-col gap-2 rounded-xl border border-[var(--proof-border)] p-4">
-      <div className="text-xs font-bold uppercase tracking-widest text-[var(--proof-text-secondary)]">Overview</div>
-      <div className="flex items-baseline gap-2">
-        <span className="metric-number text-2xl" style={{ color: chartColor }}>{passRate}%</span>
-        <span className="text-xs font-bold text-[var(--proof-text-muted)]">Pass Rate</span>
+    <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: 8, borderRadius: 12, border: "1px solid var(--proof-border)", padding: 16 }}>
+      <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--proof-text-secondary)" }}>Overview</div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+        <span className="metric-number" style={{ fontSize: 24, color: chartColor }}>{passRate}%</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text-muted)" }}>Pass Rate</span>
       </div>
-      <div className="flex items-baseline gap-2">
-        <span className="metric-number text-lg text-white">{total}</span>
-        <span className="text-xs font-bold text-[var(--proof-text-muted)]">Runs</span>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+        <span className="metric-number" style={{ fontSize: 18, color: "#fff" }}>{total}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text-muted)" }}>Runs</span>
       </div>
     </div>
   );

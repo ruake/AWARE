@@ -255,7 +255,7 @@ export function RunRibbonCard({
               }}
             >
               <div style={{ width: 6, height: 6, borderRadius: 3, background: accent }} />
-              {new Date(nextDue).getTime() > Date.now() ? "Scheduled" : "Queued"}
+              {new Date(nextDue).getTime() > now ? "Scheduled" : "Queued"}
             </span>
           ) : (
             <div style={{ width: 6, height: 6, borderRadius: 3, background: "var(--proof-text-muted)" }} />

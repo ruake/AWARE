@@ -1,17 +1,14 @@
 import React from "react";
-import { useLocation } from "wouter";
-import { PageTemplate } from "@/components/aware";
 import { CategoryHeatmap } from "@/components/aware/CategoryHeatmap";
 import { HeatmapCalendar } from "@/components/aware/HeatmapCalendar";
-import { PassRateHeatmap } from "@/components/aware/PassRateHeatmap";
-import { Activity, Beaker, Zap, BarChart2 } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart2 } from "lucide-react";
+import { AreaChart, Area, ResponsiveContainer } from "recharts";
 
 export default function TestAnalytics() {
   const data = Array.from({ length: 30 }).map((_, i) => ({
     name: `Run ${i}`,
-    pass: 80 + Math.random() * 20,
-    fail: Math.random() * 20
+    pass: 80 + ((i * 13 + 7) % 100) / 100 * 20,
+    fail: ((i * 17 + 3) % 100) / 100 * 20
   }));
 
   return (

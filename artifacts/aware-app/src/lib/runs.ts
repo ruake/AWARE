@@ -88,7 +88,7 @@ export async function loadRuns(): Promise<void> {
       bus.emit("runs:loaded", { count: data?.length ?? 0 });
     } catch (err) {
       _runsPromise = null;
-      throw new Error(`Failed to load runs data: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(`Failed to load runs data: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
   })();
   return _runsPromise;
@@ -113,7 +113,7 @@ export async function loadDiffRows(): Promise<void> {
       bus.emit("diffrows:loaded", { count: data?.length ?? 0 });
     } catch (err) {
       _diffRowsPromise = null;
-      throw new Error(`Failed to load diff rows data: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(`Failed to load diff rows data: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
   })();
   return _diffRowsPromise;

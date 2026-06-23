@@ -414,7 +414,7 @@ function synthesizeNode(): AgentNode {
 
       // Parse accumulated tool-call argument buffers after stream completes
       for (const [id, { name, rawArgs }] of argBuffers) {
-        let args: Record<string, unknown> = {};
+        let args: Record<string, unknown>;
         try {
           args = JSON.parse(rawArgs || "{}") as Record<string, unknown>;
         } catch {

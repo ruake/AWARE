@@ -18,7 +18,7 @@ interface HeroKpiCardProps {
 }
 
 export const HeroKpiCard = React.memo(function HeroKpiCard({
-  label, value, suffix = "", delta = 0, deltaLabel = "vs prev", sparkData = [], accentColor = "var(--proof-blue)", icon, onClick, invertDelta = false, delay = 0
+  label, value, suffix = "", delta = 0, deltaLabel = "vs prev", sparkData: _sparkData = [], accentColor = "var(--proof-blue)", icon, onClick, invertDelta = false, delay = 0
 }: HeroKpiCardProps) {
   const animatedValue = useCountUp(value, 700, delay);
   const displayValue = value != null ? animatedValue : "—";
@@ -33,33 +33,43 @@ export const HeroKpiCard = React.memo(function HeroKpiCard({
       tabIndex={onClick ? 0 : undefined}
       initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: delay / 1000 }}
       whileHover={{ y: -2, boxShadow: `0 0 24px ${accentColor}33`, borderColor: `${accentColor}66` }}
-      className="glass-panel relative flex cursor-pointer flex-col gap-4 overflow-hidden rounded-xl border border-[var(--proof-border)] p-5 transition-all"
+      className="glass-panel"
       style={{
+        position: "relative",
+        display: "flex",
+        cursor: onClick ? "pointer" : undefined,
+        flexDirection: "column",
+        gap: 16,
+        overflow: "hidden",
+        borderRadius: 12,
+        border: "1px solid var(--proof-border)",
+        padding: 20,
+        transition: "all 150ms ease-out",
         background: "rgba(9, 13, 20, 0.6)",
         backdropFilter: "blur(20px)",
       }}
     >
-      <div className="absolute top-0 left-0 h-1 w-full" style={{ background: `linear-gradient(90deg, ${accentColor}, transparent)` }} />
-      <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full opacity-20 blur-3xl pointer-events-none" style={{ background: accentColor }} />
+      <div style={{ position: "absolute", top: 0, left: 0, height: 4, width: "100%", background: `linear-gradient(90deg, ${accentColor}, transparent)` }} />
+      <div style={{ position: "absolute", top: -40, right: -40, height: 128, width: 128, borderRadius: "50%", opacity: 0.2, filter: "blur(64px)", pointerEvents: "none", background: accentColor }} />
       
-      <div className="flex items-center justify-between z-10">
-        <span className="text-xs font-bold uppercase tracking-widest text-[var(--proof-text-secondary)]">{label}</span>
-        {icon && <div className="text-[var(--proof-text-secondary)]" style={{ color: accentColor }}>{React.cloneElement(icon as any, { size: 16 })}</div>}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", zIndex: 10 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--proof-text-secondary)" }}>{label}</span>
+        {icon && <div style={{ color: accentColor }}>{React.cloneElement(icon as React.ReactElement<{size?: number}>, { size: 16 })}</div>}
       </div>
 
-      <div className="z-10 flex items-baseline gap-1">
-        <span className="metric-number text-5xl font-bold tracking-tighter" style={{ color: accentColor, textShadow: `0 0 20px ${accentColor}40` }}>
+      <div style={{ zIndex: 10, display: "flex", alignItems: "baseline", gap: 4 }}>
+        <span className="metric-number" style={{ fontSize: 48, fontWeight: 700, letterSpacing: "-0.03em", color: accentColor, textShadow: `0 0 20px ${accentColor}40` }}>
           {displayValue}
         </span>
-        {suffix && <span className="text-lg font-bold text-[var(--proof-text-secondary)]">{suffix}</span>}
+        {suffix && <span style={{ fontSize: 18, fontWeight: 700, color: "var(--proof-text-secondary)" }}>{suffix}</span>}
       </div>
 
-      <div className="z-10 mt-auto flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1 rounded bg-black/20 px-2 py-0.5 text-xs font-bold" style={{ color: deltaColor, border: `1px solid ${deltaColor}33` }}>
+      <div style={{ zIndex: 10, marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 4, borderRadius: 4, background: "rgba(0,0,0,0.2)", padding: "2px 8px", fontSize: 12, fontWeight: 700, color: deltaColor, border: `1px solid ${deltaColor}33` }}>
             <DeltaIcon size={12} /> {delta > 0 ? "+" : ""}{delta}{suffix === "%" ? "%" : ""}
           </span>
-          <span className="text-xs text-[var(--proof-text-muted)]">{deltaLabel}</span>
+          <span style={{ fontSize: 12, color: "var(--proof-text-muted)" }}>{deltaLabel}</span>
         </div>
       </div>
     </motion.div>

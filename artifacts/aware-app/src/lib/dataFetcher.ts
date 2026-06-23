@@ -1,4 +1,4 @@
-import { TimeoutError, ValidationError, FetchError } from "./types";
+import { TimeoutError, FetchError } from "./types";
 import type { Run } from "./types";
 
 // Static data URL — always resolves relative to the app's base URL.
@@ -68,7 +68,7 @@ export function clearFetchCache(): void {
  * @returns The parsed JSON data of type T, or null if not found.
  */
 export async function fetchJson<T>(path: string, options?: FetchJsonOptions<T>): Promise<T | null> {
-  const { validate, timeoutMs = 15000, retries = 0 } = options ?? {};
+  const { validate: _validate, timeoutMs: _timeoutMs, retries: _retries } = options ?? {};
   const url = dataUrl(path);
 
   const cached = _fetchCache.get(url);
@@ -86,7 +86,7 @@ export async function fetchJson<T>(path: string, options?: FetchJsonOptions<T>):
 async function _revalidate<T>(url: string, options?: FetchJsonOptions<T>): Promise<void> {
   try {
     await _doFetch<T>(url, options);
-  } catch (err) {
+  } catch {
     // Background revalidation failures are swallowed to avoid disrupting the UI
   }
 }

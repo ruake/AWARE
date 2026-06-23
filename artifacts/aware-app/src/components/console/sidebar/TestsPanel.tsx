@@ -12,18 +12,18 @@ import {
   getTestSuites,
   subscribeToTestCases,
   getTestCases} from "@/lib/data";
-import { FolderTree, Beaker, Search, Download, X, Filter, ChevronRight, ChevronDown, Layers, Target, Activity } from "lucide-react";
+import { FolderTree, Beaker, Search, Download, X, ChevronRight, ChevronDown, Layers, Target } from "lucide-react";
 import type { TestSuite } from "@/lib/types";
-import { exportAndDownload, exportAsXML, downloadFile } from "@/lib/testImportExport";
+
 
 const TEST_TYPES = ["All", "web", "api", "http", "edgeworker", "transaction", "pytest"] as const;
 const STATUSES = ["All", "active", "disabled", "deprecated"] as const;
-const PRIORITIES = ["All", "P0", "P1", "P2", "P3"] as const;
+const _PRIORITIES = ["All", "P0", "P1", "P2", "P3"] as const;
 
 function TestKpis() {
   const [, navigate] = useLocation();
   const { tcs, suites } = useTestData();
-  const stats = React.useMemo(() => computeTestStats(), [tcs]);
+  const _stats = React.useMemo(() => computeTestStats(), [tcs]);
 
   const kpis = [
     {
@@ -101,8 +101,8 @@ function TestKpis() {
 function TestFilters() {
   const [loc, navigate] = useLocation();
   const { suites } = useTestData();
-  const allTests = useSyncExternalStore(subscribeToAutoTests, getAutoDiscoveredTests);
-  const discovery = React.useMemo(() => getAutoDiscoverySummary(), []);
+  const _allTests = useSyncExternalStore(subscribeToAutoTests, getAutoDiscoveredTests);
+  const _discovery = React.useMemo(() => getAutoDiscoverySummary(), []);
   const params = React.useMemo(() => new URLSearchParams(window.location.search), [loc]);
   const suiteFilter = params.get("suite") || "";
   const selectedSuite = suiteFilter ? (suites.find((s) => s.id === suiteFilter) ?? null) : null;

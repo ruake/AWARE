@@ -20,7 +20,6 @@ export const CategoryHeatmap = React.memo(function CategoryHeatmap({ data }: Cat
     for (const env of envs) {
       const envData = data.filter((d) => d.env === env);
       const passCount = envData.filter((d) => d.status === "PASS").length;
-      const failCount = envData.filter((d) => d.status === "FAIL").length;
       const total = envData.length;
 
       if (total === 0) continue;

@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle, Home, Ghost, Terminal } from "lucide-react";
+import { Home, Terminal } from "lucide-react";
 import { navTo } from "@/lib/nav";
 
 export default function NotFound() {

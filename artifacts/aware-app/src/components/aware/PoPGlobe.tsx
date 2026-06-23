@@ -1,19 +1,8 @@
-// @ts-nocheck
 import React, { useRef, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
-
-function cssVar(name: string): string {
-  if (typeof document === "undefined") return "#00c4ff";
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#00c4ff";
-}
-
-const BLUE_BRIGHT = () => cssVar("--proof-blue-bright");
-const BLUE = () => cssVar("--proof-blue");
-const SURFACE = () => cssVar("--proof-surface");
-const BG = () => cssVar("--proof-bg");
 
 interface PoPGlobeProps {
   size?: number;

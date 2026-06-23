@@ -242,6 +242,21 @@ html, body {
   border-color: rgba(0, 196, 255, 0.3);
 }
 
+.glow-border-red {
+  box-shadow: var(--proof-glow-red);
+  border-color: rgba(255, 51, 85, 0.3);
+}
+
+.glow-border-green {
+  box-shadow: var(--proof-glow-green);
+  border-color: rgba(0, 229, 160, 0.3);
+}
+
+.glow-border-amber {
+  box-shadow: var(--proof-glow-amber);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
 .proof-card {
   background: var(--proof-surface);
   border: 1px solid var(--proof-border);
@@ -544,6 +559,7 @@ html, body {
 .proof-button-primary { composes: proof-btn proof-btn-primary; }
 .proof-button-sm { composes: proof-btn proof-btn-sm; }
 .proof-button-xs { composes: proof-btn proof-btn-xs; }
+.proof-button-ghost { composes: proof-btn proof-btn-ghost; }
 
 /* Table classes used by FilterableTable */
 .proof-th {

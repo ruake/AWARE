@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
   getEnvConfigs, getTestSuites, loadAllData,
-  PROMOTION_GATE_THRESHOLD, getDataInitState,
+  PROMOTION_GATE_THRESHOLD,
 } from "@/lib/data";
 import {
-  Database, Layers, Beaker, Info, RefreshCw, Check, Monitor, Cpu, ExternalLink, CheckCircle, Save
+  Database, Layers, Beaker, Info, RefreshCw, Check, Monitor, Cpu, ExternalLink, Save
 } from "lucide-react";
 import { ChromeProvider } from "@/lib/copilot/providers";
-import { ProviderStatus } from "@/lib/copilot/types";
+import type { ProviderStatus } from "@/lib/copilot/types";
 
 const SETTINGS_KEY = "aware-settings-v1";
 interface AwareSettings { promotionThreshold: number }
@@ -16,11 +16,11 @@ function getSettings(): AwareSettings {
   try {
     const s = localStorage.getItem(SETTINGS_KEY);
     if (s) return { ...DEFAULT_SETTINGS, ...JSON.parse(s) };
-  } catch {}
+  } catch { /* empty */ }
   return DEFAULT_SETTINGS;
 }
 function saveSettings(s: AwareSettings) {
-  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); window.dispatchEvent(new Event("storage")); } catch {}
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); window.dispatchEvent(new Event("storage")); } catch { /* empty */ }
 }
 
 function SettingsCard({ icon: Icon, title, color, glowColor, children }: {
@@ -65,22 +65,20 @@ export default function Settings() {
   const envConfigs = getEnvConfigs();
   const suites = getTestSuites();
 
-  useEffect(() => {
-    checkChromeAi();
-  }, []);
-
   const checkChromeAi = async () => {
-    setCheckingAi(true);
     try {
       const provider = new ChromeProvider();
       const status = await provider.checkAvailability();
       setChromeAiStatus(status);
     } catch {
       setChromeAiStatus("unavailable");
-    } finally {
-      setCheckingAi(false);
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(checkChromeAi, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSave = () => {
     saveSettings(settings);
@@ -154,7 +152,7 @@ export default function Settings() {
                 {chromeAiStatus.toUpperCase()}
               </span>
               <button
-                onClick={checkChromeAi}
+                onClick={async () => { setCheckingAi(true); await checkChromeAi(); setCheckingAi(false); }}
                 disabled={checkingAi}
                 className="proof-btn proof-btn-ghost"
                 style={{ padding: "6px 12px", border: "1px solid var(--proof-border)", fontSize: 12 }}

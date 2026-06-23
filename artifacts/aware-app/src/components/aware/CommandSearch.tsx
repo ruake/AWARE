@@ -45,7 +45,6 @@ export function CommandSearch({
             fontWeight: 500,
             color: "var(--proof-text)",
             fontFamily: "var(--font-sans)",
-            outline: "none",
             caretColor: "var(--proof-blue)",
           }}
           value={query}
