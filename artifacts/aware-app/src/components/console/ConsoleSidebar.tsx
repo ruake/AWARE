@@ -40,7 +40,6 @@ const PANEL_ACCENTS: Record<string, string> = {
   about: "var(--proof-text-muted)",
 };
 
-/* ── Compact run-health mini-bar ───────────────────────────────── */
 function RunHealthBar({ pct, color }: { pct: number; color: string }) {
   return (
     <div
@@ -48,7 +47,7 @@ function RunHealthBar({ pct, color }: { pct: number; color: string }) {
         width: 32,
         height: 3,
         borderRadius: 99,
-        background: "var(--proof-bar-track)",
+        background: "var(--proof-surface)",
         overflow: "hidden",
         flexShrink: 0,
       }}
@@ -67,7 +66,6 @@ function RunHealthBar({ pct, color }: { pct: number; color: string }) {
   );
 }
 
-/* ── Recent runs list ───────────────────────────────────────────── */
 function RecentRunsList() {
   const [location, navigate] = useLocation();
   const runs = useSyncExternalStore(subscribeToRuns, getRuns);
@@ -94,17 +92,18 @@ function RecentRunsList() {
           fontSize: 10,
           fontWeight: 700,
           textTransform: "uppercase",
-          letterSpacing: "0.05em",
+          letterSpacing: "0.1em",
           color: "var(--proof-text-muted)",
           display: "flex",
           alignItems: "center",
           gap: 6,
+          fontFamily: "var(--font-sans)",
         }}
       >
         <Activity size={12} />
         Latest Activity
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0 8px" }}>
         {recent.map((run, idx) => {
           const pct = run.passPct ?? 0;
           const c =
@@ -126,13 +125,16 @@ function RecentRunsList() {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                padding: "8px 14px",
+                padding: "8px 12px",
                 cursor: "pointer",
                 position: "relative",
+                borderRadius: "var(--proof-radius-sm)",
                 background: isSelected
                   ? "var(--proof-surface-active)"
                   : "transparent",
-                transition: "background 0.2s ease",
+                border: "1px solid transparent",
+                borderColor: isSelected ? "var(--proof-border-strong)" : "transparent",
+                transition: "all 0.2s ease",
               }}
               whileHover={{ background: "var(--proof-surface-hover)" }}
             >
@@ -141,18 +143,17 @@ function RecentRunsList() {
                   layoutId="active-run-indicator"
                   style={{
                     position: "absolute",
-                    left: 0,
+                    left: -1,
                     top: 6,
                     bottom: 6,
                     width: 3,
                     background: "var(--proof-blue)",
-                    borderRadius: "0 4px 4px 0",
-                    boxShadow: "0 0 8px var(--proof-blue-glow)",
+                    borderRadius: "4px",
+                    boxShadow: "var(--proof-glow-cyan)",
                   }}
                 />
               )}
 
-              {/* Status icon/dot */}
               <div style={{ position: "relative", display: "flex", flexShrink: 0 }}>
                 <span
                   style={{
@@ -165,14 +166,13 @@ function RecentRunsList() {
                 />
               </div>
 
-              {/* Label */}
               <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
                 <span
                   style={{
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
-                    fontSize: 11.5,
+                    fontSize: 12,
                     color: isSelected ? "var(--proof-text)" : "var(--proof-text-secondary)",
                     fontWeight: isSelected ? 600 : 400,
                   }}
@@ -184,12 +184,11 @@ function RecentRunsList() {
                 </span>
               </div>
 
-              {/* Mini health bar & % */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                 <RunHealthBar pct={pct} color={c} />
                 <span
                   style={{
-                    fontSize: 10.5,
+                    fontSize: 10,
                     fontFamily: "var(--font-mono)",
                     fontWeight: 700,
                     color: c,
@@ -254,12 +253,12 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
                 width: 64,
                 height: 64,
                 borderRadius: 20,
-                background: "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-blue-bright) 100%)",
+                background: "var(--proof-blue)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: 20,
-                boxShadow: "0 0 0 8px var(--proof-blue-bg), 0 12px 32px var(--proof-blue-glow)",
+                boxShadow: "var(--proof-glow-cyan)",
               }}
             >
               <svg
@@ -283,13 +282,13 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
             </div>
             
             <div style={{ marginTop: 40, width: "100%", textAlign: "left" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--proof-text-tertiary)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--proof-text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
                 Engine Status
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <StatusRow icon={ShieldCheck} label="Core Engine" status="Online" color="var(--proof-green)" />
                 <StatusRow icon={Activity} label="Data Pipeline" status="Active" color="var(--proof-green)" />
-                <StatusRow icon={Bot} label="AI Copilot" status="Ready" color="var(--proof-blue-bright)" />
+                <StatusRow icon={Bot} label="AI Copilot" status="Ready" color="var(--proof-blue)" />
               </div>
             </div>
           </div>
@@ -302,9 +301,9 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
   return (
     <aside
       style={{
-        width: "var(--proof-sidebar-width)",
-        minWidth: "var(--proof-sidebar-width)",
-        background: "var(--proof-sidebar-bg)",
+        width: 280,
+        minWidth: 280,
+        background: "var(--proof-surface-2)",
         borderRight: "1px solid var(--proof-border)",
         display: "flex",
         flexDirection: "column",
@@ -314,10 +313,9 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
         position: "relative",
       }}
     >
-      {/* Accent top stripe */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.6 }}
+        animate={{ opacity: 0.8 }}
         style={{
           position: "absolute",
           top: 0,
@@ -328,7 +326,6 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
         }}
       />
 
-      {/* Header */}
       <div
         style={{
           padding: "0 16px",
@@ -337,8 +334,8 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
           fontWeight: 700,
           color: "var(--proof-text)",
           textTransform: "uppercase",
-          letterSpacing: "0.08em",
-          borderBottom: "1px solid var(--proof-border)",
+          letterSpacing: "0.1em",
+          borderBottom: "1px solid var(--proof-border-strong)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -362,7 +359,7 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
         <motion.button
           onClick={onClose}
           aria-label="Close sidebar"
-          whileHover={{ background: "var(--proof-surface-hover)", color: "var(--proof-text)" }}
+          whileHover={{ background: "var(--proof-surface)", color: "var(--proof-text)" }}
           whileTap={{ scale: 0.95 }}
           style={{
             border: "none",
@@ -379,7 +376,6 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
         </motion.button>
       </div>
 
-      {/* Panel content */}
       <div
         style={{
           flex: 1,
@@ -410,7 +406,7 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
 function StatusRow({ icon: Icon, label, status, color }: { icon: any; label: string; status: string; color: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <div style={{ width: 24, height: 24, borderRadius: 6, background: "var(--proof-surface-hover)", display: "flex", alignItems: "center", justifyItems: "center", flexShrink: 0 }}>
+      <div style={{ width: 24, height: 24, borderRadius: 6, background: "var(--proof-surface)", display: "flex", alignItems: "center", justifyItems: "center", flexShrink: 0, border: "1px solid var(--proof-border-light)" }}>
         <Icon size={12} style={{ margin: "0 auto", color: "var(--proof-text-muted)" }} />
       </div>
       <div style={{ flex: 1, fontSize: 11, color: "var(--proof-text-secondary)" }}>{label}</div>

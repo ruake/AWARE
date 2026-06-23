@@ -11,11 +11,11 @@ export function StatusBar() {
   const envConfigs = getEnvConfigs();
 
   const activeEnvLabel = React.useMemo(() => {
-    if (isAll) return "All environments";
+    if (isAll) return "ALL ENVIRONMENTS";
     const labels = envConfigs.filter((c) => envIds.includes(c.id)).map((c) => c.label);
-    if (labels.length === 0) return "All environments";
-    if (labels.length === 1) return labels[0];
-    return `${labels[0]} + ${labels.length - 1} more`;
+    if (labels.length === 0) return "ALL ENVIRONMENTS";
+    if (labels.length === 1) return labels[0].toUpperCase();
+    return `${labels[0].toUpperCase()} + ${labels.length - 1} MORE`;
   }, [envIds, isAll, envConfigs]);
 
   const passPct = React.useMemo(() => {
@@ -37,32 +37,23 @@ export function StatusBar() {
           ? "var(--proof-red)"
           : "var(--proof-text-muted)";
 
-  const healthBg =
-    healthState === "healthy"
-      ? "rgba(34,211,160,0.06)"
-      : healthState === "degraded"
-        ? "rgba(245,158,11,0.06)"
-        : healthState === "critical"
-          ? "rgba(248,68,90,0.06)"
-          : "transparent";
-
   return (
     <footer
       style={{
-        height: 26,
-        minHeight: 26,
+        height: 22,
+        minHeight: 22,
         background: "var(--proof-status-bar-bg)",
-        color: "var(--proof-status-bar-text)",
+        color: "var(--proof-text-muted)",
         display: "flex",
         alignItems: "center",
-        paddingLeft: 12,
-        paddingRight: 12,
-        fontSize: 11,
+        paddingLeft: 8,
+        paddingRight: 8,
+        fontSize: 10,
         gap: 0,
         flexShrink: 0,
         userSelect: "none",
-        fontFamily: "var(--font-sans)",
-        borderTop: "1px solid var(--proof-border)",
+        fontFamily: "var(--font-mono)",
+        borderTop: "1px solid var(--proof-border-strong)",
         position: "relative",
         overflow: "hidden",
       }}
@@ -74,11 +65,10 @@ export function StatusBar() {
             position: "absolute",
             bottom: 0,
             left: 0,
-            height: 2,
+            height: 1,
             width: `${passPct}%`,
             background: `linear-gradient(90deg, ${healthColor}80, ${healthColor}30)`,
             transition: "width 1s ease, background 0.5s ease",
-            borderRadius: "0 99px 0 0",
           }}
         />
       )}
@@ -88,8 +78,8 @@ export function StatusBar() {
         <div
           style={{
             position: "relative",
-            width: 8,
-            height: 8,
+            width: 6,
+            height: 6,
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
@@ -110,15 +100,15 @@ export function StatusBar() {
           <span
             style={{
               position: "relative",
-              width: 5,
-              height: 5,
+              width: 4,
+              height: 4,
               borderRadius: "50%",
               background: healthColor,
-              boxShadow: healthState !== "unknown" ? `0 0 8px ${healthColor}` : "none",
+              boxShadow: healthState !== "unknown" ? `0 0 6px ${healthColor}` : "none",
             }}
           />
         </div>
-        {activeEnvLabel}
+        <span style={{ color: "var(--proof-text)" }}>{activeEnvLabel}</span>
       </StatusChip>
 
       <div style={{ flex: 1 }} />
@@ -127,17 +117,13 @@ export function StatusBar() {
       {totalRuns > 0 && (
         <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
           <StatusChip>
-            <span style={{ opacity: 0.4, marginRight: 2, fontSize: 12 }}>⬡</span>
-            {totalRuns} run{totalRuns !== 1 ? "s" : ""}
+            <span style={{ color: "var(--proof-text)" }}>{totalRuns}</span> RUNS
           </StatusChip>
 
           {passPct > 0 && (
             <StatusChip
               style={{
-                background: healthBg,
                 color: healthColor,
-                fontWeight: 600,
-                borderLeft: "1px solid var(--proof-border)",
               }}
             >
               {healthState === "healthy" ? (
@@ -145,55 +131,26 @@ export function StatusBar() {
               ) : (
                 <WifiOff size={10} aria-hidden="true" style={{ opacity: 0.8 }} />
               )}
-              {passPct}% pass
+              {passPct}% PASS
             </StatusChip>
           )}
 
           {failedRuns > 0 && (
             <StatusChip
               style={{
-                color: "var(--proof-red-bright)",
-                background: "rgba(248,68,90,0.08)",
-                borderLeft: "1px solid var(--proof-border)",
-                fontWeight: 600,
+                color: "var(--proof-red)",
               }}
             >
-              <span style={{ fontSize: 12, marginRight: 2 }}>✕</span> {failedRuns} failed
+              <span style={{ fontSize: 10, marginRight: 2 }}>✕</span> {failedRuns} FAILED
             </StatusChip>
           )}
         </div>
       )}
 
-      {/* Version tag */}
-      <StatusChip style={{ opacity: 0.35, borderLeft: "1px solid var(--proof-border)" }}>
-        v1.0
+      <StatusChip style={{ opacity: 0.5, borderRight: "none" }}>
+        AWARE_V1.0
       </StatusChip>
     </footer>
-  );
-}
-
-function StatusItem({
-  children,
-  style,
-}: {
-  children: React.ReactNode;
-  style?: React.CSSProperties;
-}) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5,
-        padding: "0 8px",
-        opacity: 0.9,
-        borderRight: "1px solid var(--proof-border)",
-        height: "100%",
-        ...style,
-      }}
-    >
-      {children}
-    </span>
   );
 }
 
@@ -209,11 +166,10 @@ function StatusChip({
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: 4,
+        gap: 6,
         padding: "0 10px",
         height: "100%",
-        borderRight: "1px solid var(--proof-border)",
-        fontSize: 10.5,
+        borderRight: "1px solid var(--proof-border-strong)",
         transition: "color 0.3s ease",
         ...style,
       }}
@@ -222,5 +178,3 @@ function StatusChip({
     </span>
   );
 }
-
-export { StatusItem };

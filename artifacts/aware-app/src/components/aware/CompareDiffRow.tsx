@@ -19,47 +19,21 @@ export function DiffRowItem({
         display: "grid",
         gridTemplateColumns: "1fr 1fr 1fr",
         gap: 12,
-        padding: "6px 8px",
+        padding: "8px 12px",
         borderBottom: "1px solid var(--proof-border)",
-        background: changed ? (label.toLowerCase().includes('fail') || label.toLowerCase().includes('error') ? "rgba(239,68,68,0.06)" : "rgba(59,130,246,0.06)") : "transparent",
-        borderRadius: changed ? 6 : 0,
-        fontSize: 11,
+        background: changed ? (label.toLowerCase().includes('fail') || label.toLowerCase().includes('error') ? "rgba(255,51,85,0.06)" : "rgba(0,196,255,0.06)") : "transparent",
         fontFamily: "var(--font-mono)",
-        marginLeft: indent ? 12 : 0,
-        transition: "background 0.2s ease",
+        fontSize: 12,
+        marginLeft: indent ? 16 : 0,
       }}
     >
-      <span
-        style={{
-          color: "var(--proof-text-secondary)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          fontWeight: changed ? 700 : 500,
-        }}
-      >
+      <span style={{ color: "var(--proof-text-secondary)", fontWeight: changed ? 700 : 500 }}>
         {label}
       </span>
-      <span
-        style={{
-          color: changed ? "var(--proof-red)" : "var(--proof-text)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          opacity: changed ? 1 : 0.8,
-        }}
-      >
+      <span style={{ color: changed ? "var(--proof-red)" : "var(--proof-text-muted)" }}>
         {base}
       </span>
-      <span
-        style={{
-          color: changed ? "var(--proof-green)" : "var(--proof-text)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          fontWeight: changed ? 600 : 400,
-        }}
-      >
+      <span style={{ color: changed ? "var(--proof-green)" : "var(--proof-text)" }}>
         {cand}
       </span>
     </div>
@@ -79,26 +53,8 @@ export function compareHeaders(
 }
 
 export function compareCookies(
-  base:
-    | {
-        name: string;
-        value: string;
-        domain?: string;
-        path?: string;
-        httpOnly?: boolean;
-        secure?: boolean;
-      }[]
-    | undefined,
-  cand:
-    | {
-        name: string;
-        value: string;
-        domain?: string;
-        path?: string;
-        httpOnly?: boolean;
-        secure?: boolean;
-      }[]
-    | undefined,
+  base: any[] | undefined,
+  cand: any[] | undefined,
 ) {
   const allNames = [
     ...new Set([...(base ?? []).map((c) => c.name), ...(cand ?? []).map((c) => c.name)]),

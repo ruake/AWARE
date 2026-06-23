@@ -18,16 +18,28 @@ export function StateBadge({ state }: { state: DiffRow["state"] }) {
     icon: Minus,
   };
   const Icon = s.icon;
+  const isRegression = state === "regression";
+  const isFixed = state === "fixed";
+  const glow = isRegression ? "var(--proof-glow-red)" : isFixed ? "var(--proof-glow-green)" : "none";
+  const bg = isRegression ? "var(--proof-red-bg)" : isFixed ? "var(--proof-green-bg)" : "var(--proof-surface-2)";
 
   return (
     <span
       style={{
-        fontSize: 11,
-        fontWeight: 600,
+        fontSize: 10,
+        fontWeight: 800,
+        fontFamily: "var(--font-mono)",
         color: s.color,
+        background: bg,
+        padding: "4px 8px",
+        borderRadius: 4,
+        border: `1px solid ${s.color}40`,
+        boxShadow: glow,
         display: "inline-flex",
         alignItems: "center",
-        gap: 4,
+        gap: 6,
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
       }}
       aria-label={s.label}
       title={s.label}

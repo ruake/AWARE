@@ -2,13 +2,14 @@ import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
 import { Pagination, StatusBadge, PageTemplate } from "@/components/aware";
 import { getRuns, subscribeToRuns } from "@/lib/data";
+import { useDataInit } from "@/lib/hooks/useData";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { formatRelativeTime, formatDurationMs } from "@/lib/i18n";
 import type { Run } from "@/lib/types";
 import {
   Play, GitCompare, Loader2, ExternalLink, Search, X, Activity,
-  ChevronRight, Minus,
+  ChevronRight, Minus, ChevronUp, ChevronDown
 } from "lucide-react";
 import { repo } from "@/lib/nav";
 
@@ -28,16 +29,17 @@ function timeAgo(iso: string): string {
 
 const TierBadge = React.memo(function TierBadge({ envId }: { envId: string }) {
   const tier = envId.split("_")[0]?.toUpperCase() ?? envId.toUpperCase();
-  const cfg: Record<string, { color: string; bg: string }> = {
-    QA: { color: "var(--proof-blue)", bg: "var(--proof-blue-bg)" },
-    UAT: { color: "var(--proof-purple)", bg: "var(--proof-purple-bg)" },
-    PROD: { color: "var(--proof-green)", bg: "var(--proof-green-bg)" },
+  const cfg: Record<string, { color: string; bg: string; border: string; glow: string }> = {
+    QA: { color: "var(--proof-yellow)", bg: "var(--proof-yellow-bg)", border: "var(--proof-yellow-border)", glow: "var(--proof-glow-amber)" },
+    UAT: { color: "var(--proof-blue)", bg: "var(--proof-blue-bg)", border: "var(--proof-blue-border)", glow: "var(--proof-glow-cyan)" },
+    PROD: { color: "var(--proof-green)", bg: "var(--proof-green-bg)", border: "var(--proof-green-border)", glow: "var(--proof-glow-green)" },
   };
-  const c = cfg[tier] ?? { color: "var(--proof-text-muted)", bg: "var(--proof-subtle-bg)" };
+  const c = cfg[tier] ?? { color: "var(--proof-text-muted)", bg: "var(--proof-subtle-bg)", border: "var(--proof-border)", glow: "none" };
   return (
     <span style={{
-      fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px",
-      color: c.color, background: c.bg, padding: "2px 6px", borderRadius: "4px",
+      fontSize: "10px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em",
+      color: c.color, background: c.bg, border: `1px solid ${c.border}`, padding: "4px 8px", borderRadius: "6px",
+      boxShadow: c.glow
     }}>
       {tier}
     </span>
@@ -46,17 +48,18 @@ const TierBadge = React.memo(function TierBadge({ envId }: { envId: string }) {
 
 const PassBar = React.memo(function PassBar({ pct }: { pct: number }) {
   const c = pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
+  const bg = pct >= 95 ? "var(--proof-green-bg)" : pct >= 80 ? "var(--proof-yellow-bg)" : "var(--proof-red-bg)";
   return (
     <div 
-      style={{ display: "flex", alignItems: "center", gap: 8 }}
+      style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--proof-surface)", padding: "4px 8px", borderRadius: 6, border: "1px solid var(--proof-border-light)" }}
       role="progressbar"
       aria-valuenow={pct}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label={`${pct}% passing`}
     >
-      <div className="proof-progress-track" style={{ width: 48, height: 4 }}>
-        <div className="proof-progress-bar" style={{ width: `${pct}%`, background: c }} />
+      <div className="proof-progress-track" style={{ width: 48, height: 6, background: "var(--proof-surface-2)" }}>
+        <div className="proof-progress-bar" style={{ width: `${pct}%`, background: c, boxShadow: `0 0 8px ${c}` }} />
       </div>
       <span className="proof-mono" style={{ fontSize: "12px", fontWeight: 700, color: c, minWidth: "36px", textAlign: "right" }}>
         {pct}%
@@ -71,13 +74,26 @@ const FilterChip = React.memo(function FilterChip({ label, active, onSelect }: {
       onClick={onSelect}
       aria-pressed={active}
       style={{
-        display: "inline-flex", alignItems: "center", padding: "4px 12px",
+        display: "inline-flex", alignItems: "center", padding: "6px 14px",
         borderRadius: "var(--proof-radius-full)", cursor: "pointer",
         border: `1px solid ${active ? "var(--proof-blue-border)" : "var(--proof-border)"}`,
-        background: active ? "var(--proof-blue-bg)" : "transparent",
+        background: active ? "var(--proof-blue-bg)" : "var(--proof-surface-2)",
         color: active ? "var(--proof-blue-bright)" : "var(--proof-text-secondary)",
-        fontSize: "12px", fontWeight: active ? 600 : 500,
+        fontSize: "12px", fontWeight: active ? 700 : 600,
+        boxShadow: active ? "var(--proof-glow-cyan)" : "none",
         transition: "all var(--proof-transition)", whiteSpace: "nowrap",
+      }}
+      onMouseEnter={(e) => {
+        if (!active) {
+          e.currentTarget.style.background = "var(--proof-surface-hover)";
+          e.currentTarget.style.color = "var(--proof-text)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!active) {
+          e.currentTarget.style.background = "var(--proof-surface-2)";
+          e.currentTarget.style.color = "var(--proof-text-secondary)";
+        }
       }}
     >
       {label}
@@ -92,6 +108,7 @@ export default function Runs() {
   const [suiteFilter, setSuiteFilter] = useSyncedUrlState("suite", "all");
   const [envFilter, setEnvFilter] = useSyncedUrlState("env", "all");
 
+  const dataState = useDataInit();
   const allRuns = useSyncExternalStore(subscribeToRuns, getRuns);
   const envSnap = useSyncExternalStore(subscribeToSelectedEnv, getSelectedEnvSnapshot);
   
@@ -204,35 +221,45 @@ export default function Runs() {
     setSearch(""); setStatusFilter("all"); setSuiteFilter("all"); setEnvFilter("all"); setPage(1);
   };
 
+  const sortIcon = (key: SortableRunKey) => {
+    if (sortKey !== key) return null;
+    return sortDir === "asc" ? <ChevronUp size={14} style={{ color: "var(--proof-blue)" }} /> : <ChevronDown size={14} style={{ color: "var(--proof-blue)" }} />;
+  };
+
   return (
     <PageTemplate
       title="Run History"
       subtitle={`${envFilteredRuns.length} runs · Playwright + pytest across all environments`}
+      loading={dataState.loading}
+      error={dataState.error as Error | null}
       headerActions={(
         <>
           {runningCount > 0 && (
             <span className="proof-badge" style={{
               color: "var(--proof-blue-bright)", background: "var(--proof-blue-bg)", borderColor: "var(--proof-blue-border)",
+              boxShadow: "var(--proof-glow-cyan)", padding: "8px 16px", fontSize: 13, fontWeight: 700
             }}>
-              <Loader2 size={12} className="animate-spin" /> {runningCount} running
+              <Loader2 size={16} style={{ animation: "spin 1s linear infinite", marginRight: 8 }} /> {runningCount} RUNNING
             </span>
           )}
           <button
             onClick={() => window.open(`${repo}/actions/workflows/run-tests.yml`, "_blank")}
             className="proof-btn proof-btn-primary"
+            style={{ padding: "8px 20px", fontSize: 13, fontWeight: 700, borderRadius: 8 }}
           >
-            <Play size={14} /> Start Run <ExternalLink size={12} style={{ opacity: 0.7 }} />
+            <Play size={16} /> Start Run <ExternalLink size={14} style={{ opacity: 0.7 }} />
           </button>
         </>
       )}
       filters={(
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", width: "100%", paddingBottom: 16 }}>
           {/* Search */}
-          <div style={{ position: "relative", flex: "1 1 240px", minWidth: "180px" }}>
-            <label htmlFor="run-search" className="sr-only">Search runs</label>
-            <Search size={14} style={{
-              position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)",
-              color: "var(--proof-text-muted)", pointerEvents: "none",
+          <div style={{ position: "relative", flex: "1 1 300px", minWidth: "240px" }}>
+            <label htmlFor="run-search" style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}>Search runs</label>
+            <Search size={16} style={{
+              position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)",
+              color: search ? "var(--proof-blue)" : "var(--proof-text-muted)", pointerEvents: "none",
+              transition: "color 0.2s"
             }} />
             <input
               id="run-search"
@@ -241,16 +268,17 @@ export default function Runs() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search runs by ID, env, or suite…"
               className="proof-input"
-              style={{ paddingLeft: "36px" }}
+              style={{ paddingLeft: "42px", paddingRight: "36px", height: 44, borderRadius: 8, fontSize: 14, background: "var(--proof-surface-2)", border: "1px solid var(--proof-border)", boxShadow: search ? "0 0 0 2px var(--proof-blue-glow)" : "none" }}
               maxLength={200}
             />
-            {search && (
+              {search && (
               <button
                 onClick={() => setSearch("")}
+                aria-label="Clear search"
                 style={{
-                  position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)",
-                  background: "transparent", border: "none", cursor: "pointer",
-                  color: "var(--proof-text-muted)", padding: "4px", display: "flex",
+                  position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
+                  background: "var(--proof-surface-hover)", border: "none", cursor: "pointer",
+                  color: "var(--proof-text-muted)", padding: "4px", display: "flex", borderRadius: "50%"
                 }}
               >
                 <X size={14} />
@@ -258,10 +286,10 @@ export default function Runs() {
             )}
           </div>
 
-          <div style={{ width: "1px", height: "24px", background: "var(--proof-border)", flexShrink: 0 }} />
+          <div style={{ width: "1px", height: "32px", background: "var(--proof-border)", flexShrink: 0 }} />
 
           {/* Status chips */}
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             {["all", "PASS", "FAIL", "PARTIAL", "FLAKY"].map((s) => (
               <FilterChip key={s} label={s === "all" ? "All" : s} active={statusFilter === s} onSelect={() => setStatusFilter(s)} />
             ))}
@@ -271,9 +299,9 @@ export default function Runs() {
             <button
               onClick={resetFilters}
               className="proof-btn proof-btn-ghost"
-              style={{ padding: "4px 8px", fontSize: "12px" }}
+              style={{ padding: "6px 12px", fontSize: "12px", fontWeight: 600 }}
             >
-              <X size={12} /> Clear Filters
+              <X size={14} /> Clear Filters
             </button>
           )}
         </div>
@@ -293,14 +321,15 @@ export default function Runs() {
     >
       {/* Stats row */}
       <div style={{
-        display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px",
-        fontSize: "13px", color: "var(--proof-text-secondary)",
+        display: "flex", alignItems: "center", gap: "20px", marginBottom: "24px",
+        fontSize: "14px", color: "var(--proof-text-secondary)", fontWeight: 500,
+        background: "var(--proof-surface-2)", padding: "12px 20px", borderRadius: 8, border: "1px solid var(--proof-border)"
       }}>
         <span>Showing <strong style={{ color: "var(--proof-text)" }}>{totalItems}</strong> of {envFilteredRuns.length} runs</span>
         <span style={{ color: "var(--proof-border-strong)" }}>·</span>
-        <span style={{ color: "var(--proof-green)" }}>{passedCount} passed</span>
-        <span style={{ color: "var(--proof-red)" }}>{failedCount} failed</span>
-        {partialCount > 0 && <span style={{ color: "var(--proof-yellow)" }}>{partialCount} partial</span>}
+        <span style={{ color: "var(--proof-green)", display: "flex", alignItems: "center", gap: 6 }}><div style={{width: 8, height: 8, borderRadius: "50%", background: "var(--proof-green)"}}/>{passedCount} passed</span>
+        <span style={{ color: "var(--proof-red)", display: "flex", alignItems: "center", gap: 6 }}><div style={{width: 8, height: 8, borderRadius: "50%", background: "var(--proof-red)"}}/>{failedCount} failed</span>
+        {partialCount > 0 && <span style={{ color: "var(--proof-yellow)", display: "flex", alignItems: "center", gap: 6 }}><div style={{width: 8, height: 8, borderRadius: "50%", background: "var(--proof-yellow)"}}/>{partialCount} partial</span>}
         
         <div style={{ flex: 1 }} />
         
@@ -308,132 +337,116 @@ export default function Runs() {
           onClick={handleExportCSV}
           className="proof-btn proof-btn-ghost"
           aria-label="Export filtered runs as CSV"
+          style={{ fontSize: 13, fontWeight: 600 }}
         >
           Export CSV
         </button>
         <button
           onClick={() => navigate("/compare")}
           className="proof-btn proof-btn-ghost"
+          style={{ fontSize: 13, fontWeight: 600, border: "1px solid var(--proof-border)" }}
         >
-          <GitCompare size={14} /> Compare Runs
+          <GitCompare size={16} /> Compare Runs
         </button>
       </div>
 
       {/* Table */}
-      <div className="proof-card" style={{ overflow: "hidden" }}>
+      <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+      <div className="glass-panel" style={{ minWidth: 800, borderRadius: 12, border: "1px solid var(--proof-border)", overflow: "hidden" }}>
         {/* Table header */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "2.5fr 110px 100px 110px 100px 100px 40px",
-          padding: "12px 20px",
-          background: "var(--proof-surface-2)",
-          borderBottom: "1px solid var(--proof-border)",
-          fontSize: "11px", fontWeight: 700, textTransform: "uppercase",
-          letterSpacing: "0.5px", color: "var(--proof-text-muted)",
+          gridTemplateColumns: "2.5fr 120px 140px 140px 120px 140px 40px",
+          padding: "16px 24px",
+          background: "var(--proof-surface-3)",
+          borderBottom: "1px solid var(--proof-border-strong)",
+          fontSize: "12px", fontWeight: 800, textTransform: "uppercase",
+          letterSpacing: "0.1em", color: "var(--proof-text-muted)",
         }}>
-          <span 
-            onClick={() => toggleSort("id")} 
-            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
-            aria-sort={sortKey === "id" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && toggleSort("id")}
-          >
-            Run {sortKey === "id" && (sortDir === "asc" ? "↑" : "↓")}
-          </span>
-          <span 
-            onClick={() => toggleSort("env")} 
-            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
-            aria-sort={sortKey === "env" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && toggleSort("env")}
-          >
-            Env {sortKey === "env" && (sortDir === "asc" ? "↑" : "↓")}
-          </span>
-          <span 
-            onClick={() => toggleSort("status")} 
-            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
-            aria-sort={sortKey === "status" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && toggleSort("status")}
-          >
-            Status {sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
-          </span>
-          <span 
-            onClick={() => toggleSort("passPct")} 
-            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
-            aria-sort={sortKey === "passPct" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && toggleSort("passPct")}
-          >
-            Pass Rate {sortKey === "passPct" && (sortDir === "asc" ? "↑" : "↓")}
-          </span>
-          <span 
-            onClick={() => toggleSort("durationMs")} 
-            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
-            aria-sort={sortKey === "durationMs" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && toggleSort("durationMs")}
-          >
-            Duration {sortKey === "durationMs" && (sortDir === "asc" ? "↑" : "↓")}
-          </span>
-          <span 
-            onClick={() => toggleSort("started")} 
-            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
-            aria-sort={sortKey === "started" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && toggleSort("started")}
-          >
-            When {sortKey === "started" && (sortDir === "asc" ? "↑" : "↓")}
-          </span>
+          {[
+            { key: "id", label: "Run" },
+            { key: "env", label: "Env" },
+            { key: "status", label: "Status" },
+            { key: "passPct", label: "Pass Rate" },
+            { key: "durationMs", label: "Duration" },
+            { key: "started", label: "When" }
+          ].map((col) => (
+            <span 
+              key={col.key}
+              onClick={() => toggleSort(col.key as SortableRunKey)} 
+              style={{ 
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 6, borderRadius: "6px", padding: "4px 8px", margin: "-4px -8px",
+                color: sortKey === col.key ? "var(--proof-blue)" : "inherit",
+                transition: "all 0.2s"
+              }}
+              aria-sort={sortKey === col.key ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && toggleSort(col.key as SortableRunKey)}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--proof-surface-hover)"; e.currentTarget.style.color = "var(--proof-text)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = sortKey === col.key ? "var(--proof-blue)" : "var(--proof-text-muted)"; }}
+            >
+              {col.label} {sortIcon(col.key as SortableRunKey)}
+            </span>
+          ))}
           <span />
         </div>
 
         {/* Table rows */}
-        {paginated.map((run) => (
-          <RunRow key={run.id} run={run} onNavigate={(id) => navigate(`/runs/${id}`)} />
+        {paginated.map((run, index) => (
+          <RunRow key={run.id} run={run} index={index} onNavigate={(id) => navigate(`/runs/${id}`)} />
         ))}
+      </div>
       </div>
     </PageTemplate>
   );
 }
 
-function RunRow({ run, onNavigate }: { run: Run; onNavigate: (id: string) => void }) {
+function RunRow({ run, index, onNavigate }: { run: Run; index: number; onNavigate: (id: string) => void }) {
   const [hovered, setHovered] = React.useState(false);
+  const tier = run.env?.split("_")[0]?.toUpperCase() ?? "UNKNOWN";
+  const leftBorderColor = tier === "QA" ? "var(--proof-yellow)" : tier === "UAT" ? "var(--proof-blue)" : tier === "PROD" ? "var(--proof-green)" : "var(--proof-border)";
+  const leftBorderGlow = hovered ? (tier === "QA" ? "var(--proof-glow-amber)" : tier === "UAT" ? "var(--proof-glow-cyan)" : tier === "PROD" ? "var(--proof-glow-green)" : "none") : "none";
 
   return (
     <div
       onClick={() => onNavigate(run.id)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      role="button"
+      tabIndex={0}
+      aria-label={`View run ${run.id}`}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNavigate(run.id); } }}
       style={{
         display: "grid",
-        gridTemplateColumns: "2.5fr 110px 100px 110px 100px 100px 40px",
-        padding: "14px 20px",
+        gridTemplateColumns: "2.5fr 120px 140px 140px 120px 140px 40px",
+        padding: "16px 24px",
         borderBottom: "1px solid var(--proof-border-light)",
         cursor: "pointer",
-        background: hovered ? "var(--proof-surface-hover)" : "transparent",
-        transition: "background var(--proof-transition)",
+        background: hovered ? "rgba(255, 255, 255, 0.03)" : "transparent",
+        transition: "all var(--proof-transition)",
         alignItems: "center",
+        borderLeft: `4px solid ${leftBorderColor}`,
+        boxShadow: leftBorderGlow,
+        animation: `proof-slide-up 0.4s ease-out forwards`,
+        animationDelay: `${Math.min(index * 30, 600)}ms`,
+        opacity: 0, // for animation
       }}
     >
       {/* Run ID + suite */}
-      <div style={{ minWidth: 0 }}>
+      <div style={{ minWidth: 0, paddingLeft: 12 }}>
         <div className="proof-mono" style={{
-          fontSize: "13px", fontWeight: 600, color: "var(--proof-text)",
-          marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          fontSize: "14px", fontWeight: 700, color: "var(--proof-text)",
+          marginBottom: "6px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          letterSpacing: "-0.02em"
         }}>
           {run.id}
         </div>
         {run.suiteId && (
           <div style={{
-            fontSize: "12px", color: "var(--proof-text-secondary)",
+            fontSize: "12px", color: "var(--proof-text-secondary)", fontWeight: 600,
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            display: "inline-flex", background: "var(--proof-surface-2)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--proof-border-light)"
           }}>
             {run.suiteId}
           </div>
@@ -456,20 +469,20 @@ function RunRow({ run, onNavigate }: { run: Run; onNavigate: (id: string) => voi
       </div>
 
       {/* Duration */}
-      <div className="proof-mono" style={{ fontSize: "13px", color: "var(--proof-text-secondary)" }}>
-        {run.durationMs ? formatDuration(run.durationMs) : <Minus size={12} style={{ opacity: 0.3 }} />}
+      <div className="proof-mono" style={{ fontSize: "14px", fontWeight: 600, color: "var(--proof-text-secondary)" }}>
+        {run.durationMs ? formatDuration(run.durationMs) : <Minus size={14} style={{ opacity: 0.3 }} />}
       </div>
 
       {/* Time */}
-      <div style={{ fontSize: "12px", color: "var(--proof-text-secondary)" }}>
+      <div style={{ fontSize: "13px", fontWeight: 500, color: "var(--proof-text-secondary)" }}>
         {run.started ? timeAgo(run.started) : "—"}
       </div>
 
       {/* Arrow */}
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <ChevronRight size={16} style={{
-          color: hovered ? "var(--proof-text)" : "var(--proof-text-muted)",
-          transform: hovered ? "translateX(2px)" : "translateX(0)",
+        <ChevronRight size={20} style={{
+          color: hovered ? "var(--proof-blue)" : "var(--proof-text-muted)",
+          transform: hovered ? "translateX(4px)" : "translateX(0)",
           transition: "all var(--proof-transition)",
         }} />
       </div>

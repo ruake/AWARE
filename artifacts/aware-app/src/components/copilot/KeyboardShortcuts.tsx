@@ -61,8 +61,7 @@ const ACTION_CATEGORY: Record<string, Category> = {
   newline: "Messaging",
   "edit-last": "Messaging",
   close: "General",
-  export: "General",
-};
+  export: "General"};
 
 function groupByCategory(): { label: Category; items: KeyboardShortcut[] }[] {
   const map = new Map<Category, KeyboardShortcut[]>();
@@ -73,8 +72,7 @@ function groupByCategory(): { label: Category; items: KeyboardShortcut[] }[] {
   }
   return CATEGORY_ORDER.filter((c) => map.has(c)).map((label) => ({
     label,
-    items: map.get(label)!,
-  }));
+    items: map.get(label)!}));
 }
 
 export default function KeyboardShortcuts({ onClose }: Props) {
@@ -101,8 +99,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
         alignItems: "center",
         justifyContent: "center",
         background: "rgba(2, 8, 23, 0.7)",
-        backdropFilter: "blur(6px)",
-      }}
+        backdropFilter: "blur(6px)"}}
     >
       <div
         ref={dialogRef}
@@ -117,9 +114,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
           border: "1px solid var(--proof-border)",
           borderRadius: 12,
           boxShadow: "var(--proof-shadow-lg), 0 0 0 1px rgba(59,130,246,0.08)",
-          padding: 0,
-          outline: "none",
-        }}
+          padding: 0}}
       >
         <div
           style={{
@@ -127,8 +122,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 20px 12px",
-            borderBottom: "1px solid var(--proof-border-light)",
-          }}
+            borderBottom: "1px solid var(--proof-border-light)"}}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div
@@ -140,8 +134,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
                 height: 32,
                 borderRadius: 8,
                 background: "var(--proof-blue-bg)",
-                color: "var(--proof-blue-bright)",
-              }}
+                color: "var(--proof-blue-bright)"}}
             >
               <Keyboard size={16} />
             </div>
@@ -150,8 +143,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
                 fontSize: 15,
                 fontWeight: 600,
                 color: "var(--proof-text)",
-                letterSpacing: "0.2px",
-              }}
+                letterSpacing: "0.2px"}}
             >
               Keyboard Shortcuts
             </span>
@@ -168,8 +160,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
               border: "none",
               background: "transparent",
               color: "var(--proof-text-muted)",
-              cursor: "pointer",
-            }}
+              cursor: "pointer"}}
           >
             <X size={14} />
           </button>
@@ -183,8 +174,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
                   style={{
                     height: 1,
                     background: "var(--proof-border-light)",
-                    margin: "4px 20px",
-                  }}
+                    margin: "4px 20px"}}
                 />
               )}
               {group.items.map((shortcut, si) => {
@@ -198,16 +188,14 @@ export default function KeyboardShortcuts({ onClose }: Props) {
                       alignItems: "center",
                       justifyContent: "space-between",
                       padding: "8px 20px",
-                      background: altRow ? "var(--proof-hover-light)" : "transparent",
-                    }}
+                      background: altRow ? "var(--proof-hover-light)" : "transparent"}}
                   >
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
                         gap: 4,
-                        flexWrap: "wrap",
-                      }}
+                        flexWrap: "wrap"}}
                     >
                       {parts.map((part, pi) => (
                         <React.Fragment key={pi}>
@@ -216,8 +204,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
                               style={{
                                 fontSize: 10,
                                 color: "var(--proof-text-muted)",
-                                userSelect: "none",
-                              }}
+                                userSelect: "none"}}
                             >
                               +
                             </span>
@@ -238,8 +225,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
                               border: "1px solid var(--proof-border)",
                               borderRadius: 5,
                               lineHeight: 1,
-                              userSelect: "none",
-                            }}
+                              userSelect: "none"}}
                           >
                             {part}
                           </kbd>
@@ -252,8 +238,7 @@ export default function KeyboardShortcuts({ onClose }: Props) {
                         color: "var(--proof-text-secondary)",
                         marginLeft: 16,
                         textAlign: "right",
-                        flexShrink: 0,
-                      }}
+                        flexShrink: 0}}
                     >
                       {shortcut.description}
                     </span>

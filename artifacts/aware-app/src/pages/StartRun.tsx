@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Play, Github, GitCompare, ExternalLink, Loader2, Copy, Check, Clock } from "lucide-react";
+import { Play, Github, GitCompare, ExternalLink, Loader2, Copy, Check, Clock, Rocket } from "lucide-react";
 import { navTo, getRuns, getTestSuites, getEnvConfigs } from "@/lib/data";
 
 export default function StartRun() {
@@ -21,7 +21,6 @@ export default function StartRun() {
     }
     setError(null);
     setIsSubmitting(true);
-    // Simulate submission
     setTimeout(() => {
       setIsSubmitting(false);
       navTo("/runs");
@@ -49,34 +48,34 @@ export default function StartRun() {
       <div style={{ textAlign: "center", marginBottom: 40 }}>
         <div
           style={{
-            width: 64,
-            height: 64,
-            background: "var(--proof-blue-bg)",
-            borderRadius: 16,
+            width: 80,
+            height: 80,
+            background: "color-mix(in srgb, var(--proof-blue) 15%, transparent)",
+            borderRadius: 20,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            margin: "0 auto 20px",
-            boxShadow: "var(--proof-shadow-sm)",
+            margin: "0 auto 24px",
+            boxShadow: "var(--proof-glow-cyan)",
+            border: "1px solid rgba(0,196,255,0.3)"
           }}
         >
-          <Play size={32} style={{ color: "var(--proof-blue)", marginLeft: 4 }} />
+          <Rocket size={40} style={{ color: "var(--proof-blue)" }} />
         </div>
-        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 12, letterSpacing: "-0.02em" }}>Start New Test Run</h1>
-        <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", lineHeight: 1.6, maxWidth: 460, margin: "0 auto" }}>
-          Trigger a new regression test run through GitHub Actions. Results appear in the Runs table
-          once complete.
+        <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12, letterSpacing: "-0.02em", color: "var(--proof-text)" }}>LAUNCH REGRESSION</h1>
+        <p style={{ fontSize: 14, color: "var(--proof-text-secondary)", lineHeight: 1.6, maxWidth: 460, margin: "0 auto" }}>
+          Trigger a new regression test run through GitHub Actions. Results will be populated in the Runs table upon completion.
         </p>
       </div>
 
       <div
-        className="proof-card"
-        style={{ padding: 32, display: "flex", flexDirection: "column", gap: 24, marginBottom: 40 }}
+        className="glass-panel"
+        style={{ padding: 40, display: "flex", flexDirection: "column", gap: 24, marginBottom: 40, borderRadius: "var(--proof-radius-xl)" }}
       >
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div>
             <label 
-              style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}
+              style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--proof-text)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}
               htmlFor="suite-select"
             >
               Test Suite
@@ -88,10 +87,12 @@ export default function StartRun() {
                 setSuiteId(e.target.value);
                 if (e.target.value) setError(null);
               }}
-              className="proof-select"
+              className="proof-select metric-number"
               style={{
                 width: "100%",
-                border: error ? "1px solid var(--proof-red)" : undefined,
+                padding: "12px 16px",
+                border: error ? "1px solid var(--proof-red)" : "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(0,0,0,0.3)"
               }}
               aria-label="Select test suite to run"
             >
@@ -100,12 +101,12 @@ export default function StartRun() {
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
-            {error && <div style={{ color: "var(--proof-red)", fontSize: 11, marginTop: 6, fontWeight: 500 }}>{error}</div>}
+            {error && <div style={{ color: "var(--proof-red)", fontSize: 12, marginTop: 8, fontWeight: 500 }}>{error}</div>}
           </div>
 
           <div>
             <label 
-              style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}
+              style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--proof-text)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}
               htmlFor="env-select"
             >
               Target Environment
@@ -114,8 +115,8 @@ export default function StartRun() {
               id="env-select"
               value={envId}
               onChange={(e) => setEnvId(e.target.value)}
-              className="proof-select"
-              style={{ width: "100%" }}
+              className="proof-select metric-number"
+              style={{ width: "100%", padding: "12px 16px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)" }}
               aria-label="Select target environment"
             >
               {envConfigs.map(e => (
@@ -127,138 +128,60 @@ export default function StartRun() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="proof-button-primary"
+            className="proof-btn proof-btn-primary"
             style={{ 
               width: "100%", 
               justifyContent: "center", 
-              padding: "12px", 
-              fontSize: 15,
-              marginTop: 8,
+              padding: "16px", 
+              fontSize: 16,
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              marginTop: 16,
+              boxShadow: "var(--proof-glow-cyan)",
               opacity: isSubmitting ? 0.7 : 1
             }}
           >
-            {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Play size={18} />}
-            {isSubmitting ? "Triggering..." : "Start Workflow"}
+            {isSubmitting ? <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} /> : <Play size={20} />}
+            {isSubmitting ? "INITIATING..." : "LAUNCH RUN"}
           </button>
         </form>
-
-        <div style={{ height: 1, background: "var(--proof-border)", margin: "4px 0" }} />
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-              padding: 16,
-              borderRadius: 8,
-              border: "1px solid var(--proof-border)",
-              background: "var(--proof-surface-2)",
-            }}
-          >
-            <div style={{ 
-              width: 36, 
-              height: 36, 
-              borderRadius: 8, 
-              background: "var(--proof-surface-3)", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center" 
-            }}>
-              <Github size={20} style={{ color: "var(--proof-text)" }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>
-                GitHub Actions Dispatch
-              </div>
-              <div style={{ fontSize: 12, color: "var(--proof-text-secondary)" }}>
-                Trigger manually from the repository
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button
-                onClick={copyWorkflowUrl}
-                className="proof-button proof-button-sm proof-button-secondary"
-                title="Copy Workflow URL"
-                style={{ width: 32, height: 32, padding: 0, justifyContent: "center" }}
-              >
-                {copiedUrl ? <Check size={14} /> : <Copy size={14} />}
-              </button>
-              <a
-                href="https://github.com/ruake/AWARE/actions"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="proof-button proof-button-sm proof-button-secondary"
-                style={{ textDecoration: "none", width: 32, height: 32, padding: 0, justifyContent: "center" }}
-              >
-                <ExternalLink size={14} />
-              </a>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Recent Runs Section */}
       <div style={{ marginBottom: 48 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, paddingLeft: 4 }}>
           <Clock size={16} style={{ color: "var(--proof-text-muted)" }} />
-          <h3 style={{ fontSize: 12, fontWeight: 600, margin: 0, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--proof-text-secondary)" }}>Recent Environment Runs</h3>
+          <h3 className="metric-number" style={{ fontSize: 12, margin: 0, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--proof-text-secondary)" }}>RECENT LAUNCHES</h3>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {recentRunsByEnv.map(run => (
             <div 
               key={run.id}
-              className="proof-card"
+              className="glass-panel"
               style={{ 
                 display: "flex", 
                 alignItems: "center", 
                 justifyContent: "space-between",
-                padding: "12px 16px",
-                fontSize: 13,
-                border: "1px solid var(--proof-border-light)"
+                padding: "16px 20px",
+                borderRadius: "var(--proof-radius-lg)",
+                borderLeft: `4px solid ${run.passPct >= 95 ? "var(--proof-green)" : run.passPct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)"}`
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div className={`proof-status-dot proof-status-dot-${run.passPct >= 95 ? 'pass' : run.passPct >= 80 ? 'degraded' : 'fail'}`} />
-                <span style={{ fontWeight: 600 }}>{run.label}</span>
-                <span style={{ color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", fontSize: 11 }}>{run.id}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <span className="metric-number" style={{ fontWeight: 600, color: "var(--proof-text)" }}>{run.label}</span>
+                <span className="metric-number" style={{ color: "var(--proof-text-muted)", fontSize: 12 }}>{run.id}</span>
               </div>
-              <div style={{ color: "var(--proof-text-secondary)", fontSize: 12, fontWeight: 500 }}>
+              <div className="metric-number" style={{ color: "var(--proof-text-secondary)", fontSize: 14 }}>
                 <span style={{ color: run.passPct >= 95 ? "var(--proof-green)" : run.passPct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)" }}>{run.passPct}%</span>
-                <span style={{ margin: "0 8px", color: "var(--proof-border-strong)" }}>|</span>
-                {new Date(run.started).toLocaleDateString()}
               </div>
             </div>
           ))}
           {recentRunsByEnv.length === 0 && (
-            <div className="proof-empty-state" style={{ padding: "24px", fontSize: 13 }}>
+            <div className="glass-panel" style={{ padding: "32px", fontSize: 14, textAlign: "center", color: "var(--proof-text-muted)" }}>
               No recent runs found for this environment.
             </div>
           )}
         </div>
-      </div>
-
-      <div style={{ textAlign: "center" }}>
-        <button 
-          onClick={() => navTo("/compare")} 
-          style={{ 
-            background: "none", 
-            border: "none", 
-            color: "var(--proof-blue-bright)", 
-            fontSize: 13, 
-            fontWeight: 500,
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "8px 16px",
-            borderRadius: 8,
-            transition: "all 0.2s"
-          }}
-          className="proof-focus-ring"
-        >
-          <GitCompare size={16} /> Compare existing runs instead
-        </button>
       </div>
     </div>
   );

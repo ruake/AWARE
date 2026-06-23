@@ -6,8 +6,7 @@ import {
   getTestDetailsAsync,
   computeRunFrequency,
   subscribeToRuns,
-  getRuns,
-} from "@/lib/data";
+  getRuns} from "@/lib/data";
 import { getTestDetailStat, subscribeToSidebarData } from "@/lib/sidebarData";
 import { useTestData } from "@/hooks/useTestData";
 import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
@@ -25,8 +24,7 @@ import {
   Grid3x3,
   Activity,
   History,
-  Info,
-} from "lucide-react";
+  Info} from "lucide-react";
 
 function selectorLabel(item: { id: string; name: string }, query: string): React.ReactNode {
   if (!query.trim()) return item.name;
@@ -104,8 +102,7 @@ function TestSelector() {
             borderRadius: 6,
             border: "1px solid var(--proof-border)",
             background: "var(--proof-surface)",
-            cursor: "pointer",
-          }}
+            cursor: "pointer"}}
         >
           <ArrowLeft size={12} /> Back
         </button>
@@ -124,8 +121,7 @@ function TestSelector() {
             padding: "6px 10px",
             background: selOpen ? "var(--proof-surface-active)" : "var(--proof-surface)",
             transition: "all 0.2s ease",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-          }}
+            boxShadow: "0 2px 4px rgba(0,0,0,0.05)"}}
         >
           <Search size={14} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
           <input
@@ -153,14 +149,12 @@ function TestSelector() {
             placeholder={isTcMode ? "Search tests..." : "Search results..."}
             style={{
               border: "none",
-              outline: "none",
               fontSize: 12,
               background: "transparent",
               flex: 1,
               minWidth: 0,
               color: "var(--proof-text)",
-              padding: 0,
-            }}
+              padding: 0}}
           />
           {selSearch && (
             <X size={12} onClick={() => setSelSearch("")} style={{ color: "var(--proof-text-muted)", cursor: "pointer" }} />
@@ -185,8 +179,7 @@ function TestSelector() {
                 marginTop: 6,
                 maxHeight: 260,
                 overflow: "auto",
-                boxShadow: "0 12px 32px rgba(0,0,0,0.25)",
-              }}
+                boxShadow: "0 12px 32px rgba(0,0,0,0.25)"}}
             >
               {filteredSelector.map((item, i) => (
                 <div
@@ -200,8 +193,7 @@ function TestSelector() {
                     padding: "8px 12px",
                     cursor: "pointer",
                     background: i === selActiveIdx ? "var(--proof-blue-bg)" : "transparent",
-                    borderBottom: "1px solid var(--proof-border-subtle)",
-                  }}
+                    borderBottom: "1px solid var(--proof-border-subtle)"}}
                 >
                   <span
                     style={{
@@ -210,8 +202,7 @@ function TestSelector() {
                       flexShrink: 0,
                       color: i === selActiveIdx ? "var(--proof-blue-bright)" : "var(--proof-text-muted)",
                       fontFamily: "var(--font-mono)",
-                      minWidth: 44,
-                    }}
+                      minWidth: 44}}
                   >
                     {item.id}
                   </span>
@@ -222,8 +213,7 @@ function TestSelector() {
                       color: i === selActiveIdx ? "var(--proof-text)" : "var(--proof-text-secondary)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
+                      whiteSpace: "nowrap"}}
                   >
                     {selectorLabel(item, selSearch)}
                   </span>
@@ -294,32 +284,27 @@ function TrendsOverviewStats() {
       label: "Total Runs",
       value: freq.totalRuns.toLocaleString(),
       color: "var(--proof-blue)",
-      onClick: () => navigate("/runs"),
-    },
+      onClick: () => navigate("/runs")},
     {
       label: "Avg Pass Rate",
       value: `${avgPassRate}%`,
       color: avgPassRate >= 85 ? "var(--proof-green)" : "var(--proof-yellow)",
-      onClick: () => navigate("/runs"),
-    },
+      onClick: () => navigate("/runs")},
     {
       label: "Days",
       value: `${freq.daysCovered}d`,
       color: "var(--proof-text-secondary)",
-      onClick: () => navigate("/trends"),
-    },
+      onClick: () => navigate("/trends")},
     {
       label: "Flaky Tests",
       value: flakyCount.toString(),
       color: flakyCount > 0 ? "var(--proof-yellow)" : "var(--proof-text-muted)",
-      onClick: flakyCount > 0 ? () => navigate("/trends") : undefined,
-    },
+      onClick: flakyCount > 0 ? () => navigate("/trends") : undefined},
     {
       label: "Anomalies",
       value: anomalyCount.toString(),
       color: anomalyCount > 0 ? "var(--proof-red)" : "var(--proof-green)",
-      onClick: anomalyCount > 0 ? () => navigate("/trends") : undefined,
-    },
+      onClick: anomalyCount > 0 ? () => navigate("/trends") : undefined},
   ];
 
   return (
@@ -329,8 +314,7 @@ function TrendsOverviewStats() {
         gridTemplateColumns: "1fr 1fr",
         gap: 4,
         padding: "8px 10px",
-        borderBottom: "1px solid var(--proof-border)",
-      }}
+        borderBottom: "1px solid var(--proof-border)"}}
     >
       {items.map((item) => (
         <div
@@ -344,8 +328,7 @@ function TrendsOverviewStats() {
             flexDirection: "column",
             gap: 1,
             cursor: item.onClick ? "pointer" : "default",
-            transition: "background 0.1s",
-          }}
+            transition: "background 0.1s"}}
           onMouseEnter={(e) => {
             if (item.onClick)
               (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
@@ -360,8 +343,7 @@ function TrendsOverviewStats() {
               fontWeight: 700,
               fontFamily: "var(--font-mono)",
               color: item.color,
-              lineHeight: 1.2,
-            }}
+              lineHeight: 1.2}}
           >
             {item.value}
           </span>
@@ -370,8 +352,7 @@ function TrendsOverviewStats() {
               fontSize: 8,
               color: "var(--proof-text-muted)",
               textTransform: "uppercase",
-              letterSpacing: "0.4px",
-            }}
+              letterSpacing: "0.4px"}}
           >
             {item.label}
           </span>
@@ -396,8 +377,7 @@ function TestDetailSummary() {
           fontSize: 11,
           color: "var(--proof-text-secondary)",
           textAlign: "center",
-          lineHeight: 1.5,
-        }}
+          lineHeight: 1.5}}
       >
         Select a test to view pass rate history, assertion trends, and flakiness.
       </div>
@@ -409,20 +389,17 @@ function TestDetailSummary() {
       label: "Pass Rate",
       value: `${detail.passRate}%`,
       color: "var(--proof-blue)",
-      onClick: () => navigate(`/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}`),
-    },
+      onClick: () => navigate(`/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}`)},
     {
       label: "Flakiness",
       value: `${detail.flakinessScore}%`,
       color: detail.flakinessScore > 20 ? "var(--proof-yellow)" : "var(--proof-green)",
-      onClick: () => navigate(`/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}`),
-    },
+      onClick: () => navigate(`/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}`)},
     {
       label: "Avg Duration",
       value: `${detail.avgDuration}ms`,
       color: "var(--proof-green)",
-      onClick: () => navigate(`/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}`),
-    },
+      onClick: () => navigate(`/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}`)},
     {
       label: "Failures",
       value: detail.failCount.toString(),
@@ -434,8 +411,7 @@ function TestDetailSummary() {
                 `/trends?${params.get("testId") ? "testId" : "diffId"}=${testId}&hStatus=FAIL`,
               )
           : undefined,
-      active: hStatus === "FAIL",
-    },
+      active: hStatus === "FAIL"},
   ];
 
   return (
@@ -445,8 +421,7 @@ function TestDetailSummary() {
         gridTemplateColumns: "1fr 1fr",
         gap: 4,
         padding: "8px 10px",
-        borderBottom: "1px solid var(--proof-border)",
-      }}
+        borderBottom: "1px solid var(--proof-border)"}}
     >
       {items.map((item) => (
         <div
@@ -461,8 +436,7 @@ function TestDetailSummary() {
             gap: 1,
             cursor: item.onClick ? "pointer" : "default",
             transition: "background 0.1s",
-            border: item.active ? `1px solid ${item.color}40` : "1px solid transparent",
-          }}
+            border: item.active ? `1px solid ${item.color}40` : "1px solid transparent"}}
           onMouseEnter={(e) => {
             if (item.onClick)
               (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
@@ -479,8 +453,7 @@ function TestDetailSummary() {
               fontWeight: 700,
               fontFamily: "var(--font-mono)",
               color: item.color,
-              lineHeight: 1.2,
-            }}
+              lineHeight: 1.2}}
           >
             {item.value}
           </span>
@@ -489,8 +462,7 @@ function TestDetailSummary() {
               fontSize: 8,
               color: "var(--proof-text-muted)",
               textTransform: "uppercase",
-              letterSpacing: "0.4px",
-            }}
+              letterSpacing: "0.4px"}}
           >
             {item.label}
           </span>
@@ -516,18 +488,15 @@ function CompactTrendChart() {
     {
       label: "Pass Rate",
       value: `${detail.passRate}%`,
-      dotColor: detail.passRate >= 80 ? "var(--proof-green)" : "var(--proof-red)",
-    },
+      dotColor: detail.passRate >= 80 ? "var(--proof-green)" : "var(--proof-red)"},
     {
       label: "Flakiness",
       value: `${detail.flakinessScore}%`,
-      dotColor: flakinessColor,
-    },
+      dotColor: flakinessColor},
     {
       label: "Avg Duration",
       value: `${detail.avgDuration}ms`,
-      dotColor: "var(--proof-blue)",
-    },
+      dotColor: "var(--proof-blue)"},
   ];
 
   return (
@@ -542,8 +511,7 @@ function CompactTrendChart() {
           marginBottom: 6,
           display: "flex",
           alignItems: "center",
-          gap: 4,
-        }}
+          gap: 4}}
       >
         <TrendingUp size={11} /> Trend
       </div>
@@ -557,8 +525,7 @@ function CompactTrendChart() {
               gap: 6,
               padding: "4px 6px",
               borderRadius: 3,
-              background: "var(--proof-hover-light)",
-            }}
+              background: "var(--proof-hover-light)"}}
           >
             <div
               style={{
@@ -566,15 +533,13 @@ function CompactTrendChart() {
                 height: 6,
                 borderRadius: "50%",
                 background: item.dotColor,
-                flexShrink: 0,
-              }}
+                flexShrink: 0}}
             />
             <span
               style={{
                 fontSize: 9,
                 color: "var(--proof-text-secondary)",
-                flex: 1,
-              }}
+                flex: 1}}
             >
               {item.label}
             </span>
@@ -583,8 +548,7 @@ function CompactTrendChart() {
                 fontSize: 11,
                 fontWeight: 700,
                 fontFamily: "var(--font-mono)",
-                color: item.dotColor,
-              }}
+                color: item.dotColor}}
             >
               {item.value}
             </span>
@@ -610,8 +574,7 @@ function CompactCategoryHeatmap() {
     return Array.from(map.entries())
       .map(([env, s]) => ({
         env,
-        avgPassRate: Math.round(s.passPctSum / s.totalCount),
-      }))
+        avgPassRate: Math.round(s.passPctSum / s.totalCount)}))
       .sort((a, b) => b.avgPassRate - a.avgPassRate);
   }, [runs]);
 
@@ -629,8 +592,7 @@ function CompactCategoryHeatmap() {
           marginBottom: 6,
           display: "flex",
           alignItems: "center",
-          gap: 4,
-        }}
+          gap: 4}}
       >
         <Grid3x3 size={11} /> Environments
       </div>
@@ -651,8 +613,7 @@ function CompactCategoryHeatmap() {
                 gap: 6,
                 padding: "3px 6px",
                 borderRadius: 3,
-                background: "var(--proof-hover-light)",
-              }}
+                background: "var(--proof-hover-light)"}}
             >
               <span
                 style={{
@@ -660,8 +621,7 @@ function CompactCategoryHeatmap() {
                   fontWeight: 600,
                   color: "var(--proof-text-secondary)",
                   width: 32,
-                  flexShrink: 0,
-                }}
+                  flexShrink: 0}}
               >
                 {env}
               </span>
@@ -671,8 +631,7 @@ function CompactCategoryHeatmap() {
                   height: 4,
                   borderRadius: 2,
                   background: "var(--proof-grey)",
-                  overflow: "hidden",
-                }}
+                  overflow: "hidden"}}
               >
                 <div
                   style={{
@@ -680,8 +639,7 @@ function CompactCategoryHeatmap() {
                     height: "100%",
                     borderRadius: 2,
                     background: barColor,
-                    transition: "width 0.3s",
-                  }}
+                    transition: "width 0.3s"}}
                 />
               </div>
               <span
@@ -691,8 +649,7 @@ function CompactCategoryHeatmap() {
                   fontFamily: "var(--font-mono)",
                   color: barColor,
                   width: 32,
-                  textAlign: "right",
-                }}
+                  textAlign: "right"}}
               >
                 {avgPassRate}%
               </span>

@@ -19,7 +19,7 @@ function InlineCode({ children }: { children: React.ReactNode }) {
         padding: "1px 5px",
         fontSize: 12,
         fontFamily: "var(--font-mono)",
-        color: "#a5f3fc",
+        color: "var(--proof-cyan)",
       }}
     >
       {children}
@@ -137,9 +137,9 @@ function TaskItem({ children, checked }: { children: React.ReactNode; checked: b
           width: 16,
           height: 16,
           borderRadius: 3,
-          border: `1.5px solid ${checked ? "#34d399" : "var(--proof-border)"}`,
+          border: `1.5px solid ${checked ? "var(--proof-emerald)" : "var(--proof-border)"}`,
           background: checked ? "rgba(52,211,153,0.15)" : "transparent",
-          color: "#34d399",
+          color: "var(--proof-emerald)",
           fontSize: 10,
           fontWeight: 700,
           flexShrink: 0,
@@ -235,7 +235,7 @@ export function MarkdownRenderer({ content, streaming: _streaming }: MarkdownRen
         strong: ({ children }) => (
           <strong style={{ fontWeight: 700, color: "var(--proof-text)" }}>{children}</strong>
         ),
-        em: ({ children }) => <em style={{ color: "#94a3b8", fontStyle: "italic" }}>{children}</em>,
+        em: ({ children }) => <em style={{ color: "var(--proof-text-muted)", fontStyle: "italic" }}>{children}</em>,
         blockquote: ({ children }) => (
           <blockquote
             style={{

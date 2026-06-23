@@ -45,42 +45,34 @@ export function YamlPreview({ yaml }: { yaml: string }) {
   const { show, Toast } = useSimpleToast();
 
   return (
-    <div
-      style={{
-        border: "1px solid var(--proof-border)",
-        borderRadius: 12,
-        background: "var(--proof-surface)",
-        color: "var(--proof-text)",
-        overflow: "hidden",
-        boxShadow: "var(--proof-shadow-sm)",
-      }}
-    >
+    <div className="glass-panel" style={{ borderRadius: 12, overflow: "hidden" }}>
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "10px 16px",
-          background: "var(--proof-surface-2)",
-          borderBottom: "1px solid var(--proof-border)",
+          padding: "12px 16px",
+          background: "rgba(255,255,255,0.05)",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{
-              width: 8,
-              height: 8,
+              width: 10,
+              height: 10,
               borderRadius: "50%",
               background: "var(--proof-blue)",
+              boxShadow: "var(--proof-glow-cyan)",
             }}
           />
           <span
             style={{
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 700,
               textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              color: "var(--proof-text-secondary)",
+              letterSpacing: "1px",
+              color: "var(--proof-text)",
             }}
           >
             GitHub Actions Workflow
@@ -91,15 +83,15 @@ export function YamlPreview({ yaml }: { yaml: string }) {
             navigator.clipboard.writeText(yaml);
             show("YAML configuration copied to clipboard");
           }}
-          className="proof-button proof-button-sm"
-          style={{ padding: "4px 10px" }}
+          className="proof-button-ghost proof-button-sm"
+          style={{ padding: "4px 10px", color: "var(--proof-blue-bright)" }}
         >
-          <Copy size={12} /> Copy YAML
+          <Copy size={14} style={{ marginRight: 6 }}/> Copy YAML
         </button>
       </div>
       <pre
         style={{
-          fontSize: 12,
+          fontSize: 13,
           fontFamily: "var(--font-mono)",
           lineHeight: 1.6,
           overflow: "auto",
@@ -107,26 +99,35 @@ export function YamlPreview({ yaml }: { yaml: string }) {
           whiteSpace: "pre-wrap",
           padding: 20,
           margin: 0,
-          background: "var(--proof-surface)",
-          color: "var(--proof-text)",
+          background: "transparent",
         }}
       >
         {yaml.split("\n").map((line, i) => {
           const isComment = line.trim().startsWith("#");
-          const isKey = line.includes(":") && !line.startsWith("-");
+          const isKey = line.includes(":") && !line.trim().startsWith("-");
           
+          let coloredLine = <span style={{ color: "var(--proof-text)" }}>{line}</span>;
+          
+          if (isComment) {
+             coloredLine = <span style={{ color: "var(--proof-text-muted)" }}>{line}</span>;
+          } else if (isKey) {
+             const parts = line.split(":");
+             const key = parts[0];
+             const val = parts.slice(1).join(":");
+             coloredLine = (
+               <>
+                 <span style={{ color: "var(--proof-blue)" }}>{key}</span>:
+                 <span style={{ color: val.trim().match(/^[0-9]+$/) ? "var(--proof-yellow)" : "var(--proof-green)" }}>{val}</span>
+               </>
+             );
+          } else if (line.trim().startsWith("-")) {
+             coloredLine = <span style={{ color: "var(--proof-text)" }}>{line}</span>;
+          }
+
           return (
             <div key={i} style={{ display: "flex", gap: 16 }}>
-              <span style={{ width: 24, textAlign: "right", opacity: 0.3, userSelect: "none" }}>{i + 1}</span>
-              <span style={{ 
-                color: isComment 
-                  ? "var(--proof-text-secondary)" 
-                  : isKey 
-                    ? "var(--proof-blue)" 
-                    : "var(--proof-text)" 
-              }}>
-                {line}
-              </span>
+              <span style={{ width: 24, textAlign: "right", opacity: 0.3, userSelect: "none", color: "var(--proof-text)" }}>{i + 1}</span>
+              {coloredLine}
             </div>
           );
         })}

@@ -121,7 +121,7 @@ export function AboutFeatures() {
                   style={{
                     width: 34,
                     height: 34,
-                    borderRadius: 9,
+                    borderRadius: "var(--proof-radius)",
                     background: `color-mix(in srgb, ${f.color} 10%, transparent)`,
                     border: `1px solid color-mix(in srgb, ${f.color} 15%, transparent)`,
                     display: "flex",
@@ -135,7 +135,7 @@ export function AboutFeatures() {
                 <div>
                   <div
                     style={{
-                      fontSize: 12.5,
+                      fontSize: 12,
                       fontWeight: 600,
                       color: "var(--proof-text)",
                       letterSpacing: "-0.1px",
@@ -145,7 +145,7 @@ export function AboutFeatures() {
                   </div>
                   <div
                     style={{
-                      fontSize: 11.5,
+                      fontSize: 12,
                       color: "var(--proof-text-secondary)",
                       lineHeight: 1.45,
                       marginTop: 2,

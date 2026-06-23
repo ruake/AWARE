@@ -19,10 +19,10 @@ const TONE_ICONS: Record<ToneOption, React.ReactNode> = {
 };
 
 const TONE_COLORS: Record<ToneOption, string> = {
-  professional: "#60a5fa",
-  concise: "#a78bfa",
-  detailed: "#f59e0b",
-  friendly: "#34d399",
+  professional: "var(--proof-blue)",
+  concise: "var(--proof-purple)",
+  detailed: "var(--proof-yellow)",
+  friendly: "var(--proof-emerald)",
   technical: "#f472b6",
 };
 

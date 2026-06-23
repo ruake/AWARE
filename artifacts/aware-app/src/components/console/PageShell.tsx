@@ -71,28 +71,24 @@ export function PageShell({
         animation: "page-enter 0.2s ease-out both",
       }}
     >
-      {/* Header */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 12,
-          padding: "24px 32px",
+          padding: "20px 24px",
           flexShrink: 0,
           borderBottom: "1px solid var(--proof-border)",
-          background: "rgba(0,0,0,0.1)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
+          background: "var(--proof-surface)",
           position: "relative",
         }}
       >
-        {/* Left accent line */}
         <div
           style={{
             position: "absolute",
             bottom: -1,
-            left: 32,
+            left: 24,
             width: 48,
             height: 2,
             borderRadius: 99,
@@ -105,12 +101,13 @@ export function PageShell({
         <div style={{ minWidth: 0 }}>
           <h1
             style={{
-              fontSize: 17,
+              fontSize: 16,
               fontWeight: 700,
               color: "var(--proof-text)",
               margin: 0,
               lineHeight: 1.2,
-              letterSpacing: "-0.02em",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
             }}
           >
             {title}
@@ -118,7 +115,7 @@ export function PageShell({
           {subtitle && (
             <p
               style={{
-                fontSize: 13,
+                fontSize: 12,
                 color: "var(--proof-text-secondary)",
                 margin: "4px 0 0",
                 lineHeight: 1.4,
@@ -135,11 +132,10 @@ export function PageShell({
         )}
       </div>
 
-      {/* Filters */}
       {filters && (
         <div
           style={{
-            padding: "12px 32px",
+            padding: "12px 24px",
             flexShrink: 0,
             borderBottom: "1px solid var(--proof-border-light)",
             background: "var(--proof-surface-2)",
@@ -149,27 +145,24 @@ export function PageShell({
         </div>
       )}
 
-      {/* Top pagination */}
       {hasPaginationTop && (
-        <div style={{ padding: "12px 32px 0", flexShrink: 0 }}>{renderPagination()}</div>
+        <div style={{ padding: "12px 24px 0", flexShrink: 0 }}>{renderPagination()}</div>
       )}
 
-      {/* Content area */}
       <div
         style={{
           flex: 1,
           minHeight: 0,
           overflowY: "auto",
           overflowX: "hidden",
-          padding: "24px 32px 32px",
+          padding: "24px",
         }}
       >
         {children}
       </div>
 
-      {/* Bottom pagination */}
       {hasPaginationBottom && (
-        <div style={{ padding: "0 32px 24px", flexShrink: 0 }}>{renderPagination()}</div>
+        <div style={{ padding: "0 24px 20px", flexShrink: 0 }}>{renderPagination()}</div>
       )}
     </div>
   );

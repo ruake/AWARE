@@ -37,7 +37,7 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
         border: "1px solid var(--proof-border)",
         background: "var(--proof-hover-light)",
         cursor: "pointer",
-        color: copied ? "#34d399" : "var(--proof-text-muted)",
+        color: copied ? "var(--proof-emerald)" : "var(--proof-text-muted)",
         display: "inline-flex",
         alignItems: "center",
         gap: 4,
@@ -95,7 +95,7 @@ function CodeBlock({ children, language }: { children: string; language: string 
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: copied ? "#34d399" : "var(--proof-text-muted)",
+            color: copied ? "var(--proof-emerald)" : "var(--proof-text-muted)",
             fontSize: 10,
             padding: "2px 4px",
             borderRadius: 4,
@@ -180,7 +180,7 @@ export function UserBubble({ message }: BubbleProps) {
           marginTop: 2,
         }}
       >
-        <User size={14} style={{ color: "#60a5fa" }} />
+        <User size={14} style={{ color: "var(--proof-blue)" }} />
       </div>
     </div>
   );
@@ -245,7 +245,7 @@ function AssistantBubbleInner({ message, onRetry, providerType = "chrome" }: Bub
           transition: "box-shadow 0.3s",
         }}
       >
-        <Bot size={14} style={{ color: "#60a5fa" }} />
+        <Bot size={14} style={{ color: "var(--proof-blue)" }} />
       </div>
 
       <div style={{ flex: 1, minWidth: 0, maxWidth: "88%" }}>
@@ -338,7 +338,7 @@ function AssistantBubbleInner({ message, onRetry, providerType = "chrome" }: Bub
                           padding: "1px 5px",
                           fontSize: 12,
                           fontFamily: "var(--font-mono)",
-                          color: "#a5f3fc",
+                          color: "var(--proof-cyan)",
                         }}
                       >
                         {children}
@@ -489,7 +489,7 @@ function AssistantBubbleInner({ message, onRetry, providerType = "chrome" }: Bub
               borderRadius: 10,
               padding: "8px 12px",
               fontSize: 12.5,
-              color: "#f87171",
+              color: "var(--proof-red)",
               marginTop: hasContent ? 6 : 0,
               display: "flex",
               alignItems: "flex-start",

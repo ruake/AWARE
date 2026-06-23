@@ -9,8 +9,7 @@ import {
   ChevronRight,
   Edit3,
   Check,
-  X,
-} from "lucide-react";
+  X} from "lucide-react";
 import type { Thread } from "@/lib/copilot/types";
 
 interface ThreadSidebarProps {
@@ -52,8 +51,7 @@ function ThreadItem({
   onDelete,
   onRename,
   onMoveUp,
-  onMoveDown,
-}: {
+  onMoveDown}: {
   thread: Thread;
   isActive: boolean;
   isPinned: boolean;
@@ -101,8 +99,7 @@ function ThreadItem({
           display: "flex",
           alignItems: "center",
           gap: 6,
-          padding: "6px 10px",
-        }}
+          padding: "6px 10px"}}
       >
         <input
           ref={inputRef}
@@ -121,9 +118,7 @@ function ThreadItem({
             padding: "3px 7px",
             fontSize: 12,
             color: "var(--proof-text)",
-            outline: "none",
-            minWidth: 0,
-          }}
+            minWidth: 0}}
         />
         <button
           onClick={handleRename}
@@ -133,8 +128,7 @@ function ThreadItem({
             cursor: "pointer",
             padding: 2,
             display: "flex",
-            color: "var(--proof-green)",
-          }}
+            color: "var(--proof-green)"}}
         >
           <Check size={12} />
         </button>
@@ -146,8 +140,7 @@ function ThreadItem({
             cursor: "pointer",
             padding: 2,
             display: "flex",
-            color: "var(--proof-text-muted)",
-          }}
+            color: "var(--proof-text-muted)"}}
         >
           <X size={12} />
         </button>
@@ -162,8 +155,7 @@ function ThreadItem({
           display: "flex",
           alignItems: "center",
           gap: 6,
-          padding: "6px 10px",
-        }}
+          padding: "6px 10px"}}
       >
         <span
           style={{
@@ -172,8 +164,7 @@ function ThreadItem({
             flex: 1,
             whiteSpace: "nowrap",
             overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
+            textOverflow: "ellipsis"}}
         >
           Delete?
         </span>
@@ -190,8 +181,7 @@ function ThreadItem({
             padding: "2px 6px",
             fontSize: 10,
             fontWeight: 600,
-            color: "var(--proof-red-bright)",
-          }}
+            color: "var(--proof-red-bright)"}}
         >
           Delete
         </button>
@@ -203,8 +193,7 @@ function ThreadItem({
             cursor: "pointer",
             padding: 2,
             display: "flex",
-            color: "var(--proof-text-muted)",
-          }}
+            color: "var(--proof-text-muted)"}}
         >
           <X size={12} />
         </button>
@@ -250,9 +239,7 @@ function ThreadItem({
         transition: "all 0.2s",
         position: "relative",
         userSelect: "none",
-        outline: "none",
-        margin: "0 4px",
-      }}
+        margin: "0 4px"}}
       onMouseEnter={(e) => {
         if (!isActive) {
           e.currentTarget.style.background = "var(--proof-hover)";
@@ -276,14 +263,12 @@ function ThreadItem({
           border: isActive ? "1px solid var(--proof-blue-border)" : "1px solid var(--proof-border)",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-        }}
+          justifyContent: "center"}}
       >
         <MessageSquare
           size={10}
           style={{
-            color: isActive ? "var(--proof-blue-bright)" : "var(--proof-text-muted)",
-          }}
+            color: isActive ? "var(--proof-blue-bright)" : "var(--proof-text-muted)"}}
         />
       </div>
 
@@ -296,8 +281,7 @@ function ThreadItem({
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            lineHeight: 1.3,
-          }}
+            lineHeight: 1.3}}
         >
           {thread.title}
         </div>
@@ -306,14 +290,12 @@ function ThreadItem({
             display: "flex",
             alignItems: "center",
             gap: 4,
-            marginTop: 1,
-          }}
+            marginTop: 1}}
         >
           <span
             style={{
               fontSize: 10,
-              color: "var(--proof-text-muted)",
-            }}
+              color: "var(--proof-text-muted)"}}
           >
             {thread.messageCount === 0
               ? "Empty"
@@ -323,8 +305,7 @@ function ThreadItem({
           <span
             style={{
               fontSize: 10,
-              color: "var(--proof-text-muted)",
-            }}
+              color: "var(--proof-text-muted)"}}
           >
             {relTime(thread.updatedAt)}
           </span>
@@ -339,8 +320,7 @@ function ThreadItem({
           gap: 1,
           opacity: 0,
           transition: "opacity 0.1s",
-          flexShrink: 0,
-        }}
+          flexShrink: 0}}
         onClick={(e) => e.stopPropagation()}
       >
         {!isFirst && (
@@ -355,8 +335,7 @@ function ThreadItem({
               padding: 2,
               display: "flex",
               color: "var(--proof-text-muted)",
-              borderRadius: 3,
-            }}
+              borderRadius: 3}}
           >
             <ChevronLeft size={11} style={{ transform: "rotate(90deg)" }} />
           </button>
@@ -373,8 +352,7 @@ function ThreadItem({
               padding: 2,
               display: "flex",
               color: "var(--proof-text-muted)",
-              borderRadius: 3,
-            }}
+              borderRadius: 3}}
           >
             <ChevronRight size={11} style={{ transform: "rotate(90deg)" }} />
           </button>
@@ -393,8 +371,7 @@ function ThreadItem({
             padding: 2,
             display: "flex",
             color: "var(--proof-text-muted)",
-            borderRadius: 3,
-          }}
+            borderRadius: 3}}
         >
           <Edit3 size={11} />
         </button>
@@ -409,8 +386,7 @@ function ThreadItem({
             padding: 2,
             display: "flex",
             color: "var(--proof-text-muted)",
-            borderRadius: 3,
-          }}
+            borderRadius: 3}}
         >
           <Trash2 size={11} />
         </button>
@@ -430,8 +406,7 @@ export function ThreadSidebar({
   onThreadRename,
   onThreadsReorder,
   collapsed,
-  onToggleCollapse,
-}: ThreadSidebarProps) {
+  onToggleCollapse}: ThreadSidebarProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [focusedIndex, setFocusedIndex] = React.useState<number>(-1);
   const [showClearConfirm, setShowClearConfirm] = React.useState(false);
@@ -440,8 +415,7 @@ export function ThreadSidebar({
 
   const normalized = threads.map((t) => ({
     ...t,
-    pinned: t.pinned ?? false,
-  }));
+    pinned: t.pinned ?? false}));
 
   const filtered = searchQuery.trim()
     ? normalized.filter((t) => t.title.toLowerCase().includes(searchQuery.toLowerCase().trim()))
@@ -531,8 +505,7 @@ export function ThreadSidebar({
           alignItems: "center",
           gap: 2,
           padding: "8px 0",
-          overflow: "hidden",
-        }}
+          overflow: "hidden"}}
       >
         <button
           onClick={onToggleCollapse}
@@ -545,8 +518,7 @@ export function ThreadSidebar({
             borderRadius: 6,
             display: "flex",
             color: "var(--proof-text-muted)",
-            transition: "color 0.1s, background 0.1s",
-          }}
+            transition: "color 0.1s, background 0.1s"}}
         >
           <ChevronRight size={16} />
         </button>
@@ -556,8 +528,7 @@ export function ThreadSidebar({
             width: 24,
             height: 1,
             background: "var(--proof-border)",
-            margin: "4px 0",
-          }}
+            margin: "4px 0"}}
         />
 
         {threads.slice(0, 8).map((thread) => (
@@ -582,8 +553,7 @@ export function ThreadSidebar({
               color:
                 thread.id === activeThreadId
                   ? "var(--proof-blue-bright)"
-                  : "var(--proof-text-muted)",
-            }}
+                  : "var(--proof-text-muted)"}}
           >
             <MessageSquare size={14} />
           </button>
@@ -602,8 +572,7 @@ export function ThreadSidebar({
             borderRadius: 6,
             display: "flex",
             color: "var(--proof-blue-bright)",
-            transition: "color 0.1s, background 0.1s",
-          }}
+            transition: "color 0.1s, background 0.1s"}}
         >
           <Plus size={16} />
         </button>
@@ -621,8 +590,7 @@ export function ThreadSidebar({
         background: "var(--proof-sidebar-bg)",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
-      }}
+        overflow: "hidden"}}
     >
       <div
         style={{
@@ -631,16 +599,14 @@ export function ThreadSidebar({
           justifyContent: "space-between",
           padding: "10px 12px 8px",
           borderBottom: "1px solid var(--proof-border)",
-          flexShrink: 0,
-        }}
+          flexShrink: 0}}
       >
         <span
           style={{
             fontSize: 12,
             fontWeight: 700,
             color: "var(--proof-text)",
-            letterSpacing: "-0.2px",
-          }}
+            letterSpacing: "-0.2px"}}
         >
           Threads
         </span>
@@ -657,8 +623,7 @@ export function ThreadSidebar({
                 borderRadius: 5,
                 display: "flex",
                 color: "var(--proof-text-muted)",
-                transition: "color 0.1s, background 0.1s",
-              }}
+                transition: "color 0.1s, background 0.1s"}}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.color = "var(--proof-red-bright)";
               }}
@@ -680,8 +645,7 @@ export function ThreadSidebar({
               borderRadius: 5,
               display: "flex",
               color: "var(--proof-text-muted)",
-              transition: "color 0.1s, background 0.1s",
-            }}
+              transition: "color 0.1s, background 0.1s"}}
           >
             <ChevronLeft size={14} />
           </button>
@@ -697,8 +661,7 @@ export function ThreadSidebar({
             border: "1px solid rgba(239,68,68,0.2)",
             borderRadius: 7,
             fontSize: 11,
-            color: "var(--proof-text-secondary)",
-          }}
+            color: "var(--proof-text-secondary)"}}
         >
           <div style={{ fontWeight: 600, color: "var(--proof-red-bright)", marginBottom: 6 }}>
             Delete {unpinnedCount} conversation{unpinnedCount !== 1 ? "s" : ""}?
@@ -718,8 +681,7 @@ export function ThreadSidebar({
                 color: "var(--proof-red-bright)",
                 cursor: "pointer",
                 fontSize: 10.5,
-                fontWeight: 600,
-              }}
+                fontWeight: 600}}
             >
               Delete all
             </button>
@@ -733,8 +695,7 @@ export function ThreadSidebar({
                 background: "transparent",
                 color: "var(--proof-text-muted)",
                 cursor: "pointer",
-                fontSize: 10.5,
-              }}
+                fontSize: 10.5}}
             >
               Cancel
             </button>
@@ -745,15 +706,13 @@ export function ThreadSidebar({
       <div
         style={{
           padding: "8px 10px 4px",
-          flexShrink: 0,
-        }}
+          flexShrink: 0}}
       >
         <div
           style={{
             position: "relative",
             display: "flex",
-            alignItems: "center",
-          }}
+            alignItems: "center"}}
         >
           <Search
             size={13}
@@ -761,8 +720,7 @@ export function ThreadSidebar({
               position: "absolute",
               left: 8,
               color: "var(--proof-text-muted)",
-              pointerEvents: "none",
-            }}
+              pointerEvents: "none"}}
           />
           <input
             value={searchQuery}
@@ -776,9 +734,7 @@ export function ThreadSidebar({
               border: "1px solid var(--proof-border)",
               borderRadius: 6,
               fontSize: 12,
-              color: "var(--proof-text)",
-              outline: "none",
-            }}
+              color: "var(--proof-text)"}}
           />
           {searchQuery && (
             <button
@@ -791,8 +747,7 @@ export function ThreadSidebar({
                 cursor: "pointer",
                 padding: 2,
                 display: "flex",
-                color: "var(--proof-text-muted)",
-              }}
+                color: "var(--proof-text-muted)"}}
             >
               <X size={12} />
             </button>
@@ -813,9 +768,7 @@ export function ThreadSidebar({
           padding: "4px 8px 8px",
           display: "flex",
           flexDirection: "column",
-          gap: 2,
-          outline: "none",
-        }}
+          gap: 2}}
       >
         {filtered.length === 0 && (
           <div
@@ -826,16 +779,14 @@ export function ThreadSidebar({
               justifyContent: "center",
               gap: 8,
               padding: "32px 16px",
-              textAlign: "center",
-            }}
+              textAlign: "center"}}
           >
             <MessageSquare size={24} style={{ color: "var(--proof-text-tertiary)" }} />
             <span
               style={{
                 fontSize: 12,
                 color: "var(--proof-text-muted)",
-                lineHeight: 1.4,
-              }}
+                lineHeight: 1.4}}
             >
               {searchQuery.trim()
                 ? "No threads match your search"
@@ -856,8 +807,7 @@ export function ThreadSidebar({
                   border: "1px solid var(--proof-blue-border)",
                   background: "var(--proof-blue-bg)",
                   color: "var(--proof-blue-bright)",
-                  marginTop: 4,
-                }}
+                  marginTop: 4}}
               >
                 <Plus size={12} />
                 Start a chat
@@ -873,8 +823,7 @@ export function ThreadSidebar({
                 display: "flex",
                 alignItems: "center",
                 gap: 4,
-                padding: "6px 10px 2px",
-              }}
+                padding: "6px 10px 2px"}}
             >
               <Pin
                 size={10}
@@ -886,8 +835,7 @@ export function ThreadSidebar({
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
-                  color: "var(--proof-text-muted)",
-                }}
+                  color: "var(--proof-text-muted)"}}
               >
                 Pinned
               </span>
@@ -924,8 +872,7 @@ export function ThreadSidebar({
               style={{
                 height: 1,
                 background: "var(--proof-border-light)",
-                margin: "4px 10px",
-              }}
+                margin: "4px 10px"}}
             />
           </>
         )}
@@ -964,8 +911,7 @@ export function ThreadSidebar({
         style={{
           padding: "8px 10px 10px",
           borderTop: "1px solid var(--proof-border)",
-          flexShrink: 0,
-        }}
+          flexShrink: 0}}
       >
         <button
           onClick={handleCreate}
@@ -983,8 +929,7 @@ export function ThreadSidebar({
             border: "1px solid var(--proof-border)",
             background: "rgba(255,255,255,0.03)",
             color: "var(--proof-text-secondary)",
-            transition: "all 0.15s",
-          }}
+            transition: "all 0.15s"}}
         >
           <Plus size={14} />
           New Chat

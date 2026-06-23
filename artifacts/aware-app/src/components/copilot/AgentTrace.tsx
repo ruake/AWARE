@@ -9,7 +9,7 @@ interface Props {
 }
 
 const PROVIDER_LABEL: Record<ProviderType, { label: string; color: string }> = {
-  chrome: { label: "Chrome AI · Gemini Nano", color: "#fbbf24" },
+  chrome: { label: "Chrome AI · Gemini Nano", color: "var(--proof-yellow)" },
 };
 
 export default function AgentTrace({ toolCalls, providerType, streaming }: Props) {
@@ -70,7 +70,7 @@ export default function AgentTrace({ toolCalls, providerType, streaming }: Props
               display: "flex",
               alignItems: "center",
               gap: 4,
-              color: "#60a5fa",
+              color: "var(--proof-blue)",
               fontSize: 10.5,
             }}
           >
@@ -103,13 +103,13 @@ export default function AgentTrace({ toolCalls, providerType, streaming }: Props
               style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}
             >
               {tc.status === "done" ? (
-                <CheckCircle2 size={10} style={{ color: "#34d399", flexShrink: 0 }} />
+                <CheckCircle2 size={10} style={{ color: "var(--proof-emerald)", flexShrink: 0 }} />
               ) : tc.status === "error" ? (
-                <XCircle size={10} style={{ color: "#f87171", flexShrink: 0 }} />
+                <XCircle size={10} style={{ color: "var(--proof-red)", flexShrink: 0 }} />
               ) : (
                 <Loader2
                   size={10}
-                  style={{ color: "#60a5fa", flexShrink: 0, animation: "spin 1s linear infinite" }}
+                  style={{ color: "var(--proof-blue)", flexShrink: 0, animation: "spin 1s linear infinite" }}
                 />
               )}
               <span

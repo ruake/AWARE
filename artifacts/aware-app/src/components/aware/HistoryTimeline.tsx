@@ -88,12 +88,13 @@ export function TimeWindowControls() {
         border: "1px solid var(--proof-border)"
       }}
     >
-      <button onClick={() => shiftWindow(-window.sizeDays)} title="Skip back" style={navBtnStyle}>
+      <button onClick={() => shiftWindow(-window.sizeDays)} title="Skip back" aria-label="Skip back" style={navBtnStyle}>
         <SkipBack size={14} />
       </button>
       <button
         onClick={() => shiftWindow(-Math.ceil(window.sizeDays / 4))}
         title="Back"
+        aria-label="Back"
         style={navBtnStyle}
       >
         <ChevronLeft size={14} />
@@ -115,11 +116,12 @@ export function TimeWindowControls() {
       <button
         onClick={() => shiftWindow(Math.ceil(window.sizeDays / 4))}
         title="Forward"
+        aria-label="Forward"
         style={navBtnStyle}
       >
         <ChevronRight size={14} />
       </button>
-      <button onClick={() => shiftWindow(window.sizeDays)} title="Skip forward" style={navBtnStyle}>
+      <button onClick={() => shiftWindow(window.sizeDays)} title="Skip forward" aria-label="Skip forward" style={navBtnStyle}>
         <SkipForward size={14} />
       </button>
       <div style={{ width: 1, height: 16, background: "var(--proof-border)", margin: "0 8px" }} />
@@ -416,22 +418,22 @@ export function TestHistoryStrip({
 export function HistoryTimelineSection({ testName }: { testName: string }) {
   return (
     <div
-      className="proof-card"
-      style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
+      className="glass-panel"
+      style={{ display: "flex", flexDirection: "column", overflow: "hidden", border: "1px solid var(--proof-border)", borderRadius: "var(--proof-radius-lg)" }}
     >
       <div
         style={{
-          padding: "8px 12px",
-          borderBottom: "1px solid var(--proof-grey)",
-          background: "var(--proof-surface-hover)",
+          padding: "12px 16px",
+          borderBottom: "1px solid var(--proof-border)",
+          background: "rgba(255,255,255,0.02)",
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          gap: 12,
         }}
       >
         <TimeWindowControls />
       </div>
-      <div style={{ padding: "8px 12px" }}>
+      <div style={{ padding: "16px" }}>
         <TestHistoryStrip testName={testName} />
       </div>
     </div>

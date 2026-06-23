@@ -9,8 +9,7 @@ import {
   deleteThreadFromList,
   updateThreadInList,
   getActiveThreadId,
-  setActiveThreadId,
-} from "@/lib/copilot/storage";
+  setActiveThreadId} from "@/lib/copilot/storage";
 import type { Thread } from "@/lib/copilot/types";
 import { Plus, Bot, Zap, MessageSquare, Trash2, Edit3, Check, X, Search, Clock, ChevronRight, PlusCircle, History } from "lucide-react";
 
@@ -107,8 +106,7 @@ export function CopilotPanel() {
             border: "1px solid var(--proof-border)",
             borderRadius: 8,
             padding: "6px 10px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-          }}
+            boxShadow: "0 2px 4px rgba(0,0,0,0.05)"}}
         >
           <Search size={14} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
           <input
@@ -117,13 +115,11 @@ export function CopilotPanel() {
             placeholder="Search history..."
             style={{
               border: "none",
-              outline: "none",
               fontSize: 12,
               background: "transparent",
               flex: 1,
               minWidth: 0,
-              color: "var(--proof-text)",
-            }}
+              color: "var(--proof-text)"}}
           />
           {search && <X size={12} style={{ color: "var(--proof-text-muted)", cursor: "pointer" }} onClick={() => setSearch("")} />}
         </div>
@@ -168,8 +164,7 @@ export function CopilotPanel() {
                      cursor: "pointer",
                      background: isActive ? "var(--proof-surface-active)" : "transparent",
                      position: "relative",
-                     transition: "background 0.2s ease",
-                   }}
+                     transition: "background 0.2s ease"}}
                  >
                    {isActive && (
                      <motion.div
@@ -181,8 +176,7 @@ export function CopilotPanel() {
                          bottom: 8,
                          width: 3,
                          background: "var(--proof-blue)",
-                         borderRadius: "0 4px 4px 0",
-                       }}
+                         borderRadius: "0 4px 4px 0"}}
                      />
                    )}
 
@@ -208,9 +202,7 @@ export function CopilotPanel() {
                            borderRadius: 4,
                            padding: "2px 6px",
                            fontSize: 12,
-                           color: "var(--proof-text)",
-                           outline: "none",
-                         }}
+                           color: "var(--proof-text)"}}
                        />
                      ) : (
                        <>
@@ -282,8 +274,7 @@ export function CopilotPanel() {
                     cursor: "pointer",
                     fontSize: 11,
                     textAlign: "left",
-                    transition: "all 0.2s ease",
-                  }}
+                    transition: "all 0.2s ease"}}
                 >
                   <Icon size={14} style={{ color: "var(--proof-blue-bright)" }} />
                   <span style={{ flex: 1 }}>{a.label}</span>

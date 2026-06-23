@@ -394,7 +394,7 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
                 style={{
                   height: "100%",
                   width: `${assistantRatio * 100}%`,
-                  background: "#22c55e",
+                  background: "var(--proof-green)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -409,7 +409,7 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
             <span style={{ fontSize: 9, color: "var(--proof-blue)", fontWeight: 600 }}>
               User: {stats.userMessages}
             </span>
-            <span style={{ fontSize: 9, color: "#22c55e", fontWeight: 600 }}>
+            <span style={{ fontSize: 9, color: "var(--proof-green)", fontWeight: 600 }}>
               Assistant: {stats.assistantMessages}
             </span>
           </div>
@@ -532,7 +532,7 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
                     width: 6,
                     height: 6,
                     borderRadius: "50%",
-                    background: msg.role === "user" ? "var(--proof-blue)" : "#22c55e",
+                    background: msg.role === "user" ? "var(--proof-blue)" : "var(--proof-green)",
                     flexShrink: 0,
                   }}
                 />
@@ -561,7 +561,7 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
                   {msg.role === "user" ? (
                     <span style={{ color: "var(--proof-blue)" }}>User</span>
                   ) : (
-                    <span style={{ color: "#22c55e" }}>Assistant</span>
+                    <span style={{ color: "var(--proof-green)" }}>Assistant</span>
                   )}
                   {msg.content.length > 40 ? `: ${msg.content.slice(0, 40)}…` : `: ${msg.content}`}
                 </span>
@@ -622,7 +622,7 @@ export default function StatsPanel({ thread, onClose }: StatsPanelProps) {
             borderRadius: 6,
             border: `1px solid var(--proof-border)`,
             background: copied ? "rgba(52,211,153,0.1)" : "var(--proof-surface)",
-            color: copied ? "#22c55e" : "var(--proof-text-secondary)",
+            color: copied ? "var(--proof-green)" : "var(--proof-text-secondary)",
             cursor: "pointer",
             fontSize: 11,
             fontWeight: 500,

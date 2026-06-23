@@ -7,7 +7,7 @@ export function CommandSearch({
   inputRef,
   onQueryChange,
   onTypeFilterChange,
-  onKeyDown,
+  onKeyDown
 }: {
   query: string;
   typeFilter: string | null;
@@ -25,27 +25,28 @@ export function CommandSearch({
           alignItems: "center",
           gap: 12,
           padding: "16px 20px",
-          borderBottom: "1px solid var(--proof-border)",
-          background: "var(--proof-surface-2)",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          background: "transparent",
         }}
       >
-        <span style={{ fontSize: 18, color: "var(--proof-blue)", opacity: 0.8 }}>🔍</span>
+        <span style={{ fontSize: 18, color: "var(--proof-blue)", opacity: 0.8, textShadow: "var(--proof-glow-cyan)" }}>🔍</span>
         <input
           ref={inputRef}
           type="text"
           id="command-palette-search"
           aria-label="Search commands"
           aria-controls="command-results-list"
-          placeholder="Search for anything... (type > for actions)"
+          placeholder="Search commands, runs, tests..."
           style={{
             flex: 1,
             background: "transparent",
             border: "none",
-            outline: "none",
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: 500,
             color: "var(--proof-text)",
             fontFamily: "var(--font-sans)",
+            outline: "none",
+            caretColor: "var(--proof-blue)",
           }}
           value={query}
           onChange={(e) => {
@@ -58,13 +59,12 @@ export function CommandSearch({
             style={{
               fontSize: 10,
               padding: "3px 8px",
-              background: "var(--proof-surface-3)",
-              border: "1px solid var(--proof-border)",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: 6,
               color: "var(--proof-text-secondary)",
               fontFamily: "var(--font-mono)",
               fontWeight: 700,
-              boxShadow: "0 2px 0 var(--proof-border)",
             }}
           >
             ESC
@@ -76,8 +76,8 @@ export function CommandSearch({
           display: "flex",
           gap: 8,
           padding: "10px 20px",
-          borderBottom: "1px solid var(--proof-border)",
-          background: "var(--proof-surface-2)",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          background: "rgba(255,255,255,0.02)",
           flexWrap: "wrap",
         }}
       >
@@ -91,10 +91,10 @@ export function CommandSearch({
               padding: "4px 12px",
               borderRadius: 20,
               fontWeight: 700,
-              border: "1px solid var(--proof-border)",
-              background: typeFilter === type ? "var(--proof-blue)" : "var(--proof-surface)",
-              color: typeFilter === type ? "white" : "var(--proof-text-secondary)",
-              borderColor: typeFilter === type ? "var(--proof-blue)" : "var(--proof-border)",
+              border: typeFilter === type ? "1px solid var(--proof-blue)" : "1px solid rgba(255,255,255,0.1)",
+              background: typeFilter === type ? "rgba(0,196,255,0.15)" : "transparent",
+              color: typeFilter === type ? "var(--proof-blue-bright)" : "var(--proof-text-secondary)",
+              boxShadow: typeFilter === type ? "var(--proof-glow-cyan)" : "none",
               transition: "all 0.2s",
               minWidth: "auto",
             }}

@@ -60,6 +60,7 @@ export function CopilotSettings({ onClose }: CopilotSettingsProps) {
         </div>
         <button
           onClick={onClose}
+          aria-label="Close"
           style={{
             background: "none",
             border: "none",

@@ -187,6 +187,38 @@ artifacts/aware-app/src/
 - Scheduler and test workflows push run data to the `data` branch, not `main`
 - Commits to `data` branch include `[skip ci]` to prevent recursive workflow triggers
 
+## Fixes Applied (June 2026 Audit)
+
+### CSS Variables Added to `index.css`
+The following `--proof-*` CSS variables were missing (rendered as transparent):
+- `--proof-surface-3` — layer between surface-2 and surface-hover
+- `--proof-emerald`, `--proof-emerald-bg`, `--proof-emerald-border` — success/pass indicators
+- `--proof-indigo`, `--proof-indigo-bg`, `--proof-indigo-border` — info/highlight
+- `--proof-teal`, `--proof-teal-bg`, `--proof-teal-border` — accent/info
+- `--proof-grey`, `--proof-grey-bg` — neutral border/text
+- `--proof-blue-hover` — interactive element hover
+- `--proof-sidebar-bg`, `--proof-editor-bg`, `--proof-title-bar-bg`, `--proof-activity-bar-bg`, `--proof-status-bar-bg` — console IDE theming
+- `--proof-hover-light`, `--proof-text-tertiary`, `--proof-overlay`
+
+### @keyframes Added
+`blink`, `slide-down`, `copilotFadeIn`, `modelConfigFadeIn`, `progressPulse`, `page-enter`, `proof-slide-up`
+
+### CSS Classes Added
+`.proof-btn-sm`, `.proof-btn-xs`, `.proof-button-primary` (alias), `.proof-button-sm`, `.proof-button-xs`, `.proof-th`, `.proof-td`, `.proof-tr`, `.proof-progress-track`, `.proof-progress-bar`, `.proof-live-dot`, `.proof-live-dot-warning`, `.proof-live-dot-error`, `.proof-select`, `.proof-skeleton`, `.proof-badge-healthy`, `.proof-badge-critical`, `.proof-truncate`
+
+### Dead Modules Removed
+`src/lib/builders/`, `src/lib/jobs/`, `src/lib/loaders/`, `src/lib/machines/`, `src/lib/commands/` — all had zero external imports. Barrel exports from `data.ts` removed. Corresponding test file `commandBus.test.ts` deleted (tested dead code).
+
+### Bug Fixes
+1. **`lib/urlState.ts`** — `_location` added to `useMemo` deps so URL params reflect cross-component `navigate()` calls
+2. **`lib/testSuites.ts`, `lib/schedulerStatus.ts`, `lib/promotions.ts`** — retry-block pattern: `_loaded = true` moved after `await fetchJson()` so network failures allow retry
+3. **`pages/Compare.tsx`** — swap double-inversion removed (`swapped` state deleted; URL swap alone is correct); `window.location.href` replaced with wouter `navigate()`
+4. **`pages/Copilot.tsx`** — `$\{...\}` → `${...}` in template literals (escaped backslashes prevented evaluation); `proof-button-primary` → `proof-btn-primary`
+5. **`lib/linkify.ts`** — `run_\S+` → `run_[\w-]+` to prevent greedy match across punctuation
+6. **`components/console/ConsoleShell.tsx`** — duplicate `RouteAnnouncer` removed (App.tsx already has one); `--proof-emerald` refs replaced with `--proof-blue`/`--proof-green`
+7. **`components/console/EnvSelector.tsx`, `components/console/SuiteSelector.tsx`** — invalid `role="searchbox"` on `<input>` removed (implicit `type="search"` is correct)
+8. **Outline accessibility** — `outline: "none"` removed from inline styles across 24 component files (CSS `*:focus-visible` rule in `index.css` provides proper focus rings)
+
 ## Git
 - **Always run `gh auth setup-git` before `git push origin`** to configure GitHub token-based auth
 

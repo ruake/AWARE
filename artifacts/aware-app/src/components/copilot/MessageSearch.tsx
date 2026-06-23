@@ -78,8 +78,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
             content: msg.content,
             matchPreview: extractPreview(msg.content, q),
             role: msg.role,
-            timestamp: msg.timestamp,
-          });
+            timestamp: msg.timestamp});
         }
       }
     }
@@ -133,8 +132,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
         display: "flex",
         flexDirection: "column",
         zIndex: 50,
-        overflow: "hidden",
-      }}
+        overflow: "hidden"}}
       onKeyDown={handleKeyDown}
     >
       {/* Header / Search Input */}
@@ -145,8 +143,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
           gap: 10,
           padding: "12px 14px",
           borderBottom: "1px solid var(--proof-border)",
-          flexShrink: 0,
-        }}
+          flexShrink: 0}}
       >
         <Search size={16} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
         <input
@@ -162,11 +159,9 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
             flex: 1,
             border: "none",
             background: "transparent",
-            outline: "none",
             fontSize: 13.5,
             color: "var(--proof-text)",
-            fontFamily: "var(--font-sans)",
-          }}
+            fontFamily: "var(--font-sans)"}}
         />
         {query.trim() ? (
           <span
@@ -174,8 +169,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
               fontSize: 11,
               color: "var(--proof-text-muted)",
               whiteSpace: "nowrap",
-              flexShrink: 0,
-            }}
+              flexShrink: 0}}
           >
             {results.length > 0
               ? `${results.length} result${results.length !== 1 ? "s" : ""}`
@@ -195,8 +189,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
             background: "transparent",
             color: "var(--proof-text-muted)",
             cursor: "pointer",
-            flexShrink: 0,
-          }}
+            flexShrink: 0}}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
           }}
@@ -214,8 +207,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
           flex: 1,
           overflowY: "auto",
           scrollbarWidth: "thin",
-          scrollbarColor: "var(--proof-border) transparent",
-        }}
+          scrollbarColor: "var(--proof-border) transparent"}}
       >
         {!query.trim() ? (
           <div
@@ -226,8 +218,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
               height: "100%",
               color: "var(--proof-text-muted)",
               fontSize: 12.5,
-              padding: 32,
-            }}
+              padding: 32}}
           >
             Type to search across all conversations
           </div>
@@ -240,8 +231,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
               justifyContent: "center",
               height: "100%",
               gap: 10,
-              padding: 32,
-            }}
+              padding: 32}}
           >
             <Search size={28} style={{ color: "var(--proof-text-muted)", opacity: 0.4 }} />
             <div style={{ fontSize: 13, color: "var(--proof-text-muted)" }}>
@@ -266,8 +256,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
                     fontWeight: 600,
                     color: "var(--proof-text-muted)",
                     borderBottom: "1px solid var(--proof-border)",
-                    background: "rgba(255,255,255,0.02)",
-                  }}
+                    background: "rgba(255,255,255,0.02)"}}
                 >
                   <MessageSquare size={12} style={{ flexShrink: 0 }} />
                   <span
@@ -275,8 +264,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
                       flex: 1,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
+                      whiteSpace: "nowrap"}}
                   >
                     {groupResults[0].threadTitle}
                   </span>
@@ -285,8 +273,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
                       fontSize: 10,
                       color: "var(--proof-text-muted)",
                       opacity: 0.6,
-                      flexShrink: 0,
-                    }}
+                      flexShrink: 0}}
                   >
                     {groupResults.length}
                   </span>
@@ -307,8 +294,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
                         borderLeft: isSelected
                           ? "2px solid var(--proof-blue)"
                           : "2px solid transparent",
-                        transition: "background 0.1s",
-                      }}
+                        transition: "background 0.1s"}}
                       onMouseEnter={(e) => {
                         if (!isSelected) {
                           (e.currentTarget as HTMLElement).style.background =
@@ -336,8 +322,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
                             fontWeight: 600,
                             background:
                               r.role === "user" ? "rgba(59,130,246,0.12)" : "rgba(139,92,246,0.12)",
-                            color: r.role === "user" ? "#60a5fa" : "#a78bfa",
-                          }}
+                            color: r.role === "user" ? "var(--proof-blue)" : "var(--proof-purple)"}}
                         >
                           {r.role === "user" ? <User size={10} /> : <Bot size={10} />}
                           {r.role === "user" ? "User" : "Assistant"}
@@ -358,8 +343,7 @@ export default function MessageSearch({ threads, onResultSelect, onClose }: Mess
                           textOverflow: "ellipsis",
                           display: "-webkit-box",
                           WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                        }}
+                          WebkitBoxOrient: "vertical"}}
                       >
                         {highlightText(r.matchPreview, query)}
                       </div>

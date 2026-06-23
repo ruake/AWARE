@@ -36,7 +36,7 @@ export function AboutHero() {
         }}
       />
       <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <motion.div
             whileHover={{ scale: 1.05, rotate: 5 }}
             whileTap={{ scale: 0.95 }}
@@ -76,7 +76,7 @@ export function AboutHero() {
                   background: "var(--proof-subtle-bg2)",
                   border: "1px solid var(--proof-border)",
                   padding: "2px 8px",
-                  borderRadius: 5,
+                  borderRadius: "var(--proof-radius-sm)",
                 }}
               >
                 v3.0.4
@@ -121,7 +121,7 @@ export function AboutHero() {
               display: "flex",
               alignItems: "center",
               gap: 5,
-              fontSize: 12.5,
+              fontSize: 12,
               fontWeight: 600,
               color: "var(--proof-text)",
               background: "var(--proof-subtle-bg2)",
@@ -144,7 +144,7 @@ export function AboutHero() {
               display: "flex",
               alignItems: "center",
               gap: 5,
-              fontSize: 12.5,
+              fontSize: 12,
               fontWeight: 600,
               color: "var(--proof-blue-bright)",
               background: "var(--proof-blue-bg)",

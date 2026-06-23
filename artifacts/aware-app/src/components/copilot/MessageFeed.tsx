@@ -25,15 +25,15 @@ const QUICK_ACTIONS = [
     label: "Status",
     query: "What's the current health status across all environments?",
     icon: Activity,
-    color: "#22c55e",
+    color: "var(--proof-green)",
   },
-  { label: "Flaky", query: "Show me the flakiest tests", icon: Zap, color: "#f59e0b" },
-  { label: "Fails", query: "What are the latest failures?", icon: AlertTriangle, color: "#ef4444" },
-  { label: "Promote", query: "Can we promote to PROD?", icon: Shield, color: "#8b5cf6" },
-  { label: "Trends", query: "Show pass rate trends", icon: TrendingUp, color: "#3b82f6" },
+  { label: "Flaky", query: "Show me the flakiest tests", icon: Zap, color: "var(--proof-yellow)" },
+  { label: "Fails", query: "What are the latest failures?", icon: AlertTriangle, color: "var(--proof-red)" },
+  { label: "Promote", query: "Can we promote to PROD?", icon: Shield, color: "var(--proof-purple)" },
+  { label: "Trends", query: "Show pass rate trends", icon: TrendingUp, color: "var(--proof-blue)" },
   { label: "Durations", query: "What are the slowest tests?", icon: Clock, color: "#ec4899" },
-  { label: "Suites", query: "Show suite health breakdown", icon: BarChart3, color: "#06b6d4" },
-  { label: "Akamai", query: "What's the Akamai property status?", icon: Globe, color: "#f97316" },
+  { label: "Suites", query: "Show suite health breakdown", icon: BarChart3, color: "var(--proof-teal)" },
+  { label: "Akamai", query: "What's the Akamai property status?", icon: Globe, color: "var(--proof-orange)" },
 ];
 
 function MessageFeedInner({ messages, onRetry, onSend }: Props) {

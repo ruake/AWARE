@@ -18,17 +18,17 @@ interface Props {
 const RAW_DATA_CHAR_LIMIT = 1500;
 
 const TOOL_META: Record<string, { label: string; verb: string; color: string; icon: string }> = {
-  query_runs: { label: "Run History", verb: "Querying run history…", color: "#3b82f6", icon: "📊" },
+  query_runs: { label: "Run History", verb: "Querying run history…", color: "var(--proof-blue)", icon: "📊" },
   get_flaky_tests: {
     label: "Flaky Tests",
     verb: "Analyzing flakiness…",
-    color: "#f59e0b",
+    color: "var(--proof-yellow)",
     icon: "⚡",
   },
   compare_environments: {
     label: "Env Comparison",
     verb: "Comparing environments…",
-    color: "#8b5cf6",
+    color: "var(--proof-purple)",
     icon: "🔀",
   },
   get_promotion_status: {
@@ -40,7 +40,7 @@ const TOOL_META: Record<string, { label: string; verb: string; color: string; ic
   get_failure_breakdown: {
     label: "Failure Breakdown",
     verb: "Breaking down failures…",
-    color: "#ef4444",
+    color: "var(--proof-red)",
     icon: "🔍",
   },
 };
@@ -113,10 +113,10 @@ export default function ToolCallCard({ toolCall }: Props) {
           }}
         >
           {isRunning && (
-            <Loader2 size={11} style={{ color: "#60a5fa", animation: "spin 1s linear infinite" }} />
+            <Loader2 size={11} style={{ color: "var(--proof-blue)", animation: "spin 1s linear infinite" }} />
           )}
-          {isDone && <CheckCircle2 size={11} style={{ color: "#34d399" }} />}
-          {isError && <XCircle size={11} style={{ color: "#f87171" }} />}
+          {isDone && <CheckCircle2 size={11} style={{ color: "var(--proof-emerald)" }} />}
+          {isError && <XCircle size={11} style={{ color: "var(--proof-red)" }} />}
         </div>
 
         {/* Emoji + label */}
@@ -127,7 +127,7 @@ export default function ToolCallCard({ toolCall }: Props) {
           style={{
             fontSize: 12,
             fontWeight: 600,
-            color: isRunning ? "#60a5fa" : isDone ? "var(--proof-text)" : "#f87171",
+            color: isRunning ? "var(--proof-blue)" : isDone ? "var(--proof-text)" : "var(--proof-red)",
             flex: 1,
           }}
         >
@@ -231,7 +231,7 @@ export default function ToolCallCard({ toolCall }: Props) {
           {toolCall.error ? (
             <pre
               style={{
-                color: "#f87171",
+                color: "var(--proof-red)",
                 background: "rgba(239,68,68,0.06)",
                 border: "1px solid rgba(248,113,113,0.15)",
                 borderRadius: 6,
@@ -247,7 +247,7 @@ export default function ToolCallCard({ toolCall }: Props) {
               {toolCall.error}
             </pre>
           ) : (
-            <span style={{ color: "#f87171" }}>Tool execution failed.</span>
+            <span style={{ color: "var(--proof-red)" }}>Tool execution failed.</span>
           )}
         </div>
       )}

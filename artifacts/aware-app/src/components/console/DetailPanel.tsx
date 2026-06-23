@@ -34,25 +34,28 @@ const BACKDROP_CSS: React.CSSProperties = {
 };
 
 const PANEL_CSS: React.CSSProperties = {
-  background: "var(--proof-surface)",
-  border: "1px solid var(--proof-border)",
-  borderRadius: 8,
+  background: "rgba(9, 13, 20, 0.85)",
+  backdropFilter: "blur(24px)",
+  WebkitBackdropFilter: "blur(24px)",
+  border: "1px solid rgba(0,196,255,0.2)",
+  boxShadow: "0 24px 64px rgba(0,0,0,0.6), var(--proof-glow-cyan)",
+  borderRadius: 12,
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
-  boxShadow: "0 16px 48px rgba(0,0,0,0.3)",
-  animation: "scaleIn 0.15s ease",
+  animation: "scaleIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.05)",
   maxHeight: "85vh",
 };
 
 const HEADER_CSS: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: 6,
-  padding: "10px 14px",
+  gap: 8,
+  padding: "16px 20px",
   borderBottom: "1px solid var(--proof-border)",
   flexShrink: 0,
-  minHeight: 44,
+  minHeight: 56,
+  background: "rgba(255,255,255,0.03)",
 };
 
 const NAV_BTN: React.CSSProperties = {
@@ -196,18 +199,20 @@ export function DetailPanel({
               minWidth: 0,
               display: "flex",
               flexDirection: "column",
-              gap: 1,
+              gap: 2,
+              marginLeft: 8,
             }}
           >
             <div
               style={{
-                fontSize: 13,
+                fontSize: 16,
                 fontWeight: 700,
                 color: "var(--proof-text)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
-                lineHeight: 1.3,
+                lineHeight: 1.2,
+                letterSpacing: "0.5px"
               }}
             >
               {title}
@@ -215,12 +220,13 @@ export function DetailPanel({
             {subtitle && (
               <div
                 style={{
-                  fontSize: 11,
-                  color: "var(--proof-text-secondary)",
+                  fontSize: 12,
+                  color: "var(--proof-blue)",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                  lineHeight: 1.3,
+                  lineHeight: 1.2,
+                  fontFamily: "var(--font-mono)"
                 }}
               >
                 {subtitle}

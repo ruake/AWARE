@@ -88,7 +88,7 @@ export function TestManagerSidePanel({
           padding: 14,
           display: "flex",
           flexDirection: "column",
-          gap: 14,
+          gap: 16,
         }}
       >
         <div>
@@ -118,15 +118,15 @@ export function TestManagerSidePanel({
               borderRadius: 4,
               background:
                 (CATEGORY_COLORS[CATEGORIES.indexOf(tc.category) % CATEGORY_COLORS.length] ??
-                  "#9aa0a6") + "20",
+                  "var(--proof-text-muted)") + "20",
               border:
                 "1px solid " +
                 (CATEGORY_COLORS[CATEGORIES.indexOf(tc.category) % CATEGORY_COLORS.length] ??
-                  "#9aa0a6") +
+                  "var(--proof-text-muted)") +
                 "40",
               color:
                 CATEGORY_COLORS[CATEGORIES.indexOf(tc.category) % CATEGORY_COLORS.length] ??
-                "#9aa0a6",
+                "var(--proof-text-muted)",
               fontWeight: 600,
             }}
           >

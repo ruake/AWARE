@@ -1,12 +1,12 @@
 import type { TestResult } from "@/lib/types";
 
 const WATERFALL_PHASES = [
-  { name: "DNS", pct: 0.06, color: "#a78bfa" },
-  { name: "TCP", pct: 0.04, color: "#60a5fa" },
+  { name: "DNS", pct: 0.06, color: "var(--proof-purple)" },
+  { name: "TCP", pct: 0.04, color: "var(--proof-blue)" },
   { name: "TLS", pct: 0.1, color: "#38bdf8" },
-  { name: "Request", pct: 0.02, color: "#94a3b8" },
-  { name: "TTFB", pct: 0.66, color: "#fbbf24" },
-  { name: "Download", pct: 0.12, color: "#34d399" },
+  { name: "Request", pct: 0.02, color: "var(--proof-text-muted)" },
+  { name: "TTFB", pct: 0.66, color: "var(--proof-yellow)" },
+  { name: "Download", pct: 0.12, color: "var(--proof-emerald)" },
 ];
 
 function WaterfallSide({ result, label }: { result: TestResult | null; label: string }) {

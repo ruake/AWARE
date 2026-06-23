@@ -37,13 +37,15 @@ export function ConsoleCard({
 
   return (
     <div
+      className="glass-panel"
       style={{
         border: "1px solid var(--proof-border)",
-        borderRadius: 4,
-        background: variant === "inset" ? "var(--proof-grey-bg)" : "var(--proof-surface)",
+        borderRadius: "var(--proof-radius-lg)",
+        background: variant === "inset" ? "var(--proof-surface-2)" : "rgba(9, 13, 20, 0.6)",
         overflow: "hidden",
         position: "relative",
-        transition: "border-color 0.15s",
+        transition: "border-color 0.15s, box-shadow 0.15s",
+        boxShadow: accentCfg ? accentCfg.glow : "var(--proof-shadow-md)"
       }}
     >
       {/* Accent bar */}
@@ -51,8 +53,8 @@ export function ConsoleCard({
         <div
           style={{
             height: 2,
-            background: `linear-gradient(90deg, ${accentCfg.main}, color-mix(in srgb, ${accentCfg.main} 50%, transparent))`,
-            boxShadow: `0 0 8px ${accentCfg.glow}`,
+            background: `linear-gradient(90deg, ${accentCfg.main}, transparent)`,
+            boxShadow: `0 0 12px ${accentCfg.main}`,
             flexShrink: 0,
           }}
         />

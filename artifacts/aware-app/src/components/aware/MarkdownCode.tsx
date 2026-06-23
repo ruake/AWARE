@@ -1,94 +1,22 @@
 import React from "react";
-import { MarkdownChart } from "./MarkdownChart";
+import { Copy, Check } from "lucide-react";
 
-export const STATUS_COLORS: Record<string, string> = {
-  pass: "var(--proof-green)",
-  passed: "var(--proof-green)",
-  success: "var(--proof-green)",
-  ok: "var(--proof-green)",
-  healthy: "var(--proof-green)",
-  stable: "var(--proof-green)",
-  good: "var(--proof-green)",
-  fail: "var(--proof-red)",
-  failed: "var(--proof-red)",
-  error: "var(--proof-red)",
-  critical: "var(--proof-red)",
-  broken: "var(--proof-red)",
-  down: "var(--proof-red)",
-  warning: "var(--proof-yellow)",
-  warn: "var(--proof-yellow)",
-  flaky: "var(--proof-yellow)",
-  unstable: "var(--proof-yellow)",
-  degraded: "var(--proof-yellow)",
-  slow: "var(--proof-yellow)",
-  high: "var(--proof-yellow)",
-  skip: "var(--proof-text-muted)",
-  skipped: "var(--proof-text-muted)",
-  pending: "var(--proof-text-muted)",
-  disabled: "var(--proof-text-muted)",
-  "n/a": "var(--proof-text-muted)",
-  none: "var(--proof-text-muted)",
-  low: "var(--proof-green)",
-  medium: "var(--proof-yellow)",
-};
-
-export function MarkdownCode({
-  className,
-  children,
-  ...props
-}: {
-  className?: string;
-  children?: React.ReactNode;
-}) {
-  const lang = className?.replace(/^language-/, "");
-  // ── Chart blocks ──────────────────────────────────────────────────────────
-  if (lang === "chart") {
-    let chartConfig: Record<string, unknown> | null = null;
-    try {
-      chartConfig = JSON.parse(String(children).trim());
-    } catch {
-      /* ignore parse errors */
-    }
-    if (chartConfig) {
-      return <MarkdownChart config={chartConfig} />;
-    }
-  }
-  // ── Inline code (status badges or plain inline code) ──────────────────────
+export function MarkdownCode({ className, children, ...props }: any) {
+  const [copied, setCopied] = React.useState(false);
+  
   const isInline = !className;
+  const content = String(children).trim();
+
   if (isInline) {
-    const text = String(children).trim();
-    const statusKey = text.toLowerCase();
-    const statusColor = STATUS_COLORS[statusKey];
-    if (statusColor) {
-      return (
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            padding: "1px 8px",
-            borderRadius: 10,
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.35px",
-            background: `color-mix(in srgb, ${statusColor} 10%, transparent)`,
-            color: statusColor,
-            border: `1px solid color-mix(in srgb, ${statusColor} 20%, transparent)`,
-            lineHeight: 1.5,
-          }}
-        >
-          {text}
-        </span>
-      );
-    }
     return (
       <code
         style={{
-          background: "var(--proof-grey-bg)",
-          padding: "1px 5px",
-          borderRadius: 3,
-          fontSize: 11,
+          background: "var(--proof-surface-3)",
+          color: "var(--proof-blue-bright)",
+          padding: "2px 6px",
+          borderRadius: 4,
           fontFamily: "var(--font-mono)",
-          color: "var(--proof-blue)",
+          fontSize: "0.9em"
         }}
         {...props}
       >
@@ -96,22 +24,27 @@ export function MarkdownCode({
       </code>
     );
   }
-  // ── Block code ────────────────────────────────────────────────────────────
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <pre
-      style={{
-        background: "var(--proof-grey-bg)",
-        padding: 12,
-        borderRadius: 6,
-        overflowX: "auto",
-        fontSize: 11,
-        fontFamily: "var(--font-mono)",
-        lineHeight: 1.5,
-        border: "1px solid var(--proof-grey)",
-        margin: "8px 0",
-      }}
-    >
-      <code {...props}>{children}</code>
-    </pre>
+    <div style={{ position: "relative", margin: "16px 0", borderRadius: 8, overflow: "hidden", border: "1px solid var(--proof-border-strong)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#000", padding: "6px 12px", borderBottom: "1px solid var(--proof-border)" }}>
+        <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--proof-text-muted)" }}>{className?.replace('language-', '') || 'code'}</span>
+        <button
+          onClick={handleCopy}
+          style={{ background: "transparent", border: "none", color: "var(--proof-text-muted)", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 10, textTransform: "uppercase" }}
+        >
+          {copied ? <Check size={12} style={{ color: "var(--proof-green)" }} /> : <Copy size={12} />}
+        </button>
+      </div>
+      <pre style={{ margin: 0, padding: 16, background: "#050608", overflowX: "auto", fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--proof-text)" }}>
+        <code {...props}>{children}</code>
+      </pre>
+    </div>
   );
 }

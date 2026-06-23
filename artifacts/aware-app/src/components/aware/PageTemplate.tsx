@@ -62,12 +62,11 @@ export function PageTemplate({
     onPageChange !== undefined;
 
   return (
-    <div className="proof-page animate-fade-in" style={{ padding: 0, height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
+    <div className="proof-page" style={{ padding: 0, height: "100%", display: "flex", flexDirection: "column", animation: "fade-in-up 0.3s ease-out both" }}>
       <div
         className="proof-page-header"
         style={{
-          padding: "32px 40px",
+          padding: "24px 32px",
           borderBottom: "1px solid var(--proof-border)",
           background: "var(--proof-surface)",
           display: "flex",
@@ -75,18 +74,33 @@ export function PageTemplate({
           alignItems: "center",
           gap: 24,
           flexShrink: 0,
+          position: "relative"
         }}
       >
+        <div
+          style={{
+            position: "absolute",
+            bottom: -1,
+            left: 32,
+            width: 48,
+            height: 2,
+            borderRadius: 99,
+            background: "var(--proof-blue)",
+            boxShadow: "var(--proof-glow-cyan)",
+            zIndex: 1,
+          }}
+        />
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <h1
               className="proof-page-title"
               style={{
-                fontSize: 24,
+                fontSize: 16,
                 fontWeight: 700,
                 color: "var(--proof-text)",
                 margin: 0,
-                letterSpacing: "-0.02em",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase"
               }}
             >
               {title}
@@ -97,7 +111,7 @@ export function PageTemplate({
             <p
               className="proof-page-subtitle"
               style={{
-                fontSize: 14,
+                fontSize: 12,
                 color: "var(--proof-text-secondary)",
                 margin: 0,
               }}
@@ -114,11 +128,10 @@ export function PageTemplate({
         )}
       </div>
 
-      {/* Filters */}
       {filters && (
         <div
           style={{
-            padding: "16px 40px",
+            padding: "16px 32px",
             borderBottom: "1px solid var(--proof-border-light)",
             background: "var(--proof-surface-2)",
             display: "flex",
@@ -132,7 +145,6 @@ export function PageTemplate({
         </div>
       )}
 
-      {/* Top Content */}
       {topContent && (
         <div
           style={{
@@ -145,7 +157,6 @@ export function PageTemplate({
         </div>
       )}
 
-      {/* Main Content Area */}
       <div
         className="proof-page-content"
         style={{
@@ -153,12 +164,12 @@ export function PageTemplate({
           display: "flex",
           overflow: "hidden",
           position: "relative",
-          padding: sidePanel ? 0 : "32px 40px",
+          padding: sidePanel ? 0 : "24px 32px",
         }}
       >
         <PanelErrorBoundary label={errorLabel ?? title}>
           {loading ? (
-            <div style={{ width: "100%", padding: sidePanel ? "32px 40px" : 0 }}>
+            <div style={{ width: "100%", padding: sidePanel ? "24px 32px" : 0 }}>
               {loadingSkeleton ?? <SkeletonTable rows={loadingRows} cols={loadingCols} />}
             </div>
           ) : error ? (
@@ -174,7 +185,7 @@ export function PageTemplate({
                 color: "var(--proof-text-muted)",
               }}
             >
-              <div style={{ width: 48, height: 48, borderRadius: "50%", background: "var(--proof-red-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 48, height: 48, borderRadius: "50%", background: "var(--proof-red-bg)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--proof-glow-red)" }}>
                 <AlertTriangle size={24} style={{ color: "var(--proof-red)" }} />
               </div>
               <span style={{ fontSize: 14 }}>{error.message}</span>
@@ -203,7 +214,7 @@ export function PageTemplate({
             </div>
           ) : sidePanel ? (
             <div style={{ display: "flex", width: "100%", height: "100%" }}>
-              <div style={{ flex: 1, minWidth: 0, overflow: "auto", padding: "32px 40px" }}>
+              <div style={{ flex: 1, minWidth: 0, overflow: "auto", padding: "24px 32px" }}>
                 {children}
               </div>
               <div
@@ -224,11 +235,10 @@ export function PageTemplate({
         </PanelErrorBoundary>
       </div>
 
-      {/* Pagination Footer */}
       {showPagination && totalPages > 1 && !loading && !error && !isEmpty && (
         <div
           style={{
-            padding: "16px 40px",
+            padding: "16px 32px",
             borderTop: "1px solid var(--proof-border)",
             background: "var(--proof-surface)",
             flexShrink: 0,

@@ -303,7 +303,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
           alignItems: "flex-start",
           justifyContent: "center",
           paddingTop: "12vh",
-          background: "var(--proof-overlay-dark)",
+          background: "rgba(0, 0, 0, 0.6)",
           backdropFilter: "blur(4px)",
         }}
         onClick={onClose}
@@ -319,10 +319,10 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
           style={{
             position: "relative",
             width: "min(680px, 92vw)",
-            background: "var(--proof-surface)",
+            background: "rgba(9, 13, 20, 0.85)",
+            backdropFilter: "blur(20px)",
             borderRadius: 16,
-            boxShadow: "var(--proof-shadow-xl)",
-            border: "1px solid var(--proof-border)",
+            boxShadow: "0 0 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1)",
             overflow: "hidden",
           }}
           onClick={(e) => e.stopPropagation()}

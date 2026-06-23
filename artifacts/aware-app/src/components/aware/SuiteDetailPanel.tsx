@@ -94,51 +94,56 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
         exit={{ x: 400 }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
         style={{
-          width: 400,
+          width: 440,
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          background: "var(--proof-surface)",
-          borderLeft: "1px solid var(--proof-border)",
+          background: "rgba(9, 13, 20, 0.8)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderLeft: "1px solid rgba(0,196,255,0.1)",
+          boxShadow: "-12px 0 32px rgba(0,0,0,0.5)",
           zIndex: 10,
         }}
       >
         {/* Header */}
         <div
           style={{
-            padding: "16px 20px",
+            padding: "20px 24px",
             borderBottom: "1px solid var(--proof-border)",
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "space-between",
-            background: "var(--proof-surface-2)",
+            background: "rgba(255,255,255,0.02)",
           }}
         >
           <div style={{ minWidth: 0 }}>
             <h3
               style={{
-                fontSize: 15,
+                fontSize: 18,
                 fontWeight: 700,
+                fontFamily: "var(--font-mono)",
                 margin: 0,
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
+                gap: 10,
                 color: "var(--proof-text)",
+                letterSpacing: "0.5px"
               }}
             >
-              <FolderTree size={16} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
+              <FolderTree size={20} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {suite.name}
               </span>
             </h3>
             <p
               style={{
-                fontSize: 11,
-                color: "var(--proof-text-secondary)",
-                margin: "4px 0 0 0",
+                fontSize: 12,
+                color: "var(--proof-blue)",
+                margin: "6px 0 0 0",
                 fontFamily: "var(--font-mono)",
-                opacity: 0.7,
+                opacity: 0.9,
               }}
             >
               {suite.id}
@@ -146,8 +151,9 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
           </div>
           <button
             onClick={onClose}
-            className="proof-button"
-            style={{ padding: 6, borderRadius: "50%", minWidth: "auto" }}
+            className="proof-button-ghost"
+            aria-label="Close"
+            style={{ padding: 8, borderRadius: "50%", minWidth: "auto", background: "rgba(255,255,255,0.05)" }}
           >
             <X size={18} />
           </button>
@@ -177,14 +183,14 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
           )}
 
           {/* Stats Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             {[
-              { label: "Total Tests", value: tests.length, icon: <Beaker size={14} />, color: "var(--proof-blue)" },
-              { label: "Active", value: activeCount, icon: <Activity size={14} />, color: "var(--proof-green)" },
+              { label: "Total Tests", value: tests.length, icon: <Beaker size={16} />, color: "var(--proof-blue)" },
+              { label: "Active", value: activeCount, icon: <Activity size={16} />, color: "var(--proof-green)" },
               {
                 label: "Pass Rate (Last 5)",
                 value: suitePassRate !== null ? `${suitePassRate.toFixed(0)}%` : "--",
-                icon: <Activity size={14} />,
+                icon: <Activity size={16} />,
                 color:
                   suitePassRate === null
                     ? "var(--proof-text-secondary)"
@@ -197,19 +203,19 @@ export function SuiteDetailPanel({ suite, tests, onClose, onTestSelect }: SuiteD
               {
                 label: "Parallelism",
                 value: `${suite.config.parallelism}x`,
-                icon: <Layers size={14} />,
+                icon: <Layers size={16} />,
                 color: "var(--proof-text)",
               },
             ].map((s) => (
               <div
                 key={s.label}
-                className="proof-card"
-                style={{ padding: "14px 12px", display: "flex", flexDirection: "column", gap: 4 }}
+                className="glass-panel"
+                style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 8, borderRadius: "var(--proof-radius-md)", border: "1px solid var(--proof-border)", background: "rgba(255,255,255,0.02)" }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                  {s.icon} {s.label}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600 }}>
+                  <span style={{ color: s.color }}>{s.icon}</span> {s.label}
                 </div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: s.color }}>{s.value}</div>
+                <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "var(--font-mono)", color: s.color, textShadow: `0 0 12px ${s.color}40` }}>{s.value}</div>
               </div>
             ))}
           </div>

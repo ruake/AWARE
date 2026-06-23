@@ -29,7 +29,7 @@ export function AboutTestCategories({ categories }: { categories: Record<string,
                 >
                   <span
                     style={{
-                      fontSize: 11.5,
+                      fontSize: 12,
                       fontWeight: 600,
                       color: "var(--proof-text-secondary)",
                       textTransform: "capitalize",

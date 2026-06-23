@@ -18,8 +18,7 @@ export default function InputBar({
   onSend,
   onStop,
   onKeyDown,
-  onInput,
-}: Props) {
+  onInput}: Props) {
   const canSend = input.trim().length > 0 && !busy;
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -35,8 +34,7 @@ export default function InputBar({
         background: "rgba(2, 8, 23, 0.8)",
         backdropFilter: "blur(20px)",
         borderTop: "1px solid var(--proof-border)",
-        flexShrink: 0,
-      }}
+        flexShrink: 0}}
     >
       {/* Generating indicator */}
       {busy && (
@@ -48,8 +46,7 @@ export default function InputBar({
             padding: "6px 4px 8px",
             fontSize: 11.5,
             color: "var(--proof-blue-bright)",
-            fontWeight: 500,
-          }}
+            fontWeight: 500}}
         >
           <div style={{ display: "flex", gap: 3 }}>
             <span className="copilot-thinking-dot" style={{ width: 5, height: 5 }} />
@@ -68,11 +65,10 @@ export default function InputBar({
               borderRadius: 6,
               border: "1px solid rgba(248,113,113,0.25)",
               background: "rgba(239,68,68,0.08)",
-              color: "#f87171",
+              color: "var(--proof-red)",
               cursor: "pointer",
               fontSize: 11,
-              fontWeight: 600,
-            }}
+              fontWeight: 600}}
           >
             <Square size={9} fill="currentColor" /> Stop
           </button>
@@ -100,7 +96,6 @@ export default function InputBar({
             resize: "none",
             border: "none",
             background: "transparent",
-            outline: "none",
             fontSize: 13.5,
             lineHeight: 1.55,
             color: "var(--proof-text)",
@@ -110,8 +105,7 @@ export default function InputBar({
             overflowY: "auto",
             padding: "4px 0",
             opacity: busy ? 0.6 : 1,
-            cursor: busy ? "default" : "text",
-          }}
+            cursor: busy ? "default" : "text"}}
         />
         <button
           onClick={busy ? undefined : onSend}
@@ -130,8 +124,7 @@ export default function InputBar({
             justifyContent: "center",
             cursor: canSend ? "pointer" : "not-allowed",
             transition: "all 0.2s",
-            boxShadow: canSend ? "0 0 12px var(--proof-blue-glow)" : "none",
-          }}
+            boxShadow: canSend ? "0 0 12px var(--proof-blue-glow)" : "none"}}
         >
           <Send size={15} />
         </button>
@@ -144,8 +137,7 @@ export default function InputBar({
           color: "var(--proof-text-muted)",
           marginTop: 6,
           textAlign: "center",
-          letterSpacing: "0.2px",
-        }}
+          letterSpacing: "0.2px"}}
       >
         <kbd
           style={{
@@ -154,8 +146,7 @@ export default function InputBar({
             background: "rgba(255,255,255,0.05)",
             border: "1px solid var(--proof-border)",
             borderRadius: 3,
-            padding: "1px 4px",
-          }}
+            padding: "1px 4px"}}
         >
           Enter
         </kbd>{" "}
@@ -168,8 +159,7 @@ export default function InputBar({
             background: "rgba(255,255,255,0.05)",
             border: "1px solid var(--proof-border)",
             borderRadius: 3,
-            padding: "1px 4px",
-          }}
+            padding: "1px 4px"}}
         >
           ⇧Enter
         </kbd>{" "}

@@ -63,7 +63,7 @@ export function AboutTechStack() {
               transition: "background-color 0.2s",
             }}
           >
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: s.color }}>{s.label}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: s.color }}>{s.label}</span>
             <span style={{ fontSize: 11, color: "var(--proof-text-muted)" }}>{s.sub}</span>
           </motion.div>
         ))}

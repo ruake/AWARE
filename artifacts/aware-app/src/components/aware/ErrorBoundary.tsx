@@ -96,10 +96,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
     return (
       <div
-        className="animate-slide-up"
         role="alert"
         aria-live="assertive"
         style={{
+          animation: "slide-up 0.5s ease-out both",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",

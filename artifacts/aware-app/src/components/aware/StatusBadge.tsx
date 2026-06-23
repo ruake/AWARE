@@ -66,10 +66,27 @@ export const StatusBadge = React.memo(function StatusBadge({
   const display = label ?? STATUS_DISPLAY[key] ?? status;
 
   const sizeStyles: Record<string, React.CSSProperties> = {
-    xs: { fontSize: 9, padding: "1px 4px" },
-    sm: { fontSize: 11, padding: "2px 6px" },
-    md: { fontSize: 12, padding: "3px 8px" },
+    xs: { fontSize: 10, padding: "2px 6px" },
+    sm: { fontSize: 11, padding: "4px 8px" },
+    md: { fontSize: 12, padding: "6px 12px" },
   };
+
+  const getGlowStyle = (key: string) => {
+    switch (key) {
+      case "PASS": return { boxShadow: "0 0 12px rgba(0, 229, 160, 0.4)", borderColor: "rgba(0, 229, 160, 0.8)", background: "rgba(0, 229, 160, 0.15)", color: "#00e5a0" };
+      case "SUCCESS": return { boxShadow: "0 0 12px rgba(0, 229, 160, 0.4)", borderColor: "rgba(0, 229, 160, 0.8)", background: "rgba(0, 229, 160, 0.15)", color: "#00e5a0" };
+      case "FAIL": return { boxShadow: "0 0 12px rgba(255, 51, 85, 0.4)", borderColor: "rgba(255, 51, 85, 0.8)", background: "rgba(255, 51, 85, 0.15)", color: "#ff3355" };
+      case "ERROR": return { boxShadow: "0 0 12px rgba(255, 51, 85, 0.4)", borderColor: "rgba(255, 51, 85, 0.8)", background: "rgba(255, 51, 85, 0.15)", color: "#ff3355" };
+      case "REGRESSION": return { boxShadow: "0 0 12px rgba(255, 51, 85, 0.4)", borderColor: "rgba(255, 51, 85, 0.8)", background: "rgba(255, 51, 85, 0.15)", color: "#ff3355" };
+      case "FLAKY": return { boxShadow: "0 0 12px rgba(245, 158, 11, 0.4)", borderColor: "rgba(245, 158, 11, 0.8)", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b" };
+      case "WARNING": return { boxShadow: "0 0 12px rgba(245, 158, 11, 0.4)", borderColor: "rgba(245, 158, 11, 0.8)", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b" };
+      case "RUNNING": return { boxShadow: "0 0 16px rgba(0, 196, 255, 0.6)", borderColor: "rgba(0, 196, 255, 0.8)", background: "rgba(0, 196, 255, 0.15)", color: "#00c4ff", animation: "pulse-glow 2s infinite" };
+      case "PARTIAL": return { boxShadow: "0 0 12px rgba(245, 158, 11, 0.4)", borderColor: "rgba(245, 158, 11, 0.8)", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b" };
+      default: return { boxShadow: "0 0 12px rgba(255, 255, 255, 0.1)", borderColor: "rgba(255, 255, 255, 0.3)", background: "rgba(255, 255, 255, 0.05)", color: "var(--proof-text-secondary)" };
+    }
+  };
+
+  const glowStyle = getGlowStyle(key);
 
   return (
     <span
@@ -78,7 +95,13 @@ export const StatusBadge = React.memo(function StatusBadge({
       style={{
         display: "inline-flex",
         alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "var(--font-mono)",
+        fontWeight: 800,
+        letterSpacing: "0.05em",
+        border: "1px solid",
         ...sizeStyles[size],
+        ...glowStyle
       }}
       aria-label={`${display} status`}
       aria-live="polite"
@@ -91,14 +114,15 @@ export const StatusBadge = React.memo(function StatusBadge({
             height: 6,
             borderRadius: "50%",
             background: "currentColor",
-            marginRight: 4,
+            marginRight: 6,
             animation: "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+            boxShadow: "0 0 8px currentColor"
           }}
           aria-hidden="true"
         />
       )}
-      {icon && <span style={{ marginRight: 4, display: "flex", alignItems: "center" }} aria-hidden="true">{icon}</span>}
-      {display}
+      {icon && <span style={{ marginRight: 6, display: "flex", alignItems: "center" }} aria-hidden="true">{icon}</span>}
+      {display.toUpperCase()}
     </span>
   );
 });

@@ -14,8 +14,7 @@ import {
   ChevronDown,
   ChevronsUpDown,
   Info,
-  LineChart as ChartIcon,
-} from "lucide-react";
+  LineChart as ChartIcon} from "lucide-react";
 import type { TestCase } from "@/lib/types";
 import { ConsolePagination } from "@/components/console";
 import { repo } from "@/lib/nav";
@@ -27,8 +26,7 @@ import {
   CAT_COLORS,
   CAT_BGS,
   STATUS_COLORS,
-  STATUS_BGS,
-} from "@/lib/testColors";
+  STATUS_BGS} from "@/lib/testColors";
 
 const PAGE_SIZE = 25;
 
@@ -38,8 +36,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   http: <Server size={13} />,
   edgeworker: <Zap size={13} />,
   transaction: <Unlink size={13} />,
-  pytest: <TestTube size={13} />,
-};
+  pytest: <TestTube size={13} />};
 
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -50,14 +47,12 @@ const PRIORITY_ORDER: Record<string, number> = {
   critical: 0,
   high: 1,
   medium: 2,
-  low: 3,
-};
+  low: 3};
 
 const STATUS_ORDER: Record<string, number> = {
   active: 0,
   disabled: 1,
-  deprecated: 2,
-};
+  deprecated: 2};
 
 function sortTests(tests: TestCase[], key: SortKey, dir: SortDir): TestCase[] {
   return [...tests].sort((a, b) => {
@@ -103,8 +98,7 @@ export function TestList({
   page,
   filteredCount,
   onPageChange,
-  onClearFilters,
-}: TestListProps) {
+  onClearFilters}: TestListProps) {
   const [, navigate] = useLocation();
   const [sortKey, setSortKey] = React.useState<SortKey>("name");
   const [sortDir, setSortDir] = React.useState<SortDir>("asc");
@@ -142,8 +136,7 @@ export function TestList({
   const SortableTh = ({
     col,
     label,
-    center,
-  }: {
+    center}: {
     col: SortKey;
     label: string;
     center?: boolean;
@@ -155,9 +148,7 @@ export function TestList({
         cursor: "pointer",
         position: "sticky",
         top: 0,
-        zIndex: 10,
-        outline: "none",
-      }}
+        zIndex: 10}}
       onClick={() => handleSort(col)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -184,8 +175,7 @@ export function TestList({
         display: "flex",
         flexDirection: "column",
         minWidth: 0,
-        overflow: "hidden",
-      }}
+        overflow: "hidden"}}
     >
       <div style={{ overflowX: "auto", flex: 1, minHeight: 0 }}>
         <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
@@ -226,8 +216,7 @@ export function TestList({
                     textAlign: "center",
                     padding: 48,
                     color: "var(--proof-text-secondary)",
-                    fontSize: 13,
-                  }}
+                    fontSize: 13}}
                 >
                   <div className="proof-empty-state">
                     <Search size={32} style={{ opacity: 0.3, marginBottom: 12 }} />
@@ -256,8 +245,7 @@ export function TestList({
                       style={{
                         cursor: "pointer",
                         transition: "background 0.1s",
-                        height: 48,
-                      }}
+                        height: 48}}
                       onMouseEnter={() => onHoverRow(test.id)}
                       onMouseLeave={() => onHoverRow(null)}
                       onClick={(e) => toggleExpand(test.id, e)}
@@ -275,8 +263,7 @@ export function TestList({
                           fontFamily: "var(--font-mono)",
                           fontSize: 11,
                           color: "var(--proof-text-muted)",
-                          whiteSpace: "nowrap",
-                        }}
+                          whiteSpace: "nowrap"}}
                       >
                         {test.id}
                       </td>
@@ -288,8 +275,7 @@ export function TestList({
                           maxWidth: "100%",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
+                          whiteSpace: "nowrap"}}
                       >
                         <span style={{ color: hoveredRow === test.id ? "var(--proof-blue)" : "inherit" }}>
                           {test.name}
@@ -446,8 +432,7 @@ export function TestList({
                           className="proof-td"
                           style={{
                             background: "var(--proof-surface-hover)",
-                            padding: "16px 24px",
-                          }}
+                            padding: "16px 24px"}}
                         >
                           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                             <div
@@ -470,8 +455,7 @@ export function TestList({
                                       fontSize: 10,
                                       background: "var(--proof-surface)",
                                       borderColor: "var(--proof-border)",
-                                      color: "var(--proof-text-secondary)",
-                                    }}
+                                      color: "var(--proof-text-secondary)"}}
                                   >
                                     #{tag}
                                   </span>

@@ -14,15 +14,13 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   analysis: <Sparkles size={12} />,
   deployment: <Bookmark size={12} />,
   report: <FileText size={12} />,
-  performance: <Star size={12} />,
-};
+  performance: <Star size={12} />};
 
 const CATEGORY_LABELS: Record<string, string> = {
   analysis: "Analysis",
   deployment: "Deployment",
   report: "Report",
-  performance: "Performance",
-};
+  performance: "Performance"};
 
 const CARD_STYLE: React.CSSProperties = {
   background: "var(--proof-surface)",
@@ -31,9 +29,7 @@ const CARD_STYLE: React.CSSProperties = {
   padding: "10px 12px",
   cursor: "pointer",
   transition: "all var(--proof-transition)",
-  position: "relative",
-  outline: "none",
-};
+  position: "relative"};
 
 export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryProps) {
   const [templates, setTemplates] = useState<PromptTemplate[]>(() => loadTemplates());
@@ -145,8 +141,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
         justifyContent: "flex-end",
         background: "rgba(0,0,0,0.6)",
         backdropFilter: "blur(4px)",
-        WebkitBackdropFilter: "blur(4px)",
-      }}
+        WebkitBackdropFilter: "blur(4px)"}}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -160,8 +155,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
           borderLeft: "1px solid var(--proof-border)",
           display: "flex",
           flexDirection: "column",
-          animation: "fadeSlideIn 180ms ease-out",
-        }}
+          animation: "fadeSlideIn 180ms ease-out"}}
         onKeyDown={handleListKeyDown}
       >
         {/* Header */}
@@ -172,8 +166,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
             justifyContent: "space-between",
             padding: "14px 16px",
             borderBottom: "1px solid var(--proof-border)",
-            flexShrink: 0,
-          }}
+            flexShrink: 0}}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <FileText size={16} color="var(--proof-blue-bright)" />
@@ -187,8 +180,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                 background: "var(--proof-surface)",
                 borderRadius: "var(--proof-radius-full)",
                 padding: "1px 7px",
-                fontWeight: 600,
-              }}
+                fontWeight: 600}}
             >
               {templates.length}
             </span>
@@ -206,8 +198,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
               border: "none",
               background: "transparent",
               color: "var(--proof-text-muted)",
-              cursor: "pointer",
-            }}
+              cursor: "pointer"}}
           >
             <X size={15} />
           </button>
@@ -223,8 +214,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
               background: "var(--proof-surface)",
               border: "1px solid var(--proof-border)",
               borderRadius: "var(--proof-radius)",
-              padding: "0 10px",
-            }}
+              padding: "0 10px"}}
           >
             <Search size={13} color="var(--proof-text-muted)" />
             <input
@@ -237,12 +227,10 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                 flex: 1,
                 background: "transparent",
                 border: "none",
-                outline: "none",
                 color: "var(--proof-text)",
                 fontSize: 12.5,
                 padding: "8px 0",
-                fontFamily: "var(--font-sans)",
-              }}
+                fontFamily: "var(--font-sans)"}}
             />
             {search && (
               <button
@@ -253,8 +241,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                   color: "var(--proof-text-muted)",
                   cursor: "pointer",
                   padding: 4,
-                  display: "inline-flex",
-                }}
+                  display: "inline-flex"}}
               >
                 <X size={12} />
               </button>
@@ -269,8 +256,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
             gap: 6,
             padding: "0 16px 10px",
             flexWrap: "wrap",
-            flexShrink: 0,
-          }}
+            flexShrink: 0}}
           role="tablist"
           aria-label="Template categories"
         >
@@ -296,8 +282,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                   cursor: "pointer",
                   fontSize: 10.5,
                   fontWeight: 600,
-                  transition: "all var(--proof-transition)",
-                }}
+                  transition: "all var(--proof-transition)"}}
               >
                 {cat !== "All" && CATEGORY_ICONS[cat]}
                 {cat === "All" ? "All" : CATEGORY_LABELS[cat]}
@@ -323,8 +308,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                 justifyContent: "center",
                 padding: "48px 16px",
                 textAlign: "center",
-                gap: 8,
-              }}
+                gap: 8}}
             >
               <FileText size={32} color="var(--proof-text-tertiary)" />
               <span style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text-secondary)" }}>
@@ -347,8 +331,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                     fontWeight: 600,
                     color: "var(--proof-text-muted)",
                     textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                  }}
+                    letterSpacing: "0.5px"}}
                 >
                   <Pin size={10} />
                   Pinned
@@ -370,8 +353,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                           fontWeight: 600,
                           color: "var(--proof-text-muted)",
                           textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                        }}
+                          letterSpacing: "0.5px"}}
                       >
                         <FileText size={10} />
                         All Templates
@@ -401,8 +383,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                           : "1px solid var(--proof-border)",
                         background: isFocused
                           ? "var(--proof-surface-hover)"
-                          : "var(--proof-surface)",
-                      }}
+                          : "var(--proof-surface)"}}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.borderColor = "var(--proof-border-accent)";
                         e.currentTarget.style.background = "var(--proof-surface-hover)";
@@ -437,8 +418,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                               : "var(--proof-text-tertiary)",
                           cursor: "pointer",
                           opacity: 0,
-                          transition: "opacity var(--proof-transition-fast)",
-                        }}
+                          transition: "opacity var(--proof-transition-fast)"}}
                         className="template-delete-btn"
                         title={
                           confirmDelete === template.id
@@ -460,8 +440,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                             alignItems: "center",
                             justifyContent: "center",
                             fontSize: 15,
-                            flexShrink: 0,
-                          }}
+                            flexShrink: 0}}
                         >
                           {template.icon}
                         </div>
@@ -473,8 +452,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                                 fontSize: 12.5,
                                 fontWeight: 700,
                                 color: "var(--proof-text)",
-                                lineHeight: 1.3,
-                              }}
+                                lineHeight: 1.3}}
                             >
                               {template.name}
                             </span>
@@ -490,8 +468,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                                   background: "var(--proof-blue-bg)",
                                   borderRadius: "var(--proof-radius-full)",
                                   padding: "1px 6px",
-                                  lineHeight: "16px",
-                                }}
+                                  lineHeight: "16px"}}
                               >
                                 <Pin size={8} />
                                 Pinned
@@ -508,8 +485,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                               display: "-webkit-box",
                               WebkitLineClamp: 2,
                               WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                            }}
+                              overflow: "hidden"}}
                           >
                             {template.description}
                           </div>
@@ -529,8 +505,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                               WebkitBoxOrient: "vertical",
                               overflow: "hidden",
                               whiteSpace: "pre-wrap",
-                              wordBreak: "break-word",
-                            }}
+                              wordBreak: "break-word"}}
                           >
                             {template.content}
                           </div>
@@ -541,8 +516,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                         style={{
                           display: "flex",
                           justifyContent: "flex-end",
-                          marginTop: 8,
-                        }}
+                          marginTop: 8}}
                       >
                         <button
                           onClick={(e) => {
@@ -562,8 +536,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
                             cursor: "pointer",
                             fontSize: 10.5,
                             fontWeight: 600,
-                            transition: "all var(--proof-transition)",
-                          }}
+                            transition: "all var(--proof-transition)"}}
                         >
                           Use ↵
                         </button>
@@ -586,8 +559,7 @@ export default function TemplateLibrary({ onSelect, onClose }: TemplateLibraryPr
             display: "flex",
             alignItems: "center",
             gap: 4,
-            flexShrink: 0,
-          }}
+            flexShrink: 0}}
         >
           <Pin size={9} />
           ↑↓ navigate · Enter to use · Esc to close

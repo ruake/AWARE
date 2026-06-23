@@ -6,8 +6,8 @@ import * as THREE from "three";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
 
 function cssVar(name: string): string {
-  if (typeof document === "undefined") return "#3b82f6";
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#3b82f6";
+  if (typeof document === "undefined") return "#00c4ff";
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#00c4ff";
 }
 
 const BLUE_BRIGHT = () => cssVar("--proof-blue-bright");
@@ -23,8 +23,8 @@ interface PoPGlobeProps {
   onMarkerClick?: (index: number) => void;
 }
 
-const DOT_COUNT = 300;
-const ACTIVE_COUNT = 15;
+const DOT_COUNT = 600;
+const ACTIVE_COUNT = 25;
 
 function latLngToXYZ(lat: number, lng: number, r: number): [number, number, number] {
   const phi = (90 - lat) * (Math.PI / 180);
@@ -48,9 +48,9 @@ const DOT_POSITIONS = (() => {
 
 const DOT_COLORS = (() => {
   const c = new Float32Array(DOT_COUNT * 3);
-  const col = new THREE.Color(BLUE_BRIGHT());
+  const col = new THREE.Color("#00c4ff"); // force bright blue
   for (let i = 0; i < DOT_COUNT; i++) {
-    const b = 0.4 + Math.random() * 0.6;
+    const b = 0.2 + Math.random() * 0.4;
     c[i * 3] = col.r * b;
     c[i * 3 + 1] = col.g * b;
     c[i * 3 + 2] = col.b * b;
@@ -75,7 +75,7 @@ function StaticDots() {
         <bufferAttribute args={[DOT_POSITIONS, 3]} attach="attributes-position" />
         <bufferAttribute args={[DOT_COLORS, 3]} attach="attributes-color" />
       </bufferGeometry>
-      <pointsMaterial size={0.025} vertexColors sizeAttenuation transparent opacity={0.7} />
+      <pointsMaterial size={0.015} vertexColors sizeAttenuation transparent opacity={0.6} />
     </points>
   );
 }
@@ -92,9 +92,9 @@ function ActiveDots({ onMarkerClick }: { onMarkerClick?: (index: number) => void
     if (!ref.current) return;
     const t = state.clock.elapsedTime;
     const mat = ref.current.material as THREE.PointsMaterial;
-    const pulse = 0.5 + 0.5 * Math.sin(t * 2.5);
-    mat.opacity = 0.5 + pulse * 0.5;
-    mat.size = 0.03 + pulse * 0.025;
+    const pulse = 0.5 + 0.5 * Math.sin(t * 3.0);
+    mat.opacity = 0.6 + pulse * 0.4;
+    mat.size = 0.04 + pulse * 0.02;
   });
 
   const activePositions: [number, number, number][] = [];
@@ -113,11 +113,12 @@ function ActiveDots({ onMarkerClick }: { onMarkerClick?: (index: number) => void
           <bufferAttribute args={[ACTIVE_DOT_POSITIONS, 3]} attach="attributes-position" />
         </bufferGeometry>
         <pointsMaterial
-          color={BLUE_BRIGHT()}
-          size={0.04}
+          color="#33d4ff"
+          size={0.05}
           sizeAttenuation
           transparent
-          opacity={0.8}
+          opacity={1}
+          blending={THREE.AdditiveBlending}
         />
       </points>
       {activePositions.map((pos, i) => (
@@ -129,7 +130,7 @@ function ActiveDots({ onMarkerClick }: { onMarkerClick?: (index: number) => void
             hitRef.current?.(i);
           }}
         >
-          <sphereGeometry args={[0.06, 8, 8]} />
+          <sphereGeometry args={[0.08, 8, 8]} />
           <meshBasicMaterial transparent opacity={0} />
         </mesh>
       ))}
@@ -142,20 +143,22 @@ function GlobeGroup({ onMarkerClick }: { onMarkerClick?: (index: number) => void
 
   useFrame((_, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.12;
+      groupRef.current.rotation.y += delta * 0.08;
     }
   });
 
   return (
     <group ref={groupRef}>
       <mesh>
-        <sphereGeometry args={[1, 48, 48]} />
+        <sphereGeometry args={[1, 64, 64]} />
         <meshPhongMaterial
-          color={SURFACE()}
-          emissive={BG()}
-          emissiveIntensity={0.25}
-          shininess={15}
-          specular={BLUE()}
+          color="#050608"
+          emissive="#090d14"
+          emissiveIntensity={0.5}
+          shininess={50}
+          specular="#00c4ff"
+          transparent
+          opacity={0.95}
         />
       </mesh>
       <StaticDots />
@@ -189,18 +192,18 @@ function PoPGlobeContent({
 
   const cameraZ = 2.5 * (size / 200);
   return (
-    <div ref={containerRef} className={className} style={{ width: size, height: size }}>
+    <div ref={containerRef} className={className} style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', boxShadow: 'inset 0 0 60px rgba(0,196,255,0.1)' }}>
       <Canvas
         camera={{ position: [0, 0, cameraZ], fov: 45, near: 0.1, far: 10 }}
         gl={{ alpha: true, antialias: true }}
         style={{ background: "transparent", width: "100%", height: "100%" }}
         frameloop={isVisible ? "always" : "demand"}
       >
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 3, 5]} intensity={0.9} />
-        <directionalLight position={[-3, -2, 4]} intensity={0.3} />
+        <ambientLight intensity={0.2} />
+        <directionalLight position={[5, 3, 5]} intensity={1.5} color="#00c4ff" />
+        <directionalLight position={[-3, -2, 4]} intensity={0.5} color="#00e5a0" />
         <GlobeGroup onMarkerClick={onMarkerClick} />
-        {interactive && <OrbitControls enableZoom={false} enablePan={false} />}
+        {interactive && <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={1} />}
       </Canvas>
     </div>
   );
