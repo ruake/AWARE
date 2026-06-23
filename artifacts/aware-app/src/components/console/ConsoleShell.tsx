@@ -17,7 +17,6 @@ import {
   Sun,
   Moon,
   ChevronRight,
-  WifiOff,
   Check,
   AlertTriangle,
 } from "lucide-react";
@@ -189,7 +188,7 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
   const toggleTheme = () => {
     const next = !isDark;
     setIsDark(next);
-    try { localStorage.setItem("proof-theme", next ? "dark" : "light"); } catch {}
+    try { localStorage.setItem("proof-theme", next ? "dark" : "light"); } catch { /* intentionally empty */ }
     document.documentElement.classList.toggle("light", !next);
   };
 

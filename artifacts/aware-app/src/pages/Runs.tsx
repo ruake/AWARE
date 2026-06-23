@@ -1,6 +1,6 @@
 import React, { useSyncExternalStore } from "react";
 import { useLocation } from "wouter";
-import { Pagination, StatusBadge, PageTemplate } from "@/components/aware";
+import { StatusBadge, PageTemplate } from "@/components/aware";
 import { getRuns, subscribeToRuns } from "@/lib/data";
 import { useDataInit } from "@/lib/hooks/useData";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
@@ -8,7 +8,7 @@ import { useSyncedUrlState } from "@/lib/urlState";
 import { formatRelativeTime, formatDurationMs } from "@/lib/i18n";
 import type { Run } from "@/lib/types";
 import {
-  Play, GitCompare, Loader2, ExternalLink, Search, X, Activity,
+  Play, GitCompare, Loader2, ExternalLink, Search, X,
   ChevronRight, Minus, ChevronUp, ChevronDown
 } from "lucide-react";
 import { repo } from "@/lib/nav";
@@ -48,7 +48,7 @@ const TierBadge = React.memo(function TierBadge({ envId }: { envId: string }) {
 
 const PassBar = React.memo(function PassBar({ pct }: { pct: number }) {
   const c = pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
-  const bg = pct >= 95 ? "var(--proof-green-bg)" : pct >= 80 ? "var(--proof-yellow-bg)" : "var(--proof-red-bg)";
+  const _bg = pct >= 95 ? "var(--proof-green-bg)" : pct >= 80 ? "var(--proof-yellow-bg)" : "var(--proof-red-bg)";
   return (
     <div 
       style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--proof-surface)", padding: "4px 8px", borderRadius: 6, border: "1px solid var(--proof-border-light)" }}
@@ -158,13 +158,10 @@ export default function Runs() {
   const [page, setPage] = React.useState(1);
   const PAGE_SIZE = 30;
 
-  React.useEffect(() => {
-    setPage(1);
-  }, [search, statusFilter, suiteFilter, envFilter, sortKey]);
-
   const totalItems = sorted.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
-  const paginated = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const safePage = Math.min(page, totalPages);
+  const paginated = sorted.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const toggleSort = (key: SortableRunKey) => {
     if (sortKey === key) {
@@ -201,15 +198,6 @@ export default function Runs() {
     link.click();
     document.body.removeChild(link);
   };
-
-  const filterKey = `${search}|${statusFilter}|${suiteFilter}|${envFilter}`;
-  const prevFilterKey = React.useRef(filterKey);
-  React.useEffect(() => {
-    if (prevFilterKey.current !== filterKey) {
-      prevFilterKey.current = filterKey;
-      if (page !== 1) setPage(1);
-    }
-  }, [filterKey, page]);
 
   const runningCount = envFilteredRuns.filter((r) => r.status === "RUNNING").length;
   const passedCount = filtered.filter((r) => r.status === "PASS").length;
@@ -306,7 +294,7 @@ export default function Runs() {
           )}
         </div>
       )}
-      currentPage={page}
+      currentPage={safePage}
       totalPages={totalPages}
       totalItems={totalItems}
       pageSize={PAGE_SIZE}

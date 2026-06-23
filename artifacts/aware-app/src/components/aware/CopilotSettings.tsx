@@ -1,6 +1,23 @@
 import React from "react";
 import { X, Info, ExternalLink, Zap, CheckCircle, AlertCircle } from "lucide-react";
 
+interface AICapabilities {
+  available: string;
+}
+
+interface AILanguageModel {
+  capabilities(): Promise<AICapabilities>;
+}
+
+interface ChromeAIWindow {
+  LanguageModel?: {
+    availability(): Promise<string>;
+  };
+  ai?: {
+    languageModel?: AILanguageModel;
+  };
+}
+
 interface CopilotSettingsProps {
   onClose: () => void;
 }
@@ -8,26 +25,31 @@ interface CopilotSettingsProps {
 export function CopilotSettings({ onClose }: CopilotSettingsProps) {
   const [status, setStatus] = React.useState<"checking" | "available" | "unavailable" | "downloading">("checking");
 
+  async function getProviderStatus(): Promise<"available" | "unavailable" | "downloading"> {
+    const chromeAI = window as unknown as ChromeAIWindow;
+    if (typeof chromeAI.LanguageModel?.availability === "function") {
+      const res = await chromeAI.LanguageModel.availability();
+      setStatus((res === "downloadable" || res === "downloading" ? "downloading" : res) as "available" | "unavailable" | "downloading");
+    } else if (typeof chromeAI.ai?.languageModel?.capabilities === "function") {
+      const cap = await chromeAI.ai.languageModel.capabilities();
+      const avail = typeof cap === "object" ? cap.available : cap;
+      if (avail === "readily") return "available";
+      if (avail === "after-download") return "downloading";
+      return "unavailable";
+    }
+    return "unavailable";
+  }
+
   const checkStatus = React.useCallback(async () => {
     setStatus("checking");
-    // Simple availability check
-    if (typeof (window as any).LanguageModel?.availability === "function") {
-      const res = await (window as any).LanguageModel.availability();
-      setStatus(res === "downloadable" || res === "downloading" ? "downloading" : res);
-    } else if (typeof (window as any).ai?.languageModel?.capabilities === "function") {
-      const cap = await (window as any).ai.languageModel.capabilities();
-      const avail = typeof cap === "object" ? cap.available : cap;
-      if (avail === "readily") setStatus("available");
-      else if (avail === "after-download") setStatus("downloading");
-      else setStatus("unavailable");
-    } else {
-      setStatus("unavailable");
-    }
+    setStatus(await getProviderStatus());
   }, []);
 
   React.useEffect(() => {
-    checkStatus();
-  }, [checkStatus]);
+    let mounted = true;
+    getProviderStatus().then(s => { if (mounted) setStatus(s); });
+    return () => { mounted = false; };
+  }, []);
 
   const copyFlag = () => {
     navigator.clipboard.writeText("chrome://flags/#prompt-api-for-gemini-nano");

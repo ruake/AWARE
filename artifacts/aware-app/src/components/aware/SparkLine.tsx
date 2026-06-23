@@ -3,7 +3,7 @@ import React from "react";
 export function SparkLine({ data, color }: any) {
   if (!data || !data.length) return null;
   return (
-    <div className="h-6 w-16 opacity-70">
+    <div style={{ height: 24, width: 64, opacity: 0.7 }}>
       <svg width="100%" height="100%" viewBox="0 0 100 24" preserveAspectRatio="none">
         <polyline
           fill="none"

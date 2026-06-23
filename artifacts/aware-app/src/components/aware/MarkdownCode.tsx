@@ -1,7 +1,7 @@
 import React from "react";
 import { Copy, Check } from "lucide-react";
 
-export function MarkdownCode({ className, children, ...props }: any) {
+export function MarkdownCode({ className, children, ...props }: React.HTMLAttributes<HTMLElement>) {
   const [copied, setCopied] = React.useState(false);
   
   const isInline = !className;

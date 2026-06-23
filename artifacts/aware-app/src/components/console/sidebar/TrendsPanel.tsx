@@ -1,30 +1,22 @@
 import React, { useSyncExternalStore } from "react";
-import { Link, useLocation, useSearch } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   DIFF_ROWS,
-  getTestDetailsAsync,
   computeRunFrequency,
   subscribeToRuns,
   getRuns} from "@/lib/data";
 import { getTestDetailStat, subscribeToSidebarData } from "@/lib/sidebarData";
 import { useTestData } from "@/hooks/useTestData";
-import { CATEGORIES, CATEGORY_COLORS } from "@/lib/constants";
+
 import { detectAnomalies } from "@/lib/anomalyDetection";
 import { getTestDetailsSync } from "@/lib/runsLoader";
 import {
   ArrowLeft,
-  ChevronRight,
   Search,
-  FileText,
-  Share2,
-  AlertTriangle,
   X,
   TrendingUp,
-  Grid3x3,
-  Activity,
-  History,
-  Info} from "lucide-react";
+  Grid3x3} from "lucide-react";
 
 function selectorLabel(item: { id: string; name: string }, query: string): React.ReactNode {
   if (!query.trim()) return item.name;
@@ -224,33 +216,6 @@ function TestSelector() {
         </AnimatePresence>
       </div>
     </div>
-  );
-}
-
-function MiniSparkline({ data, color }: { data: number[], color: string }) {
-  if (!data || data.length < 2) return null;
-  const max = Math.max(...data, 1);
-  const min = Math.min(...data);
-  const range = max - min || 1;
-  const width = 60;
-  const height = 16;
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * width;
-    const y = height - ((v - min) / range) * height;
-    return `${x},${y}`;
-  }).join(' ');
-
-  return (
-    <svg width={width} height={height} style={{ overflow: 'visible' }}>
-      <polyline
-        fill="none"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        points={points}
-      />
-    </svg>
   );
 }
 

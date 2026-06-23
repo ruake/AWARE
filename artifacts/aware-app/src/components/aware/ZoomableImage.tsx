@@ -1,5 +1,5 @@
 import React from "react";
-import { Loader2, AlertCircle, ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2, ImageOff } from "lucide-react";
+import { Loader2, ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2, ImageOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ZoomableImageProps {

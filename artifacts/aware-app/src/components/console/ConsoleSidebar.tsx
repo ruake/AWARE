@@ -9,8 +9,7 @@ import { ComparePanel } from "./sidebar/ComparePanel";
 import { TrendsPanel } from "./sidebar/TrendsPanel";
 import { TestsPanel } from "./sidebar/TestsPanel";
 import { CopilotPanel } from "./sidebar/CopilotPanel";
-import { X, Activity, Clock, ShieldCheck, AlertCircle, Bot } from "lucide-react";
-import { useRelativeTime } from "@/lib/hooks/useData";
+import { X, Activity, Clock, ShieldCheck, Bot } from "lucide-react";
 
 interface ConsoleSidebarProps {
   activePanel: string;

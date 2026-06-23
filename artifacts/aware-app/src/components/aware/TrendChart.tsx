@@ -7,9 +7,9 @@ interface TrendChartProps { passRate: number; flakinessScore: number; avgDuratio
 export const TrendChart = React.memo(function TrendChart({ history }: TrendChartProps) {
   const data = history.slice(-20).map(h => ({ pass: "env" in h && typeof (h as any).passRate === "number" ? (h as any).passRate : h.status === "PASS" ? 100 : 0 }));
   return (
-    <div className="glass-panel flex h-48 w-full flex-col justify-end overflow-hidden rounded-2xl border border-[var(--proof-border)]">
-      <div className="p-4 pb-0 text-sm font-bold uppercase tracking-widest text-[var(--proof-text-secondary)] z-10">Pass Rate Trend</div>
-      <div className="flex-1 h-full w-full opacity-80">
+    <div className="glass-panel" style={{ display: "flex", height: 192, width: "100%", flexDirection: "column", justifyContent: "flex-end", overflow: "hidden", borderRadius: 16, border: "1px solid var(--proof-border)" }}>
+      <div style={{ padding: "16px 16px 0", fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--proof-text-secondary)", zIndex: 10 }}>Pass Rate Trend</div>
+      <div style={{ flex: 1, height: "100%", width: "100%", opacity: 0.8 }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
             <defs>

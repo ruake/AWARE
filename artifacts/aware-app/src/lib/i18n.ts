@@ -26,7 +26,7 @@ export function formatPercent(value: number, locale?: string): string {
 /**
  * Locale-aware duration formatter.
  */
-export function formatDurationMs(ms: number, locale?: string): string {
+export function formatDurationMs(ms: number, _locale?: string): string {
   const s = Math.floor((ms / 1000) % 60);
   const m = Math.floor((ms / 60_000) % 60);
   const h = Math.floor(ms / 3_600_000);

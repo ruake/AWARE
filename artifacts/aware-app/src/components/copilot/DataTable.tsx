@@ -113,7 +113,9 @@ function VirtualBody({
   onNavigate: (href: string) => void;
   onVisibleCount?: (n: number) => void;
 }) {
+  "use no memo";
   const parentRef = React.useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,

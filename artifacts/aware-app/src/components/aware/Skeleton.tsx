@@ -218,7 +218,7 @@ export function SkeletonChart({ height = 300 }: { height?: number }) {
           <SkeletonBox
             key={i}
             width="100%"
-            height={`${Math.max(20, Math.random() * 100)}%`}
+            height={`${Math.max(20, ((i * 13 + 7) % 100))}%`}
             borderRadius="var(--proof-radius-sm) var(--proof-radius-sm) 0 0"
           />
         ))}

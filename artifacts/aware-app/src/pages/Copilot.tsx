@@ -1,6 +1,6 @@
 import React from "react";
 import { CopilotSidebar } from "@/components/aware/CopilotSidebar";
-import ChatMessage, { ChatMsg } from "@/components/aware/ChatMessage";
+import ChatMessage, { type ChatMsg } from "@/components/aware/ChatMessage";
 import { Bot, Send, Sparkles } from "lucide-react";
 
 export default function Copilot() {

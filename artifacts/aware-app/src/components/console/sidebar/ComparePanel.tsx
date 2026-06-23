@@ -5,7 +5,7 @@ import { useSyncedUrlState } from "@/lib/urlState";
 import { subscribeToRuns, getRuns, subscribeToDiffRows, getDiffRows } from "@/lib/data";
 import { getSelectedEnvSnapshot, subscribeToSelectedEnv } from "@/lib/selectedEnv";
 import { getCompareStats, subscribeToSidebarData } from "@/lib/sidebarData";
-import { Link2, Share2, Github, Zap, GitCompare, ArrowRight, Info } from "lucide-react";
+import { Share2, Github, Zap, GitCompare, ArrowRight, Info } from "lucide-react";
 
 function copy(text: string) {
   navigator.clipboard.writeText(text).catch(() => {});
@@ -142,7 +142,7 @@ function CompareStatSummary() {
         background: "var(--proof-surface-subtle)",
       }}
     >
-      {stats.map((s, idx) => (
+      {stats.map((s, _idx) => (
         <StatCard
           key={s.key}
           stat={s}

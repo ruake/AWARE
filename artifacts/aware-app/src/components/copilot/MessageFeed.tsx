@@ -36,12 +36,13 @@ const QUICK_ACTIONS = [
   { label: "Akamai", query: "What's the Akamai property status?", icon: Globe, color: "var(--proof-orange)" },
 ];
 
-function MessageFeedInner({ messages, onRetry, onSend }: Props) {
+function MessageFeedInner({ messages, onRetry, onSend }: Props) {"use no memo";
   const parentRef = React.useRef<HTMLDivElement | null>(null);
   const atBottomRef = React.useRef(true);
   const prevLenRef = React.useRef(messages.length);
   const [, _navigate] = useLocation();
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: messages.length,
     getScrollElement: () => parentRef.current,

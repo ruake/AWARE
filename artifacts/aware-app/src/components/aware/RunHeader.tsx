@@ -1,4 +1,4 @@
-import { Copy, Clock, Globe, Activity, GitBranch, Terminal } from "lucide-react";
+import { Copy } from "lucide-react";
 import React from "react";
 import type { Run } from "@/lib/types";
 import { getEnvConfigById, envIdToLabel } from "@/lib/envConfig";
@@ -10,7 +10,7 @@ export function RunHeader({ run }: { run: Run }) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  const envCfg = getEnvConfigById(run.envId);
+  const _envCfg = getEnvConfigById(run.envId);
 
   // Calculate stroke-dasharray for the ring gauge
   const radius = 24;

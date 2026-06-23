@@ -1,7 +1,7 @@
 import React from "react";
-import { FolderTree, X, Info, Terminal, Activity, FileText } from "lucide-react";
+import { X, Terminal, Activity, FileText } from "lucide-react";
 import type { TestCase, TestSuite } from "@/lib/types";
-import { PRI_COLORS } from "@/lib/testColors";
+
 
 interface TestDetailPanelProps {
   test: TestCase | null;
@@ -9,7 +9,7 @@ interface TestDetailPanelProps {
   onClose: () => void;
 }
 
-export function TestDetailPanel({ test, parentSuite, onClose }: TestDetailPanelProps) {
+export function TestDetailPanel({ test, parentSuite: _parentSuite, onClose }: TestDetailPanelProps) {
   if (!test) return null;
 
   return (
@@ -91,7 +91,7 @@ export function TestDetailPanel({ test, parentSuite, onClose }: TestDetailPanelP
           </div>
           <div style={{ display: "flex", gap: 4 }}>
              {Array.from({ length: 15 }).map((_, i) => {
-               const isPass = Math.random() > 0.2;
+                const isPass = ((i * 13 + 7) % 100) / 100 > 0.2;
                const color = isPass ? "var(--proof-green)" : "var(--proof-red)";
                return (
                  <div key={i} style={{ flex: 1, height: 24, borderRadius: 4, background: color, opacity: isPass ? 0.6 : 1, boxShadow: !isPass ? `0 0 8px ${color}` : 'none' }} title={isPass ? "Passed" : "Failed"} />

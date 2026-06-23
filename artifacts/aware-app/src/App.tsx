@@ -6,7 +6,7 @@ import { SkeletonTable, SkeletonChart, SkeletonCard } from "@/components/aware/S
 import { ConsoleShell } from "@/components/console";
 import NotFound from "@/pages/NotFound";
 import { loadAllData, getDataInitState, subscribeToDataInit } from "@/lib/data";
-import { AlertTriangle, RefreshCw, Loader2, Activity } from "lucide-react";
+import { AlertTriangle, RefreshCw, Activity } from "lucide-react";
 
 /*
  * ── Navigation Architecture ─────────────────────────────────────────────

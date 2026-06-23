@@ -1,7 +1,6 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { CompareSidePanel } from "@/components/aware/CompareSidePanel";
+import { motion } from "framer-motion";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { logWarn } from "@/lib/ai/debugLogger";
 import {
@@ -10,25 +9,20 @@ import {
 } from "@/lib/data";
 import { loadResultsForRun } from "@/lib/runsLoader";
 import type { DiffRow, TestResult } from "@/lib/types";
-import {
-  Search, ArrowLeftRight, CheckCircle2, AlertTriangle,
-  Clock, Minus, XCircle, GitCompare, ArrowRight
-} from "lucide-react";
+import { ArrowLeftRight, GitCompare } from "lucide-react";
 import { CompareRunsHeader } from "@/components/aware/CompareSummary";
 import { CompareRunSelector } from "@/components/aware/CompareRunSelector";
-import { Pagination } from "@/components/aware";
 
 export default function Compare() {
-  const [, navigate] = useLocation();
+  useLocation();
   const initState = React.useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const runs = React.useSyncExternalStore(subscribeToRuns, getRuns);
   
   const envRuns = runs;
   const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
   const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
-  const [selectedName, setSelectedName] = useSyncedUrlState<string | null>("sel", null);
   const [searchText, setSearchText] = useSyncedUrlState("q", "");
-  const [activeFilter, setActiveFilter] = useSyncedUrlState<string | null>("filter", null);
+  const [activeFilter] = useSyncedUrlState<string | null>("filter", null);
   const [computedRows, setComputedRows] = React.useState<DiffRow[]>([]);
   const [baseResults, setBaseResults] = React.useState<TestResult[]>([]);
   const [candResults, setCandResults] = React.useState<TestResult[]>([]);

@@ -1,4 +1,4 @@
-import { AnomalyEntry, AnomalyResult, AnomalyStrategy } from "./types";
+import type { AnomalyEntry, AnomalyResult, AnomalyStrategy } from "./types";
 
 export class ZScoreStrategy implements AnomalyStrategy {
   readonly name = "Z-Score Strategy";

@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { Run } from "@/lib/types";
 
 const STATUS_COLORS: Record<string, string> = {

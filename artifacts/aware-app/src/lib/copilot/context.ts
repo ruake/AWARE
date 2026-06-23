@@ -47,7 +47,7 @@ Behavior rules:
 // Very rough estimate: 1 token ≈ 4 chars.
 export function truncateMessages(
   messages: ApiMessage[],
-  providerType: ProviderType,
+  _providerType: ProviderType,
 ): ApiMessage[] {
   const MAX_CHARS = 40000; // Chrome AI context window
   let total = 0;

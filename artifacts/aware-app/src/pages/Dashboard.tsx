@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import {
@@ -6,17 +5,12 @@ import {
   useEnvHealth,
   useDashboardKPIs,
   usePassRateChart,
-  useSchedulerStatus,
   useDataInit,
 } from "@/lib/hooks/useData";
-import { Activity, Zap, Clock, Calendar, Play, GitCompare, XCircle, AlertTriangle, ArrowRight, TrendingUp } from "lucide-react";
-import { AnomalyBanner, HeroKpiCard, TierCard, RunRibbonCard, KpiCard, TrendChart, StatsDashboard, CTAStatCard } from "@/components/aware";
+import { Activity, Zap, XCircle, AlertTriangle } from "lucide-react";
+import { AnomalyBanner, HeroKpiCard, TierCard, TrendChart } from "@/components/aware";
 import type { TierGroup } from "@/components/aware/TierCard";
 
-const itemVariant = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: "easeOut" } },
-};
 const containerVariant = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.05 } },
@@ -28,7 +22,6 @@ export default function Dashboard() {
   const envHealthData = useEnvHealth();
   const chartData = usePassRateChart();
   const filteredRuns = useFilteredRuns();
-  const scheduler = useSchedulerStatus();
   const dataState = useDataInit();
 
   const sortedRuns = [...filteredRuns].sort(
@@ -65,22 +58,22 @@ export default function Dashboard() {
 
   if (dataState.loading) {
     return (
-      <main className="flex h-full flex-col items-center justify-center gap-4 p-10">
-        <Activity size={32} className="animate-spin text-[var(--proof-blue)]" />
-        <div className="text-sm font-semibold text-[var(--proof-text-secondary)]">Loading command center...</div>
+      <main style={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 40 }}>
+        <Activity size={32} style={{ color: "var(--proof-blue)", animation: "spin 1s linear infinite" }} />
+        <div style={{ fontSize: 14, fontWeight: 600, color: "var(--proof-text-secondary)" }}>Loading command center...</div>
       </main>
     );
   }
 
   if (dataState.error) {
     return (
-      <main className="flex h-full flex-col items-center justify-center gap-4 p-10">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--proof-red-bg)] border border-[var(--proof-red-border)]">
-          <XCircle size={22} className="text-[var(--proof-red)]" />
+      <main style={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 40 }}>
+        <div style={{ display: "flex", height: 48, width: 48, alignItems: "center", justifyContent: "center", borderRadius: 12, background: "var(--proof-red-bg)", border: "1px solid var(--proof-red-border)" }}>
+          <XCircle size={22} style={{ color: "var(--proof-red)" }} />
         </div>
-        <div className="text-center">
-          <div className="mb-2 text-base font-bold text-[var(--proof-text)]">System Failure</div>
-          <div className="max-w-[400px] text-sm text-[var(--proof-text-secondary)] leading-relaxed">Could not establish connection to the edge nodes. Check network relays and retry.</div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ marginBottom: 8, fontSize: 16, fontWeight: 700, color: "var(--proof-text)" }}>System Failure</div>
+          <div style={{ maxWidth: 400, fontSize: 14, color: "var(--proof-text-secondary)", lineHeight: 1.6 }}>Could not establish connection to the edge nodes. Check network relays and retry.</div>
         </div>
         <button onClick={() => window.location.reload()} className="proof-btn proof-btn-primary">Retry Connection</button>
       </main>
@@ -88,7 +81,7 @@ export default function Dashboard() {
   }
 
   return (
-    <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex min-h-full flex-col gap-6 p-6">
+    <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: "flex", flexDirection: "column", gap: 24, padding: 24, minHeight: "100%" }}>
       {(hasAlert || hasDegradation) && (
         <AnomalyBanner
           hasAlert={hasAlert}
@@ -100,7 +93,7 @@ export default function Dashboard() {
       )}
 
       {/* Hero KPIs - Horizontal Strip */}
-      <motion.section variants={containerVariant} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.section variants={containerVariant} initial="hidden" animate="show" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
         <HeroKpiCard label="Pass Rate" value={kpis.passRate} suffix="%" delta={kpis.passTrend} accentColor={chartColor} icon={<Activity />} onClick={() => navigate("/trends")} />
         <HeroKpiCard label="Total Runs" value={kpis.total} delta={1} deltaLabel="new" accentColor="var(--proof-blue)" icon={<Zap />} onClick={() => navigate("/runs")} />
         <HeroKpiCard label="Failures" value={kpis.failedRuns} delta={sortedRuns.length >= 2 ? (sortedRuns[0]?.failures ?? 0) - (sortedRuns[1]?.failures ?? 0) : 0} invertDelta accentColor={kpis.failedRuns > 0 ? "var(--proof-red)" : "var(--proof-green)"} icon={<XCircle />} onClick={() => navigate("/runs")} />
@@ -108,14 +101,14 @@ export default function Dashboard() {
       </motion.section>
 
       {/* Tier Cards - Visually Dominant 3-Column */}
-      <motion.section variants={containerVariant} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.section variants={containerVariant} initial="hidden" animate="show" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
         {tierGroups.map((group, i) => (
           <TierCard key={group.tier} group={group} onClick={() => navigate(`/runs?env=${group.tier}`)} index={i} />
         ))}
       </motion.section>
 
       {/* Trend Chart Area */}
-      <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="w-full">
+      <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ width: "100%" }}>
         <TrendChart passRate={kpis.passRate} flakinessScore={12} avgDuration={1450} history={chartData.map((d, i) => ({ runId: `R-${i}`, status: d.passRate > 80 ? "PASS" : "FAIL", env: "QA", passRate: d.passRate, date: d.label, duration: 1000 }))} />
       </motion.section>
     </motion.main>

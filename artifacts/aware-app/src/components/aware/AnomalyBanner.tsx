@@ -1,8 +1,16 @@
 import React from "react";
 import { AlertCircle, ArrowRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
-export function AnomalyBanner({ hasAlert, hasDegradation, regressions, degradedTiers, onInvestigate }: any) {
+interface AnomalyBannerProps {
+  hasAlert: boolean;
+  hasDegradation: boolean;
+  regressions: number;
+  degradedTiers: string;
+  onInvestigate: () => void;
+}
+
+export function AnomalyBanner({ hasAlert, hasDegradation, regressions, degradedTiers, onInvestigate }: AnomalyBannerProps) {
   if (!hasAlert && !hasDegradation) return null;
 
   const isCritical = hasAlert;
@@ -12,18 +20,18 @@ export function AnomalyBanner({ hasAlert, hasDegradation, regressions, degradedT
   const message = isCritical ? `${regressions} CRITICAL REGRESSION${regressions !== 1 ? "S" : ""} DETECTED` : `${degradedTiers} DEGRADED`;
 
   return (
-    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
-      <div className="flex w-full items-center justify-between rounded-xl border p-4 shadow-lg backdrop-blur-md" style={{ background: bg, borderColor: color, boxShadow: glow }}>
-        <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/20" style={{ color }}>
-            <AlertCircle className="animate-pulse" size={24} />
+    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ width: "100%" }}>
+      <div style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", borderRadius: 12, border: `1px solid ${color}`, padding: 16, boxShadow: glow, backdropFilter: "blur(12px)", background: bg }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ display: "flex", height: 40, width: 40, alignItems: "center", justifyContent: "center", borderRadius: 8, background: "rgba(0,0,0,0.2)", color }}>
+            <AlertCircle style={{ animation: "pulse 2s infinite" }} size={24} />
           </div>
           <div>
-            <div className="text-lg font-black tracking-widest" style={{ color, textShadow: `0 0 10px ${color}80` }}>{message}</div>
-            <div className="text-sm font-bold text-white/70">Immediate attention recommended. System pass rate below threshold.</div>
+            <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: "0.1em", color, textShadow: `0 0 10px ${color}80` }}>{message}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>Immediate attention recommended. System pass rate below threshold.</div>
           </div>
         </div>
-        <button onClick={onInvestigate} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-black transition-transform hover:scale-105 active:scale-95" style={{ background: color, boxShadow: glow }}>
+        <button onClick={onInvestigate} style={{ display: "flex", alignItems: "center", gap: 8, borderRadius: 8, padding: "8px 16px", fontSize: 14, fontWeight: 700, color: "#000", border: "none", cursor: "pointer", background: color, boxShadow: glow }} onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.05)"; }} onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; }}>
           INVESTIGATE <ArrowRight size={16} strokeWidth={3} />
         </button>
       </div>

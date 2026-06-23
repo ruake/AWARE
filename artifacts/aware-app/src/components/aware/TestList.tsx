@@ -56,7 +56,7 @@ const STATUS_ORDER: Record<string, number> = {
 
 function sortTests(tests: TestCase[], key: SortKey, dir: SortDir): TestCase[] {
   return [...tests].sort((a, b) => {
-    let cmp = 0;
+    let cmp;
     if (key === "priority") {
       cmp = (PRIORITY_ORDER[a.priority] ?? 99) - (PRIORITY_ORDER[b.priority] ?? 99);
     } else if (key === "status") {
@@ -87,6 +87,45 @@ function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; s
   return sortDir === "asc"
     ? <ChevronUp size={10} style={{ color: "var(--proof-blue)" }} />
     : <ChevronDown size={10} style={{ color: "var(--proof-blue)" }} />;
+}
+
+interface SortableThProps {
+  col: SortKey;
+  label: string;
+  center?: boolean;
+  sortKey: SortKey;
+  sortDir: SortDir;
+  onSort: (key: SortKey) => void;
+}
+
+function SortableTh({ col, label, center, sortKey, sortDir, onSort }: SortableThProps) {
+  return (
+    <th
+      className="proof-th"
+      style={{
+        textAlign: center ? "center" : "left",
+        cursor: "pointer",
+        position: "sticky",
+        top: 0,
+        zIndex: 10}}
+      onClick={() => onSort(col)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSort(col);
+        }
+      }}
+      tabIndex={0}
+      aria-sort={sortKey === col ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+    >
+      <span 
+        style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+      >
+        {label}
+        <SortIcon col={col} sortKey={sortKey} sortDir={sortDir} />
+      </span>
+    </th>
+  );
 }
 
 export function TestList({
@@ -133,41 +172,6 @@ export function TestList({
     setExpandedIds(next);
   };
 
-  const SortableTh = ({
-    col,
-    label,
-    center}: {
-    col: SortKey;
-    label: string;
-    center?: boolean;
-  }) => (
-    <th
-      className="proof-th"
-      style={{
-        textAlign: center ? "center" : "left",
-        cursor: "pointer",
-        position: "sticky",
-        top: 0,
-        zIndex: 10}}
-      onClick={() => handleSort(col)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          handleSort(col);
-        }
-      }}
-      tabIndex={0}
-      aria-sort={sortKey === col ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
-    >
-      <span 
-        style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-      >
-        {label}
-        <SortIcon col={col} sortKey={sortKey} sortDir={sortDir} />
-      </span>
-    </th>
-  );
-
   return (
     <div
       style={{
@@ -193,14 +197,14 @@ export function TestList({
           <thead>
             <tr className="proof-tr">
               <th className="proof-th" style={{ width: 4, padding: 0 }} />
-              <SortableTh col="id" label="ID" />
-              <SortableTh col="name" label="Name" />
+              <SortableTh col="id" label="ID" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableTh col="name" label="Name" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
               <th className="proof-th" style={{ textAlign: "center", position: "sticky", top: 0, zIndex: 10 }}>
                 Type
               </th>
-              <SortableTh col="category" label="Category" />
-              <SortableTh col="priority" label="Pri" center />
-              <SortableTh col="status" label="Status" center />
+              <SortableTh col="category" label="Category" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableTh col="priority" label="Pri" center sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              <SortableTh col="status" label="Status" center sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
               <th className="proof-th" style={{ textAlign: "center", position: "sticky", top: 0, zIndex: 10 }}>
                 Coverage
               </th>
