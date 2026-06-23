@@ -15,12 +15,11 @@ const TOKEN_PRESETS = [256, 512, 1024, 2048, 4096, 8192];
 const TONE_ORDER: ToneOption[] = ["professional", "concise", "detailed", "friendly", "technical"];
 
 const TONE_ACCENT: Record<ToneOption, string> = {
-  professional: "#60a5fa",
-  concise: "#a78bfa",
-  detailed: "#f59e0b",
-  friendly: "#34d399",
-  technical: "#f472b6",
-};
+  professional: "var(--proof-blue)",
+  concise: "var(--proof-purple)",
+  detailed: "var(--proof-yellow)",
+  friendly: "var(--proof-emerald)",
+  technical: "#f472b6"};
 
 function formatTokens(n: number): string {
   if (n >= 1024) return `${n / 1024}K tokens`;
@@ -36,8 +35,7 @@ function formatContextWindow(n: number): string {
 export default function ModelConfigPanel({
   settings,
   onSettingsChange,
-  onClose,
-}: ModelConfigPanelProps) {
+  onClose}: ModelConfigPanelProps) {
   const [local, setLocal] = React.useState<CopilotSettings>({ ...settings });
   const [promptChars, setPromptChars] = React.useState(settings.systemPrompt.length);
 
@@ -75,8 +73,7 @@ export default function ModelConfigPanel({
           inset: 0,
           background: "rgba(0,0,0,0.4)",
           zIndex: 999,
-          animation: "modelConfigFadeIn 0.15s ease-out",
-        }}
+          animation: "modelConfigFadeIn 0.15s ease-out"}}
         onClick={onClose}
       />
 
@@ -94,8 +91,7 @@ export default function ModelConfigPanel({
           display: "flex",
           flexDirection: "column",
           animation: "modelConfigSlideIn 0.2s ease-out",
-          boxShadow: "-8px 0 24px rgba(0,0,0,0.4)",
-        }}
+          boxShadow: "-8px 0 24px rgba(0,0,0,0.4)"}}
       >
         <div
           style={{
@@ -104,8 +100,7 @@ export default function ModelConfigPanel({
             justifyContent: "space-between",
             padding: "14px 16px",
             borderBottom: "1px solid var(--proof-border)",
-            flexShrink: 0,
-          }}
+            flexShrink: 0}}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Sliders size={14} style={{ color: "var(--proof-blue-bright)" }} />
@@ -125,8 +120,7 @@ export default function ModelConfigPanel({
               border: "none",
               background: "transparent",
               color: "var(--proof-text-muted)",
-              cursor: "pointer",
-            }}
+              cursor: "pointer"}}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "var(--proof-hover)";
               e.currentTarget.style.color = "var(--proof-text)";
@@ -147,10 +141,9 @@ export default function ModelConfigPanel({
             padding: "12px 16px",
             display: "flex",
             flexDirection: "column",
-            gap: 20,
-          }}
+            gap: 20}}
         >
-          <Section icon={<Thermometer size={13} />} title="Temperature" accent="#f97316">
+          <Section icon={<Thermometer size={13} />} title="Temperature" accent="var(--proof-orange)">
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <input
                 type="range"
@@ -174,8 +167,7 @@ export default function ModelConfigPanel({
                       ? "var(--proof-orange)"
                       : local.temperature > 0.3
                         ? "var(--proof-blue-bright)"
-                        : "var(--proof-blue)",
-                }}
+                        : "var(--proof-blue)"}}
               >
                 {local.temperature.toFixed(2)}
               </span>
@@ -189,7 +181,7 @@ export default function ModelConfigPanel({
             </div>
           </Section>
 
-          <Section icon={<Hash size={13} />} title="Max Tokens" accent="#a78bfa">
+          <Section icon={<Hash size={13} />} title="Max Tokens" accent="var(--proof-purple)">
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <input
                 type="range"
@@ -208,8 +200,7 @@ export default function ModelConfigPanel({
                   fontFamily: "var(--font-mono)",
                   fontSize: 11,
                   fontWeight: 600,
-                  color: "var(--proof-purple-bright)",
-                }}
+                  color: "var(--proof-purple-bright)"}}
               >
                 {formatTokens(local.maxTokens)}
               </span>
@@ -219,8 +210,7 @@ export default function ModelConfigPanel({
                 display: "flex",
                 gap: 4,
                 flexWrap: "wrap",
-                marginTop: 6,
-              }}
+                marginTop: 6}}
             >
               {TOKEN_PRESETS.map((val) => {
                 const active = local.maxTokens === val;
@@ -240,8 +230,7 @@ export default function ModelConfigPanel({
                       background: active ? "var(--proof-purple-bg)" : "var(--proof-surface-2)",
                       color: active ? "var(--proof-purple-bright)" : "var(--proof-text-muted)",
                       cursor: "pointer",
-                      transition: "all 0.1s",
-                    }}
+                      transition: "all 0.1s"}}
                     onMouseEnter={(e) => {
                       if (!active) {
                         e.currentTarget.style.background = "var(--proof-surface-3)";
@@ -262,7 +251,7 @@ export default function ModelConfigPanel({
             </div>
           </Section>
 
-          <Section icon={<FileText size={13} />} title="System Prompt" accent="#60a5fa">
+          <Section icon={<FileText size={13} />} title="System Prompt" accent="var(--proof-blue)">
             <textarea
               value={local.systemPrompt}
               onChange={(e) => update({ systemPrompt: e.target.value })}
@@ -280,17 +269,14 @@ export default function ModelConfigPanel({
                 color: "var(--proof-text)",
                 fontFamily: "var(--font-mono)",
                 fontSize: 11.5,
-                lineHeight: 1.6,
-                outline: "none",
-              }}
+                lineHeight: 1.6}}
             />
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                marginTop: 5,
-              }}
+                marginTop: 5}}
             >
               <button
                 onClick={() => {
@@ -307,8 +293,7 @@ export default function ModelConfigPanel({
                   border: "1px solid var(--proof-border)",
                   background: "var(--proof-surface-2)",
                   color: "var(--proof-text-muted)",
-                  cursor: "pointer",
-                }}
+                  cursor: "pointer"}}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "var(--proof-surface-3)";
                   e.currentTarget.style.color = "var(--proof-text-secondary)";
@@ -327,7 +312,7 @@ export default function ModelConfigPanel({
             </div>
           </Section>
 
-          <Section icon={<Sliders size={13} />} title="Tone" accent="#34d399">
+          <Section icon={<Sliders size={13} />} title="Tone" accent="var(--proof-emerald)">
             <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
               {TONE_ORDER.map((tone) => {
                 const active = local.tone === tone;
@@ -347,8 +332,7 @@ export default function ModelConfigPanel({
                       background: active ? `${color}12` : "transparent",
                       cursor: "pointer",
                       textAlign: "left",
-                      transition: "background 0.1s",
-                    }}
+                      transition: "background 0.1s"}}
                     onMouseEnter={(e) => {
                       if (!active) e.currentTarget.style.background = "var(--proof-hover)";
                     }}
@@ -364,16 +348,14 @@ export default function ModelConfigPanel({
                         background: color,
                         flexShrink: 0,
                         opacity: active ? 1 : 0.35,
-                        transition: "opacity 0.1s",
-                      }}
+                        transition: "opacity 0.1s"}}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div
                         style={{
                           fontSize: 11.5,
                           fontWeight: active ? 700 : 500,
-                          color: "var(--proof-text)",
-                        }}
+                          color: "var(--proof-text)"}}
                       >
                         {TONE_LABELS[tone]}
                       </div>
@@ -382,8 +364,7 @@ export default function ModelConfigPanel({
                           fontSize: 10,
                           color: "var(--proof-text-secondary)",
                           marginTop: 1,
-                          lineHeight: 1.3,
-                        }}
+                          lineHeight: 1.3}}
                       >
                         {TONE_DESCRIPTIONS[tone]}
                       </div>
@@ -395,7 +376,7 @@ export default function ModelConfigPanel({
             </div>
           </Section>
 
-          <Section icon={<Sliders size={13} />} title="Context Window" accent="#8ba3c7">
+          <Section icon={<Sliders size={13} />} title="Context Window" accent="var(--proof-text-muted)">
             <div
               style={{
                 display: "flex",
@@ -404,8 +385,7 @@ export default function ModelConfigPanel({
                 padding: "8px 10px",
                 background: "var(--proof-surface)",
                 border: "1px solid var(--proof-border)",
-                borderRadius: 6,
-              }}
+                borderRadius: 6}}
             >
               <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>
                 Maximum context size
@@ -415,8 +395,7 @@ export default function ModelConfigPanel({
                   fontFamily: "var(--font-mono)",
                   fontSize: 12,
                   fontWeight: 600,
-                  color: "var(--proof-text)",
-                }}
+                  color: "var(--proof-text)"}}
               >
                 {formatContextWindow(local.contextWindow)} tokens
               </span>
@@ -430,8 +409,7 @@ export default function ModelConfigPanel({
             gap: 8,
             padding: "12px 16px",
             borderTop: "1px solid var(--proof-border)",
-            flexShrink: 0,
-          }}
+            flexShrink: 0}}
         >
           <button
             onClick={handleReset}
@@ -447,8 +425,7 @@ export default function ModelConfigPanel({
               fontSize: 11.5,
               fontWeight: 600,
               cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
+              whiteSpace: "nowrap"}}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "var(--proof-surface-3)";
               e.currentTarget.style.color = "var(--proof-text-secondary)";
@@ -477,8 +454,7 @@ export default function ModelConfigPanel({
               color: "var(--proof-text-secondary)",
               fontSize: 11.5,
               fontWeight: 600,
-              cursor: "pointer",
-            }}
+              cursor: "pointer"}}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "var(--proof-surface-3)";
               e.currentTarget.style.color = "var(--proof-text)";
@@ -504,8 +480,7 @@ export default function ModelConfigPanel({
               color: "#fff",
               fontSize: 11.5,
               fontWeight: 700,
-              cursor: "pointer",
-            }}
+              cursor: "pointer"}}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "var(--proof-blue-hover)";
             }}
@@ -526,8 +501,7 @@ function Section({
   icon,
   title,
   accent,
-  children,
-}: {
+  children}: {
   icon: React.ReactNode;
   title: string;
   accent: string;
@@ -540,8 +514,7 @@ function Section({
           display: "flex",
           alignItems: "center",
           gap: 6,
-          marginBottom: 8,
-        }}
+          marginBottom: 8}}
       >
         <span style={{ color: accent, display: "flex" }}>{icon}</span>
         <span
@@ -549,8 +522,7 @@ function Section({
             fontSize: 11.5,
             fontWeight: 700,
             color: "var(--proof-text)",
-            letterSpacing: "0.1px",
-          }}
+            letterSpacing: "0.1px"}}
         >
           {title}
         </span>

@@ -74,10 +74,6 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     };
   }, [isVisible, src, onError]);
 
-  // Handle cleanup of blob URLs if they were created specifically for this component instance
-  // Note: images.ts handles the actual LRU cache, but we want to ensure we don't leak if the cache is cleared
-  // Actually, images.ts should be the source of truth for revocation.
-
   const handleImgLoad = () => {
     setLoaded(true);
     onLoad?.();
@@ -93,14 +89,13 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     width: "100%",
     paddingBottom: aspectRatio ? `${(1 / aspectRatio) * 100}%` : undefined,
     height: aspectRatio ? 0 : "100%",
-    backgroundColor: "var(--proof-surface-2)",
     overflow: "hidden",
     borderRadius: "inherit",
     ...style,
   };
 
   return (
-    <div ref={containerRef} style={containerStyle} className={className}>
+    <div ref={containerRef} style={containerStyle} className={`${className || ""} glass-panel`}>
       {!loaded && !error && (
         <div
           style={{
@@ -112,17 +107,17 @@ export const LazyImage: React.FC<LazyImageProps> = ({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "var(--proof-surface-3)",
+            background: "rgba(255,255,255,0.02)",
           }}
         >
-          <SkeletonBox width="100%" height="100%" borderRadius={0} />
+          <div className="animate-shimmer" style={{ position: "absolute", inset: 0, opacity: 0.1 }} />
           <div style={{ position: "absolute", zIndex: 1 }}>
             <motion.div
-              initial={{ opacity: 0.3 }}
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
+              initial={{ opacity: 0.2 }}
+              animate={{ opacity: [0.2, 0.6, 0.2] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
-              <ImageIcon size={24} style={{ color: "var(--proof-blue)", opacity: 0.4 }} />
+              <ImageIcon size={28} style={{ color: "var(--proof-blue)", opacity: 0.5, filter: "drop-shadow(var(--proof-glow-cyan))" }} />
             </motion.div>
           </div>
         </div>
@@ -142,11 +137,14 @@ export const LazyImage: React.FC<LazyImageProps> = ({
             justifyContent: "center",
             gap: 8,
             color: "var(--proof-red)",
-            background: "var(--proof-red-bg)",
-            fontSize: 10,
+            background: "rgba(255,51,85,0.1)",
+            fontSize: 11,
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "1px",
           }}
         >
-          <AlertCircle size={16} />
+          <AlertCircle size={20} />
           <span>Failed to load</span>
         </div>
       )}
@@ -165,7 +163,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
             height: "100%",
             objectFit: "cover",
             opacity: loaded ? 1 : 0,
-            transition: "opacity 0.3s ease-in-out",
+            transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
           {...props}
         />

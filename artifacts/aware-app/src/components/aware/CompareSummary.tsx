@@ -13,159 +13,38 @@ export function CompareSummary({
   const isLarge = size === "large";
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 12, marginBottom: 8 }}>
-      <div
-        style={{
-          padding: isLarge ? "12px 16px" : 10,
-          borderRadius: 12,
-          border: `1px solid ${diff.baseStatus === "PASS" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}`,
-          background: diff.baseStatus === "PASS" ? "rgba(34,197,94,0.03)" : "rgba(239,68,68,0.03)",
-          position: "relative",
-          overflow: "hidden"
-        }}
-      >
-        <div style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 3,
-          background: diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"
-        }} />
-        <div
-          style={{
-            fontSize: isLarge ? 11 : 10,
-            fontWeight: 700,
-            color: "var(--proof-text-secondary)",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            marginBottom: isLarge ? 6 : 4,
-          }}
-        >
+      <div className="glass-panel" style={{ padding: isLarge ? "16px 20px" : 12, borderRadius: 0, borderLeft: `3px solid ${diff.baseStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}` }}>
+        <div style={{ fontSize: isLarge ? 11 : 10, fontWeight: 700, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: isLarge ? 6 : 4 }}>
           Baseline
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span
-            className={`proof-badge ${diff.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-            style={{ fontSize: isLarge ? 11 : 10, padding: '2px 8px' }}
-          >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span className={`proof-badge ${diff.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}>
             {diff.baseStatus}
           </span>
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: isLarge ? 14 : 12,
-              color: "var(--proof-text)",
-              fontWeight: 700,
-            }}
-          >
+          <div className="metric-number" style={{ fontSize: isLarge ? 16 : 14, color: "var(--proof-text)" }}>
             {diff.durBase}ms
           </div>
         </div>
       </div>
-      <div
-        style={{
-          padding: isLarge ? "12px 16px" : 10,
-          borderRadius: 12,
-          border: `1px solid ${diff.candStatus === "PASS" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}`,
-          background: diff.candStatus === "PASS" ? "rgba(34,197,94,0.03)" : "rgba(239,68,68,0.03)",
-          position: "relative",
-          overflow: "hidden"
-        }}
-      >
-        <div style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 3,
-          background: diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"
-        }} />
-        <div
-          style={{
-            fontSize: isLarge ? 11 : 10,
-            fontWeight: 700,
-            color: "var(--proof-text-secondary)",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            marginBottom: isLarge ? 6 : 4,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+      <div className="glass-panel" style={{ padding: isLarge ? "16px 20px" : 12, borderRadius: 0, borderLeft: `3px solid ${diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"}` }}>
+        <div style={{ fontSize: isLarge ? 11 : 10, fontWeight: 700, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: isLarge ? 6 : 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span>Candidate</span>
-          {diff.durBase > 0 && (
-            <span
-              style={{
-                fontSize: isLarge ? 10 : 9,
-                color: diff.candStatus === diff.baseStatus ? "var(--proof-text-muted)" : (diff.candStatus === "PASS" ? "var(--proof-green)" : "var(--proof-red)"),
-                fontWeight: 700,
-              }}
-            >
-              {diff.candStatus === "PASS" && diff.baseStatus === "FAIL" ? "+100%pp" : diff.candStatus === "FAIL" && diff.baseStatus === "PASS" ? "-100%pp" : "0pp"}
-            </span>
-          )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span
-            className={`proof-badge ${diff.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}
-            style={{ fontSize: isLarge ? 11 : 10, padding: '2px 8px' }}
-          >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span className={`proof-badge ${diff.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`}>
             {diff.candStatus}
           </span>
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: isLarge ? 14 : 12,
-              color: "var(--proof-text)",
-              fontWeight: 700,
-            }}
-          >
+          <div className="metric-number" style={{ fontSize: isLarge ? 16 : 14, color: "var(--proof-text)" }}>
             {diff.durCand}ms
           </div>
         </div>
       </div>
-      <div
-        style={{
-          padding: isLarge ? "10px 14px" : "8px 10px",
-          borderRadius: 12,
-          border: "1px solid var(--proof-border)",
-          background: "var(--proof-surface-hover)",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          minWidth: isLarge ? 110 : 90,
-        }}
-      >
-        <div
-          style={{
-            fontSize: isLarge ? 10 : 9,
-            fontWeight: 700,
-            color: "var(--proof-text-secondary)",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            marginBottom: isLarge ? 4 : 2,
-          }}
-        >
-          Difference
+      <div className="glass-panel" style={{ padding: isLarge ? "16px 20px" : 12, borderRadius: 0, minWidth: isLarge ? 120 : 100, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div style={{ fontSize: isLarge ? 11 : 10, fontWeight: 700, color: "var(--proof-text-secondary)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: isLarge ? 6 : 4 }}>
+          Delta
         </div>
-        <div
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: isLarge ? 14 : 12,
-            fontWeight: 800,
-            color:
-              deltaMs > 20
-                ? "var(--proof-red)"
-                : deltaMs < -20
-                  ? "var(--proof-green)"
-                  : "var(--proof-text-secondary)",
-          }}
-        >
+        <div className="metric-number" style={{ fontSize: isLarge ? 16 : 14, color: deltaMs > 20 ? "var(--proof-red)" : deltaMs < -20 ? "var(--proof-green)" : "var(--proof-text-secondary)" }}>
           {Math.abs(deltaMs) > 20 ? `${deltaMs > 0 ? "+" : ""}${deltaMs}ms` : "~0ms"}
-        </div>
-        <div style={{ fontSize: isLarge ? 10 : 9, color: "var(--proof-text-muted)", fontWeight: 500 }}>
-          {diff.durBase > 0 ? `${deltaMs > 0 ? "+" : ""}${((deltaMs / diff.durBase) * 100).toFixed(1)}%` : "0%"}
         </div>
       </div>
     </div>
@@ -183,74 +62,50 @@ export function CompareRunsHeader({
 }) {
   const regressions = diffs.filter(d => d.state === 'regression').length;
   const fixed = diffs.filter(d => d.state === 'fixed').length;
+  const unchanged = diffs.filter(d => d.state === 'unchanged').length;
+  const slower = diffs.filter(d => d.state === 'duration').length;
   const totalDurationChange = diffs.reduce((acc, d) => acc + (d.durCand - d.durBase), 0);
 
   return (
-    <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-      <div className="proof-card" style={{ flex: 1, padding: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ 
-          width: 32, 
-          height: 32, 
-          borderRadius: '50%', 
-          background: regressions > 0 ? 'var(--proof-red-bg)' : 'var(--proof-green-bg)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 16
-        }}>
-          {regressions > 0 ? '⚠️' : '✓'}
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="glass-panel glow-border-red" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
+          Regressions
         </div>
-        <div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase' }}>
-            Regressions
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: regressions > 0 ? 'var(--proof-red)' : 'var(--proof-green)' }}>
-            {regressions}
-          </div>
+        <div className="metric-number" style={{ fontSize: 42, color: regressions > 0 ? 'var(--proof-red)' : 'var(--proof-text-muted)' }}>
+          {regressions}
         </div>
       </div>
-      <div className="proof-card" style={{ flex: 1, padding: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ 
-          width: 32, 
-          height: 32, 
-          borderRadius: '50%', 
-          background: 'var(--proof-green-bg)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 16
-        }}>
-          ✨
+      <div className="glass-panel glow-border-green" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
+          Fixed
         </div>
-        <div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase' }}>
-            Fixed
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--proof-green)' }}>
-            {fixed}
-          </div>
+        <div className="metric-number" style={{ fontSize: 42, color: fixed > 0 ? 'var(--proof-green)' : 'var(--proof-text-muted)' }}>
+          {fixed}
         </div>
       </div>
-      <div className="proof-card" style={{ flex: 1, padding: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ 
-          width: 32, 
-          height: 32, 
-          borderRadius: '50%', 
-          background: 'var(--proof-blue-bg)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 16
-        }}>
-          ⏱️
+      <div className="glass-panel glow-border-cyan" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
+          Unchanged
         </div>
-        <div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase' }}>
-            Duration Change
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: totalDurationChange > 0 ? 'var(--proof-red)' : 'var(--proof-green)' }}>
-            {totalDurationChange > 0 ? '+' : ''}{(totalDurationChange / 1000).toFixed(2)}s total
-          </div>
+        <div className="metric-number" style={{ fontSize: 42, color: 'var(--proof-text)' }}>
+          {unchanged}
+        </div>
+      </div>
+      <div className="glass-panel glow-border-amber" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
+          Slower
+        </div>
+        <div className="metric-number" style={{ fontSize: 42, color: slower > 0 ? 'var(--proof-yellow)' : 'var(--proof-text-muted)' }}>
+          {slower}
+        </div>
+      </div>
+      <div className="glass-panel" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
+          Duration Delta
+        </div>
+        <div className="metric-number" style={{ fontSize: 32, color: totalDurationChange > 0 ? 'var(--proof-red)' : 'var(--proof-green)', marginTop: "auto" }}>
+          {totalDurationChange > 0 ? '+' : ''}{(totalDurationChange / 1000).toFixed(2)}s
         </div>
       </div>
     </div>

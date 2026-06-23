@@ -15,11 +15,11 @@ const ENV_COLORS: Record<string, string> = {
   FAIL: "rgba(239,68,68,0.15)",
 };
 const ENV_TEXT: Record<string, string> = {
-  QA: "#60a5fa",
-  UAT: "#c084fc",
-  PROD: "#4ade80",
-  PASS: "#4ade80",
-  FAIL: "#f87171",
+  QA: "var(--proof-blue)",
+  UAT: "var(--proof-purple)",
+  PROD: "var(--proof-green)",
+  PASS: "var(--proof-green)",
+  FAIL: "var(--proof-red)",
 };
 
 const VIRTUAL_THRESHOLD = 50;
@@ -33,7 +33,7 @@ function formatCell(
   if (value === null || value === undefined)
     return <span style={{ color: "var(--proof-text-muted)" }}>—</span>;
 
-  const highlight = isMax ? "#34d399" : isMin ? "#f87171" : undefined;
+  const highlight = isMax ? "var(--proof-emerald)" : isMin ? "var(--proof-red)" : undefined;
   const highlightBg = isMax
     ? "rgba(52,211,153,0.08)"
     : isMin

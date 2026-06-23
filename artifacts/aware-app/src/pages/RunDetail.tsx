@@ -113,6 +113,34 @@ export default function RunDetail() {
     }
   };
 
+  if (initState.error && !initState.loading) {
+    return (
+      <div style={{ textAlign: "center", padding: 64 }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: 12,
+          background: "var(--proof-red-bg)", border: "1px solid var(--proof-red-border)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          margin: "0 auto 16px",
+        }}>
+          <XCircle size={20} style={{ color: "var(--proof-red)" }} />
+        </div>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--proof-text-primary)" }}>
+          Failed to load data
+        </h2>
+        <p style={{ fontSize: 13, color: "var(--proof-text-secondary)", marginTop: 8 }}>
+          Could not fetch run details. Check your network connection.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="proof-btn proof-btn-primary"
+          style={{ fontSize: 13, marginTop: 16 }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   if (!run) {
     if (initState.loading) {
       return (
@@ -164,6 +192,7 @@ export default function RunDetail() {
         <button 
           onClick={() => navigate("/runs")}
           className="proof-btn-ghost"
+          aria-label="Back to runs"
           style={{ 
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             width: 32, height: 32, borderRadius: 8, padding: 0,
@@ -227,7 +256,7 @@ export default function RunDetail() {
       </div>
 
       {/* Stats row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
         {[
           { label: "Total Tests", value: counts.total, icon: TerminalSquare, color: "var(--proof-text)" },
           { label: "Passed", value: counts.passed, icon: CheckCircle2, color: "var(--proof-green)" },
@@ -298,8 +327,8 @@ export default function RunDetail() {
         </div>
 
         {/* Table */}
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          <table className="proof-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div style={{ flex: 1, overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+          <table className="proof-table" style={{ width: "100%", minWidth: 600, borderCollapse: "collapse" }}>
             <thead style={{ position: "sticky", top: 0, background: "var(--proof-surface)", zIndex: 5 }}>
               <tr>
                 <th style={{ width: 40, padding: "12px 16px" }}></th>
@@ -307,7 +336,9 @@ export default function RunDetail() {
                   onClick={() => toggleSort("name")}
                   onKeyDown={(e) => handleKeyDownSort(e, "name")}
                   tabIndex={0}
-                  style={{ textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer" }}
+                  style={{ textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer", borderRadius: "4px" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--proof-hover-light)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                 >
                   TEST {sortKey === "name" && (sortDir === "asc" ? "↑" : "↓")}
                 </th>
@@ -315,7 +346,9 @@ export default function RunDetail() {
                   onClick={() => toggleSort("status")}
                   onKeyDown={(e) => handleKeyDownSort(e, "status")}
                   tabIndex={0}
-                  style={{ width: 120, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer" }}
+                  style={{ width: 120, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer", borderRadius: "4px" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--proof-hover-light)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                 >
                   STATUS {sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
                 </th>
@@ -323,7 +356,9 @@ export default function RunDetail() {
                   onClick={() => toggleSort("category")}
                   onKeyDown={(e) => handleKeyDownSort(e, "category")}
                   tabIndex={0}
-                  style={{ width: 140, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer" }}
+                  style={{ width: 140, textAlign: "left", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer", borderRadius: "4px" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--proof-hover-light)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                 >
                   CATEGORY {sortKey === "category" && (sortDir === "asc" ? "↑" : "↓")}
                 </th>
@@ -332,7 +367,9 @@ export default function RunDetail() {
                   onClick={() => toggleSort("duration")}
                   onKeyDown={(e) => handleKeyDownSort(e, "duration")}
                   tabIndex={0}
-                  style={{ width: 100, textAlign: "right", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer" }}
+                  style={{ width: 100, textAlign: "right", padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", cursor: "pointer", borderRadius: "4px" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--proof-hover-light)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                 >
                   DURATION {sortKey === "duration" && (sortDir === "asc" ? "↑" : "↓")}
                 </th>
@@ -349,7 +386,14 @@ export default function RunDetail() {
                       style={{ 
                         cursor: "pointer", 
                         borderBottom: "1px solid var(--proof-border-light)",
-                        background: isExpanded ? "var(--proof-surface-2)" : "transparent"
+                        background: isExpanded ? "var(--proof-surface-2)" : "transparent",
+                        transition: "background var(--proof-transition)",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isExpanded) e.currentTarget.style.background = "var(--proof-hover)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isExpanded) e.currentTarget.style.background = "transparent";
                       }}
                     >
                       <td style={{ padding: "12px 16px", color: "var(--proof-text-muted)" }}>
@@ -403,7 +447,7 @@ export default function RunDetail() {
                                 <div style={{ fontSize: 12, fontWeight: 600, color: "var(--proof-text-muted)", marginBottom: 12 }}>ASSERTIONS</div>
                                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                                   {r.assertions.map((a, i) => (
-                                    <AssertionRow key={i} a={a} />
+                                    <AssertionRow key={a.assertion || i} a={a} />
                                   ))}
                                 </div>
                               </div>

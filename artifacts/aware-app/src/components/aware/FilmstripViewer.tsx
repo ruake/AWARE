@@ -22,8 +22,7 @@ function LazyGalleryImage({ source }: { source: string }) {
           alignItems: "center",
           justifyContent: "center",
           fontSize: 12,
-          color: "var(--proof-text-secondary)",
-        }}
+          color: "var(--proof-text-secondary)"}}
       >
         Loading…
       </div>
@@ -35,8 +34,7 @@ function LazyGalleryImage({ source }: { source: string }) {
 function GalleryImage({
   frame,
   onPrev,
-  onNext,
-}: {
+  onNext}: {
   frame: FilmstripFrame;
   onPrev: (() => void) | null;
   onNext: (() => void) | null;
@@ -69,12 +67,12 @@ function GalleryImage({
         alignItems: "center",
         justifyContent: "center",
         padding: 12,
-        maxHeight: "80vh",
-      }}
+        maxHeight: "80vh"}}
     >
       {onPrev && (
         <button
           onClick={onPrev}
+          aria-label="Previous image"
           style={{
             position: "absolute",
             left: 8,
@@ -91,8 +89,7 @@ function GalleryImage({
             alignItems: "center",
             justifyContent: "center",
             zIndex: 10,
-            backdropFilter: "blur(4px)",
-          }}
+            backdropFilter: "blur(4px)"}}
         >
           <ChevronLeft size={18} />
         </button>
@@ -105,6 +102,7 @@ function GalleryImage({
       {onNext && (
         <button
           onClick={onNext}
+          aria-label="Next image"
           style={{
             position: "absolute",
             right: 8,
@@ -121,8 +119,7 @@ function GalleryImage({
             alignItems: "center",
             justifyContent: "center",
             zIndex: 10,
-            backdropFilter: "blur(4px)",
-          }}
+            backdropFilter: "blur(4px)"}}
         >
           <ChevronRight size={18} />
         </button>
@@ -134,8 +131,7 @@ function GalleryImage({
 function FilmstripThumbnail({
   frame,
   isActive,
-  onExpand,
-}: {
+  onExpand}: {
   frame: FilmstripFrame;
   isActive: boolean;
   onExpand: () => void;
@@ -166,8 +162,7 @@ function FilmstripThumbnail({
           background: "none",
           cursor: "pointer",
           display: "block",
-          width: "100%",
-        }}
+          width: "100%"}}
       >
         {loaded ? (
           <img
@@ -179,8 +174,7 @@ function FilmstripThumbnail({
               borderRadius: 4,
               border: isActive ? "2px solid var(--proof-blue)" : "1px solid var(--proof-grey)",
               display: "block",
-              boxShadow: isActive ? "0 0 0 2px var(--proof-blue-bg)" : undefined,
-            }}
+              boxShadow: isActive ? "0 0 0 2px var(--proof-blue-bg)" : undefined}}
           />
         ) : (
           <div
@@ -194,8 +188,7 @@ function FilmstripThumbnail({
               alignItems: "center",
               justifyContent: "center",
               fontSize: 10,
-              color: "var(--proof-text-secondary)",
-            }}
+              color: "var(--proof-text-secondary)"}}
           >
             Loading…
           </div>
@@ -211,8 +204,7 @@ function FilmstripThumbnail({
           alignItems: "center",
           justifyContent: "center",
           gap: 2,
-          fontWeight: isActive ? 600 : 400,
-        }}
+          fontWeight: isActive ? 600 : 400}}
       >
         {frame.label}
         <Maximize2 size={9} />
@@ -223,8 +215,7 @@ function FilmstripThumbnail({
 
 export function FilmstripViewer({
   frames,
-  onClose,
-}: {
+  onClose}: {
   frames: FilmstripFrame[];
   onClose: () => void;
 }) {
@@ -280,13 +271,13 @@ export function FilmstripViewer({
             color: "var(--proof-text-secondary)",
             textTransform: "uppercase",
             letterSpacing: "0.5px",
-            flex: 1,
-          }}
+            flex: 1}}
         >
           Filmstrip ({frames.length})
         </span>
         <button
           onClick={() => scrollTo(-1)}
+          aria-label="Scroll left"
           style={{
             border: "none",
             background: "var(--proof-surface-hover)",
@@ -295,13 +286,13 @@ export function FilmstripViewer({
             borderRadius: 3,
             color: "var(--proof-text-secondary)",
             display: "flex",
-            alignItems: "center",
-          }}
+            alignItems: "center"}}
         >
           <ChevronLeft size={11} />
         </button>
         <button
           onClick={() => scrollTo(1)}
+          aria-label="Scroll right"
           style={{
             border: "none",
             background: "var(--proof-surface-hover)",
@@ -310,8 +301,7 @@ export function FilmstripViewer({
             borderRadius: 3,
             color: "var(--proof-text-secondary)",
             display: "flex",
-            alignItems: "center",
-          }}
+            alignItems: "center"}}
         >
           <ChevronRight size={11} />
         </button>
@@ -330,9 +320,7 @@ export function FilmstripViewer({
           paddingBottom: 4,
           cursor: isDragging ? "grabbing" : "grab",
           userSelect: "none",
-          scrollBehavior: "smooth",
-          outline: "none",
-        }}
+          scrollBehavior: "smooth"}}
       >
         {frames.map((f, i) => (
           <FilmstripThumbnail
@@ -358,8 +346,7 @@ export function FilmstripViewer({
             background: "var(--proof-surface)",
             border: "1px solid var(--proof-grey)",
             padding: 0,
-            overflow: "hidden",
-          }}
+            overflow: "hidden"}}
         >
           {activeIdx !== null && (
             <>
@@ -369,8 +356,7 @@ export function FilmstripViewer({
                   alignItems: "center",
                   gap: 8,
                   padding: "8px 12px",
-                  borderBottom: "1px solid var(--proof-grey)",
-                }}
+                  borderBottom: "1px solid var(--proof-grey)"}}
               >
                 <span
                   style={{
@@ -378,8 +364,7 @@ export function FilmstripViewer({
                     fontWeight: 600,
                     color: "var(--proof-text-secondary)",
                     fontFamily: "var(--font-mono)",
-                    flex: 1,
-                  }}
+                    flex: 1}}
                 >
                   {frames[activeIdx].label}
                 </span>
@@ -388,13 +373,13 @@ export function FilmstripViewer({
                 </span>
                 <button
                   onClick={onClose}
+                  aria-label="Close"
                   style={{
                     border: "none",
                     background: "transparent",
                     cursor: "pointer",
                     color: "var(--proof-text-secondary)",
-                    display: "flex",
-                  }}
+                    display: "flex"}}
                 >
                   <X size={14} />
                 </button>

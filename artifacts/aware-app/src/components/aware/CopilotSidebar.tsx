@@ -1,6 +1,5 @@
 import React from "react";
-import { Bot, Plus, MessageSquare } from "lucide-react";
-import { QUICK_ACTIONS } from "@/lib/copilot/quickActions";
+import { Bot, MessageSquare } from "lucide-react";
 
 interface CopilotSidebarProps {
   onNewChat: () => void;
@@ -9,12 +8,19 @@ interface CopilotSidebarProps {
 }
 
 export function CopilotSidebar({ onNewChat, onSend, style }: CopilotSidebarProps) {
+  const sessions = [
+    "UAT Promotion Check",
+    "Flaky tests in auth suite",
+    "Regression analysis: checkout",
+    "Status of critical endpoints"
+  ];
+
   return (
     <div
       style={{
-        width: 250,
+        width: 260,
         flexShrink: 0,
-        background: "var(--proof-overlay)",
+        background: "var(--proof-surface)",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -22,152 +28,63 @@ export function CopilotSidebar({ onNewChat, onSend, style }: CopilotSidebarProps
         ...style,
       }}
     >
-      {/* Logo */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "14px 16px",
-          borderBottom: "1px solid var(--proof-border)",
-        }}
-      >
-        <div
-          style={{
-            width: 30,
-            height: 30,
-            borderRadius: 8,
-            background: "linear-gradient(135deg, rgba(59,130,246,0.2), rgba(59,130,246,0.1))",
-            border: "1px solid rgba(59,130,246,0.3)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Bot size={14} style={{ color: "#60a5fa" }} />
-        </div>
-        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--proof-text)" }}>
-          A.W.A.R.E.
-        </span>
-      </div>
-
-      {/* New Chat */}
-      <div style={{ padding: "10px 12px" }}>
+      <div style={{ padding: 20 }}>
         <button
           onClick={onNewChat}
+          className="glass-panel"
           style={{
             width: "100%",
+            padding: "12px",
+            borderRadius: "var(--proof-radius-md)",
+            border: "1px solid rgba(0,196,255,0.3)",
+            background: "rgba(0,196,255,0.05)",
+            color: "var(--proof-blue-bright)",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.5px",
+            cursor: "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 6,
-            padding: "7px 0",
-            borderRadius: 7,
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-            border: "1px solid var(--proof-border)",
-            background: "rgba(255,255,255,0.03)",
-            color: "var(--proof-text-secondary)",
-            transition: "all 0.15s",
+            gap: 8,
+            boxShadow: "var(--proof-glow-cyan)",
+            transition: "all 0.2s"
           }}
+          onMouseEnter={e => e.currentTarget.style.background = "rgba(0,196,255,0.15)"}
+          onMouseLeave={e => e.currentTarget.style.background = "rgba(0,196,255,0.05)"}
         >
-          <Plus size={13} /> New Chat
+          <Bot size={16} /> New Session
         </button>
       </div>
 
-      {/* Quick Actions */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "0 8px",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.7px",
-            color: "var(--proof-text-muted)",
-            padding: "10px 8px 6px",
-          }}
-        >
-          Quick Actions
+      <div style={{ flex: 1, overflowY: "auto", padding: "0 20px" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", color: "var(--proof-text-muted)", marginBottom: 12 }}>
+          Recent Sessions
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {QUICK_ACTIONS.map((action) => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {sessions.map((s, i) => (
             <button
-              key={action.id}
-              onClick={() => onSend(action.message)}
+              key={i}
+              onClick={() => onSend(s)}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
-                padding: "7px 10px",
-                borderRadius: 7,
-                fontSize: 11.5,
-                fontWeight: 500,
-                cursor: "pointer",
-                border: "none",
+                padding: "10px 12px",
+                borderRadius: "var(--proof-radius-md)",
                 background: "transparent",
-                color: "var(--proof-text-secondary)",
-                textAlign: "left",
-                transition: "all 0.12s",
-              }}
-            >
-              <action.icon size={14} style={{ color: action.color, flexShrink: 0 }} />
-              <span>{action.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Suggestions */}
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.7px",
-            color: "var(--proof-text-muted)",
-            padding: "14px 8px 6px",
-          }}
-        >
-          Try asking
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {[
-            "What's failing in the latest run?",
-            "Show pass rate trend over 15 runs",
-            "Which tests are flakiest?",
-            "Is UAT ready to promote to PROD?",
-            "Compare suite health across environments",
-            "Are there any duration regressions?",
-            "What's the Akamai property version in PROD?",
-            "Summarize all environment health",
-          ].map((prompt) => (
-            <button
-              key={prompt}
-              onClick={() => onSend(prompt)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "6px 10px",
-                borderRadius: 7,
-                fontSize: 11,
-                cursor: "pointer",
                 border: "none",
-                background: "transparent",
-                color: "var(--proof-text-muted)",
+                color: "var(--proof-text)",
+                fontSize: 13,
+                cursor: "pointer",
                 textAlign: "left",
-                lineHeight: 1.4,
-                transition: "all 0.12s",
+                transition: "background 0.2s"
               }}
+              onMouseEnter={e => e.currentTarget.style.background = "var(--proof-surface-2)"}
+              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
             >
-              <MessageSquare size={10} style={{ flexShrink: 0, opacity: 0.5 }} />
-              <span>{prompt}</span>
+              <MessageSquare size={14} style={{ color: "var(--proof-text-secondary)" }} />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s}</span>
             </button>
           ))}
         </div>

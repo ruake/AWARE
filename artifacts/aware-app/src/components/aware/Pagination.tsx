@@ -9,18 +9,18 @@ interface PaginationProps {
 }
 
 const btnBase: React.CSSProperties = {
-  background: "var(--proof-subtle-bg2)",
-  border: "1px solid var(--proof-border-strong)",
+  background: "transparent",
+  border: "none",
   color: "var(--proof-text-secondary)",
-  borderRadius: 4,
-  fontWeight: 500,
+  borderRadius: 6,
+  fontWeight: 600,
   cursor: "pointer",
-  fontFamily: "var(--font-sans)",
+  fontFamily: "var(--font-mono)",
   whiteSpace: "nowrap",
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  transition: "all 0.15s",
+  transition: "all 0.15s ease",
 };
 
 const btnDisabled: React.CSSProperties = {
@@ -43,6 +43,8 @@ function pageNumbers(current: number, total: number): (number | "ellipsis")[] {
   return pages;
 }
 
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+
 export function Pagination({
   currentPage,
   totalPages,
@@ -55,6 +57,8 @@ export function Pagination({
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
+  const pages = pageNumbers(currentPage, totalPages);
+
   return (
     <nav
       aria-label="Pagination"
@@ -62,129 +66,156 @@ export function Pagination({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 8,
-        padding: "8px 0",
+        gap: 4,
+        padding: "16px 0",
         flexWrap: "wrap",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 2, background: "var(--proof-surface-2)", padding: 4, borderRadius: 8, border: "1px solid var(--proof-border)" }}>
         <button
           disabled={currentPage <= 1}
           onClick={() => onPageChange(1)}
           aria-label="First page"
-          aria-disabled={currentPage <= 1 ? "true" : "false"}
           style={{
             ...btnBase,
-            padding: "3px 8px",
-            fontSize: 11,
+            width: 32,
+            height: 32,
             ...(currentPage <= 1 ? btnDisabled : {}),
           }}
+          onMouseEnter={(e) => {
+            if (currentPage > 1) {
+              e.currentTarget.style.background = "var(--proof-surface-hover)";
+              e.currentTarget.style.color = "var(--proof-text)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (currentPage > 1) {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "var(--proof-text-secondary)";
+            }
+          }}
         >
-          First
+          <ChevronsLeft size={16} />
         </button>
 
         <button
           disabled={currentPage <= 1}
           onClick={() => onPageChange(currentPage - 1)}
           aria-label="Previous page"
-          aria-disabled={currentPage <= 1 ? "true" : "false"}
           style={{
             ...btnBase,
-            padding: "3px 8px",
-            fontSize: 11,
+            width: 32,
+            height: 32,
             ...(currentPage <= 1 ? btnDisabled : {}),
           }}
           onMouseEnter={(e) => {
             if (currentPage > 1) {
               e.currentTarget.style.background = "var(--proof-surface-hover)";
-              e.currentTarget.style.borderColor = "var(--proof-border-accent)";
               e.currentTarget.style.color = "var(--proof-text)";
             }
           }}
           onMouseLeave={(e) => {
             if (currentPage > 1) {
-              e.currentTarget.style.background = "var(--proof-subtle-bg2)";
-              e.currentTarget.style.borderColor = "var(--proof-border-strong)";
+              e.currentTarget.style.background = "transparent";
               e.currentTarget.style.color = "var(--proof-text-secondary)";
             }
           }}
         >
-          Prev
+          <ChevronLeft size={16} />
         </button>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 4, margin: "0 8px" }}>
-          <span
-            style={{
-              fontSize: 11,
-              color: "var(--proof-text-secondary)",
-            }}
-          >
-            Page{" "}
-            <span 
-              aria-current="page"
-              style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}
+        <div style={{ width: 1, height: 20, background: "var(--proof-border)", margin: "0 4px" }} />
+
+        {pages.map((p, i) => {
+          if (p === "ellipsis") {
+            return <span key={`ell-${i}`} style={{ color: "var(--proof-text-muted)", padding: "0 8px" }}>...</span>;
+          }
+          const isActive = p === currentPage;
+          return (
+            <button
+              key={p}
+              onClick={() => onPageChange(p as number)}
+              aria-current={isActive ? "page" : undefined}
+              style={{
+                ...btnBase,
+                width: 32,
+                height: 32,
+                background: isActive ? "var(--proof-blue)" : "transparent",
+                color: isActive ? "#fff" : "var(--proof-text-secondary)",
+                boxShadow: isActive ? "0 0 12px rgba(0, 196, 255, 0.4)" : "none",
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = "var(--proof-surface-hover)";
+                  e.currentTarget.style.color = "var(--proof-text)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "var(--proof-text-secondary)";
+                }
+              }}
             >
-              {currentPage}
-            </span> of{" "}
-            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>{totalPages}</span>
-          </span>
-        </div>
+              {p}
+            </button>
+          );
+        })}
+
+        <div style={{ width: 1, height: 20, background: "var(--proof-border)", margin: "0 4px" }} />
 
         <button
           disabled={currentPage >= totalPages}
           onClick={() => onPageChange(currentPage + 1)}
           aria-label="Next page"
-          aria-disabled={currentPage >= totalPages ? "true" : "false"}
           style={{
             ...btnBase,
-            padding: "3px 8px",
-            fontSize: 11,
+            width: 32,
+            height: 32,
             ...(currentPage >= totalPages ? btnDisabled : {}),
           }}
           onMouseEnter={(e) => {
             if (currentPage < totalPages) {
               e.currentTarget.style.background = "var(--proof-surface-hover)";
-              e.currentTarget.style.borderColor = "var(--proof-border-accent)";
               e.currentTarget.style.color = "var(--proof-text)";
             }
           }}
           onMouseLeave={(e) => {
             if (currentPage < totalPages) {
-              e.currentTarget.style.background = "var(--proof-subtle-bg2)";
-              e.currentTarget.style.borderColor = "var(--proof-border-strong)";
+              e.currentTarget.style.background = "transparent";
               e.currentTarget.style.color = "var(--proof-text-secondary)";
             }
           }}
         >
-          Next
+          <ChevronRight size={16} />
         </button>
 
         <button
           disabled={currentPage >= totalPages}
           onClick={() => onPageChange(totalPages)}
           aria-label="Last page"
-          aria-disabled={currentPage >= totalPages ? "true" : "false"}
           style={{
             ...btnBase,
-            padding: "3px 8px",
-            fontSize: 11,
+            width: 32,
+            height: 32,
             ...(currentPage >= totalPages ? btnDisabled : {}),
           }}
+          onMouseEnter={(e) => {
+            if (currentPage < totalPages) {
+              e.currentTarget.style.background = "var(--proof-surface-hover)";
+              e.currentTarget.style.color = "var(--proof-text)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (currentPage < totalPages) {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "var(--proof-text-secondary)";
+            }
+          }}
         >
-          Last
+          <ChevronsRight size={16} />
         </button>
       </div>
-
-      <span
-        style={{
-          fontSize: 11,
-          color: "var(--proof-text-muted)",
-          fontFamily: "var(--font-mono)",
-          marginLeft: 12,
-        }}
-      >
-        Showing {startItem}–{endItem} of {totalItems}
-      </span>
     </nav>
   );
 }

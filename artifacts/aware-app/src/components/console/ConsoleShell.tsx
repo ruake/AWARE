@@ -36,9 +36,11 @@ import {
   setSelectedSuiteIds,
 } from "@/lib/filters";
 import { useSyncExternalStore } from "react";
+import { ProofLogo } from "../aware/ProofLogo";
 
 interface ConsoleShellProps {
   children: React.ReactNode;
+  fullBleed?: boolean;
 }
 
 const NAV_GROUPS = [
@@ -92,29 +94,6 @@ function routeLabel(path: string): string {
   return labels[seg] ?? "A.W.A.R.E.";
 }
 
-function AwareLogo() {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 4px" }}>
-      <div style={{
-        width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-        background: "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-blue-bright) 100%)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        boxShadow: "0 4px 14px var(--proof-blue-glow)",
-      }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-        </svg>
-      </div>
-      <span style={{
-        fontSize: 14, fontWeight: 800, letterSpacing: "-0.3px",
-        color: "var(--proof-text)",
-      }}>
-        A.W.A.R.E.
-      </span>
-    </div>
-  );
-}
-
 function SidebarNavItem({ item, isActive, collapsed }: {
   item: { id: string; icon: React.ComponentType<{ size?: number }>; label: string; href: string };
   isActive: boolean;
@@ -127,17 +106,18 @@ function SidebarNavItem({ item, isActive, collapsed }: {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: collapsed ? 0 : 9,
-        padding: collapsed ? "8px" : "7px 10px",
+        gap: collapsed ? 0 : 12,
+        padding: collapsed ? "10px" : "8px 12px",
         borderRadius: "var(--proof-radius)",
         fontSize: 13,
         fontWeight: isActive ? 600 : 500,
-        color: isActive ? "var(--proof-emerald)" : "var(--proof-text-secondary)",
+        color: isActive ? "var(--proof-blue-bright)" : "var(--proof-text-secondary)",
         cursor: "pointer",
         transition: "all 150ms ease",
         textDecoration: "none",
-        borderLeft: isActive ? "3px solid var(--proof-emerald)" : "3px solid transparent",
-        background: isActive ? "var(--proof-surface-active)" : "transparent",
+        borderLeft: isActive ? "3px solid var(--proof-blue)" : "3px solid transparent",
+        background: isActive ? "var(--proof-blue-bg)" : "transparent",
+        boxShadow: isActive ? "var(--proof-glow-cyan)" : "none",
         justifyContent: collapsed ? "center" : "flex-start",
         position: "relative",
         whiteSpace: "nowrap",
@@ -147,30 +127,29 @@ function SidebarNavItem({ item, isActive, collapsed }: {
         if (!isActive) {
           (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
           (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
+          (e.currentTarget as HTMLElement).style.textShadow = "0 0 8px rgba(255,255,255,0.3)";
         }
       }}
       onMouseLeave={(e) => {
         if (!isActive) {
           (e.currentTarget as HTMLElement).style.background = "transparent";
           (e.currentTarget as HTMLElement).style.color = "var(--proof-text-secondary)";
+          (e.currentTarget as HTMLElement).style.textShadow = "none";
         }
       }}
       title={collapsed ? item.label : undefined}
     >
-      <Icon size={15} />
+      <Icon size={16} />
       {!collapsed && (
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>
           {item.label}
         </span>
       )}
-      {!collapsed && isActive && (
-        <ChevronRight size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
-      )}
     </Link>
   );
 }
 
-export function ConsoleShell({ children, fullBleed }: ConsoleShellProps & { fullBleed?: boolean }) {
+export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
   const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
@@ -214,7 +193,7 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps & { full
     document.documentElement.classList.toggle("light", !next);
   };
 
-  const sidebarWidth = sidebarOpen ? (sidebarCollapsed ? 52 : 220) : 0;
+  const sidebarWidth = sidebarOpen ? (sidebarCollapsed ? 56 : 200) : 0;
 
   return (
     <div style={{
@@ -223,27 +202,25 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps & { full
     }}>
       {/* ── Topbar ───────────────────────────────────────────────── */}
       <header style={{
-        height: 52, minHeight: 52, flexShrink: 0,
-        background: "var(--proof-title-bar-bg)",
-        borderBottom: "1px solid var(--proof-border)",
-        display: "flex", alignItems: "center", gap: 8, padding: "0 14px",
+        height: 44, minHeight: 44, flexShrink: 0,
+        background: "var(--proof-surface)",
+        borderBottom: "1px solid var(--proof-border-strong)",
+        display: "flex", alignItems: "center", gap: 12, padding: "0 16px",
         position: "relative", zIndex: 50,
       }}>
-        {/* Top accent line */}
         <div style={{
           position: "absolute", top: 0, left: 0, right: 0, height: 1,
-          background: "linear-gradient(90deg, transparent 0%, var(--proof-blue-border) 40%, var(--proof-purple-border) 70%, transparent 100%)",
+          background: "linear-gradient(90deg, transparent 0%, var(--proof-blue-border) 40%, var(--proof-blue-bright) 70%, transparent 100%)",
         }} />
 
-        {/* Sidebar toggle */}
         <button
           onClick={() => setSidebarOpen((p) => !p)}
           title="Toggle sidebar"
           style={{
-            width: 30, height: 30, padding: 0, border: "1px solid var(--proof-border)",
+            width: 28, height: 28, padding: 0, border: "1px solid var(--proof-border-light)",
             background: "transparent", cursor: "pointer", color: "var(--proof-text-muted)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            borderRadius: "var(--proof-radius)", transition: "all var(--proof-transition)", flexShrink: 0,
+            borderRadius: "var(--proof-radius-sm)", transition: "all var(--proof-transition)", flexShrink: 0,
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
@@ -257,63 +234,51 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps & { full
           {sidebarOpen ? <X size={14} /> : <Menu size={14} />}
         </button>
 
-        {/* Logo → Dashboard */}
         <button
           onClick={() => navigate("/")}
           style={{
-            display: "flex", alignItems: "center", gap: 8, background: "transparent",
-            border: "none", cursor: "pointer", padding: "4px 6px", borderRadius: 8,
+            display: "flex", alignItems: "center", gap: 10, background: "transparent",
+            border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: 8,
             transition: "all 150ms ease", flexShrink: 0,
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-surface-3)"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
         >
-          <div style={{
-            width: 24, height: 24, borderRadius: 6,
-            background: "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-blue-bright) 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 2px 8px var(--proof-blue-glow)", flexShrink: 0,
-          }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-            </svg>
-          </div>
-          <span style={{ fontSize: 13, fontWeight: 800, color: "var(--proof-text)", letterSpacing: "-0.3px" }}>
-            AWARE
+          <ProofLogo size={20} />
+          <span style={{ fontSize: 14, fontWeight: 800, color: "var(--proof-text)", letterSpacing: "-0.3px", fontFamily: "var(--font-mono)" }}>
+            A.W.A.R.E.
           </span>
         </button>
 
-        {/* Breadcrumb */}
         <span style={{ color: "var(--proof-border-strong)", fontSize: 16, opacity: 0.4, userSelect: "none" }}>/</span>
         <span style={{
-          fontSize: 11, fontWeight: 600, color: "var(--proof-text-secondary)",
-          textTransform: "uppercase", letterSpacing: "0.3px",
-          background: "var(--proof-surface-2)", padding: "2px 8px",
-          borderRadius: "var(--proof-radius-full)", border: "1px solid var(--proof-border)",
+          fontSize: 10, fontWeight: 700, color: "var(--proof-text)",
+          textTransform: "uppercase", letterSpacing: "0.05em",
+          background: "var(--proof-surface-2)", padding: "4px 10px",
+          borderRadius: "var(--proof-radius-sm)", border: "1px solid var(--proof-border)",
+          fontFamily: "var(--font-mono)",
         }}>
           {pageLabel}
         </span>
 
-        {/* Loading indicator */}
         {dataState.loading && (
           <span style={{
             display: "inline-flex", alignItems: "center", gap: 5,
-            padding: "2px 8px", borderRadius: 99,
+            padding: "4px 8px", borderRadius: 4,
             background: "var(--proof-blue-bg)", border: "1px solid var(--proof-blue-border)",
             fontSize: 10, fontWeight: 600, color: "var(--proof-blue-bright)",
           }}>
             <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--proof-blue-bright)", animation: "badge-pulse 1s ease-in-out infinite" }} />
-            Loading
+            LOADING
           </span>
         )}
 
         <div style={{ flex: 1 }} />
 
-        {/* Env + Suite selectors */}
         <div style={{
           display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
-          background: "var(--proof-surface-2)", border: "1px solid var(--proof-border)",
-          borderRadius: "var(--proof-radius)", padding: "2px 6px", height: 32,
+          background: "var(--proof-surface)", border: "1px solid var(--proof-border-strong)",
+          borderRadius: "var(--proof-radius-sm)", padding: "2px 6px", height: 28,
         }}>
           <EnvSelector currentEnvIds={envSnap.envIds} onEnvChange={setSelectedEnvIds} variant="topbar" />
           <div style={{ width: 1, height: 14, background: "var(--proof-border)", flexShrink: 0 }} />
@@ -321,66 +286,51 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps & { full
         </div>
 
         <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 8px" }}>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 9, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>QA</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-blue-bright)" }}>47%</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 9, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>UAT</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-yellow)" }}>94%</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 9, color: "var(--proof-text-muted)", fontWeight: 600, textTransform: "uppercase" }}>PROD</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--proof-emerald)" }}>58%</span>
-          </div>
-        </div>
-        <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
         <EnvTierSelector />
         <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
 
-        {/* Search */}
         <button
           onClick={() => setPaletteOpen(true)}
           title="Search (⌘K)"
           style={{
-            display: "flex", alignItems: "center", gap: 6, padding: "5px 10px",
-            fontSize: 11.5, cursor: "pointer",
-            border: "1px solid var(--proof-border)", borderRadius: "var(--proof-radius)",
+            display: "flex", alignItems: "center", gap: 6, padding: "4px 10px",
+            fontSize: 11, cursor: "pointer",
+            border: "1px solid var(--proof-border)", borderRadius: "var(--proof-radius-sm)",
             background: "var(--proof-surface-2)", color: "var(--proof-text-muted)",
-            transition: "all 120ms ease", fontFamily: "var(--font-sans)",
-            height: 30, minWidth: 110, flexShrink: 0,
+            transition: "all 120ms ease", fontFamily: "var(--font-mono)",
+            height: 28, minWidth: 140, flexShrink: 0,
           }}
           onMouseEnter={(e) => {
             const el = e.currentTarget as HTMLElement;
-            el.style.borderColor = "var(--proof-border-strong)";
+            el.style.borderColor = "var(--proof-blue-border)";
             el.style.color = "var(--proof-text)";
+            el.style.boxShadow = "var(--proof-glow-cyan)";
           }}
           onMouseLeave={(e) => {
             const el = e.currentTarget as HTMLElement;
             el.style.borderColor = "var(--proof-border)";
             el.style.color = "var(--proof-text-muted)";
+            el.style.boxShadow = "none";
           }}
         >
-          <Search size={11} />
-          <span style={{ flex: 1, textAlign: "left" }}>Search…</span>
+          <Search size={12} />
+          <span style={{ flex: 1, textAlign: "left" }}>SEARCH...</span>
           <kbd style={{
             fontSize: 9, border: "1px solid var(--proof-border-strong)",
-            borderRadius: 4, padding: "0 4px", fontFamily: "var(--font-mono)",
-            lineHeight: "14px", opacity: 0.5,
+            borderRadius: 2, padding: "0 4px", fontFamily: "var(--font-mono)",
+            lineHeight: "14px", opacity: 0.6,
           }}>⌘K</kbd>
         </button>
 
-        {/* Theme toggle */}
         <button
           onClick={toggleTheme}
           title={isDark ? "Light mode" : "Dark mode"}
           style={{
-            width: 30, height: 30, padding: 0,
+            width: 28, height: 28, padding: 0,
             border: "1px solid var(--proof-border)", background: "transparent",
             cursor: "pointer", color: "var(--proof-text-muted)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            borderRadius: "var(--proof-radius)", transition: "all 120ms ease", flexShrink: 0,
+            borderRadius: "var(--proof-radius-sm)", transition: "all 120ms ease", flexShrink: 0,
           }}
           onMouseEnter={(e) => {
             const el = e.currentTarget as HTMLElement;
@@ -393,40 +343,35 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps & { full
             el.style.background = "transparent";
           }}
         >
-          {isDark ? <Sun size={13} /> : <Moon size={13} />}
+          {isDark ? <Sun size={12} /> : <Moon size={12} />}
         </button>
       </header>
 
-      {/* ── Body: Sidebar + Main ──────────────────────────────────── */}
+      {/* ── Body ─────────────────────────────────────────────────── */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0 }}>
-
         {/* Sidebar */}
         <nav style={{
           width: sidebarWidth, minWidth: sidebarWidth, flexShrink: 0,
-          background: "var(--proof-sidebar-bg)",
-          borderRight: sidebarOpen ? "1px solid var(--proof-border)" : "none",
+          background: "var(--proof-surface-2)",
+          borderRight: sidebarOpen ? "1px solid var(--proof-border-strong)" : "none",
           display: "flex", flexDirection: "column",
           overflow: "hidden",
-          transition: "width 220ms cubic-bezier(0.4,0,0.2,1), min-width 220ms cubic-bezier(0.4,0,0.2,1)",
+          transition: "width 200ms cubic-bezier(0.4,0,0.2,1), min-width 200ms cubic-bezier(0.4,0,0.2,1)",
         }}>
           {sidebarOpen && (
             <>
-              {/* Sidebar header */}
               <div style={{
-                padding: "14px 12px 10px",
-                borderBottom: "1px solid var(--proof-border)",
-                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "8px",
+                display: "flex", alignItems: "center", justifyContent: "flex-end",
               }}>
-                {!sidebarCollapsed && <AwareLogo />}
                 <button
                   onClick={() => setSidebarCollapsed((p) => !p)}
                   title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                   style={{
-                    width: 26, height: 26, padding: 0, border: "none",
+                    width: 24, height: 24, padding: 0, border: "none",
                     background: "transparent", cursor: "pointer", color: "var(--proof-text-muted)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     borderRadius: "var(--proof-radius-sm)", transition: "all var(--proof-transition)",
-                    marginLeft: sidebarCollapsed ? "auto" : 0,
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
@@ -438,8 +383,8 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps & { full
                   }}
                 >
                   {sidebarCollapsed
-                    ? <ChevronRight size={13} />
-                    : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    ? <ChevronRight size={14} />
+                    : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                         <line x1="3" y1="12" x2="21" y2="12" />
                         <line x1="3" y1="6" x2="15" y2="6" />
                         <line x1="3" y1="18" x2="15" y2="18" />
@@ -448,88 +393,87 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps & { full
                 </button>
               </div>
 
-              {/* Nav groups */}
-              <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "10px 8px" }}>
+              <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "8px" }}>
                 {NAV_GROUPS.map((group) => (
-                  <div key={group.label} style={{ marginBottom: 4 }}>
+                  <div key={group.label} style={{ marginBottom: 16 }}>
                     {!sidebarCollapsed && (
                       <div style={{
                         fontSize: 10, fontWeight: 700, textTransform: "uppercase",
-                        letterSpacing: "0.7px", color: "var(--proof-text-muted)",
-                        padding: "12px 10px 4px",
+                        letterSpacing: "0.1em", color: "var(--proof-text-muted)",
+                        padding: "0 12px 8px", fontFamily: "var(--font-sans)",
                       }}>
                         {group.label}
                       </div>
                     )}
-                    {group.items.map((item) => (
-                      <SidebarNavItem
-                        key={item.id}
-                        item={item}
-                        isActive={currentId === item.id}
-                        collapsed={sidebarCollapsed}
-                      />
-                    ))}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      {group.items.map((item) => (
+                        <SidebarNavItem
+                          key={item.id}
+                          item={item}
+                          isActive={currentId === item.id}
+                          collapsed={sidebarCollapsed}
+                        />
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
 
-              {/* Bottom nav */}
               <div style={{
-                borderTop: "1px solid var(--proof-border)",
-                padding: "8px 8px 12px",
+                borderTop: "1px solid var(--proof-border-strong)",
+                padding: "8px",
               }}>
-                {BOTTOM_NAV.map((item) => (
-                  <SidebarNavItem
-                    key={item.id}
-                    item={item}
-                    isActive={currentId === item.id}
-                    collapsed={sidebarCollapsed}
-                  />
-                ))}
+                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  {BOTTOM_NAV.map((item) => (
+                    <SidebarNavItem
+                      key={item.id}
+                      item={item}
+                      isActive={currentId === item.id}
+                      collapsed={sidebarCollapsed}
+                    />
+                  ))}
+                </div>
               </div>
             </>
           )}
         </nav>
 
-        {/* Main content */}
+        {/* Main */}
         <main
           id="main-content"
           style={{
             flex: 1, minWidth: 0, 
             overflowY: fullBleed ? "hidden" : "auto", 
             overflowX: "hidden",
-            background: "var(--proof-editor-bg)",
-            backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.028) 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
+            background: "var(--proof-bg)",
             position: "relative",
             padding: fullBleed ? 0 : undefined,
+            boxShadow: "inset 1px 1px 10px rgba(0,0,0,0.2)",
           }}
         >
           {children}
         </main>
       </div>
 
-      {/* ── Command palette ───────────────────────────────────────── */}
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
 
-      {/* ── Live status toast ─────────────────────────────────────── */}
       {currentToast && (() => {
         const cfg = {
-          success: { bg: "var(--proof-green-bg)", border: "var(--proof-green-border)", color: "var(--proof-green)", icon: <Check size={13} /> },
-          warning: { bg: "var(--proof-yellow-bg)", border: "var(--proof-yellow-border)", color: "var(--proof-yellow)", icon: <AlertTriangle size={13} /> },
-          error: { bg: "var(--proof-red-bg)", border: "var(--proof-red-border)", color: "var(--proof-red-bright)", icon: <AlertTriangle size={13} /> },
-          info: { bg: "var(--proof-blue-bg)", border: "var(--proof-blue-border)", color: "var(--proof-blue-bright)", icon: null },
-        }[currentToast.type] ?? { bg: "var(--proof-surface-2)", border: "var(--proof-border)", color: "var(--proof-text)", icon: null };
+          success: { bg: "var(--proof-green-bg)", border: "var(--proof-green-border)", color: "var(--proof-green)", icon: <Check size={13} />, glow: "var(--proof-glow-green)" },
+          warning: { bg: "var(--proof-yellow-bg)", border: "var(--proof-yellow-border)", color: "var(--proof-yellow)", icon: <AlertTriangle size={13} />, glow: "var(--proof-glow-amber)" },
+          error: { bg: "var(--proof-red-bg)", border: "var(--proof-red-border)", color: "var(--proof-red-bright)", icon: <AlertTriangle size={13} />, glow: "var(--proof-glow-red)" },
+          info: { bg: "var(--proof-blue-bg)", border: "var(--proof-blue-border)", color: "var(--proof-blue-bright)", icon: null, glow: "var(--proof-glow-cyan)" },
+        }[currentToast.type] ?? { bg: "var(--proof-surface-2)", border: "var(--proof-border)", color: "var(--proof-text)", icon: null, glow: "none" };
 
         return (
           <div style={{
-            position: "fixed", bottom: 20, left: "50%", zIndex: 9999,
+            position: "fixed", bottom: 30, left: "50%", zIndex: 9999,
             animation: "toast-pop 0.2s cubic-bezier(0.2,0,0,1) both",
-            display: "flex", alignItems: "center", gap: 8, padding: "9px 14px",
-            background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color,
-            borderRadius: "var(--proof-radius-lg)", fontSize: 12.5, fontWeight: 600,
-            boxShadow: "var(--proof-shadow-lg)", maxWidth: 360,
-            transform: "translateX(-50%)",
+            display: "flex", alignItems: "center", gap: 8, padding: "12px 16px",
+            background: "var(--proof-glass)", border: `1px solid ${cfg.border}`, color: cfg.color,
+            borderRadius: "var(--proof-radius-lg)", fontSize: 13, fontWeight: 600,
+            boxShadow: cfg.glow, maxWidth: 400,
+            transform: "translateX(-50%)", backdropFilter: "blur(16px)",
           }}>
             {cfg.icon}
             <span style={{ flex: 1 }}>{currentToast.message}</span>
@@ -541,39 +485,11 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps & { full
                 alignItems: "center",
               }}
             >
-              <X size={12} />
+              <X size={14} />
             </button>
           </div>
         );
       })()}
-
-      {/* ── Route announcer (a11y) ────────────────────────────────── */}
-      <RouteAnnouncer />
-    </div>
-  );
-}
-
-const ROUTE_NAMES: Record<string, string> = {
-  "/": "Dashboard", "/runs": "Runs", "/compare": "Compare", "/trends": "Trends",
-  "/tests": "Tests", "/copilot": "Copilot", "/settings": "Settings", "/about": "About",
-};
-
-function RouteAnnouncer() {
-  const [location] = useLocation();
-  const [msg, setMsg] = React.useState("");
-  React.useEffect(() => {
-    const base = "/" + location.replace(/^\//, "").split(/[/?]/)[0];
-    const name = ROUTE_NAMES[base === "/" ? "/" : base] ?? "Page";
-    const t0 = setTimeout(() => setMsg(`Navigated to ${name}`), 0);
-    const t1 = setTimeout(() => setMsg(""), 2500);
-    return () => { clearTimeout(t0); clearTimeout(t1); };
-  }, [location]);
-  return (
-    <div role="status" aria-live="polite" aria-atomic="true" style={{
-      position: "absolute", width: 1, height: 1, padding: 0, margin: -1,
-      overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0, zIndex: -1,
-    }}>
-      {msg}
     </div>
   );
 }

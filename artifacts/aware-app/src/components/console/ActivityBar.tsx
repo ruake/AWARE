@@ -25,19 +25,19 @@ export function ActivityBar({
   return (
     <aside
       style={{
-        width: 72,
-        minWidth: 72,
+        width: 56,
+        minWidth: 56,
         background: "var(--proof-activity-bar-bg)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        borderRight: "1px solid var(--proof-border)",
+        borderRight: "1px solid var(--proof-border-strong)",
         flexShrink: 0,
         height: "100%",
         userSelect: "none",
         paddingTop: 12,
         paddingBottom: 12,
-        gap: 6,
+        gap: 8,
         position: "relative",
         zIndex: 10,
       }}
@@ -57,10 +57,10 @@ export function ActivityBar({
             onMouseLeave={() => setHoveredId(null)}
             style={{
               position: "relative",
-              width: 52,
-              height: 52,
+              width: 44,
+              height: 44,
               border: "none",
-              borderRadius: 14,
+              borderRadius: 12,
               cursor: "pointer",
               display: "flex",
               flexDirection: "column",
@@ -69,7 +69,7 @@ export function ActivityBar({
               gap: 4,
               transition: "all 200ms cubic-bezier(0.2,0,0,1)",
               background: isActive
-                ? "linear-gradient(135deg, rgba(59,130,246,0.25) 0%, rgba(96,165,250,0.15) 100%)"
+                ? "var(--proof-blue-bg)"
                 : isHovered
                   ? "var(--proof-surface-3)"
                   : "transparent",
@@ -79,13 +79,12 @@ export function ActivityBar({
                   ? "var(--proof-text)"
                   : "var(--proof-text-muted)",
               boxShadow: isActive
-                ? "inset 0 0 0 1px rgba(59,130,246,0.3), 0 4px 12px var(--proof-blue-glow)"
+                ? "var(--proof-glow-cyan)"
                 : "none",
-              transform: isHovered && !isActive ? "scale(1.05) translateX(2px)" : "scale(1)",
+              transform: isHovered && !isActive ? "scale(1.05)" : "scale(1)",
               flexShrink: 0,
             }}
           >
-            {/* Active indicator left bar */}
             {isActive && (
               <span
                 style={{
@@ -93,63 +92,30 @@ export function ActivityBar({
                   left: -6,
                   top: "50%",
                   transform: "translateY(-50%)",
-                  width: 4,
-                  height: 32,
+                  width: 3,
+                  height: 24,
                   borderRadius: "0 4px 4px 0",
-                  background: "linear-gradient(180deg, var(--proof-blue-bright), var(--proof-blue))",
-                  boxShadow: "0 0 12px var(--proof-blue-glow)",
+                  background: "var(--proof-blue)",
+                  boxShadow: "var(--proof-glow-cyan)",
                   zIndex: 2,
                 }}
               />
             )}
 
-            {/* Glow ring on active */}
-            {isActive && (
-              <span
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  borderRadius: 14,
-                  background:
-                    "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.3) 0%, transparent 70%)",
-                  pointerEvents: "none",
-                }}
-              />
-            )}
-
             <Icon
-              size={20}
+              size={18}
               style={{
                 transition: "transform 200ms ease",
                 transform: isHovered ? "scale(1.1)" : "scale(1)",
                 flexShrink: 0,
               }}
             />
-            <span
-              style={{
-                fontSize: 9,
-                fontWeight: isActive ? 700 : 600,
-                letterSpacing: "0.2px",
-                textTransform: "uppercase",
-                lineHeight: 1,
-                opacity: isActive ? 1 : 0.6,
-                maxWidth: 52,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                textAlign: "center",
-                transition: "opacity 200ms ease",
-              }}
-            >
-              {item.label}
-            </span>
           </button>
         );
       })}
 
       <div style={{ flex: 1 }} />
 
-      {/* Sidebar toggle */}
       <button
         onClick={onSidebarToggle}
         title={sidebarVisible ? "Collapse panel" : "Expand panel"}
@@ -167,7 +133,7 @@ export function ActivityBar({
         style={{
           width: 32,
           height: 32,
-          border: "1px solid var(--proof-border)",
+          border: "1px solid var(--proof-border-strong)",
           borderRadius: 8,
           background: "transparent",
           cursor: "pointer",

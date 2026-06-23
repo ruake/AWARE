@@ -12,27 +12,28 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
+      className="glass-panel"
       style={{
-        background: "var(--proof-blue-bg)",
-        border: "1px solid var(--proof-blue)",
+        borderLeft: "4px solid var(--proof-blue)",
         borderRadius: 8,
         overflow: "hidden",
-        marginBottom: 14,
-        boxShadow: "0 4px 12px rgba(0, 102, 255, 0.1)",
+        marginBottom: 16,
+        boxShadow: "var(--proof-shadow-md)",
       }}
     >
       {/* Header row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px" }}>
-        <FileText size={15} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
-        <span style={{ fontSize: 12, flex: 1, color: "var(--proof-text)" }}>
-          <strong>CI config changed.</strong> Download the updated{" "}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px" }}>
+        <FileText size={16} style={{ color: "var(--proof-blue)", flexShrink: 0, filter: "drop-shadow(var(--proof-glow-cyan))" }} />
+        <span style={{ fontSize: 13, flex: 1, color: "var(--proof-text)" }}>
+          <strong style={{ color: "var(--proof-blue-bright)" }}>CI config changed.</strong> Download the updated{" "}
           <code
             style={{
               fontSize: 11,
-              background: "var(--proof-blue-bg)",
-              padding: "1px 5px",
-              borderRadius: 3,
+              background: "rgba(255,255,255,0.1)",
+              padding: "2px 6px",
+              borderRadius: 4,
               fontFamily: "var(--font-mono)",
+              color: "var(--proof-blue-bright)",
             }}
           >
             proof-test-config.yml
@@ -43,26 +44,29 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
           onClick={() => {
             downloadCiConfig();
           }}
-          className="proof-button-primary proof-button-xs"
+          className="proof-button-primary proof-button-sm glow-border-cyan"
           aria-label="Download updated test configuration file"
+          style={{ textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em", fontSize: 11 }}
         >
-          <Download size={12} /> Download Config
+          <Download size={14} style={{ marginRight: 4 }}/> Download Config
         </button>
         <button
           onClick={() => {
             setExpanded(!expanded);
           }}
           style={{
-            border: "none",
-            background: "transparent",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 6,
+            background: "rgba(255,255,255,0.05)",
             cursor: "pointer",
-            color: "var(--proof-blue)",
-            padding: 4,
+            color: "var(--proof-text)",
+            padding: 6,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
           title="Show instructions"
+          aria-label="Show instructions"
         >
           <motion.div
             animate={{ rotate: expanded ? 180 : 0 }}
@@ -79,15 +83,13 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
             background: "transparent",
             cursor: "pointer",
             color: "var(--proof-text-secondary)",
-            padding: 4,
-            fontSize: 16,
-            lineHeight: 1,
+            padding: 6,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <X size={14} />
+          <X size={16} />
         </button>
       </div>
 
@@ -101,39 +103,36 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
             transition={{ duration: 0.3, ease: "easeInOut" }}
             style={{
               overflow: "hidden",
-              borderTop: "1px solid var(--proof-blue-border)",
+              borderTop: "1px solid rgba(255,255,255,0.05)",
+              background: "rgba(0,0,0,0.2)",
             }}
           >
-            <div
-              style={{
-                padding: "0 14px 12px",
-                marginTop: 0,
-              }}
-            >
-              <div style={{ display: "flex", gap: 20, flexWrap: "wrap", paddingTop: 10 }}>
+            <div style={{ padding: "16px 20px" }}>
+              <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 280px" }}>
                   <div
                     style={{
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: 700,
                       color: "var(--proof-text-secondary)",
                       textTransform: "uppercase",
-                      letterSpacing: "0.3px",
-                      marginBottom: 6,
+                      letterSpacing: "1px",
+                      marginBottom: 8,
                       display: "flex",
                       alignItems: "center",
-                      gap: 4,
+                      gap: 6,
                     }}
                   >
-                    <TerminalSquare size={12} /> Where to commit
+                    <TerminalSquare size={14} /> Where to commit
                   </div>
                   <div
                     style={{
-                      background: "var(--proof-surface)",
-                      borderRadius: 4,
-                      padding: "8px 12px",
+                      background: "rgba(0,0,0,0.4)",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      borderRadius: 6,
+                      padding: "12px 16px",
                       fontFamily: "var(--font-mono)",
-                      fontSize: 10,
+                      fontSize: 12,
                       lineHeight: 1.8,
                       color: "var(--proof-text)",
                     }}
@@ -158,26 +157,27 @@ export function CiConfigBanner({ show, onDismiss }: { show: boolean; onDismiss: 
                 <div style={{ flex: "1 1 280px" }}>
                   <div
                     style={{
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: 700,
                       color: "var(--proof-text-secondary)",
                       textTransform: "uppercase",
-                      letterSpacing: "0.3px",
-                      marginBottom: 6,
+                      letterSpacing: "1px",
+                      marginBottom: 8,
                       display: "flex",
                       alignItems: "center",
-                      gap: 4,
+                      gap: 6,
                     }}
                   >
-                    <GitCompare size={12} /> How GHA reads it
+                    <GitCompare size={14} /> How GHA reads it
                   </div>
                   <div
                     style={{
-                      background: "var(--proof-surface)",
-                      borderRadius: 4,
-                      padding: "8px 12px",
+                      background: "rgba(0,0,0,0.4)",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      borderRadius: 6,
+                      padding: "12px 16px",
                       fontFamily: "var(--font-mono)",
-                      fontSize: 10,
+                      fontSize: 12,
                       lineHeight: 1.8,
                       color: "var(--proof-text)",
                     }}

@@ -14,15 +14,15 @@ const NODE_DEFS: Array<{
   Icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   color: string;
 }> = [
-  { id: "classify", label: "Classify", Icon: Brain, color: "#a78bfa" },
-  { id: "plan", label: "Plan", Icon: Zap, color: "#60a5fa" },
-  { id: "execute", label: "Execute", Icon: Wrench, color: "#f59e0b" },
-  { id: "synthesize", label: "Synthesize", Icon: Sparkles, color: "#34d399" },
-  { id: "done", label: "Done", Icon: Flag, color: "#22c55e" },
+  { id: "classify", label: "Classify", Icon: Brain, color: "var(--proof-purple)" },
+  { id: "plan", label: "Plan", Icon: Zap, color: "var(--proof-blue)" },
+  { id: "execute", label: "Execute", Icon: Wrench, color: "var(--proof-yellow)" },
+  { id: "synthesize", label: "Synthesize", Icon: Sparkles, color: "var(--proof-emerald)" },
+  { id: "done", label: "Done", Icon: Flag, color: "var(--proof-green)" },
 ];
 
 const PROVIDER_META: Record<ProviderType, { label: string; color: string }> = {
-  chrome: { label: "Chrome AI · Gemini Nano", color: "#fbbf24" },
+  chrome: { label: "Chrome AI · Gemini Nano", color: "var(--proof-yellow)" },
 };
 
 function NodePill({
@@ -101,8 +101,8 @@ function NodePill({
             style={{ color: def.color, animation: "spin 0.8s linear infinite", flexShrink: 0 }}
           />
         )}
-        {isDone && <CheckCircle2 size={10} style={{ color: "#34d399", flexShrink: 0 }} />}
-        {isError && <XCircle size={10} style={{ color: "#f87171", flexShrink: 0 }} />}
+        {isDone && <CheckCircle2 size={10} style={{ color: "var(--proof-emerald)", flexShrink: 0 }} />}
+        {isError && <XCircle size={10} style={{ color: "var(--proof-red)", flexShrink: 0 }} />}
         {isPending && (
           <Icon
             size={10}
@@ -292,7 +292,7 @@ export default function LangGraphPanel({ nodes, streaming, providerType }: Props
           <span
             style={{
               fontSize: 9.5,
-              color: "#34d399",
+              color: "var(--proof-emerald)",
               fontWeight: 600,
               whiteSpace: "nowrap",
               flexShrink: 0,
@@ -301,7 +301,7 @@ export default function LangGraphPanel({ nodes, streaming, providerType }: Props
             ✓ done
           </span>
         ) : streaming ? (
-          <span style={{ fontSize: 9.5, color: "#60a5fa", whiteSpace: "nowrap", flexShrink: 0 }}>
+          <span style={{ fontSize: 9.5, color: "var(--proof-blue)", whiteSpace: "nowrap", flexShrink: 0 }}>
             {activeCount}/{totalExpected}
           </span>
         ) : null}

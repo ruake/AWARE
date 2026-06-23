@@ -9,7 +9,7 @@ const META: Record<
   chrome: {
     label: "Chrome AI",
     icon: <Zap size={12} />,
-    color: "#4285f4",
+    color: "var(--proof-blue)",
     description: "On-device via Chrome's built-in Gemini Nano",
   },
 };
@@ -17,9 +17,9 @@ const META: Record<
 const ORDER: "chrome"[] = ["chrome"];
 
 const STATUS_DOT: Record<ProviderStatus, { color: string; title: string }> = {
-  available: { color: "#22c55e", title: "Available" },
-  downloading: { color: "#f59e0b", title: "Downloading…" },
-  unavailable: { color: "#6b7280", title: "Unavailable" },
+  available: { color: "var(--proof-green)", title: "Available" },
+  downloading: { color: "var(--proof-yellow)", title: "Downloading…" },
+  unavailable: { color: "var(--proof-text-tertiary)", title: "Unavailable" },
 };
 
 const UNAVAILABLE_REASON: Record<"chrome", string> = {
@@ -95,7 +95,7 @@ export default function ProviderSelector({
             width: 6,
             height: 6,
             borderRadius: "50%",
-            background: STATUS_DOT[currentStatus]?.color ?? "#6b7280",
+            background: STATUS_DOT[currentStatus]?.color ?? "var(--proof-text-tertiary)",
             flexShrink: 0,
           }}
         />

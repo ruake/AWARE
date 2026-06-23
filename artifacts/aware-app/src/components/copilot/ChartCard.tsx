@@ -20,7 +20,7 @@ interface Props {
   chartData: ChartData;
 }
 
-const DEFAULT_COLORS = ["#5b8af5", "#22c55e", "#f59e0b", "#a855f7", "#ef4444", "#06b6d4"];
+const DEFAULT_COLORS = ["var(--proof-blue)", "var(--proof-green)", "var(--proof-yellow)", "#a855f7", "var(--proof-red)", "#06b6d4"];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TICK_STYLE: any = { fontSize: 10, fill: "var(--proof-text-secondary)" };

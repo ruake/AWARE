@@ -78,8 +78,6 @@ export {
   loadTestSuites,
 } from "./testSuites";
 
-export { SuiteTree } from "./suiteTree";
-
 export {
   getPromotionDecision,
   getAllPromotionDecisions,
@@ -140,14 +138,6 @@ export type { EventName, EventPayload } from "./eventBus";
 export { LRUCache, memoize } from "./memo";
 
 export { StateMachine, InvalidTransitionError } from "./stateMachine";
-export { createJobMachine, createRunMachine } from "./machines";
-
-export {
-  composePipeline,
-  defaultPipeline,
-  freshPipeline,
-  fastPipeline,
-} from "./fetchPipeline";
 
 export { getImageSource, preloadImage, revokeAllImages, isExternalImage } from "./images";
 

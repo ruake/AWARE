@@ -21,11 +21,14 @@ export function SkeletonBox({
 }: SkeletonBoxProps) {
   return (
     <div
-      className={`animate-shimmer ${className}`}
+      className={className}
       style={{
         width,
         height,
         borderRadius,
+        animation: "shimmer 1.5s ease-in-out infinite",
+        background: "linear-gradient(90deg, var(--proof-surface-2) 25%, var(--proof-hover) 50%, var(--proof-surface-2) 75%)",
+        backgroundSize: "200% 100%",
         ...style,
       }}
     />

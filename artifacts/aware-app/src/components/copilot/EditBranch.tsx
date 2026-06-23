@@ -53,8 +53,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
       style={{
         display: "flex",
         justifyContent: "flex-end",
-        padding: "4px 0",
-      }}
+        padding: "4px 0"}}
     >
       <div
         style={{
@@ -64,8 +63,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
           border: "1px solid rgba(59,130,246,0.15)",
           borderRadius: 14,
           padding: "10px 12px 8px",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
-        }}
+          boxShadow: "0 4px 24px rgba(0,0,0,0.25)"}}
       >
         {/* Header */}
         <div
@@ -75,8 +73,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
             gap: 6,
             marginBottom: 8,
             paddingBottom: 8,
-            borderBottom: "1px solid var(--proof-border)",
-          }}
+            borderBottom: "1px solid var(--proof-border)"}}
         >
           <div
             style={{
@@ -86,8 +83,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
               background: "rgba(59,130,246,0.12)",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-            }}
+              justifyContent: "center"}}
           >
             <Edit3 size={12} style={{ color: "var(--proof-blue-bright)" }} />
           </div>
@@ -97,8 +93,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
               fontWeight: 600,
               color: "var(--proof-blue-bright)",
               letterSpacing: "0.2px",
-              textTransform: "uppercase",
-            }}
+              textTransform: "uppercase"}}
           >
             Editing message
           </span>
@@ -107,8 +102,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
               marginLeft: "auto",
               fontSize: 10.5,
               color: "var(--proof-text-muted)",
-              fontFamily: "var(--font-mono)",
-            }}
+              fontFamily: "var(--font-mono)"}}
           >
             {value.length}
           </span>
@@ -126,7 +120,6 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
             resize: "none",
             border: "1px solid var(--proof-border)",
             background: "rgba(2, 8, 23, 0.6)",
-            outline: "none",
             borderRadius: 8,
             padding: "8px 10px",
             fontSize: 13,
@@ -136,8 +129,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
             minHeight: 60,
             maxHeight: 200,
             overflowY: "auto",
-            boxSizing: "border-box",
-          }}
+            boxSizing: "border-box"}}
         />
 
         {/* History note */}
@@ -146,8 +138,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
             fontSize: 10.5,
             color: "var(--proof-text-muted)",
             marginTop: 6,
-            lineHeight: 1.4,
-          }}
+            lineHeight: 1.4}}
         >
           Editing message &mdash; new responses will branch from this point
         </div>
@@ -159,8 +150,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
             alignItems: "center",
             gap: 6,
             marginTop: 8,
-            justifyContent: "flex-end",
-          }}
+            justifyContent: "flex-end"}}
         >
           {/* Branch button */}
           <button
@@ -175,12 +165,11 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
               borderRadius: 7,
               border: "1px solid rgba(139,92,246,0.2)",
               background: "rgba(139,92,246,0.06)",
-              color: "#a78bfa",
+              color: "var(--proof-purple)",
               cursor: "pointer",
               fontSize: 11,
               fontWeight: 600,
-              transition: "all 0.15s",
-            }}
+              transition: "all 0.15s"}}
           >
             <GitBranch size={12} />
             Branch
@@ -202,8 +191,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
               cursor: "pointer",
               fontSize: 11,
               fontWeight: 600,
-              transition: "all 0.15s",
-            }}
+              transition: "all 0.15s"}}
           >
             <X size={12} />
             Cancel
@@ -230,8 +218,7 @@ export default function EditBranch({ message, onSave, onCancel, onBranch }: Edit
               fontSize: 11,
               fontWeight: 600,
               transition: "all 0.15s",
-              opacity: value.trim().length > 0 ? 1 : 0.5,
-            }}
+              opacity: value.trim().length > 0 ? 1 : 0.5}}
           >
             <Save size={12} />
             Save

@@ -71,11 +71,11 @@ export function ConsoleStat({
       >
         <span
           style={{
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: 600,
-            color: "var(--proof-text-secondary)",
+            color: "var(--proof-text-muted)",
             textTransform: "uppercase",
-            letterSpacing: "0.5px",
+            letterSpacing: "1px",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -86,8 +86,8 @@ export function ConsoleStat({
         {icon && (
           <div
             style={{
-              color: color ?? "var(--proof-text-secondary)",
-              opacity: 0.6,
+              color: color ?? "var(--proof-blue)",
+              opacity: 0.8,
               flexShrink: 0,
             }}
           >
@@ -104,13 +104,12 @@ export function ConsoleStat({
         }}
       >
         <span
+          className="metric-number"
           style={{
             fontSize: VALUE_SIZES[size],
-            fontWeight: 700,
-            fontFamily: "var(--font-mono)",
             color: color ?? "var(--proof-text)",
-            letterSpacing: "-0.5px",
             lineHeight: 1.1,
+            textShadow: color ? `0 0 12px ${color}40` : "none"
           }}
         >
           {value}

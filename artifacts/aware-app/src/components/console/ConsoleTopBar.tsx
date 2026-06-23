@@ -15,6 +15,7 @@ import {
   subscribeToSelectedSuites,
   setSelectedSuiteIds,
 } from "@/lib/filters";
+import { ProofLogo } from "../aware/ProofLogo";
 
 interface ConsoleTopBarProps {
   onSearchOpen: () => void;
@@ -65,23 +66,20 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
   return (
     <header
       style={{
-        height: 48,
-        minHeight: 48,
-        background: "var(--proof-title-bar-bg)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
+        height: 44,
+        minHeight: 44,
+        background: "var(--proof-surface)",
         display: "flex",
         alignItems: "center",
         padding: "0 16px",
         gap: 12,
         flexShrink: 0,
         userSelect: "none",
-        borderBottom: "1px solid var(--proof-border)",
+        borderBottom: "1px solid var(--proof-border-strong)",
         position: "relative",
         zIndex: 50,
       }}
     >
-      {/* Subtle top highlight */}
       <div
         style={{
           position: "absolute",
@@ -89,13 +87,10 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
           left: 0,
           right: 0,
           height: 1,
-          background:
-            "linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.3) 30%, rgba(96,165,250,0.2) 70%, transparent 100%)",
-          pointerEvents: "none",
+          background: "linear-gradient(90deg, transparent 0%, var(--proof-blue-border) 40%, var(--proof-blue-bright) 70%, transparent 100%)",
         }}
       />
 
-      {/* Logo */}
       <button
         onClick={() => navigate("/")}
         style={{
@@ -114,87 +109,54 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLElement;
           el.style.background = "var(--proof-surface-3)";
-          el.style.transform = "translateY(-1px)";
         }}
         onMouseLeave={(e) => {
           const el = e.currentTarget as HTMLElement;
           el.style.background = "transparent";
-          el.style.transform = "translateY(0)";
         }}
       >
-        {/* Logo icon */}
+        <ProofLogo size={20} />
         <span
           style={{
-            width: 26,
-            height: 26,
-            borderRadius: 8,
-            background: "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-blue-bright) 100%)",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 4px 12px var(--proof-blue-glow)",
-          }}
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-          </svg>
-        </span>
-
-        <span
-          className="proof-logo-text"
-          style={{
-            fontSize: 15,
+            fontSize: 14,
             fontWeight: 800,
-            background: "linear-gradient(to right, var(--proof-text), var(--proof-text-secondary))",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            letterSpacing: "-0.5px",
+            color: "var(--proof-text)",
+            letterSpacing: "-0.3px",
+            fontFamily: "var(--font-mono)",
           }}
         >
-          AWARE
+          A.W.A.R.E.
         </span>
       </button>
 
-      {/* Separator + breadcrumb */}
       <span style={{ color: "var(--proof-border-strong)", fontSize: 16, fontWeight: 300, opacity: 0.3 }}>
         /
       </span>
       <span
         style={{
-          fontSize: 11,
-          color: "var(--proof-text-secondary)",
-          fontWeight: 600,
-          letterSpacing: "0.2px",
+          fontSize: 10,
+          color: "var(--proof-text)",
+          fontWeight: 700,
+          letterSpacing: "0.05em",
           textTransform: "uppercase",
           background: "var(--proof-surface-2)",
-          padding: "2px 10px",
-          borderRadius: 99,
+          padding: "4px 10px",
+          borderRadius: "var(--proof-radius-sm)",
           border: "1px solid var(--proof-border)",
-          boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+          fontFamily: "var(--font-mono)",
         }}
       >
         {label}
       </span>
 
-      {/* Loading pill */}
       {dataState.loading && (
         <span
           style={{
             display: "inline-flex",
             alignItems: "center",
             gap: 5,
-            padding: "2px 8px",
-            borderRadius: 99,
+            padding: "4px 8px",
+            borderRadius: 4,
             background: "var(--proof-blue-bg)",
             border: "1px solid var(--proof-blue-border)",
             fontSize: 10,
@@ -212,7 +174,7 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
               animation: "badge-pulse 1s ease-in-out infinite",
             }}
           />
-          Loading…
+          LOADING
         </span>
       )}
       {!!dataState.error && !dataState.loading && (
@@ -221,8 +183,8 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
             display: "inline-flex",
             alignItems: "center",
             gap: 5,
-            padding: "2px 8px",
-            borderRadius: 99,
+            padding: "4px 8px",
+            borderRadius: 4,
             background: "var(--proof-red-bg)",
             border: "1px solid var(--proof-red-border)",
             fontSize: 10,
@@ -230,25 +192,23 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
             color: "var(--proof-red-bright)",
           }}
         >
-          <WifiOff size={9} />
-          Error
+          <WifiOff size={10} />
+          ERROR
         </span>
       )}
 
       <div style={{ flex: 1 }} />
 
-      {/* Filters cluster */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: 6,
-          background: "var(--proof-surface-2)",
-          border: "1px solid var(--proof-border)",
-          borderRadius: 8,
+          background: "var(--proof-surface)",
+          border: "1px solid var(--proof-border-strong)",
+          borderRadius: "var(--proof-radius-sm)",
           padding: "2px 6px",
-          height: 32,
-          boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+          height: 28,
         }}
       >
         <EnvSelector
@@ -264,16 +224,10 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
         />
       </div>
 
-      {/* Divider */}
       <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
-
-      {/* Tier selector */}
       <EnvTierSelector />
-
-      {/* Divider */}
       <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
 
-      {/* Search button */}
       <button
         onClick={onSearchOpen}
         title="Search (⌘K)"
@@ -281,83 +235,78 @@ export function ConsoleTopBar({ onSearchOpen }: ConsoleTopBarProps) {
           display: "flex",
           alignItems: "center",
           gap: 6,
-          padding: "5px 10px",
-          fontSize: 11.5,
+          padding: "4px 10px",
+          fontSize: 11,
           cursor: "pointer",
           border: "1px solid var(--proof-border)",
-          borderRadius: 8,
+          borderRadius: "var(--proof-radius-sm)",
           background: "var(--proof-surface-2)",
           color: "var(--proof-text-muted)",
           transition: "all 120ms ease",
-          fontFamily: "var(--font-sans)",
-          height: 30,
-          minWidth: 120,
+          fontFamily: "var(--font-mono)",
+          height: 28,
+          minWidth: 140,
         }}
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLElement;
-          el.style.borderColor = "var(--proof-border-strong)";
+          el.style.borderColor = "var(--proof-blue-border)";
           el.style.color = "var(--proof-text)";
-          el.style.background = "var(--proof-surface-3)";
+          el.style.boxShadow = "var(--proof-glow-cyan)";
         }}
         onMouseLeave={(e) => {
           const el = e.currentTarget as HTMLElement;
           el.style.borderColor = "var(--proof-border)";
           el.style.color = "var(--proof-text-muted)";
-          el.style.background = "var(--proof-surface-2)";
+          el.style.boxShadow = "none";
         }}
       >
-        <Search size={11} />
-        <span style={{ flex: 1, textAlign: "left" }}>Search…</span>
+        <Search size={12} />
+        <span style={{ flex: 1, textAlign: "left" }}>SEARCH...</span>
         <kbd
           style={{
             fontSize: 9,
             border: "1px solid var(--proof-border-strong)",
-            borderRadius: 4,
+            borderRadius: 2,
             padding: "0 4px",
             fontFamily: "var(--font-mono)",
             lineHeight: "14px",
-            opacity: 0.5,
-            background: "var(--proof-surface-3)",
+            opacity: 0.6,
           }}
         >
           ⌘K
         </kbd>
       </button>
 
-      {/* Theme toggle */}
       <button
         onClick={toggleTheme}
         title={isDark ? "Light mode" : "Dark mode"}
-        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
         style={{
-          width: 30,
-          height: 30,
+          width: 28,
+          height: 28,
           padding: 0,
           border: "1px solid var(--proof-border)",
-          background: "var(--proof-surface-2)",
+          background: "transparent",
           cursor: "pointer",
           color: "var(--proof-text-muted)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          borderRadius: 8,
+          borderRadius: "var(--proof-radius-sm)",
           transition: "all 120ms ease",
           flexShrink: 0,
         }}
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLElement;
           el.style.color = "var(--proof-text)";
-          el.style.background = "var(--proof-surface-3)";
-          el.style.borderColor = "var(--proof-border-strong)";
+          el.style.background = "var(--proof-hover)";
         }}
         onMouseLeave={(e) => {
           const el = e.currentTarget as HTMLElement;
           el.style.color = "var(--proof-text-muted)";
-          el.style.background = "var(--proof-surface-2)";
-          el.style.borderColor = "var(--proof-border)";
+          el.style.background = "transparent";
         }}
       >
-        {isDark ? <Sun size={13} /> : <Moon size={13} />}
+        {isDark ? <Sun size={12} /> : <Moon size={12} />}
       </button>
     </header>
   );

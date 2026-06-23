@@ -138,6 +138,7 @@ export function CompareSidePanel({
           <button
             disabled={idx <= 0}
             onClick={() => onSelect(diffs[idx - 1]?.id)}
+            aria-label="Previous test"
             style={{
               padding: "4px 7px",
               border: "none",
@@ -154,6 +155,7 @@ export function CompareSidePanel({
           <button
             disabled={idx >= diffs.length - 1}
             onClick={() => onSelect(diffs[idx + 1]?.id)}
+            aria-label="Next test"
             style={{
               padding: "4px 7px",
               border: "none",
@@ -743,6 +745,7 @@ export function CompareSidePanel({
                 <button
                   disabled={idx <= 0}
                   onClick={() => onSelect(diffs[idx - 1]?.id)}
+                  aria-label="Previous test"
                   style={{
                     padding: "4px 7px",
                     border: "none",
@@ -761,6 +764,7 @@ export function CompareSidePanel({
                 <button
                   disabled={idx >= diffs.length - 1}
                   onClick={() => onSelect(diffs[idx + 1]?.id)}
+                  aria-label="Next test"
                   style={{
                     padding: "4px 7px",
                     border: "none",

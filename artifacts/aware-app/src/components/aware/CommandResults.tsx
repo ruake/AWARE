@@ -6,15 +6,14 @@ import { motion } from "framer-motion";
 function typeColor(type: string) {
   if (type === "test") return { bg: "rgba(168,85,247,0.15)", color: "var(--proof-purple)" };
   if (type === "suite") return { bg: "rgba(245,158,11,0.15)", color: "var(--proof-yellow)" };
-  if (type === "run") return { bg: "rgba(91,138,245,0.15)", color: "var(--proof-blue)" };
-  if (type === "action") return { bg: "rgba(34,197,94,0.15)", color: "var(--proof-green)" };
+  if (type === "run") return { bg: "rgba(0,196,255,0.15)", color: "var(--proof-blue)" };
+  if (type === "action") return { bg: "rgba(0,229,160,0.15)", color: "var(--proof-green)" };
   return { bg: "rgba(154,160,166,0.15)", color: "var(--proof-text-secondary)" };
 }
 
 const FOOTER_KEYS: [string, string][] = [
   ["↑↓", "Navigate"],
   ["↵", "Open"],
-  ["⌘K", "Toggle"],
   ["ESC", "Close"],
 ];
 
@@ -65,8 +64,8 @@ export function CommandResults({
                 role="option"
                 aria-selected={isActive}
                 animate={{ 
-                  background: isActive ? "var(--proof-surface-2)" : "transparent",
-                  x: isActive ? 4 : 0
+                  background: isActive ? "rgba(0,196,255,0.15)" : "transparent",
+                  borderLeftColor: isActive ? "var(--proof-blue)" : "transparent",
                 }}
                 style={{
                   display: "flex",
@@ -74,8 +73,10 @@ export function CommandResults({
                   gap: 12,
                   padding: "10px 20px",
                   cursor: "pointer",
-                  margin: "0 8px",
+                  margin: "4px 8px",
                   borderRadius: 8,
+                  borderLeft: "3px solid transparent",
+                  boxShadow: isActive ? "inset 0 0 12px rgba(0,196,255,0.1)" : "none",
                 }}
                 onClick={() => onSelect(r)}
                 onMouseEnter={() => onHover(i)}
@@ -93,6 +94,7 @@ export function CommandResults({
                     fontSize: 16,
                     flexShrink: 0,
                     transition: "all 0.2s",
+                    boxShadow: isActive ? "var(--proof-glow-cyan)" : "none",
                   }}
                 >
                   {r.icon}
@@ -100,9 +102,9 @@ export function CommandResults({
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: isActive ? "var(--proof-blue)" : "var(--proof-text)",
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: isActive ? "var(--proof-blue-bright)" : "var(--proof-text)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -112,17 +114,20 @@ export function CommandResults({
                   </div>
                   <div
                     style={{
-                      fontSize: 11,
+                      fontSize: 12,
                       color: "var(--proof-text-secondary)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
-                      opacity: 0.8,
+                      opacity: isActive ? 1 : 0.7,
                     }}
                   >
                     {r.description}
                   </div>
                 </div>
+                {isActive && r.type === "action" && (
+                   <span style={{ fontSize: 10, color: "var(--proof-blue-bright)", opacity: 0.8 }}>↵ RUN</span>
+                )}
                 <span
                   style={{
                     fontSize: 10,
@@ -131,8 +136,8 @@ export function CommandResults({
                     fontWeight: 700,
                     textTransform: "uppercase",
                     letterSpacing: "0.5px",
-                    background: isActive ? "rgba(91, 138, 245, 0.2)" : tc.bg,
-                    color: isActive ? "var(--proof-blue)" : tc.color,
+                    background: isActive ? "rgba(0,196,255,0.2)" : tc.bg,
+                    color: isActive ? "var(--proof-blue-bright)" : tc.color,
                     flexShrink: 0,
                   }}
                 >
@@ -146,13 +151,13 @@ export function CommandResults({
       <div
         style={{
           padding: "12px 20px",
-          borderTop: "1px solid var(--proof-border)",
+          borderTop: "1px solid rgba(255,255,255,0.1)",
           display: "flex",
           justifyContent: "center",
           gap: 20,
           fontSize: 11,
           color: "var(--proof-text-secondary)",
-          background: "var(--proof-surface-2)",
+          background: "transparent",
         }}
       >
         {FOOTER_KEYS.map(([key, label]) => (
@@ -160,8 +165,8 @@ export function CommandResults({
             <kbd
               style={{
                 padding: "2px 6px",
-                background: "var(--proof-surface-3)",
-                border: "1px solid var(--proof-border)",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: 4,
                 fontFamily: "var(--font-mono)",
                 fontSize: 10,

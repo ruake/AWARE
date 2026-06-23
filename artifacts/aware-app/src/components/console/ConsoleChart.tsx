@@ -29,6 +29,7 @@ export function ConsoleChart({
 
   return (
     <ConsoleCard title={title} subtitle={subtitle} actions={actions} padding="0">
+      <div className="glass-panel" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
       {loading ? (
         <div
           style={{
@@ -56,23 +57,24 @@ export function ConsoleChart({
         >
           <ChartArea
             style={{
-              width: 32,
-              height: 32,
+              width: 48,
+              height: 48,
               color: "var(--proof-text-muted)",
-              opacity: 0.4,
+              opacity: 0.2,
             }}
           />
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)" }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--proof-text)", letterSpacing: "1px", textTransform: "uppercase" }}>
             {emptyMessage}
           </span>
         </div>
       ) : (
-        <div style={{ width: "100%", height: chartHeight, padding: 16, paddingTop: 8 }}>
+        <div style={{ width: "100%", height: chartHeight, padding: 24, paddingTop: 16 }}>
           <ResponsiveContainer width="100%" height="100%">
             {children as React.ReactElement}
           </ResponsiveContainer>
         </div>
       )}
+      </div>
     </ConsoleCard>
   );
 }

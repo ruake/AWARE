@@ -22,9 +22,9 @@ export function subscribeToPromotions(cb: () => void): () => void {
 
 export async function loadPromotions(): Promise<void> {
   if (_promotionsLoaded) return;
-  _promotionsLoaded = true;
   try {
     _promotionDecisions = (await fetchJson<PromotionDecision[]>("promotions.json")) || [];
+    _promotionsLoaded = true;
     updateSnapshot();
     notify();
   } catch (err) {

@@ -90,13 +90,13 @@ export default function ThinkingStepFeed({ lgState, lgHistory, busy }: Props) {
               }}
             >
               {st.status === "completed" ? (
-                <CheckCircle2 size={9} style={{ color: "#22c55e", flexShrink: 0 }} />
+                <CheckCircle2 size={9} style={{ color: "var(--proof-green)", flexShrink: 0 }} />
               ) : st.status === "error" ? (
-                <XCircle size={9} style={{ color: "#ef4444", flexShrink: 0 }} />
+                <XCircle size={9} style={{ color: "var(--proof-red)", flexShrink: 0 }} />
               ) : (
                 <Loader2
                   size={9}
-                  style={{ color: "#5b8af5", flexShrink: 0, animation: "spin 1s linear infinite" }}
+                  style={{ color: "var(--proof-blue)", flexShrink: 0, animation: "spin 1s linear infinite" }}
                 />
               )}
               <span
@@ -131,11 +131,11 @@ export default function ThinkingStepFeed({ lgState, lgHistory, busy }: Props) {
                         : "var(--proof-grey-bg)",
                 color:
                   s.status === "completed"
-                    ? "#22c55e"
+                    ? "var(--proof-green)"
                     : s.status === "running"
-                      ? "#5b8af5"
+                      ? "var(--proof-blue)"
                       : s.status === "error"
-                        ? "#ef4444"
+                        ? "var(--proof-red)"
                         : "var(--proof-text-muted)",
                 fontWeight: 600,
                 display: "flex",

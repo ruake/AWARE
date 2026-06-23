@@ -23,8 +23,7 @@ import {
   Calendar,
   Filter,
   History,
-  Tag,
-} from "lucide-react";
+  Tag} from "lucide-react";
 
 const GH_ACTIONS_URL = `${repo}/actions`;
 
@@ -45,26 +44,22 @@ function RunsStatSummary({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
       label: "Total",
       value: total.toString(),
       color: "var(--proof-blue)",
-      onClick: () => navigate("/runs"),
-    },
+      onClick: () => navigate("/runs")},
     {
       label: "Running",
       value: running.length.toString(),
       color: "var(--proof-blue-hover)",
-      onClick: () => navigate("/runs?status=RUNNING"),
-    },
+      onClick: () => navigate("/runs?status=RUNNING")},
     {
       label: "Passed",
       value: passed.toString(),
       color: "var(--proof-green)",
-      onClick: () => navigate("/runs?status=PASS"),
-    },
+      onClick: () => navigate("/runs?status=PASS")},
     {
       label: "Failed",
       value: failed.toString(),
       color: "var(--proof-red)",
-      onClick: () => navigate("/runs?status=FAIL"),
-    },
+      onClick: () => navigate("/runs?status=FAIL")},
     {
       label: "Pass Rate",
       value: `${avgPassRate}%`,
@@ -74,14 +69,12 @@ function RunsStatSummary({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
           : avgPassRate >= 50
             ? "var(--proof-yellow)"
             : "var(--proof-red)",
-      onClick: () => navigate("/trends"),
-    },
+      onClick: () => navigate("/trends")},
     {
       label: "Duration",
       value: avgDurationStr,
       color: "var(--proof-purple)",
-      onClick: () => navigate("/runs"),
-    },
+      onClick: () => navigate("/runs")},
   ];
 
   return (
@@ -91,8 +84,7 @@ function RunsStatSummary({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
         gridTemplateColumns: "1fr 1fr",
         gap: 4,
         padding: "8px 10px",
-        borderBottom: "1px solid var(--proof-border)",
-      }}
+        borderBottom: "1px solid var(--proof-border)"}}
     >
       {items.map((item) => (
         <div
@@ -106,8 +98,7 @@ function RunsStatSummary({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
             flexDirection: "column",
             gap: 1,
             cursor: "pointer",
-            transition: "background 0.1s",
-          }}
+            transition: "background 0.1s"}}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
           }}
@@ -121,8 +112,7 @@ function RunsStatSummary({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
               fontWeight: 700,
               fontFamily: "var(--font-mono)",
               color: item.color,
-              lineHeight: 1.2,
-            }}
+              lineHeight: 1.2}}
           >
             {item.value}
           </span>
@@ -131,8 +121,7 @@ function RunsStatSummary({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
               fontSize: 9,
               color: "var(--proof-text-muted)",
               textTransform: "uppercase",
-              letterSpacing: "0.4px",
-            }}
+              letterSpacing: "0.4px"}}
           >
             {item.label}
           </span>
@@ -154,16 +143,14 @@ function RunsListBanner({ running }: { running: Run[] }) {
           borderLeft: "3px solid var(--proof-blue-hover)",
           display: "flex",
           alignItems: "center",
-          gap: 8,
-        }}
+          gap: 8}}
       >
         <Loader2
           size={12}
           style={{
             color: "var(--proof-blue-hover)",
             animation: "spin 1s linear infinite",
-            flexShrink: 0,
-          }}
+            flexShrink: 0}}
         />
         <span style={{ flex: 1, fontSize: 11, fontWeight: 600, color: "var(--proof-text)" }}>
           {running.length} running
@@ -179,8 +166,7 @@ function RunsListBanner({ running }: { running: Run[] }) {
             textDecoration: "none",
             display: "flex",
             alignItems: "center",
-            gap: 3,
-          }}
+            gap: 3}}
         >
           View <ExternalLink size={8} />
         </a>
@@ -197,8 +183,7 @@ function RunsListBanner({ running }: { running: Run[] }) {
           borderLeft: "3px solid #22c55e",
           display: "flex",
           alignItems: "center",
-          gap: 8,
-        }}
+          gap: 8}}
       >
         <Check size={12} style={{ color: "var(--proof-green)", flexShrink: 0 }} />
         <span style={{ flex: 1, fontSize: 11, fontWeight: 600, color: "var(--proof-text)" }}>
@@ -215,8 +200,7 @@ function RunsListBanner({ running }: { running: Run[] }) {
             textDecoration: "none",
             display: "flex",
             alignItems: "center",
-            gap: 3,
-          }}
+            gap: 3}}
         >
           Actions <ExternalLink size={8} />
         </a>
@@ -239,8 +223,7 @@ function RunsQuickNav() {
         borderBottom: "1px solid var(--proof-border)",
         display: "flex",
         gap: 4,
-        flexWrap: "wrap",
-      }}
+        flexWrap: "wrap"}}
     >
       {items.map(({ href, icon: Ic, label }) => (
         <button
@@ -258,8 +241,7 @@ function RunsQuickNav() {
             cursor: "pointer",
             fontSize: 10,
             fontWeight: 500,
-            transition: "all 0.12s",
-          }}
+            transition: "all 0.12s"}}
           onMouseEnter={(e) => {
             e.currentTarget.style.color = "var(--proof-text)";
             e.currentTarget.style.borderColor = "rgba(91,138,245,0.35)";
@@ -326,8 +308,7 @@ function RunsListFilters() {
           border: "1px solid var(--proof-border)",
           borderRadius: 4,
           padding: "3px 6px",
-          marginBottom: 6,
-        }}
+          marginBottom: 6}}
       >
         <Search size={11} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
         <input
@@ -336,13 +317,11 @@ function RunsListFilters() {
           placeholder="Search runs..."
           style={{
             border: "none",
-            outline: "none",
             fontSize: 11,
             background: "transparent",
             flex: 1,
             minWidth: 0,
-            color: "var(--proof-text)",
-          }}
+            color: "var(--proof-text)"}}
         />
       </div>
       <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
@@ -357,8 +336,7 @@ function RunsListFilters() {
             background: "var(--proof-surface)",
             color: "var(--proof-text)",
             flex: 1,
-            minWidth: 0,
-          }}
+            minWidth: 0}}
         >
           <option value="all">All status</option>
           <option value="PASS">PASS</option>
@@ -378,8 +356,7 @@ function RunsListFilters() {
             background: "var(--proof-surface)",
             color: "var(--proof-text)",
             flex: 1,
-            minWidth: 0,
-          }}
+            minWidth: 0}}
         >
           <option value="all">All suites</option>
           {suites.map((s) => (
@@ -399,8 +376,7 @@ function RunsListFilters() {
             background: "var(--proof-surface)",
             color: "var(--proof-text)",
             flex: 1,
-            minWidth: 0,
-          }}
+            minWidth: 0}}
         >
           <option value="all">All envs</option>
           {envs.map((e) => (
@@ -421,8 +397,7 @@ function RunsListFilters() {
               padding: "2px 4px",
               display: "flex",
               alignItems: "center",
-              gap: 2,
-            }}
+              gap: 2}}
           >
             <X size={10} /> Clear
           </button>
@@ -433,8 +408,7 @@ function RunsListFilters() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginTop: 4,
-        }}
+          marginTop: 4}}
       >
         <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
           {statusFilter !== "all" && (
@@ -471,8 +445,7 @@ function FilterBadge({ label, onRemove }: { label: string; onRemove: () => void 
         background: "var(--proof-hover)",
         border: "1px solid var(--proof-border)",
         color: "var(--proof-text-secondary)",
-        cursor: "pointer",
-      }}
+        cursor: "pointer"}}
       onClick={onRemove}
     >
       {label} <X size={8} />
@@ -490,8 +463,7 @@ function RunsGhActions() {
           gap: 8,
           padding: "8px 10px",
           borderRadius: 6,
-          border: "1px solid var(--proof-grey)",
-        }}
+          border: "1px solid var(--proof-grey)"}}
       >
         <Github size={16} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -519,8 +491,7 @@ function RunsGhActions() {
             fontSize: 9,
             fontWeight: 600,
             textDecoration: "none",
-            flexShrink: 0,
-          }}
+            flexShrink: 0}}
         >
           Open <ExternalLink size={8} />
         </a>
@@ -550,8 +521,7 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
             display: "flex",
             alignItems: "center",
             fontSize: 10,
-            fontWeight: 600,
-          }}
+            fontWeight: 600}}
         >
           <ArrowLeft size={11} /> Runs
         </button>
@@ -565,8 +535,7 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            flex: 1,
-          }}
+            flex: 1}}
         >
           {run.id}
         </span>
@@ -589,8 +558,7 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
                 ? "var(--proof-green)"
                 : run.status === "FAIL"
                   ? "var(--proof-red)"
-                  : "var(--proof-yellow)",
-          }}
+                  : "var(--proof-yellow)"}}
         >
           {run.status}
         </span>
@@ -604,8 +572,7 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
                 ? "var(--proof-green)"
                 : passRate < 90
                   ? "var(--proof-red)"
-                  : "var(--proof-yellow)",
-          }}
+                  : "var(--proof-yellow)"}}
         >
           {passRate}%
         </span>
@@ -613,8 +580,7 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
           style={{
             fontSize: 9,
             color: "var(--proof-text-secondary)",
-            fontFamily: "var(--font-mono)",
-          }}
+            fontFamily: "var(--font-mono)"}}
         >
           +{passCount}/-{failCount}
         </span>
@@ -633,8 +599,7 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
             padding: "1px 5px",
             background: "rgba(255,255,255,0.04)",
             border: "1px solid var(--proof-border)",
-            borderRadius: 3,
-          }}
+            borderRadius: 3}}
         >
           {run.env} · {run.envId} · build {run.build}
         </span>
@@ -654,8 +619,7 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
             display: "flex",
             alignItems: "center",
             gap: 3,
-            fontSize: 9,
-          }}
+            fontSize: 9}}
         >
           <Share2 size={9} /> Share
         </button>
@@ -671,8 +635,7 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
             display: "flex",
             alignItems: "center",
             gap: 3,
-            fontSize: 9,
-          }}
+            fontSize: 9}}
         >
           <GitCompare size={9} /> Diff
         </button>
@@ -690,8 +653,7 @@ function RunDetailBreadcrumb({ run }: { run: Run }) {
             display: "flex",
             alignItems: "center",
             textDecoration: "none",
-            fontSize: 9,
-          }}
+            fontSize: 9}}
         >
           <Github size={9} />
         </a>
@@ -719,8 +681,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: collapsed ? 0 : 6,
-        }}
+          marginBottom: collapsed ? 0 : 6}}
       >
         {!collapsed && (
           <span
@@ -729,8 +690,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
               fontWeight: 600,
               color: "var(--proof-text-secondary)",
               textTransform: "uppercase",
-              letterSpacing: "0.4px",
-            }}
+              letterSpacing: "0.4px"}}
           >
             Run KPIs
           </span>
@@ -744,15 +704,13 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
             color: "var(--proof-text-secondary)",
             padding: 2,
             display: "flex",
-            marginLeft: "auto",
-          }}
+            marginLeft: "auto"}}
         >
           <ChevronDown
             size={12}
             style={{
               transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)",
-              transition: "transform 0.15s",
-            }}
+              transition: "transform 0.15s"}}
           />
         </button>
       </div>
@@ -770,16 +728,14 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                     ? "rgba(239,68,68,0.08)"
                     : "rgba(234,179,8,0.08)",
               border: `1px solid ${passRate === 100 ? "rgba(34,197,94,0.2)" : passRate < 90 ? "rgba(239,68,68,0.2)" : "rgba(234,179,8,0.2)"}`,
-              cursor: "pointer",
-            }}
+              cursor: "pointer"}}
           >
             <div
               style={{
                 fontSize: 8,
                 color: "var(--proof-text-secondary)",
                 textTransform: "uppercase",
-                letterSpacing: "0.3px",
-              }}
+                letterSpacing: "0.3px"}}
             >
               Pass Rate
             </div>
@@ -793,8 +749,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                     ? "var(--proof-green)"
                     : passRate < 90
                       ? "var(--proof-red)"
-                      : "var(--proof-yellow)",
-              }}
+                      : "var(--proof-yellow)"}}
             >
               {passRate}%
             </div>
@@ -805,26 +760,22 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                 label: "Total",
                 value: results.length,
                 color: "var(--proof-text)",
-                onClick: () => navigate(`/runs/${run.id}`),
-              },
+                onClick: () => navigate(`/runs/${run.id}`)},
               {
                 label: "Failed",
                 value: failCount,
                 color: failCount > 0 ? "var(--proof-red)" : "var(--proof-text-secondary)",
-                onClick: failCount > 0 ? () => navigate(`/runs/${run.id}?status=FAIL`) : undefined,
-              },
+                onClick: failCount > 0 ? () => navigate(`/runs/${run.id}?status=FAIL`) : undefined},
               {
                 label: "Passed",
                 value: passCount,
                 color: "var(--proof-green)",
-                onClick: passCount > 0 ? () => navigate(`/runs/${run.id}?status=PASS`) : undefined,
-              },
+                onClick: passCount > 0 ? () => navigate(`/runs/${run.id}?status=PASS`) : undefined},
               {
                 label: "Avg Dur",
                 value: `${avgDuration}ms`,
                 color: "var(--proof-text)",
-                onClick: () => navigate(`/trends`),
-              },
+                onClick: () => navigate(`/trends`)},
             ].map((s) => (
               <div
                 key={s.label}
@@ -835,8 +786,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                   background: "var(--proof-grey-bg)",
                   border: "1px solid var(--proof-grey)",
                   cursor: s.onClick ? "pointer" : "default",
-                  transition: "background 0.1s",
-                }}
+                  transition: "background 0.1s"}}
                 onMouseEnter={(e) => {
                   if (s.onClick)
                     (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
@@ -850,8 +800,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                     fontSize: 8,
                     color: "var(--proof-text-secondary)",
                     textTransform: "uppercase",
-                    letterSpacing: "0.3px",
-                  }}
+                    letterSpacing: "0.3px"}}
                 >
                   {s.label}
                 </div>
@@ -860,8 +809,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                     fontFamily: "var(--font-mono)",
                     fontSize: 13,
                     fontWeight: 700,
-                    color: s.color,
-                  }}
+                    color: s.color}}
                 >
                   {s.value}
                 </div>
@@ -874,8 +822,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                 padding: "6px 8px",
                 borderRadius: 4,
                 border: "1px solid var(--proof-grey)",
-                background: "var(--proof-grey-bg)",
-              }}
+                background: "var(--proof-grey-bg)"}}
             >
               <div
                 style={{
@@ -883,8 +830,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                   color: "var(--proof-text-secondary)",
                   textTransform: "uppercase",
                   letterSpacing: "0.3px",
-                  marginBottom: 2,
-                }}
+                  marginBottom: 2}}
               >
                 By Category
               </div>
@@ -902,8 +848,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                       alignItems: "center",
                       gap: 4,
                       marginTop: 2,
-                      cursor: "pointer",
-                    }}
+                      cursor: "pointer"}}
                     onMouseEnter={(e) => {
                       (e.currentTarget as HTMLElement).style.opacity = "0.8";
                     }}
@@ -919,8 +864,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                         flex: 1,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
+                        whiteSpace: "nowrap"}}
                     >
                       {cat}
                     </span>
@@ -929,8 +873,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                         width: 50,
                         height: 4,
                         borderRadius: 2,
-                        background: "var(--proof-grey)",
-                      }}
+                        background: "var(--proof-grey)"}}
                     >
                       <div
                         style={{
@@ -942,8 +885,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                               ? "var(--proof-green)"
                               : pct < 80
                                 ? "var(--proof-red)"
-                                : "var(--proof-yellow)",
-                        }}
+                                : "var(--proof-yellow)"}}
                       />
                     </div>
                     <span
@@ -952,8 +894,7 @@ function RunDetailKpis({ run, results }: { run: Run; results: TestResult[] }) {
                         color: "var(--proof-text-muted)",
                         fontFamily: "var(--font-mono)",
                         minWidth: 16,
-                        textAlign: "right",
-                      }}
+                        textAlign: "right"}}
                     >
                       {pct}%
                     </span>
@@ -994,8 +935,7 @@ function RunDetailFilters() {
           border: "1px solid var(--proof-border)",
           borderRadius: 4,
           padding: "3px 6px",
-          marginBottom: 4,
-        }}
+          marginBottom: 4}}
       >
         <Search size={11} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
         <input
@@ -1004,13 +944,11 @@ function RunDetailFilters() {
           placeholder="Search tests..."
           style={{
             border: "none",
-            outline: "none",
             fontSize: 11,
             background: "transparent",
             flex: 1,
             minWidth: 0,
-            color: "var(--proof-text)",
-          }}
+            color: "var(--proof-text)"}}
         />
       </div>
       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
@@ -1025,8 +963,7 @@ function RunDetailFilters() {
             background: "var(--proof-surface)",
             color: "var(--proof-text)",
             flex: 1,
-            minWidth: 0,
-          }}
+            minWidth: 0}}
         >
           <option value="all">All status</option>
           <option value="PASS">PASS</option>
@@ -1043,8 +980,7 @@ function RunDetailFilters() {
             background: "var(--proof-surface)",
             color: "var(--proof-text)",
             flex: 1,
-            minWidth: 0,
-          }}
+            minWidth: 0}}
         >
           <option value="all">All cats</option>
           {categories.map((c) => (
@@ -1058,8 +994,7 @@ function RunDetailFilters() {
             fontSize: 9,
             color: "var(--proof-text-muted)",
             fontFamily: "var(--font-mono)",
-            flexShrink: 0,
-          }}
+            flexShrink: 0}}
         >
           {filtered.length}/{results.length}
         </span>
@@ -1084,8 +1019,7 @@ function RecentRunsList({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: "0.5px",
-          color: "var(--proof-text-muted)",
-        }}
+          color: "var(--proof-text-muted)"}}
       >
         Recent Runs
       </div>
@@ -1111,8 +1045,7 @@ function RecentRunsList({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
                 padding: "1px 0",
                 cursor: "pointer",
                 lineHeight: "14px",
-                position: "relative",
-              }}
+                position: "relative"}}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)";
               }}
@@ -1126,8 +1059,7 @@ function RecentRunsList({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  flexShrink: 0,
-                }}
+                  flexShrink: 0}}
               >
                 {i > 0 && (
                   <div
@@ -1135,8 +1067,7 @@ function RecentRunsList({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
                       width: 1,
                       height: 2,
                       background: "var(--proof-border)",
-                      flexShrink: 0,
-                    }}
+                      flexShrink: 0}}
                   />
                 )}
                 <div
@@ -1147,8 +1078,7 @@ function RecentRunsList({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
                     background: passColor,
                     flexShrink: 0,
                     outline: isSelected ? `2px solid ${passColor}` : "none",
-                    outlineOffset: 2,
-                  }}
+                    outlineOffset: 2}}
                 />
                 {i < recent.length - 1 && (
                   <div
@@ -1156,8 +1086,7 @@ function RecentRunsList({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
                       width: 1,
                       height: 2,
                       background: "var(--proof-border)",
-                      flexShrink: 0,
-                    }}
+                      flexShrink: 0}}
                   />
                 )}
               </div>
@@ -1168,8 +1097,7 @@ function RecentRunsList({ envFilteredRuns }: { envFilteredRuns: Run[] }) {
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                   fontSize: 9,
-                  color: "var(--proof-text-secondary)",
-                }}
+                  color: "var(--proof-text-secondary)"}}
               >
                 {run.label || run.id}
               </span>

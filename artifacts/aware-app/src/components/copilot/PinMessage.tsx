@@ -36,8 +36,7 @@ export function PinMessage({ message, threadId, bookmarks, onBookmarkChange }: P
       messageId: message.id,
       label: label || message.content.slice(0, 80),
       createdAt: Date.now(),
-      contentPreview: message.content.slice(0, 120),
-    };
+      contentPreview: message.content.slice(0, 120)};
     addBookmark(newBookmark);
     setShowLabelInput(false);
     onBookmarkChange();
@@ -69,9 +68,7 @@ export function PinMessage({ message, threadId, bookmarks, onBookmarkChange }: P
             background: "var(--proof-surface)",
             color: "var(--proof-text)",
             fontSize: 11,
-            width: 140,
-            outline: "none",
-          }}
+            width: 140}}
         />
         <button
           onClick={handleSave}
@@ -82,10 +79,9 @@ export function PinMessage({ message, threadId, bookmarks, onBookmarkChange }: P
             border: "none",
             background: "transparent",
             cursor: "pointer",
-            color: "#34d399",
+            color: "var(--proof-emerald)",
             display: "inline-flex",
-            alignItems: "center",
-          }}
+            alignItems: "center"}}
         >
           <Check size={12} />
         </button>
@@ -100,8 +96,7 @@ export function PinMessage({ message, threadId, bookmarks, onBookmarkChange }: P
             cursor: "pointer",
             color: "var(--proof-text-muted)",
             display: "inline-flex",
-            alignItems: "center",
-          }}
+            alignItems: "center"}}
         >
           <X size={12} />
         </button>
@@ -119,12 +114,11 @@ export function PinMessage({ message, threadId, bookmarks, onBookmarkChange }: P
         border: "none",
         background: "transparent",
         cursor: "pointer",
-        color: isPinned ? "#f59e0b" : "var(--proof-text-muted)",
+        color: isPinned ? "var(--proof-yellow)" : "var(--proof-text-muted)",
         display: "inline-flex",
         alignItems: "center",
         opacity: isPinned ? 1 : 0.5,
-        transition: "all 0.15s",
-      }}
+        transition: "all 0.15s"}}
       onMouseEnter={(e) => {
         if (!isPinned) e.currentTarget.style.opacity = "1";
       }}
@@ -140,8 +134,7 @@ export function PinMessage({ message, threadId, bookmarks, onBookmarkChange }: P
 export function PinBadge({
   bookmarks,
   threadId,
-  messageId,
-}: {
+  messageId}: {
   bookmarks: Bookmark[];
   threadId: string;
   messageId: string;
@@ -154,9 +147,8 @@ export function PinBadge({
       style={{
         display: "inline-flex",
         alignItems: "center",
-        color: "#f59e0b",
-        marginLeft: 4,
-      }}
+        color: "var(--proof-yellow)",
+        marginLeft: 4}}
     >
       <Pin size={10} />
     </span>

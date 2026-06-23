@@ -74,38 +74,40 @@ export function EnvTierSelector() {
               health ? `${health.tier}: ${health.passRate}% pass rate` : "Show all environments"
             }
             style={{
-              padding: "2px 9px",
-              fontSize: 10.5,
-              fontWeight: isActive ? 700 : 500,
+              padding: "4px 12px",
+              fontSize: 11,
+              fontWeight: isActive ? 700 : 600,
               lineHeight: "16px",
-              fontFamily: "var(--font-sans)",
-              letterSpacing: "-0.2px",
-              border: isActive
-                ? "1px solid var(--proof-border-strong)"
-                : "1px solid var(--proof-border)",
-              borderRight: isLast ? undefined : "none",
-              borderTopLeftRadius: isFirst ? "var(--proof-radius-sm)" : 0,
-              borderBottomLeftRadius: isFirst ? "var(--proof-radius-sm)" : 0,
-              borderTopRightRadius: isLast ? "var(--proof-radius-sm)" : 0,
-              borderBottomRightRadius: isLast ? "var(--proof-radius-sm)" : 0,
-              background: isActive ? "var(--proof-hover)" : "transparent",
-              color,
+              fontFamily: "var(--font-mono)",
+              letterSpacing: "0.5px",
+              border: "1px solid var(--proof-border)",
+              borderRight: isLast ? "1px solid var(--proof-border)" : "none",
+              borderTopLeftRadius: isFirst ? "var(--proof-radius-full)" : 0,
+              borderBottomLeftRadius: isFirst ? "var(--proof-radius-full)" : 0,
+              borderTopRightRadius: isLast ? "var(--proof-radius-full)" : 0,
+              borderBottomRightRadius: isLast ? "var(--proof-radius-full)" : 0,
+              background: isActive ? "rgba(0,196,255,0.1)" : "rgba(255,255,255,0.02)",
+              color: isActive ? "var(--proof-blue)" : "var(--proof-text-secondary)",
+              borderColor: isActive ? "var(--proof-blue)" : "var(--proof-border)",
+              boxShadow: isActive ? "var(--proof-glow-cyan)" : "none",
               cursor: "pointer",
-              transition: "all 0.12s",
+              transition: "all 0.15s",
               display: "flex",
               alignItems: "center",
-              gap: 4,
+              gap: 6,
+              zIndex: isActive ? 2 : 1,
+              position: "relative"
             }}
             onMouseEnter={(e) => {
               if (!isActive) {
-                e.currentTarget.style.background = "var(--proof-hover-light)";
+                e.currentTarget.style.background = "rgba(255,255,255,0.06)";
                 e.currentTarget.style.color = "var(--proof-text)";
               }
             }}
             onMouseLeave={(e) => {
               if (!isActive) {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = "var(--proof-text-muted)";
+                e.currentTarget.style.background = "rgba(255,255,255,0.02)";
+                e.currentTarget.style.color = "var(--proof-text-secondary)";
               }
             }}
           >

@@ -64,8 +64,7 @@ export default function RichInputBar({
   onAttach,
   onRemoveAttachment,
   onPaste,
-  onTemplateSelect,
-}: RichInputBarProps) {
+  onTemplateSelect}: RichInputBarProps) {
   const canSend = input.trim().length > 0 && !busy;
   const [dragging, setDragging] = useState(false);
   const [sizeWarning, setSizeWarning] = useState<string | null>(null);
@@ -151,8 +150,7 @@ export default function RichInputBar({
     background: "transparent",
     color: "var(--proof-text-muted)",
     cursor: "pointer",
-    transition: "all 0.12s",
-  };
+    transition: "all 0.12s"};
 
   return (
     <div
@@ -165,8 +163,7 @@ export default function RichInputBar({
         backdropFilter: "blur(20px)",
         borderTop: "1px solid var(--proof-border)",
         flexShrink: 0,
-        position: "relative",
-      }}
+        position: "relative"}}
     >
       {/* Drag overlay */}
       {dragging && (
@@ -186,8 +183,7 @@ export default function RichInputBar({
             fontWeight: 600,
             letterSpacing: "0.3px",
             zIndex: 10,
-            pointerEvents: "none",
-          }}
+            pointerEvents: "none"}}
         >
           Drop files here
         </div>
@@ -205,8 +201,7 @@ export default function RichInputBar({
             padding: "6px 4px 8px",
             fontSize: 11.5,
             color: "var(--proof-blue-bright)",
-            fontWeight: 500,
-          }}
+            fontWeight: 500}}
         >
           <div style={{ display: "flex", gap: 3 }} aria-hidden="true">
             <span className="copilot-thinking-dot" style={{ width: 5, height: 5 }} />
@@ -226,11 +221,10 @@ export default function RichInputBar({
               borderRadius: 6,
               border: "1px solid rgba(248,113,113,0.25)",
               background: "rgba(239,68,68,0.08)",
-              color: "#f87171",
+              color: "var(--proof-red)",
               cursor: "pointer",
               fontSize: 11,
-              fontWeight: 600,
-            }}
+              fontWeight: 600}}
           >
             <Square size={9} fill="currentColor" /> Stop
           </button>
@@ -243,8 +237,7 @@ export default function RichInputBar({
           display: "flex",
           alignItems: "center",
           gap: 8,
-          paddingBottom: 8,
-        }}
+          paddingBottom: 8}}
       >
         <button
           title="Bold (select text first)"
@@ -358,11 +351,10 @@ export default function RichInputBar({
               borderRadius: 8,
               border: "1px solid rgba(248,113,113,0.3)",
               background: "rgba(239,68,68,0.1)",
-              color: "#f87171",
+              color: "var(--proof-red)",
               cursor: "pointer",
               flexShrink: 0,
-              transition: "all 0.15s",
-            }}
+              transition: "all 0.15s"}}
           >
             <Square size={13} fill="currentColor" />
           </button>
@@ -389,8 +381,7 @@ export default function RichInputBar({
             padding: "0 4px 6px",
             display: "flex",
             alignItems: "center",
-            gap: 6,
-          }}
+            gap: 6}}
         >
           <button
             aria-label="Dismiss warning"
@@ -400,8 +391,7 @@ export default function RichInputBar({
               cursor: "pointer",
               padding: 0,
               display: "flex",
-              color: "inherit",
-            }}
+              color: "inherit"}}
             onClick={() => setSizeWarning(null)}
           >
             <X size={12} />
@@ -417,8 +407,7 @@ export default function RichInputBar({
             display: "flex",
             flexWrap: "wrap",
             gap: 6,
-            paddingBottom: 8,
-          }}
+            paddingBottom: 8}}
         >
           {attachments.map((att) => (
             <div
@@ -431,8 +420,7 @@ export default function RichInputBar({
                 borderRadius: 8,
                 background: "var(--proof-surface-2)",
                 border: "1px solid var(--proof-border)",
-                maxWidth: 240,
-              }}
+                maxWidth: 240}}
             >
               {att.type === "image" || att.type === "screenshot" ? (
                 att.data ? (
@@ -444,8 +432,7 @@ export default function RichInputBar({
                       height: 26,
                       borderRadius: 4,
                       objectFit: "cover",
-                      flexShrink: 0,
-                    }}
+                      flexShrink: 0}}
                   />
                 ) : (
                   <Image
@@ -469,8 +456,7 @@ export default function RichInputBar({
                     lineHeight: 1.3,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
+                    whiteSpace: "nowrap"}}
                 >
                   {att.name}
                 </div>
@@ -494,8 +480,7 @@ export default function RichInputBar({
                   color: "var(--proof-text-muted)",
                   cursor: "pointer",
                   flexShrink: 0,
-                  marginLeft: "auto",
-                }}
+                  marginLeft: "auto"}}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "var(--proof-hover)";
                   e.currentTarget.style.color = "var(--proof-red-bright)";
@@ -532,7 +517,6 @@ export default function RichInputBar({
             resize: "none",
             border: "none",
             background: "transparent",
-            outline: "none",
             fontSize: 13.5,
             lineHeight: 1.55,
             color: "var(--proof-text)",
@@ -540,8 +524,7 @@ export default function RichInputBar({
             minHeight: 26,
             maxHeight: 160,
             overflowY: "auto",
-            padding: "4px 0",
-          }}
+            padding: "4px 0"}}
         />
       </div>
 
@@ -552,8 +535,7 @@ export default function RichInputBar({
           color: "var(--proof-text-muted)",
           marginTop: 6,
           textAlign: "center",
-          letterSpacing: "0.2px",
-        }}
+          letterSpacing: "0.2px"}}
       >
         <kbd
           style={{
@@ -562,8 +544,7 @@ export default function RichInputBar({
             background: "rgba(255,255,255,0.05)",
             border: "1px solid var(--proof-border)",
             borderRadius: 3,
-            padding: "1px 4px",
-          }}
+            padding: "1px 4px"}}
         >
           Enter
         </kbd>{" "}
@@ -576,8 +557,7 @@ export default function RichInputBar({
             background: "rgba(255,255,255,0.05)",
             border: "1px solid var(--proof-border)",
             borderRadius: 3,
-            padding: "1px 4px",
-          }}
+            padding: "1px 4px"}}
         >
           ⇧Enter
         </kbd>{" "}
@@ -590,8 +570,7 @@ export default function RichInputBar({
             background: "rgba(255,255,255,0.05)",
             border: "1px solid var(--proof-border)",
             borderRadius: 3,
-            padding: "1px 4px",
-          }}
+            padding: "1px 4px"}}
         >
           ⌘F
         </kbd>{" "}

@@ -30,9 +30,7 @@ export function useSyncedUrlState<T>(
   // Force re-read on replaceState-based updates and browser back/forward
   const [bump, setBump] = React.useState(0);
 
-  // Derive state directly from URL — re-computes whenever bump changes (urlstate:sync events)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const state = React.useMemo(() => readParam(key, defaultValue), [key, defaultValue, bump]);
+  const state = React.useMemo(() => readParam(key, defaultValue), [key, defaultValue, bump, _location]);
 
   React.useEffect(() => {
     const handler = () => setBump((n) => n + 1);

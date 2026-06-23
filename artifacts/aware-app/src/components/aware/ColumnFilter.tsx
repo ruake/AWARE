@@ -9,15 +9,14 @@ export interface ColumnFilterState {
 export const EMPTY_FILTER: ColumnFilterState = { text: "", selected: [] };
 
 export function priorityColor(p: string): string {
-  return p === "P0" ? "#ef4444" : p === "P1" ? "#f97316" : p === "P2" ? "#5b8af5" : "#9aa0a6";
+  return p === "P0" ? "var(--proof-red)" : p === "P1" ? "var(--proof-orange)" : p === "P2" ? "var(--proof-blue)" : "var(--proof-text-muted)";
 }
 
 export function ColumnFilter({
   label,
   allValues,
   filter,
-  onFilterChange,
-}: {
+  onFilterChange}: {
   label: string;
   allValues?: string[];
   filter: ColumnFilterState;
@@ -83,8 +82,7 @@ export function ColumnFilter({
           border: "none",
           cursor: "pointer",
           padding: 0,
-          whiteSpace: "nowrap",
-        }}
+          whiteSpace: "nowrap"}}
       >
         {label}
         {activeCount > 0 && (
@@ -101,8 +99,7 @@ export function ColumnFilter({
               fontSize: 9,
               fontWeight: 700,
               marginLeft: 2,
-              flexShrink: 0,
-            }}
+              flexShrink: 0}}
           >
             {activeCount}
           </span>
@@ -113,8 +110,7 @@ export function ColumnFilter({
             marginLeft: 2,
             transform: open ? "rotate(180deg)" : "none",
             display: "inline-block",
-            transition: "transform 0.15s",
-          }}
+            transition: "transform 0.15s"}}
         >
           ▾
         </span>
@@ -122,18 +118,17 @@ export function ColumnFilter({
 
       {open && (
         <div
+          className="glass-panel"
           style={{
             position: "absolute",
             top: "calc(100% + 4px)",
             left: 0,
-            width: 220,
+            width: 240,
             zIndex: 50,
-            background: "var(--proof-surface)",
-            border: "1px solid var(--proof-grey)",
-            borderRadius: 4,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
-            padding: 8,
-          }}
+            border: "1px solid var(--proof-border)",
+            borderRadius: "var(--proof-radius-lg)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+            padding: 12}}
           role="listbox"
         >
           <div
@@ -141,13 +136,17 @@ export function ColumnFilter({
               display: "flex",
               alignItems: "center",
               gap: 6,
-              border: "1px solid var(--proof-grey)",
-              borderRadius: 4,
-              padding: "4px 8px",
-              marginBottom: 6,
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid var(--proof-border)",
+              borderRadius: "var(--proof-radius-full)",
+              padding: "6px 12px",
+              marginBottom: 12,
+              transition: "border-color var(--proof-transition)",
+              boxShadow: filter.text ? "var(--proof-glow-cyan)" : "none",
+              borderColor: filter.text ? "var(--proof-blue)" : "var(--proof-border)"
             }}
           >
-            <span style={{ fontSize: 11, color: "var(--proof-text-secondary)" }}>🔍</span>
+            <span style={{ fontSize: 13, color: filter.text ? "var(--proof-blue)" : "var(--proof-text-secondary)" }}>🔍</span>
             <input
               ref={inputRef}
               type="text"
@@ -156,19 +155,19 @@ export function ColumnFilter({
               placeholder="Search..."
               style={{
                 flex: 1,
-                fontSize: 12,
-                outline: "none",
+                fontSize: 13,
                 background: "transparent",
                 border: "none",
                 padding: 0,
                 color: "var(--proof-text)",
                 fontFamily: "var(--font-sans)",
+                outline: "none"
               }}
             />
             {filter.text && (
               <button
                 onClick={() => onFilterChange({ ...filter, text: "" })}
-                aria-label="Close"
+                aria-label="Clear search"
                 style={{
                   background: "none",
                   border: "none",
@@ -176,8 +175,7 @@ export function ColumnFilter({
                   fontSize: 14,
                   color: "var(--proof-text-secondary)",
                   lineHeight: 1,
-                  padding: 0,
-                }}
+                  padding: 0}}
               >
                 <X size={14} />
               </button>
@@ -185,29 +183,52 @@ export function ColumnFilter({
           </div>
           {allValues && (
             <div style={{ maxHeight: 160, overflowY: "auto" }}>
-              {filteredValues.map((v) => (
+              {filteredValues.map((v) => {
+                const isSelected = filter.selected.includes(v);
+                return (
                 <label
                   key={v}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 6,
-                    padding: "4px 4px",
-                    borderRadius: 3,
+                    gap: 8,
+                    padding: "6px 8px",
+                    borderRadius: "var(--proof-radius-sm)",
                     cursor: "pointer",
-                    fontSize: 12,
-                    color: "var(--proof-text)",
+                    fontSize: 13,
+                    color: isSelected ? "var(--proof-text)" : "var(--proof-text-secondary)",
+                    transition: "all var(--proof-transition)",
+                    background: isSelected ? "rgba(255,255,255,0.05)" : "transparent"
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = "var(--proof-surface-hover)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = "transparent";
                   }}
                 >
+                  <div style={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: 3,
+                    border: `1px solid ${isSelected ? "var(--proof-blue)" : "var(--proof-border-strong)"}`,
+                    background: isSelected ? "var(--proof-blue)" : "transparent",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: isSelected ? "0 0 8px rgba(0,196,255,0.4)" : "none"
+                  }}>
+                    {isSelected && <svg viewBox="0 0 14 14" fill="none" style={{ width: 10, height: 10 }}><path d="M3 7.5L5.5 10L11 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                  </div>
                   <input
                     type="checkbox"
-                    checked={filter.selected.includes(v)}
+                    checked={isSelected}
                     onChange={() => toggleValue(v)}
-                    style={{ accentColor: "var(--proof-blue)" }}
+                    style={{ position: "absolute", opacity: 0, width: 0, height: 0 }}
                   />
                   {v}
                 </label>
-              ))}
+              )})}
               {filteredValues.length === 0 && (
                 <div
                   style={{ fontSize: 11, color: "var(--proof-text-secondary)", padding: "4px 4px" }}
@@ -230,8 +251,7 @@ export function ColumnFilter({
                 marginTop: 4,
                 paddingTop: 4,
                 borderTop: "1px solid var(--proof-grey)",
-                textAlign: "center",
-              }}
+                textAlign: "center"}}
             >
               Clear filter
             </button>

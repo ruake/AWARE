@@ -1,3 +1,5 @@
+import React from "react";
+
 export function ProofLogo({ size = 30 }: { size?: number }) {
   return (
     <svg
@@ -8,19 +10,16 @@ export function ProofLogo({ size = 30 }: { size?: number }) {
       xmlns="http://www.w3.org/2000/svg"
       style={{ flexShrink: 0, display: "block" }}
     >
-      <path
-        d="M5 24L5 18M9.5 24L9.5 13M14 24L14 8"
-        stroke="var(--proof-blue)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M18.5 24Q18.5 15 20.5 12L26 19"
-        stroke="var(--proof-blue-hover)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M15 3 L26 9 L26 21 L15 27 L4 21 L4 9 Z" stroke="var(--proof-blue)" strokeWidth="1.5" fill="var(--proof-blue-bg)" />
+      <path d="M4 9 L15 15 L26 9" stroke="var(--proof-blue)" strokeWidth="1.5" />
+      <path d="M15 15 L15 27" stroke="var(--proof-blue)" strokeWidth="1.5" />
+      <circle cx="15" cy="3" r="2" fill="var(--proof-blue-bright)" />
+      <circle cx="26" cy="9" r="2" fill="var(--proof-blue-bright)" />
+      <circle cx="26" cy="21" r="2" fill="var(--proof-blue-bright)" />
+      <circle cx="15" cy="27" r="2" fill="var(--proof-blue-bright)" />
+      <circle cx="4" cy="21" r="2" fill="var(--proof-blue-bright)" />
+      <circle cx="4" cy="9" r="2" fill="var(--proof-blue-bright)" />
+      <circle cx="15" cy="15" r="2.5" fill="var(--proof-blue-bright)" filter="drop-shadow(0 0 4px var(--proof-blue-glow))" />
     </svg>
   );
 }

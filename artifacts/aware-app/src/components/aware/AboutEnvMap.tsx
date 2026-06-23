@@ -39,7 +39,7 @@ export function AboutEnvMap() {
               flexDirection: "column",
               gap: 6,
               padding: "14px 16px",
-              borderRadius: 10,
+              borderRadius: "var(--proof-radius-lg)",
               border: "1px solid var(--proof-border)",
               background: "var(--proof-subtle-bg)",
               transition: "border-color 0.2s",
@@ -71,12 +71,12 @@ export function AboutEnvMap() {
                 <span
                   key={e}
                   style={{
-                    fontSize: 10.5,
+                    fontSize: 11,
                     fontWeight: 600,
                     color: "var(--proof-text-secondary)",
                     background: "var(--proof-subtle-bg2)",
                     border: "1px solid var(--proof-border)",
-                    borderRadius: 5,
+                    borderRadius: "var(--proof-radius-sm)",
                     padding: "2px 8px",
                     display: "flex",
                     alignItems: "center",

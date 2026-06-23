@@ -12,9 +12,9 @@ interface Props {
 
 const LEVEL_COLOR: Record<string, string> = {
   info: "var(--proof-text-muted)",
-  warn: "#f59e0b",
-  error: "#ef4444",
-  debug: "#5b8af5",
+  warn: "var(--proof-yellow)",
+  error: "var(--proof-red)",
+  debug: "var(--proof-blue)",
 };
 
 export default function DebugPanel({ show, logs, logEndRef, onToggle, onClear }: Props) {
@@ -34,7 +34,7 @@ export default function DebugPanel({ show, logs, logEndRef, onToggle, onClear }:
           cursor: "pointer",
           border: `1px solid ${show ? "#22c55e44" : "var(--proof-border)"}`,
           background: show ? "#22c55e20" : "var(--proof-surface)",
-          color: show ? "#22c55e" : "var(--proof-text-secondary)",
+          color: show ? "var(--proof-green)" : "var(--proof-text-secondary)",
         }}
       >
         {show ? <EyeOff size={11} /> : <Terminal size={11} />}
@@ -65,7 +65,7 @@ export default function DebugPanel({ show, logs, logEndRef, onToggle, onClear }:
               justifyContent: "space-between",
               padding: "8px 12px",
               borderBottom: "1px solid #30363d",
-              color: "#8b949e",
+              color: "var(--proof-text-tertiary)",
               fontSize: 10,
               fontWeight: 600,
               textTransform: "uppercase",
@@ -78,7 +78,7 @@ export default function DebugPanel({ show, logs, logEndRef, onToggle, onClear }:
               style={{
                 background: "none",
                 border: "none",
-                color: "#8b949e",
+                color: "var(--proof-text-tertiary)",
                 cursor: "pointer",
                 fontSize: 10,
                 padding: "2px 6px",
@@ -90,7 +90,7 @@ export default function DebugPanel({ show, logs, logEndRef, onToggle, onClear }:
           </div>
           <div style={{ flex: 1, overflowY: "auto", padding: "6px 8px" }}>
             {logs.length === 0 ? (
-              <div style={{ color: "#484f58", padding: 8, textAlign: "center" }}>No logs yet</div>
+              <div style={{ color: "var(--proof-text-tertiary)", padding: 8, textAlign: "center" }}>No logs yet</div>
             ) : (
               logs.map((log, i) => (
                 <div
@@ -104,15 +104,15 @@ export default function DebugPanel({ show, logs, logEndRef, onToggle, onClear }:
                     color: LEVEL_COLOR[log.level] || "var(--proof-text-muted)",
                   }}
                 >
-                  <span style={{ color: "#484f58", flexShrink: 0, width: 50 }}>
+                  <span style={{ color: "var(--proof-text-tertiary)", flexShrink: 0, width: 50 }}>
                     {log.timestamp.slice(11, 19)}
                   </span>
-                  <span style={{ color: "#58a6ff", flexShrink: 0, width: 60 }}>{log.node}</span>
+                  <span style={{ color: "var(--proof-blue)", flexShrink: 0, width: 60 }}>{log.node}</span>
                   <span style={{ flex: 1 }}>{log.event}</span>
                   {log.details && (
                     <span
                       style={{
-                        color: "#484f58",
+                        color: "var(--proof-text-tertiary)",
                         maxWidth: 160,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -126,9 +126,9 @@ export default function DebugPanel({ show, logs, logEndRef, onToggle, onClear }:
                     <span style={{ color: "#d2a8ff", flexShrink: 0 }}>{log.duration}ms</span>
                   )}
                   {log.level === "error" && (
-                    <XCircle size={10} style={{ color: "#ef4444", flexShrink: 0 }} />
+                    <XCircle size={10} style={{ color: "var(--proof-red)", flexShrink: 0 }} />
                   )}
-                  {log.level === "warn" && <span style={{ color: "#f59e0b" }}>⚠</span>}
+                  {log.level === "warn" && <span style={{ color: "var(--proof-yellow)" }}>⚠</span>}
                 </div>
               ))
             )}

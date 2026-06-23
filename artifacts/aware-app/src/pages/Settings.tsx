@@ -4,7 +4,7 @@ import {
   PROMOTION_GATE_THRESHOLD, getDataInitState,
 } from "@/lib/data";
 import {
-  Database, Layers, Beaker, Info, RefreshCw, Check, Monitor, Cpu, ExternalLink,
+  Database, Layers, Beaker, Info, RefreshCw, Check, Monitor, Cpu, ExternalLink, CheckCircle, Save
 } from "lucide-react";
 import { ChromeProvider } from "@/lib/copilot/providers";
 import { ProviderStatus } from "@/lib/copilot/types";
@@ -23,31 +23,34 @@ function saveSettings(s: AwareSettings) {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); window.dispatchEvent(new Event("storage")); } catch {}
 }
 
-function SettingsCard({ icon: Icon, title, colorClass, children }: {
-  icon: React.ComponentType<{ size?: number, className?: string }>;
-  title: string; colorClass: string; children: React.ReactNode;
+function SettingsCard({ icon: Icon, title, color, glowColor, children }: {
+  icon: React.ComponentType<{ size?: number }>;
+  title: string;
+  color: string;
+  glowColor: string;
+  children: React.ReactNode;
 }) {
   return (
-    <section className="proof-card overflow-hidden">
-      <div className="flex items-center gap-3 px-5 py-3.5 border-b border-[var(--proof-border)] bg-[var(--proof-surface-2)]">
-        <div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center ${colorClass}`}>
+    <section className="glass-panel" style={{ overflow: "hidden", borderRadius: "var(--proof-radius-xl)", border: "1px solid rgba(255,255,255,0.07)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.2)" }}>
+        <div style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `color-mix(in srgb, ${color} 15%, transparent)`, color, boxShadow: `0 0 16px ${glowColor}` }}>
           <Icon size={16} />
         </div>
-        <span className="text-[13px] font-bold text-[var(--proof-text)]">{title}</span>
+        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--proof-text)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{title}</span>
       </div>
-      <div className="p-5">{children}</div>
+      <div style={{ padding: "24px" }}>{children}</div>
     </section>
   );
 }
 
 function Row({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-3 border-b border-[var(--proof-border-light)] last:border-0 last:pb-0 first:pt-0">
-      <div className="flex-1">
-        <div className="text-[13px] font-semibold text-[var(--proof-text)] mb-0.5">{label}</div>
-        {hint && <div className="text-[11.5px] text-[var(--proof-text-muted)]">{hint}</div>}
+    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 24, padding: "16px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: "var(--proof-text)", marginBottom: 4 }}>{label}</div>
+        {hint && <div style={{ fontSize: 12, color: "var(--proof-text-muted)" }}>{hint}</div>}
       </div>
-      <div className="shrink-0">{children}</div>
+      <div style={{ flexShrink: 0 }}>{children}</div>
     </div>
   );
 }
@@ -90,7 +93,6 @@ export default function Settings() {
     try { await loadAllData(); } finally { setTimeout(() => setSyncing(false), 600); }
   };
 
-  // App uses `.light` class for light mode; absence = dark mode (default)
   const isDarkMode = !document.documentElement.classList.contains("light");
   const toggleTheme = () => {
     const wasLight = document.documentElement.classList.contains("light");
@@ -105,77 +107,84 @@ export default function Settings() {
   };
 
   return (
-    <div className="px-6 py-5 max-w-[800px] w-full animate-fade-in mx-auto">
-      <div className="flex items-start justify-between mb-6">
+    <div style={{ padding: "40px", maxWidth: 900, width: "100%", animation: "page-enter 0.5s ease-out both", margin: "0 auto" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
         <div>
-          <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--proof-text)] m-0 mb-1">
-            Settings
+          <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em", color: "var(--proof-text)", margin: 0, marginBottom: 8 }}>
+            System Configuration
           </h1>
-          <p className="text-[13px] text-[var(--proof-text-secondary)] m-0">
-            Configure environments, promotion gates, and data sources
+          <p style={{ fontSize: 14, color: "var(--proof-text-secondary)", margin: 0 }}>
+            Fine-tune environment parameters and agent behaviors.
           </p>
         </div>
         <button
           onClick={handleSave}
           className="proof-btn proof-btn-primary"
+          style={{ padding: "10px 24px", fontSize: 14, boxShadow: "var(--proof-glow-cyan)", border: "1px solid rgba(0,196,255,0.3)" }}
         >
-          {saved ? <><Check size={14} /> Saved</> : "Save Changes"}
+          {saved ? <><Check size={16} /> Configuration Saved</> : <><Save size={16}/> Apply Changes</>}
         </button>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {/* Appearance */}
-        <SettingsCard icon={Monitor} title="Appearance" colorClass="bg-[var(--proof-blue-bg)] border border-[var(--proof-blue-border)] text-[var(--proof-blue-bright)]">
-          <Row label="Theme" hint="Switch between dark (Midnight Observatory) and light modes">
+        <SettingsCard icon={Monitor} title="Appearance" color="var(--proof-blue)" glowColor="rgba(0,196,255,0.25)">
+          <Row label="Theme Mode" hint="Switch between Light and Dark terminal aesthetics">
             <button 
               onClick={toggleTheme}
               className="proof-btn proof-btn-ghost"
+              style={{ border: "1px solid var(--proof-border)", background: "rgba(0,0,0,0.3)" }}
             >
-              {isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              {isDarkMode ? "Engage Light Mode" : "Engage Dark Mode"}
             </button>
           </Row>
         </SettingsCard>
 
         {/* Chrome AI */}
-        <SettingsCard icon={Cpu} title="Chrome AI (Gemini Nano)" colorClass="bg-[var(--proof-emerald-bg)] border border-[var(--proof-emerald-border)] text-[var(--proof-emerald)]">
-          <Row label="Status" hint="On-device AI status for Copilot features">
-            <div className="flex items-center gap-3">
-              <span className={`text-[11px] font-bold uppercase px-2 py-0.5 rounded-[4px] ${
-                chromeAiStatus === "available" ? "bg-[var(--proof-green-bg)] text-[var(--proof-green)]" :
-                chromeAiStatus === "downloading" ? "bg-[var(--proof-yellow-bg)] text-[var(--proof-yellow)]" :
-                "bg-[var(--proof-red-bg)] text-[var(--proof-red)]"
-              }`}>
-                {chromeAiStatus}
+        <SettingsCard icon={Cpu} title="Copilot Neural Engine" color="var(--proof-purple)" glowColor="rgba(167,139,250,0.25)">
+          <Row label="Gemini Nano Status" hint="On-device AI provider connection state">
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span className="metric-number" style={{
+                fontSize: 12, padding: "4px 10px", borderRadius: 4,
+                background: chromeAiStatus === "available" ? "var(--proof-green-bg)" : chromeAiStatus === "downloading" ? "var(--proof-yellow-bg)" : "var(--proof-red-bg)",
+                color: chromeAiStatus === "available" ? "var(--proof-green)" : chromeAiStatus === "downloading" ? "var(--proof-yellow)" : "var(--proof-red)",
+                border: `1px solid ${chromeAiStatus === "available" ? "rgba(0,229,160,0.3)" : chromeAiStatus === "downloading" ? "rgba(245,158,11,0.3)" : "rgba(255,51,85,0.3)"}`,
+                boxShadow: chromeAiStatus === "available" ? "var(--proof-glow-green)" : "none"
+              }}>
+                {chromeAiStatus.toUpperCase()}
               </span>
               <button
                 onClick={checkChromeAi}
                 disabled={checkingAi}
-                className="proof-btn proof-btn-ghost px-2 py-1 h-auto text-[11px]"
+                className="proof-btn proof-btn-ghost"
+                style={{ padding: "6px 12px", border: "1px solid var(--proof-border)", fontSize: 12 }}
               >
-                {checkingAi ? "Checking..." : "Check Availability"}
+                <RefreshCw size={14} style={{ animation: checkingAi ? "spin 1s linear infinite" : "none" }} />
+                {checkingAi ? "Polling..." : "Test Connection"}
               </button>
             </div>
           </Row>
           {chromeAiStatus !== "available" && (
-            <div className="mt-4 p-4 rounded-[var(--proof-radius)] bg-[var(--proof-surface-2)] border border-[var(--proof-border)]">
-              <h4 className="text-[13px] font-bold text-[var(--proof-text)] mb-2 flex items-center gap-2">
-                <Info size={14} className="text-[var(--proof-blue-bright)]" />
-                How to enable Chrome AI
+            <div className="glass-panel" style={{ marginTop: 16, padding: 20, borderRadius: "var(--proof-radius-lg)", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: "var(--proof-text)", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                <Info size={16} style={{ color: "var(--proof-blue)" }} />
+                Initialization Protocol
               </h4>
-              <ol className="text-[12px] text-[var(--proof-text-secondary)] space-y-2 list-decimal ml-4">
-                <li>Ensure you are using <strong>Chrome Canary</strong> or <strong>Dev</strong> (v138+).</li>
-                <li>Go to <code className="bg-[var(--proof-surface-3)] px-1 py-0.5 rounded text-[var(--proof-blue-bright)]">chrome://flags/#prompt-api-for-gemini-nano</code> and set to <strong>Enabled</strong>.</li>
-                <li>Go to <code className="bg-[var(--proof-surface-3)] px-1 py-0.5 rounded text-[var(--proof-blue-bright)]">chrome://flags/#optimization-guide-on-device-model</code> and set to <strong>Enabled BypassPerfRequirement</strong>.</li>
-                <li>Relaunch Chrome and wait for the model to download (check <code className="bg-[var(--proof-surface-3)] px-1 py-0.5 rounded text-[var(--proof-blue-bright)]">chrome://components</code> for "Optimization Guide On Device Model").</li>
+              <ol style={{ fontSize: 13, color: "var(--proof-text-secondary)", margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8, fontFamily: "var(--font-mono)" }}>
+                <li>Ensure you are using <span style={{ color: "var(--proof-text)" }}>Chrome Canary</span> or <span style={{ color: "var(--proof-text)" }}>Dev</span> (v138+).</li>
+                <li>Go to <code style={{ color: "var(--proof-blue)" }}>chrome://flags/#prompt-api-for-gemini-nano</code> and set to <span style={{ color: "var(--proof-green)" }}>Enabled</span>.</li>
+                <li>Go to <code style={{ color: "var(--proof-blue)" }}>chrome://flags/#optimization-guide-on-device-model</code> and set to <span style={{ color: "var(--proof-green)" }}>Enabled BypassPerfRequirement</span>.</li>
+                <li>Relaunch Chrome and monitor <code style={{ color: "var(--proof-blue)" }}>chrome://components</code> for "Optimization Guide On Device Model".</li>
               </ol>
-              <div className="mt-4 flex gap-3">
+              <div style={{ marginTop: 20, display: "flex", gap: 12 }}>
                 <a 
                   href="https://developer.chrome.com/docs/ai/built-in" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-[11px] text-[var(--proof-blue-bright)] hover:underline flex items-center gap-1"
+                  className="proof-btn proof-btn-ghost"
+                  style={{ fontSize: 12, color: "var(--proof-blue)", border: "1px solid rgba(0,196,255,0.3)" }}
                 >
-                  Developer Docs <ExternalLink size={10} />
+                  View Provider Docs <ExternalLink size={12} />
                 </a>
               </div>
             </div>
@@ -183,19 +192,22 @@ export default function Settings() {
         </SettingsCard>
 
         {/* Promotion gate */}
-        <SettingsCard icon={Layers} title="Promotion Gate" colorClass="bg-[var(--proof-green-bg)] border border-[var(--proof-green-border)] text-[var(--proof-green)]">
-          <Row label="Pass Rate Threshold" hint="Minimum pass rate required to promote from UAT → PROD">
-            <div className="flex items-center gap-2.5">
+        <SettingsCard icon={Layers} title="Promotion Gates" color="var(--proof-green)" glowColor="rgba(0,229,160,0.25)">
+          <Row label="Pass Rate Threshold" hint="Minimum required stability to authorize QA → UAT → PROD promotion">
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <input
                 type="range" min={50} max={100} step={1}
+                aria-label="Pass rate threshold"
                 value={settings.promotionThreshold}
                 onChange={(e) => setSettings((s) => ({ ...s, promotionThreshold: Number(e.target.value) }))}
-                className="w-[120px] cursor-pointer"
-                style={{ accentColor: "var(--proof-green)" }}
+                style={{ width: 160, cursor: "pointer", accentColor: "var(--proof-green)" }}
               />
-              <span 
-                className="text-[14px] font-extrabold font-mono min-w-[42px] text-right"
-                style={{ color: settings.promotionThreshold >= 95 ? "var(--proof-green)" : settings.promotionThreshold >= 80 ? "var(--proof-yellow)" : "var(--proof-red)" }}
+              <span className="metric-number"
+                style={{
+                  fontSize: 20, minWidth: 64, textAlign: "right",
+                  color: settings.promotionThreshold >= 95 ? "var(--proof-green)" : settings.promotionThreshold >= 80 ? "var(--proof-yellow)" : "var(--proof-red)",
+                  textShadow: settings.promotionThreshold >= 95 ? "0 0 12px rgba(0,229,160,0.4)" : "none"
+                }}
               >
                 {settings.promotionThreshold}%
               </span>
@@ -204,45 +216,52 @@ export default function Settings() {
         </SettingsCard>
 
         {/* Environments */}
-        <SettingsCard icon={Database} title="Environments" colorClass="bg-[var(--proof-blue-bg)] border border-[var(--proof-blue-border)] text-[var(--proof-blue-bright)]">
+        <SettingsCard icon={Database} title="Environment Topology" color="var(--proof-cyan)" glowColor="rgba(0,196,255,0.25)">
           {envConfigs.map((env) => (
-            <div key={env.id} className="flex items-center justify-between py-2.5 border-b border-[var(--proof-border-light)] last:border-0 last:pb-0">
+            <div key={env.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
               <div>
-                <div className="text-[12.5px] font-semibold text-[var(--proof-text)] mb-0.5">{env.label}</div>
-                <div className="text-[11px] text-[var(--proof-text-muted)] font-mono">{env.id}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--proof-text)", marginBottom: 4 }}>{env.label}</div>
+                <div className="metric-number" style={{ fontSize: 12, color: "var(--proof-text-muted)" }}>{env.id}</div>
               </div>
-              <div className="flex gap-1.5">
-                <span className="text-[9.5px] font-bold uppercase px-1.5 py-0.5 rounded-[4px]" style={{
-                  color: env.target === "QA" ? "var(--proof-blue)" : env.target === "UAT" ? "var(--proof-purple)" : "var(--proof-green)",
-                  background: env.target === "QA" ? "var(--proof-blue-bg)" : env.target === "UAT" ? "var(--proof-purple-bg)" : "var(--proof-green-bg)",
+              <div style={{ display: "flex", gap: 8 }}>
+                <span className="metric-number" style={{
+                  fontSize: 11, padding: "4px 8px", borderRadius: 4,
+                  color: env.target === "QA" ? "var(--proof-yellow)" : env.target === "UAT" ? "var(--proof-blue)" : "var(--proof-green)",
+                  background: env.target === "QA" ? "var(--proof-yellow-bg)" : env.target === "UAT" ? "var(--proof-blue-bg)" : "var(--proof-green-bg)",
+                  border: `1px solid ${env.target === "QA" ? "rgba(245,158,11,0.3)" : env.target === "UAT" ? "rgba(0,196,255,0.3)" : "rgba(0,229,160,0.3)"}`,
                 }}>
                   {env.target}
                 </span>
-                <span className="text-[9.5px] font-semibold text-[var(--proof-text-muted)] bg-[var(--proof-hover)] px-1.5 py-0.5 rounded-[4px]">
+                <span className="metric-number" style={{
+                  fontSize: 11, color: "var(--proof-text-secondary)", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", padding: "4px 8px", borderRadius: 4,
+                }}>
                   {env.network}
                 </span>
               </div>
             </div>
           ))}
-          <div className="mt-3 px-3 py-2.5 rounded-[var(--proof-radius)] bg-[var(--proof-subtle-bg)] flex gap-2">
-            <Info size={12} className="text-[var(--proof-blue-bright)] shrink-0 mt-[1px]" />
-            <span className="text-[11px] text-[var(--proof-text-secondary)]">
-              Edit in <code className="font-mono text-[10.5px] bg-[var(--proof-surface-2)] px-1 py-0.5 rounded-[3px]">config/environments.yml</code>
+          <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: "var(--proof-radius)", background: "rgba(0,0,0,0.2)", border: "1px dashed rgba(255,255,255,0.1)", display: "flex", gap: 8 }}>
+            <Info size={14} style={{ color: "var(--proof-blue)", flexShrink: 0, marginTop: 2 }} />
+            <span style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>
+              Modify topology via <code style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--proof-blue)" }}>config/environments.yml</code>
             </span>
           </div>
         </SettingsCard>
 
         {/* Test suites */}
-        <SettingsCard icon={Beaker} title="Test Suites" colorClass="bg-[var(--proof-purple-bg)] border border-[var(--proof-purple-border)] text-[var(--proof-purple-bright)]">
+        <SettingsCard icon={Beaker} title="Test Suites Registry" color="var(--proof-orange)" glowColor="rgba(251,146,60,0.25)">
           {suites.slice(0, 8).map((suite) => (
-            <div key={suite.id} className="flex items-center justify-between py-2.5 border-b border-[var(--proof-border-light)] last:border-0 last:pb-0">
+            <div key={suite.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
               <div>
-                <div className="text-[12.5px] font-semibold text-[var(--proof-text)] mb-0.5">{suite.name}</div>
-                <div className="text-[11px] text-[var(--proof-text-muted)]">{suite.testIds?.length ?? 0} tests</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--proof-text)", marginBottom: 4 }}>{suite.name}</div>
+                <div className="metric-number" style={{ fontSize: 12, color: "var(--proof-text-muted)" }}>{suite.testIds?.length ?? 0} tests registered</div>
               </div>
-              <div className="flex gap-1">
+              <div style={{ display: "flex", gap: 6 }}>
                 {suite.envIds?.map((e) => (
-                  <span key={e} className="text-[9.5px] font-bold uppercase px-1.5 py-0.5 rounded-[4px] text-[var(--proof-text-secondary)] bg-[var(--proof-hover)]">
+                  <span key={e} className="metric-number" style={{
+                    fontSize: 11, padding: "4px 8px", borderRadius: 4,
+                    color: "var(--proof-text-secondary)", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)"
+                  }}>
                     {e}
                   </span>
                 ))}
@@ -250,28 +269,32 @@ export default function Settings() {
             </div>
           ))}
           {suites.length > 8 && (
-            <div className="pt-2.5 text-[11.5px] text-[var(--proof-text-muted)]">
-              +{suites.length - 8} more suites
+            <div className="metric-number" style={{ paddingTop: 16, fontSize: 13, color: "var(--proof-text-muted)" }}>
+              +{suites.length - 8} additional suites
             </div>
           )}
         </SettingsCard>
 
         {/* Data sync */}
-        <SettingsCard icon={RefreshCw} title="Data &amp; Sync" colorClass="bg-[var(--proof-yellow-bg)] border border-[var(--proof-yellow-border)] text-[var(--proof-yellow-bright)]">
-          <Row label="Reload data" hint="Refetch all JSON data from the server">
+        <SettingsCard icon={RefreshCw} title="Data Synchronization" color="var(--proof-yellow)" glowColor="rgba(245,158,11,0.25)">
+          <Row label="Force Reload" hint="Re-fetch all JSON metrics and logs from the server">
             <button
               onClick={handleSync}
               disabled={syncing}
               className="proof-btn proof-btn-ghost"
-              style={{ opacity: syncing ? 0.7 : 1, cursor: syncing ? "wait" : "pointer" }}
+              style={{ opacity: syncing ? 0.7 : 1, cursor: syncing ? "wait" : "pointer", border: "1px solid rgba(245,158,11,0.3)", color: "var(--proof-yellow)" }}
             >
-              <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
-              {syncing ? "Syncing…" : "Sync Now"}
+              <RefreshCw size={14} style={{ animation: syncing ? "spin 1s linear infinite" : "none" }} />
+              {syncing ? "Syncing..." : "Sync Now"}
             </button>
           </Row>
-          <Row label="Data source" hint="All data is loaded from JSON seed files in data/">
-            <span className="text-[11px] font-mono text-[var(--proof-text-secondary)] bg-[var(--proof-surface-2)] px-2 py-1 rounded-[var(--proof-radius-sm)] border border-[var(--proof-border)]">
-              data/
+          <Row label="Data Source Path" hint="All telemetry is sourced from JSON seed records">
+            <span className="metric-number" style={{
+              fontSize: 13, color: "var(--proof-text-secondary)",
+              background: "rgba(0,0,0,0.3)", padding: "6px 12px", borderRadius: 4,
+              border: "1px solid rgba(255,255,255,0.1)",
+            }}>
+              /data/
             </span>
           </Row>
         </SettingsCard>
@@ -279,4 +302,3 @@ export default function Settings() {
     </div>
   );
 }
-

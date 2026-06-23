@@ -257,7 +257,7 @@ const CodeHighlight: React.FC<CodeHighlightProps> = ({ code, language }) => {
             border: "1px solid var(--proof-border)",
             background: "var(--proof-hover-light)",
             cursor: "pointer",
-            color: copied ? "#34d399" : "var(--proof-text-muted)",
+            color: copied ? "var(--proof-emerald)" : "var(--proof-text-muted)",
             fontSize: 10.5,
             transition: "all 0.15s",
             fontFamily: "var(--font-sans)",

@@ -166,28 +166,28 @@ export function EnvSelector({ currentEnvIds, onEnvChange, variant = "topbar" }: 
         display: "flex",
         alignItems: "center",
         gap: 6,
-        padding: variant === "full" ? "8px 14px" : "4px 8px",
-        fontSize: variant === "full" ? 13 : 11,
+        padding: variant === "full" ? "8px 16px" : "6px 12px",
+        fontSize: variant === "full" ? 13 : 12,
         fontWeight: 600,
         cursor: "pointer",
-        border: "1px solid var(--proof-border-strong)",
-        borderRadius: 5,
+        border: "1px solid var(--proof-border)",
+        borderRadius: "var(--proof-radius-full)",
         background: triggerHovered
-          ? "var(--proof-hover)"
-          : variant === "full"
-            ? "var(--proof-surface-2)"
-            : "var(--proof-hover-light)",
-        color: triggerHovered ? "var(--proof-text)" : "var(--proof-text-secondary)",
+          ? "rgba(255,255,255,0.06)"
+          : "rgba(255,255,255,0.03)",
+        color: triggerHovered ? "var(--proof-text)" : "var(--proof-text)",
         fontFamily: "var(--font-mono)",
         whiteSpace: "nowrap",
         transition: "all 0.15s",
+        boxShadow: triggerHovered ? "var(--proof-glow-cyan)" : "none",
+        borderColor: triggerHovered ? "var(--proof-blue)" : "var(--proof-border)",
         width: variant === "full" ? "100%" : undefined,
         justifyContent: variant === "full" ? "space-between" : undefined,
-        maxWidth: variant === "full" ? undefined : 200,
+        maxWidth: variant === "full" ? undefined : 220,
       }}
     >
       {variant === "full" && (
-        <Globe size={14} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
+        <Globe size={16} style={{ color: "var(--proof-blue)", flexShrink: 0 }} />
       )}
       <span style={{ flex: 1, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis" }}>
         {triggerLabel(currentEnvIds)}
@@ -244,12 +244,10 @@ export function EnvSelector({ currentEnvIds, onEnvChange, variant = "topbar" }: 
             setActiveIdx(-1);
           }}
           placeholder="Find environments"
-          role="searchbox"
           aria-label="Find environments"
           style={{
             flex: 1,
             border: "none",
-            outline: "none",
             background: "transparent",
             fontSize: 12,
             color: "var(--proof-text)",

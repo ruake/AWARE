@@ -86,28 +86,36 @@ export function SuiteTreeItem({
   const isSelected = selectedId === suite.id;
 
   return (
-    <div style={{ marginBottom: 2 }}>
+    <div style={{ marginBottom: 4 }}>
       <motion.div
-        whileHover={{ x: 2 }}
+        whileHover={{ x: 4 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 10,
-          padding: "8px 12px",
+          gap: 12,
+          padding: "10px 14px",
           cursor: "pointer",
-          borderRadius: 8,
-          marginLeft: depth > 0 ? depth * 20 : 0,
-          background: isSelected ? "var(--proof-blue-bg)" : "transparent",
-          boxShadow: isSelected ? "inset 0 0 0 1px var(--proof-blue)" : "none",
-          transition: "background 0.2s, box-shadow 0.2s",
+          borderRadius: "var(--proof-radius-md)",
+          marginLeft: depth > 0 ? depth * 24 : 0,
+          background: isSelected ? "rgba(0,196,255,0.08)" : "rgba(255,255,255,0.02)",
+          border: "1px solid",
+          borderColor: isSelected ? "rgba(0,196,255,0.3)" : "var(--proof-border)",
+          boxShadow: isSelected ? "var(--proof-glow-cyan)" : "none",
+          transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
         }}
         onClick={() => onSelect(suite)}
         onMouseEnter={(e) => {
-          if (!isSelected) e.currentTarget.style.background = "var(--proof-surface-2)";
+          if (!isSelected) {
+            e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+            e.currentTarget.style.borderColor = "var(--proof-border-strong)";
+          }
         }}
         onMouseLeave={(e) => {
-          if (!isSelected) e.currentTarget.style.background = "transparent";
+          if (!isSelected) {
+            e.currentTarget.style.background = "rgba(255,255,255,0.02)";
+            e.currentTarget.style.borderColor = "var(--proof-border)";
+          }
         }}
       >
         <div 
@@ -116,8 +124,8 @@ export function SuiteTreeItem({
             if (hasChildren) onToggle(suite.id);
           }}
           style={{
-            width: 18,
-            height: 18,
+            width: 20,
+            height: 20,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -126,31 +134,33 @@ export function SuiteTreeItem({
             cursor: hasChildren ? "pointer" : "default",
           }}
         >
-          {hasChildren && (expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />)}
+          {hasChildren && (expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}
         </div>
         
         <div
           style={{
-            width: 28,
-            height: 28,
-            borderRadius: 6,
-            background: isSelected ? "var(--proof-blue)" : "rgba(91, 138, 245, 0.1)",
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            background: isSelected ? "var(--proof-blue)" : "rgba(255,255,255,0.05)",
             color: isSelected ? "white" : "var(--proof-blue)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
             transition: "all 0.2s",
+            boxShadow: isSelected ? "0 0 12px rgba(0,196,255,0.5)" : "none"
           }}
         >
-          <FolderTree size={14} />
+          <FolderTree size={16} />
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 14,
+              fontWeight: 700,
+              fontFamily: "var(--font-mono)",
               color: isSelected ? "var(--proof-blue)" : "var(--proof-text)",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -161,19 +171,19 @@ export function SuiteTreeItem({
           </div>
           <div
             style={{
-              fontSize: 11,
+              fontSize: 12,
               color: "var(--proof-text-secondary)",
               display: "flex",
               alignItems: "center",
               gap: 8,
-              marginTop: 1,
-              opacity: 0.7,
+              marginTop: 2,
+              opacity: 0.8,
             }}
           >
             <span>{suite.testIds.length} tests</span>
             {suite.schedule && (
-              <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                <Clock size={10} />
+              <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <Clock size={12} />
                 {suite.schedule.split(" ").slice(0, 5).join(" ")}
               </span>
             )}
@@ -183,12 +193,14 @@ export function SuiteTreeItem({
         {suite.testIds.length > 0 && !isSelected && (
           <div
             style={{
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 700,
-              padding: "2px 6px",
+              fontFamily: "var(--font-mono)",
+              padding: "4px 8px",
               borderRadius: "var(--proof-radius-full)",
-              background: "var(--proof-surface-3)",
+              background: "rgba(255,255,255,0.05)",
               color: "var(--proof-text-secondary)",
+              border: "1px solid var(--proof-border)"
             }}
           >
             {suite.testIds.length}

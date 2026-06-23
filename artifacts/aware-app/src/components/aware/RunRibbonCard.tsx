@@ -111,10 +111,19 @@ export function RunRibbonCard({
         transition: "all var(--proof-transition)",
         minWidth: 0,
       }}
-      className="group"
+      className="proof-ribbon-card"
+      onMouseEnter={(e) => {
+        const glow = e.currentTarget.querySelector('.proof-ribbon-glow') as HTMLElement;
+        if (glow) glow.style.opacity = '1';
+      }}
+      onMouseLeave={(e) => {
+        const glow = e.currentTarget.querySelector('.proof-ribbon-glow') as HTMLElement;
+        if (glow) glow.style.opacity = '0';
+      }}
     >
       {/* Background glow on hover */}
       <div 
+        className="proof-ribbon-glow"
         style={{
           position: "absolute",
           top: 0,
@@ -126,7 +135,6 @@ export function RunRibbonCard({
           transition: "opacity 0.3s ease",
           pointerEvents: "none"
         }}
-        className="group-hover:opacity-100"
       />
 
       {/* Icon */}
@@ -258,8 +266,10 @@ export function RunRibbonCard({
       {/* Hover arrow */}
       {onClick && (
         <div 
-          className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
-          style={{ color: accent, flexShrink: 0 }}
+          className="proof-ribbon-arrow"
+          style={{ color: accent, flexShrink: 0, opacity: 0, transform: "translateX(-8px)", transition: "all 0.2s ease" }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateX(0)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = '0'; e.currentTarget.style.transform = 'translateX(-8px)'; }}
         >
           <ArrowRight size={18} />
         </div>

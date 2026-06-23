@@ -11,8 +11,8 @@ let _suitesLoaded = false;
 
 export async function loadTestSuites(): Promise<void> {
   if (_suitesLoaded) return;
-  _suitesLoaded = true;
   const data = await fetchJson<TestSuite[]>("test-suites.json");
+  _suitesLoaded = true;
   _testSuitesStore = Array.isArray(data) ? data : [];
   _tsSnapshot = [..._testSuitesStore];
   _notifyTS();

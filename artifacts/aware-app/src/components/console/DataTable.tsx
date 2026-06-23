@@ -7,8 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+  ChevronsRight} from "lucide-react";
 import { SkeletonBox } from "@/components/aware/Skeleton";
 
 export interface ColumnDef<T> {
@@ -57,8 +56,7 @@ export interface DataTableProps<T extends Record<string, unknown>> {
 const sortIconMap = {
   none: ArrowUpDown,
   asc: ArrowUp,
-  desc: ArrowDown,
-} as const;
+  desc: ArrowDown} as const;
 
 function SortIcon({ direction }: { direction: "asc" | "desc" | null }) {
   const Icon = sortIconMap[direction ?? "none"];
@@ -70,8 +68,7 @@ function SortIcon({ direction }: { direction: "asc" | "desc" | null }) {
         marginLeft: 4,
         opacity: direction ? 1 : 0.5,
         color: direction ? "var(--proof-blue)" : undefined,
-        flexShrink: 0,
-      }}
+        flexShrink: 0}}
     />
   );
 }
@@ -89,8 +86,7 @@ const headerCellStyle: React.CSSProperties = {
   overflow: "hidden",
   textOverflow: "ellipsis",
   userSelect: "none",
-  minWidth: 80,
-};
+  minWidth: 80};
 
 const dataCellStyle: React.CSSProperties = {
   padding: "8px 16px",
@@ -100,8 +96,7 @@ const dataCellStyle: React.CSSProperties = {
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
-  minWidth: 80,
-};
+  minWidth: 80};
 
 const checkboxCellStyle: React.CSSProperties = {
   width: 48,
@@ -109,8 +104,7 @@ const checkboxCellStyle: React.CSSProperties = {
   maxWidth: 48,
   padding: "8px 12px",
   textAlign: "center",
-  borderBottom: "1px solid var(--proof-border)",
-};
+  borderBottom: "1px solid var(--proof-border)"};
 
 export function DataTable<T extends Record<string, unknown>>({
   columns,
@@ -141,8 +135,7 @@ export function DataTable<T extends Record<string, unknown>>({
   totalPages,
   totalFiltered,
   onPageChange,
-  onPageSizeChange,
-}: DataTableProps<T>) {
+  onPageSizeChange}: DataTableProps<T>) {
   const [selectedKeys, setSelectedKeys] = React.useState<Set<string | number>>(new Set());
   const lastClickedRef = useRef<string | number | null>(null);
 
@@ -154,8 +147,7 @@ export function DataTable<T extends Record<string, unknown>>({
         header: "",
         width: 48,
         sortable: false,
-        filterable: false,
-      } as ColumnDef<T>,
+        filterable: false} as ColumnDef<T>,
       ...columns,
     ];
   }, [selectable, columns]);
@@ -251,8 +243,7 @@ export function DataTable<T extends Record<string, unknown>>({
     alignItems: "center",
     justifyContent: "center",
     fontSize: 12,
-    transition: "all var(--proof-transition)",
-  };
+    transition: "all var(--proof-transition)"};
 
   const pageButtonStyle = (active: boolean): React.CSSProperties => ({
     background: active ? "var(--proof-blue)" : "none",
@@ -266,8 +257,7 @@ export function DataTable<T extends Record<string, unknown>>({
     justifyContent: "center",
     fontSize: 12,
     fontWeight: active ? 600 : 400,
-    transition: "all var(--proof-transition)",
-  });
+    transition: "all var(--proof-transition)"});
 
   const renderedPages = useMemo(() => {
     if (!totalPages) return [];
@@ -287,11 +277,11 @@ export function DataTable<T extends Record<string, unknown>>({
 
   return (
     <div
+      className="glass-panel"
       style={{
         border: "1px solid var(--proof-border)",
-        borderRadius: 6,
+        borderRadius: "var(--proof-radius-lg)",
         overflow: "hidden",
-        background: "var(--proof-surface)",
       }}
     >
       {/* Search bar */}
@@ -302,8 +292,7 @@ export function DataTable<T extends Record<string, unknown>>({
             alignItems: "center",
             padding: "12px 16px",
             borderBottom: "1px solid var(--proof-border)",
-            background: "var(--proof-surface)",
-          }}
+            background: "rgba(255,255,255,0.02)"}}
         >
           <div style={{ position: "relative", flex: 1, maxWidth: 320 }}>
             <Search
@@ -314,9 +303,8 @@ export function DataTable<T extends Record<string, unknown>>({
                 transform: "translateY(-50%)",
                 width: 14,
                 height: 14,
-                color: "var(--proof-text-muted)",
-                pointerEvents: "none",
-              }}
+                color: "var(--proof-blue)",
+                pointerEvents: "none"}}
             />
             <input
               type="text"
@@ -329,16 +317,15 @@ export function DataTable<T extends Record<string, unknown>>({
                 paddingLeft: 32,
                 paddingRight: 10,
                 fontSize: 13,
-                background: "var(--proof-surface)",
+                background: "rgba(0,0,0,0.2)",
                 border: "1px solid var(--proof-border)",
-                borderRadius: 4,
+                borderRadius: "var(--proof-radius-full)",
                 color: "var(--proof-text)",
-                outline: "none",
-                fontFamily: "var(--font-sans)",
-              }}
+                fontFamily: "var(--font-mono)",
+                transition: "all var(--proof-transition)"}}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = "var(--proof-blue)";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(91, 138, 245, 0.12)";
+                e.currentTarget.style.boxShadow = "var(--proof-glow-cyan)";
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = "var(--proof-border)";
@@ -356,12 +343,11 @@ export function DataTable<T extends Record<string, unknown>>({
             width: "100%",
             tableLayout: "fixed",
             borderCollapse: "separate",
-            borderSpacing: 0,
-          }}
+            borderSpacing: 0}}
         >
           {/* Header */}
           <thead>
-            <tr style={{ background: "var(--proof-surface)" }}>
+            <tr style={{ background: "rgba(255,255,255,0.03)" }}>
               {displayColumns.map((col) => {
                 const isSortable =
                   sortable && col.sortable !== false && col.key !== "__selection__";
@@ -377,16 +363,16 @@ export function DataTable<T extends Record<string, unknown>>({
                       textAlign: align,
                       cursor: isSortable ? "pointer" : "default",
                       width: width ?? undefined,
-                      ...(col.key === "__selection__" ? checkboxCellStyle : {}),
-                    }}
+                      color: sortKey === col.key ? "var(--proof-blue)" : "var(--proof-text-secondary)",
+                      transition: "color var(--proof-transition)",
+                      ...(col.key === "__selection__" ? checkboxCellStyle : {})}}
                   >
                     <span
                       style={{
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: align === "right" ? "flex-end" : "flex-start",
-                        gap: 2,
-                      }}
+                        gap: 2}}
                     >
                       {col.key === "__selection__" ? (
                         <input
@@ -399,8 +385,7 @@ export function DataTable<T extends Record<string, unknown>>({
                           style={{
                             accentColor: "var(--proof-blue)",
                             cursor: "pointer",
-                            margin: 0,
-                          }}
+                            margin: 0}}
                         />
                       ) : (
                         <>
@@ -431,8 +416,7 @@ export function DataTable<T extends Record<string, unknown>>({
                       textTransform: "none",
                       letterSpacing: 0,
                       background: "var(--proof-grey-bg)",
-                      ...(col.key === "__selection__" ? checkboxCellStyle : {}),
-                    }}
+                      ...(col.key === "__selection__" ? checkboxCellStyle : {})}}
                   >
                     {col.key !== "__selection__" && col.filterable !== false && (
                       <input
@@ -449,10 +433,8 @@ export function DataTable<T extends Record<string, unknown>>({
                           border: "1px solid var(--proof-border)",
                           borderRadius: 3,
                           color: "var(--proof-text)",
-                          outline: "none",
                           fontFamily: "var(--font-sans)",
-                          boxSizing: "border-box",
-                        }}
+                          boxSizing: "border-box"}}
                         onFocus={(e) => {
                           e.currentTarget.style.borderColor = "var(--proof-blue)";
                         }}
@@ -487,16 +469,14 @@ export function DataTable<T extends Record<string, unknown>>({
                     padding: "48px 24px",
                     textAlign: "center",
                     color: "var(--proof-text-secondary)",
-                    fontSize: 13,
-                  }}
+                    fontSize: 13}}
                 >
                   <div
                     style={{
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      gap: 8,
-                    }}
+                      gap: 8}}
                   >
                     <div
                       style={{
@@ -508,8 +488,7 @@ export function DataTable<T extends Record<string, unknown>>({
                         alignItems: "center",
                         justifyContent: "center",
                         color: "var(--proof-text-muted)",
-                        fontSize: 18,
-                      }}
+                        fontSize: 18}}
                     >
                       <Search style={{ width: 18, height: 18 }} />
                     </div>
@@ -531,13 +510,12 @@ export function DataTable<T extends Record<string, unknown>>({
                     onClick={(e) => handleRowClick(item, index, e)}
                     style={{
                       background: isSelected
-                        ? "color-mix(in srgb, var(--proof-blue) 10%, transparent)"
+                        ? "var(--proof-blue-bg)"
                         : isOdd
-                          ? "var(--proof-grey-bg)"
+                          ? "var(--proof-surface-2)"
                           : "transparent",
                       cursor: onRowClick || selectable ? "pointer" : "default",
-                      transition: "background var(--proof-transition)",
-                    }}
+                      transition: "background var(--proof-transition)"}}
                     onMouseEnter={(e) => {
                       if (!isSelected) {
                         e.currentTarget.style.background = "var(--proof-surface-hover)";
@@ -546,7 +524,7 @@ export function DataTable<T extends Record<string, unknown>>({
                     onMouseLeave={(e) => {
                       if (!isSelected) {
                         e.currentTarget.style.background = isOdd
-                          ? "var(--proof-grey-bg)"
+                          ? "var(--proof-surface-2)"
                           : "transparent";
                       }
                     }}
@@ -564,14 +542,14 @@ export function DataTable<T extends Record<string, unknown>>({
                               style={{
                                 accentColor: "var(--proof-blue)",
                                 cursor: "pointer",
-                                margin: 0,
-                              }}
+                                margin: 0}}
                             />
                           </td>
                         );
                       }
 
                       const cellValue = col.render ? col.render(item) : String(item[col.key] ?? "");
+                      const isNumber = typeof item[col.key] === "number" || align === "right";
 
                       return (
                         <td
@@ -579,8 +557,8 @@ export function DataTable<T extends Record<string, unknown>>({
                           style={{
                             ...dataCellStyle,
                             textAlign: align,
-                            ...col.cellStyle,
-                          }}
+                            fontFamily: isNumber ? "var(--font-mono)" : "inherit",
+                            ...col.cellStyle}}
                           title={
                             typeof cellValue === "string" ? cellValue : String(item[col.key] ?? "")
                           }
@@ -610,8 +588,7 @@ export function DataTable<T extends Record<string, unknown>>({
             fontSize: 12,
             color: "var(--proof-text-secondary)",
             flexWrap: "wrap",
-            gap: 8,
-          }}
+            gap: 8}}
         >
           {/* Left: page info */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -630,10 +607,8 @@ export function DataTable<T extends Record<string, unknown>>({
                   color: "var(--proof-text)",
                   fontSize: 12,
                   padding: "2px 6px",
-                  outline: "none",
                   cursor: "pointer",
-                  fontFamily: "var(--font-sans)",
-                }}
+                  fontFamily: "var(--font-sans)"}}
               >
                 {pageSizeOptions.map((size) => (
                   <option key={size} value={size}>
@@ -652,8 +627,7 @@ export function DataTable<T extends Record<string, unknown>>({
               style={{
                 ...arrowButtonStyle,
                 opacity: page && page > 1 ? 1 : 0.4,
-                cursor: page && page > 1 ? "pointer" : "not-allowed",
-              }}
+                cursor: page && page > 1 ? "pointer" : "not-allowed"}}
               title="First page"
             >
               <ChevronsLeft style={{ width: 14, height: 14 }} />
@@ -664,8 +638,7 @@ export function DataTable<T extends Record<string, unknown>>({
               style={{
                 ...arrowButtonStyle,
                 opacity: page && page > 1 ? 1 : 0.4,
-                cursor: page && page > 1 ? "pointer" : "not-allowed",
-              }}
+                cursor: page && page > 1 ? "pointer" : "not-allowed"}}
               title="Previous page"
             >
               <ChevronLeft style={{ width: 14, height: 14 }} />
@@ -678,8 +651,7 @@ export function DataTable<T extends Record<string, unknown>>({
                   style={{
                     padding: "4px 4px",
                     color: "var(--proof-text-muted)",
-                    fontSize: 12,
-                  }}
+                    fontSize: 12}}
                 >
                   …
                 </span>
@@ -700,8 +672,7 @@ export function DataTable<T extends Record<string, unknown>>({
               style={{
                 ...arrowButtonStyle,
                 opacity: page && page < (totalPages ?? 1) ? 1 : 0.4,
-                cursor: page && page < (totalPages ?? 1) ? "pointer" : "not-allowed",
-              }}
+                cursor: page && page < (totalPages ?? 1) ? "pointer" : "not-allowed"}}
               title="Next page"
             >
               <ChevronRight style={{ width: 14, height: 14 }} />
@@ -712,8 +683,7 @@ export function DataTable<T extends Record<string, unknown>>({
               style={{
                 ...arrowButtonStyle,
                 opacity: page && page < (totalPages ?? 1) ? 1 : 0.4,
-                cursor: page && page < (totalPages ?? 1) ? "pointer" : "not-allowed",
-              }}
+                cursor: page && page < (totalPages ?? 1) ? "pointer" : "not-allowed"}}
               title="Last page"
             >
               <ChevronsRight style={{ width: 14, height: 14 }} />

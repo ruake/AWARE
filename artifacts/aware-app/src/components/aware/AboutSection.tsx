@@ -23,7 +23,7 @@ export function AboutSection({
       style={{
         background: "var(--proof-surface)",
         border: "1px solid var(--proof-border)",
-        borderRadius: 14,
+        borderRadius: "var(--proof-radius-xl)",
         overflow: "hidden",
       }}
     >

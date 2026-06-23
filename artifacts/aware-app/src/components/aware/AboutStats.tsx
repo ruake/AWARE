@@ -42,14 +42,14 @@ function StatCard({
         padding: "20px 22px",
         background: "var(--proof-surface)",
         border: "1px solid var(--proof-border)",
-        borderRadius: 14,
+        borderRadius: "var(--proof-radius-xl)",
         transition: "border-color 0.15s",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span
           style={{
-            fontSize: 10.5,
+            fontSize: 11,
             fontWeight: 600,
             color: "var(--proof-text-muted)",
             textTransform: "uppercase",

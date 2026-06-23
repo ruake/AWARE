@@ -5,6 +5,10 @@ import type { TestAssertionResult } from "@/lib/types";
 export function AssertionRow({ a }: { a: TestAssertionResult }) {
   const [isExpanded, setIsExpanded] = React.useState(!a.passed);
   const hasDiff = a.expected !== undefined || a.actual !== undefined;
+  
+  const accent = a.passed ? "var(--proof-green)" : "var(--proof-red)";
+  const bg = a.passed ? "rgba(0, 229, 160, 0.05)" : "rgba(255, 51, 85, 0.05)";
+  const border = a.passed ? "rgba(0, 229, 160, 0.2)" : "rgba(255, 51, 85, 0.3)";
 
   return (
     <div
@@ -13,9 +17,9 @@ export function AssertionRow({ a }: { a: TestAssertionResult }) {
         flexDirection: "column",
         gap: 0,
         borderRadius: 8,
-        background: "var(--proof-surface)",
-        border: "1px solid var(--proof-border)",
-        borderLeft: `4px solid ${a.passed ? "var(--proof-green)" : "var(--proof-red)"}`,
+        background: bg,
+        border: `1px solid ${border}`,
+        borderLeft: `4px solid ${accent}`,
         fontSize: 13,
         overflow: "hidden",
         transition: "all 0.2s ease",
@@ -29,7 +33,7 @@ export function AssertionRow({ a }: { a: TestAssertionResult }) {
           display: "flex",
           alignItems: "center",
           gap: 12,
-          padding: "10px 14px",
+          padding: "12px 16px",
           background: "none",
           border: "none",
           cursor: hasDiff ? "pointer" : "default",
@@ -38,32 +42,34 @@ export function AssertionRow({ a }: { a: TestAssertionResult }) {
         }}
       >
         <div style={{
-          width: 20,
-          height: 20,
+          width: 24,
+          height: 24,
           borderRadius: "50%",
-          background: a.passed ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
+          background: a.passed ? "rgba(0, 229, 160, 0.15)" : "rgba(255, 51, 85, 0.15)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
+          boxShadow: `0 0 12px ${a.passed ? "rgba(0, 229, 160, 0.3)" : "rgba(255, 51, 85, 0.4)"}`
         }}>
           {a.passed ? (
-            <CheckCircle2 size={12} style={{ color: "var(--proof-green)" }} />
+            <CheckCircle2 size={14} style={{ color: "var(--proof-green)" }} />
           ) : (
-            <XCircle size={12} style={{ color: "var(--proof-red)" }} />
+            <XCircle size={14} style={{ color: "var(--proof-red)" }} />
           )}
         </div>
-        <span style={{ flex: 1, fontWeight: 600, fontSize: 13 }}>{a.assertion}</span>
+        <span style={{ flex: 1, fontWeight: 600, fontSize: 13, fontFamily: "var(--font-mono)" }}>{a.assertion}</span>
         {hasDiff && (
           <div style={{
             fontSize: 10,
-            color: "var(--proof-text-muted)",
-            fontWeight: 700,
+            color: accent,
+            fontWeight: 800,
             textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            background: "var(--proof-surface-hover)",
-            padding: "2px 6px",
-            borderRadius: 4,
+            letterSpacing: "0.1em",
+            background: `color-mix(in srgb, ${accent} 15%, transparent)`,
+            border: `1px solid color-mix(in srgb, ${accent} 30%, transparent)`,
+            padding: "4px 8px",
+            borderRadius: 6,
             display: "flex",
             alignItems: "center",
             gap: 4,
@@ -80,25 +86,25 @@ export function AssertionRow({ a }: { a: TestAssertionResult }) {
             display: "flex",
             flexDirection: "column",
             gap: 8,
-            margin: "0 14px 12px 46px",
-            padding: "10px 14px",
-            background: "var(--proof-surface-hover)",
+            margin: "0 16px 16px 48px",
+            padding: "12px 16px",
+            background: "rgba(0, 0, 0, 0.3)",
             borderRadius: 6,
-            fontSize: 11,
+            fontSize: 12,
             fontFamily: "var(--font-mono)",
-            border: "1px solid var(--proof-border)",
+            border: "1px solid var(--proof-border-light)",
             animation: "proof-slide-up 0.2s ease-out",
           }}
         >
           {a.expected !== undefined && (
-            <div style={{ display: "flex", gap: 12 }}>
-              <span style={{ color: "var(--proof-text-muted)", width: 60, flexShrink: 0 }}>Expected</span>
+            <div style={{ display: "flex", gap: 16 }}>
+              <span style={{ color: "var(--proof-text-muted)", width: 64, flexShrink: 0, textTransform: "uppercase", fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginTop: 2 }}>Expected</span>
               <span style={{ color: "var(--proof-green)", fontWeight: 700, wordBreak: "break-all" }}>{String(a.expected)}</span>
             </div>
           )}
           {a.actual !== undefined && (
-            <div style={{ display: "flex", gap: 12 }}>
-              <span style={{ color: "var(--proof-text-muted)", width: 60, flexShrink: 0 }}>Actual</span>
+            <div style={{ display: "flex", gap: 16 }}>
+              <span style={{ color: "var(--proof-text-muted)", width: 64, flexShrink: 0, textTransform: "uppercase", fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", marginTop: 2 }}>Actual</span>
               <span style={{ color: "var(--proof-red)", fontWeight: 700, wordBreak: "break-all" }}>{String(a.actual)}</span>
             </div>
           )}

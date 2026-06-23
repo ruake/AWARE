@@ -7,9 +7,9 @@ interface ContextIndicatorProps {
 }
 
 function getColor(pct: number): string {
-  if (pct < 50) return "#22c55e";
-  if (pct < 80) return "#f59e0b";
-  return "#ef4444";
+  if (pct < 50) return "var(--proof-green)";
+  if (pct < 80) return "var(--proof-yellow)";
+  return "var(--proof-red)";
 }
 
 export default function ContextIndicator({

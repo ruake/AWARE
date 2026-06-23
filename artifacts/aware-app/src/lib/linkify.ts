@@ -7,7 +7,7 @@ export interface LinkifyRule {
 const RULES: LinkifyRule[] = [
   { pattern: /(?<!`|\w)\b(tc_\d+)\b(?!`)/g, href: (id) => `/tests?detail=${id}` },
   { pattern: /(?<!`|\w)\b(diff_\d+)\b(?!`)/g, href: (id) => `/trends?diffId=${id}` },
-  { pattern: /(?<!`|\w)\b(run_\S+)\b(?!`)/g, href: (id) => `/runs/${id}` },
+  { pattern: /(?<!`|\w)\b(run_[\w-]+)\b(?!`)/g, href: (id) => `/runs/${id}` },
   { pattern: /(?<!`|\w)\b(TC-\d{3})\b(?!`)/g, href: (id) => `/trends?testId=${id}` },
 ];
 

@@ -5,15 +5,13 @@ import {
   getAutoDiscoveredTests,
   subscribeToAutoTests,
   computeTestStats,
-  getAutoDiscoverySummary,
-} from "@/lib/data";
+  getAutoDiscoverySummary} from "@/lib/data";
 import { useTestData } from "@/hooks/useTestData";
 import {
   subscribeToTestSuites,
   getTestSuites,
   subscribeToTestCases,
-  getTestCases,
-} from "@/lib/data";
+  getTestCases} from "@/lib/data";
 import { FolderTree, Beaker, Search, Download, X, Filter, ChevronRight, ChevronDown, Layers, Target, Activity } from "lucide-react";
 import type { TestSuite } from "@/lib/types";
 import { exportAndDownload, exportAsXML, downloadFile } from "@/lib/testImportExport";
@@ -32,20 +30,17 @@ function TestKpis() {
       label: "Suites",
       value: suites.length,
       color: "var(--proof-blue)",
-      onClick: () => navigate("/suites"),
-    },
+      onClick: () => navigate("/suites")},
     {
       label: "Tests",
       value: tcs.length,
       color: "var(--proof-cyan)",
-      onClick: () => navigate("/tests"),
-    },
+      onClick: () => navigate("/tests")},
     {
       label: "Active",
       value: tcs.filter((t) => t.status === "active").length,
       color: "var(--proof-green)",
-      onClick: () => navigate("/tests?status=active"),
-    },
+      onClick: () => navigate("/tests?status=active")},
   ];
 
   return (
@@ -56,8 +51,7 @@ function TestKpis() {
         gap: 6,
         padding: "12px",
         borderBottom: "1px solid var(--proof-border)",
-        background: "var(--proof-surface-subtle)",
-      }}
+        background: "var(--proof-surface-subtle)"}}
     >
       {kpis.map((kpi, idx) => (
         <motion.div
@@ -75,8 +69,7 @@ function TestKpis() {
             border: "1px solid var(--proof-border)",
             textAlign: "center",
             cursor: "pointer",
-            transition: "all 0.2s ease",
-          }}
+            transition: "all 0.2s ease"}}
         >
           <div
             style={{
@@ -84,8 +77,7 @@ function TestKpis() {
               fontWeight: 700,
               fontFamily: "var(--font-mono)",
               color: kpi.color,
-              lineHeight: 1,
-            }}
+              lineHeight: 1}}
           >
             {kpi.value}
           </div>
@@ -96,8 +88,7 @@ function TestKpis() {
               color: "var(--proof-text-muted)",
               textTransform: "uppercase",
               letterSpacing: "0.05em",
-              marginTop: 2,
-            }}
+              marginTop: 2}}
           >
             {kpi.label}
           </div>
@@ -132,8 +123,7 @@ function TestFilters() {
           borderRadius: 8,
           padding: "6px 10px",
           marginBottom: 10,
-          boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-        }}
+          boxShadow: "0 2px 4px rgba(0,0,0,0.05)"}}
       >
         <Search size={14} style={{ color: "var(--proof-text-muted)", flexShrink: 0 }} />
         <input
@@ -142,13 +132,11 @@ function TestFilters() {
           placeholder="Filter tests..."
           style={{
             border: "none",
-            outline: "none",
             fontSize: 12,
             background: "transparent",
             flex: 1,
             minWidth: 0,
-            color: "var(--proof-text)",
-          }}
+            color: "var(--proof-text)"}}
         />
         {search && <X size={12} style={{ color: "var(--proof-text-muted)", cursor: "pointer" }} onClick={() => setSearch("")} />}
       </div>
@@ -167,8 +155,7 @@ function TestFilters() {
               borderRadius: 6,
               background: "var(--proof-surface)",
               color: "var(--proof-text)",
-              appearance: "none",
-            }}
+              appearance: "none"}}
           >
             {TEST_TYPES.map((t) => (
               <option key={t} value={t}>{t} Type</option>
@@ -188,8 +175,7 @@ function TestFilters() {
               borderRadius: 6,
               background: "var(--proof-surface)",
               color: "var(--proof-text)",
-              appearance: "none",
-            }}
+              appearance: "none"}}
           >
             {STATUSES.map((s) => (
               <option key={s} value={s}>{s === "All" ? "Any Status" : s.charAt(0).toUpperCase() + s.slice(1)}</option>
@@ -254,8 +240,7 @@ function SuiteTreeItem({ suite, depth, allSuites, currentSuiteId, onSelect }: {
           cursor: "pointer",
           background: isActive ? "var(--proof-surface-active)" : "transparent",
           position: "relative",
-          transition: "background 0.2s ease",
-        }}
+          transition: "background 0.2s ease"}}
       >
         {isActive && (
           <motion.div
@@ -267,8 +252,7 @@ function SuiteTreeItem({ suite, depth, allSuites, currentSuiteId, onSelect }: {
               bottom: 4,
               width: 3,
               background: "var(--proof-blue)",
-              borderRadius: "0 4px 4px 0",
-            }}
+              borderRadius: "0 4px 4px 0"}}
           />
         )}
         
@@ -430,8 +414,7 @@ export function TestsPanel() {
             cursor: "pointer",
             color: "var(--proof-text-secondary)",
             fontSize: 11,
-            fontWeight: 600,
-          }}
+            fontWeight: 600}}
         >
           <Download size={14} /> Export Tests
         </motion.button>

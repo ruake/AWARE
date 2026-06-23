@@ -489,7 +489,7 @@ export default function ExportDialog({ thread, onClose }: ExportDialogProps) {
               padding: "8px 14px",
               borderRadius: 8,
               border: "1px solid var(--proof-border)",
-              background: copied ? "#16a34a" : "var(--proof-surface)",
+              background: copied ? "var(--proof-green)" : "var(--proof-surface)",
               color: copied ? "#fff" : "var(--proof-text)",
               cursor: "pointer",
               fontSize: 12,

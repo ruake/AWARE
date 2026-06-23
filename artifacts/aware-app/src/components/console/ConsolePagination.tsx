@@ -19,20 +19,17 @@ const containerStyle: React.CSSProperties = {
   padding: "12px 0",
   borderTop: "1px solid var(--proof-border)",
   flexWrap: "wrap",
-  gap: 8,
-};
+  gap: 8};
 
 const infoStyle: React.CSSProperties = {
   fontSize: 12,
   color: "var(--proof-text-secondary)",
-  whiteSpace: "nowrap",
-};
+  whiteSpace: "nowrap"};
 
 const navStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: 2,
-};
+  gap: 2};
 
 const selectStyle: React.CSSProperties = {
   height: 28,
@@ -43,48 +40,45 @@ const selectStyle: React.CSSProperties = {
   color: "var(--proof-text)",
   padding: "0 4px",
   cursor: "pointer",
-  outline: "none",
-  fontFamily: "var(--font-sans)",
-};
+  fontFamily: "var(--font-sans)"};
 
 function pageBtnStyle(disabled: boolean): React.CSSProperties {
   return {
-    minWidth: 28,
-    height: 28,
-    borderRadius: 4,
+    minWidth: 32,
+    height: 32,
+    borderRadius: "var(--proof-radius-sm)",
     border: "1px solid var(--proof-border)",
     background: "transparent",
     color: "var(--proof-text)",
-    fontSize: 12,
+    fontSize: 13,
     cursor: disabled ? "not-allowed" : "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    margin: "0 1px",
-    padding: "0 6px",
+    margin: "0 2px",
+    padding: "0 8px",
     opacity: disabled ? 0.3 : 1,
     transition: "all var(--proof-transition)",
-    fontFamily: "var(--font-sans)",
-  };
+    fontFamily: "var(--font-mono)"};
 }
 
 const activePageBtnStyle: React.CSSProperties = {
-  minWidth: 28,
-  height: 28,
-  borderRadius: 4,
+  minWidth: 32,
+  height: 32,
+  borderRadius: "var(--proof-radius-sm)",
   border: "1px solid var(--proof-blue)",
-  background: "var(--proof-blue)",
-  color: "#fff",
-  fontSize: 12,
+  background: "rgba(0,196,255,0.1)",
+  color: "var(--proof-blue)",
+  boxShadow: "var(--proof-glow-cyan)",
+  fontSize: 13,
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  margin: "0 1px",
-  padding: "0 6px",
-  fontWeight: 600,
-  fontFamily: "var(--font-sans)",
-};
+  margin: "0 2px",
+  padding: "0 8px",
+  fontWeight: 700,
+  fontFamily: "var(--font-mono)"};
 
 function getVisiblePages(current: number, total: number): (number | "ellipsis")[] {
   if (total <= 7) {
@@ -116,8 +110,7 @@ export function ConsolePagination({
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [10, 25, 50, 100],
-  showTotal = true,
-}: ConsolePaginationProps) {
+  showTotal = true}: ConsolePaginationProps) {
   const first = (currentPage - 1) * pageSize + 1;
   const last = Math.min(currentPage * pageSize, totalItems);
 
@@ -193,8 +186,7 @@ export function ConsolePagination({
                 justifyContent: "center",
                 fontSize: 12,
                 color: "var(--proof-text-muted)",
-                userSelect: "none",
-              }}
+                userSelect: "none"}}
             >
               …
             </span>

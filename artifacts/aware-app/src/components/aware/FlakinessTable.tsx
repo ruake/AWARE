@@ -98,8 +98,10 @@ export function FlakinessTable({
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
       <div
-        className="proof-card"
+        className="glass-panel"
         style={{
+          border: "1px solid var(--proof-border)",
+          borderRadius: "var(--proof-radius-lg)",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -110,7 +112,7 @@ export function FlakinessTable({
           style={{
             padding: "16px 20px",
             borderBottom: "1px solid var(--proof-border)",
-            background: "var(--proof-surface-2)",
+            background: "rgba(255,255,255,0.02)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -204,10 +206,12 @@ export function FlakinessTable({
         <div style={{ overflowX: "auto", flex: 1 }}>
           <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid var(--proof-border)", background: "var(--proof-surface)", color: "var(--proof-text-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              <tr style={{ borderBottom: "1px solid var(--proof-border)", background: "rgba(255,255,255,0.02)", color: "var(--proof-text-secondary)", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1px" }}>
                 <th
                   onClick={() => toggleSort("runId")}
-                  style={{ padding: "16px 20px", cursor: "pointer", userSelect: "none", width: "14%" }}
+                  style={{ padding: "16px 20px", cursor: "pointer", userSelect: "none", width: "14%", transition: "color var(--proof-transition)", color: hSort.endsWith("runId") ? "var(--proof-blue)" : "inherit" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "var(--proof-text)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = hSort.endsWith("runId") ? "var(--proof-blue)" : "inherit"; }}
                 >
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                     Run ID {sortIcon("runId")}
@@ -215,7 +219,9 @@ export function FlakinessTable({
                 </th>
                 <th
                   onClick={() => toggleSort("status")}
-                  style={{ padding: "16px 20px", cursor: "pointer", userSelect: "none", width: "12%" }}
+                  style={{ padding: "16px 20px", cursor: "pointer", userSelect: "none", width: "12%", transition: "color var(--proof-transition)", color: hSort.endsWith("status") ? "var(--proof-blue)" : "inherit" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "var(--proof-text)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = hSort.endsWith("status") ? "var(--proof-blue)" : "inherit"; }}
                 >
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                     Status {sortIcon("status")}
@@ -223,7 +229,9 @@ export function FlakinessTable({
                 </th>
                 <th
                   onClick={() => toggleSort("duration")}
-                  style={{ padding: "16px 20px", textAlign: "right", cursor: "pointer", userSelect: "none", width: "12%" }}
+                  style={{ padding: "16px 20px", textAlign: "right", cursor: "pointer", userSelect: "none", width: "12%", transition: "color var(--proof-transition)", color: hSort.endsWith("duration") ? "var(--proof-blue)" : "inherit" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "var(--proof-text)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = hSort.endsWith("duration") ? "var(--proof-blue)" : "inherit"; }}
                 >
                   <span
                     style={{
@@ -238,7 +246,9 @@ export function FlakinessTable({
                 </th>
                 <th
                   onClick={() => toggleSort("env")}
-                  style={{ padding: "16px 20px", cursor: "pointer", userSelect: "none", width: "14%" }}
+                  style={{ padding: "16px 20px", cursor: "pointer", userSelect: "none", width: "14%", transition: "color var(--proof-transition)", color: hSort.endsWith("env") ? "var(--proof-blue)" : "inherit" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "var(--proof-text)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = hSort.endsWith("env") ? "var(--proof-blue)" : "inherit"; }}
                 >
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                     Environment {sortIcon("env")}
@@ -246,7 +256,9 @@ export function FlakinessTable({
                 </th>
                 <th
                   onClick={() => toggleSort("flakiness")}
-                  style={{ padding: "16px 20px", textAlign: "right", cursor: "pointer", userSelect: "none", width: "12%" }}
+                  style={{ padding: "16px 20px", textAlign: "right", cursor: "pointer", userSelect: "none", width: "12%", transition: "color var(--proof-transition)", color: hSort.endsWith("flakiness") ? "var(--proof-blue)" : "inherit" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "var(--proof-text)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = hSort.endsWith("flakiness") ? "var(--proof-blue)" : "inherit"; }}
                 >
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
                     Pass Rate {sortIcon("flakiness")}
@@ -257,7 +269,7 @@ export function FlakinessTable({
               </tr>
             </thead>
             <tbody>
-              {filteredHistory.map((h) => {
+              {filteredHistory.map((h, i) => {
                 const isSlow = h.duration > avgDuration * 2;
                 const isWarn = h.duration > avgDuration * 1.5;
                 const passRate = enriched.length > 0 ? (enriched.filter(e => e.status === "PASS").length / enriched.length) * 100 : 0; 
@@ -269,14 +281,14 @@ export function FlakinessTable({
                     style={{
                       cursor: "pointer",
                       borderBottom: "1px solid var(--proof-border-light)",
-                      background: selectedRow?.runId === h.runId ? "var(--proof-surface-active)" : "var(--proof-surface)",
+                      background: selectedRow?.runId === h.runId ? "var(--proof-surface-active)" : i % 2 === 1 ? "var(--proof-surface-2)" : "transparent",
                       transition: "background var(--proof-transition)"
                     }}
                     onMouseEnter={(e) => {
                       if (selectedRow?.runId !== h.runId) e.currentTarget.style.background = "var(--proof-surface-hover)";
                     }}
                     onMouseLeave={(e) => {
-                      if (selectedRow?.runId !== h.runId) e.currentTarget.style.background = "var(--proof-surface)";
+                      if (selectedRow?.runId !== h.runId) e.currentTarget.style.background = i % 2 === 1 ? "var(--proof-surface-2)" : "transparent";
                     }}
                   >
                     <td style={{ padding: "16px 20px" }}>
