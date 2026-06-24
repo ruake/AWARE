@@ -1,9 +1,12 @@
 import type { ToolDefinition, ToolContext, ToolResult, ChartData, TableData } from "./types";
+import type { Run, TestResult, PromotionDecision } from "@/lib/types";
 import { RUNS, getTestResultsForRun } from "@/lib/runs";
 import { getAllPromotionDecisions } from "@/lib/promotions";
 import { PROMOTION_GATE_THRESHOLD } from "@/lib/ciConfig";
 
 const PASS_GATE_PCT = Math.round(PROMOTION_GATE_THRESHOLD * 100);
+
+type PromotionDecisionRow = PromotionDecision & { passPct?: number; date?: string; timestamp?: string };
 
 /** Throw an AbortError if the AbortSignal has already fired. */
 function assertNotAborted(ctx: ToolContext): void {
@@ -60,10 +63,10 @@ const queryRuns: ToolDefinition = {
     const rows = runs.map((r) => ({
       run: r.label || r.id.slice(0, 8),
       env: r.env,
-      network: (r as any).network || "—",
+      network: r.network,
       passRate: r.passPct,
       failures: r.failures ?? 0,
-      suite: (r as any).suite || "—",
+      suite: (r as Run & { suite?: string }).suite || "—",
       date: r.started.slice(0, 10),
       time: r.started.slice(11, 16),
     }));
@@ -298,16 +301,16 @@ const getPromotionStatus: ToolDefinition = {
 
     const recentRows = decisions.slice(0, 8).map((d, i) => ({
       "#": i + 1,
-      runId: ((d as any).runId || "—").slice(0, 12),
+      runId: (d.runId || "—").slice(0, 12),
       decision:
         d.decision === "promote"
           ? "✅ Promote"
           : d.decision === "block"
             ? "❌ Block"
             : "⏳ Pending",
-      passRate: (d as any).passPct ?? "—",
+      passRate: (d as PromotionDecisionRow).passPct ?? "—",
       threshold: `${PASS_GATE_PCT}%`,
-      date: ((d as any).date || (d as any).timestamp || "—").toString().slice(0, 10),
+      date: ((d as PromotionDecisionRow).date || (d as PromotionDecisionRow).timestamp || "—").toString().slice(0, 10),
     }));
 
     const tableData: TableData = {
@@ -385,7 +388,7 @@ const getFailureBreakdown: ToolDefinition = {
       if (!byCategory[cat]) byCategory[cat] = { total: 0, failed: 0, flaky: 0 };
       byCategory[cat].total++;
       if (r.status === "FAIL") byCategory[cat].failed++;
-      if ((r as any).flaky) byCategory[cat].flaky++;
+      if ((r as TestResult & { flaky?: boolean }).flaky) byCategory[cat].flaky++;
     }
 
     const rows = Object.entries(byCategory)
@@ -463,7 +466,7 @@ const getSuiteHealth: ToolDefinition = {
       { runs: number; totalPass: number; failures: number; envs: Set<string> }
     > = {};
     for (const run of runs) {
-      const suite = (run as any).suite || "default";
+      const suite = (run as Run & { suite?: string }).suite || "default";
       if (!bySuite[suite]) bySuite[suite] = { runs: 0, totalPass: 0, failures: 0, envs: new Set() };
       bySuite[suite].runs++;
       bySuite[suite].totalPass += run.passPct;
@@ -561,12 +564,12 @@ const getDurationTrends: ToolDefinition = {
       .slice(0, limit);
 
     const rows = recent.map((r, i) => {
-      const durationSec = (r as any).durationMs
-        ? Math.round((r as any).durationMs / 1000)
+      const durationSec = r.durationMs
+        ? Math.round(r.durationMs / 1000)
         : 15 + Math.floor(Math.random() * 30);
       const prev = i < recent.length - 1 ? recent[i + 1] : null;
       const prevDuration =
-        prev && (prev as any).durationMs ? Math.round((prev as any).durationMs / 1000) : null;
+        prev?.durationMs ? Math.round(prev.durationMs / 1000) : null;
       const delta = prevDuration ? durationSec - prevDuration : 0;
       return {
         run: r.label || r.id.slice(0, 8),

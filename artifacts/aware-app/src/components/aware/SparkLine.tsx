@@ -1,6 +1,6 @@
 import React from "react";
 
-export function SparkLine({ data, color }: any) {
+export function SparkLine({ data, color }: { data: number[]; color: string }) {
   if (!data || !data.length) return null;
   return (
     <div style={{ height: 24, width: 64, opacity: 0.7 }}>

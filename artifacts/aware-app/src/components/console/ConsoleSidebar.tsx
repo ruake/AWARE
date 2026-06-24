@@ -402,7 +402,7 @@ export function ConsoleSidebar({ activePanel, visible, onClose }: ConsoleSidebar
   );
 }
 
-function StatusRow({ icon: Icon, label, status, color }: { icon: any; label: string; status: string; color: string }) {
+function StatusRow({ icon: Icon, label, status, color }: { icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>; label: string; status: string; color: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       <div style={{ width: 24, height: 24, borderRadius: 6, background: "var(--proof-surface)", display: "flex", alignItems: "center", justifyItems: "center", flexShrink: 0, border: "1px solid var(--proof-border-light)" }}>

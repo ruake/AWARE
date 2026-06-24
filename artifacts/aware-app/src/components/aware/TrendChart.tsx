@@ -5,7 +5,10 @@ import type { TestRunPoint } from "@/lib/types";
 interface TrendChartProps { passRate: number; flakinessScore: number; avgDuration: number; history: TestRunPoint[]; }
 
 export const TrendChart = React.memo(function TrendChart({ history }: TrendChartProps) {
-  const data = history.slice(-20).map(h => ({ pass: "env" in h && typeof (h as any).passRate === "number" ? (h as any).passRate : h.status === "PASS" ? 100 : 0 }));
+  const data = history.slice(-20).map((h: TestRunPoint) => {
+    const ext = h as TestRunPoint & { passRate?: number };
+    return { pass: typeof ext.passRate === "number" ? ext.passRate : h.status === "PASS" ? 100 : 0 };
+  });
   return (
     <div className="glass-panel" style={{ display: "flex", height: 192, width: "100%", flexDirection: "column", justifyContent: "flex-end", overflow: "hidden", borderRadius: 16, border: "1px solid var(--proof-border)" }}>
       <div style={{ padding: "16px 16px 0", fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--proof-text-secondary)", zIndex: 10 }}>Pass Rate Trend</div>

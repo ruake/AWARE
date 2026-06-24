@@ -1,6 +1,6 @@
 import React from "react";
 
-export function KpiCard({ total, passRate, _failedRuns, chartColor }: any) {
+export function KpiCard({ total, passRate, chartColor }: { total: number; passRate: number; chartColor: string }) {
   return (
     <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: 8, borderRadius: 12, border: "1px solid var(--proof-border)", padding: 16 }}>
       <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--proof-text-secondary)" }}>Overview</div>

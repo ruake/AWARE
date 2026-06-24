@@ -60,7 +60,7 @@ export function RunRibbonCard({
     const days = Math.floor(hrs / 24);
     if (!run && nextDue && days >= 1) return `Overdue ${days}d`;
     return `${days}d ago`;
-  }, [run?.started, nextDue, now]);
+  }, [run, nextDue, now]);
 
   const passColor = run
     ? run.passPct >= 95

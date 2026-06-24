@@ -1,6 +1,23 @@
 import type { StreamDelta } from "./types";
 import { RUNS } from "@/lib/runs";
 
+// ── Chrome AI API types ──────────────────────────────────────────────────────
+interface ChromeAILanguageModelCreateConfig {
+  systemPrompt: string;
+  signal: AbortSignal;
+}
+
+interface ChromeAILanguageModelStatic {
+  create(config: ChromeAILanguageModelCreateConfig): Promise<ChromeAISession>;
+}
+
+interface ChromeAIWindow {
+  LanguageModel?: ChromeAILanguageModelStatic;
+  ai?: {
+    languageModel?: ChromeAILanguageModelStatic;
+  };
+}
+
 // ── Chrome AI Session types ──────────────────────────────────────────────────
 interface ChromeAISession {
   promptStreaming(prompt: string): ReadableStream;
@@ -11,11 +28,78 @@ interface OldChromeAISession {
   destroy(): void;
 }
 
+// ── Data structure types for tool results ────────────────────────────────────
+interface RunRecord {
+  passRate?: number | string;
+  passPct?: number | string;
+  failures?: number | string;
+  env: string;
+  date?: string;
+  run: string;
+}
+
+interface FlakyTestRecord {
+  test: string;
+  score?: number | string;
+  flips?: number | string;
+  sequence?: string;
+}
+
+interface CompareEnvRecord {
+  env: string;
+  avgPassRate: number;
+  totalFailures: number;
+  runs: number;
+}
+
+interface PromotionStatusRecord {
+  total?: number;
+  promoted?: number;
+  blocked?: number;
+  pending?: number;
+  promoteRate?: number;
+}
+
+interface FailureCategoryRow {
+  category: string;
+  failed: number;
+  total: number;
+  passRate?: number;
+}
+
+interface FailureBreakdownData {
+  label?: string;
+  passPct?: number | string;
+  rows: FailureCategoryRow[];
+  env?: string;
+}
+
+interface SuiteHealthRecord {
+  suite: string;
+  avgPassRate: number;
+  totalFailures: number;
+  runs: number;
+}
+
+interface DurationTrendRecord {
+  durationSec: number;
+  run: string;
+}
+
+interface AkamaiPropertyRecord {
+  status?: string;
+  env: string;
+  network?: string;
+  edgeWorkerVersion?: string;
+  propertyVersion?: string;
+  pops?: number | string;
+}
+
 function hasNewAPI(): boolean {
-  return typeof (window as any).LanguageModel?.create === "function";
+  return typeof (window as unknown as ChromeAIWindow).LanguageModel?.create === "function";
 }
 function hasOldAPI(): boolean {
-  return typeof (window as any).ai?.languageModel?.create === "function";
+  return typeof (window as unknown as ChromeAIWindow).ai?.languageModel?.create === "function";
 }
 
 // ── Streaming helper ─────────────────────────────────────────────────────────
@@ -29,9 +113,9 @@ async function streamFromChromeAI(
 
   try {
     if (hasNewAPI()) {
-      session = await (window as any).LanguageModel.create({ systemPrompt, signal });
+      session = await (window as unknown as ChromeAIWindow).LanguageModel!.create({ systemPrompt, signal });
     } else if (hasOldAPI()) {
-      session = await (window as any).ai.languageModel.create({ systemPrompt, signal });
+      session = await (window as unknown as ChromeAIWindow).ai!.languageModel!.create({ systemPrompt, signal });
     } else {
       onDelta({ content: "Chrome AI is not available in this browser.", done: true });
       return;
@@ -171,18 +255,18 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
   try {
     switch (toolName) {
       case "query_runs": {
-        const runs: any[] = Array.isArray(rawData) ? rawData : [];
+        const runs: RunRecord[] = Array.isArray(rawData) ? rawData : [];
         if (!runs.length) return "No test runs found in the dataset.";
 
-        const passRates = runs.map((r: any) => Number(r.passRate ?? r.passPct ?? 0));
+        const passRates = runs.map((r) => Number(r.passRate ?? r.passPct ?? 0));
         const avgPass = Math.round(passRates.reduce((a, b) => a + b, 0) / passRates.length);
-        const totalFails = runs.reduce((s: number, r: any) => s + Number(r.failures ?? 0), 0);
+        const totalFails = runs.reduce((s, r) => s + Number(r.failures ?? 0), 0);
         const latest = runs[0];
         const oldest = runs[runs.length - 1];
         const trend = passRates.length >= 2 ? passRates[0] - passRates[passRates.length - 1] : 0;
         const trendWord = trend > 2 ? "improving" : trend < -2 ? "declining" : "stable";
-        const failedRuns = runs.filter((r: any) => Number(r.failures ?? 0) > 0);
-        const envCounts = runs.reduce((acc: any, r: any) => {
+        const failedRuns = runs.filter((r) => Number(r.failures ?? 0) > 0);
+        const envCounts = runs.reduce<Record<string, number>>((acc, r) => {
           acc[r.env] = (acc[r.env] || 0) + 1;
           return acc;
         }, {});
@@ -221,7 +305,7 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
           const failLines = failedRuns
             .slice(0, 4)
             .map(
-              (r: any) =>
+              (r) =>
                 `- **${r.run}** (${r.env}, ${r.date}) — ${r.failures} failure${Number(r.failures) !== 1 ? "s" : ""}, **${r.passRate}%** pass`,
             )
             .join("\n");
@@ -269,16 +353,16 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
       }
 
       case "get_flaky_tests": {
-        const tests: any[] = Array.isArray(rawData) ? rawData : [];
+        const tests: FlakyTestRecord[] = Array.isArray(rawData) ? rawData : [];
         if (!tests.length)
           return "✅ No flaky tests detected — all tests are stable across recent runs.";
 
         const worst = tests[0];
         const avgScore = Math.round(
-          tests.reduce((s: number, t: any) => s + Number(t.score ?? 0), 0) / tests.length,
+          tests.reduce((s, t) => s + Number(t.score ?? 0), 0) / tests.length,
         );
-        const highRisk = tests.filter((t: any) => Number(t.score ?? 0) >= 50).length;
-        const stable = tests.filter((t: any) => Number(t.flips ?? 0) === 1).length;
+        const highRisk = tests.filter((t) => Number(t.score ?? 0) >= 50).length;
+        const stable = tests.filter((t) => Number(t.flips ?? 0) === 1).length;
 
         if (/worst|top|most|highest|biggest/.test(q)) {
           return `Most unstable: **\`${worst.test}\`** — flakiness score **${worst.score}%** with **${worst.flips}** flips (pattern: \`${worst.sequence ?? "?"}\`). ${highRisk} test${highRisk !== 1 ? "s" : ""} are high-risk (≥50% score). Quarantine these to cut CI noise.`;
@@ -294,7 +378,7 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
           tests
             .slice(0, 4)
             .map(
-              (t: any) =>
+              (t) =>
                 `- \`${t.test}\` — **${t.score}%** · ${t.flips} flip${t.flips !== 1 ? "s" : ""} · \`${t.sequence ?? "?"}\``,
             )
             .join("\n") +
@@ -303,13 +387,13 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
       }
 
       case "compare_environments": {
-        const rows: any[] = Array.isArray(rawData) ? rawData : [];
+        const rows: CompareEnvRecord[] = Array.isArray(rawData) ? rawData : [];
         if (!rows.length) return "No environment data available.";
 
-        const sorted = [...rows].sort((a: any, b: any) => b.avgPassRate - a.avgPassRate);
+        const sorted = [...rows].sort((a, b) => b.avgPassRate - a.avgPassRate);
         const best = sorted[0];
         const worst = sorted[sorted.length - 1];
-        const allHealthy = rows.every((r: any) => r.avgPassRate >= 95);
+        const allHealthy = rows.every((r) => r.avgPassRate >= 95);
         const gapPP = best.avgPassRate - worst.avgPassRate;
 
         if (/worst|problem|low|struggling|bad/.test(q)) {
@@ -322,7 +406,7 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
 
         return (
           rows
-            .map((r: any) => {
+            .map((r) => {
               const icon = r.avgPassRate >= 95 ? "🟢" : r.avgPassRate >= 80 ? "🟡" : "🔴";
               return `${icon} **${r.env}** — **${r.avgPassRate}%** avg · ${r.totalFailures} failures · ${r.runs} runs`;
             })
@@ -332,7 +416,7 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
       }
 
       case "get_promotion_status": {
-        const d = (rawData as any) || {};
+        const d = (rawData ?? {}) as PromotionStatusRecord;
         const { total = 0, promoted = 0, blocked = 0, pending = 0, promoteRate = 0 } = d;
         const blockRate = total > 0 ? Math.round((blocked / total) * 100) : 0;
 
@@ -353,24 +437,24 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
       }
 
       case "get_failure_breakdown": {
-        const d = (rawData as any) || {};
+        const d = (rawData ?? {}) as FailureBreakdownData;
         const { label, passPct, rows = [], env } = d;
-        const totalFailed = rows.reduce((s: number, r: any) => s + Number(r.failed ?? 0), 0);
-        const totalTests = rows.reduce((s: number, r: any) => s + Number(r.total ?? 0), 0);
+        const totalFailed = rows.reduce((s, r) => s + Number(r.failed ?? 0), 0);
+        const totalTests = rows.reduce((s, r) => s + Number(r.total ?? 0), 0);
 
         if (!rows.length)
           return `**${label || "Latest Run"}** (${env}) — **${passPct}%** pass · No failures ✅`;
 
         const topCat = rows[0];
-        const cleanCats = rows.filter((r: any) => r.failed === 0).length;
+        const cleanCats = rows.filter((r) => r.failed === 0).length;
 
         if (/category|type|kind|which|what kind/.test(q)) {
           return (
             `Failures by category in **${label || "latest run"}** (${env}):\n\n` +
             rows
               .slice(0, 5)
-              .map((r: any) => {
-                const icon = r.failed === 0 ? "✅" : r.passRate >= 80 ? "⚠️" : "🔴";
+              .map((r) => {
+                const icon = r.failed === 0 ? "✅" : r.passRate && r.passRate >= 80 ? "⚠️" : "🔴";
                 return `${icon} **${r.category}** — ${r.failed}/${r.total} failed`;
               })
               .join("\n") +
@@ -385,17 +469,17 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
       }
 
       case "get_suite_health": {
-        const rows: any[] = Array.isArray(rawData) ? rawData : [];
+        const rows: SuiteHealthRecord[] = Array.isArray(rawData) ? rawData : [];
         if (!rows.length) return "No suite data available.";
 
-        const failing = rows.filter((r: any) => r.avgPassRate < 95);
+        const failing = rows.filter((r) => r.avgPassRate < 95);
         const best = rows[0];
         const worst = rows[rows.length - 1];
 
         if (/worst|low|struggling|problem/.test(q)) {
           return failing.length === 0
             ? `✅ All ${rows.length} suites are above the 95% threshold. Lowest: **${worst.suite}** at **${worst.avgPassRate}%**.`
-            : `Struggling suite${failing.length !== 1 ? "s" : ""}: ${failing.map((r: any) => `**${r.suite}** (${r.avgPassRate}%)`).join(", ")}. These are below the 95% promotion gate — investigate before releasing.`;
+            : `Struggling suite${failing.length !== 1 ? "s" : ""}: ${failing.map((r) => `**${r.suite}** (${r.avgPassRate}%)`).join(", ")}. These are below the 95% promotion gate — investigate before releasing.`;
         }
 
         if (/best|top|clean|healthy/.test(q)) {
@@ -405,30 +489,27 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
         return (
           rows
             .slice(0, 5)
-            .map((r: any) => {
+            .map((r) => {
               const icon = r.avgPassRate >= 95 ? "🟢" : r.avgPassRate >= 80 ? "🟡" : "🔴";
               return `${icon} **${r.suite}** — **${r.avgPassRate}%** avg · ${r.totalFailures} failures`;
             })
             .join("\n") +
           (failing.length > 0
-            ? `\n\n⚠️ ${failing.length} suite${failing.length !== 1 ? "s" : ""} below 95%: ${failing.map((r: any) => `\`${r.suite}\``).join(", ")}.`
+            ? `\n\n⚠️ ${failing.length} suite${failing.length !== 1 ? "s" : ""} below 95%: ${failing.map((r) => `\`${r.suite}\``).join(", ")}.`
             : `\n\n✅ All ${rows.length} suites above the 95% gate.`)
         );
       }
 
       case "get_duration_trends": {
-        const rows: any[] = Array.isArray(rawData) ? rawData : [];
+        const rows: DurationTrendRecord[] = Array.isArray(rawData) ? rawData : [];
         if (!rows.length) return "No duration data available.";
 
-        const durations = rows.map((r: any) => Number(r.durationSec ?? 0));
+        const durations = rows.map((r) => Number(r.durationSec ?? 0));
         const avg = Math.round(durations.reduce((a, b) => a + b, 0) / durations.length);
         const max = Math.max(...durations);
         const min = Math.min(...durations);
-        const slowRuns = rows.filter((r: any) => r.durationSec > avg * 1.2);
-        const slowest = rows.reduce(
-          (a: any, b: any) => (b.durationSec > a.durationSec ? b : a),
-          rows[0],
-        );
+        const slowRuns = rows.filter((r) => r.durationSec > avg * 1.2);
+        const slowest = rows.reduce((a, b) => (b.durationSec > a.durationSec ? b : a), rows[0]);
 
         if (/slow|longest|worst|spike|timeout/.test(q)) {
           return slowRuns.length === 0
@@ -445,13 +526,13 @@ function buildTemplateSynthesis(toolName: string, rawData: unknown, userQuery: s
       }
 
       case "get_akamai_property": {
-        const rows: any[] = Array.isArray(rawData) ? rawData : [];
+        const rows: AkamaiPropertyRecord[] = Array.isArray(rawData) ? rawData : [];
         if (!rows.length) return "No Akamai property data available.";
 
-        const active = rows.filter((r: any) => r.status?.includes("Active")).length;
-        const pending = rows.filter((r: any) => r.status?.includes("Pending")).length;
-        const prodRow = rows.find((r: any) => r.env === "PROD" && r.network === "Production");
-        const ewVersions = [...new Set(rows.map((r: any) => r.edgeWorkerVersion))];
+        const active = rows.filter((r) => r.status?.includes("Active")).length;
+        const pending = rows.filter((r) => r.status?.includes("Pending")).length;
+        const prodRow = rows.find((r) => r.env === "PROD" && r.network === "Production");
+        const ewVersions = [...new Set(rows.map((r) => r.edgeWorkerVersion))];
 
         if (/edgeworker|ew|worker/.test(q)) {
           return `EdgeWorker versions: ${ewVersions.join(", ")} across 3 tiers. PROD is on **${prodRow?.edgeWorkerVersion ?? "—"}**. ${ewVersions.length > 1 ? "⚠️ Multiple versions deployed — check for drift." : "✅ Consistent version across all tiers."}`;
@@ -481,39 +562,40 @@ function formatToolDataForNano(toolName: string, rawData: unknown): string | nul
   try {
     switch (toolName) {
       case "query_runs": {
-        const runs: any[] = Array.isArray(rawData) ? rawData : [];
+        const runs: RunRecord[] = Array.isArray(rawData) ? rawData : [];
         if (!runs.length) return null;
         const avg = Math.round(runs.reduce((s, r) => s + Number(r.passRate ?? 0), 0) / runs.length);
         const fails = runs.reduce((s, r) => s + Number(r.failures ?? 0), 0);
         return `${runs.length} runs, avg pass ${avg}%, ${fails} total failures. Latest: ${runs[0]?.run} ${runs[0]?.passRate}%`;
       }
       case "get_flaky_tests": {
-        const tests: any[] = Array.isArray(rawData) ? rawData : [];
+        const tests: FlakyTestRecord[] = Array.isArray(rawData) ? rawData : [];
         if (!tests.length) return "No flaky tests";
         return `${tests.length} flaky tests. Top: ${tests[0]?.test} score ${tests[0]?.score}%, ${tests[0]?.flips} flips`;
       }
       case "compare_environments": {
-        const rows: any[] = Array.isArray(rawData) ? rawData : [];
-        return rows.map((r: any) => `${r.env}: ${r.avgPassRate}% avg (${r.runs} runs)`).join(", ");
+        const rows: CompareEnvRecord[] = Array.isArray(rawData) ? rawData : [];
+        return rows.map((r) => `${r.env}: ${r.avgPassRate}% avg (${r.runs} runs)`).join(", ");
       }
       case "get_promotion_status": {
-        const d = rawData as any;
-        return `${d.promoted} promoted, ${d.blocked} blocked, ${d.pending} pending out of ${d.total} decisions`;
+        const d = (rawData ?? {}) as PromotionStatusRecord;
+        return `${d.promoted ?? 0} promoted, ${d.blocked ?? 0} blocked, ${d.pending ?? 0} pending out of ${d.total ?? 0} decisions`;
       }
       case "get_failure_breakdown": {
-        const d = rawData as any;
-        const top = Array.isArray(d.rows) ? d.rows[0] : null;
-        return `${d.label}: ${d.passPct}% pass. Top category: ${top?.category} (${top?.failed}/${top?.total} failed)`;
+        const d = (rawData ?? {}) as FailureBreakdownData;
+        const rows = Array.isArray(d.rows) ? d.rows : [];
+        const top = rows[0] ?? null;
+        return `${d.label ?? "?"}: ${d.passPct ?? "?"}% pass. Top category: ${top?.category ?? "?"} (${top?.failed ?? 0}/${top?.total ?? 0} failed)`;
       }
       case "get_suite_health": {
-        const rows: any[] = Array.isArray(rawData) ? rawData : [];
+        const rows: SuiteHealthRecord[] = Array.isArray(rawData) ? rawData : [];
         return rows
           .slice(0, 4)
-          .map((r: any) => `${r.suite}: ${r.avgPassRate}%`)
+          .map((r) => `${r.suite}: ${r.avgPassRate}%`)
           .join(", ");
       }
       case "get_duration_trends": {
-        const rows: any[] = Array.isArray(rawData) ? rawData : [];
+        const rows: DurationTrendRecord[] = Array.isArray(rawData) ? rawData : [];
         const avg =
           rows.length > 0
             ? Math.round(rows.reduce((s, r) => s + Number(r.durationSec ?? 0), 0) / rows.length)
@@ -521,8 +603,8 @@ function formatToolDataForNano(toolName: string, rawData: unknown): string | nul
         return `Avg duration ${avg}s across ${rows.length} runs`;
       }
       case "get_akamai_property": {
-        const rows: any[] = Array.isArray(rawData) ? rawData : [];
-        return `${rows.length} property slots. Versions: PROD v${rows.find((r: any) => r.env === "PROD")?.propertyVersion ?? "?"}, UAT v${rows.find((r: any) => r.env === "UAT")?.propertyVersion ?? "?"}, QA v${rows.find((r: any) => r.env === "QA")?.propertyVersion ?? "?"}`;
+        const rows: AkamaiPropertyRecord[] = Array.isArray(rawData) ? rawData : [];
+        return `${rows.length} property slots. Versions: PROD v${rows.find((r) => r.env === "PROD")?.propertyVersion ?? "?"}, UAT v${rows.find((r) => r.env === "UAT")?.propertyVersion ?? "?"}, QA v${rows.find((r) => r.env === "QA")?.propertyVersion ?? "?"}`;
       }
       default:
         return null;
@@ -591,13 +673,13 @@ function buildDataScopeAnswer(q: string): string | null {
   )
     return null;
 
-  const runs = RUNS as any[];
+  const runs = RUNS as unknown as RunRecord[];
   if (!runs.length) return "No run data is loaded yet.";
 
   const passRates = runs.map((r) => Number(r.passRate ?? r.passPct ?? 0));
   const avg = Math.round(passRates.reduce((a, b) => a + b, 0) / passRates.length);
   const fails = runs.reduce((s, r) => s + Number(r.failures ?? 0), 0);
-  const envCounts = runs.reduce((acc: Record<string, number>, r) => {
+  const envCounts = runs.reduce<Record<string, number>>((acc, r) => {
     acc[r.env] = (acc[r.env] || 0) + 1;
     return acc;
   }, {});
