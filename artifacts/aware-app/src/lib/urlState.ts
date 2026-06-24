@@ -30,6 +30,7 @@ export function useSyncedUrlState<T>(
   // Force re-read on replaceState-based updates and browser back/forward
   const [bump, setBump] = React.useState(0);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const state = React.useMemo(() => readParam(key, defaultValue), [key, defaultValue, bump, _location]);
 
   React.useEffect(() => {

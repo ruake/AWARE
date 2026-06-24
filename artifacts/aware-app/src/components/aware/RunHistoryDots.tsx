@@ -26,7 +26,7 @@ export function RunHistoryDots({ testName }: RunHistoryDotsProps) {
         seen.add(run.id);
         result.push({
           runId: run.id,
-          status: match.status as any,
+          status: match.status,
           date: run.started,
         });
       }

@@ -29,7 +29,7 @@ export function CopilotSettings({ onClose }: CopilotSettingsProps) {
     const chromeAI = window as unknown as ChromeAIWindow;
     if (typeof chromeAI.LanguageModel?.availability === "function") {
       const res = await chromeAI.LanguageModel.availability();
-      setStatus((res === "downloadable" || res === "downloading" ? "downloading" : res) as "available" | "unavailable" | "downloading");
+      return (res === "downloadable" || res === "downloading" ? "downloading" : res) as "available" | "unavailable" | "downloading";
     } else if (typeof chromeAI.ai?.languageModel?.capabilities === "function") {
       const cap = await chromeAI.ai.languageModel.capabilities();
       const avail = typeof cap === "object" ? cap.available : cap;

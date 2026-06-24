@@ -23,7 +23,7 @@ const _PRIORITIES = ["All", "P0", "P1", "P2", "P3"] as const;
 function TestKpis() {
   const [, navigate] = useLocation();
   const { tcs, suites } = useTestData();
-  const _stats = React.useMemo(() => computeTestStats(), [tcs]);
+  const _stats = React.useMemo(() => computeTestStats(), []);
 
   const kpis = [
     {
@@ -103,7 +103,7 @@ function TestFilters() {
   const { suites } = useTestData();
   const _allTests = useSyncExternalStore(subscribeToAutoTests, getAutoDiscoveredTests);
   const _discovery = React.useMemo(() => getAutoDiscoverySummary(), []);
-  const params = React.useMemo(() => new URLSearchParams(window.location.search), [loc]);
+  const params = React.useMemo(() => new URLSearchParams(loc.includes("?") ? loc.split("?")[1] : window.location.search), [loc]);
   const suiteFilter = params.get("suite") || "";
   const selectedSuite = suiteFilter ? (suites.find((s) => s.id === suiteFilter) ?? null) : null;
 

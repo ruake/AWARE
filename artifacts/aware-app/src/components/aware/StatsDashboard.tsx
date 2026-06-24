@@ -1,7 +1,7 @@
 import React from "react";
 import { ResponsiveContainer, BarChart, Bar, Tooltip, XAxis } from "recharts";
 
-export function StatsDashboard({ stats }: any) {
+export function StatsDashboard({ stats }: { stats?: { byCategory?: Record<string, number> } }) {
   return (
     <div className="glass-panel" style={{ display: "flex", flexDirection: "column", gap: 16, borderRadius: 12, border: "1px solid var(--proof-border)", padding: 24 }}>
       <div style={{ fontSize: 14, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--proof-text-secondary)" }}>Analytics</div>

@@ -105,7 +105,7 @@ export function retryMiddleware<T>(
   };
 }
 
-const globalCache = new Map<string, { data: any; expires: number }>();
+const globalCache = new Map<string, { data: unknown; expires: number }>();
 
 export function cacheMiddleware<T>(defaultTTLMs = 60000): FetchMiddleware<T> {
   return async (req, next) => {
@@ -169,20 +169,20 @@ export function composePipeline<T>(
   };
 }
 
-export const defaultPipeline = composePipeline<any>(
+export const defaultPipeline = composePipeline<unknown>(
   loggingMiddleware(),
   timeoutMiddleware(15000),
   retryMiddleware(2),
   cacheMiddleware(60000),
 );
 
-export const freshPipeline = composePipeline<any>(
+export const freshPipeline = composePipeline<unknown>(
   loggingMiddleware(),
   timeoutMiddleware(15000),
   retryMiddleware(2),
 );
 
-export const fastPipeline = composePipeline<any>(
+export const fastPipeline = composePipeline<unknown>(
   timeoutMiddleware(5000),
   cacheMiddleware(300000),
 );

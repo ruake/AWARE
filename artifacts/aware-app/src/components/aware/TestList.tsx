@@ -153,7 +153,7 @@ export function TestList({
 
   React.useEffect(() => {
     onPageChange(1);
-  }, [sortKey, sortDir]);
+  }, [sortKey, sortDir, onPageChange]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {

@@ -243,14 +243,14 @@ export class ChromeProvider implements IProvider {
 
     this._initPromise = (async () => {
       try {
-        if (typeof (window as any).LanguageModel?.availability === "function") {
-          const r = await (window as any).LanguageModel.availability();
+        if (typeof window.LanguageModel?.availability === "function") {
+          const r = await window.LanguageModel.availability();
           if (r === "available") return "available";
           if (r === "downloading" || r === "downloadable") return "downloading";
           return "unavailable";
         }
-        if (typeof (window as any).ai?.languageModel?.capabilities === "function") {
-          const api = (window as any).ai.languageModel;
+        if (typeof window.ai?.languageModel?.capabilities === "function") {
+          const api = window.ai.languageModel;
           const r = await api.capabilities();
           const avail = typeof r === "object" ? r.available : r;
           if (avail === "readily") return "available";

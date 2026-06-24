@@ -16,7 +16,7 @@ export type EventName = keyof AwareEventMap;
 export type EventPayload<K extends EventName> = AwareEventMap[K];
 
 export class TypedEventBus {
-  private listeners: Map<EventName, Set<(payload: any) => void>> = new Map();
+  private listeners: Map<EventName, Set<(payload: unknown) => void>> = new Map();
 
   emit<K extends EventName>(event: K, payload: EventPayload<K>): void {
     const handlers = this.listeners.get(event);
