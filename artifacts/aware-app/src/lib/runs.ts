@@ -161,12 +161,15 @@ export const computeDiffRows = memoize(
       const candStatus: "PASS" | "FAIL" = cand?.status === "PASS" ? "PASS" : "FAIL";
       const durBase: number = base?.duration ?? 0;
       const durCand: number = cand?.duration ?? 0;
-      const durDiff: number = durBase > 0 ? Math.abs(durCand - durBase) / durBase : 0;
+      // Signed ratio: positive = candidate is slower, negative = candidate is faster.
+      // Only slowdowns are flagged as "duration" regressions; improvements stay "unchanged".
+      const DURATION_CHANGE_THRESHOLD = 0.25; // 25% slower → notable regression
+      const durSlowdown: number = durBase > 0 ? (durCand - durBase) / durBase : 0;
 
       let state: DiffRow["state"];
       if (baseStatus === "PASS" && candStatus === "FAIL") state = "regression";
       else if (baseStatus === "FAIL" && candStatus === "PASS") state = "fixed";
-      else if (durDiff > 0.25 && baseStatus === candStatus) state = "duration";
+      else if (durSlowdown > DURATION_CHANGE_THRESHOLD && baseStatus === candStatus) state = "duration";
       else state = "unchanged";
 
       return {

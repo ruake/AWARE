@@ -21,7 +21,7 @@ const PANEL_LABELS: Record<string, string> = {
   dashboard: "Overview",
   runs: "Run History",
   compare: "Comparison",
-  trends: "Analytics",
+  trends: "Trends",
   suites: "Suites",
   tests: "Test Explorer",
   copilot: "AWARE Copilot",

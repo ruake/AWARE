@@ -8,6 +8,7 @@ export interface CiConfig {
   version: string;
   project: string;
   description: string;
+  promotionGate: { threshold: number; description: string };
   suites: CiSuite[];
   environments: CiEnvironment[];
   workflow: CiWorkflowRef;
@@ -50,20 +51,36 @@ export function generateCiConfig(): CiConfig {
   const tests = getTestCases();
   const envConfigs = getEnvConfigs();
 
+  // Explicit runner mapping — all recognised test types must be listed here.
+  // Adding a new testType without updating this map is a build-time type error.
+  const RUNNER_MAP: Record<string, "playwright" | "pytest"> = {
+    web: "playwright",
+    playwright: "playwright",
+    pytest: "pytest",
+    puppeteer: "pytest",
+    selenium: "pytest",
+    api: "pytest",
+    http: "pytest",
+    edgeworker: "pytest",
+    transaction: "pytest",
+  };
+
   return {
     version: "3.0",
     project: "A.W.A.R.E. — Akamai Web Analytics Regression Engine",
     description:
       "Auto-generated Akamai CDN regression test configuration. " +
       "Playwright + pytest suites running via GitHub Actions across QA, UAT, and PROD.",
+    promotionGate: {
+      threshold: PROMOTION_GATE_THRESHOLD,
+      description: `UAT regression suite must achieve ≥ ${Math.round(PROMOTION_GATE_THRESHOLD * 100)}% pass rate before PROD property activation.`,
+    },
     suites: suites.map((s) => {
       const suiteTests = tests.filter((t) => s.testIds.includes(t.id));
       const cats = [...new Set(suiteTests.map((t) => t.category))];
       const runners = [
         ...new Set(
-          suiteTests.map((t) =>
-            t.testType === "pytest" || t.testType === "puppeteer" || t.testType === "selenium" ? "pytest" : t.testType === "web" ? "playwright" : "pytest",
-          ),
+          suiteTests.map((t) => RUNNER_MAP[t.testType] ?? "pytest"),
         ),
       ];
       return {

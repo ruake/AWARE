@@ -20,20 +20,27 @@ export class IQRStrategy implements AnomalyStrategy {
     const latest = entries[entries.length - 1];
     
     if (latest.duration > upperLimit) {
-      // For compatibility with AnomalyResult, we calculate a pseudo z-score
-      // or just use a value that indicates it's above the threshold.
-      // Since AnomalyResult requires a zScore, we'll estimate one or just use 2.0 as a baseline for "medium" severity if it's an outlier.
+      // Detection: IQR method — robust to outliers. The IQR fence decides *if* this
+      // is an anomaly. Severity is then expressed as how many IQR-widths the value
+      // exceeds the upper fence, giving a scale-free "excess ratio".
+      // zScore is also retained for AnomalyResult interface compatibility, computed
+      // from stdDev of the full distribution.
       const mean = durations.reduce((s, v) => s + v, 0) / n;
       const variance = durations.reduce((s, v) => s + (v - mean) ** 2, 0) / n;
       const stdDev = Math.sqrt(variance) || 1;
       const zScore = (latest.duration - mean) / stdDev;
+
+      // IQR-relative excess: how many fence-widths above the upper fence.
+      const excessRatio = (latest.duration - upperLimit) / (iqr || 1);
+      const severity: "critical" | "high" | "medium" =
+        excessRatio > 2 ? "critical" : excessRatio > 1 ? "high" : "medium";
 
       return {
         testId,
         testName: latest.name,
         metric: "latency",
         zScore,
-        severity: zScore > 3 ? "critical" : (zScore > 2.5 ? "high" : "medium"),
+        severity,
         lastValue: latest.duration,
         avgValue: Math.round(mean),
         stdDev: Math.round(stdDev),

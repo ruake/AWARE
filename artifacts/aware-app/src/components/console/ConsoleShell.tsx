@@ -76,7 +76,7 @@ function activeIdFromPath(path: string): string {
   const seg = path.split("/")[1];
   const map: Record<string, string> = {
     runs: "runs", compare: "compare", trends: "trends", analytics: "trends",
-    tests: "tests", copilot: "copilot", settings: "settings", about: "about",
+    tests: "tests", suites: "tests", copilot: "copilot", settings: "settings", about: "about",
   };
   return map[seg] ?? "dashboard";
 }
@@ -229,7 +229,9 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
 
         <button
           onClick={() => setSidebarOpen((p) => !p)}
-          title="Toggle sidebar"
+          title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          aria-expanded={sidebarOpen}
           style={{
             width: 32, height: 32, padding: 0, border: "1px solid var(--proof-border-light)",
             background: "transparent", cursor: "pointer", color: "var(--proof-text-muted)",

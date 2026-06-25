@@ -142,7 +142,7 @@ export default function Dashboard() {
         >
           <HeroKpiCard label="Pass Rate" value={kpis.passRate} suffix="%" delta={kpis.passTrend} accentColor={chartColor} icon={<Activity />} onClick={() => navigate("/trends")} />
           <HeroKpiCard label="Total Runs" value={kpis.total} delta={1} deltaLabel="new" accentColor="var(--proof-blue)" icon={<Zap />} onClick={() => navigate("/runs")} />
-          <HeroKpiCard label="Failures" value={kpis.failedRuns} delta={sortedRuns.length >= 2 ? (sortedRuns[0]?.failures ?? 0) - (sortedRuns[1]?.failures ?? 0) : 0} invertDelta accentColor={kpis.failedRuns > 0 ? "var(--proof-red)" : "var(--proof-green)"} icon={<XCircle />} onClick={() => navigate("/runs")} />
+          <HeroKpiCard label="Failures" value={kpis.failedRuns} delta={sortedRuns.length >= 2 ? (sortedRuns[0]?.failures ?? 0) - (sortedRuns[1]?.failures ?? 0) : 0} invertDelta accentColor={kpis.failedRuns > 0 ? "var(--proof-red)" : "var(--proof-green)"} icon={<XCircle />} onClick={() => navigate("/runs?status=FAIL")} />
           <HeroKpiCard label="Regressions" value={kpis.regressions} delta={kpis.regressions} invertDelta accentColor={kpis.regressions > 0 ? "var(--proof-red)" : "var(--proof-green)"} icon={<AlertTriangle />} onClick={() => navigate("/compare")} />
         </motion.section>
       </div>

@@ -86,7 +86,7 @@ describe('runs.ts', () => {
       expect(diff[0].state).toBe('fixed');
     });
 
-    it('should detect duration changes (> 25%)', () => {
+    it('should detect duration slowdowns (candidate > 25% slower than base)', () => {
       globalThis.mockResults = {
         base: [{ id: '1', testCaseId: '1', runId: 'base', name: 'Test 1', status: 'PASS', duration: 100, category: 'A', suite: 'S', evidence: {} as any, filmstrip: [] }],
         cand: [{ id: '2', testCaseId: '1', runId: 'cand', name: 'Test 1', status: 'PASS', duration: 130, category: 'A', suite: 'S', evidence: {} as any, filmstrip: [] }]
@@ -95,6 +95,19 @@ describe('runs.ts', () => {
 
       const diff = computeDiffRows('base', 'cand');
       expect(diff[0].state).toBe('duration');
+    });
+
+    it('should NOT flag duration improvements (candidate faster than base) as "duration"', () => {
+      // Candidate is 30% faster — this is an improvement, not a regression
+      globalThis.mockResults = {
+        base: [{ id: '1', testCaseId: '1', runId: 'base', name: 'Test 1', status: 'PASS', duration: 100, category: 'A', suite: 'S', evidence: {} as any, filmstrip: [] }],
+        cand: [{ id: '2', testCaseId: '1', runId: 'cand', name: 'Test 1', status: 'PASS', duration: 70,  category: 'A', suite: 'S', evidence: {} as any, filmstrip: [] }]
+      };
+      (computeDiffRows as any).clear();
+
+      const diff = computeDiffRows('base', 'cand');
+      // A 30% improvement must be "unchanged", not "duration"
+      expect(diff[0].state).toBe('unchanged');
     });
 
     it('should mark as unchanged when status and duration (<= 25%) are similar', () => {

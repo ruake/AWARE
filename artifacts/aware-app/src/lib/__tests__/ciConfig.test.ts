@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { generateCiConfig, generateCiConfigYaml, downloadCiConfig } from "../ciConfig";
+import { generateCiConfig, generateCiConfigYaml, downloadCiConfig, PROMOTION_GATE_THRESHOLD } from "../ciConfig";
 
 vi.mock("../data", () => ({
   getTestSuites: vi.fn(),
@@ -179,6 +179,48 @@ describe("generateCiConfig", () => {
     (getTestSuites as ReturnType<typeof vi.fn>).mockReturnValue([]);
     const config = generateCiConfig();
     expect(config.suites).toEqual([]);
+  });
+
+  it("includes promotionGate with correct threshold (critical business rule)", () => {
+    const config = generateCiConfig();
+    expect(config.promotionGate).toBeDefined();
+    expect(config.promotionGate.threshold).toBe(PROMOTION_GATE_THRESHOLD);
+    expect(config.promotionGate.threshold).toBe(0.95);
+    expect(config.promotionGate.description).toContain("95%");
+    expect(config.promotionGate.description).toContain("UAT");
+    expect(config.promotionGate.description).toContain("PROD");
+  });
+
+  it("PROMOTION_GATE_THRESHOLD is exported and equals 0.95", () => {
+    expect(PROMOTION_GATE_THRESHOLD).toBe(0.95);
+  });
+
+  it("maps 'http' and 'edgeworker' testTypes to pytest runner", () => {
+    const suiteWithHttp: typeof mockSuites = [
+      {
+        ...mockSuites[0],
+        testIds: ["test_http", "test_ew"],
+      },
+    ];
+    const httpTests: TestCase[] = [
+      { ...mockTestCases[0], id: "test_http", testType: "http" },
+      { ...mockTestCases[0], id: "test_ew", testType: "edgeworker" },
+    ];
+    (getTestSuites as ReturnType<typeof vi.fn>).mockReturnValue(suiteWithHttp);
+    (getTestCases as ReturnType<typeof vi.fn>).mockReturnValue(httpTests);
+    const config = generateCiConfig();
+    expect(config.suites[0].runners).toContain("pytest");
+    expect(config.suites[0].runners).not.toContain("playwright");
+  });
+
+  it("maps 'web' testType to playwright runner", () => {
+    const webOnly: TestCase[] = [{ ...mockTestCases[0], id: "test_1", testType: "web" }];
+    const suiteWebOnly = [{ ...mockSuites[0], testIds: ["test_1"] }];
+    (getTestSuites as ReturnType<typeof vi.fn>).mockReturnValue(suiteWebOnly);
+    (getTestCases as ReturnType<typeof vi.fn>).mockReturnValue(webOnly);
+    const config = generateCiConfig();
+    expect(config.suites[0].runners).toContain("playwright");
+    expect(config.suites[0].runners).not.toContain("pytest");
   });
 
   it("handles empty test cases within a suite", () => {

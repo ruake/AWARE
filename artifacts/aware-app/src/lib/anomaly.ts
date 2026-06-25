@@ -18,7 +18,10 @@ export function computeAnomalyScores(): AnomalyScore[] {
   const durMean = durations.reduce((s, v) => s + v, 0) / n;
   const durStd = Math.sqrt(durations.reduce((s, v) => s + (v - durMean) ** 2, 0) / n) || 1;
 
-  return RUNS.map((run, _i) => {
+  const failMean = RUNS.reduce((s, r) => s + r.failures, 0) / n;
+  const maxFailures = Math.max(...RUNS.map((r) => r.failures), 0) || 1;
+
+  return RUNS.map((run) => {
     const passRateZ = (passMean - run.passPct) / passStd;
     const durationZ = (run.durationMs - durMean) / durStd;
 
@@ -26,16 +29,17 @@ export function computeAnomalyScores(): AnomalyScore[] {
     if (passRateZ > 2) flags.push("pass-rate-drop");
     if (passRateZ > 3) flags.push("critical-pass-rate-drop");
     if (durationZ > 2) flags.push("slow-run");
-    if (run.failures > (RUNS.reduce((s, r) => s + r.failures, 0) / n) * 2)
-      flags.push("high-failures");
+    if (run.failures > failMean * 2) flags.push("high-failures");
 
+    // Weighted composite: 40% pass-rate anomaly, 30% duration anomaly, 30% failure ratio.
+    // Clamped to [0, 1] so callers can treat it as a probability-like severity.
     const overallAnomaly = Math.min(
       1,
       Math.max(
         0,
         passRateZ * 0.4 +
           durationZ * 0.3 +
-          (run.failures / (RUNS.length > 0 ? (Math.max(...RUNS.map((r) => r.failures)) || 1) : 1)) * 0.3,
+          (run.failures / maxFailures) * 0.3,
       ),
     );
 
