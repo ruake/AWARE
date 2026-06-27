@@ -1,155 +1,351 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useStore } from "@/lib/store";
 import { computeDiff } from "@/lib/analytics";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftRight, CheckCircle2, XCircle, MinusCircle, PlusCircle, Search } from "lucide-react";
+import {
+  Pagination, PaginationContent, PaginationItem,
+  PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis,
+} from "@/components/ui/pagination";
+import { ArrowLeftRight, CheckCircle2, XCircle, MinusCircle, Search, Copy, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { usePagination } from "@/hooks/use-pagination";
+
+const PAGE_SIZE = 25;
 
 export default function Compare() {
-  const runs = useStore(state => state.runs);
-  const getTestResultsByRunId = useStore(state => state.getTestResultsByRunId);
-  
-  const searchParams = new URLSearchParams(window.location.search);
-  
-  const [baseId, setBaseId] = useState(searchParams.get("baseline") || runs[1]?.id || "");
-  const [candId, setCandId] = useState(searchParams.get("candidate") || runs[0]?.id || "");
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all"|"regressions"|"fixed">("all");
+  const runs        = useStore(state => state.runs);
+  const testResults = useStore(state => state.testResults);
 
-  const baseResults = baseId ? getTestResultsByRunId(baseId) : [];
-  const candResults = candId ? getTestResultsByRunId(candId) : [];
-  
-  const diffs = computeDiff(baseResults, candResults);
-  
-  const filteredDiffs = diffs.filter(d => {
-    if (search && !d.name.toLowerCase().includes(search.toLowerCase())) return false;
-    if (filter === "regressions" && d.status !== "regression") return false;
-    if (filter === "fixed" && d.status !== "fixed") return false;
-    return true;
-  });
+  // Sort runs newest-first for the select options
+  const sortedRuns = useMemo(
+    () => [...runs].sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime()),
+    [runs],
+  );
 
-  const summary = {
+  const urlParams = new URLSearchParams(window.location.search);
+  const [baseId, setBaseId] = useState(urlParams.get("baseline") || sortedRuns[1]?.id || "");
+  const [candId, setCandId] = useState(urlParams.get("candidate") || sortedRuns[0]?.id || "");
+  const [search, setSearch] = useState(urlParams.get("q") || "");
+  const [filter, setFilter] = useState<"all" | "regressions" | "fixed" | "unchanged">("all");
+  const [copied, setCopied] = useState(false);
+
+  // Stable memoized results — avoids new array refs on each render
+  const baseResults = useMemo(
+    () => testResults.filter(r => r.runId === baseId),
+    [testResults, baseId],
+  );
+  const candResults = useMemo(
+    () => testResults.filter(r => r.runId === candId),
+    [testResults, candId],
+  );
+
+  const diffs = useMemo(() => computeDiff(baseResults, candResults), [baseResults, candResults]);
+
+  const summary = useMemo(() => ({
     regressions: diffs.filter(d => d.status === "regression").length,
-    fixed: diffs.filter(d => d.status === "fixed").length,
-    unchanged: diffs.filter(d => d.status === "unchanged").length
-  };
+    fixed:       diffs.filter(d => d.status === "fixed").length,
+    unchanged:   diffs.filter(d => d.status === "unchanged").length,
+    newTests:    diffs.filter(d => d.status === "new").length,
+  }), [diffs]);
 
-  const swap = () => {
-    setBaseId(candId);
-    setCandId(baseId);
+  const filteredDiffs = useMemo(() =>
+    diffs.filter(d => {
+      if (search && !d.name.toLowerCase().includes(search.toLowerCase())) return false;
+      if (filter === "regressions" && d.status !== "regression") return false;
+      if (filter === "fixed"       && d.status !== "fixed")       return false;
+      if (filter === "unchanged"   && d.status !== "unchanged")   return false;
+      return true;
+    }),
+    [diffs, search, filter],
+  );
+
+  const pg = usePagination(filteredDiffs, PAGE_SIZE);
+
+  const swap = () => { setBaseId(candId); setCandId(baseId); };
+
+  function copyShareUrl() {
+    const url = `${window.location.origin}${window.location.pathname}?baseline=${baseId}&candidate=${candId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  const isReady = baseId && candId && baseId !== candId;
+
+  const filterButtons: Array<{ key: typeof filter; label: string; count: number; variant?: string }> = [
+    { key: "all",         label: "All",         count: diffs.length },
+    { key: "regressions", label: "Regressions", count: summary.regressions },
+    { key: "fixed",       label: "Fixed",       count: summary.fixed },
+    { key: "unchanged",   label: "Unchanged",   count: summary.unchanged },
+  ];
+
+  const runLabel = (id: string) => {
+    const r = sortedRuns.find(r => r.id === id);
+    if (!r) return id;
+    return `${r.id} · ${r.env} ${r.network} · ${r.passPct}% · ${r.status}`;
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Compare Runs</h1>
+        {isReady && (
+          <Button variant="outline" size="sm" className="gap-2" onClick={copyShareUrl}>
+            {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+            {copied ? "Copied!" : "Share URL"}
+          </Button>
+        )}
       </div>
 
+      {/* Run selectors */}
       <Card className="bg-card">
-        <CardContent className="p-6 flex flex-col md:flex-row items-center gap-6">
+        <CardContent className="p-6 flex flex-col md:flex-row items-end gap-4">
           <div className="flex-1 w-full">
-            <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Baseline Run</label>
-            <select 
-              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={baseId} onChange={e => setBaseId(e.target.value)}
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+              Baseline Run
+            </label>
+            <select
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={baseId}
+              onChange={e => setBaseId(e.target.value)}
             >
-              {runs.map(r => <option key={r.id} value={r.id}>{r.id} - {r.env} ({r.passPct}%)</option>)}
+              <option value="">— select run —</option>
+              {sortedRuns.map(r => (
+                <option key={r.id} value={r.id} disabled={r.id === candId}>
+                  {runLabel(r.id)}
+                </option>
+              ))}
             </select>
+            {baseId && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {baseResults.length} test results loaded
+              </p>
+            )}
           </div>
-          <Button variant="outline" size="icon" className="rounded-full mt-6" onClick={swap}>
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full shrink-0 mb-1"
+            onClick={swap}
+            title="Swap baseline and candidate"
+          >
             <ArrowLeftRight className="w-4 h-4" />
           </Button>
           <div className="flex-1 w-full">
-            <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Candidate Run</label>
-            <select 
-              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={candId} onChange={e => setCandId(e.target.value)}
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+              Candidate Run
+            </label>
+            <select
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={candId}
+              onChange={e => setCandId(e.target.value)}
             >
-              {runs.map(r => <option key={r.id} value={r.id}>{r.id} - {r.env} ({r.passPct}%)</option>)}
+              <option value="">— select run —</option>
+              {sortedRuns.map(r => (
+                <option key={r.id} value={r.id} disabled={r.id === baseId}>
+                  {runLabel(r.id)}
+                </option>
+              ))}
             </select>
+            {candId && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {candResults.length} test results loaded
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {baseId && candId && baseId !== candId ? (
+      {!isReady ? (
+        <div className="p-12 text-center border rounded-lg border-dashed text-muted-foreground">
+          {!baseId || !candId
+            ? "Select two different runs above to compare their test results."
+            : "Baseline and candidate must be different runs."}
+        </div>
+      ) : (
         <>
-          <div className="grid grid-cols-3 gap-4">
-            <Card className="border-destructive/20 bg-destructive/5">
+          {/* Summary cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="border-destructive/20 bg-destructive/5 cursor-pointer hover:border-destructive/50 transition" onClick={() => setFilter("regressions")}>
               <CardContent className="p-4 flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-destructive font-medium mb-1">Regressions</p>
+                  <p className="text-xs text-destructive font-semibold uppercase mb-1">Regressions</p>
                   <p className="text-3xl font-bold text-destructive">{summary.regressions}</p>
                 </div>
-                <XCircle className="w-8 h-8 text-destructive/50" />
+                <XCircle className="w-8 h-8 text-destructive/40" />
               </CardContent>
             </Card>
-            <Card className="border-emerald-500/20 bg-emerald-500/5">
+            <Card className="border-emerald-500/20 bg-emerald-500/5 cursor-pointer hover:border-emerald-500/50 transition" onClick={() => setFilter("fixed")}>
               <CardContent className="p-4 flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mb-1">Fixed</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold uppercase mb-1">Fixed</p>
                   <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{summary.fixed}</p>
                 </div>
-                <CheckCircle2 className="w-8 h-8 text-emerald-500/50" />
+                <CheckCircle2 className="w-8 h-8 text-emerald-500/40" />
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:border-primary/30 transition" onClick={() => setFilter("unchanged")}>
               <CardContent className="p-4 flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium mb-1">Unchanged</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase mb-1">Unchanged</p>
                   <p className="text-3xl font-bold">{summary.unchanged}</p>
                 </div>
                 <MinusCircle className="w-8 h-8 text-muted-foreground/30" />
               </CardContent>
             </Card>
+            <Card className="cursor-pointer hover:border-primary/30 transition" onClick={() => setFilter("all")}>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase mb-1">Total Tests</p>
+                  <p className="text-3xl font-bold">{diffs.length}</p>
+                </div>
+                <ArrowLeftRight className="w-8 h-8 text-muted-foreground/30" />
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="flex gap-4 mb-4">
-            <div className="relative flex-1 max-w-md">
+          {/* Filter bar */}
+          <div className="flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Search tests..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
+              <Input
+                placeholder="Search test name..."
+                className="pl-9"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+              {search && (
+                <button
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setSearch("")}
+                >
+                  <XCircle className="w-4 h-4" />
+                </button>
+              )}
             </div>
-            <div className="flex gap-2">
-              <Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>All</Button>
-              <Button variant={filter === "regressions" ? "destructive" : "outline"} onClick={() => setFilter("regressions")}>Regressions</Button>
-              <Button variant={filter === "fixed" ? "default" : "outline"} onClick={() => setFilter("fixed")}>Fixed</Button>
+            <div className="flex gap-2 flex-wrap">
+              {filterButtons.map(btn => (
+                <Button
+                  key={btn.key}
+                  size="sm"
+                  variant={filter === btn.key ? "default" : "outline"}
+                  className={
+                    filter === btn.key && btn.key === "regressions"
+                      ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      : filter === btn.key && btn.key === "fixed"
+                      ? "bg-emerald-500 text-white hover:bg-emerald-500/90"
+                      : ""
+                  }
+                  onClick={() => setFilter(btn.key)}
+                >
+                  {btn.label}
+                  <span className="ml-1.5 text-[10px] opacity-70">({btn.count})</span>
+                </Button>
+              ))}
             </div>
           </div>
 
-          <div className="space-y-3">
-            {filteredDiffs.map(diff => (
-              <div key={diff.id} className={`p-4 border rounded-lg flex items-center justify-between bg-card
-                ${diff.status === 'regression' ? 'border-destructive/40 bg-destructive/5' : ''}
-                ${diff.status === 'fixed' ? 'border-emerald-500/40 bg-emerald-500/5' : ''}
-              `}>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-sm mb-1">{diff.name}</h4>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      Base: <Badge variant="outline" className="text-[10px] uppercase">{diff.baseResult?.status || 'N/A'}</Badge>
+          {/* Diff list */}
+          <div className="space-y-2">
+            {pg.pageItems.map(diff => (
+              <div
+                key={diff.id}
+                className={`p-4 border rounded-lg flex items-center justify-between gap-4 bg-card transition
+                  ${diff.status === "regression" ? "border-destructive/40 bg-destructive/5" : ""}
+                  ${diff.status === "fixed"      ? "border-emerald-500/40 bg-emerald-500/5" : ""}
+                `}
+              >
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-sm mb-1 truncate" title={diff.name}>{diff.name}</h4>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      Baseline:
+                      <Badge
+                        variant={diff.baseResult?.status === "PASS" ? "outline" : diff.baseResult?.status === "FAIL" ? "destructive" : "secondary"}
+                        className={`text-[10px] ${diff.baseResult?.status === "PASS" ? "border-emerald-500 text-emerald-500" : ""}`}
+                      >
+                        {diff.baseResult?.status || "N/A"}
+                      </Badge>
                     </span>
                     <ArrowLeftRight className="w-3 h-3" />
-                    <span className="flex items-center gap-1.5">
-                      Cand: <Badge variant="outline" className="text-[10px] uppercase">{diff.candidateResult?.status || 'N/A'}</Badge>
+                    <span className="flex items-center gap-1">
+                      Candidate:
+                      <Badge
+                        variant={diff.candidateResult?.status === "PASS" ? "outline" : diff.candidateResult?.status === "FAIL" ? "destructive" : "secondary"}
+                        className={`text-[10px] ${diff.candidateResult?.status === "PASS" ? "border-emerald-500 text-emerald-500" : ""}`}
+                      >
+                        {diff.candidateResult?.status || "N/A"}
+                      </Badge>
                     </span>
+                    {diff.baseResult?.duration && diff.candidateResult?.duration && (
+                      <span className="text-muted-foreground">
+                        Δ duration:{" "}
+                        <span className={diff.candidateResult.duration > diff.baseResult.duration ? "text-destructive" : "text-emerald-500"}>
+                          {diff.candidateResult.duration > diff.baseResult.duration ? "+" : ""}
+                          {(diff.candidateResult.duration - diff.baseResult.duration).toFixed(0)}ms
+                        </span>
+                      </span>
+                    )}
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="shrink-0">
                   {diff.status === "regression" && <Badge variant="destructive">REGRESSION</Badge>}
-                  {diff.status === "fixed" && <Badge className="bg-emerald-500 text-white">FIXED</Badge>}
-                  {diff.status === "new" && <Badge variant="secondary">NEW</Badge>}
-                  {diff.status === "unchanged" && <span className="text-sm text-muted-foreground">Unchanged</span>}
+                  {diff.status === "fixed"       && <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white">FIXED</Badge>}
+                  {diff.status === "new"         && <Badge variant="secondary">NEW</Badge>}
+                  {diff.status === "unchanged"   && <span className="text-xs text-muted-foreground">Unchanged</span>}
                 </div>
               </div>
             ))}
-            {filteredDiffs.length === 0 && <div className="p-8 text-center text-muted-foreground border rounded-lg bg-card">No differences found for current filters.</div>}
+            {pg.pageItems.length === 0 && (
+              <div className="p-10 text-center text-muted-foreground border rounded-lg bg-card">
+                No differences match the current filter.
+              </div>
+            )}
           </div>
+
+          {/* Pagination for diffs */}
+          {filteredDiffs.length > PAGE_SIZE && (
+            <div className="flex items-center justify-between border-t border-border pt-4">
+              <p className="text-xs text-muted-foreground">
+                Showing {pg.from}–{pg.to} of {pg.total} diffs
+              </p>
+              <Pagination className="w-auto mx-0">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={e => { e.preventDefault(); if (pg.hasPrev) pg.setPage(p => p - 1); }}
+                      className={!pg.hasPrev ? "pointer-events-none opacity-40" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  {pg.pageRange().map((p, i) =>
+                    p === -1 ? (
+                      <PaginationItem key={`e-${i}`}><PaginationEllipsis /></PaginationItem>
+                    ) : (
+                      <PaginationItem key={p}>
+                        <PaginationLink
+                          isActive={p === pg.page}
+                          onClick={e => { e.preventDefault(); pg.setPage(p); }}
+                          className="cursor-pointer"
+                        >
+                          {p}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+                  )}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={e => { e.preventDefault(); if (pg.hasNext) pg.setPage(p => p + 1); }}
+                      className={!pg.hasNext ? "pointer-events-none opacity-40" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </>
-      ) : (
-        <div className="p-12 text-center border rounded-lg border-dashed text-muted-foreground mt-8">
-          Select two different runs to see a comparison.
-        </div>
       )}
     </div>
   );
