@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useStore } from "@/lib/store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,8 +25,12 @@ export default function RunDetail() {
   const params = useParams<{ runId: string }>();
   const runId = params.runId || "";
 
-  const run = useStore(state => state.getRunById(runId));
-  const results = useStore(state => state.getTestResultsByRunId(runId));
+  const run = useStore(state => state.runs.find(r => r.id === runId));
+  const testResults = useStore(state => state.testResults);
+  const results = useMemo(
+    () => testResults.filter(r => r.runId === runId),
+    [testResults, runId],
+  );
 
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [filter, setFilter] = useState<"ALL" | "PASS" | "FAIL" | "SKIPPED" | "FLAKY">("ALL");
