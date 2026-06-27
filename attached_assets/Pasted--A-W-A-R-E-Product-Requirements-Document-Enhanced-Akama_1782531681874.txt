@@ -1,0 +1,2382 @@
+# A.W.A.R.E. — Product Requirements Document (Enhanced)
+
+> **Akamai Web Analytics Regression Engine** (also branded "PROOF")
+>
+> **Domain**: CDN test observability dashboard for Playwright + pytest regression suites
+> **Platform**: React 19 + TypeScript 5.9 + Vite 7 SPA (single-page application)
+> **CI/CD**: GitHub Actions — scheduler-driven, config-as-code
+> **Data**: Runtime-fetched from orphan `data` branch on GitHub
+>
+> **This PRD excludes all UI/UX, visual design, look-and-feel, styling, animation, and layout concerns.**
+
+---
+
+**Revision**: 2.0 — Enhanced with risk register, tech debt inventory, edge case catalog, testing strategy, architecture contracts, security disclosures, scalability limits, and competitive analysis from 30 deep-dive audits (June 2026).
+
+---
+
+## Table of Contents
+
+1. [Product Overview](#1-product-overview)
+2. [Feature Catalog](#2-feature-catalog)
+3. [User Personas](#3-user-personas)
+4. [User Journeys](#4-user-journeys)
+5. [Data Contracts & Schema](#5-data-contracts--schema)
+6. [Feature Specifications (by Module)](#6-feature-specifications-by-module)
+7. [Workflow Engine](#7-workflow-engine)
+8. [Non-Functional Requirements](#8-non-functional-requirements)
+9. [Risk Register & Failure Modes](#9-risk-register--failure-modes)
+10. [Tech Debt Inventory](#10-tech-debt-inventory)
+11. [Edge Cases & Error States Catalog](#11-edge-cases--error-states-catalog)
+12. [Testing Strategy](#12-testing-strategy)
+13. [Architecture Contract Map](#13-architecture-contract-map)
+14. [Data Evolution & Versioning Strategy](#14-data-evolution--versioning-strategy)
+15. [Integration Dependency Map](#15-integration-dependency-map)
+16. [Config-as-Code Cross-Validation](#16-config-as-code-cross-validation)
+17. [State Management Architecture](#17-state-management-architecture)
+18. [Security Disclosures & Remediation](#18-security-disclosures--remediation)
+19. [Privacy & Compliance Requirements](#19-privacy--compliance-requirements)
+20. [AI Data Flow Governance](#20-ai-data-flow-governance)
+21. [Scalability & Capacity Limits](#21-scalability--capacity-limits)
+22. [Performance Budget & Bottlenecks](#22-performance-budget--bottlenecks)
+23. [Memory & Resource Management](#23-memory--resource-management)
+24. [Observability & Self-Monitoring](#24-observability--self-monitoring)
+25. [Error Handling Architecture](#25-error-handling-architecture)
+26. [Alerting & Notification Rules](#26-alerting--notification-rules)
+27. [Flakiness Computation Specification](#27-flakiness-computation-specification)
+28. [Anomaly Detection Architecture](#28-anomaly-detection-architecture)
+29. [Chart Data Pipeline Specification](#29-chart-data-pipeline-specification)
+30. [Data Freshness & Staleness SLA](#30-data-freshness--staleness-sla)
+31. [AI Provider Implementation Reality](#31-ai-provider-implementation-reality)
+32. [LangGraph Pipeline Unification Plan](#32-langgraph-pipeline-unification-plan)
+33. [AI Skills Coverage Matrix](#33-ai-skills-coverage-matrix)
+34. [Release & Deployment Strategy](#34-release--deployment-strategy)
+35. [Migration & Rollback Protocol](#35-migration--rollback-protocol)
+36. [Extensibility & Multi-Tenancy Roadmap](#36-extensibility--multi-tenancy-roadmap)
+37. [Competitive Gap Analysis](#37-competitive-gap-analysis)
+38. [Documentation Requirements](#38-documentation-requirements)
+39. [Cost Model & Infrastructure Budget](#39-cost-model--infrastructure-budget)
+40. [Glossary](#40-glossary)
+
+---
+
+## 1. Product Overview
+
+### 1.1 Problem Statement
+
+Akamai CDN properties are tested across 3 environment tiers (QA, UAT, PROD) with 2 networks each (staging, production) — 6 environments total. Teams run Playwright browser tests and pytest HTTP/functional tests against these environments on recurring schedules. There is no unified observability layer to:
+
+- Track pass/fail trends across environments over time
+- Compare baseline vs candidate runs for regression detection
+- Compute flakiness scores and detect anomalous pass-rate drops
+- Gate promotions from UAT → PROD based on objective pass-rate thresholds
+- Auto-discover test definitions from source code and correlate them with CI results
+- Provide an LLM-powered assistant that can answer questions about test health
+
+### 1.2 Solution
+
+A single-page dashboard application that:
+
+- Fetches CI run data, test results, and scheduler state at runtime from a GitHub `data` branch
+- Provides a read-only observability layer (no write-back from the app to the data branch)
+- Computes derived analytics (pass-rate trends, flakiness, anomaly scores, diff rows)
+- Integrates with an AI Copilot for natural-language querying of test health
+- Is driven entirely by config-as-code YAML files that define environments, suites, and Akamai properties
+
+### 1.3 Scope
+
+**In scope:**
+- Data ingestion from GitHub raw storage (JSON files on `data` branch)
+- In-memory reactive stores fed by runtime `fetch()` calls
+- Run history browsing, filtering, sorting, and drill-down
+- A/B run comparison with computed diff rows
+- Pass-rate trend charts, category heatmaps, flakiness leaderboards
+- Anomaly detection (Z-score, IQR) at test level and run level
+- AI Copilot with LangGraph analysis pipeline and multi-provider LLM support
+- Promotion gate tracking (UAT → PROD pass-rate threshold)
+- CI pipeline status display
+- Test case discovery (pytest AST, Playwright spec parser, Puppeteer, HTTP)
+- Test suite hierarchy management
+- Environment configuration (6 canonical envs with localStorage override)
+- CSV export of run data
+- Deep-link sharing via URL search params
+- Config-as-code YAML validation against TypeScript types
+- Scheduler controller (K8s-style reconciler) for cron-driven workflow dispatch
+- Badge generation for latest pass rate
+
+**Out of scope (current):**
+- Writing test results back to GitHub from the dashboard (data is CI-written only)
+- Real-time WebSocket streaming (data is polled on load and refreshed manually)
+- User authentication / authorization (single-user tool)
+- Database storage (all data is file-based JSON on orphan branch)
+- Mobile native apps
+- Multi-tenant / multi-account support
+
+---
+
+## 2. Feature Catalog
+
+### 2.1 Feature Index
+
+| ID | Feature | Module | Priority | User Value | Implementation Status |
+|----|---------|--------|----------|------------|----------------------|
+| F-01 | Run History Browser | Runs | P0 | See all CI runs, filter, search, sort | ✅ Functional |
+| F-02 | Run Detail Drill-Down | RunDetail | P0 | Inspect test results per run | ✅ Functional |
+| F-03 | A/B Run Comparison | Compare | P0 | Detect regressions between runs | ✅ Functional |
+| F-04 | Dashboard KPIs & Health | Dashboard | P0 | At-a-glance env health summary | ✅ Functional |
+| F-05 | Pass-Rate Trend Chart | Dashboard | P1 | Visualize pass rate over time | ✅ Data-driven |
+| F-06 | Category Heatmap | TestAnalytics | P1 | Test health by category × env | ⚠️ Hardcoded mock data |
+| F-07 | Flakiness Leaderboard | TestAnalytics | P1 | Identify flaky tests | ⚠️ Static "NO FLAKY TESTS" |
+| F-08 | Anomaly Detection | Analytics | P1 | Flag anomalous pass-rate drops | ⚠️ 4 non-integrated systems |
+| F-09 | AI Copilot | Copilot | P1 | Natural-language test analysis | ⚠️ Mock setTimeout response |
+| F-10 | Promotion Gate Tracking | Settings/Dash | P1 | Track UAT→PROD promotion readiness | ✅ Functional |
+| F-11 | CI Pipeline Status | Status | P1 | View ongoing CI pipeline state | ✅ Functional |
+| F-12 | Scheduler Status | Scheduler | P1 | See scheduler health & dispatch log | ✅ Functional |
+| F-13 | Test Case Browser | Tests | P1 | Browse auto-discovered tests | ✅ Functional |
+| F-14 | Test Suite Hierarchy | TestSuiteMgr | P2 | Manage suite→test mappings | ✅ Functional |
+| F-15 | Env Configuration | Settings | P1 | View/override env configs | ✅ Functional |
+| F-16 | CI Config Generator | Status | P2 | Generate CI YAML from UI | ✅ Functional |
+| F-17 | Live Status Feed | Pulse | P2 | Real-time feed of run events | 🔴 Dead (currentToast always null) |
+| F-18 | Sharing & Deep-Links | Sharing | P2 | Shareable run/config URLs | ⚠️ Offline-for-maintenance page |
+| F-19 | Local Data Persistence | Store | P1 | Survive refresh for settings | ✅ Functional |
+| F-20 | Data Validation Pipeline | Build | P0 | Prevent bad data from shipping | ⚠️ Schema files loaded but never validated |
+| F-21 | Test Discovery Automation | Discovery | P0 | Auto-detect tests from source | ✅ Functional |
+| F-22 | Run Recording from CI | CI | P0 | Record test results from workflows | ⚠️ No idempotency, no file locking |
+| F-23 | Scheduler Controller | CI | P0 | Cron-based workflow dispatch | ⚠️ Concurrent race condition |
+| F-24 | Config-as-Code Validation | Build | P1 | Cross-validate YAML + TypeScript | ⚠️ Gaps in env label cross-ref |
+| F-25 | Badge Generation | Build | P2 | SVG shield for latest pass rate | ✅ Functional |
+| F-26 | Run Frequency Analysis | Analytics | P2 | Compute runs/day metrics | ✅ Functional |
+| F-27 | Env Comparison (AI) | Copilot | P2 | AI compares env health | ❌ Not wired to UI |
+| F-28 | LLM Provider Abstraction | Copilot | P1 | Pluggable AI backends | ⚠️ Chrome AI only (OpenAI/WebLLM removed) |
+| F-29 | LangGraph Analysis Pipeline | Copilot | P2 | Multi-step agentic analysis | ⚠️ Dual graphs, neither wired to UI |
+| F-30 | Evidence Viewer | RunDetail | P1 | View HTTP waterfall & assertions | ✅ Functional |
+
+### 2.2 Priority Classification
+
+**P0 (Blocking — must ship before any release):**
+- F-22: Run Recording — no idempotency fix
+- F-23: Scheduler — no file-locking fix (concurrent data corruption)
+- F-20: Data Validation — schema files must actually validate
+- All P0 features (F-01 through F-04)
+
+**P1 (High — required for production readiness):**
+- F-06, F-07: Replace mock data with real analytics computation
+- F-08: Consolidate 4 anomaly systems into one
+- F-09: Wire real AI pipeline to Copilot UI
+- F-11, F-12: CI/Scheduler status reliability
+- F-28: Re-add OpenAI provider or document removal
+
+**P2 (Medium — nice to have):**
+- F-14, F-16, F-17, F-18, F-25, F-26, F-27, F-29
+
+### 2.3 Feature Dependencies
+
+```
+F-04 (Dashboard) ──depends-on──▶ F-21 (Data Ingestion)
+F-01 (Runs) ────────depends-on──▶ F-21
+F-02 (RunDetail) ───depends-on──▶ F-01, F-30
+F-03 (Compare) ─────depends-on──▶ F-01, F-30
+F-05 (Trends) ──────depends-on──▶ F-21
+F-06 (Heatmap) ─────depends-on──▶ F-21
+F-07 (Flakiness) ───depends-on──▶ F-21
+F-08 (Anomaly) ─────depends-on──▶ F-21
+F-09 (Copilot) ──────depends-on──▶ F-21, F-28, F-29
+F-10 (Promotion) ────depends-on──▶ F-01, F-24
+F-11 (CI Status) ────depends-on──▶ F-23
+F-12 (Scheduler) ────depends-on──▶ F-23
+F-13 (Tests) ────────depends-on──▶ F-21
+F-14 (Suites) ───────depends-on──▶ F-21
+F-15 (Env Config) ───depends-on──▶ F-24
+F-16 (CI Config) ────depends-on──▶ F-24
+F-22 (Record Run) ───depends-on──▶ F-21
+F-23 (Scheduler) ────depends-on──▶ F-22
+```
+
+### 2.4 Dead or Orphaned Code Inventory
+
+| Module | Status | Evidence |
+|--------|--------|----------|
+| `lib/eventBus.ts` | 🔴 Dead | 12 events defined, 3 partially emitted, ZERO subscribers |
+| `lib/notifications.ts` | 🔴 Dead | `currentToast` is always null; `window.__showToast` never registered |
+| `lib/stateMachine.ts` | 🔴 Orphaned | No known consumers of the generic state machine |
+| `lib/anomaly.ts` (run-level) | 🔴 Dead | Superseded by `anomalyDetection.ts` but never removed |
+| `lib/ai/` LangGraph pipeline | ⚠️ Orphaned | Never wired to any UI; dual-maintenance with `lib/copilot/` |
+| `pages/Sharing.tsx` | 🔴 Dead | Returns offline-for-maintenance message |
+| `pages/Pulse.tsx` | 🔴 Dead | Relies on dead event bus / toast pipeline |
+| `scripts/run-puppeteer.mjs` | 🔴 Dead | Unused — no Puppeteer tests in active use |
+| `scripts/generate-realistic-data.mjs` | 🔴 Dead | One-shot generator, never re-run |
+| `scripts/post-merge.sh` | 🔴 Dead | Git hook script never installed |
+| `scripts/hello.ts` | 🔴 Dead | Development scaffolding |
+
+---
+
+## 3. User Personas
+
+### 3.1 CDN Engineer (Primary)
+
+**Role**: Akamai property owner / CDN reliability engineer  
+**Goal**: Monitor test health across 6 environments, detect regressions, gate promotions  
+**Needs**:
+- See pass-rate trends for each environment over time
+- Compare two runs to identify new failures
+- Know when UAT pass rate drops below 95% (promotion blocked)
+- Investigate per-test failure evidence (HTTP waterfall, assertions)
+- Export run data for external reporting
+- Quick access to CI pipeline status
+
+**Frequency**: Daily (continuous monitoring) + during deployment windows  
+**Power user**: Uses URL deep-links to share specific runs or comparisons
+
+### 3.2 QA Engineer
+
+**Role**: Test author / suite maintainer  
+**Goal**: Ensure test coverage is accurate, tests are not flaky, suites are well-organized  
+**Needs**:
+- Browse auto-discovered tests and verify they map correctly
+- Review flakiness scores to identify problematic tests
+- Explore test suite hierarchy and suite→test assignments
+- Understand which environments each suite targets
+- Use AI Copilot to summarize failure patterns
+
+**Frequency**: Per sprint / on test changes
+
+### 3.3 CI/CD Engineer
+
+**Role**: Pipeline maintainer / DevOps  
+**Goal**: Ensure scheduler runs correctly, config is valid, runs are recorded  
+**Needs**:
+- Validate YAML config files against TypeScript types
+- View scheduler status (last run, dispatch log, GC activity)
+- See CI pipeline state (which workflows are running)
+- Generate CI config YAML from the dashboard
+- Monitor the reconciler loop
+
+**Frequency**: During pipeline setup/maintenance
+
+### 3.4 Engineering Manager
+
+**Role**: Stakeholder  
+**Goal**: High-level view of test health, release confidence  
+**Needs**:
+- Dashboard KPIs (overall pass rate, trend, regressions)
+- Promotion gate status
+- About page with system stats and data health
+- AI Copilot summarization for standup reporting
+
+**Frequency**: Weekly / per release cycle
+
+---
+
+## 4. User Journeys
+
+### Journey J-01: Daily Health Check
+
+**Actor**: CDN Engineer  
+**Trigger**: Start of shift / before deployment  
+**Flow**:
+1. Land on Dashboard → see 4 KPI cards (Pass Rate, Total Runs, Failures, Regressions)
+2. Inspect 3 TierCards (QA, UAT, PROD) — each shows avg pass rate + env list
+3. If any tier shows degradation (critical status), click "Investigate" in AnomalyBanner
+4. AnomalyBanner navigates to Compare page with the degraded run as candidate
+5. Select a known-good baseline run → view diff rows (regressions in red)
+6. Click a regression to see test details → expand assertion evidence
+7. Copy the full diagnostic link to share with the team
+
+**Edge cases**:
+- AnomalyBanner shown when regressions=0 but data is stale (>24h) → false alert
+- Compare page loads with one or both run IDs missing from data → recovery: show dropdown with all runs
+- URL params contain invalid run IDs → component should fall back to defaults gracefully
+
+**Success criteria**:
+- Engineer identifies failing tests within 3 clicks of landing
+- Regression diffs are computed correctly (true positives > false positives)
+- No data staleness beyond last CI run
+
+### Journey J-02: Run Investigation
+
+**Actor**: CDN or QA Engineer  
+**Trigger**: CI run shows unexpected failures  
+**Flow**:
+1. Navigate to Runs page (/runs)
+2. Filter by environment (e.g., QA), status (FAIL), or search by run ID
+3. Click a run row → RunDetail page (/runs/:runId)
+4. See summary stats (total/passed/failed/skipped)
+5. Filter test results by status: show only failures
+6. Expand a failed test row → view assertion details + evidence (HTTP request/response, timings)
+7. Optionally click "View Analytics" to see trend for that test over time
+8. Click "Compare" to diff this run against a previous passing run
+
+**Edge cases**:
+- Run has zero test results → show empty state with helpful message (not "0 results" table)
+- TestResult missing evidence field (schema violation) → graceful fallback with "Evidence not available"
+- Evidence filmstrip data URIs exceed memory → lazy-load on expand
+- runId in URL not found in store → show error state with link to /runs
+
+**Success criteria**:
+- Engineer finds root-cause evidence (specific assertion failure) within 5 clicks
+- URL params preserve state for sharing the exact view
+- Evidence includes complete HTTP waterfall (DNS, TCP, TLS, TTFB, download)
+
+### Journey J-03: Run Comparison (A/B Diff)
+
+**Actor**: CDN Engineer  
+**Trigger**: Regression detected / pre-deployment validation  
+**Flow**:
+1. Navigate to Compare page (/compare)
+2. Baseline dropdown auto-selects most recent run; candidate selects the earliest
+3. Two run selectors show run ID, env, status, date, pass rate
+4. Click Swap button to exchange baseline ↔ candidate
+5. View diff row list: each row shows test name, baseline status, candidate status, duration delta
+6. Rows color-coded: red = regression, green = fixed, grey = unchanged
+7. Search diffs by test name (URL param `q`)
+8. Filter diffs by state (regression/fixed only)
+9. Click a diff row to drill into that test's details
+
+**Edge cases**:
+- Both dropdowns selecting the same run → "Baseline and candidate must be different runs" message
+- Baseline date > candidate date → show waring icon but allow (the swap exists for this reason)
+- Run with 0 test results produces 0 diffs → empty state
+- 500+ diffs → performance degradation (O(n) comparison)
+- Duplicate test IDs across runs → deduplication required
+
+**Success criteria**:
+- Swap operation is O(1) — no double-inversion bug (confirmed fixed: swapped state deleted)
+- Durations delta correctly computed: candidate - baseline
+- Regressions and fixes are accurately computed from TestResult[] comparison
+- URL params `?baseline=X&candidate=Y` are shareable
+
+### Journey J-04: Flaky Test Investigation
+
+**Actor**: QA Engineer  
+**Trigger**: Periodic test maintenance  
+**Flow**:
+1. Navigate to TestAnalytics page (/trends)
+2. View CategoryHeatmap — per-category pass rates across environments
+3. View Flakiness leaderboard (tests sorted by flakiness score)
+4. Click a flaky test → navigate to its trend / detail
+5. Review historical pass/fail pattern to determine if test needs fixing or quarantining
+
+**Edge cases**:
+- Zero runs for a category → show N/A instead of 0% (misleading)
+- Test with only 1 run → flakiness undefined (needs minimum window of 7)
+- All tests pass in window → "No flaky tests detected" (current state — acceptable for this case)
+- Category combination exists for env but no runs → empty cell
+
+**Success criteria**:
+- Flakiness score is computed from N≥7 run history (alternating pass/fail = high flakiness)
+- Category heatmap is data-driven (not hardcoded mock data — currently broken)
+- Engineer can identify which tests need attention
+
+### Journey J-05: AI Copilot Analysis
+
+**Actor**: All personas  
+**Trigger**: Need for natural-language analysis  
+**Flow**:
+1. Navigate to Copilot page (/copilot)
+2. Choose from 4 suggestion buttons (e.g., "Analyze recent failures", "Compare environments")
+3. Type a natural-language query: "Which tests are most flaky in PROD?"
+4. Copilot processes query through LangGraph pipeline
+5. Response includes rich data (chart, table, etc.) and text summary
+6. User can continue the conversation, ask follow-ups
+7. Chat history persists to localStorage (7-day TTL)
+8. User can start a new thread, bookmark conversations, or use templates
+
+**Critical note**: This journey represents the INTENDED behavior. The CURRENT implementation returns a mock setTimeout response — neither the ai/ nor the copilot/ LangGraph pipeline is wired to the UI. This is the single biggest gap in the application.
+
+**Edge cases**:
+- Chrome AI (Gemini Nano) unavailable → show provider configuration prompt
+- Query returns no data → "No data matches your query" with suggestion to broaden
+- localStorage chat history exceeds 5MB → oldest entries evicted
+- 7-day TTL declared but never enforced in code → chat data persists indefinitely
+- Rate limiter never called in production pipeline → unlimited requests
+- Concurrent queries → abort previous in-flight request
+
+**Success criteria**:
+- Real LangGraph pipeline wired to Copilot UI (currently mock-only)
+- All data queries go through DataQueries.ts (the only sanctioned data access for AI)
+- Responses include at least one chart/table for data-rich queries
+- Responses ≤3 sentences of prose (enforced by chart standards)
+
+### Journey J-06: Promotion Gate Check
+
+**Actor**: CDN Engineer / Engineering Manager  
+**Trigger**: Before PROD property activation  
+**Flow**:
+1. Navigate to Dashboard → check PropertyStatusBar (always visible)
+2. See current pass rates for UAT/staging and UAT/production
+3. If UAT pass rate ≥ 95%, promotion gate is green
+4. If below threshold, see which suites are failing
+5. Navigate to Settings → Promotion Gates section
+6. View/adjust the pass-rate threshold slider (50–100%)
+7. Review promotion decision history from data store
+8. Make informed decision about PROD activation
+
+**Success criteria**:
+- PropertyStatusBar is rendered on every page (app-level)
+- 95% threshold is the default; override persists in localStorage
+- Promotion history is loaded from promotions.json
+
+### Journey J-07: CI Pipeline Monitoring
+
+**Actor**: CI/CD Engineer  
+**Trigger**: During deployment / incident response  
+**Flow**:
+1. Navigate to Status page (/status)
+2. View CI pipeline status: running/completed/failed workflows
+3. See scheduler status: last reconcile, dispatch log, GC runs
+4. Download or preview CI config YAML
+5. Copy config or regenerate as needed
+
+**Success criteria**:
+- CI pipeline status reflects real GitHub Actions workflow state
+- Scheduler status shows last 50 dispatch entries
+- CI config YAML is generated from current store data
+
+### Journey J-08: Test Discovery & Management
+
+**Actor**: QA Engineer  
+**Trigger**: After adding new tests to the codebase  
+**Flow**:
+1. Run `pnpm discover:tests` (or it runs in CI)
+2. discover-all.mjs orchestrates 4 discovery scripts
+3. Merge strategy: existing filmstrip/screenshot config preserved by scriptPath match
+4. Output: data/auto-tests.json
+5. In the dashboard, navigate to Tests page (/tests)
+6. Browse auto-discovered tests, search by name/ID/description
+7. View test details: category, priority, tags, script path
+8. Cross-reference with test suites
+
+**Success criteria**:
+- Discovery completes in < 30s
+- All existing test metadata preserved across re-discovery
+- No duplicate test IDs
+- Suite→test references remain valid
+
+### Journey J-09: Data Validation & Build
+
+**Actor**: CI/CD Engineer / Developer  
+**Trigger**: Before deployment / commit  
+**Flow**:
+1. Pre-commit hook runs `pnpm verify`
+2. Prebuild step (`pnpm build`) runs:
+   - `validate-data.mjs`: validates all 7 JSON data files against schema
+   - `validate-config.mjs`: validates YAML configs + cross-references + TypeScript alignment
+3. If any validation fails → build fails → deployment blocked
+
+**Critical gap**: `validate-data.mjs` loads `test-results.schema.json` but NEVER performs validation against it. The schema file acts as dead weight. Schema validation is implemented as manual TypeScript-level field checks, not against a formal JSON schema.
+
+**Success criteria**:
+- Schema validation actually executes against loaded schemas
+- Config validation catches: environment/enum drift between YAML and TypeScript
+- Build is blocked on any validation error
+
+### Journey J-10: Data Ingestion Lifecycle
+
+**Actor**: System (automated)  
+**Trigger**: App mount / page load  
+**Flow**:
+1. App.tsx mounts → DataGate component rendered
+2. DataGate calls `loadAllData()` once (guarded by `triggeredRef`)
+3. Phase 1 (parallel): Load runs + test suites
+4. Phase 2 (parallel): Load results + promotions + scheduler status + auto-discovered tests
+5. Each data module uses `fetchJson<T>(path)` with retry
+6. Each module stores data in module-level `let` bindings with pub/sub
+7. Components subscribe via `useSyncExternalStore` or custom subscriptions
+
+**Performance concern**: `loadAllData()` triggers 11 `notify()` calls during init — every subscriber recomputes 11 times. Each notify() clones the full data array for `_snapshot`. At 10K+ runs, this causes multi-second freezes on every load.
+
+**Edge cases**:
+- Network failure → retry 3× → show error panel with Retry button
+- Data loaded but has schema violations → show warning + render what's valid
+- Partial failure (some data loaded, some failed) → show warning + render available data
+- `_loaded` flag does NOT guard against re-fetch; a second page visit re-fetches all data
+- raw.githubusercontent.com has no SLA → rate limiting or 429 responses possible
+- `_loaded = true` moved AFTER `await fetchJson()` as retry-block fix, but retry never resets `_loaded` on success
+
+---
+
+## 5. Data Contracts & Schema
+
+### 5.1 Entity: Run
+
+```typescript
+interface Run {
+  id: string;
+  label: string;
+  suiteId: string;
+  envId: string;
+  env: "QA" | "UAT" | "PROD";
+  network: "staging" | "production";
+  status: "PASS" | "FAIL" | "RUNNING" | "PENDING" | "ERROR";
+  passPct: number;
+  failures: number;
+  duration: string;
+  durationMs: number;
+  started: string;
+  build: string;
+  rev: string;
+  conditions?: RunCondition[];
+  workflowRunId?: number;
+  updatedAt?: string;
+}
+```
+
+**Conditions** (K8s-inspired status sub-resource):
+
+```typescript
+interface RunCondition {
+  type: "Dispatched" | "WorkflowRunning" | "Completed" | "Passed" | "Reconciled";
+  status: "True" | "False" | "Unknown";
+  reason: string;
+  message: string;
+  lastTransitionTime: string;
+}
+```
+
+**Status derivation** (from conditions):
+
+| Completed | Passed | Status |
+|-----------|--------|--------|
+| True | True | PASS |
+| True | False | FAIL |
+| — | — | RUNNING (if WorkflowRunning=True) |
+| — | — | PENDING (dispatched but not active) |
+| GC'd | — | ERROR (>24h stale) |
+
+### 5.2 Entity: TestResult
+
+```typescript
+interface TestResult {
+  id: string;
+  testCaseId: string;
+  runId: string;
+  name: string;
+  status: "PASS" | "FAIL" | "SKIPPED" | "FLAKY" | "TIMEOUT" | "ERROR";
+  duration: number;
+  category: string;
+  assertions?: Assertion[];
+  tags?: string[];
+  error?: string;
+  flaky?: boolean;
+  screenshots?: string[];
+  filmstrip?: FilmstripFrame[];
+  retryCount?: number;
+  started?: string;
+}
+
+interface Assertion {
+  assertion: string;
+  expected: string;
+  actual: string;
+  passed: boolean;
+}
+
+interface Evidence {
+  request: { method: string; url: string; headers: Record<string, string>; body?: string };
+  response: { status: number; headers: Record<string, string>; body?: string; timings: Timing };
+  assertions: Assertion[];
+  filmstrip?: FilmstripFrame[];
+}
+
+interface Timing {
+  dnsLookup: number;
+  tcpConnect: number;
+  tlsHandshake: number;
+  ttfb: number;
+  download: number;
+  total: number;
+}
+
+interface FilmstripFrame {
+  id: string;
+  label: string;
+  dataUri: string;
+}
+```
+
+### 5.3 Entity: TestCase
+
+```typescript
+interface TestCase {
+  id: string;         // ad_0, pw_1, pu_2, ht_3, tc_4
+  name: string;
+  description: string;
+  category: string;
+  priority: "P0" | "P1" | "P2" | "P3";
+  severity: "critical" | "major" | "minor" | "trivial";
+  status: "active" | "deprecated" | "draft";
+  owner: string;
+  scriptPath: string;
+  testType: "playwright" | "pytest" | "puppeteer" | "http";
+  tags: string[];
+  assertions?: string[];
+  config?: Record<string, unknown>;
+  predicates?: Record<string, unknown>;
+  changelog: string[];
+  updatedAt: string;
+  githubPath?: string;
+}
+```
+
+### 5.4 Entity: TestSuite
+
+```typescript
+interface TestSuite {
+  id: string;
+  name: string;
+  description: string;
+  parentId?: string;
+  testIds: string[];
+  metadata?: {
+    schedule?: string;
+    parallelism?: number;
+    timeoutMinutes?: number;
+    environments?: string[];
+    runners?: ("playwright" | "pytest")[];
+    tags?: string[];
+  };
+}
+```
+
+### 5.5 Entity: DiffRow
+
+```typescript
+interface DiffRow {
+  id: string;
+  name: string;
+  status: "regression" | "fixed" | "unchanged" | "new" | "missing";
+  baseResult: TestResult | null;
+  candidateResult: TestResult | null;
+  changed: boolean;
+}
+```
+
+Computed by comparing TestResult[] of baseline run vs candidate run.
+
+### 5.6 Entity: PromotionDecision
+
+```typescript
+interface PromotionDecision {
+  runId: string;
+  suiteId: string;
+  decision: "promoted" | "blocked" | "pending";
+  decidedBy: string;
+  decidedAt: string;
+  score: number;
+}
+```
+
+### 5.7 Entity: SchedulerStatus
+
+```typescript
+interface SchedulerStatus {
+  lastRun: string;
+  status: "healthy" | "degraded" | "error";
+  suites: SuiteStatus[];
+  recentDispatches: DispatchLogEntry[];
+  summary: { totalSuites: number; activeRuns: number; pendingDispatches: number; lastGC: string | null };
+}
+
+interface SuiteStatus {
+  suiteId: string;
+  schedule: string;
+  lastRun: string | null;
+  lastConclusion: string | null;
+  activeRuns: number;
+}
+
+interface DispatchLogEntry {
+  suiteId: string;
+  environment: string;
+  dispatchedAt: string;
+  status: "success" | "failed";
+  workflowRunId: number;
+}
+```
+
+### 5.8 In-Memory Store Pattern
+
+```typescript
+// WARNING: This pattern has known bugs:
+// 1. _snapshot = [...DATA] creates a new array but if elements are objects,
+//    they are still shared references — shallow clone only.
+// 2. notify() during init causes subscriber thundering herd (11× per load).
+// 3. Mutating DATA directly while other code holds references to _snapshot
+//    causes zombie observation windows.
+```
+
+### 5.9 Data Files (JSON, fetched at runtime)
+
+| File | Location | Type | Schema Version Field |
+|------|----------|------|---------------------|
+| runs.json | data/runs.json | `Run[]` | ❌ Missing ($schema, version) |
+| test-results.json | data/test-results.json | `Record<runId, TestResult[]>` | ❌ Missing |
+| auto-tests.json | data/auto-tests.json | `TestCase[]` | ❌ Missing |
+| test-suites.json | data/test-suites.json | `TestSuite[]` | ❌ Missing |
+| promotions.json | data/promotions.json | `PromotionDecision[]` | ❌ Missing |
+| scheduler-status.json | data/scheduler-status.json | `SchedulerStatus` | ❌ Missing |
+| diff-results.json | data/diff-results.json | `DiffRow[]` | ❌ Missing |
+
+**Requirement**: All data files MUST include a `$schema` pointer and `version` field in the top-level object within 2 minor releases.
+
+### 5.10 Config Files (YAML, not fetched at runtime)
+
+| File | Purpose |
+|------|---------|
+| config/akamai-config.yml | Property metadata, EdgeWorker versions, runner settings, notifications |
+| config/environments.yml | 6 environment definitions (ids, URLs, IPs, property versions) |
+| config/test-suites.yml | Suite schedules, parallelism, env assignments, runner selection |
+
+### 5.11 localStorage Keys
+
+| Key | Purpose | TTL | Version Field | Migration Logic |
+|-----|---------|-----|---------------|-----------------|
+| aware-env-configs-v3 | Env config overrides | Permanent | `_v3` in name | ❌ None |
+| aware_test_cases_v2 | Test case local edits | Permanent | `_v2` in name | ❌ None |
+| aware_test_suites_v2 | Test suite local edits | Permanent | `_v2` in name | ❌ None |
+| aware_promotion_decisions | Cached promotion decisions | Permanent | ❌ None | ❌ None |
+| aware_copilot_chat | Chat history | 7 days (unenforced) | ❌ None | ❌ None |
+| aware_copilot_v5 | Current session | Session | `_v5` in name | ❌ None |
+| aware_copilot_threads_v1 | Thread list | Permanent | `_v1` in name | ❌ None |
+| aware_copilot_templates_v1 | Prompt templates | Permanent | `_v1` in name | ❌ None |
+| aware_copilot_bookmarks_v1 | Bookmarked conversations | Permanent | `_v1` in name | ❌ None |
+| aware_copilot_settings_v1 | AI settings | Permanent | `_v1` in name | ❌ None |
+| aware-settings-v1 | App settings (theme, threshold) | Permanent | `_v1` in name | ❌ None |
+
+**Critical gap**: ZERO migration logic exists. If a localStorage key format changes, old data is silently discarded on read. The `_v1`/`_v2`/`_v3`/`_v5` naming scheme is inconsistent (some use underscores, some use hyphens, some use only suffix, some use only prefix). The 7-day TTL for chat history is declared in code but never enforced — chat data persists indefinitely.
+
+---
+
+## 6. Feature Specifications (by Module)
+
+### 6.1 Data Ingestion (lib/dataFetcher.ts + lib/initData.ts + per-file store modules)
+
+**Purpose**: Fetch JSON data files from GitHub raw storage at runtime; hydrate in-memory stores.
+
+**Key behaviors**:
+- `fetchJson<T>(path)` resolves URL based on environment
+- Timeout: 10s per request with 3 retries, 1s delay
+- Progress tracking: `DataInitState` with 6 boolean readiness flags
+- React consumption: `useSyncExternalStore` for each data slice
+
+**Known issues**:
+- `_loaded` flag never reset on failure — page reload needed to retry
+- 11 notify() cascade during init causes thundering herd
+- Raw.githubusercontent.com has no SLA — no fallback/cache mechanism if GitHub is unreachable
+- No polling/refresh — data is loaded once per session
+
+### 6.2 Run Management (pages/Runs.tsx + pages/RunDetail.tsx + lib/runs.ts)
+
+**Purpose**: Browse, filter, sort, and inspect CI run records.
+
+**Run History (F-01)**:
+- Filter: environment (multi-select), status, suite, text search
+- Sort: run ID, env, status, pass rate, duration, started
+- Pagination: 30 rows per page (hardcoded)
+- CSV export with safe leading-character escaping
+
+**Run Detail (F-02)**:
+- Summary: total/passed/failed/skipped counts
+- Filter: status, category, text search
+- Expandable rows with assertion detail + evidence
+- Actions per test: "View Analytics", "View Definition", "Compare"
+
+**Known issues**:
+- `computeTestDetailForName` iterates ALL runs × ALL results = O(6000+) per call
+- `slice(0,50)` hardcoded pagination — at ~60 runs total, 10 extra rows hidden
+- Missing loading state for test result expansion (evidence fetch is sync but large)
+- Duplicate test IDs across runs not handled
+
+### 6.3 Run Comparison (pages/Compare.tsx + lib/runs.ts computeDiffRows)
+
+**Purpose**: Compare two runs to detect regressions and fixes.
+
+**Specification**:
+- URL: `/compare` with params `baseline`, `candidate`, `q`, `filter`
+- Diff computation: index candidate by testCaseId, compare each baseline result
+- Status mapping: PASS→FAIL = regression, FAIL→PASS = fixed, same = unchanged
+
+**Known issues**:
+- `window.location.href` replaced with wouter `navigate()` (confirmed fix)
+- Swap double-inversion removed (`swapped` state deleted, URL swap alone is correct)
+- 500+ diffs cause O(n) performance degradation
+- No masking/pagination for large diff sets
+
+### 6.4 Dashboard Analytics (pages/Dashboard.tsx + lib/hooks/useData.ts)
+
+**Purpose**: At-a-glance health summary with KPIs, tier health, pass-rate trends.
+
+**KPIs**: Total runs (filtered), overall pass rate, pass trend (delta), failed runs, regression count
+
+**Pass-Rate Trend (F-05)**: Area chart from data-driven pipeline — works correctly.
+
+**Anomaly Banner**: Shown when regressions > 0 or any tier degraded.
+
+### 6.5 Test Analytics (pages/TestAnalytics.tsx + lib/flakiness + lib/anomalyDetection)
+
+**⚠️ CRITICAL**: This entire page uses hardcoded mock data.
+
+| Component | Current State | Required State |
+|-----------|---------------|----------------|
+| AreaChart (trend) | 30 synthetic points | Data-driven from run history |
+| CategoryHeatmap | Hardcoded 2×3 mock matrix | Computed from test results × categories |
+| FlakinessTable | "NO FLAKY TESTS DETECTED" | Computed from N≥7 run history |
+| HeatmapCalendar | Empty data array | Computed from daily pass rate |
+
+This is a P1 blocking gap — the page exists and renders, but shows entirely fake data.
+
+### 6.6 AI Copilot (pages/Copilot.tsx + lib/ai/ + lib/copilot/)
+
+**⚠️ CRITICAL**: The Copilot page returns a mock setTimeout response. Two complete LangGraph pipelines exist in the codebase (lib/ai/ and lib/copilot/) but NEITHER is wired to the UI.
+
+**Architecture**:
+- 3 provider types: `"openai"`, `"webllm"`, `"chrome"`
+- Reality: Chrome AI (Gemini Nano) is fully implemented. OpenAI was completely removed in commit b65ca96. WebLLM was completely removed — only build config remnants remain.
+
+**Current Capabilities** (Chrome AI only):
+- Streaming responses
+- Abort support
+- Dual API version support (window.ai API shapes)
+
+**Current Gaps**:
+- Rate limiter exists but never called in production pipeline
+- Debug logger ring buffer of 500 entries, in-memory only
+- `supportsToolCalling = false` — no function calling in any provider
+- System prompt dumps ALL app state indiscriminately (no context filtering)
+- User queries stored in localStorage without TTL enforcement
+
+### 6.7 Environment Management (lib/envConfig.ts + config/environments.yml)
+
+**Purpose**: Define and override 6 canonical environments.
+
+**6 Environments**:
+
+| ID | Tier | Network |
+|----|------|---------|
+| qa_staging | QA | staging |
+| qa_prod | QA | production |
+| uat_staging | UAT | staging |
+| uat_prod | UAT | production |
+| prod_staging | PROD | staging |
+| prod_prod | PROD | production |
+
+**Known issues**:
+- `envConfig` type has unused `properties` field
+- LocalStorage key `aware-env-configs-v3` — v1 and v2 data silently lost
+- No validation that env IDs match GitHub workflow names in CI workflows
+
+### 6.8 Promotion Gate (lib/ciConfig.ts + lib/promotions.ts + Settings page)
+
+**Purpose**: Track and enforce pass-rate threshold for UAT→PROD promotion.
+
+**Specification**:
+- Default threshold: 95%
+- Configurable slider (50–100%), persisted to aware-settings-v1
+- Promotion history loaded from promotions.json
+
+### 6.9 CI Config Generator (lib/ciConfig.ts)
+
+**Purpose**: Generate CI workflow YAML from current app state.
+
+### 6.10 Test Discovery (scripts/discover-all.mjs + scripts/discover-*.{py,mjs})
+
+**Purpose**: Auto-discover test definitions from source code.
+
+**4 Discovery Sources**: pytest (AST), Playwright (regex), Puppeteer (regex), HTTP (regex)
+
+**Merge Strategy**: Preserve filmstrip/screenshot config by scriptPath match.
+
+### 6.11 Scheduler Controller (scripts/scheduler.mjs)
+
+**⚠️ CRITICAL**: No file-locking mechanism. Two concurrent scheduler instances simultaneously read `runs.json`, modify in memory, and write — the last writer wins, silently discarding the other's changes.
+
+**5 Phases per Tick**: Reconcile → Cron Eval + Dispatch → GC → Persist → Commit
+
+**Known issues**:
+- `git checkout data` before writing destroys local working tree if data branch has diverged
+- No lockfile or transaction — concurrent instances corrupt data
+- No tests (zero coverage for scheduler logic)
+- Force-push to data branch with potential history loss
+- After checkout, `git add -A` includes stale files from previous checkout
+
+### 6.12 Run Recording (scripts/record-run.mjs)
+
+**Purpose**: Record CI test results from GitHub Actions workflows.
+
+**Known issues**:
+- No idempotency: if called twice for same run, creates duplicate entries
+- Runs.json matches by suite+envId on RUNNING entry — if no RUNNING entry found, silently prepends new entry (masking misconfiguration)
+- No validation that env variables are set before processing
+
+### 6.13 Config Validation (scripts/validate-config.mjs)
+
+**Purpose**: Cross-validate YAML config files against each other and against TypeScript types.
+
+**Known issues**:
+- No validation that env IDs in YAML match TypeScript `Run.env` enum
+- No validation against actual GitHub workflow names
+- Config file size constraints exceed GitHub's 32KB limit in 2 sections (environments.yml expanded IP lists)
+
+### 6.14 Data Validation (scripts/validate-data.mjs)
+
+**⚠️ CRITICAL BUG**: This script loads `test-results.schema.json` into memory but NEVER validates any data against it. The schema file is dead weight. JSON files are validated via manual TypeScript-level field checks, not against formal JSON Schema definitions.
+
+### 6.15 Badge Generation (scripts/generate-badge.mjs)
+
+**Purpose**: Generate SVG health badge for README.
+
+---
+
+## 7. Workflow Engine
+
+### 7.1 CI/CD Pipeline Flow
+
+```
+[External Trigger]        [Cron: 15min]
+        │                       │
+        ▼                       ▼
+   run-tests.yml          scheduler.mjs
+  (GitHub Actions)        ├── Reconcile (poll GH)
+   ┌──────────────┐       ├── Cron Eval → Dispatch
+   │               │      ├── GC (>24h stale)
+   └──────────────┘       ├── Persist status
+        │                 └── Commit [skip ci]
+        ▼                        │
+   record-run.mjs                │
+   ├── Update run                │
+   ├── Enrich evidence            │
+   └── Write data files          │
+        │                        │
+        ▼                        ▼
+   ───────────────────────────────────
+   data branch (orphan, root level)
+   ├── runs.json
+   ├── test-results.json
+   ├── scheduler-status.json
+   └── ...
+              │ (runtime fetch)
+              ▼
+   AWARE Dashboard (React SPA)
+   ├── loadAllData() → hydrate stores
+   └── Render via useSyncExternalStore
+```
+
+**Failure modes**:
+- Scheduler and CI both write to data branch simultaneously → last-writer-wins corruption
+- `git checkout data` fails if data branch diverged → script exits without recovery
+- GitHub API rate limiting (5000 req/hr) → reconcile phase misses updates
+- Force-push loses history on data branch
+
+### 7.2 Pre-commit / Build Gate
+
+```
+Commit → simple-git-hooks → pnpm verify (tsc + eslint + prettier + vitest)
+    │
+    ▼ (pass/fail)
+CI Push → deploy.yml → validate-data + validate-config + typecheck + test + build
+```
+
+### 7.3 Data Flow (Runtime) — Currently Wired
+
+```
+raw.githubusercontent.com → fetchJson<T> → loadAllData() → module stores → React hooks → components
+```
+
+### 7.4 AI Copilot Pipeline — INTENDED (Currently Not Wired)
+
+```
+User query → Copilot page → runGraphAgent() → LangGraph DAG (7 stages) → Response
+```
+
+### 7.5 Config Validation Pipeline
+
+```
+config/*.yml → validate-config.mjs (4 passes + cross-refs + TypeScript alignment) → exit 0/1
+```
+
+---
+
+## 8. Non-Functional Requirements
+
+### 8.1 Performance
+
+| Metric | Target | Current Status |
+|--------|--------|----------------|
+| Initial data load | ≤5s (prod), ≤3s (dev) | ⚠️ Degraded by 11× notify cascade |
+| Page navigation | ≤500ms | ✅ Likely OK at current data scale |
+| Run filter/search | ≤200ms debounce | ⚠️ 88 filter computations per stat render |
+| CSV export | ≤1s for 500 runs | ✅ O(n) on filtered data |
+| Diff computation | ≤2s for 200-test runs | ⚠️ O(n) with no pagination for 500+ diffs |
+| Copilot response (OpenAI) | ≤5s | ❌ OpenAI provider removed |
+| Copilot response (WebLLM) | ≤15s | ❌ WebLLM provider removed |
+| Copilot response (Chrome AI) | ≤2s (on-device) | ✅ Functional |
+| AI chart generation | ≤1s | ⚠️ Mock pipeline only |
+| Discovery (all sources) | ≤30s | ✅ Functional |
+
+### 8.2 Reliability
+
+| Requirement | Target | Current Status |
+|-------------|--------|----------------|
+| Data load success rate | ≥99% | ⚠️ No fallback for raw.githubusercontent.com failure |
+| Schema validation coverage | 100% of required fields | ❌ Schema files loaded but never validated |
+| Store subscription delivery | 100% | ⚠️ `_snapshot` array cloning, not deep clone |
+| Scheduler tick reliability | 100% | ⚠️ No timer drift protection in reconciler |
+| GC accuracy | Zero false-positives | ✅ Timer-based |
+| AI response fallback | 100% | ⚠️ 3 use cases have no generation fallback |
+| localStorage persistence | Survives refresh | ✅ But no migration logic for format changes |
+| Build gate | Zero false-positives | ❌ Schema validation not enforced |
+| Link integrity | 100% | ✅ All URLs resolve |
+
+### 8.3 Data Integrity
+
+| Rule | Enforcement | Status |
+|------|-------------|--------|
+| Every run in runs.json must have entry in test-results.json | validate-data.mjs | ✅ Enforced |
+| Every test-results key must have matching run | validate-data.mjs | ✅ Enforced |
+| Every suite testId must reference valid test ID | validate-data.mjs | ✅ Enforced |
+| Run.env must be QA/UAT/PROD | validate-data.mjs + TypeScript | ✅ Enforced |
+| Evidence.timings must have all 6 numeric fields | validate-data.mjs | ✅ Enforced |
+| TestResult.assertions must be present | AGENTS.md | ⚠️ Convention only, not enforced by code |
+| TestResult.evidence must be present | AGENTS.md | ⚠️ Convention only |
+| Data files carry schema version | — | ❌ Not enforced |
+
+### 8.4 Compatibility
+
+| Requirement | Target | Status |
+|-------------|--------|--------|
+| Browser support | Chrome 120+, Firefox 120+, Safari 17+ | ✅ |
+| JavaScript | ES2022 | ✅ |
+| Package manager | pnpm 10.26.1 | ✅ |
+| Node.js | ≥20 | ✅ |
+| React | 19.1 | ✅ |
+| Vite | 7.3 | ✅ |
+| TypeScript | 5.9 | ✅ |
+| LLM providers | OpenAI, WebLLM, Chrome AI | ⚠️ Chrome AI only (others removed) |
+
+### 8.5 Security
+
+| Requirement | Implementation | Status |
+|-------------|----------------|--------|
+| No secrets in client code | API key via VITE_ env proxy | ⚠️ VITE_ env vars inlined into bundle |
+| CSP headers | Configured via Vite | ⚠️ 'unsafe-inline' in CSP |
+| Safe CSV export | Escaped | ✅ |
+| No XSS in rendered markdown | Sanitized | ✅ |
+| localStorage isolation | Prefix `aware_` | ✅ |
+| No stored credentials | Env-only | ✅ |
+
+**CRITICAL SECURITY ISSUE**: GitHub OAuth token exposed on disk at `.config/gh/hosts.yml`:
+```
+github.com:
+    user: ruake
+    oauth_token: REDACTED_OAUTH_TOKEN
+    git_protocol: https
+```
+
+---
+
+## 9. Risk Register & Failure Modes
+
+### 9.1 Critical Risks (RTO < 1 hour, potential data loss)
+
+| ID | Risk | Component | Likelihood | Impact | Mitigation |
+|----|------|-----------|------------|--------|------------|
+| R-01 | Concurrent scheduler instances corrupt runs.json | scheduler.mjs | Medium | High — silent data loss | Add file locking (lockfile per tick) |
+| R-02 | git checkout failure destroys working tree | scheduler.mjs | Low | Critical — working tree destroyed | Use `git worktree` instead of checkout |
+| R-03 | GitHub OAuth token leaked via repo | .config/gh/hosts.yml | Low | Critical — CI/CD compromise | Rotate token; add .gitignore entry |
+| R-04 | raw.githubusercontent.com rate limiting | dataFetcher.ts | Medium | High — app shows no data | Add stale cache fallback, exponential backoff |
+| R-05 | data branch force-push loses history | scheduler.mjs | Medium | High — no rollback path | Use non-force push with merge strategy |
+
+### 9.2 High Risks (RTO < 4 hours)
+
+| ID | Risk | Component | Likelihood | Impact | Mitigation |
+|----|------|-----------|------------|--------|------------|
+| R-06 | Copilot page shows mock data in production | Copilot.tsx | Certain | High — misleading users | Wire real pipeline before GA |
+| R-07 | TestAnalytics shows fake numbers | TestAnalytics.tsx | Certain | High — misleading users | Replace mock with real computation |
+| R-08 | OpenAI API key in client bundle | VITE_ env | Medium | High — key theft, runaway billing | Server-side proxy only |
+| R-09 | localStorage quota exceeded (5MB) | chatStorage.ts | Low (current) | Medium — silent data loss | TTL enforcement, LRU eviction |
+| R-10 | 11× notify cascade causes multi-second freeze | initData.ts | High at 10K+ runs | Medium — poor UX | Batch notify calls |
+
+### 9.3 Medium Risks (RTO < 24 hours)
+
+| ID | Risk | Component | Likelihood | Impact | Mitigation |
+|----|------|-----------|------------|--------|------------|
+| R-11 | Event bus emits to zero subscribers | eventBus.ts | Certain | Low — dead code | Remove or wire consumers |
+| R-12 | Toast pipeline never fires | notifications.ts | Certain | Low — silent UI | Remove dead code |
+| R-13 | Schema validation loads but never validates | validate-data.mjs | Certain | Medium — false confidence | Wire AJV validation |
+| R-14 | Flakiness algorithm inconsistencies (6 impls) | multiple files | Certain | Medium — confusing results | Consolidate to single implementation |
+| R-15 | `_snapshot` shallow clone causes stale refs | lib/runs.ts | Medium | Medium — UI shows stale data | Deep clone or use immutable pattern |
+
+---
+
+## 10. Tech Debt Inventory
+
+### 10.1 Critical Debt (must fix before GA)
+
+| ID | Item | File(s) | Effort | Impact |
+|----|------|---------|--------|--------|
+| TD-01 | TestAnalytics entirely hardcoded mock data | pages/TestAnalytics.tsx | 3d | Feature shows fake data |
+| TD-02 | Copilot page uses mock setTimeout response | pages/Copilot.tsx | 5d | AI feature non-functional |
+| TD-03 | Schema validation loads schema but never validates | validate-data.mjs | 4h | False confidence in data integrity |
+| TD-04 | No file locking in scheduler | scheduler.mjs | 1d | Concurrent data corruption |
+| TD-05 | GitHub OAuth token on disk | .config/gh/hosts.yml | 1h | Security incident |
+| TD-06 | Two AI pipelines co-exist, neither wired | lib/ai/, lib/copilot/ | 2d | 100% wasted AI infra |
+
+### 10.2 High Debt (fix within 1 month)
+
+| ID | Item | File(s) | Effort |
+|----|------|---------|--------|
+| TD-07 | 50+ console.log statements | Multiple files | 2h |
+| TD-08 | 17 @ts-ignore / @ts-expect-error | Multiple files | 1d |
+| TD-09 | Dead event bus (12 events, 0 subscribers) | eventBus.ts | 4h |
+| TD-10 | Dead toast pipeline (currentToast always null) | notifications.ts | 4h |
+| TD-11 | 9 dead scripts (post-merge, start-desktop, hello, etc.) | scripts/ | 2h |
+| TD-12 | 50+ empty export patterns | Multiple files | 1d |
+| TD-13 | Unused envConfig field `properties` | envConfig.ts | 1h |
+| TD-14 | localStorage version naming inconsistency | store.ts | 4h |
+
+### 10.3 Medium Debt
+
+| ID | Item | File(s) | Effort |
+|----|------|---------|--------|
+| TD-15 | Missing error boundaries on 4 pages | Dashboard, Settings, About, Health | 1d |
+| TD-16 | 18 throw new Error() with generic messages | Multiple files | 1d |
+| TD-17 | `catch {}` silently swallowing errors | rls.ts, fetchDecorators.ts | 4h |
+| TD-18 | Flakiness computed 6 different ways | Multiple files | 2d |
+| TD-19 | 4 non-integrated anomaly detection systems | Multiple files | 2d |
+| TD-20 | Dual LangGraph engines with no mutual awareness | ai/, copilot/ | 3d |
+| TD-21 | Module-level stores never garbage collected | Multiple files | 2d |
+| TD-22 | runsLoader cache Map has no eviction | runs.ts | 1d |
+
+---
+
+## 11. Edge Cases & Error States Catalog
+
+### 11.1 Data Loading Edge Cases
+
+| Scenario | Expected Behavior | Current Status |
+|----------|------------------|----------------|
+| All 7 data files load successfully | Full app render | ✅ |
+| All 7 data files fail to load | Error panel with Retry button | ✅ |
+| Partial load (runs OK, results fail) | Warning + render with runs only | ⚠️ Untested — may throw |
+| Network timeout (10s) | Retry 3×, then error | ✅ |
+| Corrupted JSON (parse error) | Error message with file name | ✅ |
+| Empty array for runs.json | Empty state on Runs page | ⚠️ Missing — may show broken UI |
+| Empty test-results.json (Record with no keys) | No test results anywhere | ⚠️ Missing — may show broken UI |
+| Duplicate run IDs | Deduplication on load | ❌ Not implemented |
+| Stale data (>24h) | Show staleness indicator | ❌ Not implemented |
+
+### 11.2 Runs & Results Edge Cases
+
+| Scenario | Expected Behavior | Current Status |
+|----------|------------------|----------------|
+| Run has 0 test results | "No results" empty state | ⚠️ Missing |
+| Run has 10,000 test results | Pagination (or virtual list) | ❌ Not implemented — OOM risk |
+| TestResult missing evidence field | Graceful fallback | ❌ Not implemented |
+| TestResult missing assertions array | Show empty assertions list | ✅ |
+| All tests in a run are SKIPPED | Show 100% skipped, not 0% pass | ⚠️ Missing |
+| Run status is RUNNING for >24h | GC should mark ERROR | ✅ (in scheduler) |
+| Two runs have identical IDs | Deduplication | ❌ Not implemented |
+
+### 11.3 Compare Page Edge Cases
+
+| Scenario | Expected Behavior | Current Status |
+|----------|------------------|----------------|
+| Baseline and candidate are the same run | Show error message | ⚠️ Missing |
+| Run ID in URL does not exist | Fall back to defaults | ⚠️ Missing |
+| 0 diffs between two runs | "No differences found" empty state | ⚠️ Missing |
+| 500+ diffs | Pagination or virtual scroll | ❌ Not implemented |
+| Candidate has tests not in baseline | Show "new" status rows | ✅ |
+| Baseline has tests not in candidate | Show "missing" status rows | ✅ |
+
+### 11.4 URL State Edge Cases
+
+| Scenario | Expected Behavior | Current Status |
+|----------|------------------|----------------|
+| Invalid URL params (e.g., `?status=INVALID`) | Ignore invalid params, use defaults | ⚠️ Missing |
+| URL param with valid key but wrong type | Coerce gracefully | ⚠️ Missing |
+| Missing required params on Compare page | Auto-select defaults | ✅ |
+| URL params overflow (100+ params) | Truncate or ignore | ❌ Not implemented |
+| Race condition — URL update during async load | Debounce URL sync | ⚠️ Missing |
+
+### 11.5 localStorage Edge Cases
+
+| Scenario | Expected Behavior | Current Status |
+|----------|------------------|----------------|
+| localStorage quota exceeded (5MB) | LRU eviction, warn user | ❌ Not implemented |
+| Corrupted stored JSON | Discard and use defaults | ❌ Not implemented |
+| Old format data (v1/v2) | Migration on read | ❌ Not implemented |
+| Private browsing (localStorage unavailable) | In-memory fallback | ❌ Not implemented |
+| Multiple tabs writing same key | Last-writer-wins | ⚠️ Acceptable for current use case |
+
+---
+
+## 12. Testing Strategy
+
+### 12.1 Current Coverage
+
+| Layer | Files | Lines of Test Code | Coverage Estimate |
+|-------|-------|--------------------|-------------------|
+| lib (data, utils, flakiness) | ~20 | 2,881 lines | ~30% |
+| CI scripts | ~10 | 353 lines | ~5% |
+| E2E (Playwright) | ~4 | 554 lines | ~5% |
+| All 41 aware components | 41 | 0 lines | 0% |
+| All pages (16) | 16 | 0 lines | 0% |
+| All copilot modules | ~10 | 0 lines | 0% |
+| All AI modules | ~15 | 0 lines | 0% |
+| All scripts (50+) | 50+ | 0 lines | 0% |
+| discover-all.mjs | 1 | 0 lines | 0% |
+| **Total** | ~150 | ~3,788 lines | ~15% |
+
+### 12.2 Test Pyramid (Desired)
+
+```
+         ╱╲
+        ╱ E2E ╲          5-10 critical user journeys (Playwright)
+       ╱────────╲
+      ╱ Integration ╲    20-30 store + API + script + data validation tests
+     ╱────────────────╲
+    ╱   Unit Tests      ╲  100+ tests for lib/*, utils, flakiness, anomaly, hooks
+   ╱──────────────────────╲
+```
+
+### 12.3 Priority Test Targets
+
+| Priority | Target | Current | Needed |
+|----------|--------|---------|--------|
+| P0 | Data loading (fetchJson, retry, timeout) | ❌ | 10 unit tests |
+| P0 | Store pattern (notify, subscribe, snapshot) | ❌ | 5 unit tests |
+| P0 | Diff computation (computeDiffRows) | ✅ | 20 unit tests (existing + expand edge cases) |
+| P0 | Flakiness computation (single impl) | ❌ | 15 unit tests |
+| P1 | Anomaly detection (Z-score, IQR) | ❌ | 10 unit tests |
+| P1 | URL state sync (useSyncedUrlState) | ❌ | 8 unit tests |
+| P1 | CSV export escaping | ❌ | 4 unit tests |
+| P1 | Scheduler reconciler (mock ghApi) | ❌ | 20 integration tests |
+| P1 | Record-run logic (no-idempotency fix) | ❌ | 10 integration tests |
+| P1 | Validate-data.mjs with known-good/bad data | ❌ | 10 integration tests |
+| P1 | Validate-config.mjs cross-refs | ❌ | 8 integration tests |
+| P2 | All aware components | ❌ | 1 basic smoke test each |
+| P2 | All pages | ❌ | 1 render test each |
+| P2 | AI context building + queries | ❌ | 10 unit tests |
+| P2 | E2E: run CRUD flow | ❌ | 2 E2E tests |
+| P2 | E2E: compare flow | ❌ | 2 E2E tests |
+
+---
+
+## 13. Architecture Contract Map
+
+### 13.1 Formal Contracts (Enforced)
+
+| Contract | Enforced By | Scope |
+|----------|-------------|-------|
+| `TestResult.evidence` presence | validate-data.mjs | Data files |
+| `TestResult.assertions` presence | validate-data.mjs | Data files |
+| `Run.env` ∈ {QA, UAT, PROD} | validate-data.mjs + TypeScript | Data files |
+| All timing fields numeric | validate-data.mjs | Data files |
+| `env` + `network` = unique | validate-data.mjs | Cross-ref |
+| Suite testIds → valid test IDs | validate-data.mjs | Cross-ref |
+| Run IDs ⇔ test-results keys | validate-data.mjs | Cross-ref |
+| YAML env IDs ↔ TypeScript ids | validate-config.mjs | Config |
+| Suite envs ↔ YAML env labels | validate-config.mjs | Config |
+
+### 13.2 Implicit Contracts (Unenforced — Risk Area)
+
+| Contract | Risk | Location |
+|----------|------|----------|
+| `_snapshot` is treated as immutable by consumers | Stale data if mutated | All stores |
+| `notify()` always triggers full subscriber re-read | Performance at scale | All stores |
+| Evidence is never optional in components | Crash on null evidence | RunDetail, Compare |
+| Events emitted to bus have at least one subscriber | Dead letter office | eventBus.ts |
+| `_loaded` flag prevents re-fetch | Stale data if reload needed | All stores |
+| Module-level DATA is mutated, not replaced | Zombie observation windows | All stores |
+| All routes exist in wouter Switch | Navigation fails silently | App.tsx |
+| Data files have matching version field | No versioning | Data files |
+
+---
+
+## 14. Data Evolution & Versioning Strategy
+
+### 14.1 Current State
+
+- 0 of 7 JSON data files have version fields
+- 11 localStorage keys with mixed `_v1`/`_v2`/`_v3`/`_v4`/`_v5` naming (inconsistent: some use underscore, some use hyphen, some suffix-only)
+- ZERO migration logic for old localStorage formats
+- ZERO migration logic for old JSON data formats
+- Schema files exist for `test-results.json` but are never used for validation
+
+### 14.2 Versioning Schema (Required)
+
+Every JSON data file must include:
+
+```typescript
+{
+  "$schema": "./schemas/runs.schema.json",
+  "version": 1,
+  "data": Run[]
+  // ... actual data
+}
+```
+
+Files to version:
+- `runs.json` → `{ version: 1, data: Run[] }`
+- `test-results.json` → `{ version: 1, data: Record<runId, TestResult[]> }`
+- `auto-tests.json` → `{ version: 1, data: TestCase[] }`
+- `test-suites.json` → `{ version: 1, data: TestSuite[] }`
+- `promotions.json` → `{ version: 1, data: PromotionDecision[] }`
+- `scheduler-status.json` → `{ version: 1, data: SchedulerStatus }`
+- `diff-results.json` → `{ version: 1, data: DiffRow[] }`
+
+### 14.3 Migration Strategy
+
+- JSON Schema per file: `data/schemas/<file>.schema.json`
+- Migration script: `scripts/migrate-data.mjs` — reads all files, checks version, applies transforms sequentially
+- Backward compatibility: store readers handle missing `version` field as `version: 0` (legacy format)
+- localStorage migration: version key embedded in stored JSON, migration function registered in map
+
+### 14.4 localStorage Naming Convention
+
+Standardize to: `aware_<domain>_v<version>` (all lowercase, underscore-separated, consistent `_v` suffix)
+
+| Current | Standardized |
+|---------|-------------|
+| aware-env-configs-v3 | `aware_env_configs_v3` |
+| aware_test_cases_v2 | `aware_test_cases_v2` |
+| aware_test_suites_v2 | `aware_test_suites_v2` |
+| aware_promotion_decisions | `aware_promotion_decisions_v1` |
+| aware_copilot_chat | `aware_copilot_chat_v1` |
+| aware_copilot_v5 | `aware_copilot_session_v1` |
+| aware_copilot_threads_v1 | `aware_copilot_threads_v1` |
+| aware_copilot_templates_v1 | `aware_copilot_templates_v1` |
+| aware_copilot_bookmarks_v1 | `aware_copilot_bookmarks_v1` |
+| aware_copilot_settings_v1 | `aware_copilot_settings_v1` |
+| aware-settings-v1 | `aware_settings_v1` |
+
+---
+
+## 15. Integration Dependency Map
+
+### 15.1 External Services
+
+| Service | Dependency | Criticality | Fallback | SLA |
+|---------|-----------|-------------|----------|-----|
+| raw.githubusercontent.com | Data loading (frontend) | Critical — app won't load data | ❌ None | None (best-effort) |
+| GitHub API (gh CLI) | Scheduler reconciler | Critical — scheduler won't run | ❌ None | GitHub API: 5000 req/hr |
+| git CLI | Scheduler commit phase | Critical — data not persisted | ❌ None | N/A |
+| Chrome AI (window.ai) | AI Copilot | High — only working provider | ❌ None (OpenAI/WebLLM removed) | On-device |
+
+### 15.2 Critical npm Dependencies
+
+| Package | Purpose | Known CVEs | Risk |
+|---------|---------|------------|------|
+| cross-spawn@7.0.3 | Process spawning | CVE-2024-21538 | Medium — shell injection |
+| nanoid@3.3.7 | ID generation | CVE-2024-55565 | Medium — entropy |
+| ws@7.5.10 | WebSocket (dev server) | GHSA-3h5v-q93c-6h6q | Low — dev only |
+| esbuild (<0.25.0) | Bundler | Multiple | Low — build only |
+| express@4.21.0 | Dev server | GHSA-rv95-896h-c2vc (fixed in 4.21.1) | Low — dev only |
+| @anthropic-ai/sdk | AI provider | N/A | Low — removed from active code |
+
+### 15.3 Environment Dependencies
+
+| Requirement | Version | Enforcement |
+|-------------|---------|-------------|
+| Node.js | ≥20 | package.json engines |
+| pnpm | 10.26.1 | package.json packageManager |
+| Chrome | 120+ | Browser requirement for Chrome AI |
+| WebGPU | Required | WebLLM requirement (provider removed) |
+| gh CLI | Latest | Required for scheduler & CI operations |
+
+---
+
+## 16. Config-as-Code Cross-Validation
+
+### 16.1 Current Validation Coverage
+
+| Validation Pass | Enforced | Status |
+|-----------------|----------|--------|
+| akamai-config.yml: property metadata completeness | ✅ | Enforced |
+| akamai-config.yml: EdgeWorker versions | ✅ | Enforced |
+| environments.yml: 6 env count | ✅ | Enforced |
+| environments.yml: field completeness | ✅ | Enforced |
+| environments.yml: URL validity | ✅ | Enforced |
+| environments.yml: ID format | ✅ | Enforced |
+| test-suites.yml: unique IDs | ✅ | Enforced |
+| test-suites.yml: env references | ✅ | Enforced |
+| test-suites.yml: cron syntax | ✅ | Enforced |
+| test-suites.yml: runner validity | ✅ | Enforced |
+| Cross-refs: requiredSuites → suite IDs | ✅ | Enforced |
+| TypeScript alignment: env IDs | ✅ | Enforced |
+
+### 16.2 Validation Gaps
+
+| Gap | Risk | Priority |
+|-----|------|----------|
+| No validation that env IDs match GitHub workflow names | CI dispatch fails silently | P1 |
+| No validation against TypeScript Run.env enum | Run data can have invalid env | P1 |
+| No cross-ref validation that akamai-config property names match environments.yml targets | Config drift | P2 |
+| No validation that config file sizes are under GitHub's 32KB limit | Silent truncation on push | P2 |
+| No inline comments in config YAML files explaining field purpose | Maintenance burden | P2 |
+
+---
+
+## 17. State Management Architecture
+
+### 17.1 Current Patterns Found
+
+| Pattern | Count | Files | Issues |
+|---------|-------|-------|--------|
+| Module-level `let` + pub/sub | 7 | runs.ts, testSuites.ts, promotions.ts, etc. | — |
+| `useSyncExternalStore` wrapper | ~6 | hooks/useTestData.ts, etc. | Shallow clone bug |
+| React Query (`useQuery`) | ~5 | hooks/useData.ts | Stale cache by default |
+| `useSyncedUrlState` | ~10 | urlState.ts | Race condition during async |
+| Event bus (dead letter) | 1 | eventBus.ts | Zero subscribers |
+| State machine (generic) | 1 | stateMachine.ts | Orphaned — no consumers |
+
+### 17.2 Known Issues
+
+| Issue | Location | Description | Priority |
+|-------|----------|-------------|----------|
+| Stale snapshot references | runs.ts: `_runsSnapshot = [..._runs]` | Listeners receive old array until next update if DATA is mutated in place | P1 |
+| Zombie observation windows | All stores via `_runs.length = 0; _runs.push(...data)` | Components may hold stale snapshots while DATA is modified | P1 |
+| Boolean guards never reset | All stores: `_loaded` | Once true, never allows retry (even if data is stale) | P1 |
+| 3 subscription mechanisms | runs.ts: `_runsNotify`, `runsSubscriptionSet`, legacy `set` | Triple redundancy, synchronization not guaranteed | P2 |
+| React Query + pub/sub overlap | hooks/useData.ts + stores | Some data loaded twice (React Query cache + module store) | P2 |
+| Event bus emits to dead letter | eventBus.ts | 12 events defined, 3 emitted, ZERO subscribers | P2 |
+
+### 17.3 Recommended Architecture
+
+Consolidate to a single pattern:
+
+```
+Data files → fetchJson → module stores (single pub/sub) → useSyncExternalStore → React components
+```
+
+- Remove event bus (dead code)
+- Remove React Query for data that loads at init (keep for lazy loads only)
+- Consolidate 3 subscription mechanisms to 1
+- Replace `[...DATA]` shallow clone with `structuredClone()` or immutable update pattern
+- Reset `_loaded` to false on 3 consecutive failures
+- Batch `notify()` calls during `loadAllData()` to prevent thundering herd
+
+---
+
+## 18. Security Disclosures & Remediation
+
+### 18.1 🔴 CRITICAL: Exposed GitHub OAuth Token
+
+**Finding**: GitHub OAuth token `REDACTED_OAUTH_TOKEN` exposed in plaintext at `.config/gh/hosts.yml`.
+
+**Risk**: Any user with filesystem access can read this token and gain full GitHub API access as user `ruake`.
+
+**Remediation**:
+1. Immediately rotate the token via GitHub Settings → Developer settings → Personal access tokens
+2. Add `.config/gh/hosts.yml` to `.gitignore` (it is a local auth file, not a project file)
+3. Check git history for accidental commits of this file
+4. Consider using GitHub CLI's built-in auth mechanism (`gh auth login`) instead of manual token storage
+
+### 18.2 🟡 HIGH: VITE_ Env Vars Inlined in Client Bundle
+
+**Finding**: All `VITE_`-prefixed environment variables are inlined into the client-side JavaScript bundle by Vite at build time.
+
+**Risk**: Any API keys or secrets prefixed with `VITE_` are visible to all users via browser DevTools.
+
+**Remediation**:
+- No `VITE_` variable should contain secrets
+- OpenAI API key must flow through a server-side proxy only (never to the client)
+- Document which variables are intentionally public
+
+### 18.3 🟡 MEDIUM: CSP 'unsafe-inline' Present
+
+**Finding**: Content Security Policy includes `'unsafe-inline'` for script execution.
+
+**Risk**: Reduces effectiveness of XSS protection.
+
+**Remediation**: Remove `'unsafe-inline'` by migrating inline event handlers to addEventListener patterns and using nonce/hash-based CSP.
+
+### 18.4 🟢 LOW: AI Proxy Plugin Accepts Unsanitized Content
+
+**Finding**: The Vite plugin for AI proxy passes user content directly to the LLM API without server-side content filtering or PII scrubbing.
+
+**Risk**: User may inadvertently send PII to external LLM API.
+
+**Remediation**: Add server-side content sanitization in the AI proxy plugin for user queries before forwarding.
+
+### 18.5 🟢 LOW: copyToClipboard API Without Permission Check
+
+**Finding**: Clipboard write operations use `navigator.clipboard.writeText()` without checking `permissions.query({ name: 'clipboard-write' })`.
+
+**Risk**: In some browser contexts, the API call silently fails.
+
+**Remediation**: Add permissions check or use fallback for unsupported contexts.
+
+---
+
+## 19. Privacy & Compliance Requirements
+
+### 19.1 Current Status
+
+| Requirement | Status | Details |
+|-------------|--------|---------|
+| GDPR/CCPA compliance | ❌ Not addressed | No privacy policy, no data export, no bulk delete |
+| localStorage TTL enforcement | ❌ Not enforced | 7-day TTL declared for chat but never implemented |
+| Data export mechanism | ❌ Not implemented | Users cannot export their stored data |
+| Bulk delete mechanism | ❌ Not implemented | Users cannot delete all stored data |
+| PII sent to external LLM | 🟢 Low risk | Chrome AI is on-device (Gemini Nano); no PII leaves browser |
+| PII sent to OpenAI API | ❌ Not applicable | OpenAI provider removed |
+
+### 19.2 Requirements
+
+| Requirement | Priority | Implementation |
+|-------------|----------|----------------|
+| localStorage TTL enforcement | P1 | Scheduled cleanup on app init for keys with TTL |
+| User data export | P2 | "Export my data" button → JSON download of all localStorage keys |
+| User data delete | P2 | "Delete all data" button → clear all `aware_*` localStorage keys |
+| Privacy policy link | P2 | Link in About page |
+| Screen user queries for PII | P2 | Client-side regex/check before sending to any LLM |
+| 7-day TTL for chat history | P1 | Enforce via timestamp check on every localStorage read |
+
+---
+
+## 20. AI Data Flow Governance
+
+### 20.1 Current Architecture (Two Disconnected Pipelines)
+
+```
+                    ┌─────────────────┐
+                    │   Copilot UI     │ (pages/Copilot.tsx)
+                    │   (setTimeout    │
+                    │    mock only)    │
+                    └────────┬────────┘
+                             │
+                  ┌──────────┴──────────┐
+                  ▼                     ▼
+        ┌─────────────────┐   ┌─────────────────┐
+        │  lib/copilot/    │   │   lib/ai/        │
+        │ (modern pipeline)│   │ (legacy pipeline)│
+        │ ✔︎ Streaming      │   │ ✗ No streaming   │
+        │ ✔︎ Abort support  │   │ ✗ No abort       │
+        │ ✔︎ 5 phases       │   │ ✔︎ 7-stage DAG    │
+        │ ✔︎ Token audit    │   │ ✗ Not wired to UI│
+        │ ✗ Not wired to UI│   └─────────────────┘
+        └─────────────────┘
+```
+
+**Neither pipeline is connected to the Copilot UI page.**
+
+### 20.2 Data Queries (Sanctioned vs Unsanctioned)
+
+**Sanctioned** (the only allowed data access for AI):
+- `DATA_QUERIES` in `lib/copilot/dataQueries.ts` — 11 queries
+
+**Unsanctioned** (exists in code but bypasses DataQueries):
+- Direct imports of `RUNS`, `getTestSuites()`, etc. in AI code
+- System prompt dumps ALL app state including all test failures, flakiness data, anomaly scores — no filtering
+
+### 20.3 Governance Rules
+
+| Rule | Current | Required |
+|------|---------|----------|
+| All AI data access through DataQueries.ts | ❌ Bypassed | ✅ Enforce |
+| System prompt only includes relevant context | ❌ All state dumped | ✅ Filter by query intent |
+| Rate limiter called before every query | ❌ Never called | ✅ Enforce |
+| User queries logged with PII redaction | ❌ No redaction | ✅ Add |
+| Debug logger persisted | ❌ In-memory only | ✅ Optional file output |
+| Token usage tracking consumed by UI | ❌ Created but unused | ✅ Wire to UI |
+
+### 20.4 Pipeline Unification Plan
+
+Eliminate `lib/ai/` (legacy) and use `lib/copilot/` (modern) as the single pipeline. Add:
+1. Streaming from copilot DAG to UI (components for streaming tokens exist but are unused)
+2. Wire `runGraphAgent()` to Copilot page's message dispatch
+3. Add `supportsToolCalling` support for Chrome AI (currently false)
+4. Replace mock setTimeout with real pipeline
+
+---
+
+## 21. Scalability & Capacity Limits
+
+### 21.1 Current Limits
+
+| Dimension | Current Data | Limit | Failure Mode |
+|-----------|-------------|-------|-------------|
+| Runs (runs.json) | ~60 runs | ~50K runs | Multi-second freeze on load |
+| Test results | ~1,200 results | ~200K results | Memory pressure, slow diff |
+| Test cases (auto-tests.json) | ~30 tests | ~500 tests | UI row rendering performance |
+| Chat history (localStorage) | ~10 conversations | ~500 conversations | 5MB quota exceeded |
+| Dispatch log entries | ~50 entries | ~1,000 entries | List rendering performance |
+| Concurrent scheduler ticks | 1 | 1 | No concurrency support — data corruption if >1 |
+
+### 21.2 Bottleneck Analysis
+
+| Bottleneck | Current Complexity | At 10K Runs | At 50K Runs |
+|------------|-------------------|-------------|-------------|
+| Data load (all files JSON) | ~500KB total | ~5MB total | ~25MB total |
+| Store snapshot clone (every notify) | O(n) per notify | ~500KB/clone | ~2.5MB/clone |
+| Diff computation | O(n) per compare | ~1,000 tests | ~5,000 tests |
+| computeTestDetailForName | O(n×m) all runs × results | O(10M) operations | O(250M) — browser freezing |
+| Flakiness computation | O(n) per request | O(10K) | O(50K) |
+| Anomaly detection | O(n) per run | O(10K) window | O(50K) window |
+| localStorage chat | ~50KB | ~500KB | ~2.5MB |
+
+### 21.3 Scaling Requirements
+
+| Requirement | Target | Implementation |
+|-------------|--------|----------------|
+| Max runs before degradation | 10,000 | Virtual list for Run History, paginated CSV export |
+| Max test results per run | 500 | Lazy-load individual test results on expand |
+| Max concurrent chat conversations | 100 | LRU eviction from localStorage |
+| Max dispatch log entries | 500 | Truncate on write |
+| Data load time at 10K runs | <10s | Batch notify, lazy snapshot |
+| Diff computation at 1K tests | <5s | Paginated diff results, worker thread |
+
+---
+
+## 22. Performance Budget & Bottlenecks
+
+### 22.1 Known Performance Issues
+
+| Issue | Location | Severity | Root Cause |
+|-------|----------|----------|------------|
+| 11× notify cascade during init | loadAllData() | High — multi-second freeze at scale | Each store loaded sequentially calls notify() |
+| computeTestDetailForName O(6K+) | runs.ts | High — predictable lag | Iterates ALL runs × ALL results |
+| CategoryHeatmap recomputes every render | TestAnalytics | Medium | Missing useMemo dependency |
+| slice(0,50) hides 10 rows | Runs.tsx | Low — cosmetic | Hardcoded pagination when total ≤60 |
+| 88 filter computations per stat render | Stats rendering | Medium | No memoization on filtered runs |
+| Large bundles | Vite build | Medium | charts: 403KB, vendor: 211KB, motion: 124KB, copilot: 166KB |
+
+### 22.2 Performance Budget
+
+| Operation | Budget | Current |
+|-----------|--------|---------|
+| Initial page load (JS) | <500KB gzipped | ~400KB (acceptable) |
+| Time to interactive | <3s | ✅ <3s (no heavy deps) |
+| Data load + render | <5s | ✅ <5s at current scale |
+| Filter/rerender | <100ms | ⚠️ 88 recomputations per filter |
+| CSV export (500 runs) | <1s | ✅ |
+| Diff compute (200 tests) | <2s | ✅ at current scale |
+| Anomaly detection (50 runs) | <500ms | ✅ |
+| Flakiness compute (100 tests) | <500ms | ⚠️ O(n) on all runs |
+
+### 22.3 Optimization Targets
+
+| Optimization | Impact | Effort | Priority |
+|-------------|--------|--------|----------|
+| Batch notify() calls during init | High — eliminates thundering herd | 1d | P1 |
+| Add useMemo to CategoryHeatmap | Medium — reduces re-renders | 2h | P1 |
+| Memoize filtered run stats | Medium — 88→1 recomputation | 4h | P1 |
+| Lazy-load evidence (filmstrip data URIs) | Medium — reduces initial memory | 1d | P1 |
+| Virtual scroll for Run History | High — supports 10K+ runs | 2d | P2 |
+| Code-split large pages (Copilot, TestAnalytics) | Medium — reduces initial bundle | 1d | P2 |
+
+---
+
+## 23. Memory & Resource Management
+
+### 23.1 Identified Leaks
+
+| Leak | Location | Mechanism | Severity |
+|------|----------|-----------|----------|
+| Module-level stores never GC'd | runs.ts, testSuites.ts, etc. | DATA arrays hold references to ALL runs forever | 🔴 High — memory grows unbounded |
+| runsLoader cache no eviction | runs.ts | Map holds ALL test results with evidence data URIs permanently | 🔴 High — filmstrip data URIs are large |
+| Image cache bounded at 100 | Evidence viewer | blob URL leak (created but not revoked) | 🟡 Medium — 100 concurrent blobs |
+| 3 subscription sets per store | runs.ts | runsNotify + runsSubscriptionSet + legacySet | 🟡 Medium — 3× listener storage |
+| Chat history unbounded | chatStorage.ts | No TTL enforcement, no LRU eviction | 🟡 Medium — localStorage 5MB ceiling |
+| Event listeners never cleaned | error boundaries | console.error on unmounted component | 🟢 Low |
+
+### 23.2 Memory Budget
+
+| Resource | Budget | Current | At 10K Runs |
+|----------|--------|---------|-------------|
+| Module-level runs array | 5MB | ~50KB | ~5MB |
+| Module-level results | 10MB | ~500KB | ~15MB |
+| Evidence data URIs | 20MB | ~1MB | ~20MB (budget exceeded) |
+| Image cache | 10MB | ~1MB | ~10MB |
+| localStorage | 5MB total | ~100KB | ~2MB |
+| Total heap | 200MB | ~20MB | ~50MB |
+
+### 23.3 Memory Management Requirements
+
+| Requirement | Implementation | Priority |
+|-------------|----------------|----------|
+| LRU eviction for runsLoader cache | Remove entries for runs >N from cache | P1 |
+| Revoke blob URLs after use | Add URL.revokeObjectURL in useEffect cleanup | P1 |
+| Chat history TTL enforcement | Filter expired entries on read | P1 |
+| Lazy-load evidence on expand | Don't load evidence until user clicks expand | P1 |
+| IntersectionObserver for test rows | Only render visible rows | P2 |
+| Virtual list for Run History | Only render 30 rows + buffer | P2 |
+
+---
+
+## 24. Observability & Self-Monitoring
+
+### 24.1 Current State
+
+| Capability | Status | Details |
+|------------|--------|---------|
+| Structured logging | ❌ Not implemented | console.log scattered everywhere |
+| Error reporting integration | ❌ Not implemented | No Sentry, no DataDog, no custom endpoint |
+| Performance monitoring | ❌ Not implemented | No Web Vitals tracking |
+| Usage analytics | ❌ Not implemented | No event tracking |
+| Health endpoint | ❌ Not implemented | No /health or /status from frontend |
+| Synthetic monitoring | ❌ Not implemented | No Playwright health check |
+| Event bus | 🔴 Dead | 12 events, 0 subscribers |
+| Toast notifications | 🔴 Dead | currentToast always null |
+| Debug logger | ⚠️ Partial | Ring buffer 500 entries, in-memory only |
+| Anomaly Banner | ✅ Functional | Shows regressions (red) and degradation (amber) |
+
+### 24.2 Requirements
+
+| Requirement | Priority | Implementation |
+|-------------|----------|----------------|
+| Remove dead event bus | P1 | Delete eventBus.ts, remove imports |
+| Fix or remove toast pipeline | P1 | Either connect to live status or remove |
+| Structured console logging | P2 | Replace console.log with configurable logger (debug/info/warn/error levels) |
+| Error reporting | P2 | Add Sentry or custom error endpoint |
+| Performance monitoring | P2 | Add Web Vitals (CLS, LCP, FID) tracking |
+| Health check endpoint | P2 | Simple synthetic check that data loads correctly |
+| Scheduler health metrics | P1 | Emit tick duration, dispatch count, GC count as status fields |
+
+---
+
+## 25. Error Handling Architecture
+
+### 25.1 Error Hierarchy
+
+```typescript
+// Defined in lib/types.ts:
+class AppError extends Error {}         // Base
+class FetchError extends AppError {}    // Network failures
+class TimeoutError extends AppError {}  // Request timeout
+class ValidationError extends AppError {} // Schema validation
+class DataValidationError extends AppError {} // Data integrity
+class ServiceError extends AppError {}  // Service unavailable
+
+// Usage: Only 2 of 5 are ever thrown (FetchError, TimeoutError)
+// ValidationError, DataValidationError, ServiceError are never instantiated
+```
+
+### 25.2 Current Issues
+
+| Issue | Location | Severity |
+|-------|----------|----------|
+| `throw new Error()` with generic messages | 18 sites across codebase | Medium — hard to debug |
+| `catch {}` silently swallows errors | rls.ts, fetchDecorators.ts | High — errors hidden |
+| Missing error boundaries | Dashboard, Settings, About, Health | Medium — full page crash |
+| Missing loading states | Multiple components | Medium — flicker/empty before render |
+| Missing empty states | Multiple components | Low — shows "0 results" instead of helpful message |
+
+### 25.3 Requirements
+
+| Requirement | Priority | Implementation |
+|-------------|----------|----------------|
+| Use typed errors everywhere | P1 | Replace `throw new Error()` with typed subclasses |
+| Remove `catch {}` patterns | P1 | At minimum log the error |
+| Add error boundaries to remaining pages | P2 | Dashboard, Settings, About, Health |
+| Add loading state before data available | P2 | Skeleton screens or loading indicators |
+| Add empty states for all list components | P2 | "No runs found" etc. |
+| Show user-friendly error messages | P2 | Map error types to messages |
+
+---
+
+## 26. Alerting & Notification Rules
+
+### 26.1 Current Capabilities
+
+| Alert Type | Status | Trigger | Action |
+|------------|--------|---------|--------|
+| Anomaly Banner (regression) | ✅ Functional | regressions > 0 | Red banner, "Investigate" button |
+| Anomaly Banner (degradation) | ✅ Functional | Any tier degraded | Amber banner |
+| Toast notification pipeline | 🔴 Dead | currentToast always null | No UI effect |
+| Push notification | ❌ Not implemented | N/A | N/A |
+| Email/Slack alerts | ❌ Not implemented | N/A | N/A |
+| PagerDuty integration | ❌ Not implemented | N/A | N/A |
+| Data staleness alert | ❌ Not implemented | N/A | N/A |
+| Schema drift alert | ❌ Not implemented | N/A | N/A |
+| Scheduler failure alert | ❌ Not implemented | N/A | N/A |
+
+### 26.2 Required Alerting Rules
+
+| Rule | Trigger | Channel | Priority |
+|------|---------|---------|----------|
+| Critical pass-rate drop | Pass rate < 50% for any env | Toast + AnomalyBanner | P1 |
+| Promotion gate blocked | UAT pass rate < 95% for 3+ consecutive runs | AnomalyBanner (persistent) | P1 |
+| Scheduler tick failure | 3 consecutive missed ticks | status.json → degraded | P1 |
+| Data staleness | No new runs in >24h | Toast warning | P2 |
+| Schema drift | Validation failure on build | CI notification | P2 |
+| GC threshold exceeded | 5+ stale runs cleaned in one tick | status.json log | P2 |
+| Concurrent scheduler detected | Lockfile contention | status.json → error | P2 |
+
+---
+
+## 27. Flakiness Computation Specification
+
+### 27.1 Current State — 6 Inconsistent Implementations
+
+| # | Location | Algorithm | Edge: runs=1 | Notes |
+|---|----------|-----------|-------------|-------|
+| 1 | lib/runs.ts (computeFlakiness) | flips / (runs-1) | Returns 0 | Primary |
+| 2 | lib/flakiness.ts (computeFlakinessScores) | flips / (runs-1) | Returns NaN | Secondary |
+| 3 | lib/flakiness.ts (calculateFlakinessForTest) | flips / (runs-1) | Returns 0 | Tertiary |
+| 4 | lib/ai/useCases.ts (flaky-detection) | flips / (runs-1) | Returns 0 | AI pipeline |
+| 5 | lib/copilot/useCases.ts (flaky-detection) | flips / (runs-1) | Returns 0 | Copilot pipeline |
+| 6 | lib/anomalyDetection.ts (detectFlakiness) | flips / (runs-1) | Returns NaN | Anomaly system |
+
+**All 6 differ in edge handling when runs < 2, but use the same core algorithm.**
+
+### 27.2 Required Single Specification
+
+```typescript
+function computeFlakiness(results: TestResult[]): number {
+  // Minimum window: 7 runs
+  if (results.length < 7) return undefined;
+
+  // A flip is when status alternates between PASS and non-PASS
+  // between consecutive runs
+  let flips = 0;
+  for (let i = 1; i < results.length; i++) {
+    const prev = results[i-1].status === "PASS";
+    const curr = results[i].status === "PASS";
+    if (prev !== curr) flips++;
+  }
+
+  return flips / (results.length - 1); // 0 = stable, 1 = alternates every run
+}
+```
+
+**Rules**:
+- Only one implementation — remove the other 5
+- Minimum window: N≥7 (configurable, default 7)
+- A "flip" is status alternation between PASS and any non-PASS (FAIL, ERROR, TIMEOUT, FLAKY)
+- SKIPPED does NOT count as non-PASS (skip is neutral)
+- Result: 0.0 (completely stable) to 1.0 (alternates every run)
+- Threshold: >0.3 = flaky, >0.6 = very flaky
+- FLAKY status in a single run (from retry/computation) is treated as non-PASS for flip detection
+
+---
+
+## 28. Anomaly Detection Architecture
+
+### 28.1 Current State — 4 Non-Integrated Systems
+
+| # | System | Strategy | Data | Status |
+|---|--------|----------|------|--------|
+| 1 | lib/anomalyDetection.ts (primary) | 7-day Z-score on duration | Test-level duration data | ✅ Active |
+| 2 | lib/anomaly.ts (legacy) | Run-level Z-score | Run pass rate | 🔴 Dead code |
+| 3 | AI fallback (lib/ai/) | Pass-rate Z-score | Computed on request | ⚠️ Not wired to UI |
+| 4 | Dashboard (threshold-based) | Pass rate < 80% or < 95% | Run pass rate | ✅ Active |
+
+### 28.2 Required Single Architecture
+
+Consolidate to a single unified system with composable strategies:
+
+```typescript
+interface AnomalyDetector {
+  type: "zscore" | "iqr" | "threshold";
+  detect(runs: Run[], results: TestResult[][]): AnomalyReport[];
+}
+
+interface AnomalyReport {
+  runId: string;
+  testId?: string;        // undefined for run-level
+  metric: "passRate" | "duration" | "failureCount" | "flakiness";
+  score: number;          // Z-score or anomaly magnitude
+  threshold: number;
+  flags: string[];        // "PASS_RATE_DROP", "DURATION_SPIKE", etc.
+  severity: "critical" | "warning" | "info";
+}
+```
+
+**Strategies**:
+1. **Z-Score**: 7-day rolling window, threshold |Z| > 1.5 = anomaly
+2. **IQR**: Interquartile range, factor 1.5 = outlier
+3. **Threshold**: Hard thresholds (pass rate < 95% = warning, < 80% = critical)
+
+**Required**:
+- Remove lib/anomaly.ts (dead code — no imports)
+- Add pass-rate Z-score to primary anomalyDetection.ts
+- Add trend-based detection (not just point-in-time)
+- Wire anomaly results to Dashboard AnomalyBanner
+
+---
+
+## 29. Chart Data Pipeline Specification
+
+### 29.1 Current Inventory
+
+| Chart | Component | Data Source | Status |
+|-------|-----------|-------------|--------|
+| Pass-rate trend (area) | Dashboard TrendChart | Data-driven (all runs) | ✅ Working |
+| Category heatmap | TestAnalytics CategoryHeatmap | Hardcoded 2×3 mock matrix | ❌ Mock |
+| Pass-rate area | TestAnalytics AreaChart | 30 synthetic points | ❌ Mock |
+| Flakiness table | TestAnalytics FlakinessTable | "NO FLAKY TESTS DETECTED" | ❌ Mock |
+| Heatmap calendar | TestAnalytics HeatmapCalendar | Empty data array | ❌ Mock |
+| PoP globe | PoPGlobe | Empty data array | ❌ Mock |
+| AI chart builder | lib/ai/chartBuilder | 6 chart types, properly abstracted | ⚠️ Not wired to UI |
+
+### 29.2 Required Data Pipelines
+
+| Chart | Data Source | Compute | Priority |
+|-------|-------------|---------|----------|
+| Category heatmap | testResults grouped by (category × env) | Pass rate per group | P1 |
+| Pass-rate area (TestAnalytics) | Runs filtered by env, sorted by date | Daily/weekly aggregation | P1 |
+| Flakiness table | All tests with N≥7 runs | computeFlakiness() per test | P1 |
+| Heatmap calendar | Runs grouped by date | Daily pass rate | P2 |
+| PoP globe | Geo-IP from evidence (or empty) | Lat/lng from test config | P2 |
+
+### 29.3 Chart Standards (applied to ALL charts, not just AI)
+
+| Rule | Enforcement |
+|------|-------------|
+| Max 50 data points per chart | Truncate/aggregate |
+| Color-coded: green ≥ 95%, yellow ≥ 80%, red < 80% | Pass rate formatting |
+| Responsive container | Required for all recharts usage |
+| Tooltip on hover | Required for all interactive charts |
+| PROOF color palette | CSS var(--proof-*) tokens |
+
+---
+
+## 30. Data Freshness & Staleness SLA
+
+### 30.1 Current Behavior
+
+- Data loaded once per session (on app mount)
+- No polling, no WebSocket, no SSE, no refresh button
+- `_loaded` flag never resets — data stays as loaded until page refresh
+- React Query staleTimes: 15min for results, 10min for diffs
+- SWR cache: 60s TTL
+- No "last updated" indicator anywhere
+- No staleness detection or alerting
+
+### 30.2 Required Behavior
+
+| Requirement | Target | Priority |
+|-------------|--------|----------|
+| Staleness indicator | Show "Last updated: {timestamp}" | P1 |
+| Auto-refresh (periodic) | Poll every 5 minutes when tab is visible | P2 |
+| Manual refresh button | Refresh icon in header | P1 |
+| Staleness warning | Toast when data > 1 hour old | P2 |
+| Staleness critical | "Data may be stale" banner when > 4 hours old | P2 |
+| Offline indicator | Detect network loss, show cached data | P2 |
+
+### 30.3 Data Freshness by Source
+
+| Source | Acceptable Age | Refresh Strategy |
+|--------|---------------|------------------|
+| runs.json | < 15 min | Poll every 5 min |
+| test-results.json | < 15 min (per completed run) | Poll every 5 min |
+| scheduler-status.json | < 5 min | Poll every 1 min |
+| promotions.json | < 1 hour | On demand |
+| auto-tests.json | < 1 day | On demand |
+| test-suites.json | < 1 day | On demand |
+
+---
+
+## 31. AI Provider Implementation Reality
+
+### 31.1 Current Provider Matrix
+
+| Provider | Code Status | Streaming | Abort | Tool Calling | UI Integration |
+|----------|-------------|-----------|-------|------------|----------------|
+| Chrome AI (Gemini Nano) | ✅ Fully implemented | ✅ | ✅ | ❌ (supportsToolCalling=false) | ❌ Not wired to Copilot UI |
+| OpenAI | ❌ Removed (b65ca96) | N/A | N/A | N/A | Proxy plugin remnants + E2E test remnants only |
+| WebLLM | ❌ Removed | N/A | N/A | N/A | Build config remnants only |
+
+### 31.2 Chrome AI API Shapes Implemented
+
+```typescript
+// Gemini Nano 1.1+ (window.ai)
+const { available, defaultTemperature, defaultTopK, maxTokens } = await ai.assistant.capabilities();
+const session = await ai.assistant.create({ systemPrompt, temperature, topK });
+const response = await session.prompt(query);
+const stream = session.promptStreaming(query);
+
+// Legacy API (pre-1.1)
+const session = await ai.createTextSession();
+```
+
+### 31.3 Requirements
+
+| Requirement | Priority | Action |
+|-------------|----------|--------|
+| Wire Chrome AI to Copilot UI | P1 | Connect `runGraphAgent()` to message dispatch |
+| Add supportsToolCalling for Chrome AI | P2 | Chrome AI supports function calling in newer API versions |
+| Document provider removal status | P1 | Update docs to reflect OpenAI/WebLLM removal |
+| Remove stale provider references | P2 | Clean up proxy plugin, test remnants, build config |
+| Add provider re-selection if needed | P2 | Evaluate whether to re-add OpenAI or WebLLM |
+
+---
+
+## 32. LangGraph Pipeline Unification Plan
+
+### 32.1 Current State — Two Graphs, Neither Wired
+
+**lib/ai/langGraph.ts** (Legacy):
+- 7-stage DAG pipeline
+- No streaming, no abort
+- Max 50 iterations implicit timeout
+- Analyzer.ts + worker orchestrator
+
+**lib/copilot/graphAgent.ts** (Modern):
+- 5-phase sequential pipeline
+- Streaming support
+- Abort support
+- Token audit mechanism (unused)
+- Better separation of concerns
+
+### 32.2 Unification Strategy
+
+| Step | Action | Effort | Priority |
+|------|--------|--------|----------|
+| 1 | Remove lib/ai/ (legacy) | 2d | P1 |
+| 2 | Migrate any unique capabilities (chart builder, 7-stage DAG routing) to lib/copilot/ | 1d | P1 |
+| 3 | Ensure copilot pipeline handles all 28 use cases | 2d | P1 |
+| 4 | Wire runGraphAgent() to Copilot page | 1d | P1 |
+| 5 | Consume token audit data in UI | 1d | P2 |
+| 6 | Add streaming tokens display to Copilot UI | 2d | P2 |
+
+---
+
+## 33. AI Skills Coverage Matrix
+
+### 33.1 Skill Coverage
+
+| Category | Use Case | Fallback | Status |
+|----------|----------|----------|--------|
+| Analysis | failure-analysis | ✅ Text analysis | ✅ |
+| Analysis | flaky-detection | ✅ Text analysis | ✅ |
+| Analysis | anomaly-detection | ✅ Text analysis | ✅ |
+| Analysis | risk-scoring | ✅ Text analysis | ✅ |
+| Analysis | env-comparison | ✅ Text analysis | ✅ |
+| Analysis | category-health | ✅ Text analysis | ✅ |
+| Analysis | trend-analysis | ✅ Text analysis | ✅ |
+| Analysis | regression-analysis | ✅ Text analysis | ✅ |
+| Analysis | suite-health | ✅ Text analysis | ✅ |
+| Analysis | duration-analysis | ✅ Text analysis | ✅ |
+| Debugging | setup-guide | ✅ Text analysis | ✅ |
+| Debugging | assertion-help | ✅ Text analysis | ✅ |
+| Debugging | evidence-inspection | ✅ Text analysis | ✅ |
+| Debugging | test-config-help | ✅ Text analysis | ✅ |
+| Reporting | daily-summary | ✅ Text analysis | ✅ |
+| Reporting | release-readiness | ✅ Text analysis | ✅ |
+| Reporting | executive-summary | ✅ Text analysis | ✅ |
+| Reporting | env-audit | ✅ Text analysis | ✅ |
+| Operations | run-investigation | ✅ Text analysis | ✅ |
+| Operations | suite-management | ✅ Text analysis | ✅ |
+| Operations | promotion-check | ✅ Text analysis | ✅ |
+| Operations | scheduler-status | ✅ Text analysis | ✅ |
+| Quality | coverage-gap | ✅ Text analysis | ✅ |
+| Quality | category-breakdown | ✅ Text analysis | ✅ |
+| Quality | priority-analysis | ✅ Text analysis | ✅ |
+| Quality | owner-analysis | ✅ Text analysis | ✅ |
+| 🔴 CRITICAL | playwright-script | ❌ Returns "I suggest checking" | ❌ No generation |
+| 🔴 CRITICAL | http-test-script | ❌ Returns "I suggest checking" | ❌ No generation |
+| 🔴 CRITICAL | yaml-generation | ❌ Returns "I suggest checking" | ❌ No generation |
+
+### 33.2 Gap Closure
+
+| Gap | Closure Action | Effort | Priority |
+|-----|----------------|--------|----------|
+| playwright-script generation | Implement test script generation from TestCase config | 2d | P1 |
+| http-test-script generation | Implement HTTP request spec generation | 2d | P1 |
+| yaml-generation | Implement YAML config generation in copilot pipeline | 3d | P1 |
+| Quick actions not wired | Connect 8 quick action buttons to real pipeline | 1d | P1 |
+
+---
+
+## 34. Release & Deployment Strategy
+
+### 34.1 Current Process
+
+```
+Commit to main → GitHub Actions (deploy.yml) → validate → typecheck → unit test → E2E → discover:tests → build → gh-pages branch
+```
+
+**Current characteristics**:
+- GitHub Pages from `gh-pages` orphan branch
+- Build pipeline: validate → typecheck → build
+- Deploy runs on push to main touching `src/`, `public/`, `vite.config.*`, `package.json`
+- No versioning strategy
+- No release branches
+- No canary / preview deploys
+- No rollback procedure
+- No CHANGELOG
+- No version.json
+
+### 34.2 Required Strategy
+
+| Requirement | Implementation | Priority |
+|-------------|----------------|----------|
+| Semantic versioning | version.json generated at build time, displayed in About page | P1 |
+| CHANGELOG.md | Auto-generated from conventional commits | P2 |
+| Release branches | `release/v{major}.{minor}.x` for hotfix support | P2 |
+| Preview deployments | Deploy to `gh-pages-preview` branch from PRs | P2 |
+| Rollback procedure | Documented: checkout previous commit and deploy | P2 |
+| Build metadata | version.json includes build date, sha, deploy URL | P1 |
+| Health check after deploy | Synthetic Playwright test against deployed URL | P2 |
+
+---
+
+## 35. Migration & Rollback Protocol
+
+### 35.1 Current State
+
+- No schema versioning in any data file
+- No localStorage migration logic
+- 3 destructive one-shot scripts (rename-run-ids, generate-data, generate-realistic-data) with no backup/undo
+- Data branch uses force-push — potential history loss
+- No export/import mechanism
+- No rollback procedure documented
+
+### 35.2 Required Protocol
+
+| Scenario | Procedure | Priority |
+|----------|-----------|----------|
+| Data file format change | 1. Add migration in scripts/migrate-data.mjs 2. Increment version field 3. Run migration before pushing data | P1 |
+| localStorage format change | 1. Register migration function in store 2. On read, check version 3. Transform to new format 4. Write back | P1 |
+| Accidental force-push | 1. Identify lost commits from local reflog 2. `git reflog data` on scheduler machine 3. Cherry-pick lost commits to new data branch head | P2 |
+| Bad deployment rollback | 1. Revert commit on main 2. Push to trigger deploy 3. Verify gh-pages rollback in < 5 min | P1 |
+| Data corruption | 1. Restore from last known-good data branch head (before force-push) 2. Re-run scheduler from that point | P2 |
+
+### 35.3 Migration Script Requirements
+
+```bash
+scripts/migrate-data.mjs --from=v0 --to=v1    # Migrate all data files
+scripts/migrate-data.mjs --check              # Dry run — report what would change
+scripts/migrate-data.mjs --backup             # Copy current data to data/backups/
+```
+
+---
+
+## 36. Extensibility & Multi-Tenancy Roadmap
+
+### 36.1 Config-Driven (Already Extensible — No Code Changes Required)
+
+| Extension | File(s) | Effort |
+|-----------|---------|--------|
+| Add new test suite | config/test-suites.yml | Config change only |
+| Add new environment | config/environments.yml | Config change only |
+| Add new test (auto-discovered) | source code → discover-all.mjs | Test authoring only |
+| Modify Akamai property config | config/akamai-config.yml | Config change only |
+| Add seed data | data/*.json | Data commit only |
+
+### 36.2 Code-Required (Requires TypeScript Changes)
+
+| Extension | Files to Modify | Risk |
+|-----------|----------------|-------|
+| Add new env tier (e.g., DEV) | src/lib/types.ts, envConfig.ts, config/environments.yml, 4+ other files | Medium — env tied to Run.env type |
+| Add new status enum value | src/lib/types.ts, validate-data.mjs | Low |
+| Add new test type (e.g., "api") | src/lib/types.ts, discover-all.mjs, 2+ discovery scripts | Low |
+| Add new discovery source | New script, discover-all.mjs, lib/testDiscovery.ts | Medium |
+| Add new LLM provider | src/lib/llm.ts, lib/provider.ts | Medium — requires provider interface |
+| Add new AI use case | lib/copilot/useCases.ts, lib/copilot/dataQueries.ts | Low — well-abstracted |
+
+### 36.3 Multi-Tenancy Roadblocks
+
+| Blockade | Details | Effort to Fix |
+|----------|---------|---------------|
+| Global `let` stores | All runs/test results stored in module-level variables — shared across all "tenants" | Major — replace with context/provider pattern |
+| Hardcoded env IDs | `"QA"`, `"UAT"`, `"PROD"` typed as string literals in Run.env, ENV_COLOR_MAP, 6+ files | Major — parameterize env tiers |
+| Single data branch | All data lives in one GitHub orphan branch | Medium — namespace by tenant prefix |
+| No auth/RBAC | Single-user tool | Major — add auth layer |
+
+Multi-tenancy is not recommended before the P1 gap closures are addressed.
+
+---
+
+## 37. Competitive Gap Analysis
+
+### 37.1 Capability Comparison (28 Categories)
+
+| Capability | AWARE | Industry Standard | Gap | Priority |
+|-----------|-------|-------------------|-----|----------|
+| Pass-rate trend chart | ✅ Functional | Expected | None | — |
+| Run history & filter | ✅ Functional | Expected | None | — |
+| A/B diff comparison | ✅ Functional | Nice-to-have | None | — |
+| Test detail drill-down | ✅ Functional | Expected | None | — |
+| Evidence HTTP waterfall | ✅ Functional | Nice-to-have | None | — |
+| Config-as-code YAML | ✅ Functional | Expected | None | — |
+| Scheduler with auto-dispatch | ✅ Functional | Nice-to-have | None | — |
+| AI Copilot | ⚠️ Mock only | Cutting-edge | 🔴 Must wire real pipeline | P1 |
+| Flakiness detection | ⚠️ Inconsistent (6 impls) | Expected | 🟡 Consolidate to 1 impl | P1 |
+| Category heatmap | ⚠️ Mock data | Expected | 🔴 Make data-driven | P1 |
+| Test-to-code traceability | ⚠️ Partial (discovery exists) | Expected | 🟡 Link test results to exact source lines | P1 |
+| Time-range selector | ❌ Not implemented | Expected | 🟡 Add date range filter | P1 |
+| Promotion gate | ✅ Functional | Nice-to-have | None | — |
+| CI pipeline status | ✅ Functional | Expected | None | — |
+| Test suite management | ✅ Functional | Expected | None | — |
+| RUM data (Real User Monitoring) | ❌ Not implemented | Expected | 🔴 Out of scope — CDN tool | P0-gap |
+| PoP-level breakdown | ❌ Not implemented | Expected | 🔴 Out of scope — no geo-location data | P0-gap |
+| Cache analytics | ❌ Not implemented | Expected | 🟡 Out of scope — CDN tool | P1 |
+| Auth / RBAC | ❌ Not implemented | Expected | 🟡 Single-user acceptable for now | P1-for-teams |
+| Webhook notifications | ❌ Not implemented | Standard | 🟢 Add Slack/email | P2 |
+| Scheduled reports | ❌ Not implemented | Standard | 🟢 Add PDF/email digest | P2 |
+| SLO tracking | ❌ Not implemented | Standard | 🟢 Add per-suite pass-rate SLOs | P1 |
+| User analytics (who viewed) | ❌ Not implemented | Standard | 🟢 Add page view tracking | P2 |
+| Dark mode | ✅ Functional | Expected | None | — |
+| CSV export | ✅ Functional | Expected | None | — |
+| Deep-link sharing | ✅ Functional | Expected | None | — |
+| Versioned API | ❌ Not implemented | Expected | 🟢 Out of scope (SPA-only) | P3 |
+| Plugin/extension system | ❌ Not implemented | Nice-to-have | 🟢 Out of scope | P3 |
+
+### 37.2 Competitive Summary
+
+**Strengths**: Config-as-code, scheduler-driven CI, A/B diff with evidence waterfall, AI Copilot (potential — currently mock)
+
+**Gaps**: No RUM data (acceptable — this is a regression tool, not a RUM dashboard), no PoP-level breakdown (no geo-data source), no time-range selector (P1), no test-to-code traceability (P1), no auth (P1 for team use), no webhook notifications (P2)
+
+---
+
+## 38. Documentation Requirements
+
+### 38.1 Current State
+
+| Document Type | Count | Status |
+|---------------|-------|--------|
+| Top-level documentation files (AGENTS.md, MONOREPO.md, etc.) | 16 | ✅ Well-maintained |
+| docs/ subdirectory | 1 | ✅ |
+| App-level docs (README.md) | 2 | ✅ |
+| SKILL.md (agent instructions) | 14 | ✅ Well-structured |
+| JSDoc/TSDoc in source code | 0 | ❌ Not implemented |
+| User guide | 0 | ❌ Not implemented |
+| Operations runbook | 0 | ❌ Not implemented |
+| Deployment SOP | 0 | ❌ Not implemented |
+| Incident response guide | 0 | ❌ Not implemented |
+| Inline YAML comments explaining field purpose | 0 | ❌ Not implemented |
+
+### 38.2 Required
+
+| Document | Content | Priority |
+|----------|---------|----------|
+| JSDoc on all exported functions | Parameters, return types, edge cases | P2 |
+| User guide (README.md) | How to navigate, interpret, use each page | P1 |
+| Deployment SOP | How to deploy, version bump, rollback | P1 |
+| Operations runbook | Scheduler health, data recovery, incident response | P2 |
+| Incident response guide | What to do when data is stale/corrupt/scheduler fails | P2 |
+| Inline YAML comments | Explain each config field's purpose and valid values | P2 |
+
+---
+
+## 39. Cost Model & Infrastructure Budget
+
+### 39.1 Current Costs
+
+| Service | Cost | Details |
+|---------|------|---------|
+| GitHub Pages hosting | $0 | Free tier — unlimited static sites |
+| GitHub Actions | $0 | Free tier: 33,000 min/month Linux |
+| OpenAI API | $0 | Provider removed from codebase |
+| WebLLM (model download) | $0 (bandwidth) | 2GB per browser initial download (provider removed) |
+| Chrome AI | $0 | On-device inference (Gemini Nano) |
+| raw.githubusercontent.com | $0 | No cost, best-effort SLA |
+| **Total** | **$0/month** | All free tier |
+
+### 39.2 Capacity Headroom
+
+| Resource | Free Tier Limit | Current Usage | Headroom |
+|----------|----------------|---------------|----------|
+| GitHub Pages storage | 1GB | ~3MB | 99.7% |
+| GitHub Pages bandwidth | 100GB/month | <1GB/month | >99% |
+| GitHub Actions minutes | 33,000 min/month | ~2,000 min/month | >93% |
+| localStorage per browser | 5MB | ~100KB | >97% |
+
+### 39.3 Scale-Up Cost Model
+
+| Scenario | Additional Cost | Bottleneck |
+|----------|----------------|------------|
+| 10× more runs (data files 5MB) | $0 | GitHub Pages 1GB limit fine |
+| 100× more runs (data files 50MB) | $0 | Storage still OK; load time becomes issue |
+| OpenAI re-integration | $5-50/month (API calls) | Usage dependent; budget alert needed |
+| Team of 50 users | $0 | No auth — all share same URL |
+| WebLLM re-integration | $0 (model download) | User bandwidth (2GB initial) |
+
+### 39.4 Cost Risk Assessment
+
+| Risk | Cost Impact | Mitigation |
+|------|-------------|------------|
+| OpenAI key leaked | Runaway billing ($1K+/hr) | Budget alerts, key rotation, never ship key |
+| GitHub Actions minutes exceeded | Workflow disabled until next month | Reduce scheduler frequency, optimize runs |
+| GitHub Pages bandwidth exceeded | Site unavailable | Compress assets, reduce polling frequency |
+| raw.githubusercontent.com rate-limited | App shows no data | Add CDN caching, stale fallback |
+
+---
+
+## 40. Glossary
+
+| Term | Definition |
+|------|------------|
+| **A.W.A.R.E.** | Akamai Web Analytics Regression Engine |
+| **CDN** | Content Delivery Network (Akamai) |
+| **EdgeWorker** | Akamai's serverless compute platform at the edge |
+| **Environment** | One of 6 test targets: 3 tiers (QA, UAT, PROD) × 2 networks (staging, production) |
+| **Tier** | QA (internal), UAT (customer acceptance), PROD (production) |
+| **Run** | A single CI execution of a test suite against an environment |
+| **TestResult** | Outcome of a single test within a run |
+| **Diff Row** | Computed comparison of a single test between two runs (regression/fixed/unchanged) |
+| **Flakiness Score** | Alternation rate (0–1) of pass/fail status over N≥7 runs |
+| **Anomaly** | Statistical outlier in pass rate or duration (Z-score > 1.5σ or IQR 1.5×) |
+| **Promotion Gate** | UAT pass rate ≥ 95% threshold required before PROD activation |
+| **Scheduler** | K8s-style reconciler that evaluates cron expressions and dispatches CI workflows |
+| **Reconciler** | Controller pattern that polls current state, compares to desired state, takes action |
+| **LangGraph** | Multi-stage LLM pipeline for AI Copilot analysis |
+| **Data Branch** | Orphan git branch containing only JSON data files at root level |
+| **Config-as-Code** | YAML files that define environments, suites, and properties — validated against TypeScript types |
+| **Property** | Akamai CDN property (configuration) being tested |
+| **PoP** | Point of Presence (Akamai edge server location) |
+| **Zombie Observation Window** | A component holding a stale store snapshot while the source data has been mutated |
+
+---
+
+## Appendix A: Critical Blockers (Pre-GA)
+
+| # | Blocker | Component | Fix Required |
+|---|---------|-----------|-------------|
+| B-01 | Copilot mock response instead of real pipeline | pages/Copilot.tsx | Wire runGraphAgent() to message dispatch |
+| B-02 | TestAnalytics shows hardcoded fake data | pages/TestAnalytics.tsx | Replace mock with data-driven computation |
+| B-03 | validate-data.mjs loads schemas but never validates | validate-data.mjs | Wire AJV or equivalent validation |
+| B-04 | No file locking in scheduler | scheduler.mjs | Add lockfile or atomic write |
+| B-05 | GitHub OAuth token exposed | .config/gh/hosts.yml | Rotate token, add to .gitignore |
+| B-06 | Event bus dead letter office | eventBus.ts | Remove or wire consumers |
+| B-07 | Toast pipeline never fires | notifications.ts | Fix currentToast state or remove |
+| B-08 | Flakiness computed 6 ways | Multiple files | Consolidate to single implementation |
+| B-09 | 4 anomaly systems not integrated | Multiple files | Unify to single architecture |
+| B-10 | Two LangGraph pipelines, neither wired | lib/ai/, lib/copilot/ | Remove legacy, wire modern |
+| B-11 | 50+ console.log statements | Multiple files | Clean up or route through logger |
+| B-12 | 17 @ts-ignore directives | Multiple files | Fix underlying type issues |
+| B-13 | Sharing page returns "offline for maintenance" | Sharing.tsx | Wire actual sharing functionality or mark as planned |
+
+## Appendix B: Phased Roadmap
+
+### Phase 1 — Stabilization (2-3 weeks)
+- B-04: Scheduler file locking
+- B-05: Rotate exposed token + .gitignore fix
+- B-06: Remove dead event bus
+- B-07: Fix or remove toast pipeline
+- B-11, B-12: Clean up console.log + @ts-ignore
+- B-08, B-09: Consolidate flakiness + anomaly to single implementations
+- F-20: Wire schema validation to actually validate
+
+### Phase 2 — Core Feature Completion (3-4 weeks)
+- B-01: Wire real AI pipeline to Copilot UI (Chrome AI)
+- B-02: Replace TestAnalytics mock data with real computation
+- B-10: Remove legacy AI pipeline, wire modern one
+- TD-01 through TD-06: Critical tech debt
+- F-08: Unified anomaly detection with pass-rate Z-score
+
+### Phase 3 — Quality & Scale (2-3 weeks)
+- F-06, F-07: Data-driven heatmaps and flakiness
+- Data versioning + localStorage migration
+- Performance optimizations (batch notify, memoize, lazy evidence)
+- Memory management (LRU eviction, blob URL cleanup)
+- Missing error boundaries + empty states
+
+### Phase 4 — Production Polish (2-3 weeks)
+- Time-range selector for runs
+- Test-to-code traceability improvements
+- Data freshness polling
+- Alerting rules (data staleness, scheduler failure)
+- JSDoc + user guide + deployment SOP
+- Competitive gaps (SLO tracking, auth for teams)
+
+### Phase 5 — Innovation (Ongoing)
+- AI Copilot with full LangGraph pipeline + streaming
+- Webhook notifications
+- Scheduled PDF reports
+- Competitive differentiation gaps
