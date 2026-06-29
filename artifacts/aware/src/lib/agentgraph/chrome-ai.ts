@@ -14,42 +14,91 @@ export interface ChromeAiCapabilities {
 
 export async function getChromeAiCapabilities(): Promise<ChromeAiCapabilities | null> {
   const ai = (window as any).ai;
-  if (!ai) return null;
+  console.log("[ChromeAI] window.ai:", ai);
+  if (!ai) {
+    console.warn("[ChromeAI] ✗ window.ai is undefined — Chrome AI not available");
+    return null;
+  }
+  const keys = Object.keys(ai);
+  console.log("[ChromeAI] window.ai keys:", keys);
+  if (ai.languageModel) {
+    console.log("[ChromeAI] languageModel keys:", Object.keys(ai.languageModel));
+    console.log("[ChromeAI] languageModel.capabilities:", ai.languageModel.capabilities);
+  }
   try {
     if (ai.languageModel?.capabilities) {
-      return await ai.languageModel.capabilities();
+      const caps = await ai.languageModel.capabilities();
+      console.log("[ChromeAI] capabilities result:", caps);
+      return caps;
     }
-  } catch {}
+    console.warn("[ChromeAI] ✗ ai.languageModel.capabilities not found");
+  } catch (e) {
+    console.error("[ChromeAI] ✗ capabilities() threw:", e);
+  }
+  console.log("[ChromeAI] checking legacy ai.canCreateTextSession:", typeof ai.canCreateTextSession);
+  if (typeof ai.canCreateTextSession === "function") {
+    try {
+      const can = await ai.canCreateTextSession();
+      console.log("[ChromeAI] canCreateTextSession:", can);
+      if (can === "readily" || can === "after-download") {
+        return { available: can };
+      }
+    } catch (e) {
+      console.error("[ChromeAI] canCreateTextSession threw:", e);
+    }
+  }
   return null;
 }
 
 export async function isChromeAiAvailable(): Promise<boolean> {
   const c = await getChromeAiCapabilities();
-  return c !== null && c.available !== "no";
+  const avail = c !== null && c.available !== "no";
+  console.log("[ChromeAI] isChromeAiAvailable:", avail, "| capabilities:", c);
+  return avail;
 }
 
 async function createSession() {
   const ai = (window as any).ai;
-  if (!ai) throw new Error("Chrome AI not available");
+  console.log("[ChromeAI] createSession() — window.ai:", ai);
+  if (!ai) throw new Error("[ChromeAI] ✗ Chrome AI not available (window.ai is falsy)");
 
   if (ai.languageModel?.create) {
-    return ai.languageModel.create({
+    console.log("[ChromeAI] → using ai.languageModel.create()");
+    const session = await ai.languageModel.create({
       systemPrompt: `You are A.W.A.R.E. Copilot, an expert test-observability analyst for a CDN regression-testing platform. You analyze test runs, failures, flakiness, and pipeline health. Be concise, technical, and actionable. Use markdown formatting.`,
     });
+    console.log("[ChromeAI] ✓ session created via languageModel.create:", session);
+    return session;
   }
   if (ai.createTextSession) {
-    return ai.createTextSession();
+    console.log("[ChromeAI] → using legacy ai.createTextSession()");
+    const session = await ai.createTextSession();
+    console.log("[ChromeAI] ✓ session created via createTextSession:", session);
+    return session;
   }
-  throw new Error("No Chrome AI API found");
+  console.warn("[ChromeAI] ✗ No create method found on window.ai. Available keys:", Object.keys(ai));
+  throw new Error("[ChromeAI] ✗ No Chrome AI API found");
 }
 
 async function getSession(): Promise<any> {
-  if (_session) return _session;
-  if (_sessionPromise) return _sessionPromise;
+  if (_session) {
+    console.log("[ChromeAI] getSession() → returning cached session");
+    return _session;
+  }
+  if (_sessionPromise) {
+    console.log("[ChromeAI] getSession() → waiting for in-flight session creation");
+    return _sessionPromise;
+  }
+  console.log("[ChromeAI] getSession() → creating new session");
   _sessionPromise = createSession().then(s => {
+    console.log("[ChromeAI] ✓ session created and cached");
     _session = s;
     _sessionPromise = null;
     return s;
+  }).catch(e => {
+    console.error("[ChromeAI] ✗ session creation failed:", e);
+    _sessionPromise = null;
+    throw e;
   });
   return _sessionPromise;
 }
@@ -63,8 +112,15 @@ export function destroySession() {
 }
 
 export async function classifyIntent(query: string): Promise<string | null> {
-  const session = await getSession().catch(() => null);
-  if (!session) return null;
+  console.log("[ChromeAI] classifyIntent() called with query:", query);
+  const session = await getSession().catch((e) => {
+    console.warn("[ChromeAI] classifyIntent — getSession failed:", e);
+    return null;
+  });
+  if (!session) {
+    console.warn("[ChromeAI] classifyIntent — no session, returning null (will fall back to keywords)");
+    return null;
+  }
 
   const prompt = `Classify this test-monitoring query into exactly one of these categories. Reply with ONLY the category word, nothing else.
 
@@ -81,15 +137,20 @@ Categories:
 Query: "${query}"
 Category:`;
 
+  console.log("[ChromeAI] classifyIntent — session.prompt() called");
   try {
     const result = await session.prompt(prompt);
+    console.log("[ChromeAI] classifyIntent — raw result:", result);
     const trimmed = result.trim().toLowerCase().replace(/[.!\s]+$/g, "");
     const valid = [
       "failures", "flakiness", "environment_compare", "anomalies",
       "pipeline_health", "trend", "test_detail", "unknown",
     ];
-    return valid.includes(trimmed) ? trimmed : "unknown";
-  } catch {
+    const classified = valid.includes(trimmed) ? trimmed : "unknown";
+    console.log("[ChromeAI] classifyIntent — classified as:", classified);
+    return classified;
+  } catch (e) {
+    console.error("[ChromeAI] classifyIntent — session.prompt threw:", e);
     return null;
   }
 }
@@ -97,29 +158,43 @@ Category:`;
 export async function* generateResponseStream(
   ctx: GraphContext,
 ): AsyncGenerator<string, string, unknown> {
-  const session = await getSession().catch(() => null);
+  console.log("[ChromeAI] generateResponseStream() — intent:", ctx.intent, "| query:", ctx.query);
+  const session = await getSession().catch((e) => {
+    console.warn("[ChromeAI] generateResponseStream — getSession failed:", e);
+    return null;
+  });
   if (!session) {
-    return buildFallbackResponse(ctx);
+    console.warn("[ChromeAI] generateResponseStream — no session, using fallback");
+    const fallback = buildFallbackResponse(ctx);
+    console.log("[ChromeAI] generateResponseStream — fallback:", fallback);
+    yield fallback;
+    return fallback;
   }
 
   const prompt = buildRichPrompt(ctx);
+  console.log("[ChromeAI] generateResponseStream — built prompt, length:", prompt.length);
 
   try {
     if (session.promptStreaming) {
+      console.log("[ChromeAI] generateResponseStream — using promptStreaming");
       const stream = await session.promptStreaming(prompt);
       let full = "";
       for await (const chunk of stream) {
         full = chunk;
+        console.log("[ChromeAI] generateResponseStream — chunk length:", chunk.length);
         yield full;
       }
+      console.log("[ChromeAI] generateResponseStream — streaming complete, final length:", full.length);
       return full;
     }
 
+    console.log("[ChromeAI] generateResponseStream — using non-streaming prompt");
     const result = await session.prompt(prompt);
+    console.log("[ChromeAI] generateResponseStream — result length:", result.length);
     yield result;
     return result;
   } catch (e) {
-    console.error("[ChromeAI] generate failed:", e);
+    console.error("[ChromeAI] generateResponseStream — prompt failed:", e);
     const fallback = buildFallbackResponse(ctx);
     yield fallback;
     return fallback;
@@ -127,17 +202,26 @@ export async function* generateResponseStream(
 }
 
 export async function generateResponse(ctx: GraphContext): Promise<string> {
+  console.log("[ChromeAI] generateResponse()");
   const gen = generateResponseStream(ctx);
   let last = "";
   for await (const chunk of gen) {
     last = chunk;
   }
+  console.log("[ChromeAI] generateResponse() — final text length:", last.length, "| text:", last.slice(0, 100));
   return last;
 }
 
 export async function generateReasoning(ctx: GraphContext): Promise<string | null> {
-  const session = await getSession().catch(() => null);
-  if (!session) return null;
+  console.log("[ChromeAI] generateReasoning()");
+  const session = await getSession().catch((e) => {
+    console.warn("[ChromeAI] generateReasoning — getSession failed:", e);
+    return null;
+  });
+  if (!session) {
+    console.warn("[ChromeAI] generateReasoning — no session, returning null");
+    return null;
+  }
 
   const prompt = `You are analyzing CDN regression test data. Based on the following data summary, write 1-2 sentences of technical reasoning explaining WHY the data looks this way (root cause hypothesis, not just description). Be specific and actionable.
 
@@ -146,15 +230,25 @@ ${buildDataSummary(ctx)}
 Reasoning (1-2 sentences, technical):`;
 
   try {
-    return await session.prompt(prompt);
-  } catch {
+    const result = await session.prompt(prompt);
+    console.log("[ChromeAI] generateReasoning — result:", result);
+    return result;
+  } catch (e) {
+    console.error("[ChromeAI] generateReasoning — failed:", e);
     return null;
   }
 }
 
 export async function generateRecommendations(ctx: GraphContext): Promise<string | null> {
-  const session = await getSession().catch(() => null);
-  if (!session) return null;
+  console.log("[ChromeAI] generateRecommendations()");
+  const session = await getSession().catch((e) => {
+    console.warn("[ChromeAI] generateRecommendations — getSession failed:", e);
+    return null;
+  });
+  if (!session) {
+    console.warn("[ChromeAI] generateRecommendations — no session, returning null");
+    return null;
+  }
 
   const prompt = `You are a senior SRE reviewing CDN regression test data. Based on the following summary, provide exactly 2-3 specific, actionable recommendations to improve pipeline health. Number them. Each should be 1 sentence.
 
@@ -163,8 +257,11 @@ ${buildDataSummary(ctx)}
 Recommendations:`;
 
   try {
-    return await session.prompt(prompt);
-  } catch {
+    const result = await session.prompt(prompt);
+    console.log("[ChromeAI] generateRecommendations — result:", result);
+    return result;
+  } catch (e) {
+    console.error("[ChromeAI] generateRecommendations — failed:", e);
     return null;
   }
 }

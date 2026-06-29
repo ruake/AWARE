@@ -41,7 +41,7 @@ test.describe("Dashboard", () => {
     // May or may not be present depending on Z-score; accept either case
     const visible = await banner.isVisible().catch(() => false);
     if (visible) {
-      await expect(page.getByRole("button", { name: /investigate/i })).toBeVisible();
+      await expect(page.getByRole("link", { name: /investigate/i })).toBeVisible();
     }
   });
 
@@ -53,6 +53,6 @@ test.describe("Dashboard", () => {
 
   test("promotion gate status bar shows UAT threshold info", async ({ page }) => {
     await expect(page.getByText(/promotion gate/i)).toBeVisible();
-    await expect(page.getByText(/95%/)).toBeVisible();
+    await expect(page.getByText(/95%/).first()).toBeVisible();
   });
 });

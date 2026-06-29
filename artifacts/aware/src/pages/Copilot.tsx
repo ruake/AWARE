@@ -65,10 +65,16 @@ export default function Copilot() {
   /* ─── Chrome AI availability probe ─── */
   useEffect(() => {
     const probe = async () => {
+      console.log("[Copilot] probing Chrome AI capabilities...");
+      console.log("[Copilot] navigator.userAgent:", navigator.userAgent);
+      console.log("[Copilot] window.ai:", (window as any).ai);
       const c = await getChromeAiCapabilities();
+      console.log("[Copilot] Chrome AI capabilities result:", c);
       if (c) {
+        console.log("[Copilot] Chrome AI available:", c.available);
         setChromeAi({ avail: c.available !== "no", ready: c.available });
       } else {
+        console.warn("[Copilot] Chrome AI NOT available (getChromeAiCapabilities returned null)");
         setChromeAi({ avail: false, ready: "no" });
       }
     };
@@ -134,7 +140,15 @@ export default function Copilot() {
         responseText = `Sorry, I encountered an error: ${ctx.error}`;
       }
 
-      const usedChromeAi = ctx.intent !== "unknown" && await isChromeAiAvailable();
+      console.log("[Copilot] handleSend — ctx.intent:", ctx.intent);
+      console.log("[Copilot] handleSend — ctx.textResponse:", ctx.textResponse);
+      console.log("[Copilot] handleSend — ctx.chartConfig:", ctx.chartConfig);
+      console.log("[Copilot] handleSend — ctx.reasoning:", ctx.reasoning);
+      console.log("[Copilot] handleSend — ctx.recommendations:", ctx.recommendations);
+
+      const chromeAiAvail = await isChromeAiAvailable();
+      const usedChromeAi = ctx.intent !== "unknown" && chromeAiAvail;
+      console.log("[Copilot] handleSend — chromeAiAvail:", chromeAiAvail, "| usedChromeAi:", usedChromeAi);
 
       /* 2. If Chrome AI is available, try streaming for richer text */
       if (usedChromeAi) {
@@ -179,6 +193,8 @@ export default function Copilot() {
           return next;
         });
       } else {
+        console.log("[Copilot] handleSend — using fallback (no Chrome AI or unknown intent)");
+        console.log("[Copilot] handleSend — responseText:", responseText);
         /* 3. Fallback: static rule-based response */
         const assistantMsg: Message = {
           role: "assistant",
@@ -192,6 +208,7 @@ export default function Copilot() {
         setMessages(prev => [...prev, assistantMsg]);
       }
     } catch (e) {
+      console.error("[Copilot] handleSend — caught error:", e);
       setMessages(prev => [...prev, {
         role: "assistant",
         content: "Sorry, I encountered an error during analysis. Please try again.",
