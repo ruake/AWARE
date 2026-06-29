@@ -1,0 +1,174 @@
+# =============================================================================
+# Validate — ConfigMap Validation Gate
+#
+# Validates all config YAML files (the K8s "ConfigMaps") and optionally
+# validates test specs on the tests branch. Runs on every push that
+# touches config/, and can be triggered manually for pre-flight checks.
+# =============================================================================
+name: Validate
+
+on:
+  push:
+    branches: [main, tests]
+    paths:
+      - "config/**"
+      - "artifacts/aware-app/data/**"
+      - ".github/workflows/validate.yml"
+
+  pull_request:
+    paths:
+      - "config/**"
+      - "artifacts/aware-app/data/**"
+
+  workflow_dispatch:
+    inputs:
+      strict:
+        description: "Fail on warnings (strict mode)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: "validate-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  statuses: write
+  pull-requests: write
+
+env:
+  WORKING_DIR: artifacts/aware-app
+
+jobs:
+  validate-config:
+    name: "Validate ConfigMaps"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node + pnpm
+        uses: ./.github/actions/setup-node
+        with:
+          working-dir: ${{ env.WORKING_DIR }}
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.1
+
+      - name: Validate akamai-config.yml
+        id: akamai
+        shell: bash
+        run: |
+          FILE="config/akamai-config.yml"
+          echo "Validating $FILE …"
+          ERRORS=0
+          # Required fields
+          for field in properties[0].name properties[0].contractId properties[0].groupId; do
+            VAL=$(yq ".$field" "$FILE" 2>/dev/null)
+            if [ -z "$VAL" ] || [ "$VAL" = "null" ]; then
+              echo "::error file=$FILE::Missing required field: $field"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          # Promotion gate threshold
+          THRESHOLD=$(yq ".properties[0].promotionGate.minPassRate // 95" "$FILE")
+          if ! awk "BEGIN { exit ($THRESHOLD >= 0 && $THRESHOLD <= 100) ? 0 : 1 }"; then
+            echo "::error file=$FILE::promotionGate.minPassRate must be 0-100, got $THRESHOLD"
+            ERRORS=$((ERRORS + 1))
+          fi
+          echo "errors=$ERRORS" >> "$GITHUB_OUTPUT"
+          [ "$ERRORS" -eq 0 ] && echo "✅ akamai-config.yml valid" || echo "❌ $ERRORS error(s)"
+        working-directory: .
+
+      - name: Validate environments.yml
+        id: envs
+        shell: bash
+        run: |
+          FILE="config/environments.yml"
+          echo "Validating $FILE …"
+          ERRORS=0
+          TIERS=$(yq '.environments[].target' "$FILE" | sort -u)
+          for required in QA UAT PROD; do
+            echo "$TIERS" | grep -q "^$required$" || {
+              echo "::error file=$FILE::Missing required tier: $required"
+              ERRORS=$((ERRORS + 1))
+            }
+          done
+          echo "errors=$ERRORS" >> "$GITHUB_OUTPUT"
+          [ "$ERRORS" -eq 0 ] && echo "✅ environments.yml valid" || echo "❌ $ERRORS error(s)"
+        working-directory: .
+
+      - name: Validate test-suites.yml
+        id: suites
+        shell: bash
+        run: |
+          FILE="config/test-suites.yml"
+          echo "Validating $FILE …"
+          ERRORS=0
+          SUITE_COUNT=$(yq '.suites | length' "$FILE")
+          echo "Found $SUITE_COUNT suites"
+          # Each suite must have id, name; schedule is optional (null = event-triggered)
+          for i in $(seq 0 $((SUITE_COUNT - 1))); do
+            for field in id name; do
+              VAL=$(yq ".suites[$i].$field" "$FILE")
+              if [ -z "$VAL" ] || [ "$VAL" = "null" ]; then
+                ID=$(yq ".suites[$i].id // \"suite[$i]\"" "$FILE")
+                echo "::error file=$FILE::Suite $ID missing field: $field"
+                ERRORS=$((ERRORS + 1))
+              fi
+            done
+          done
+          echo "errors=$ERRORS" >> "$GITHUB_OUTPUT"
+          [ "$ERRORS" -eq 0 ] && echo "✅ test-suites.yml valid" || echo "❌ $ERRORS error(s)"
+        working-directory: .
+
+      - name: Validate data/runs.json schema
+        id: runs
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('data/runs.json', 'utf8'));
+            if (!Array.isArray(data)) throw new Error('runs.json must be an array');
+            let errors = 0;
+            data.slice(0, 10).forEach((r, i) => {
+              ['id','env','started','passPct'].forEach(f => {
+                if (r[f] === undefined) { console.error('run[' + i + '] missing: ' + f); errors++; }
+              });
+            });
+            if (errors > 0) process.exit(1);
+            console.log('✅ runs.json valid (' + data.length + ' runs)');
+          "
+        working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Gate — fail if errors
+        shell: bash
+        run: |
+          TOTAL=$(( ${{ steps.akamai.outputs.errors || 0 }} + ${{ steps.envs.outputs.errors || 0 }} + ${{ steps.suites.outputs.errors || 0 }} ))
+          if [ "$TOTAL" -gt 0 ]; then
+            echo "::error::ConfigMap validation failed with $TOTAL error(s). Fix the config files before merging."
+            exit 1
+          fi
+          echo "✅ All ConfigMaps valid"
+
+      - name: PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = [
+              '### ✅ AWARE Config Validation Passed',
+              '',
+              '| File | Status |',
+              '|------|--------|',
+              '| `config/akamai-config.yml` | ✅ Valid |',
+              '| `config/environments.yml` | ✅ Valid |',
+              '| `config/test-suites.yml` | ✅ Valid |',
+              '| `data/runs.json` | ✅ Valid |',
+            ].join('\n');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });

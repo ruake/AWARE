@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://raw.githubusercontent.com https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; worker-src 'self' blob:; child-src blob:;" />
+    <title>AWARE — Akamai Web Analytics Regression Engine</title>
+    <meta name="description" content="CDN test observability platform. Monitor, validate, and analyse Akamai edge configurations with real-time dashboards and AI-powered insights." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="AWARE — Akamai Web Analytics Regression Engine" />
+    <meta property="og:description" content="CDN test observability platform for Akamai edge configurations." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem("proof-theme");
+          if (t === "light") {
+            document.documentElement.classList.add("light");
+          } else {
+            document.documentElement.classList.remove("light");
+          }
+        } catch(e) {}
+      })();
+    </script>
+    <a href="#main-content" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;background:var(--proof-bg,#0d1117);color:var(--proof-text,#e6edf3);padding:8px 16px;border-radius:4px;font-size:14px;font-weight:600;" onfocus="this.style.left='8px';this.style.width='auto';this.style.height='auto';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">Skip to main content</a>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

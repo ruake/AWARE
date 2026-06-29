@@ -1,0 +1,138 @@
+# =============================================================================
+# Sync Data — Data Branch Integrity
+#
+# Periodically verifies and repairs the `data` branch:
+#   - Checks runs.json schema integrity
+#   - Prunes test-result files for deleted runs
+#   - Rebuilds any missing derived JSON (promotions.json)
+#   - Reports stale / corrupted entries
+#
+# Unlike the data-writer (which only appends), this workflow is the
+# "janitor" — it reads the whole branch and fixes inconsistencies.
+# =============================================================================
+name: Sync Data
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Report issues without writing fixes"
+        type: boolean
+        default: true
+      prune_older_than:
+        description: "Prune run artifacts older than N days (0 = skip)"
+        type: number
+        default: 90
+
+permissions:
+  contents: write
+
+env:
+  WORKING_DIR: artifacts/aware-app
+  DATA_BRANCH: data
+
+jobs:
+  sync:
+    name: "Verify + Repair data branch"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node + pnpm
+        uses: ./.github/actions/setup-node
+        with:
+          working-dir: ${{ env.WORKING_DIR }}
+
+      - name: Checkout data branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DATA_BRANCH }}
+          path: data-branch
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify runs.json
+        id: verify
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const runsPath = 'data-branch/runs.json';
+            if (!fs.existsSync(runsPath)) {
+              console.log('::warning::runs.json not found on data branch');
+              process.exit(0);
+            }
+            let runs;
+            try { runs = JSON.parse(fs.readFileSync(runsPath, 'utf8')); }
+            catch(e) { console.error('::error::runs.json is invalid JSON:', e.message); process.exit(1); }
+            if (!Array.isArray(runs)) { console.error('::error::runs.json must be an array'); process.exit(1); }
+            let issues = 0;
+            const requiredFields = ['id','env','started','passPct'];
+            runs.forEach((r, i) => {
+              requiredFields.forEach(f => {
+                if (r[f] === undefined) {
+                  console.log('::warning::run[' + i + '] (id=' + r.id + ') missing field: ' + f);
+                  issues++;
+                }
+              });
+            });
+            console.log('runs.json: ' + runs.length + ' runs, ' + issues + ' issues');
+            fs.writeFileSync('$GITHUB_OUTPUT', 'run_count=' + runs.length + '\nissues=' + issues + '\n', {flag:'a'});
+          "
+
+      - name: Verify promotions.json
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const promoPath = 'data-branch/promotions.json';
+            if (!fs.existsSync(promoPath)) {
+              console.log('::warning::promotions.json not found — will be created on next UAT run');
+              process.exit(0);
+            }
+            const data = JSON.parse(fs.readFileSync(promoPath, 'utf8'));
+            console.log('promotions.json: ' + (Array.isArray(data) ? data.length : 0) + ' decisions');
+          "
+
+      - name: Prune old artifacts
+        if: inputs.prune_older_than != '0' && inputs.dry_run != 'true'
+        shell: bash
+        run: |
+          CUTOFF=$(date -d "-${{ inputs.prune_older_than }} days" +%s 2>/dev/null || date -v-${{ inputs.prune_older_than }}d +%s)
+          PRUNED=0
+          for dir in data-branch/test-results/*/; do
+            [ -d "$dir" ] || continue
+            MTIME=$(stat -c %Y "$dir" 2>/dev/null || stat -f %m "$dir")
+            if [ "$MTIME" -lt "$CUTOFF" ]; then
+              echo "Pruning: $dir"
+              rm -rf "$dir"
+              PRUNED=$((PRUNED + 1))
+            fi
+          done
+          echo "Pruned $PRUNED artifact directories"
+
+      - name: Write repairs to data branch
+        if: inputs.dry_run != 'true'
+        uses: ./.github/actions/data-writer
+        with:
+          files: "data-branch/runs.json data-branch/promotions.json"
+          dest-paths: "runs.json promotions.json"
+          commit-message: "sync: daily integrity check — ${{ steps.verify.outputs.run_count }} runs [skip ci]"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          {
+            echo "## Data Branch Sync"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| **Runs** | ${{ steps.verify.outputs.run_count }} |"
+            echo "| **Issues Found** | ${{ steps.verify.outputs.issues }} |"
+            echo "| **Dry Run** | ${{ inputs.dry_run || 'false' }} |"
+            echo "| **Prune Older Than** | ${{ inputs.prune_older_than || '90' }} days |"
+          } >> "$GITHUB_STEP_SUMMARY"

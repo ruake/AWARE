@@ -1,0 +1,522 @@
+[
+  {
+    "id": "ad_0",
+    "name": "HSTS header present on all responses",
+    "description": "Verify Strict-Transport-Security header is set on all responses.",
+    "testType": "web",
+    "category": "security",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": ["security", "securityheaders"],
+    "owner": "auto@discovery",
+    "suiteIds": ["suite_smoke", "suite_regression_qa", "suite_regression_uat", "suite_nightly_prod"],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_strict_transport_security_header",
+    "preconditions": "Akamai security policy must be active on the property under test.",
+    "expectedBehavior": "All responses must include Strict-Transport-Security header with max-age >= 31536000.",
+    "documentation": "HSTS header ensures browsers always connect via HTTPS.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      },
+      {
+        "id": "assert_strict_transport",
+        "type": "header",
+        "field": "Strict-Transport-Security",
+        "expected": "exists",
+        "operator": "exists",
+        "description": "HSTS header is enforced"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-16T00:00:00Z",
+        "author": "system",
+        "summary": "Initial enrichment with assertions and documentation",
+        "changes": ["Added assertions", "Updated documentation"]
+      }
+    ],
+    "createdAt": "2026-06-16T10:06:34.785645Z",
+    "updatedAt": "2026-06-16T10:06:34.785645Z",
+    "githubPath": "tests/test_security.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_1",
+    "name": "US East users resolve to Ashburn PoP",
+    "description": "Verify us-east users resolve to the Ashburn (IAD) edge PoP.",
+    "testType": "api",
+    "category": "geo-match",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": ["geo-match"],
+    "owner": "auto@discovery",
+    "suiteIds": ["suite_smoke", "suite_regression_qa", "suite_regression_uat", "suite_nightly_prod"],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::test_us_east_users_resolve_to_ashburn",
+    "preconditions": "Akamai Edge DNS must be configured with geo-matching rules for IAD (Ashburn, VA).",
+    "expectedBehavior": "The request must resolve to the correct Akamai edge PoP and return HTTP 200.",
+    "documentation": "Verify us-east users resolve to the Ashburn (IAD) edge PoP.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      },
+      {
+        "id": "assert_region_header",
+        "type": "header",
+        "field": "X-Akamai-PoP-Region",
+        "expected": "exists",
+        "operator": "exists",
+        "description": "Response includes Akamai PoP region header"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-16T00:00:00Z",
+        "author": "system",
+        "summary": "Initial enrichment with assertions and documentation",
+        "changes": ["Added assertions", "Updated documentation"]
+      }
+    ],
+    "createdAt": "2026-06-16T10:06:34.781560Z",
+    "updatedAt": "2026-06-16T10:06:34.781560Z",
+    "githubPath": "tests/test_geo_matching.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_2",
+    "name": "HTTP/2 negotiated via ALPN",
+    "description": "Verify HTTP/2 is negotiated via ALPN during TLS handshake.",
+    "testType": "http",
+    "category": "http-protocol",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": ["http", "protocol"],
+    "owner": "auto@discovery",
+    "suiteIds": ["suite_smoke", "suite_regression_qa", "suite_regression_uat", "suite_nightly_prod"],
+    "automated": true,
+    "scriptPath": "tests/test_http_protocol.py::test_http2_negotiated_via_alpn",
+    "preconditions": "TLS 1.2+ must be supported on the edge. ALPN must be enabled on the property.",
+    "expectedBehavior": "The TLS handshake must negotiate HTTP/2 via ALPN and return HTTP 200.",
+    "documentation": "Verify HTTP/2 is negotiated via ALPN during TLS handshake.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      },
+      {
+        "id": "assert_http2",
+        "type": "protocol",
+        "field": "protocol",
+        "expected": "HTTP/2",
+        "operator": "equals",
+        "description": "HTTP/2 protocol negotiated"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-16T00:00:00Z",
+        "author": "system",
+        "summary": "Initial enrichment with assertions and documentation",
+        "changes": ["Added assertions", "Updated documentation"]
+      }
+    ],
+    "createdAt": "2026-06-16T10:06:34.783100Z",
+    "updatedAt": "2026-06-16T10:06:34.783100Z",
+    "githubPath": "tests/test_http_protocol.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_3",
+    "name": "EdgeWorker activates on /api/* routes",
+    "description": "Verify EdgeWorker activation on /api/* route patterns.",
+    "testType": "edgeworker",
+    "category": "edge-routing",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": ["edgeworker", "functional"],
+    "owner": "auto@discovery",
+    "suiteIds": ["suite_edgeworker", "suite_regression_qa", "suite_regression_uat", "suite_nightly_prod"],
+    "automated": true,
+    "scriptPath": "tests/test_edgeworker.py::test_edgeworker_activates_on_api_routes",
+    "preconditions": "EdgeWorker must be deployed and activated on the property.",
+    "expectedBehavior": "Requests to /api/* routes must trigger the EdgeWorker.",
+    "documentation": "Verify EdgeWorker activation on /api/* route patterns.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      },
+      {
+        "id": "assert_ew_active",
+        "type": "header",
+        "field": "X-Akamai-EdgeWorker",
+        "expected": "exists",
+        "operator": "exists",
+        "description": "EdgeWorker activation header present"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-16T00:00:00Z",
+        "author": "system",
+        "summary": "Initial enrichment with assertions and documentation",
+        "changes": ["Added assertions", "Updated documentation"]
+      }
+    ],
+    "createdAt": "2026-06-16T10:06:34.782120Z",
+    "updatedAt": "2026-06-16T10:06:34.782120Z",
+    "githubPath": "tests/test_edgeworker.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_4",
+    "name": "Login transaction completes within 5s",
+    "description": "Verify login transaction flow completes within 5 seconds.",
+    "testType": "transaction",
+    "category": "performance",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": ["performance", "transaction"],
+    "owner": "auto@discovery",
+    "suiteIds": ["suite_smoke", "suite_performance", "suite_regression_qa", "suite_regression_uat", "suite_nightly_prod"],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestTransaction::test_login_transaction_under_5s",
+    "preconditions": "Akamai property must be deployed to all edge servers.",
+    "expectedBehavior": "Login transaction must complete within 5000ms.",
+    "documentation": "Verify login transaction flow completes within 5 seconds.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      },
+      {
+        "id": "assert_duration_threshold",
+        "type": "responseTime",
+        "field": "duration",
+        "expected": "5000",
+        "operator": "lt",
+        "description": "Transaction completes within 5000ms"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-16T00:00:00Z",
+        "author": "system",
+        "summary": "Initial enrichment with assertions and documentation",
+        "changes": ["Added assertions", "Updated documentation"]
+      }
+    ],
+    "createdAt": "2026-06-16T10:06:34.783772Z",
+    "updatedAt": "2026-06-16T10:06:34.783772Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_5",
+    "name": "Cache hit ratio exceeds 80% for static assets",
+    "description": "Verify cache HIT ratio exceeds 80% for static assets.",
+    "testType": "pytest",
+    "category": "caching",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": ["caching", "cachebehavior"],
+    "owner": "auto@discovery",
+    "suiteIds": ["suite_performance", "suite_regression_qa", "suite_regression_uat", "suite_nightly_prod"],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCacheBehavior::test_cache_hit_ratio_exceeds_80_percent",
+    "preconditions": "Akamai property must have caching rules enabled.",
+    "expectedBehavior": "Cache hit ratio must exceed 80%. X-Cache header must indicate the caching tier.",
+    "documentation": "Verify cache HIT ratio exceeds 80% for static assets.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      },
+      {
+        "id": "assert_cache_control",
+        "type": "header",
+        "field": "Cache-Control",
+        "expected": "exists",
+        "operator": "exists",
+        "description": "Cache-Control header is present"
+      },
+      {
+        "id": "assert_x_cache",
+        "type": "header",
+        "field": "X-Cache",
+        "expected": "exists",
+        "operator": "exists",
+        "description": "X-Cache header indicates edge caching status"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-16T00:00:00Z",
+        "author": "system",
+        "summary": "Initial enrichment with assertions and documentation",
+        "changes": ["Added assertions", "Updated documentation"]
+      }
+    ],
+    "createdAt": "2026-06-16T10:06:34.783760Z",
+    "updatedAt": "2026-06-16T10:06:34.783760Z",
+    "githubPath": "tests/test_performance.py",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_6",
+    "name": "Homepage renders critical assets via Puppeteer",
+    "description": "Verify homepage loads CSS, JS, and favicon assets without errors via headless Chromium.",
+    "testType": "puppeteer",
+    "category": "browser-rendering",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": ["puppeteer", "rendering"],
+    "owner": "auto@puppeteer",
+    "suiteIds": ["suite_smoke", "suite_regression_qa", "suite_regression_uat"],
+    "automated": true,
+    "scriptPath": "e2e/puppeteer/screenshots.spec.ts",
+    "preconditions": "Akamai property must be deployed. Chromium must be available.",
+    "expectedBehavior": "All critical assets (CSS, JS, favicon) must load with HTTP 200.",
+    "documentation": "Verify homepage loads critical assets without errors.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-21T00:00:00Z",
+        "author": "system",
+        "summary": "Initial Puppeteer test case",
+        "changes": ["Added Puppeteer test entry"]
+      }
+    ],
+    "createdAt": "2026-06-21T06:00:00Z",
+    "updatedAt": "2026-06-21T06:00:00Z",
+    "githubPath": "e2e/puppeteer/screenshots.spec.ts",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "ad_7",
+    "name": "Cross-browser login flow via Selenium WebDriver",
+    "description": "Verify login flow works across Chrome, Firefox, and Edge via Selenium WebDriver.",
+    "testType": "selenium",
+    "category": "cross-browser",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": ["selenium", "cross-browser"],
+    "owner": "auto@selenium",
+    "suiteIds": ["suite_regression_qa", "suite_regression_uat"],
+    "automated": true,
+    "scriptPath": "e2e/selenium/login.spec.ts",
+    "preconditions": "Selenium WebDriver and browser drivers must be installed.",
+    "expectedBehavior": "Login flow must complete successfully on all three browsers.",
+    "documentation": "Verify login flow works across Chrome, Firefox, and Edge via Selenium WebDriver.",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-06-21T00:00:00Z",
+        "author": "system",
+        "summary": "Initial Selenium test case",
+        "changes": ["Added Selenium test entry"]
+      }
+    ],
+    "createdAt": "2026-06-21T06:00:00Z",
+    "updatedAt": "2026-06-21T06:00:00Z",
+    "githubPath": "e2e/selenium/login.spec.ts",
+    "repoStatus": "synced"
+  }
+]

@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "A.W.A.K.E. — CDN Test Observability"
+version = "1.0.0"
+id = "artifacts/aware-app"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20857
+
+[services.development]
+run = "pnpm --filter @workspace/aware-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/aware-app", "run", "build" ]
+publicDir = "artifacts/aware-app/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20857"
+BASE_PATH = "/"

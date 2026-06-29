@@ -44,6 +44,10 @@ Thumbs.db
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
+# Playwright
+test-results/
+artifacts/aware-app/test-results/
+
 # Replit
 .cache/
 .local/

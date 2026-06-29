@@ -1,0 +1,149 @@
+[
+  {
+    "id": "suite_continuous",
+    "name": "Continuous — QA / Staging (Every 10min)",
+    "description": "Lightweight smoke suite running every 10 minutes on QA/Staging to catch regressions fast.",
+    "parentId": null,
+    "testIds": ["ad_0", "ad_1", "ad_2", "ad_4"],
+    "envIds": ["qa_staging"],
+    "runners": ["playwright", "pytest"],
+    "config": {
+      "target": "QA",
+      "environment": "Staging",
+      "parallelism": 2,
+      "retries": 0,
+      "failFast": true,
+      "timeoutMinutes": 5
+    },
+    "tags": ["smoke", "continuous"],
+    "schedule": "*/30 * * * *",
+    "createdAt": "2026-06-01T08:00:00Z",
+    "updatedAt": "2026-06-12T00:00:00Z"
+  },
+  {
+    "id": "suite_smoke",
+    "name": "Smoke — All Environments",
+    "description": "Lightweight smoke tests run on every deployment across all six environment+network combinations. Must complete in < 3 minutes.",
+    "parentId": null,
+    "testIds": ["ad_0", "ad_1", "ad_2", "ad_4"],
+    "envIds": ["qa_staging", "qa_prod", "uat_staging", "uat_prod", "prod_staging", "prod_prod"],
+    "runners": ["playwright", "pytest"],
+    "config": {
+      "target": "ALL",
+      "environment": "All",
+      "parallelism": 4,
+      "retries": 1,
+      "failFast": true,
+      "timeoutMinutes": 5
+    },
+    "tags": ["smoke", "security", "geo-match", "http"],
+    "schedule": null,
+    "createdAt": "2026-01-15T08:00:00Z",
+    "updatedAt": "2026-06-12T00:00:00Z"
+  },
+  {
+    "id": "suite_regression_qa",
+    "name": "Full Regression — QA (Staging + Production)",
+    "description": "Complete regression on both QA networks. Runs on every feature branch push.",
+    "parentId": null,
+    "testIds": ["ad_0", "ad_1", "ad_2", "ad_3", "ad_4", "ad_5"],
+    "envIds": ["qa_staging", "qa_prod"],
+    "runners": ["playwright", "pytest"],
+    "config": {
+      "target": "QA",
+      "environment": "Staging + Production",
+      "parallelism": 8,
+      "retries": 2,
+      "failFast": false,
+      "timeoutMinutes": 30
+    },
+    "tags": ["regression", "security", "geo-match", "caching", "edgeworker", "http"],
+    "schedule": "0 */2 * * *",
+    "createdAt": "2026-01-15T08:00:00Z",
+    "updatedAt": "2026-06-12T00:00:00Z"
+  },
+  {
+    "id": "suite_regression_uat",
+    "name": "Full Regression — UAT (Staging + Production)",
+    "description": "Complete regression suite in UAT before property promotion to PROD. Promotion gate: ≥ 95% pass rate on both networks required.",
+    "parentId": null,
+    "testIds": ["ad_0", "ad_1", "ad_2", "ad_3", "ad_4", "ad_5"],
+    "envIds": ["uat_staging", "uat_prod"],
+    "runners": ["playwright", "pytest"],
+    "config": {
+      "target": "UAT",
+      "environment": "Staging + Production",
+      "parallelism": 6,
+      "retries": 2,
+      "failFast": false,
+      "timeoutMinutes": 30
+    },
+    "tags": ["regression", "performance", "security", "caching"],
+    "schedule": "0 6 * * *",
+    "createdAt": "2026-01-20T08:00:00Z",
+    "updatedAt": "2026-06-12T00:00:00Z"
+  },
+  {
+    "id": "suite_nightly_prod",
+    "name": "Nightly Regression — PROD (Staging + Production)",
+    "description": "Full regression run against both PROD networks overnight.",
+    "parentId": null,
+    "testIds": ["ad_0", "ad_1", "ad_2", "ad_3", "ad_4", "ad_5"],
+    "envIds": ["prod_staging", "prod_prod"],
+    "runners": ["playwright", "pytest"],
+    "config": {
+      "target": "PROD",
+      "environment": "Staging + Production",
+      "parallelism": 4,
+      "retries": 1,
+      "failFast": false,
+      "timeoutMinutes": 45
+    },
+    "tags": ["regression", "smoke", "performance", "security"],
+    "schedule": "0 2 * * *",
+    "createdAt": "2026-01-25T08:00:00Z",
+    "updatedAt": "2026-06-12T00:00:00Z"
+  },
+  {
+    "id": "suite_edgeworker",
+    "name": "EdgeWorker Unit Tests",
+    "description": "Pytest-based unit tests for EdgeWorker bundles.",
+    "parentId": null,
+    "testIds": ["ad_3"],
+    "envIds": ["qa_staging", "uat_staging"],
+    "runners": ["pytest"],
+    "config": {
+      "target": "QA+UAT",
+      "environment": "Staging",
+      "parallelism": 4,
+      "retries": 0,
+      "failFast": true,
+      "timeoutMinutes": 10
+    },
+    "tags": ["edgeworker", "functional"],
+    "schedule": null,
+    "createdAt": "2026-02-01T08:00:00Z",
+    "updatedAt": "2026-06-12T00:00:00Z"
+  },
+  {
+    "id": "suite_performance",
+    "name": "Performance Benchmarks",
+    "description": "Performance tests measuring cache hit ratio, TTFB, and transaction timing. Runs on production network only.",
+    "parentId": null,
+    "testIds": ["ad_4", "ad_5"],
+    "envIds": ["qa_prod", "uat_prod", "prod_prod"],
+    "runners": ["playwright"],
+    "config": {
+      "target": "QA+UAT+PROD",
+      "environment": "Production",
+      "parallelism": 2,
+      "retries": 1,
+      "failFast": false,
+      "timeoutMinutes": 20
+    },
+    "tags": ["performance", "caching", "transaction"],
+    "schedule": "0 4 * * 1",
+    "createdAt": "2026-02-10T08:00:00Z",
+    "updatedAt": "2026-06-12T00:00:00Z"
+  }
+]

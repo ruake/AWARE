@@ -1,0 +1,148 @@
+# =============================================================================
+# AWARE Operator — Custom Resource Operator (Kubernetes pattern)
+#
+# Manages the complete lifecycle of a single test run:
+#   Pending → Running → Succeeded|Failed → Promoted|Blocked
+#
+# Analogous to a K8s Custom Resource Operator: it owns the run resource,
+# emits lifecycle events (commit statuses), and runs the readiness probe
+# (promotion-gate) before declaring success.
+#
+# Called by: job-playwright.yml, job-pytest.yml
+# Uses:      .github/actions/promotion-gate
+# =============================================================================
+name: "AWARE Operator"
+description: "Manages the full lifecycle of an AWARE test run"
+
+inputs:
+  suite-id:
+    description: "Suite ID from config/test-suites.yml (e.g. suite_smoke)"
+    required: true
+  env-label:
+    description: "Full environment label (e.g. 'UAT / Staging')"
+    required: true
+  tier:
+    description: "Tier: QA | UAT | PROD"
+    required: true
+  network:
+    description: "Akamai network: staging | production"
+    required: true
+  run-id:
+    description: "Unique run ID (auto-generated if empty)"
+    required: false
+    default: ""
+  pass-rate:
+    description: "Observed pass rate 0–100"
+    required: false
+    default: "0"
+  failures:
+    description: "Number of failing tests"
+    required: false
+    default: "0"
+  total-tests:
+    description: "Total number of tests executed"
+    required: false
+    default: "0"
+  duration-ms:
+    description: "Run duration in milliseconds"
+    required: false
+    default: "0"
+  min-pass-rate:
+    description: "Promotion gate minimum pass rate (default reads from akamai-config.yml)"
+    required: false
+    default: "95"
+  github-token:
+    description: "GitHub token for commit status and API calls"
+    required: true
+
+outputs:
+  run-id:
+    description: "Canonical run identifier for this execution"
+    value: ${{ steps.resolve-id.outputs.run_id }}
+  decision:
+    description: "Promotion gate decision: promote | block | skip"
+    value: ${{ steps.gate.outputs.decision }}
+  promoted:
+    description: "'true' if the run cleared the promotion gate"
+    value: ${{ steps.gate.outputs.promoted }}
+
+runs:
+  using: "composite"
+  steps:
+
+    # ── 1. Resolve run ID (K8s: assign a UID to the resource) ───────────────
+    - name: Resolve run ID
+      id: resolve-id
+      shell: bash
+      run: |
+        RUN_ID="${{ inputs.run-id }}"
+        if [ -z "$RUN_ID" ]; then
+          SUITE_SHORT=$(echo "${{ inputs.suite-id }}" | sed 's/suite_//' | cut -c1-8)
+          TS=$(date -u +%Y%m%dT%H%M%S)
+          RUN_ID="${SUITE_SHORT}-${TS}"
+        fi
+        echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+        echo "::notice title=AWARE Run ID::$RUN_ID"
+
+    # ── 2. Emit PENDING commit status (K8s: pod scheduled, not yet running) ──
+    - name: "Status: pending"
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        gh api "repos/${{ github.repository }}/statuses/${{ github.sha }}" \
+          -f state="pending" \
+          -f description="⏳ ${{ steps.resolve-id.outputs.run_id }} — ${{ inputs.suite-id }} @ ${{ inputs.env-label }}" \
+          -f context="aware/${{ inputs.suite-id }}/${{ inputs.env-label }}" \
+          -f target_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+        2>/dev/null || true
+
+    # ── 3. Run promotion-gate (K8s: readiness probe) ────────────────────────
+    - name: Promotion gate
+      id: gate
+      uses: ./.github/actions/promotion-gate
+      with:
+        pass-rate: ${{ inputs.pass-rate }}
+        tier: ${{ inputs.tier }}
+        min-pass-rate: ${{ inputs.min-pass-rate }}
+
+    # ── 4. Emit final commit status ──────────────────────────────────────────
+    - name: "Status: final"
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        DECISION="${{ steps.gate.outputs.decision }}"
+        PASS="${{ inputs.pass-rate }}"
+        FAIL="${{ inputs.failures }}"
+        case "$DECISION" in
+          promote) ICON="✅" STATE="success" ;;
+          block)   ICON="🚫" STATE="failure" ;;
+          *)       ICON="ℹ️"  STATE="success" ;;
+        esac
+        DESC="${ICON} ${{ steps.resolve-id.outputs.run_id }}: ${PASS}% pass · ${FAIL} failures (gate: ${DECISION})"
+        gh api "repos/${{ github.repository }}/statuses/${{ github.sha }}" \
+          -f state="$STATE" \
+          -f description="$DESC" \
+          -f context="aware/${{ inputs.suite-id }}/${{ inputs.env-label }}" \
+          -f target_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+        2>/dev/null || true
+
+    # ── 5. Write step summary ────────────────────────────────────────────────
+    - name: Write summary
+      shell: bash
+      run: |
+        {
+          echo "## AWARE Run — ${{ steps.resolve-id.outputs.run_id }}"
+          echo ""
+          echo "| Field | Value |"
+          echo "|-------|-------|"
+          echo "| **Suite** | \`${{ inputs.suite-id }}\` |"
+          echo "| **Environment** | ${{ inputs.env-label }} |"
+          echo "| **Tier / Network** | ${{ inputs.tier }} / ${{ inputs.network }} |"
+          echo "| **Pass Rate** | ${{ inputs.pass-rate }}% |"
+          echo "| **Failures** | ${{ inputs.failures }} / ${{ inputs.total-tests }} tests |"
+          echo "| **Duration** | ${{ inputs.duration-ms }}ms |"
+          echo "| **Gate Decision** | **${{ steps.gate.outputs.decision }}** |"
+          echo "| **Reason** | ${{ steps.gate.outputs.reason }} |"
+        } >> "$GITHUB_STEP_SUMMARY"

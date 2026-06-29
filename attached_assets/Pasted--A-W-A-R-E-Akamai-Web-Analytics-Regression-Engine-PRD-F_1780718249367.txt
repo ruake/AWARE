@@ -1,0 +1,162 @@
+# A.W.A.R.E. — Akamai Web Analytics & Regression Engine PRD
+
+> Formerly "WWW Akamai Regression Platform." Rebranded to **A.W.A.R.E. (Akamai Web Analytics & Regression Engine)** on 2026-06-05 alongside a Google Cloud Console (GCP) inspired visual revamp.
+
+## Purpose
+
+A.W.A.R.E. (Akamai Web Analytics & Regression Engine) is a static, GitHub Pages hosted regression reporting platform for Salesforce.com edge, geo, renderer, and URL health validation. It is designed to run from GitHub Actions, commit immutable JSON reports to a dedicated results branch, and provide a shareable UI for dashboarding, run detail, comparison, exports, and evidence review without SQLite or a backend service.
+
+A.W.A.R.E. is the **consolidation and analytics layer** over edge regression signal. It does not replace Akamai Test Center (which authors property test cases) or Catchpoint (global availability/RUM monitoring); it ingests their style of checks into one structured, versioned, longitudinal signal — correlating every outcome to the Akamai PM version and EdgeWorker version that produced it — so teams can make informed release decisions about the edge. See the in-app **About** page for the capability comparison.
+
+## Current State
+
+### Architecture
+
+- Static SPA in `site/`, deployed by GitHub Pages.
+- `main` contains source only: tests, scripts, workflows, schemas, docs, and static site source.
+- `results` contains generated report data at branch root: `index.json`, `stats.json`, `archive/`, and `runs/<run_id>/`.
+- `pages` contains generated static output: `index.html`, `404.html`, `assets/`, `.nojekyll`, and built `data/` copied from `results`.
+- `index.json` is rebuilt from immutable run summaries and is the SPA entry point after being copied into built `/data/`.
+- `stats.json` stores compact long-term graph history so charts survive active run-folder pruning.
+- `archive/runs.json` stores compact summaries for pruned runs; full per-test payloads stay limited to active retained runs.
+- GitHub Actions workflow `regression-report.yml` runs tests on `sfdc-www-Ubuntu`, normalizes results, commits reports to `results`, rebuilds derived JSON, builds the static site, and publishes `pages`.
+- Deploy workflow validates `results` and rebuilds `pages` when source files on `main` change.
+- No server-side database, API, queue, or application backend exists by design.
+
+### Test Suites
+
+- **Geo-gating suite (`tests/geo-gating/`)** — the primary pytest signal: ~260 test functions across geo match/mismatch/travel, locale split/disabled/mismatch, cohort cookie, QS override, renderer (NJK→Remix) split, cache-key isolation, URL health, infrastructure (EW active / base HTTP / non-PBC), and pure config unit tests. Each network call captures edge diagnostics (curl, request/response headers, cookies, PM vars, cache key, EW version).
+- **Forms suite (`tests/forms/`)** — a parallel Playwright job (8 Chromium tests) covering lead/PDF/skip form render, autodownload PDF, skip-form redirect for returning visitors, and a manual-only signup→trial-email flow. Captures step-by-step screenshots, `page.html`, and per-test `summary.json` artifacts.
+- For `full_suite`/`custom` runs, pytest (geo-gating) and Playwright (forms) are merged into one combined dashboard run record via `merge_pytest_reports.py`.
+- A documented coverage-gap analysis (`docs/test-coverage-gap-report.md`) maps the "WWW Regression suit" Google Sheet onto the automated suite and tracks pending gaps (PBC component validation, expanded URL/locale health, forms automation).
+
+### Report Capture
+
+- Each run records `summary.json`, `tests.json`, `metadata.json`, and `events.json`. Every JSON file carries a `schemaVersion` and is validated against `schemas/*.json` (index, summary, tests, metadata, stats, archive).
+- The SPA entry `index.json` has shape `{schemaVersion, generatedAt, latest, filters, runs[]}`; each run carries `id`, `label`, `createdAt`/`startedAt`/`finishedAt`, `durationMs`, `environment`, `network`, `suite`, `branch`, `commit`, `status`, `summary`, `files`, `akamai`, `testSuite`, and `source`. `stats.json` has shape `{schemaVersion, generatedAt, runs[], targets[], versions[]}`.
+- Test evidence captures curl command, request headers, HTTP response code, response/output headers, set cookies, PM variables, cache key, and EW version when available.
+- Normalization promotes Akamai runtime identity into run records:
+  - `akamai.propertyName`
+  - `akamai.propertyVersion`
+  - `akamai.edgeworkerId`
+  - `akamai.edgeworkerVersion`
+  - `akamai.edgeVersion`
+- Existing reports were backfilled where output headers already contained enough evidence.
+- Run IDs and labels can use active property/EW versions instead of opaque timestamps when the identity is captured.
+- New runs record `testSuite.name`, `testSuite.version`, `testSuite.path`, and `testSuite.commit` so report results can be correlated with future suite changes.
+- New workflow runs fail if required PM/EW runtime identity is missing, preventing silent publication of unknown Akamai runtime versions.
+
+### Workflows
+
+- Manual `workflow_dispatch` inputs: `test_run` preset (`full_suite`, `smoke`, `geo_gating`, `url_health`, `config`, `custom`), `environment` (`prod`/`uat`), `network` (`production`/`staging`), `suite` name, `retention_keep` (capped at 100), `geo_allowlist_enabled`, `geo_spoof_enabled`, and `enabled_locales` (default `us,jp,uk`). Each preset maps to an overridable `TEST_COMMAND_*` pytest invocation.
+- Scheduled workflow (`cron: */30 * * * *`) fans out a matrix over all four targets — `prod/production`, `prod/staging`, `uat/production`, and `uat/staging`.
+- Staging runs use OS-level `/etc/hosts` spoofing when staging network is selected and spoofing is enabled.
+- The Start Run page generates `gh workflow run` commands and manual GitHub Actions steps.
+- Active detailed reports are capped at 100 newest runs; older run summaries are archived in compact form for charting.
+
+### UI
+
+- Dashboard has target-scope pills for `Prod / Production`, `Prod / Staging`, `UAT / Production`, and `UAT / Staging`.
+- Dashboard uses compact observability panels with Google Charts for pass-rate trend, outcome mix, target health, and Akamai version drift.
+- Dashboard chart windows are URL-backed and support 24h, 7d, 30d, 90d, and all-time views.
+- Dashboard PM/EW tiles show active Property Manager and EdgeWorker versions from output headers.
+- Recent runs, run history, run detail test results, run metadata, workflow preview, and compare rows use Google Table-first layouts with selected-row evidence detail.
+- Runs page supports history browsing and export.
+- Run detail supports filtering, failure captions, curl evidence, HTTP status, output headers, cookies, and metadata.
+- Compare view supports baseline/candidate URL sharing, filtering, selected-row baseline/candidate evidence, and CSV/JSON/Markdown export.
+- GitHub Actions navigation is visibly marked as external and opens outside the platform.
+
+## Reconciled Gaps
+
+### P0
+
+- **Akamai identity completeness:** Future runs now fail when PM/EW identity is missing. Some older reports can still show unknown identity because their committed evidence did not include usable output headers.
+- **Archived detail access:** Long-term stats preserve graph history, but pruned runs no longer have per-test detail pages. If long-term failure drill-down is required, add artifact storage for archived `tests.json` outside the repo.
+- **UI visual verification:** There is no automated screenshot/layout regression test for the static dashboard. Add a lightweight browser render check for desktop and mobile before deploy.
+- **GitHub Pages source setting:** The branch model expects GitHub Pages to deploy from `pages` branch `/`. Confirm repository Pages settings after the first `pages` branch push.
+
+### P1
+
+- **Dashboard controls:** The old dashboard filter sidebar was removed as redundant. Active unique URL filters are now shown as context chips, but direct suite/status controls are no longer first-class on the dashboard. Decide whether dashboard should stay target-first or add compact status/suite chips.
+- **Report evidence quality gate:** Normalization captures headers and cookies when tests provide them, but validation only checks JSON shape. Add semantic validation for required evidence fields per suite.
+- **Comparison grouping:** Compare is table-first and easier to scan, but large diffs still need grouped summaries and recurring-failure clustering.
+- **Artifact links:** JSON records can reference artifacts, but there is no standardized retention or viewer for HAR, screenshots, or traces.
+- **Scheduled workload control:** Four full suites every 30 minutes can be expensive. Add a schedule profile switch if runtime or runner availability becomes constrained.
+
+### P2
+
+- **Trend analytics:** Current dashboard panels cover pass rate, outcomes, target health, and version drift. Add percentile duration trend, flaky test trend, and top recurring failure signatures.
+- **Run naming consistency:** Version-based run IDs depend on successful runtime identity capture. Unknown identity should fall back to a readable env/network/workflow name rather than timestamp-heavy labels.
+- **Accessibility polish:** Major actions are links/buttons, but keyboard/focus and color contrast should be audited with a browser-based check.
+- **Static start-run UX:** The static site cannot dispatch workflows directly; it provides commands and links. Direct dispatch would require auth/app integration outside the static-only architecture.
+
+## Next Decisions
+
+- Decide whether archived runs need full detail artifacts outside the repo or whether compact chart history is sufficient.
+- Confirm GitHub Pages is configured for branch `pages` and root `/`.
+- Decide whether dashboard remains target-first or regains compact suite/status controls.
+- Add browser screenshot checks to CI before further UI expansion.
+- Decide whether scheduled full-suite frequency should stay at every 30 minutes once all four target scopes are active.
+
+## Revamp Direction (v2) — A.W.A.R.E. + GCP
+
+This section captures the reconciled, state-of-the-art revamp agreed by an architecture, design-system, UX, and product expert review and shipped on 2026-06-05. It honors all hard constraints: static (no backend/db/server), no framework or bundler, Google Charts primary with HTML/SVG fallback, unchanged JSON data contract and hash routing, URL-backed filters, light/dark themes.
+
+### North Star
+
+Turn the observability dashboard into an SRE-grade "Signal → Detail → Evidence" platform: lead with a glanceable hero signal, lean into the Google Charts ecosystem (Gauge, ComboChart, LineChart, ColumnChart, Table) and present it in a **Google Cloud Console (GCP) visual language**. Every chart degrades gracefully offline; every interaction is shareable via URL.
+
+### Brand & Visual System
+
+- **Rebrand:** "WWW Akamai Regression Platform" → **A.W.A.R.E. — Akamai Web Analytics & Regression Engine**. New brand mark, header, titles, exports, and external-nav messaging.
+- **GCP theme (supersedes the prior Salesforce-SLDS brand):** Google Sans / Roboto typography, Google Material palette (blue `#1a73e8`, green `#1e8e3e`, red `#d93025`, yellow `#f9ab00`), `#dadce0` hairline borders, flat white surfaces with Material elevation shadows, white sticky top bar with an underlined active nav tab. Dark theme uses GCP console surfaces (`#202124` / `#2d2e30`). CSS token *names* were preserved; only their values + fonts were remapped, so all existing rules keep working.
+- Spacing scale (`--gap-xs…2xl`), elevation tokens (`--shadow`, `--shadow-raised`, `--shadow-hover`, `--shadow-floated`), and semantic `--status-*` aliases were added.
+- Google Charts read their colors/font from CSS tokens via `googleChartColors()`, so toggling the theme re-themes every chart with no reload.
+
+### Shipped Features
+
+- **Hero signal card** with a live Google Gauge of latest pass rate (CSS mini-gauge fallback), failure badge, target pills, age, and a "View latest run" CTA.
+- **Run duration trend** card (p50/p90/p99 LineChart; uses optional `run.durationStats`, falls back to run-level duration).
+- **Flaky-test trend** card (retry-detected ColumnChart) plus a first-class `status=flaky` filter across runs/dashboard with drill-down to `#/runs?status=flaky`.
+- **Run detail**: two-panel layout (test Google Table + selected-row evidence) with a sticky metadata panel and full keyboard navigation (↑/↓ to move rows, Enter/Space to open evidence; guarded against ctrl/meta/alt).
+- **Compare**: delta-summary tiles (new failures / fixed / still failing / duration regressions) and side-by-side baseline|candidate evidence on row select.
+- **About page** (`#/about`): explains why A.W.A.R.E. exists and a Google Table capability comparison vs Akamai Test Center and Catchpoint.
+- **Offline robustness**: a one-time "Charts unavailable (offline)" banner when the Google loader fails, with precomputed HTML/SVG fallbacks left visible.
+
+### Observability Refinements (2026-06-06)
+
+A follow-up pass tightened the dashboard's observability grid so every panel is self-describing and nothing is duplicated:
+
+- **Window-aware cards:** the active chart range (24h / 7d / 30d / 90d / all-time) is now stamped into every observability card header and group label (`Trends · 7d`, `Distribution · 7d`, `Outcome mix · N tests`, `Duration p99 · …`, `Flaky tests · N`). The selected window propagates from `currentDashboardRange()` through each `observability*` renderer, so a glance at any card states the window it summarizes.
+- **Version drift is per-target:** `versionGroups()` now keys drift by `environment + network + PM/EW version` (e.g. `prod/production · pv… / EW…`) rather than by version alone — the same PM/EW pair on a different target is a distinct drift row. The card is renamed "Version drift by target" and degrades to an empty-state when no identity is captured. The Google Table column header is now "Target · PM / EW".
+- **De-duplicated signal:** the dashboard header no longer repeats "Open latest" (it lives solely on the hero signal card's CTA), and the trend-signal summary table dropped metrics already shown on the signal card / outcome chart (latest pass %, raw failure density label), keeping only trend-only metrics (pass delta, volatility, failure density in window, visible runs).
+- **Renamed cards for clarity:** "Recent quality" → "Pass-rate trend", "Signal summary" → "Trend signal", "PM / EW runtime" → "Runtime identity" (latest PM/EW/Edge/Suite), and the runtime/drift cards were split into two single-responsibility panels under the "Trend signal & runtime versions" group.
+- **Layout polish:** table cards top-align their content (`obs-card-table { align-content: start }`) so short tables don't float centered, and new `.obs-window` / `.obs-subhead` tokens style the per-card window captions.
+
+### Guardrails (non-negotiable)
+
+- No route, query key, or JSON file shape was removed. New `stats.json`/run fields (`durationStats`, `flakyCount`, future `topFailureSignatures`) are optional and computed/rendered gracefully when absent.
+- Google Charts remains primary; every chart ships a fallback.
+- All new filters/interactions write through `setRoute()` so URLs stay shareable and back/forward works.
+- All new color/spacing/typography is token-driven so light and dark inherit automatically.
+- `app.js` ES-module split, a Google Charts Controls cross-filter dashboard, and Sankey/AnnotationChart/Timeline remain deferred (P2), not prerequisites.
+
+### Resolves prior gaps
+
+- P1 dashboard controls → first-class status/flaky chips.
+- P1 comparison grouping → delta summary + side-by-side evidence.
+- P1 offline UX → guaranteed fallbacks + banner.
+- P2 trend analytics → duration percentile + flaky trend cards + per-target version drift; every card is now window-scoped (failure-signature clustering still pending).
+- P2 accessibility → keyboard table nav, chart aria-labels, focus rings (full audit still pending).
+
+### Still Open After v2
+
+These remain genuinely unaddressed and carry forward as the next backlog:
+
+- **Failure-signature clustering** (P2): top recurring failure signatures / `topFailureSignatures` is reserved in the contract but not yet computed or rendered.
+- **Archived per-test detail** (P0/P1): pruned runs keep compact chart/summary history only; full `tests.json` drill-down for archived runs needs off-repo artifact storage.
+- **Automated UI render check** (P0): no screenshot/layout regression gate runs before deploy for desktop/mobile.
+- **Semantic evidence quality gate** (P1): validation checks JSON shape only, not required-per-suite evidence fields (curl, headers, cookies).
+- **Standardized artifact retention/viewer** (P1): HAR, screenshots, and traces are linkable but have no retention policy or in-app viewer.
+- **Full accessibility audit** (P2): keyboard/focus and color-contrast pass with a browser-based tool.
+- **GitHub Pages source confirmation**: verify Pages serves from branch `pages` root `/` after the first push.

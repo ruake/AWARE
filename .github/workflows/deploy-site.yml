@@ -1,0 +1,140 @@
+# =============================================================================
+# Deploy Site — Site Branch Publisher
+#
+# Builds the React SPA and pushes the static artifact to the `site` branch.
+# The `site` branch is an orphan (like gh-pages) containing ONLY build output.
+# GitHub Pages serves from `site`, not `main`.
+#
+# Branch separation: source (main) ≠ artifact (site)
+# This means a code change never accidentally deploys and a deploy never
+# pollutes commit history with build artifacts.
+# =============================================================================
+name: Deploy Site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "artifacts/aware-app/src/**"
+      - "artifacts/aware-app/public/**"
+      - "artifacts/aware-app/index.html"
+      - "artifacts/aware-app/vite.config.*"
+      - "artifacts/aware-app/package.json"
+      - "artifacts/aware-app/tailwind.config.*"
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        type: choice
+        options: [production, preview]
+        default: production
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  WORKING_DIR: artifacts/aware-app
+  SITE_BRANCH: gh-pages
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+
+jobs:
+  build-and-deploy:
+    name: "Build → Push to site branch"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node + pnpm
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          working-dir: ${{ env.WORKING_DIR }}
+
+      - name: Typecheck
+        run: pnpm run typecheck
+        working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Build
+        run: pnpm run build
+        working-directory: ${{ env.WORKING_DIR }}
+        env:
+          NODE_ENV: production
+          BASE_PATH: /AWARE/
+          VITE_APP_VERSION: ${{ github.sha }}
+          VITE_BUILD_DATE: ${{ github.event.head_commit.timestamp }}
+
+      - name: Add SPA fallback + headers
+        run: |
+          DIST="${{ env.WORKING_DIR }}/dist/public"
+          # SPA 404 fallback (serves index.html for all routes)
+          cp "$DIST/index.html" "$DIST/404.html"
+          # Security / cache headers for GitHub Pages
+          cat > "$DIST/_headers" << 'HEADERS'
+          /*
+            X-Frame-Options: SAMEORIGIN
+            X-Content-Type-Options: nosniff
+            Referrer-Policy: strict-origin-when-cross-origin
+          /assets/*
+            Cache-Control: public, max-age=31536000, immutable
+          /index.html
+            Cache-Control: no-cache
+          HEADERS
+          echo "✅ Added 404.html and _headers"
+
+      - name: Push dist to site branch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          WORK_DIR=$(mktemp -d)
+          trap "rm -rf $WORK_DIR" EXIT
+          cd "$WORK_DIR"
+
+          # Init orphan branch with the build output
+          git init
+          git remote add origin "$REMOTE"
+          git checkout --orphan "${{ env.SITE_BRANCH }}"
+
+          # Copy build output
+          cp -rf "${{ github.workspace }}/${{ env.WORKING_DIR }}/dist/public/." .
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes — site branch already up to date"
+            exit 0
+          fi
+
+          git commit -m "deploy: ${{ github.sha }} (${{ github.ref_name }}) [skip ci]"
+          git push --force "$REMOTE" "HEAD:${{ env.SITE_BRANCH }}"
+          echo "✅ Pushed to ${{ env.SITE_BRANCH }}"
+
+      - name: Summary
+        run: |
+          {
+            echo "## Site Deploy"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| **Commit** | \`${{ github.sha }}\` |"
+            echo "| **Branch** | ${{ github.ref_name }} |"
+            echo "| **Site Branch** | ${{ env.SITE_BRANCH }} |"
+            echo "| **Triggered By** | ${{ github.event_name }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

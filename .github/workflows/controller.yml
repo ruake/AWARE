@@ -1,0 +1,123 @@
+# =============================================================================
+# AWARE Controller — CronJob Reconciler (Kubernetes pattern)
+#
+# Implements the Kubernetes controller pattern:
+#   1. Read DESIRED STATE  → config/test-suites.yml   (what should run)
+#   2. Read ACTUAL STATE   → data branch scheduler-status.json (what has run)
+#   3. RECONCILE           → compute the delta (which suites are now due)
+#   4. DISPATCH            → trigger job-playwright.yml / job-pytest.yml
+#   5. PERSIST             → write updated scheduler-status.json via data-writer
+#
+# Like a K8s CronJob controller, this runs every 30 minutes and fires
+# exactly the jobs that are overdue — nothing more, nothing less.
+#
+# Manual dispatch supports: dry-run (validate only) and force-suite (bypass cron).
+# =============================================================================
+name: AWARE Controller
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Validate config without dispatching any jobs"
+        type: boolean
+        default: false
+      force_suite:
+        description: "Force-run a specific suite ID (bypasses cron schedule)"
+        type: string
+        default: ""
+      force_env:
+        description: "Override environment label for forced suite"
+        type: string
+        default: ""
+
+  push:
+    branches: [main]
+    paths:
+      - "config/test-suites.yml"
+      - "config/environments.yml"
+      - ".github/workflows/controller.yml"
+      - "scripts/scheduler.mjs"
+
+concurrency:
+  group: aware-controller
+  cancel-in-progress: false
+
+permissions:
+  actions: write
+  contents: write
+  statuses: write
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Job: reconcile
+  # Reads desired vs actual state, dispatches due jobs, persists status.
+  # ─────────────────────────────────────────────────────────────────────────
+  reconcile:
+    name: "Reconcile → Dispatch"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      dispatched: ${{ steps.reconcile.outputs.dispatched }}
+      suites_due: ${{ steps.reconcile.outputs.suites_due }}
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node + pnpm
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          working-dir: artifacts/aware-app
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.1
+
+      - name: Validate ConfigMap
+        run: |
+          node scripts/validate-config.mjs --warn-only || \
+          echo "::warning::Config validation warnings — run validate.yml for details"
+
+      - name: Reconcile desired vs actual state
+        id: reconcile
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          FORCE_SUITE: ${{ inputs.force_suite || '' }}
+          FORCE_ENV: ${{ inputs.force_env || '' }}
+          # Job templates the scheduler dispatches (K8s: Job manifests)
+          PLAYWRIGHT_WORKFLOW: "job-playwright.yml"
+          PYTEST_WORKFLOW: "job-pytest.yml"
+        run: node scripts/scheduler.mjs
+
+      - name: Persist controller status to data branch
+        if: steps.reconcile.outputs.dispatched == 'true'
+        uses: ./.github/actions/data-writer
+        with:
+          files: "artifacts/aware-app/data/scheduler-status.json"
+          dest-paths: "scheduler-status.json"
+          commit-message: "controller: reconcile cycle (dispatched ${{ steps.reconcile.outputs.suites_due }}) [skip ci]"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          {
+            echo "## AWARE Controller Cycle"
+            echo ""
+            echo "- **Trigger**: ${{ github.event_name }}"
+            echo "- **Dry Run**: ${{ inputs.dry_run || 'false' }}"
+            echo "- **Force Suite**: ${{ inputs.force_suite || '(none)' }}"
+            echo "- **Jobs Dispatched**: ${{ steps.reconcile.outputs.dispatched }}"
+            echo "- **Suites Due**: ${{ steps.reconcile.outputs.suites_due || '(none)' }}"
+          } >> "$GITHUB_STEP_SUMMARY"

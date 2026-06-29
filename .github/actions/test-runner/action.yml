@@ -1,0 +1,179 @@
+name: "Test Runner"
+description: "Pod template: checks out tests branch, runs playwright or pytest"
+
+inputs:
+  runner-type:
+    description: "Test runner: playwright | pytest"
+    required: true
+  suite-id:
+    description: "Suite ID for tag/marker filtering"
+    required: true
+  env-label:
+    description: "Full environment label"
+    required: true
+  base-url:
+    description: "Target base URL for tests"
+    required: true
+  network:
+    description: "Akamai network: staging | production"
+    required: true
+  tier:
+    description: "Environment tier: QA | UAT | PROD"
+    required: true
+  shard:
+    description: "Shard index (1-based). Playwright only."
+    required: false
+    default: "1"
+  total-shards:
+    description: "Total shards. Playwright only."
+    required: false
+    default: "1"
+  parallelism:
+    description: "pytest-xdist parallel workers"
+    required: false
+    default: "4"
+  working-dir:
+    description: "Working directory for test commands"
+    required: false
+    default: "artifacts/aware-app"
+  tests-ref:
+    description: "Git ref for the tests branch (default: tests)"
+    required: false
+    default: "tests"
+
+outputs:
+  results-path:
+    description: "Path to test result artifacts"
+    value: ${{ steps.run.outputs.results_path }}
+  passed:
+    description: "Number of passing tests"
+    value: ${{ steps.run.outputs.passed }}
+  failed:
+    description: "Number of failing tests"
+    value: ${{ steps.run.outputs.failed }}
+  total:
+    description: "Total tests executed"
+    value: ${{ steps.run.outputs.total }}
+  pass-rate:
+    description: "Pass rate 0–100"
+    value: ${{ steps.run.outputs.pass_rate }}
+  duration-ms:
+    description: "Run duration in milliseconds"
+    value: ${{ steps.run.outputs.duration_ms }}
+
+runs:
+  using: "composite"
+  steps:
+
+    # ── 1. Checkout main (app + deps) at root ─────────────────────────────
+    - name: Checkout main (app + deps)
+      uses: actions/checkout@v4
+
+    # ── 2. Check out tests branch into subdirectory ────────────────────────
+    - name: Checkout tests branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.tests-ref }}
+        path: test-workspace
+        sparse-checkout: |
+          e2e
+          tests
+          config
+          playwright.config.ts
+          pyproject.toml
+          conftest.py
+          requirements.txt
+        sparse-checkout-cone-mode: false
+
+    # ── 3. Bootstrap Node + pnpm ─────────────────────────────────────────────
+    - name: Setup Node + pnpm
+      uses: ./.github/actions/setup-node
+      with:
+        working-dir: ${{ inputs.working-dir }}
+
+    # ── 4. Execute tests ─────────────────────────────────────────────────────
+    - name: Run ${{ inputs.runner-type }} tests
+      id: run
+      shell: bash
+      working-directory: ${{ inputs.working-dir }}
+      env:
+        BASE_URL: ${{ inputs.base-url }}
+        AWARE_ENV: ${{ inputs.env-label }}
+        AWARE_SUITE: ${{ inputs.suite-id }}
+        AWARE_TIER: ${{ inputs.tier }}
+        AKAMAI_NETWORK: ${{ inputs.network }}
+        CI: "true"
+        START_MS: ${{ '' }}
+      run: |
+        START_MS=$(date +%s%3N)
+        RESULTS_DIR="test-results/${{ inputs.runner-type }}"
+        mkdir -p "$RESULTS_DIR"
+
+        if [ "${{ inputs.runner-type }}" = "playwright" ]; then
+          # Copy specs from tests branch
+          [ -d "${{ github.workspace }}/test-workspace/e2e" ] && cp -r "${{ github.workspace }}/test-workspace/e2e" ./e2e_run || true
+          [ -f "${{ github.workspace }}/test-workspace/playwright.config.ts" ] && cp "${{ github.workspace }}/test-workspace/playwright.config.ts" ./playwright.config.run.ts || true
+
+          pnpm exec playwright install chromium --with-deps 2>/dev/null || true
+
+          pnpm exec playwright test ./e2e_run \
+            --shard="${{ inputs.shard }}/${{ inputs.total-shards }}" \
+            --output="$RESULTS_DIR" \
+            --reporter="json:./$RESULTS_DIR/report.json" \
+          2>"$RESULTS_DIR/stderr.txt" || true
+
+          # Parse results
+          PASSED=0; FAILED=0; TOTAL=0
+          if [ -f "$RESULTS_DIR/report.json" ]; then
+            PASSED=$(jq '.suites[].specs[].tests[].results[] | select(.status == "passed") | 1' "$RESULTS_DIR/report.json" 2>/dev/null | wc -l | tr -d ' ' || echo 0)
+            FAILED=$(jq '.suites[].specs[].tests[].results[] | select(.status == "failed") | 1' "$RESULTS_DIR/report.json" 2>/dev/null | wc -l | tr -d ' ' || echo 0)
+            TOTAL=$((PASSED + FAILED))
+          fi
+
+        elif [ "${{ inputs.runner-type }}" = "pytest" ]; then
+          # Copy specs from tests branch
+          [ -d "${{ github.workspace }}/test-workspace/tests" ] && cp -r "${{ github.workspace }}/test-workspace/tests" ./tests_run || true
+          [ -f "${{ github.workspace }}/test-workspace/conftest.py" ] && cp "${{ github.workspace }}/test-workspace/conftest.py" conftest.py || true
+          [ -f "${{ github.workspace }}/test-workspace/requirements.txt" ] && pip install -r "${{ github.workspace }}/test-workspace/requirements.txt" -q 2>/dev/null || true
+          pip install pytest pytest-xdist pytest-json-report -q 2>/dev/null || true
+
+          python -m pytest tests_run/ \
+            -m "${{ inputs.suite-id }}" \
+            -n "${{ inputs.parallelism }}" \
+            --json-report \
+            --json-report-file="$RESULTS_DIR/report.json" \
+            --tb=short -q \
+          2>"$RESULTS_DIR/stderr.txt" || true
+
+          # Parse results
+          PASSED=0; FAILED=0; TOTAL=0
+          if [ -f "$RESULTS_DIR/report.json" ]; then
+            PASSED=$(jq '.summary.passed // 0' "$RESULTS_DIR/report.json" 2>/dev/null || echo 0)
+            FAILED=$(jq '.summary.failed // 0' "$RESULTS_DIR/report.json" 2>/dev/null || echo 0)
+            TOTAL=$(jq '.summary.total // 0' "$RESULTS_DIR/report.json" 2>/dev/null || echo 0)
+          fi
+        fi
+
+        END_MS=$(date +%s%3N)
+        DURATION_MS=$((END_MS - START_MS))
+        PASS_RATE=0
+        [ "$TOTAL" -gt 0 ] && PASS_RATE=$(( (PASSED * 100) / TOTAL ))
+
+        echo "results_path=$RESULTS_DIR" >> "$GITHUB_OUTPUT"
+        echo "passed=$PASSED"           >> "$GITHUB_OUTPUT"
+        echo "failed=$FAILED"           >> "$GITHUB_OUTPUT"
+        echo "total=$TOTAL"             >> "$GITHUB_OUTPUT"
+        echo "pass_rate=$PASS_RATE"     >> "$GITHUB_OUTPUT"
+        echo "duration_ms=$DURATION_MS" >> "$GITHUB_OUTPUT"
+
+        echo "Results: ${PASSED} passed / ${FAILED} failed / ${TOTAL} total (${PASS_RATE}%) in ${DURATION_MS}ms"
+
+    # ── 5. Upload artifacts ────────────────────────────────────────────────
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: "test-results-${{ inputs.runner-type }}-shard${{ inputs.shard }}"
+        path: "${{ inputs.working-dir }}/test-results/${{ inputs.runner-type }}/"
+        retention-days: 14
+        if-no-files-found: warn

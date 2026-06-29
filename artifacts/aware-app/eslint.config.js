@@ -1,0 +1,40 @@
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+import reactHooks from "eslint-plugin-react-hooks";
+import prettierConfig from "eslint-config-prettier";
+
+export default tseslint.config(
+  { ignores: ["dist/", "node_modules/", "coverage/", "src/lib/__tests__/"] },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  prettierConfig,
+  {
+    plugins: { "react-hooks": reactHooks },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+
+      "@typescript-eslint/consistent-type-imports": [
+        "warn",
+        { prefer: "type-imports", fixStyle: "inline-type-imports" },
+      ],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/immutability": "warn",
+      "no-restricted-globals": [
+        "error",
+        {
+          name: "dangerouslySetInnerHTML",
+          message:
+            "Use React components instead of dangerouslySetInnerHTML. If HTML injection is required, sanitize with DOMPurify first.",
+        },
+      ],
+    },
+  },
+);

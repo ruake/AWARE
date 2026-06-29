@@ -1,0 +1,128 @@
+# =============================================================================
+# A.W.A.R.E. — Akamai Environment Configuration
+# All tests target https://www.akamai.com/
+#
+# Each tier (QA / UAT / PROD) has two network variants:
+#   staging    — Akamai staging network (validate before activating)
+#   production — Akamai production (live) edge network
+#
+# 6 environments total. Commit changes here; GitHub Actions reads this file.
+# =============================================================================
+
+baseUrl: https://www.akamai.com
+property: www.akamai.com
+cpcode: "1234567"
+edgeHostname: www.akamai.com.edgekey.net
+
+environments:
+  # ── QA ─────────────────────────────────────────────────────────────────────
+  - id: qa_staging
+    label: "QA / Staging"
+    target: QA
+    stage: Staging
+    network: staging
+    baseUrl: https://www.akamai.com
+    ips:
+      - 23.32.1.10
+      - 23.32.1.11
+    property: www.akamai.com
+    propertyVersion: 52
+    propertyStatus: active
+    cpcode: "1234567"
+    edgeHostname: www.akamai.com.edgekey.net
+    notes: >
+      QA staging — use Akamai staging network IPs to validate the property
+      configuration before activating on the production network.
+
+  - id: qa_prod
+    label: "QA / Production"
+    target: QA
+    stage: Production
+    network: production
+    baseUrl: https://www.akamai.com
+    ips:
+      - 23.32.2.10
+      - 23.32.2.11
+    property: www.akamai.com
+    propertyVersion: 52
+    propertyStatus: active
+    cpcode: "1234567"
+    edgeHostname: www.akamai.com.edgekey.net
+    notes: >
+      QA production — routes through live Akamai edge PoPs.
+      Run after staging validation passes.
+
+  # ── UAT ────────────────────────────────────────────────────────────────────
+  - id: uat_staging
+    label: "UAT / Staging"
+    target: UAT
+    stage: Staging
+    network: staging
+    baseUrl: https://www.akamai.com
+    ips:
+      - 23.32.3.10
+      - 23.32.3.11
+    property: www.akamai.com
+    propertyVersion: 51
+    propertyStatus: active
+    cpcode: "1234567"
+    edgeHostname: www.akamai.com.edgekey.net
+    notes: >
+      UAT staging — stakeholder sign-off environment on staging network.
+
+  - id: uat_prod
+    label: "UAT / Production"
+    target: UAT
+    stage: Production
+    network: production
+    baseUrl: https://www.akamai.com
+    ips:
+      - 23.32.4.10
+      - 23.32.4.11
+    property: www.akamai.com
+    propertyVersion: 51
+    propertyStatus: active
+    cpcode: "1234567"
+    edgeHostname: www.akamai.com.edgekey.net
+    notes: >
+      UAT production — promotion gate: ≥ 95% pass rate required before
+      promoting property to PROD.
+
+  # ── PROD ───────────────────────────────────────────────────────────────────
+  - id: prod_staging
+    label: "PROD / Staging"
+    target: PROD
+    stage: Staging
+    network: staging
+    baseUrl: https://www.akamai.com
+    ips:
+      - 23.32.5.10
+      - 23.32.5.11
+      - 23.32.5.12
+    property: www.akamai.com
+    propertyVersion: 50
+    propertyStatus: active
+    cpcode: "1234567"
+    edgeHostname: www.akamai.com.edgekey.net
+    notes: >
+      PROD staging — final validation on staging network before the
+      production activation goes live.
+
+  - id: prod_prod
+    label: "PROD / Production"
+    target: PROD
+    stage: Production
+    network: production
+    baseUrl: https://www.akamai.com
+    ips:
+      - 23.32.6.10
+      - 23.32.6.11
+      - 23.32.6.12
+    property: www.akamai.com
+    propertyVersion: 50
+    propertyStatus: active
+    cpcode: "1234567"
+    edgeHostname: www.akamai.com.edgekey.net
+    notes: >
+      PROD production — live traffic edge. Smoke suite only on each
+      deployment; full regression nightly (02:00 UTC).

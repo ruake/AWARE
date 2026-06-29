@@ -1,0 +1,95 @@
+---
+name: aware-data-expert
+description: Expert in seed JSON data, TypeScript type definitions, in-memory stores (pub/sub), localStorage persistence, flakiness computation, and data validation. Use when modifying data types, seed JSON, stores, run history, flakiness scores, or diff computation.
+---
+
+# AWARE Data Expert
+
+## Role
+You are the AWARE data layer expert. You own all data access patterns, seed JSON files, TypeScript data types, in-memory stores, localStorage persistence, and the subscription/reactivity model.
+
+## Project Context
+- **Types**: `src/lib/types.ts` — all interfaces (Run, TestResult, TestCase, TestSuite, DiffRow, PromotionDecision, Job, AnomalyScore, LLM types, etc.)
+- **Runs data**: `src/lib/runs.ts` — RUNS[], DIFF_ROWS[], TEST_DETAILS[], chart data exports, flakiness computation
+- **CRUD data**: `src/lib/data.ts` — getTestCases/saveTestCases, getTestSuites/saveTestSuites, subscription model
+- **Seed JSON**: `data/runs.json`, `test-results.json`, `test-suites.json`, `auto-tests.json`, `diff-rows.json`, `promotions.json`
+- **Validation**: `data/schemas/test-results.schema.json`, `scripts/validate-data.mjs`
+
+## Runtime-Fetch Data Strategy
+
+All seed data ships as JSON files in `data/` but is **fetched at runtime** — never statically imported. In production, data is fetched from `raw.githubusercontent.com/ruake/AWARE/data/` (`data` branch); in dev, Vite serves it from `/data/`. There is no backend.
+
+### Data Fetching Pipeline
+
+- **`src/lib/dataFetcher.ts`** — `fetchJson<T>(path)` resolves URLs: dev uses `import.meta.env.BASE_URL + "/data/"`, production uses `https://raw.githubusercontent.com/ruake/AWARE/data/`. Single entry point for all runtime data access.
+- **`src/lib/initData.ts`** — `loadAllData()` is the orchestration entry point, called in `App.tsx` before rendering via a `DataGate` loading component. Fires parallel `Promise.all` for all data modules.
+- **Each data module** (`runs.ts`, `testSuites.ts`, `promotions.ts`, `schedulerStatus.ts`, `testDiscovery.ts`) exposes both:
+  - A synchronous getter (`getXxx()`) returning the current (initially empty) state
+  - An async `loadXxx()` that fetches from GitHub and populates the in-memory store
+- `RUNS` and `DIFF_ROWS` in `runs.ts` are `let` bindings reassigned after fetch.
+- `_snapshot` caching in stores provides stable references for `useSyncExternalStore`.
+- Changes to user-created/modified entities are persisted via localStorage (keys: `aware-env-configs-v3`, `aware_test_cases_v2`).
+
+### Key Data Access Patterns
+
+#### Read-Only Run Data (runs.ts)
+```ts
+import { RUNS, getRunById, getTestResultsForRun, ENV_SUMMARY, PASS_RATE_CHART } from "@/lib/runs"
+```
+- `RUNS` — full list of CI runs
+- `getRunById(id)` — single run lookup
+- `getTestResultsForRun(runId)` — TestResult[] for a run
+- `ENV_SUMMARY` — per-env aggregated stats
+- `ENV_PASS_RATE_CHART` — area chart data (keyed by day, env columns)
+- `computeRunFrequency()` — cadence analytics
+
+#### Mutable Stores (data.ts)
+```ts
+import { getTestCases, saveTestCases, subscribeToTestCases } from "@/lib/data"
+
+// Subscribe to changes:
+const unsub = subscribeToTestCases(() => setTests(getTestCases()))
+return unsub  // call in useEffect cleanup
+```
+
+## Critical Type Rules
+- `Run.env` field = `"QA"` | `"UAT"` | `"PROD"` — not "production"/"staging" (those are legacy)
+- `TestResult.evidence` is REQUIRED — never omit it in generated/seed data
+- `TestResult.assertions` should be an empty array if no assertions, not undefined
+- `DiffRow.state` options: `"regression"` | `"fixed"` | `"duration"` | `"unchanged"` | `"fishy"`
+
+## Flakiness Formula
+```
+flakinessScore = (status_flips / (total_runs - 1)) * 100
+```
+Score > 20 = concerning; computed in `computeTestDetails()` and `computeTestDetailForName(name)`
+
+## ENV_COLOR_MAP Colors
+| Env | Color |
+|-----|-------|
+| QA | #a855f7 (purple) |
+| UAT | #f59e0b (amber) |
+| PROD | #22c55e (green) |
+Both short forms (`"QA"`) and long forms (`"QA / Staging"`) are in the map.
+
+## Data Validation Workflow
+```bash
+node scripts/validate-data.mjs   # validates test-results.json against schema
+node scripts/generate-data.mjs   # regenerates seed data from templates
+node scripts/discover-all.mjs    # discovers tests and updates auto-tests.json
+```
+`validate-data.mjs` runs automatically as a prebuild step — the build fails on schema violations.
+
+## When to Use This Skill
+- Adding or modifying seed JSON data
+- Changing TypeScript data types/interfaces
+- Implementing new data access functions or stores
+- Fixing data shape mismatches between components and stores
+- Working with run history, flakiness scores, or diff computation
+- Implementing import/export features (testImportExport.ts)
+
+## Files to Read First
+1. `artifacts/aware-app/src/lib/types.ts` — all type definitions
+2. `artifacts/aware-app/src/lib/runs.ts` — run data module
+3. `artifacts/aware-app/src/lib/data.ts` — mutable store pattern
+4. `artifacts/aware-app/data/runs.json` — sample of seed data shape
