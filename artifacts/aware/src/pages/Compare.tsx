@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 import { useStore } from "@/lib/store";
 import { computeDiff } from "@/lib/analytics";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import {
   Pagination, PaginationContent, PaginationItem,
   PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { ArrowLeftRight, CheckCircle2, XCircle, MinusCircle, Search, Copy, Check } from "lucide-react";
+import { ArrowLeftRight, CheckCircle2, XCircle, MinusCircle, Search, Copy, Check, ChevronDown, ChevronRight, ChevronLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { usePagination } from "@/hooks/use-pagination";
 
@@ -30,6 +30,7 @@ export default function Compare() {
   const [search, setSearch] = useState(urlParams.get("q") || "");
   const [filter, setFilter] = useState<"all" | "regressions" | "fixed" | "unchanged">("all");
   const [copied, setCopied] = useState(false);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   // Stable memoized results — avoids new array refs on each render
   const baseResults = useMemo(
@@ -64,6 +65,7 @@ export default function Compare() {
   const pg = usePagination(filteredDiffs, PAGE_SIZE);
 
   const swap = () => { setBaseId(candId); setCandId(baseId); };
+  const toggleDiff = (id: string) => setExpanded(p => ({ ...p, [id]: !p[id] }));
 
   function copyShareUrl() {
     const url = `${window.location.origin}${window.location.pathname}?baseline=${baseId}&candidate=${candId}`;
@@ -250,55 +252,197 @@ export default function Compare() {
 
           {/* Diff list */}
           <div className="space-y-2">
-            {pg.pageItems.map(diff => (
-              <div
-                key={diff.id}
-                className={`p-4 border rounded-lg flex items-center justify-between gap-4 bg-card transition
-                  ${diff.status === "regression" ? "border-destructive/40 bg-destructive/5" : ""}
-                  ${diff.status === "fixed"      ? "border-emerald-500/40 bg-emerald-500/5" : ""}
-                `}
-              >
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-sm mb-1 truncate" title={diff.name}>{diff.name}</h4>
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      Baseline:
-                      <Badge
-                        variant={diff.baseResult?.status === "PASS" ? "outline" : diff.baseResult?.status === "FAIL" ? "destructive" : "secondary"}
-                        className={`text-[10px] ${diff.baseResult?.status === "PASS" ? "border-emerald-500 text-emerald-500" : ""}`}
-                      >
-                        {diff.baseResult?.status || "N/A"}
-                      </Badge>
-                    </span>
-                    <ArrowLeftRight className="w-3 h-3" />
-                    <span className="flex items-center gap-1">
-                      Candidate:
-                      <Badge
-                        variant={diff.candidateResult?.status === "PASS" ? "outline" : diff.candidateResult?.status === "FAIL" ? "destructive" : "secondary"}
-                        className={`text-[10px] ${diff.candidateResult?.status === "PASS" ? "border-emerald-500 text-emerald-500" : ""}`}
-                      >
-                        {diff.candidateResult?.status || "N/A"}
-                      </Badge>
-                    </span>
-                    {diff.baseResult?.duration && diff.candidateResult?.duration && (
-                      <span className="text-muted-foreground">
-                        Δ duration:{" "}
-                        <span className={diff.candidateResult.duration > diff.baseResult.duration ? "text-destructive" : "text-emerald-500"}>
-                          {diff.candidateResult.duration > diff.baseResult.duration ? "+" : ""}
-                          {(diff.candidateResult.duration - diff.baseResult.duration).toFixed(0)}ms
+            {pg.pageItems.map(diff => {
+              const isExpanded = expanded[diff.id];
+              return (
+              <Fragment key={diff.id}>
+                <div
+                  className={`p-4 border rounded-lg flex items-center justify-between gap-4 bg-card transition cursor-pointer hover:bg-muted/30
+                    ${diff.status === "regression" ? "border-destructive/40 bg-destructive/5" : ""}
+                    ${diff.status === "fixed"      ? "border-emerald-500/40 bg-emerald-500/5" : ""}
+                  `}
+                  onClick={() => toggleDiff(diff.id)}
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {isExpanded
+                      ? <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground" />
+                      : <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
+                    }
+                    <div className="min-w-0">
+                      <h4 className="font-semibold text-sm truncate" title={diff.name}>{diff.name}</h4>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                        <span className="flex items-center gap-1">
+                          Baseline:
+                          <Badge
+                            variant={diff.baseResult?.status === "PASS" ? "outline" : diff.baseResult?.status === "FAIL" ? "destructive" : "secondary"}
+                            className={`text-[10px] ${diff.baseResult?.status === "PASS" ? "border-emerald-500 text-emerald-500" : ""}`}
+                          >
+                            {diff.baseResult?.status || "N/A"}
+                          </Badge>
                         </span>
-                      </span>
-                    )}
+                        <ArrowLeftRight className="w-3 h-3" />
+                        <span className="flex items-center gap-1">
+                          Candidate:
+                          <Badge
+                            variant={diff.candidateResult?.status === "PASS" ? "outline" : diff.candidateResult?.status === "FAIL" ? "destructive" : "secondary"}
+                            className={`text-[10px] ${diff.candidateResult?.status === "PASS" ? "border-emerald-500 text-emerald-500" : ""}`}
+                          >
+                            {diff.candidateResult?.status || "N/A"}
+                          </Badge>
+                        </span>
+                        {diff.baseResult?.duration && diff.candidateResult?.duration && (
+                          <span className="text-muted-foreground">
+                            Δ:{" "}
+                            <span className={diff.candidateResult.duration > diff.baseResult.duration ? "text-destructive" : "text-emerald-500"}>
+                              {diff.candidateResult.duration > diff.baseResult.duration ? "+" : ""}
+                              {(diff.candidateResult.duration - diff.baseResult.duration).toFixed(0)}ms
+                            </span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="shrink-0">
+                    {diff.status === "regression" && <Badge variant="destructive">REGRESSION</Badge>}
+                    {diff.status === "fixed"       && <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white">FIXED</Badge>}
+                    {diff.status === "new"         && <Badge variant="secondary">NEW</Badge>}
+                    {diff.status === "unchanged"   && <span className="text-xs text-muted-foreground">Unchanged</span>}
                   </div>
                 </div>
-                <div className="shrink-0">
-                  {diff.status === "regression" && <Badge variant="destructive">REGRESSION</Badge>}
-                  {diff.status === "fixed"       && <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white">FIXED</Badge>}
-                  {diff.status === "new"         && <Badge variant="secondary">NEW</Badge>}
-                  {diff.status === "unchanged"   && <span className="text-xs text-muted-foreground">Unchanged</span>}
-                </div>
-              </div>
-            ))}
+
+                {isExpanded && (
+                  <div className="border border-t-0 border-border rounded-b-lg bg-card overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/10">
+                      <div className="flex items-center gap-2">
+                        {pg.pageItems.findIndex(d => d.id === diff.id) > 0 && (
+                          <button
+                            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition"
+                            onClick={() => { setExpanded({}); setExpanded({ [pg.pageItems[pg.pageItems.findIndex(d => d.id === diff.id) - 1].id]: true }); }}
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                          </button>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">
+                        {pg.pageItems.findIndex(d => d.id === diff.id) + 1} of {pg.pageItems.length}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {pg.pageItems.findIndex(d => d.id === diff.id) < pg.pageItems.length - 1 && (
+                          <button
+                            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition"
+                            onClick={() => { setExpanded({}); setExpanded({ [pg.pageItems[pg.pageItems.findIndex(d => d.id === diff.id) + 1].id]: true }); }}
+                          >
+                            Next <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-0 divide-x divide-border">
+                      <div className="p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Baseline</h5>
+                          {diff.baseResult && (
+                            <Badge
+                              variant={diff.baseResult.status === "PASS" ? "outline" : diff.baseResult.status === "FAIL" ? "destructive" : "secondary"}
+                              className={`text-[10px] ${diff.baseResult.status === "PASS" ? "border-emerald-500 text-emerald-500" : ""}`}
+                            >
+                              {diff.baseResult.status}
+                            </Badge>
+                          )}
+                        </div>
+                        {diff.baseResult ? (
+                          <>
+                            {diff.baseResult.duration > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                Duration: <span className="text-foreground font-medium">{diff.baseResult.duration.toFixed(0)}ms</span>
+                              </div>
+                            )}
+                            {diff.baseResult.error && (
+                              <div className="bg-destructive/10 border border-destructive/20 rounded p-2">
+                                <p className="text-xs font-mono text-destructive">{diff.baseResult.error}</p>
+                              </div>
+                            )}
+                            {diff.baseResult.assertions && diff.baseResult.assertions.length > 0 && (
+                              <div>
+                                <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-1.5">Assertions</p>
+                                <div className="space-y-1">
+                                  {diff.baseResult.assertions.map((a, i) => (
+                                    <div key={i} className="flex items-center gap-2 bg-background border rounded p-2 text-xs">
+                                      {a.passed
+                                        ? <CheckCircle2 className="w-3 h-3 shrink-0 text-emerald-500" />
+                                        : <XCircle className="w-3 h-3 shrink-0 text-destructive" />
+                                      }
+                                      <span className="font-mono">{a.assertion}</span>
+                                      {!a.passed && (
+                                        <span className="text-muted-foreground ml-auto">
+                                          exp: {a.expected} · act: <span className="text-destructive">{a.actual}</span>
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">No result</p>
+                        )}
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Candidate</h5>
+                          {diff.candidateResult && (
+                            <Badge
+                              variant={diff.candidateResult.status === "PASS" ? "outline" : diff.candidateResult.status === "FAIL" ? "destructive" : "secondary"}
+                              className={`text-[10px] ${diff.candidateResult.status === "PASS" ? "border-emerald-500 text-emerald-500" : ""}`}
+                            >
+                              {diff.candidateResult.status}
+                            </Badge>
+                          )}
+                        </div>
+                        {diff.candidateResult ? (
+                          <>
+                            {diff.candidateResult.duration > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                Duration: <span className="text-foreground font-medium">{diff.candidateResult.duration.toFixed(0)}ms</span>
+                              </div>
+                            )}
+                            {diff.candidateResult.error && (
+                              <div className="bg-destructive/10 border border-destructive/20 rounded p-2">
+                                <p className="text-xs font-mono text-destructive">{diff.candidateResult.error}</p>
+                              </div>
+                            )}
+                            {diff.candidateResult.assertions && diff.candidateResult.assertions.length > 0 && (
+                              <div>
+                                <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-1.5">Assertions</p>
+                                <div className="space-y-1">
+                                  {diff.candidateResult.assertions.map((a, i) => (
+                                    <div key={i} className="flex items-center gap-2 bg-background border rounded p-2 text-xs">
+                                      {a.passed
+                                        ? <CheckCircle2 className="w-3 h-3 shrink-0 text-emerald-500" />
+                                        : <XCircle className="w-3 h-3 shrink-0 text-destructive" />
+                                      }
+                                      <span className="font-mono">{a.assertion}</span>
+                                      {!a.passed && (
+                                        <span className="text-muted-foreground ml-auto">
+                                          exp: {a.expected} · act: <span className="text-destructive">{a.actual}</span>
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">No result</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </Fragment>
+            )})}
             {pg.pageItems.length === 0 && (
               <div className="p-10 text-center text-muted-foreground border rounded-lg bg-card">
                 No differences match the current filter.
@@ -307,7 +451,7 @@ export default function Compare() {
           </div>
 
           {/* Pagination for diffs */}
-          {filteredDiffs.length > PAGE_SIZE && (
+          {pg.totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-border pt-4">
               <p className="text-xs text-muted-foreground">
                 Showing {pg.from}–{pg.to} of {pg.total} diffs
