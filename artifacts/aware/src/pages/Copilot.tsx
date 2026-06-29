@@ -146,66 +146,43 @@ export default function Copilot() {
       console.log("[Copilot] handleSend — ctx.reasoning:", ctx.reasoning);
       console.log("[Copilot] handleSend — ctx.recommendations:", ctx.recommendations);
 
+      /* 2. Single assistant bubble — start with fallback, replace with Chrome AI stream if available */
+      const assistantId = Date.now();
       const chromeAiAvail = await isChromeAiAvailable();
       const usedChromeAi = ctx.intent !== "unknown" && chromeAiAvail;
       console.log("[Copilot] handleSend — chromeAiAvail:", chromeAiAvail, "| usedChromeAi:", usedChromeAi);
 
-      /* 2. If Chrome AI is available, try streaming for richer text */
-      if (usedChromeAi) {
-        const assistantId = Date.now();
-        setMessages(prev => [...prev, {
-          role: "assistant",
-          content: "",
-          ts: assistantId,
-          chartConfig: ctx.chartConfig,
-          chromeAi: true,
-          reasoning: ctx.reasoning,
-          recommendations: ctx.recommendations,
-          streaming: true,
-        }]);
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        content: responseText,
+        ts: assistantId,
+        chartConfig: ctx.chartConfig,
+        chromeAi: usedChromeAi,
+        reasoning: ctx.reasoning,
+        recommendations: ctx.recommendations,
+        streaming: usedChromeAi,
+      }]);
 
+      if (usedChromeAi) {
         const stream = generateResponseStream(ctx);
         let full = "";
         for await (const chunk of stream) {
           full = chunk;
           setMessages(prev => {
-            const idx = prev.findIndex(m => m.ts === assistantId && m.role === "assistant");
+            const idx = prev.findIndex(m => m.ts === assistantId);
             if (idx === -1) return prev;
             const next = [...prev];
-            next[idx] = {
-              ...next[idx],
-              content: chunk,
-              streaming: true,
-            };
+            next[idx] = { ...next[idx], content: chunk, streaming: true };
             return next;
           });
         }
-
         setMessages(prev => {
-          const idx = prev.findIndex(m => m.ts === assistantId && m.role === "assistant");
+          const idx = prev.findIndex(m => m.ts === assistantId);
           if (idx === -1) return prev;
           const next = [...prev];
-          next[idx] = {
-            ...next[idx],
-            content: full || responseText,
-            streaming: false,
-          };
+          next[idx] = { ...next[idx], content: full || responseText, streaming: false };
           return next;
         });
-      } else {
-        console.log("[Copilot] handleSend — using fallback (no Chrome AI or unknown intent)");
-        console.log("[Copilot] handleSend — responseText:", responseText);
-        /* 3. Fallback: static rule-based response */
-        const assistantMsg: Message = {
-          role: "assistant",
-          content: responseText,
-          ts: Date.now(),
-          chartConfig: ctx.chartConfig,
-          chromeAi: false,
-          reasoning: ctx.reasoning,
-          recommendations: ctx.recommendations,
-        };
-        setMessages(prev => [...prev, assistantMsg]);
       }
     } catch (e) {
       console.error("[Copilot] handleSend — caught error:", e);

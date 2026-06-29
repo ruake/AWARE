@@ -1,5 +1,6 @@
 import { GraphNode, GraphContext } from "./types";
-import { generateResponse, generateReasoning, generateRecommendations } from "./chrome-ai";
+import { buildFallbackResponse } from "./chrome-ai";
+
 
 function pickChart(intent: string, analysis: Record<string, unknown>): GraphContext["chartConfig"] {
   const isDark = document.documentElement.classList.contains("dark");
@@ -187,29 +188,12 @@ function pickChart(intent: string, analysis: Record<string, unknown>): GraphCont
   }
 }
 
-async function buildAiTextResponse(ctx: GraphContext): Promise<{ text: string; reasoning: string | null; recommendations: string | null }> {
-  const [text, reasoning, recommendations] = await Promise.all([
-    generateResponse(ctx),
-    generateReasoning(ctx),
-    generateRecommendations(ctx),
-  ]);
-  return { text, reasoning, recommendations };
-}
-
 export const ChartAgentNode: GraphNode = {
   id: "chart-agent",
   execute: async (ctx) => {
     const chartConfig = pickChart(ctx.intent, ctx.analysis);
-    const { text, reasoning, recommendations } = await buildAiTextResponse(ctx);
-
-    const parts: string[] = [text];
-    if (reasoning) {
-      parts.push(`\n**Reasoning**: ${reasoning.trim()}`);
-    }
-    if (recommendations) {
-      parts.push(`\n**Recommendations**:\n${recommendations.trim()}`);
-    }
-
-    return { ...ctx, chartConfig, textResponse: parts.join(""), reasoning, recommendations };
+    // textResponse is the rule-based fallback; Copilot.tsx will overlay it
+    // with a Chrome AI streaming response when available (single bubble).
+    return { ...ctx, chartConfig, textResponse: buildFallbackResponse(ctx), reasoning: null, recommendations: null };
   },
 };

@@ -384,7 +384,7 @@ Intent: ${intent}`;
 
 /* ─── Fallback text responses (rule-based, no AI) ─── */
 
-function buildFallbackResponse(ctx: GraphContext): string {
+export function buildFallbackResponse(ctx: GraphContext): string {
   const { analysis, intent } = ctx;
   const a = analysis as Record<string, any>;
 
