@@ -13,36 +13,50 @@ export interface ChromeAiCapabilities {
 }
 
 export async function getChromeAiCapabilities(): Promise<ChromeAiCapabilities | null> {
+  // ── New API: window.LanguageModel (Chrome 138+, replaces window.ai) ────────
+  const LM = (window as any).LanguageModel;
+  console.log("[ChromeAI] window.LanguageModel:", LM);
+  if (typeof LM?.availability === "function") {
+    try {
+      const avail = await LM.availability();
+      console.log("[ChromeAI] LanguageModel.availability():", avail);
+      if (avail === "available") return { available: "readily" };
+      if (avail === "downloading" || avail === "downloadable") return { available: "after-download" };
+      // "unavailable" — fall through to window.ai check
+    } catch (e) {
+      console.error("[ChromeAI] LanguageModel.availability() threw:", e);
+    }
+  }
+
+  // ── Legacy API: window.ai (pre-Chrome 138 Early Preview) ──────────────────
   const ai = (window as any).ai;
   console.log("[ChromeAI] window.ai:", ai);
   if (!ai) {
-    console.warn("[ChromeAI] ✗ window.ai is undefined — Chrome AI not available");
+    console.warn("[ChromeAI] ✗ Neither window.LanguageModel nor window.ai found — Gemini Nano not available.\n" +
+      "To enable:\n" +
+      "  1. Use Chrome 138+ on Windows 10/11, macOS 13+, or Linux (not mobile)\n" +
+      "  2. Go to chrome://flags → enable #prompt-api-for-gemini-nano\n" +
+      "  3. Go to chrome://flags → enable #optimization-guide-on-device-model (BypassPrefRequirement)\n" +
+      "  4. Restart Chrome, then check chrome://on-device-internals for model download status\n" +
+      "  5. Ensure 22 GB free disk space");
     return null;
   }
   const keys = Object.keys(ai);
   console.log("[ChromeAI] window.ai keys:", keys);
-  if (ai.languageModel) {
-    console.log("[ChromeAI] languageModel keys:", Object.keys(ai.languageModel));
-    console.log("[ChromeAI] languageModel.capabilities:", ai.languageModel.capabilities);
-  }
   try {
     if (ai.languageModel?.capabilities) {
       const caps = await ai.languageModel.capabilities();
-      console.log("[ChromeAI] capabilities result:", caps);
+      console.log("[ChromeAI] ai.languageModel.capabilities():", caps);
       return caps;
     }
-    console.warn("[ChromeAI] ✗ ai.languageModel.capabilities not found");
   } catch (e) {
-    console.error("[ChromeAI] ✗ capabilities() threw:", e);
+    console.error("[ChromeAI] ai.languageModel.capabilities() threw:", e);
   }
-  console.log("[ChromeAI] checking legacy ai.canCreateTextSession:", typeof ai.canCreateTextSession);
   if (typeof ai.canCreateTextSession === "function") {
     try {
       const can = await ai.canCreateTextSession();
       console.log("[ChromeAI] canCreateTextSession:", can);
-      if (can === "readily" || can === "after-download") {
-        return { available: can };
-      }
+      if (can === "readily" || can === "after-download") return { available: can };
     } catch (e) {
       console.error("[ChromeAI] canCreateTextSession threw:", e);
     }
@@ -58,16 +72,27 @@ export async function isChromeAiAvailable(): Promise<boolean> {
 }
 
 async function createSession() {
+  const SYSTEM = `You are A.W.A.R.E. Copilot, an expert test-observability analyst for a CDN regression-testing platform. You analyze test runs, failures, flakiness, and pipeline health. Be concise, technical, and actionable. Use markdown formatting.`;
+
+  // ── New API: window.LanguageModel (Chrome 138+) ───────────────────────────
+  const LM = (window as any).LanguageModel;
+  console.log("[ChromeAI] createSession() — window.LanguageModel:", LM);
+  if (typeof LM?.create === "function") {
+    console.log("[ChromeAI] → using window.LanguageModel.create()");
+    const session = await LM.create({ initialPrompts: [{ role: "system", content: SYSTEM }] });
+    console.log("[ChromeAI] ✓ session created via LanguageModel.create:", session);
+    return session;
+  }
+
+  // ── Legacy API: window.ai ─────────────────────────────────────────────────
   const ai = (window as any).ai;
   console.log("[ChromeAI] createSession() — window.ai:", ai);
   if (!ai) throw new Error("[ChromeAI] ✗ Chrome AI not available (window.ai is falsy)");
 
   if (ai.languageModel?.create) {
     console.log("[ChromeAI] → using ai.languageModel.create()");
-    const session = await ai.languageModel.create({
-      systemPrompt: `You are A.W.A.R.E. Copilot, an expert test-observability analyst for a CDN regression-testing platform. You analyze test runs, failures, flakiness, and pipeline health. Be concise, technical, and actionable. Use markdown formatting.`,
-    });
-    console.log("[ChromeAI] ✓ session created via languageModel.create:", session);
+    const session = await ai.languageModel.create({ systemPrompt: SYSTEM });
+    console.log("[ChromeAI] ✓ session created via ai.languageModel.create:", session);
     return session;
   }
   if (ai.createTextSession) {
@@ -76,7 +101,7 @@ async function createSession() {
     console.log("[ChromeAI] ✓ session created via createTextSession:", session);
     return session;
   }
-  console.warn("[ChromeAI] ✗ No create method found on window.ai. Available keys:", Object.keys(ai));
+  console.warn("[ChromeAI] ✗ No create method found. window.LanguageModel:", LM, "window.ai keys:", Object.keys(ai));
   throw new Error("[ChromeAI] ✗ No Chrome AI API found");
 }
 
