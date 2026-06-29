@@ -232,7 +232,9 @@ export function PageTemplate({
               </div>
             </div>
           ) : (
-            children
+            <div style={{ flex: 1, width: "100%", overflow: "auto", display: "flex", flexDirection: "column" }}>
+              {children}
+            </div>
           )}
         </PanelErrorBoundary>
       </div>

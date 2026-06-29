@@ -560,11 +560,48 @@ html, body {
   gap: 0.25rem;
 }
 
-/* Alternate button naming (proof-button-*) as alias */
-.proof-button-primary { composes: proof-btn proof-btn-primary; }
-.proof-button-sm { composes: proof-btn proof-btn-sm; }
-.proof-button-xs { composes: proof-btn proof-btn-xs; }
-.proof-button-ghost { composes: proof-btn proof-btn-ghost; }
+/* Alternate button naming (proof-button-*) as alias — actual CSS rules */
+.proof-button-primary {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--proof-radius-md);
+  font-weight: 500; transition: all var(--proof-transition);
+  cursor: pointer; border: 1px solid transparent; font-size: 0.875rem;
+  background: var(--proof-blue); color: #fff;
+}
+.proof-button-primary:hover { background: var(--proof-blue-bright); box-shadow: 0 0 12px var(--proof-blue-glow); }
+.proof-button-ghost {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--proof-radius-md);
+  font-weight: 500; transition: all var(--proof-transition);
+  cursor: pointer; border: 1px solid transparent; font-size: 0.875rem;
+  background: transparent; color: var(--proof-text);
+}
+.proof-button-ghost:hover { background: var(--proof-surface-hover); }
+.proof-button-sm {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.25rem; padding: 0.25rem 0.625rem; border-radius: var(--proof-radius-md);
+  font-weight: 500; transition: all var(--proof-transition);
+  cursor: pointer; border: 1px solid transparent; font-size: 0.75rem;
+  background: transparent; color: var(--proof-text);
+}
+.proof-button-sm:hover { background: var(--proof-surface-hover); }
+.proof-button-xs {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.25rem; padding: 0.125rem 0.5rem; border-radius: var(--proof-radius-md);
+  font-weight: 500; transition: all var(--proof-transition);
+  cursor: pointer; border: 1px solid transparent; font-size: 0.6875rem;
+  background: transparent; color: var(--proof-text);
+}
+.proof-button-xs:hover { background: var(--proof-surface-hover); }
+/* Combined proof-button (base) */
+.proof-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--proof-radius-md);
+  font-weight: 500; transition: all var(--proof-transition);
+  cursor: pointer; border: 1px solid transparent; font-size: 0.875rem;
+  background: transparent; color: var(--proof-text);
+}
+.proof-button:hover { background: var(--proof-surface-hover); }
 
 /* Table classes used by FilterableTable */
 .proof-th {

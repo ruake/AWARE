@@ -413,11 +413,11 @@ export default function Runs() {
 
       {/* Table */}
       <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-      <div className="glass-panel" style={{ minWidth: 800, borderRadius: 12, border: "1px solid var(--proof-border)", overflow: "hidden", boxShadow: "var(--proof-shadow-md)" }}>
+      <div className="glass-panel" style={{ minWidth: 960, borderRadius: 12, border: "1px solid var(--proof-border)", overflow: "hidden", boxShadow: "var(--proof-shadow-md)" }}>
         {/* Table header */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "2.5fr 120px 140px 140px 120px 140px 40px",
+          gridTemplateColumns: "minmax(220px, 2.5fr) 110px 130px 140px 110px 140px 40px",
           padding: "16px 24px",
           background: "linear-gradient(to bottom, var(--proof-surface-3), var(--proof-surface-2))",
           borderBottom: "1px solid var(--proof-border-strong)",
@@ -480,7 +480,7 @@ function RunRow({ run, index, onNavigate }: { run: Run; index: number; onNavigat
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNavigate(run.id); } }}
       style={{
         display: "grid",
-        gridTemplateColumns: "2.5fr 120px 140px 140px 120px 140px 40px",
+        gridTemplateColumns: "minmax(220px, 2.5fr) 110px 130px 140px 110px 140px 40px",
         padding: "16px 24px",
         borderBottom: "1px solid var(--proof-border-light)",
         cursor: "pointer",

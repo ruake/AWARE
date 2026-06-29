@@ -198,7 +198,7 @@ export default function RunDetail() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24, height: "100%", minHeight: 0 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 0, height: "100%", minHeight: 0 }}>
       {/* Sticky Header */}
       <div
         className="proof-card"
@@ -213,11 +213,12 @@ export default function RunDetail() {
           background: "var(--proof-glass)",
           backdropFilter: "blur(16px)",
           borderBottom: "1px solid var(--proof-border)",
-          borderTop: "1px solid transparent",
-          borderImage: "linear-gradient(to right, var(--proof-blue), var(--proof-purple)) 1",
+          borderTop: "none",
+          borderLeft: "none",
+          borderRight: "none",
           borderRadius: 0,
-          margin: "-24px -28px 0 -28px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.2)"
+          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+          flexShrink: 0,
         }}
       >
         <button 
@@ -293,6 +294,9 @@ export default function RunDetail() {
           <GitCompare size={16} /> Compare
         </button>
       </div>
+
+      {/* Content area with proper padding */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24, padding: "24px 28px", overflow: "auto", minHeight: 0 }}>
 
       {/* Stats row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
@@ -601,6 +605,8 @@ export default function RunDetail() {
           </div>
         )}
       </div>
+
+      </div> {/* end content area */}
     </div>
   );
 }
