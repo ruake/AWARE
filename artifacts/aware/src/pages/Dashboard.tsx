@@ -24,22 +24,6 @@ export default function Dashboard() {
   );
   const trendData = useMemo(() => computePassRateTrend(runs, 30), [runs]);
 
-  if (!isLoaded) return (
-    <div className="animate-pulse space-y-4">
-      <div className="h-32 bg-muted rounded-md" />
-      <div className="h-64 bg-muted rounded-md" />
-    </div>
-  );
-
-  const avgPass = recentRuns.length
-    ? Math.round(recentRuns.reduce((a, b) => a + b.passPct, 0) / recentRuns.length)
-    : 0;
-  const failedCount  = recentRuns.filter(r => r.status === "FAIL").length;
-  const runningCount = runs.filter(r => r.status === "RUNNING").length;
-
-  const anomalyRun = recentRuns.find(r => r.passPct < 85 && r.status === "FAIL") ?? null;
-  const hasAnomaly = !dismissedAnomaly && !!anomalyRun;
-
   // Per-env, per-network pass rates — computed from real data, no Math.random()
   const envStats = useMemo(() => {
     return ["QA", "UAT", "PROD"].map(env => {
@@ -57,6 +41,22 @@ export default function Dashboard() {
       };
     });
   }, [runs]);
+
+  if (!isLoaded) return (
+    <div className="animate-pulse space-y-4">
+      <div className="h-32 bg-muted rounded-md" />
+      <div className="h-64 bg-muted rounded-md" />
+    </div>
+  );
+
+  const avgPass = recentRuns.length
+    ? Math.round(recentRuns.reduce((a, b) => a + b.passPct, 0) / recentRuns.length)
+    : 0;
+  const failedCount  = recentRuns.filter(r => r.status === "FAIL").length;
+  const runningCount = runs.filter(r => r.status === "RUNNING").length;
+
+  const anomalyRun = recentRuns.find(r => r.passPct < 85 && r.status === "FAIL") ?? null;
+  const hasAnomaly = !dismissedAnomaly && !!anomalyRun;
 
   const kpiCards = [
     {

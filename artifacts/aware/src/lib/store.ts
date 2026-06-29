@@ -1,14 +1,6 @@
 import { create } from "zustand";
-import { generateMockData } from "./mockData";
 import { Run, TestResult, TestCase, TestSuite, SchedulerStatus } from "./types";
-
-let initialData: ReturnType<typeof generateMockData>;
-try {
-  initialData = generateMockData();
-} catch (e) {
-  console.error("[store] generateMockData failed:", e);
-  initialData = { runs: [], testResults: [], testCases: [], suites: [], schedulerStatus: null as any };
-}
+import { fetchAllData } from "./api";
 
 interface AwareState {
   isLoaded: boolean;
@@ -18,6 +10,7 @@ interface AwareState {
   testCases: TestCase[];
   suites: TestSuite[];
   schedulerStatus: SchedulerStatus | null;
+  error: string | null;
 
   loadData: () => Promise<void>;
   getRunById: (id: string) => Run | undefined;
@@ -25,28 +18,31 @@ interface AwareState {
 }
 
 export const useStore = create<AwareState>((set, get) => ({
-  isLoaded: true,
-  lastLoaded: new Date().toISOString(),
-  runs: initialData.runs,
-  testResults: initialData.testResults,
-  testCases: initialData.testCases,
-  suites: initialData.suites,
-  schedulerStatus: initialData.schedulerStatus,
+  isLoaded: false,
+  lastLoaded: null,
+  runs: [],
+  testResults: [],
+  testCases: [],
+  suites: [],
+  schedulerStatus: null,
+  error: null,
 
   loadData: async () => {
     try {
-      const mockData = generateMockData();
+      const data = await fetchAllData();
       set({
         isLoaded: true,
         lastLoaded: new Date().toISOString(),
-        runs: mockData.runs,
-        testResults: mockData.testResults,
-        testCases: mockData.testCases,
-        suites: mockData.suites,
-        schedulerStatus: mockData.schedulerStatus,
+        runs: data.runs,
+        testResults: data.testResults,
+        testCases: data.testCases,
+        suites: data.suites,
+        schedulerStatus: data.schedulerStatus,
+        error: null,
       });
     } catch (e) {
       console.error("[store] loadData failed:", e);
+      set({ isLoaded: true, error: (e as Error).message });
     }
   },
 
@@ -58,3 +54,5 @@ export const useStore = create<AwareState>((set, get) => ({
     return get().testResults.filter((r) => r.runId === runId);
   },
 }));
+
+useStore.getState().loadData();
