@@ -20,8 +20,18 @@ export function AnomalyBanner({ hasAlert, hasDegradation, regressions, degradedT
   const message = isCritical ? `${regressions} CRITICAL REGRESSION${regressions !== 1 ? "S" : ""} DETECTED` : `${degradedTiers} DEGRADED`;
 
   return (
-    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ width: "100%" }}>
-      <div style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", borderRadius: 12, border: `1px solid ${color}`, padding: 16, boxShadow: glow, backdropFilter: "blur(12px)", background: bg }}>
+    <motion.div 
+      initial={{ opacity: 0, y: -20 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      style={{ 
+        width: "100%",
+        borderLeft: `4px solid ${color}`,
+        borderRadius: "0 12px 12px 0",
+        boxShadow: `0 0 20px ${color}20`,
+        animation: "pulse-glow 3s infinite ease-in-out"
+      }}
+    >
+      <div style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", borderRadius: "0 12px 12px 0", border: `1px solid ${color}`, borderLeft: "none", padding: 16, backdropFilter: "blur(12px)", background: bg }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{ display: "flex", height: 40, width: 40, alignItems: "center", justifyContent: "center", borderRadius: 8, background: "rgba(0,0,0,0.2)", color }}>
             <AlertCircle style={{ animation: "pulse 2s infinite" }} size={24} />

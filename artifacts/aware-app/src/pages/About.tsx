@@ -12,7 +12,7 @@ import { AboutEnvMap } from "@/components/aware/AboutEnvMap";
 import { AboutTechStack } from "@/components/aware/AboutTechStack";
 import { AboutTestCategories } from "@/components/aware/AboutTestCategories";
 import { PanelErrorBoundary } from "@/components/aware/PanelErrorBoundary";
-import { Database, Copy, Check } from "lucide-react";
+import { Database, Copy, Check, Server, Terminal, Shield, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 const containerVariants = {
@@ -178,6 +178,42 @@ export default function About() {
             <AboutTestCategories categories={cats as Record<string, number>} />
           </motion.div>
         )}
+
+        {/* Tech Stack Powered By Strip */}
+        <motion.div 
+          variants={itemVariants}
+          style={{
+            marginTop: 12,
+            padding: "20px",
+            borderTop: "1px solid var(--proof-border-light)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 16
+          }}
+        >
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--proof-text-muted)", textTransform: "uppercase", letterSpacing: "0.2em" }}>
+            Engineered with Excellence
+          </div>
+          <div style={{ display: "flex", gap: 32, opacity: 0.5, filter: "grayscale(1)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--proof-text)" }}>
+              <Server size={16} />
+              <span style={{ fontSize: 12, fontWeight: 600 }}>Akamai Edge</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--proof-text)" }}>
+              <Terminal size={16} />
+              <span style={{ fontSize: 12, fontWeight: 600 }}>Playwright</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--proof-text)" }}>
+              <Shield size={16} />
+              <span style={{ fontSize: 12, fontWeight: 600 }}>LangGraph</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--proof-text)" }}>
+              <Zap size={16} />
+              <span style={{ fontSize: 12, fontWeight: 600 }}>Vite + React</span>
+            </div>
+          </div>
+        </motion.div>
       </motion.div>
     </div>
   );

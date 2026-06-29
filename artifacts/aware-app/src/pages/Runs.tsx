@@ -1,4 +1,4 @@
-import React, { useSyncExternalStore } from "react";
+import React, { useSyncExternalStore, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { StatusBadge, PageTemplate } from "@/components/aware";
 import { getRuns, subscribeToRuns } from "@/lib/data";
@@ -9,7 +9,7 @@ import { formatRelativeTime, formatDurationMs } from "@/lib/i18n";
 import type { Run } from "@/lib/types";
 import {
   Play, GitCompare, Loader2, ExternalLink, Search, X,
-  ChevronRight, Minus, ChevronUp, ChevronDown
+  ChevronRight, Minus, ChevronUp, ChevronDown, Download, CheckCircle2, AlertCircle, HelpCircle
 } from "lucide-react";
 import { repo } from "@/lib/nav";
 
@@ -47,8 +47,14 @@ const TierBadge = React.memo(function TierBadge({ envId }: { envId: string }) {
 });
 
 const PassBar = React.memo(function PassBar({ pct }: { pct: number }) {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const timer = setTimeout(() => setWidth(pct), 50);
+    return () => clearTimeout(timer);
+  }, [pct]);
+
   const c = pct >= 95 ? "var(--proof-green)" : pct >= 80 ? "var(--proof-yellow)" : "var(--proof-red)";
-  const _bg = pct >= 95 ? "var(--proof-green-bg)" : pct >= 80 ? "var(--proof-yellow-bg)" : "var(--proof-red-bg)";
+  
   return (
     <div 
       style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--proof-surface)", padding: "4px 8px", borderRadius: 6, border: "1px solid var(--proof-border-light)" }}
@@ -59,7 +65,7 @@ const PassBar = React.memo(function PassBar({ pct }: { pct: number }) {
       aria-label={`${pct}% passing`}
     >
       <div className="proof-progress-track" style={{ width: 48, height: 6, background: "var(--proof-surface-2)" }}>
-        <div className="proof-progress-bar" style={{ width: `${pct}%`, background: c, boxShadow: `0 0 8px ${c}` }} />
+        <div className="proof-progress-bar" style={{ width: `${width}%`, background: c, boxShadow: `0 0 8px ${c}`, transition: "width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)" }} />
       </div>
       <span className="proof-mono" style={{ fontSize: "12px", fontWeight: 700, color: c, minWidth: "36px", textAlign: "right" }}>
         {pct}%
@@ -69,19 +75,52 @@ const PassBar = React.memo(function PassBar({ pct }: { pct: number }) {
 });
 
 const FilterChip = React.memo(function FilterChip({ label, active, onSelect }: { label: string; active: boolean; onSelect: () => void }) {
+  const getGlow = () => {
+    if (!active) return "none";
+    if (label === "PASS") return "var(--proof-glow-green)";
+    if (label === "FAIL") return "var(--proof-glow-red)";
+    if (label === "PARTIAL") return "var(--proof-glow-amber)";
+    return "var(--proof-glow-cyan)";
+  };
+
+  const getColor = () => {
+    if (!active) return "var(--proof-text-secondary)";
+    if (label === "PASS") return "var(--proof-green)";
+    if (label === "FAIL") return "var(--proof-red)";
+    if (label === "PARTIAL") return "var(--proof-yellow)";
+    return "var(--proof-blue-bright)";
+  };
+
+  const getBorderColor = () => {
+    if (!active) return "var(--proof-border)";
+    if (label === "PASS") return "var(--proof-green-border)";
+    if (label === "FAIL") return "var(--proof-red-border)";
+    if (label === "PARTIAL") return "var(--proof-yellow-border)";
+    return "var(--proof-blue-border)";
+  };
+
+  const getBg = () => {
+    if (!active) return "var(--proof-surface-2)";
+    if (label === "PASS") return "var(--proof-green-bg)";
+    if (label === "FAIL") return "var(--proof-red-bg)";
+    if (label === "PARTIAL") return "var(--proof-yellow-bg)";
+    return "var(--proof-blue-bg)";
+  };
+
   return (
     <button
       onClick={onSelect}
       aria-pressed={active}
       style={{
-        display: "inline-flex", alignItems: "center", padding: "6px 14px",
+        display: "inline-flex", alignItems: "center", padding: "8px 16px",
         borderRadius: "var(--proof-radius-full)", cursor: "pointer",
-        border: `1px solid ${active ? "var(--proof-blue-border)" : "var(--proof-border)"}`,
-        background: active ? "var(--proof-blue-bg)" : "var(--proof-surface-2)",
-        color: active ? "var(--proof-blue-bright)" : "var(--proof-text-secondary)",
-        fontSize: "12px", fontWeight: active ? 700 : 600,
-        boxShadow: active ? "var(--proof-glow-cyan)" : "none",
+        border: `1px solid ${getBorderColor()}`,
+        background: getBg(),
+        color: getColor(),
+        fontSize: "13px", fontWeight: active ? 700 : 600,
+        boxShadow: getGlow(),
         transition: "all var(--proof-transition)", whiteSpace: "nowrap",
+        gap: "6px"
       }}
       onMouseEnter={(e) => {
         if (!active) {
@@ -96,6 +135,7 @@ const FilterChip = React.memo(function FilterChip({ label, active, onSelect }: {
         }
       }}
     >
+      <div style={{ width: 8, height: 8, borderRadius: "50%", background: getColor() }} />
       {label}
     </button>
   );
@@ -254,10 +294,20 @@ export default function Runs() {
               name="q"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search runs by ID, env, or suite…"
+              placeholder='Search runs by ID, env, or suite… (press "/" to search)'
               className="proof-input"
-              style={{ paddingLeft: "42px", paddingRight: "36px", height: 44, borderRadius: 8, fontSize: 14, background: "var(--proof-surface-2)", border: "1px solid var(--proof-border)", boxShadow: search ? "0 0 0 2px var(--proof-blue-glow)" : "none" }}
+              style={{ paddingLeft: "42px", paddingRight: "36px", height: 44, borderRadius: 8, fontSize: 14, background: "var(--proof-surface-2)", border: "1px solid var(--proof-border)", boxShadow: search ? "0 0 0 3px rgba(0,196,255,0.15)" : "none", transition: "all 0.2s" }}
               maxLength={200}
+              onFocus={(e) => {
+                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(0,196,255,0.15)";
+                e.currentTarget.style.borderColor = "var(--proof-blue)";
+              }}
+              onBlur={(e) => {
+                if (!search) {
+                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.borderColor = "var(--proof-border)";
+                }
+              }}
             />
               {search && (
               <button
@@ -306,47 +356,70 @@ export default function Runs() {
           Clear filters
         </button>
       ) : null}
+      emptyIcon={Search}
     >
       {/* Stats row */}
       <div style={{
-        display: "flex", alignItems: "center", gap: "20px", marginBottom: "24px",
+        display: "flex", alignItems: "center", gap: "24px", marginBottom: "28px",
         fontSize: "14px", color: "var(--proof-text-secondary)", fontWeight: 500,
-        background: "var(--proof-surface-2)", padding: "12px 20px", borderRadius: 8, border: "1px solid var(--proof-border)"
+        background: "var(--proof-surface-2)", padding: "16px 24px", borderRadius: 12, border: "1px solid var(--proof-border)",
+        boxShadow: "var(--proof-shadow-sm)"
       }}>
-        <span>Showing <strong style={{ color: "var(--proof-text)" }}>{totalItems}</strong> of {envFilteredRuns.length} runs</span>
-        <span style={{ color: "var(--proof-border-strong)" }}>·</span>
-        <span style={{ color: "var(--proof-green)", display: "flex", alignItems: "center", gap: 6 }}><div style={{width: 8, height: 8, borderRadius: "50%", background: "var(--proof-green)"}}/>{passedCount} passed</span>
-        <span style={{ color: "var(--proof-red)", display: "flex", alignItems: "center", gap: 6 }}><div style={{width: 8, height: 8, borderRadius: "50%", background: "var(--proof-red)"}}/>{failedCount} failed</span>
-        {partialCount > 0 && <span style={{ color: "var(--proof-yellow)", display: "flex", alignItems: "center", gap: 6 }}><div style={{width: 8, height: 8, borderRadius: "50%", background: "var(--proof-yellow)"}}/>{partialCount} partial</span>}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "13px", opacity: 0.7 }}>METRICS</span>
+          <div style={{ width: "1px", height: "16px", background: "var(--proof-border-strong)", margin: "0 4px" }} />
+          <span>Showing <strong style={{ color: "var(--proof-text)" }}>{totalItems}</strong> of {envFilteredRuns.length}</span>
+        </div>
+
+        <div style={{ width: "1px", height: "24px", background: "var(--proof-border-strong)" }} />
+
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <span style={{ color: "var(--proof-green)", display: "flex", alignItems: "center", gap: 8, background: "var(--proof-green-bg)", padding: "4px 12px", borderRadius: "20px", border: "1px solid var(--proof-green-border)" }}>
+            <CheckCircle2 size={14} />
+            <strong style={{ fontWeight: 700 }}>{passedCount}</strong> PASSED
+          </span>
+          <span style={{ color: "var(--proof-red)", display: "flex", alignItems: "center", gap: 8, background: "var(--proof-red-bg)", padding: "4px 12px", borderRadius: "20px", border: "1px solid var(--proof-red-border)" }}>
+            <AlertCircle size={14} />
+            <strong style={{ fontWeight: 700 }}>{failedCount}</strong> FAILED
+          </span>
+          {partialCount > 0 && (
+            <span style={{ color: "var(--proof-yellow)", display: "flex", alignItems: "center", gap: 8, background: "var(--proof-yellow-bg)", padding: "4px 12px", borderRadius: "20px", border: "1px solid var(--proof-yellow-border)" }}>
+              <HelpCircle size={14} />
+              <strong style={{ fontWeight: 700 }}>{partialCount}</strong> PARTIAL
+            </span>
+          )}
+        </div>
         
         <div style={{ flex: 1 }} />
         
-        <button
-          onClick={handleExportCSV}
-          className="proof-btn proof-btn-ghost"
-          aria-label="Export filtered runs as CSV"
-          style={{ fontSize: 13, fontWeight: 600 }}
-        >
-          Export CSV
-        </button>
-        <button
-          onClick={() => navigate("/compare")}
-          className="proof-btn proof-btn-ghost"
-          style={{ fontSize: 13, fontWeight: 600, border: "1px solid var(--proof-border)" }}
-        >
-          <GitCompare size={16} /> Compare Runs
-        </button>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button
+            onClick={handleExportCSV}
+            className="proof-btn proof-btn-ghost"
+            aria-label="Export filtered runs as CSV"
+            style={{ fontSize: 13, fontWeight: 700, gap: 8, border: "1px solid var(--proof-border)" }}
+          >
+            <Download size={16} /> Export CSV
+          </button>
+          <button
+            onClick={() => navigate("/compare")}
+            className="proof-btn proof-btn-ghost"
+            style={{ fontSize: 13, fontWeight: 700, border: "1px solid var(--proof-border)", background: "var(--proof-surface-3)" }}
+          >
+            <GitCompare size={16} /> Compare Runs
+          </button>
+        </div>
       </div>
 
       {/* Table */}
       <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-      <div className="glass-panel" style={{ minWidth: 800, borderRadius: 12, border: "1px solid var(--proof-border)", overflow: "hidden" }}>
+      <div className="glass-panel" style={{ minWidth: 800, borderRadius: 12, border: "1px solid var(--proof-border)", overflow: "hidden", boxShadow: "var(--proof-shadow-md)" }}>
         {/* Table header */}
         <div style={{
           display: "grid",
           gridTemplateColumns: "2.5fr 120px 140px 140px 120px 140px 40px",
           padding: "16px 24px",
-          background: "var(--proof-surface-3)",
+          background: "linear-gradient(to bottom, var(--proof-surface-3), var(--proof-surface-2))",
           borderBottom: "1px solid var(--proof-border-strong)",
           fontSize: "12px", fontWeight: 800, textTransform: "uppercase",
           letterSpacing: "0.1em", color: "var(--proof-text-muted)",
@@ -411,20 +484,23 @@ function RunRow({ run, index, onNavigate }: { run: Run; index: number; onNavigat
         padding: "16px 24px",
         borderBottom: "1px solid var(--proof-border-light)",
         cursor: "pointer",
-        background: hovered ? "rgba(255, 255, 255, 0.03)" : "transparent",
-        transition: "all var(--proof-transition)",
+        background: hovered ? "var(--proof-surface-hover)" : "transparent",
+        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
         alignItems: "center",
-        borderLeft: `4px solid ${leftBorderColor}`,
+        borderLeft: `3px solid ${leftBorderColor}`,
         boxShadow: leftBorderGlow,
+        transform: hovered ? "scale(1.002)" : "scale(1)",
         animation: `proof-slide-up 0.4s ease-out forwards`,
         animationDelay: `${Math.min(index * 30, 600)}ms`,
         opacity: 0, // for animation
+        position: "relative",
+        zIndex: hovered ? 1 : 0
       }}
     >
       {/* Run ID + suite */}
       <div style={{ minWidth: 0, paddingLeft: 12 }}>
         <div className="proof-mono" style={{
-          fontSize: "14px", fontWeight: 700, color: "var(--proof-text)",
+          fontSize: "15px", fontWeight: 700, color: "var(--proof-text)",
           marginBottom: "6px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           letterSpacing: "-0.02em"
         }}>
@@ -432,9 +508,10 @@ function RunRow({ run, index, onNavigate }: { run: Run; index: number; onNavigat
         </div>
         {run.suiteId && (
           <div style={{
-            fontSize: "12px", color: "var(--proof-text-secondary)", fontWeight: 600,
+            fontSize: "11px", color: "var(--proof-text-secondary)", fontWeight: 700,
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-            display: "inline-flex", background: "var(--proof-surface-2)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--proof-border-light)"
+            display: "inline-flex", background: "var(--proof-surface-3)", padding: "2px 8px", borderRadius: "10px", border: "1px solid var(--proof-border-light)",
+            textTransform: "uppercase", letterSpacing: "0.05em"
           }}>
             {run.suiteId}
           </div>

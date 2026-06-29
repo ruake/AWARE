@@ -34,49 +34,50 @@ function StatCard({
 }) {
   return (
     <motion.div
-      whileHover={{ y: -4, borderColor: "var(--proof-border-accent)" }}
+      whileHover={{ y: -4, borderColor: "var(--proof-border-accent)", boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)" }}
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: 8,
-        padding: "20px 22px",
+        gap: 12,
+        padding: "24px 28px",
         background: "var(--proof-surface)",
         border: "1px solid var(--proof-border)",
         borderRadius: "var(--proof-radius-xl)",
-        transition: "border-color 0.15s",
+        transition: "border-color 0.15s, box-shadow 0.15s",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span
           style={{
-            fontSize: 11,
-            fontWeight: 600,
+            fontSize: 12,
+            fontWeight: 700,
             color: "var(--proof-text-muted)",
             textTransform: "uppercase",
-            letterSpacing: "0.8px",
+            letterSpacing: "1px",
           }}
         >
           {label}
         </span>
         <div
           style={{
-            width: 30,
-            height: 30,
-            borderRadius: 8,
-            background: `color-mix(in srgb, ${color} 12%, transparent)`,
-            border: `1px solid color-mix(in srgb, ${color} 20%, transparent)`,
+            width: 38,
+            height: 38,
+            borderRadius: 10,
+            background: `color-mix(in srgb, ${color} 15%, transparent)`,
+            border: `1px solid color-mix(in srgb, ${color} 25%, transparent)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color,
+            boxShadow: `0 0 15px color-mix(in srgb, ${color} 20%, transparent)`,
           }}
         >
-          {icon}
+          {React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size: 18 })}
         </div>
       </div>
       <div
         style={{
-          fontSize: 30,
+          fontSize: 36,
           fontWeight: 800,
           color: "var(--proof-text)",
           fontFamily: "var(--font-mono)",

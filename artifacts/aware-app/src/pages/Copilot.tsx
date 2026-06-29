@@ -133,25 +133,59 @@ export default function Copilot() {
 
         {/* Provider status badge */}
         {providerStatus !== "checking" && (
-          <div style={{ position: "absolute", top: 12, right: 16, fontSize: 11, padding: "3px 10px", borderRadius: "var(--proof-radius-full)", background: providerStatus === "available" ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.05)", border: `1px solid ${providerStatus === "available" ? "rgba(34,197,94,0.4)" : "rgba(255,255,255,0.1)"}`, color: providerStatus === "available" ? "#4ade80" : "var(--proof-text-muted)", zIndex: 10 }}>
-            {providerStatus === "available" ? "● Gemini Nano" : providerStatus === "downloading" ? "⬇ Gemini Nano downloading…" : "○ Gemini Nano unavailable"}
+          <div style={{ position: "absolute", top: 12, right: 16, fontSize: 11, padding: "4px 12px", borderRadius: "var(--proof-radius-full)", background: providerStatus === "available" ? "var(--proof-green-bg)" : "var(--proof-surface-3)", border: `1px solid ${providerStatus === "available" ? "var(--proof-green-border)" : "var(--proof-border)"}`, color: providerStatus === "available" ? "var(--proof-green)" : "var(--proof-text-muted)", zIndex: 10, display: "flex", alignItems: "center", gap: 6, backdropFilter: "blur(8px)" }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: providerStatus === "available" ? "var(--proof-green)" : "var(--proof-text-muted)", boxShadow: providerStatus === "available" ? "0 0 8px var(--proof-green)" : "none" }} />
+            {providerStatus === "available" ? "Gemini Nano: Available" : providerStatus === "downloading" ? "Gemini Nano downloading…" : "Gemini Nano: Unavailable"}
           </div>
         )}
 
         {/* Messages Area */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 40px", scrollBehavior: "smooth" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "40px 20px", scrollBehavior: "smooth" }}>
           {messages.length === 0 ? (
-            <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "var(--proof-text-secondary)" }}>
-              <Sparkles size={48} style={{ color: "var(--proof-blue)", opacity: 0.5, marginBottom: 24 }} />
-              <h2 style={{ fontSize: 24, fontWeight: 700, color: "var(--proof-text)", marginBottom: 8, letterSpacing: "-0.5px" }}>A.W.A.R.E. Copilot</h2>
-              <p style={{ fontSize: 14, maxWidth: 400, textAlign: "center", marginBottom: 32 }}>Your AI assistant for analyzing test runs, detecting anomalies, and diagnosing infrastructure issues.</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", maxWidth: 600 }}>
-                {["Summarize the latest PROD run", "Which tests are currently flaky?", "Show me performance trends", "Are there any active anomalies?"].map((s, i) => (
-                  <button key={i} onClick={() => handleSend(s)} className="glass-panel"
-                    style={{ padding: "10px 16px", borderRadius: "var(--proof-radius-full)", background: "rgba(255,255,255,0.03)", border: "1px solid var(--proof-border)", color: "var(--proof-text)", fontSize: 13, cursor: "pointer", transition: "all 0.2s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,196,255,0.1)"; e.currentTarget.style.borderColor = "var(--proof-blue)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.borderColor = "var(--proof-border)"; }}
-                  >{s}</button>
+            <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "var(--proof-text-secondary)", animation: "fade-in 0.6s ease-out" }}>
+              <div style={{ position: "relative", marginBottom: 32 }}>
+                <div style={{ position: "absolute", inset: -20, background: "var(--proof-blue-glow)", filter: "blur(40px)", borderRadius: "50%", opacity: 0.3 }} />
+                <Bot size={64} style={{ color: "var(--proof-blue)", position: "relative" }} />
+              </div>
+              <h2 style={{ fontSize: 32, fontWeight: 800, color: "var(--proof-text)", marginBottom: 12, letterSpacing: "-1px", background: "linear-gradient(to bottom, #fff, #94a3b8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>A.W.A.R.E. Copilot</h2>
+              <p style={{ fontSize: 16, maxWidth: 500, textAlign: "center", marginBottom: 40, color: "var(--proof-text-secondary)", lineHeight: 1.6 }}>Your AI assistant for analyzing test runs, detecting anomalies, and diagnosing infrastructure issues.</p>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, width: "100%", maxWidth: 800, padding: "0 20px" }}>
+                {[
+                  { label: "Summarize latest failures", icon: "📊" },
+                  { label: "Compare last two runs", icon: "⚖️" },
+                  { label: "Show flaky tests", icon: "🧪" }
+                ].map((s, i) => (
+                  <button key={i} onClick={() => handleSend(s.label)} className="glass-panel"
+                    style={{ 
+                      padding: "20px", 
+                      borderRadius: "var(--proof-radius-lg)", 
+                      background: "var(--proof-surface-2)", 
+                      border: "1px solid var(--proof-border)", 
+                      color: "var(--proof-text)", 
+                      fontSize: 14, 
+                      cursor: "pointer", 
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 12,
+                      textAlign: "center"
+                    }}
+                    onMouseEnter={(e) => { 
+                      e.currentTarget.style.transform = "translateY(-4px)";
+                      e.currentTarget.style.borderColor = "var(--proof-blue)"; 
+                      e.currentTarget.style.boxShadow = "var(--proof-glow-cyan)";
+                    }}
+                    onMouseLeave={(e) => { 
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.borderColor = "var(--proof-border)"; 
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                  >
+                    <span style={{ fontSize: 24 }}>{s.icon}</span>
+                    <span style={{ fontWeight: 600 }}>{s.label}</span>
+                  </button>
                 ))}
               </div>
             </div>
@@ -161,11 +195,11 @@ export default function Copilot() {
                 <ChatMessage key={msg.id} msg={toChatMsg(msg)} index={idx} />
               ))}
               {isTyping && (
-                <div style={{ display: "flex", gap: 16, padding: "24px 0" }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(0,196,255,0.1)", border: "1px solid rgba(0,196,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--proof-glow-cyan)" }}>
+                <div style={{ display: "flex", gap: 16, padding: "24px 0", animation: "fade-in 0.3s ease-out" }}>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--proof-blue-bg)", border: "1px solid var(--proof-blue-border)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--proof-glow-cyan)" }}>
                     <Bot size={18} style={{ color: "var(--proof-blue)" }} />
                   </div>
-                  <div className="glass-panel" style={{ padding: "16px 24px", borderRadius: "4px 16px 16px 16px", borderLeft: "3px solid var(--proof-blue)", display: "flex", alignItems: "center", gap: 6 }}>
+                  <div className="glass-panel" style={{ padding: "16px 24px", borderRadius: "4px 16px 16px 16px", borderLeft: "3px solid var(--proof-blue)", display: "flex", alignItems: "center", gap: 6, background: "var(--proof-glass)" }}>
                     <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--proof-blue)", animation: "blink 1.4s infinite" }} />
                     <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--proof-blue)", animation: "blink 1.4s infinite 0.2s" }} />
                     <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--proof-blue)", animation: "blink 1.4s infinite 0.4s" }} />
@@ -178,27 +212,79 @@ export default function Copilot() {
         </div>
 
         {/* Input Area */}
-        <div style={{ padding: "20px 40px", background: "linear-gradient(to top, var(--proof-bg) 60%, transparent)" }}>
+        <div style={{ padding: "20px 40px 40px", background: "linear-gradient(to top, var(--proof-bg) 60%, transparent)" }}>
           <div style={{ maxWidth: 900, margin: "0 auto", position: "relative" }}>
-            <form onSubmit={(e) => { e.preventDefault(); handleSend(input); }}>
-              <input
-                type="text"
+            <form onSubmit={(e) => { e.preventDefault(); handleSend(input); }} style={{ position: "relative" }}>
+              <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask Copilot anything…"
-                className="glass-panel"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend(input);
+                  }
+                }}
+                placeholder="Ask Copilot anything… (Shift+Enter for new line)"
+                className="proof-input"
                 disabled={busy}
-                style={{ width: "100%", padding: "16px 56px 16px 20px", borderRadius: "var(--proof-radius-xl)", border: "1px solid rgba(255,255,255,0.1)", fontSize: 15, color: "white", outline: "none", transition: "all 0.2s", boxShadow: "0 4px 24px rgba(0,0,0,0.4)" }}
-                onFocus={(e) => { e.target.style.borderColor = "var(--proof-blue)"; e.target.style.boxShadow = "var(--proof-glow-cyan)"; }}
-                onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; e.target.style.boxShadow = "0 4px 24px rgba(0,0,0,0.4)"; }}
+                rows={1}
+                style={{ 
+                  width: "100%", 
+                  padding: "16px 60px 16px 20px", 
+                  borderRadius: "var(--proof-radius-xl)", 
+                  border: "1px solid var(--proof-border)", 
+                  fontSize: 15, 
+                  color: "white", 
+                  outline: "none", 
+                  transition: "all 0.2s", 
+                  boxShadow: "var(--proof-shadow-lg)",
+                  background: "var(--proof-surface-2)",
+                  resize: "none",
+                  minHeight: "56px",
+                  maxHeight: "200px"
+                }}
+                onFocus={(e) => { 
+                  e.target.style.borderColor = "var(--proof-blue)"; 
+                  e.target.style.boxShadow = "0 0 0 3px rgba(0,196,255,0.15), var(--proof-shadow-lg)"; 
+                }}
+                onBlur={(e) => { 
+                  e.target.style.borderColor = "var(--proof-border)"; 
+                  e.target.style.boxShadow = "var(--proof-shadow-lg)"; 
+                }}
               />
-              <button type="submit" disabled={!input.trim() || busy}
-                style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: input.trim() && !busy ? "var(--proof-blue)" : "var(--proof-surface-3)", border: "none", color: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: input.trim() && !busy ? "pointer" : "not-allowed", transition: "all 0.2s", boxShadow: input.trim() && !busy ? "0 0 12px var(--proof-blue)" : "none" }}>
-                <Send size={16} />
+              <button 
+                type="submit" 
+                disabled={!input.trim() || busy}
+                style={{ 
+                  position: "absolute", 
+                  right: 10, 
+                  bottom: 10, 
+                  width: 36, 
+                  height: 36, 
+                  borderRadius: "var(--proof-radius-md)", 
+                  background: input.trim() && !busy ? "var(--proof-blue)" : "var(--proof-surface-3)", 
+                  border: "none", 
+                  color: "white", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center", 
+                  cursor: input.trim() && !busy ? "pointer" : "not-allowed", 
+                  transition: "all 0.2s", 
+                  boxShadow: input.trim() && !busy ? "0 0 12px var(--proof-blue-glow)" : "none",
+                  animation: busy ? "pulse-glow 2s infinite" : "none"
+                }}
+              >
+                {busy ? <div className="animate-spin" style={{ width: 16, height: 16, border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%" }} /> : <Send size={18} />}
               </button>
             </form>
-            <div style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}>
-              Powered by Gemini Nano · AI can make mistakes. Verify critical information.
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, padding: "0 4px" }}>
+              <div style={{ fontSize: 11, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)", display: "flex", alignItems: "center", gap: 4 }}>
+                <Sparkles size={12} style={{ color: "var(--proof-blue)" }} />
+                AI-Powered Insights
+              </div>
+              <div style={{ fontSize: 11, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}>
+                {input.length} characters
+              </div>
             </div>
           </div>
         </div>

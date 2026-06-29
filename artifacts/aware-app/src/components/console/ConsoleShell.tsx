@@ -99,6 +99,9 @@ function SidebarNavItem({ item, isActive, collapsed }: {
   collapsed: boolean;
 }) {
   const Icon = item.icon;
+  const { updates } = useLiveStatus();
+  const hasRunning = item.id === "runs" && updates.some(u => u.type === "info" || u.message.toLowerCase().includes("running"));
+
   return (
     <Link
       href={item.href}
@@ -116,7 +119,7 @@ function SidebarNavItem({ item, isActive, collapsed }: {
         textDecoration: "none",
         borderLeft: isActive ? "3px solid var(--proof-blue)" : "3px solid transparent",
         background: isActive ? "var(--proof-blue-bg)" : "transparent",
-        boxShadow: isActive ? "var(--proof-glow-cyan)" : "none",
+        boxShadow: isActive ? "0 0 12px rgba(0, 196, 255, 0.15)" : "none",
         justifyContent: collapsed ? "center" : "flex-start",
         position: "relative",
         whiteSpace: "nowrap",
@@ -143,6 +146,18 @@ function SidebarNavItem({ item, isActive, collapsed }: {
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>
           {item.label}
         </span>
+      )}
+      {item.id === "runs" && (
+        <div style={{
+          width: 6, height: 6, borderRadius: "50%",
+          background: "var(--proof-blue)",
+          marginLeft: collapsed ? 0 : 4,
+          position: collapsed ? "absolute" : "relative",
+          top: collapsed ? 6 : "auto",
+          right: collapsed ? 6 : "auto",
+          boxShadow: "0 0 6px var(--proof-blue)",
+          animation: "badge-pulse 2s infinite"
+        }} />
       )}
     </Link>
   );
@@ -201,10 +216,10 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
     }}>
       {/* ── Topbar ───────────────────────────────────────────────── */}
       <header style={{
-        height: 44, minHeight: 44, flexShrink: 0,
+        height: 52, minHeight: 52, flexShrink: 0,
         background: "var(--proof-surface)",
         borderBottom: "1px solid var(--proof-border-strong)",
-        display: "flex", alignItems: "center", gap: 12, padding: "0 16px",
+        display: "flex", alignItems: "center", gap: 12, padding: "0 20px",
         position: "relative", zIndex: 50,
       }}>
         <div style={{
@@ -216,10 +231,10 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
           onClick={() => setSidebarOpen((p) => !p)}
           title="Toggle sidebar"
           style={{
-            width: 28, height: 28, padding: 0, border: "1px solid var(--proof-border-light)",
+            width: 32, height: 32, padding: 0, border: "1px solid var(--proof-border-light)",
             background: "transparent", cursor: "pointer", color: "var(--proof-text-muted)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            borderRadius: "var(--proof-radius-sm)", transition: "all var(--proof-transition)", flexShrink: 0,
+            borderRadius: "var(--proof-radius-sm)", transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)", flexShrink: 0,
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
@@ -230,31 +245,48 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
             (e.currentTarget as HTMLElement).style.background = "transparent";
           }}
         >
-          {sidebarOpen ? <X size={14} /> : <Menu size={14} />}
+          <div style={{
+            transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+            transform: sidebarOpen ? "rotate(0deg)" : "rotate(180deg)",
+            display: "flex", alignItems: "center", justifyContent: "center"
+          }}>
+            {sidebarOpen ? <X size={16} /> : <Menu size={16} />}
+          </div>
         </button>
 
         <button
           onClick={() => navigate("/")}
           style={{
-            display: "flex", alignItems: "center", gap: 10, background: "transparent",
-            border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: 8,
+            display: "flex", alignItems: "center", gap: 12, background: "transparent",
+            border: "none", cursor: "pointer", padding: "6px 12px", borderRadius: 10,
             transition: "all 150ms ease", flexShrink: 0,
+            position: "relative", overflow: "hidden"
           }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--proof-surface-3)"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
         >
-          <ProofLogo size={20} />
-          <span style={{ fontSize: 14, fontWeight: 800, color: "var(--proof-text)", letterSpacing: "-0.3px", fontFamily: "var(--font-mono)" }}>
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "radial-gradient(circle at center, var(--proof-blue-bg) 0%, transparent 70%)",
+            opacity: 0.5, pointerEvents: "none"
+          }} />
+          <ProofLogo size={24} />
+          <span style={{ 
+            fontSize: 15, fontWeight: 900, color: "var(--proof-text)", letterSpacing: "0.5px", fontFamily: "var(--font-mono)",
+            background: "linear-gradient(135deg, var(--proof-text) 0%, var(--proof-blue-bright) 100%)",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
+          }}>
             A.W.A.R.E.
           </span>
         </button>
 
-        <span style={{ color: "var(--proof-border-strong)", fontSize: 16, opacity: 0.4, userSelect: "none" }}>/</span>
+        <span style={{ color: "var(--proof-border-strong)", fontSize: 18, opacity: 0.4, userSelect: "none" }}>/</span>
         <span style={{
-          fontSize: 10, fontWeight: 700, color: "var(--proof-text)",
-          textTransform: "uppercase", letterSpacing: "0.05em",
-          background: "var(--proof-surface-2)", padding: "4px 10px",
-          borderRadius: "var(--proof-radius-sm)", border: "1px solid var(--proof-border)",
+          fontSize: 11, fontWeight: 800, 
+          textTransform: "uppercase", letterSpacing: "0.08em",
+          background: "linear-gradient(135deg, var(--proof-blue) 0%, var(--proof-purple) 100%)",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+          padding: "4px 0",
           fontFamily: "var(--font-mono)",
         }}>
           {pageLabel}
@@ -262,13 +294,14 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
 
         {dataState.loading && (
           <span style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            padding: "4px 8px", borderRadius: 4,
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "4px 10px", borderRadius: 6,
             background: "var(--proof-blue-bg)", border: "1px solid var(--proof-blue-border)",
-            fontSize: 10, fontWeight: 600, color: "var(--proof-blue-bright)",
+            fontSize: 10, fontWeight: 700, color: "var(--proof-blue-bright)",
+            marginLeft: 8
           }}>
-            <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--proof-blue-bright)", animation: "badge-pulse 1s ease-in-out infinite" }} />
-            LOADING
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--proof-blue-bright)", animation: "badge-pulse 1s ease-in-out infinite" }} />
+            SYNCING
           </span>
         )}
 
@@ -277,33 +310,33 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
         <div style={{
           display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
           background: "var(--proof-surface)", border: "1px solid var(--proof-border-strong)",
-          borderRadius: "var(--proof-radius-sm)", padding: "2px 6px", height: 28,
+          borderRadius: "var(--proof-radius-sm)", padding: "2px 6px", height: 32,
         }}>
           <EnvSelector currentEnvIds={envSnap.envIds} onEnvChange={setSelectedEnvIds} variant="topbar" />
-          <div style={{ width: 1, height: 14, background: "var(--proof-border)", flexShrink: 0 }} />
+          <div style={{ width: 1, height: 16, background: "var(--proof-border)", flexShrink: 0 }} />
           <SuiteSelector currentSuiteIds={suiteSnap.suiteIds} onSuiteChange={setSelectedSuiteIds} variant="topbar" />
         </div>
 
-        <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
+        <div style={{ width: 1, height: 20, background: "var(--proof-border)", flexShrink: 0 }} />
         <EnvTierSelector />
-        <div style={{ width: 1, height: 18, background: "var(--proof-border)", flexShrink: 0 }} />
+        <div style={{ width: 1, height: 20, background: "var(--proof-border)", flexShrink: 0 }} />
 
         <button
           onClick={() => setPaletteOpen(true)}
           title="Search (⌘K)"
           style={{
-            display: "flex", alignItems: "center", gap: 6, padding: "4px 10px",
-            fontSize: 11, cursor: "pointer",
-            border: "1px solid var(--proof-border)", borderRadius: "var(--proof-radius-sm)",
+            display: "flex", alignItems: "center", gap: 8, padding: "4px 12px",
+            fontSize: 12, cursor: "pointer",
+            border: "1px solid var(--proof-border)", borderRadius: "var(--proof-radius-md)",
             background: "var(--proof-surface-2)", color: "var(--proof-text-muted)",
-            transition: "all 120ms ease", fontFamily: "var(--font-mono)",
-            height: 28, minWidth: 140, flexShrink: 0,
+            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", fontFamily: "var(--font-mono)",
+            height: 32, minWidth: 180, flexShrink: 0,
           }}
           onMouseEnter={(e) => {
             const el = e.currentTarget as HTMLElement;
             el.style.borderColor = "var(--proof-blue-border)";
             el.style.color = "var(--proof-text)";
-            el.style.boxShadow = "var(--proof-glow-cyan)";
+            el.style.boxShadow = "0 0 15px rgba(0, 196, 255, 0.25)";
           }}
           onMouseLeave={(e) => {
             const el = e.currentTarget as HTMLElement;
@@ -312,12 +345,12 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
             el.style.boxShadow = "none";
           }}
         >
-          <Search size={12} />
-          <span style={{ flex: 1, textAlign: "left" }}>SEARCH...</span>
+          <Search size={14} />
+          <span style={{ flex: 1, textAlign: "left" }}>SEARCH COMMANDS...</span>
           <kbd style={{
-            fontSize: 9, border: "1px solid var(--proof-border-strong)",
-            borderRadius: 2, padding: "0 4px", fontFamily: "var(--font-mono)",
-            lineHeight: "14px", opacity: 0.6,
+            fontSize: 10, border: "1px solid var(--proof-border-strong)",
+            borderRadius: 4, padding: "0 6px", fontFamily: "var(--font-mono)",
+            lineHeight: "18px", opacity: 0.8, background: "var(--proof-surface-3)"
           }}>⌘K</kbd>
         </button>
 
@@ -325,24 +358,30 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
           onClick={toggleTheme}
           title={isDark ? "Light mode" : "Dark mode"}
           style={{
-            width: 28, height: 28, padding: 0,
+            width: 32, height: 32, padding: 0,
             border: "1px solid var(--proof-border)", background: "transparent",
             cursor: "pointer", color: "var(--proof-text-muted)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            borderRadius: "var(--proof-radius-sm)", transition: "all 120ms ease", flexShrink: 0,
+            borderRadius: "50%", transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)", flexShrink: 0,
           }}
           onMouseEnter={(e) => {
             const el = e.currentTarget as HTMLElement;
             el.style.color = "var(--proof-text)";
             el.style.background = "var(--proof-hover)";
+            const icon = el.firstChild as HTMLElement;
+            if (icon) icon.style.transform = "rotate(45deg)";
           }}
           onMouseLeave={(e) => {
             const el = e.currentTarget as HTMLElement;
             el.style.color = "var(--proof-text-muted)";
             el.style.background = "transparent";
+            const icon = el.firstChild as HTMLElement;
+            if (icon) icon.style.transform = "rotate(0deg)";
           }}
         >
-          {isDark ? <Sun size={12} /> : <Moon size={12} />}
+          <div style={{ transition: "transform 0.5s ease", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {isDark ? <Sun size={14} /> : <Moon size={14} />}
+          </div>
         </button>
       </header>
 
@@ -355,22 +394,31 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
           borderRight: sidebarOpen ? "1px solid var(--proof-border-strong)" : "none",
           display: "flex", flexDirection: "column",
           overflow: "hidden",
-          transition: "width 200ms cubic-bezier(0.4,0,0.2,1), min-width 200ms cubic-bezier(0.4,0,0.2,1)",
+          transition: "width 250ms cubic-bezier(0.4,0,0.2,1), min-width 250ms cubic-bezier(0.4,0,0.2,1)",
+          position: "relative",
         }}>
+          {sidebarOpen && (
+            <div style={{
+              position: "absolute", top: 0, right: 0, bottom: 0, width: 1,
+              background: "linear-gradient(to bottom, var(--proof-blue) 0%, transparent 100%)",
+              opacity: 0.2, zIndex: 10, pointerEvents: "none"
+            }} />
+          )}
           {sidebarOpen && (
             <>
               <div style={{
-                padding: "8px",
+                padding: "8px 12px",
                 display: "flex", alignItems: "center", justifyContent: "flex-end",
+                height: 40,
               }}>
                 <button
                   onClick={() => setSidebarCollapsed((p) => !p)}
                   title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                   style={{
-                    width: 24, height: 24, padding: 0, border: "none",
+                    width: 28, height: 28, padding: 0, border: "1px solid var(--proof-border-light)",
                     background: "transparent", cursor: "pointer", color: "var(--proof-text-muted)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    borderRadius: "var(--proof-radius-sm)", transition: "all var(--proof-transition)",
+                    borderRadius: "var(--proof-radius-sm)", transition: "all 0.3s ease",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.color = "var(--proof-text)";
@@ -381,30 +429,31 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
                     (e.currentTarget as HTMLElement).style.background = "transparent";
                   }}
                 >
-                  {sidebarCollapsed
-                    ? <ChevronRight size={14} />
-                    : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                        <line x1="3" y1="12" x2="21" y2="12" />
-                        <line x1="3" y1="6" x2="15" y2="6" />
-                        <line x1="3" y1="18" x2="15" y2="18" />
-                      </svg>
-                  }
+                  <div style={{
+                    transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                    transform: sidebarCollapsed ? "rotate(180deg)" : "rotate(0deg)",
+                    display: "flex", alignItems: "center", justifyContent: "center"
+                  }}>
+                    <ChevronRight size={14} />
+                  </div>
                 </button>
               </div>
 
-              <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "8px" }}>
+              <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "8px 12px" }}>
                 {NAV_GROUPS.map((group) => (
-                  <div key={group.label} style={{ marginBottom: 16 }}>
+                  <div key={group.label} style={{ marginBottom: 20 }}>
                     {!sidebarCollapsed && (
                       <div style={{
-                        fontSize: 10, fontWeight: 700, textTransform: "uppercase",
-                        letterSpacing: "0.1em", color: "var(--proof-text-muted)",
-                        padding: "0 12px 8px", fontFamily: "var(--font-sans)",
+                        fontSize: 10, fontWeight: 800, textTransform: "uppercase",
+                        letterSpacing: "0.15em", color: "var(--proof-text-muted)",
+                        padding: "8px 12px", fontFamily: "var(--font-mono)",
+                        borderTop: "1px solid var(--proof-border-light)",
+                        marginTop: 4,
                       }}>
                         {group.label}
                       </div>
                     )}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                       {group.items.map((item) => (
                         <SidebarNavItem
                           key={item.id}
@@ -420,9 +469,16 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
 
               <div style={{
                 borderTop: "1px solid var(--proof-border-strong)",
-                padding: "8px",
+                padding: "12px",
+                background: "var(--proof-surface-3)",
+                position: "relative"
               }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <div style={{
+                  position: "absolute", top: 0, left: 12, right: 12, height: 1,
+                  background: "linear-gradient(90deg, transparent, var(--proof-border-strong), transparent)",
+                  opacity: 0.5
+                }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {BOTTOM_NAV.map((item) => (
                     <SidebarNavItem
                       key={item.id}
@@ -458,34 +514,47 @@ export function ConsoleShell({ children, fullBleed }: ConsoleShellProps) {
 
       {currentToast && (() => {
         const cfg = {
-          success: { bg: "var(--proof-green-bg)", border: "var(--proof-green-border)", color: "var(--proof-green)", icon: <Check size={13} />, glow: "var(--proof-glow-green)" },
-          warning: { bg: "var(--proof-yellow-bg)", border: "var(--proof-yellow-border)", color: "var(--proof-yellow)", icon: <AlertTriangle size={13} />, glow: "var(--proof-glow-amber)" },
-          error: { bg: "var(--proof-red-bg)", border: "var(--proof-red-border)", color: "var(--proof-red-bright)", icon: <AlertTriangle size={13} />, glow: "var(--proof-glow-red)" },
-          info: { bg: "var(--proof-blue-bg)", border: "var(--proof-blue-border)", color: "var(--proof-blue-bright)", icon: null, glow: "var(--proof-glow-cyan)" },
+          success: { bg: "var(--proof-green-bg)", border: "var(--proof-green-border)", color: "var(--proof-green)", icon: <Check size={16} />, glow: "0 8px 32px rgba(0, 229, 160, 0.25)" },
+          warning: { bg: "var(--proof-yellow-bg)", border: "var(--proof-yellow-border)", color: "var(--proof-yellow)", icon: <AlertTriangle size={16} />, glow: "0 8px 32px rgba(245, 158, 11, 0.25)" },
+          error: { bg: "var(--proof-red-bg)", border: "var(--proof-red-border)", color: "var(--proof-red-bright)", icon: <AlertTriangle size={16} />, glow: "0 8px 32px rgba(255, 51, 85, 0.25)" },
+          info: { bg: "var(--proof-blue-bg)", border: "var(--proof-blue-border)", color: "var(--proof-blue-bright)", icon: <Bot size={16} />, glow: "0 8px 32px rgba(0, 196, 255, 0.25)" },
         }[currentToast.type] ?? { bg: "var(--proof-surface-2)", border: "var(--proof-border)", color: "var(--proof-text)", icon: null, glow: "none" };
 
         return (
           <div style={{
-            position: "fixed", bottom: 30, left: "50%", zIndex: 9999,
-            animation: "toast-pop 0.2s cubic-bezier(0.2,0,0,1) both",
-            display: "flex", alignItems: "center", gap: 8, padding: "12px 16px",
-            background: "var(--proof-glass)", border: `1px solid ${cfg.border}`, color: cfg.color,
-            borderRadius: "var(--proof-radius-lg)", fontSize: 13, fontWeight: 600,
-            boxShadow: cfg.glow, maxWidth: 400,
-            transform: "translateX(-50%)", backdropFilter: "blur(16px)",
+            position: "fixed", bottom: 40, left: "50%", zIndex: 9999,
+            animation: "toast-pop 0.4s cubic-bezier(0.2,0,0,1) both",
+            display: "flex", flexDirection: "column", gap: 0, 
+            background: "var(--proof-surface-2)", border: `1px solid ${cfg.border}`, color: cfg.color,
+            borderRadius: "var(--proof-radius-lg)", fontSize: 14, fontWeight: 600,
+            boxShadow: cfg.glow, minWidth: 320, maxWidth: 480,
+            transform: "translateX(-50%)", backdropFilter: "blur(20px)",
+            overflow: "hidden"
           }}>
-            {cfg.icon}
-            <span style={{ flex: 1 }}>{currentToast.message}</span>
-            <button
-              onClick={dismissToast}
-              style={{
-                background: "transparent", border: "none", cursor: "pointer",
-                color: "inherit", opacity: 0.6, padding: 0, display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <X size={14} />
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px" }}>
+              {cfg.icon}
+              <span style={{ flex: 1, color: "var(--proof-text)" }}>{currentToast.message}</span>
+              <button
+                onClick={dismissToast}
+                style={{
+                  background: "transparent", border: "none", cursor: "pointer",
+                  color: "var(--proof-text-muted)", opacity: 0.8, padding: 4, display: "flex",
+                  alignItems: "center", transition: "all 0.2s ease"
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--proof-text)"; (e.currentTarget as HTMLElement).style.background = "var(--proof-hover)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--proof-text-muted)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div style={{ height: 3, background: "rgba(255,255,255,0.05)", width: "100%" }}>
+              <div style={{
+                height: "100%",
+                background: cfg.color,
+                animation: "toast-progress 5s linear forwards",
+                boxShadow: `0 0 8px ${cfg.color}`
+              }} />
+            </div>
           </div>
         );
       })()}

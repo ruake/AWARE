@@ -58,9 +58,9 @@ export default function ChatMessage({ msg, index }: Props) {
           style={{
             padding: "16px 20px",
             borderRadius: isUser ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
-            background: isUser ? "var(--proof-surface-2)" : "rgba(9, 13, 20, 0.6)",
-            borderLeft: !isUser ? "3px solid var(--proof-blue)" : "1px solid var(--proof-border)",
-            border: isUser ? "1px solid var(--proof-border)" : undefined,
+            background: isUser ? "var(--proof-blue-bg)" : "var(--proof-glass)",
+            borderLeft: !isUser ? "3px solid var(--proof-blue)" : "1px solid var(--proof-blue-border)",
+            border: isUser ? "1px solid var(--proof-blue-border)" : "1px solid var(--proof-border)",
             color: "var(--proof-text)",
             fontSize: 14,
             lineHeight: 1.6

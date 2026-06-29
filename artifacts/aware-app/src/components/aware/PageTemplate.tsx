@@ -18,6 +18,7 @@ interface PageTemplateProps {
   isEmpty?: boolean;
   emptyMessage?: string;
   emptyAction?: React.ReactNode;
+  emptyIcon?: React.ElementType;
   topContent?: React.ReactNode;
   error?: Error | null;
   errorLabel?: string;
@@ -44,6 +45,7 @@ export function PageTemplate({
   isEmpty = false,
   emptyMessage,
   emptyAction,
+  emptyIcon: EmptyIcon = SlidersHorizontal,
   topContent,
   error = null,
   errorLabel,
@@ -206,8 +208,8 @@ export function PageTemplate({
                 border: "1px dashed var(--proof-border-strong)",
               }}
             >
-              <SlidersHorizontal size={32} style={{ opacity: 0.5 }} />
-              <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
+              {React.createElement(EmptyIcon as React.ComponentType<{ size?: number; style?: React.CSSProperties }>, { size: 48, style: { opacity: 0.3 } })}
+              <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}>
                 {emptyMessage && <span style={{ fontSize: 15, fontWeight: 500, color: "var(--proof-text)" }}>{emptyMessage}</span>}
                 {emptyAction}
               </div>
