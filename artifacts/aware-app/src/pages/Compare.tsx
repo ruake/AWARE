@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSyncedUrlState } from "@/lib/urlState";
 import { logWarn } from "@/lib/ai/debugLogger";
 import {
@@ -9,12 +9,13 @@ import {
 } from "@/lib/data";
 import { loadResultsForRun } from "@/lib/runsLoader";
 import type { DiffRow, TestResult } from "@/lib/types";
-import { ArrowLeftRight, GitCompare, AlertCircle, RefreshCcw } from "lucide-react";
+import { ArrowLeftRight, GitCompare, AlertCircle, RefreshCcw, X } from "lucide-react";
 import { CompareRunsHeader } from "@/components/aware/CompareSummary";
 import { CompareRunSelector } from "@/components/aware/CompareRunSelector";
+import { CompareSidePanel } from "@/components/aware/CompareSidePanel";
 
 export default function Compare() {
-  useLocation();
+  const [, navigate] = useLocation();
   const initState = React.useSyncExternalStore(subscribeToDataInit, getDataInitState);
   const runs = React.useSyncExternalStore(subscribeToRuns, getRuns);
   
@@ -22,7 +23,8 @@ export default function Compare() {
   const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
   const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
   const [searchText, setSearchText] = useSyncedUrlState("q", "");
-  const [activeFilter] = useSyncedUrlState<string | null>("filter", null);
+  const [activeFilter, setActiveFilter] = useSyncedUrlState<string | null>("filter", null);
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [computedRows, setComputedRows] = React.useState<DiffRow[]>([]);
   const [baseResults, setBaseResults] = React.useState<TestResult[]>([]);
   const [candResults, setCandResults] = React.useState<TestResult[]>([]);
@@ -35,12 +37,14 @@ export default function Compare() {
   const swapRuns = () => {
     setBaseline(effectiveCandidate);
     setCandidate(effectiveBaseline);
+    setSelectedId(null);
   };
 
   const loadData = React.useCallback(() => {
     if (!effectiveBaseline || !effectiveCandidate) return;
     setIsLoading(true);
     setLoadError(null);
+    setSelectedId(null);
     Promise.all([loadResultsForRun(effectiveBaseline), loadResultsForRun(effectiveCandidate)])
       .then(([br, cr]) => {
         setBaseResults(br);
@@ -69,6 +73,19 @@ export default function Compare() {
       return true;
     });
   }, [diffs, searchText, activeFilter]);
+
+  const selectedDiff = selectedId ? filtered.find(d => d.id === selectedId) ?? null : null;
+  const selectedBaseResult = selectedDiff ? (baseResults.find(r => r.name === selectedDiff.name) ?? null) : null;
+  const selectedCandResult = selectedDiff ? (candResults.find(r => r.name === selectedDiff.name) ?? null) : null;
+
+  const handleRowClick = (row: DiffRow) => {
+    setSelectedId(prev => prev === row.id ? null : row.id);
+  };
+
+  const handleFilter = (filter: string | null) => {
+    setActiveFilter(prev => prev === filter ? null : filter);
+    setSelectedId(null);
+  };
 
   if (initState.error || loadError) {
     return (
@@ -159,7 +176,7 @@ export default function Compare() {
             <CompareRunSelector
               runs={envRuns}
               value={effectiveBaseline}
-              onChange={(v) => setBaseline(v)}
+              onChange={(v) => { setBaseline(v); setSelectedId(null); }}
               label="Baseline (Before)"
               labelColor="var(--proof-text-secondary)"
               accentColor="var(--proof-blue)"
@@ -203,7 +220,7 @@ export default function Compare() {
             <CompareRunSelector
               runs={envRuns}
               value={effectiveCandidate}
-              onChange={(v) => setCandidate(v)}
+              onChange={(v) => { setCandidate(v); setSelectedId(null); }}
               label="Candidate (After)"
               labelColor="var(--proof-text-secondary)"
               accentColor="var(--proof-purple)"
@@ -227,107 +244,176 @@ export default function Compare() {
       ) : (
         <>
           {diffs.length > 0 && (
-            <CompareRunsHeader diffs={diffs} baseResults={baseResults} candResults={candResults} />
+            <CompareRunsHeader
+              diffs={diffs}
+              baseResults={baseResults}
+              candResults={candResults}
+              activeFilter={activeFilter}
+              onFilter={handleFilter}
+            />
           )}
 
-          <div className="glass-panel" style={{ display: "flex", flexDirection: "column", borderRadius: "var(--proof-radius-lg)", overflow: "hidden", border: "1px solid var(--proof-border-strong)" }}>
-            <div style={{ padding: "20px 24px", background: "rgba(255,255,255,0.02)", borderBottom: "1px solid var(--proof-border-strong)", display: "flex", gap: 16, alignItems: "center" }}>
-              <div style={{ position: "relative", flex: 1, maxWidth: 400 }}>
-                <input
-                  className="proof-input"
-                  placeholder="FILTER BY TEST SIGNAL..."
-                  value={searchText}
-                  onChange={e => setSearchText(e.target.value)}
-                  style={{ 
-                    fontFamily: "var(--font-mono)", 
-                    paddingLeft: 36,
-                    height: 42,
-                    fontSize: 13,
-                    background: "var(--proof-bg)"
-                  }}
-                />
-                <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.5 }}>
-                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-              </div>
-              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 12, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}>
-                  {filtered.length} RESULTS
-                </span>
-              </div>
-            </div>
-            <div style={{ 
-              display: "grid", 
-              gridTemplateColumns: "1fr 140px 140px 140px", 
-              padding: "14px 24px", 
-              background: "var(--proof-surface-3)",
-              borderBottom: "1px solid var(--proof-border-strong)", 
-              fontFamily: "var(--font-mono)", 
-              fontSize: 11, 
-              fontWeight: 700,
-              color: "var(--proof-text-secondary)",
-              letterSpacing: "1px"
-            }}>
-              <span>TEST SIGNAL</span>
-              <span>BASELINE</span>
-              <span>CANDIDATE</span>
-              <span>DELTA</span>
-            </div>
-            <div style={{ minHeight: 200 }}>
-              {filtered.length === 0 ? (
-                <div style={{ padding: 60, textAlign: "center", color: "var(--proof-text-muted)" }}>
-                  <div style={{ fontSize: 14, fontFamily: "var(--font-mono)" }}>NO MATCHING RESULTS FOUND</div>
-                </div>
-              ) : (
-                filtered.map((row, i) => (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(i * 0.03, 0.5) }}
-                    key={row.name}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 140px 140px 140px",
-                      padding: "16px 24px",
-                      borderBottom: "1px solid var(--proof-border-light)",
-                      borderLeft: row.state === 'regression' ? "4px solid var(--proof-red)" : row.state === 'fixed' ? "4px solid var(--proof-green)" : "4px solid transparent",
-                      alignItems: "center",
-                      background: row.state === 'regression' ? "rgba(255,51,85,0.03)" : row.state === 'fixed' ? "rgba(0,229,160,0.03)" : "transparent",
-                      cursor: "pointer",
-                      transition: "all 0.15s ease"
-                    }}
-                    whileHover={{ 
-                      background: "var(--proof-hover)",
-                      x: 2
-                    }}
-                  >
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--proof-text)", fontWeight: 500 }}>{row.name}</span>
-                    <div>
-                      <span className={`proof-badge ${row.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`} style={{ minWidth: 64, justifyContent: "center" }}>
-                        {row.baseStatus}
-                      </span>
-                    </div>
-                    <div>
-                      <span className={`proof-badge ${row.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`} style={{ minWidth: 64, justifyContent: "center" }}>
-                        {row.candStatus}
-                      </span>
-                    </div>
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 8, 
+          {/* Main content: list + optional side panel */}
+          <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+            {/* Diff table */}
+            <div className="glass-panel" style={{ flex: 1, display: "flex", flexDirection: "column", borderRadius: "var(--proof-radius-lg)", overflow: "hidden", border: "1px solid var(--proof-border-strong)", minWidth: 0 }}>
+              <div style={{ padding: "20px 24px", background: "rgba(255,255,255,0.02)", borderBottom: "1px solid var(--proof-border-strong)", display: "flex", gap: 16, alignItems: "center" }}>
+                <div style={{ position: "relative", flex: 1, maxWidth: 400 }}>
+                  <input
+                    className="proof-input"
+                    placeholder="FILTER BY TEST SIGNAL..."
+                    value={searchText}
+                    onChange={e => setSearchText(e.target.value)}
+                    style={{ 
                       fontFamily: "var(--font-mono)", 
-                      fontWeight: 700,
-                      color: row.durCand - row.durBase > 20 ? "var(--proof-red)" : row.durCand - row.durBase < -20 ? "var(--proof-green)" : "var(--proof-text-muted)" 
-                    }}>
-                      {row.durCand - row.durBase > 0 ? "+" : ""}{row.durCand - row.durBase}ms
-                    </div>
-                  </motion.div>
-                ))
-              )}
+                      paddingLeft: 36,
+                      height: 42,
+                      fontSize: 13,
+                      background: "var(--proof-bg)"
+                    }}
+                  />
+                  <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.5 }}>
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+                  {activeFilter && (
+                    <button
+                      onClick={() => handleFilter(null)}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        padding: "4px 10px", borderRadius: 6,
+                        border: "1px solid var(--proof-border)",
+                        background: "var(--proof-surface-2)",
+                        color: "var(--proof-text-secondary)",
+                        cursor: "pointer", fontSize: 11, fontFamily: "var(--font-mono)",
+                        fontWeight: 700
+                      }}
+                    >
+                      <X size={12} /> CLEAR FILTER
+                    </button>
+                  )}
+                  <span style={{ fontSize: 12, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}>
+                    {filtered.length} RESULTS
+                  </span>
+                </div>
+              </div>
+              <div style={{ 
+                display: "grid", 
+                gridTemplateColumns: "1fr 140px 140px 140px", 
+                padding: "14px 24px", 
+                background: "var(--proof-surface-3)",
+                borderBottom: "1px solid var(--proof-border-strong)", 
+                fontFamily: "var(--font-mono)", 
+                fontSize: 11, 
+                fontWeight: 700,
+                color: "var(--proof-text-secondary)",
+                letterSpacing: "1px"
+              }}>
+                <span>TEST SIGNAL</span>
+                <span>BASELINE</span>
+                <span>CANDIDATE</span>
+                <span>DELTA</span>
+              </div>
+              <div style={{ minHeight: 200 }}>
+                {filtered.length === 0 ? (
+                  <div style={{ padding: 60, textAlign: "center", color: "var(--proof-text-muted)" }}>
+                    <div style={{ fontSize: 14, fontFamily: "var(--font-mono)" }}>NO MATCHING RESULTS FOUND</div>
+                  </div>
+                ) : (
+                  filtered.map((row, i) => {
+                    const isSelected = selectedId === row.id;
+                    return (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: Math.min(i * 0.03, 0.5) }}
+                        key={row.name}
+                        onClick={() => handleRowClick(row)}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 140px 140px 140px",
+                          padding: "16px 24px",
+                          borderBottom: "1px solid var(--proof-border-light)",
+                          borderLeft: isSelected
+                            ? `4px solid var(--proof-blue)`
+                            : row.state === 'regression'
+                              ? "4px solid var(--proof-red)"
+                              : row.state === 'fixed'
+                                ? "4px solid var(--proof-green)"
+                                : "4px solid transparent",
+                          alignItems: "center",
+                          background: isSelected
+                            ? "rgba(0,196,255,0.06)"
+                            : row.state === 'regression'
+                              ? "rgba(255,51,85,0.03)"
+                              : row.state === 'fixed'
+                                ? "rgba(0,229,160,0.03)"
+                                : "transparent",
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
+                          outline: isSelected ? "none" : undefined,
+                        }}
+                        whileHover={{ 
+                          background: isSelected ? "rgba(0,196,255,0.08)" : "var(--proof-hover)",
+                          x: isSelected ? 0 : 2
+                        }}
+                      >
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: isSelected ? "var(--proof-blue)" : "var(--proof-text)", fontWeight: isSelected ? 700 : 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", paddingRight: 8 }}>
+                          {row.name}
+                        </span>
+                        <div>
+                          <span className={`proof-badge ${row.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`} style={{ minWidth: 64, justifyContent: "center" }}>
+                            {row.baseStatus}
+                          </span>
+                        </div>
+                        <div>
+                          <span className={`proof-badge ${row.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`} style={{ minWidth: 64, justifyContent: "center" }}>
+                            {row.candStatus}
+                          </span>
+                        </div>
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 8, 
+                          fontFamily: "var(--font-mono)", 
+                          fontWeight: 700,
+                          color: row.durCand - row.durBase > 20 ? "var(--proof-red)" : row.durCand - row.durBase < -20 ? "var(--proof-green)" : "var(--proof-text-muted)" 
+                        }}>
+                          {row.durCand - row.durBase > 0 ? "+" : ""}{row.durCand - row.durBase}ms
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                )}
+              </div>
             </div>
+
+            {/* Side panel */}
+            <AnimatePresence>
+              {selectedDiff && (
+                <motion.div
+                  key="side-panel"
+                  initial={{ opacity: 0, x: 40, width: 0 }}
+                  animate={{ opacity: 1, x: 0, width: 480 }}
+                  exit={{ opacity: 0, x: 40, width: 0 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                  style={{ flexShrink: 0, overflow: "hidden" }}
+                >
+                  <CompareSidePanel
+                    diff={selectedDiff}
+                    diffs={filtered}
+                    selectedId={selectedId!}
+                    onSelect={(id) => setSelectedId(id)}
+                    navigate={navigate}
+                    baseResult={selectedBaseResult}
+                    candResult={selectedCandResult}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </>
       )}

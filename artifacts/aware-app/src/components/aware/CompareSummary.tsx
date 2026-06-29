@@ -51,14 +51,26 @@ export function CompareSummary({
   );
 }
 
+interface FilterCard {
+  label: string;
+  count: number;
+  filterKey: string | null;
+  accentColor: string;
+  glowClass: string;
+}
+
 export function CompareRunsHeader({ 
   diffs,
   baseResults: _baseResults,
   candResults: _candResults,
+  activeFilter,
+  onFilter,
 }: { 
   diffs: DiffRow[];
   baseResults: TestResult[];
   candResults: TestResult[];
+  activeFilter?: string | null;
+  onFilter?: (filter: string | null) => void;
 }) {
   const regressions = diffs.filter(d => d.state === 'regression').length;
   const fixed = diffs.filter(d => d.state === 'fixed').length;
@@ -66,40 +78,56 @@ export function CompareRunsHeader({
   const slower = diffs.filter(d => d.state === 'duration').length;
   const totalDurationChange = diffs.reduce((acc, d) => acc + (d.durCand - d.durBase), 0);
 
+  const cards: FilterCard[] = [
+    { label: "Regressions", count: regressions, filterKey: "regression", accentColor: "var(--proof-red)", glowClass: "glow-border-red" },
+    { label: "Fixed", count: fixed, filterKey: "fixed", accentColor: "var(--proof-green)", glowClass: "glow-border-green" },
+    { label: "Unchanged", count: unchanged, filterKey: "unchanged", accentColor: "var(--proof-blue)", glowClass: "glow-border-cyan" },
+    { label: "Slower", count: slower, filterKey: "duration", accentColor: "var(--proof-yellow)", glowClass: "glow-border-amber" },
+  ];
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16, marginBottom: 24 }}>
-      <div className="glass-panel glow-border-red" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
-          Regressions
-        </div>
-        <div className="metric-number" style={{ fontSize: 42, color: regressions > 0 ? 'var(--proof-red)' : 'var(--proof-text-muted)' }}>
-          {regressions}
-        </div>
-      </div>
-      <div className="glass-panel glow-border-green" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
-          Fixed
-        </div>
-        <div className="metric-number" style={{ fontSize: 42, color: fixed > 0 ? 'var(--proof-green)' : 'var(--proof-text-muted)' }}>
-          {fixed}
-        </div>
-      </div>
-      <div className="glass-panel glow-border-cyan" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
-          Unchanged
-        </div>
-        <div className="metric-number" style={{ fontSize: 42, color: 'var(--proof-text)' }}>
-          {unchanged}
-        </div>
-      </div>
-      <div className="glass-panel glow-border-amber" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
-          Slower
-        </div>
-        <div className="metric-number" style={{ fontSize: 42, color: slower > 0 ? 'var(--proof-yellow)' : 'var(--proof-text-muted)' }}>
-          {slower}
-        </div>
-      </div>
+      {cards.map((card) => {
+        const isActive = activeFilter === card.filterKey;
+        return (
+          <button
+            key={card.label}
+            type="button"
+            onClick={() => onFilter?.(card.filterKey)}
+            className={`glass-panel ${card.glowClass}`}
+            style={{
+              padding: 24,
+              display: 'flex',
+              flexDirection: 'column',
+              cursor: 'pointer',
+              textAlign: 'left',
+              border: `1px solid ${isActive ? card.accentColor : "var(--proof-border)"}`,
+              borderRadius: "var(--proof-radius-md)",
+              background: isActive ? `color-mix(in srgb, ${card.accentColor} 8%, var(--proof-surface))` : undefined,
+              transform: isActive ? "translateY(-3px)" : undefined,
+              boxShadow: isActive ? `0 0 20px color-mix(in srgb, ${card.accentColor} 30%, transparent)` : undefined,
+              transition: "all 0.18s ease",
+              outline: "none",
+            }}
+            title={`Filter by ${card.label.toLowerCase()}`}
+          >
+            <div style={{ fontSize: 10, fontWeight: 700, color: isActive ? card.accentColor : 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
+              {card.label}
+              {isActive && <span style={{ marginLeft: 6, opacity: 0.7 }}>✓</span>}
+            </div>
+            <div className="metric-number" style={{ fontSize: 42, color: card.count > 0 ? card.accentColor : 'var(--proof-text-muted)' }}>
+              {card.count}
+            </div>
+            {onFilter && (
+              <div style={{ fontSize: 9, color: "var(--proof-text-muted)", marginTop: 6, fontFamily: "var(--font-mono)", letterSpacing: "0.5px" }}>
+                {isActive ? "CLICK TO CLEAR" : "CLICK TO FILTER"}
+              </div>
+            )}
+          </button>
+        );
+      })}
+
+      {/* Duration delta — not filterable, just informational */}
       <div className="glass-panel" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--proof-text-secondary)', textTransform: 'uppercase', letterSpacing: "1px", marginBottom: 8 }}>
           Duration Delta
