@@ -711,28 +711,28 @@ export async function answerDirectWithChromeAI(input: DirectInput): Promise<void
     return;
   }
 
-  // Always check canned responses first — these handle follow-up / capability questions
-  // deterministically, without burning a Gemini Nano session on a conversational query.
-  const canned = getCannedResponse(userQuery);
-  if (canned) {
-    emitAsStream(canned, onDelta);
-    return;
-  }
-
-  // Build a context-aware prompt so the model doesn't repeat prior answers
+  // Try Gemini Nano first for all conversational queries — canned responses are
+  // only used as a fallback when the model is unavailable or returns gibberish.
   const contextBlock =
     priorResponses.length > 0
       ? `Previous answers in this conversation:\n${priorResponses.map((r, i) => `[${i + 1}] ${r.slice(0, 300)}`).join("\n")}\n\n`
       : "";
 
   const llmResult = await callChromeAI(
-    "You are AWARE Copilot, a CDN test observability assistant. Answer briefly and helpfully. Do NOT repeat information already given in previous answers. Keep responses under 3 sentences.",
+    "You are AWARE Copilot, a CDN test observability assistant for Akamai CDN regression testing. Answer conversationally and helpfully. Do NOT repeat information already given in previous answers. Keep responses under 3 sentences.",
     `${contextBlock}Question: ${userQuery}`,
     signal,
   );
 
   if (llmResult) {
     emitAsStream(llmResult, onDelta);
+    return;
+  }
+
+  // Gemini Nano unavailable or returned gibberish — fall back to canned responses
+  const canned = getCannedResponse(userQuery);
+  if (canned) {
+    emitAsStream(canned, onDelta);
     return;
   }
 
