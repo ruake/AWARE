@@ -1,22 +1,5 @@
 [
   {
-    "id": "suite_continuous-20260630T083210",
-    "suite": "suite_continuous",
-    "env": "QA",
-    "envLabel": "QA / Staging",
-    "tier": "QA",
-    "network": "staging",
-    "started": "2026-06-30T08:32:10Z",
-    "duration": 0,
-    "passed": 0,
-    "failed": 0,
-    "total": 0,
-    "passPct": 0,
-    "failures": 0,
-    "runnerType": "playwright",
-    "ghRunId": "28431063274"
-  },
-  {
     "id": "run_obsidian",
     "label": "obsidian",
     "suiteId": "suite_full_regression",
