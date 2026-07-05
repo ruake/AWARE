@@ -1,111 +1,20 @@
 [
   {
-    "id": "continuo_pyte_mr89ztk1_az71",
-    "label": "Continuous — QA / Staging (Every 30min) — QA / Staging (pytest)",
-    "suiteId": "suite_continuous",
-    "envId": "qa_staging",
-    "status": "RUNNING",
-    "conditions": [
-      {
-        "type": "Dispatched",
-        "status": "True",
-        "reason": "WorkflowDispatched",
-        "message": "Dispatched via scheduler",
-        "lastTransitionTime": "2026-07-05T21:00:52.442Z"
-      },
-      {
-        "type": "WorkflowRunning",
-        "status": "True",
-        "reason": "InProgress",
-        "message": "Workflow is executing",
-        "lastTransitionTime": "2026-07-05T21:00:52.442Z"
-      },
-      {
-        "type": "Completed",
-        "status": "False",
-        "reason": "InProgress",
-        "message": "Awaiting completion",
-        "lastTransitionTime": "2026-07-05T21:00:52.442Z"
-      },
-      {
-        "type": "Passed",
-        "status": "Unknown",
-        "reason": "Pending",
-        "message": "Not yet determined",
-        "lastTransitionTime": "2026-07-05T21:00:52.442Z"
-      },
-      {
-        "type": "Reconciled",
-        "status": "True",
-        "reason": "Reconciled",
-        "message": "Initial state set",
-        "lastTransitionTime": "2026-07-05T21:00:52.442Z"
-      }
-    ],
-    "passPct": 0,
-    "failures": 0,
-    "duration": "—",
-    "durationMs": 0,
-    "started": "2026-07-05T21:00:44.532Z",
-    "build": "85b52f8",
-    "rev": "85b52f8484512fbc4d4e73e6d0fce34faa4da41e",
+    "id": "suite_continuous-20260705T210125",
+    "suite": "suite_continuous",
     "env": "QA",
+    "envLabel": "QA / Staging",
+    "tier": "QA",
     "network": "staging",
-    "workflowRunId": null
-  },
-  {
-    "id": "continuo_play_mr89zqe7_fjw0",
-    "label": "Continuous — QA / Staging (Every 30min) — QA / Staging (playwright)",
-    "suiteId": "suite_continuous",
-    "envId": "qa_staging",
-    "status": "RUNNING",
-    "conditions": [
-      {
-        "type": "Dispatched",
-        "status": "True",
-        "reason": "WorkflowDispatched",
-        "message": "Dispatched via scheduler",
-        "lastTransitionTime": "2026-07-05T21:00:48.339Z"
-      },
-      {
-        "type": "WorkflowRunning",
-        "status": "True",
-        "reason": "InProgress",
-        "message": "Workflow is executing",
-        "lastTransitionTime": "2026-07-05T21:00:48.339Z"
-      },
-      {
-        "type": "Completed",
-        "status": "False",
-        "reason": "InProgress",
-        "message": "Awaiting completion",
-        "lastTransitionTime": "2026-07-05T21:00:48.339Z"
-      },
-      {
-        "type": "Passed",
-        "status": "Unknown",
-        "reason": "Pending",
-        "message": "Not yet determined",
-        "lastTransitionTime": "2026-07-05T21:00:48.339Z"
-      },
-      {
-        "type": "Reconciled",
-        "status": "True",
-        "reason": "Reconciled",
-        "message": "Initial state set",
-        "lastTransitionTime": "2026-07-05T21:00:48.339Z"
-      }
-    ],
+    "started": "2026-07-05T21:01:25Z",
+    "duration": 6091,
+    "passed": 0,
+    "failed": 2,
+    "total": 2,
     "passPct": 0,
-    "failures": 0,
-    "duration": "—",
-    "durationMs": 0,
-    "started": "2026-07-05T21:00:44.532Z",
-    "build": "85b52f8",
-    "rev": "85b52f8484512fbc4d4e73e6d0fce34faa4da41e",
-    "env": "QA",
-    "network": "staging",
-    "workflowRunId": null
+    "failures": 2,
+    "runnerType": "pytest",
+    "ghRunId": "28754752104"
   },
   {
     "id": "run_obsidian",
