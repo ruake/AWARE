@@ -6,3 +6,9 @@ id = "orGeH4RGXIZAcaJCvLJOQ"
 uri = "file://plan.md"
 type = "text"
 title = "PROOF — State-of-the-Art Upgrade Plan"
+
+[[outputs]]
+id = "lrkUPz7jHlf2gZN2bWhAZ"
+uri = "file://SIMPLIFICATION_PLAN.md"
+type = "text"
+title = "A.W.A.R.E. Simplification Plan"
