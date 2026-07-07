@@ -45,5 +45,9 @@ channel = "stable-25_05"
 packages = ["pm2"]
 
 [[ports]]
+localPort = 5000
+externalPort = 3000
+
+[[ports]]
 localPort = 5173
 externalPort = 8000

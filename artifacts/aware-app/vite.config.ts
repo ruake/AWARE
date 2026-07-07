@@ -130,10 +130,6 @@ export default defineConfig({
       "react-dom",
       "wouter",
       "recharts",
-      "@tanstack/react-query",
-      "react-markdown",
-      "remark-gfm",
-      "zustand",
     ],
   },
   resolve: {
@@ -155,37 +151,16 @@ export default defineConfig({
             if (
               id.includes("/node_modules/react/") ||
               id.includes("/node_modules/react-dom/") ||
-              id.includes("/node_modules/wouter/") ||
-              id.includes("/node_modules/@tanstack/react-query/") ||
-              id.includes("/node_modules/zustand/")
+              id.includes("/node_modules/wouter/")
             )
               return "vendor";
-            if (
-              id.includes("/node_modules/recharts/") ||
-              id.includes("/node_modules/fuse.js/")
-            )
+            if (id.includes("/node_modules/recharts/"))
               return "charts";
             if (
-              id.includes("/node_modules/framer-motion/")
-            )
-              return "motion";
-            if (
               id.includes("/node_modules/lucide-react/") ||
-              id.includes("/node_modules/cmdk/") ||
-              id.includes("/node_modules/sonner/") ||
               id.includes("/node_modules/@radix-ui/")
             )
               return "ui";
-            if (
-              id.includes("/node_modules/@chatscope/") ||
-              id.includes("/node_modules/@mlc-ai/")
-            )
-              return "copilot";
-            if (
-              id.includes("/node_modules/three/") ||
-              id.includes("/node_modules/@react-three/")
-            )
-              return "three";
             return undefined;
           }
           if (id.includes("/src/components/ui/")) return "ui";

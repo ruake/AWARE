@@ -1,419 +1,195 @@
-import React from "react";
-import { useLocation } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { useSyncedUrlState } from "@/lib/urlState";
-import { logWarn } from "@/lib/ai/debugLogger";
-import {
-  computeDiffRows, getDataInitState, subscribeToDataInit,
-  subscribeToRuns, getRuns
-} from "@/lib/data";
-import { loadResultsForRun } from "@/lib/runsLoader";
-import type { DiffRow, TestResult } from "@/lib/types";
-import { ArrowLeftRight, GitCompare, AlertCircle, RefreshCcw, X } from "lucide-react";
-import { CompareRunsHeader } from "@/components/aware/CompareSummary";
-import { CompareRunSelector } from "@/components/aware/CompareRunSelector";
-import { CompareSidePanel } from "@/components/aware/CompareSidePanel";
+import { useEffect, useMemo, useState } from 'react';
+import { useSearch } from 'wouter';
+import { loadRuns, loadAllResults } from '@/lib/data';
+import type { Run, TestResult } from '@/lib/types';
+import { StatusBadge } from '@/components/StatusBadge';
+
+type DiffRow = {
+  name: string;
+  category: string;
+  baseStatus: string | null;
+  candStatus: string | null;
+  baseDur: number | null;
+  candDur: number | null;
+  change: 'REGRESSED' | 'FIXED' | 'UNCHANGED' | 'NEW' | 'REMOVED';
+};
+
+function computeDiff(base: TestResult[], cand: TestResult[]): DiffRow[] {
+  const byName = (arr: TestResult[]) => new Map(arr.map(t => [t.name, t]));
+  const bm = byName(base);
+  const cm = byName(cand);
+  const names = new Set([...bm.keys(), ...cm.keys()]);
+  return [...names].map(name => {
+    const b = bm.get(name);
+    const c = cm.get(name);
+    let change: DiffRow['change'] = 'UNCHANGED';
+    if (!b) change = 'NEW';
+    else if (!c) change = 'REMOVED';
+    else if (b.status === 'PASS' && c.status === 'FAIL') change = 'REGRESSED';
+    else if (b.status === 'FAIL' && c.status === 'PASS') change = 'FIXED';
+    return {
+      name,
+      category: b?.category ?? c?.category ?? '',
+      baseStatus: b?.status ?? null,
+      candStatus: c?.status ?? null,
+      baseDur: b?.duration ?? null,
+      candDur: c?.duration ?? null,
+      change,
+    };
+  }).sort((a, b) => {
+    const order = { REGRESSED: 0, FIXED: 1, NEW: 2, REMOVED: 3, UNCHANGED: 4 };
+    return order[a.change] - order[b.change];
+  });
+}
 
 export default function Compare() {
-  const [, navigate] = useLocation();
-  const initState = React.useSyncExternalStore(subscribeToDataInit, getDataInitState);
-  const runs = React.useSyncExternalStore(subscribeToRuns, getRuns);
-  
-  const envRuns = runs;
-  const [baseline, setBaseline] = useSyncedUrlState("baseline", "");
-  const [candidate, setCandidate] = useSyncedUrlState("candidate", "");
-  const [searchText, setSearchText] = useSyncedUrlState("q", "");
-  const [activeFilter, setActiveFilter] = useSyncedUrlState<string | null>("filter", null);
-  const [selectedId, setSelectedId] = React.useState<string | null>(null);
-  const [computedRows, setComputedRows] = React.useState<DiffRow[]>([]);
-  const [baseResults, setBaseResults] = React.useState<TestResult[]>([]);
-  const [candResults, setCandResults] = React.useState<TestResult[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [loadError, setLoadError] = React.useState<string | null>(null);
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const initialBase = params.get('base');
+  const initialCand = params.get('cand');
 
-  const effectiveBaseline = baseline || envRuns[envRuns.length - 1]?.id || "";
-  const effectiveCandidate = candidate || envRuns[0]?.id || "";
-  
-  const swapRuns = () => {
-    setBaseline(effectiveCandidate);
-    setCandidate(effectiveBaseline);
-    setSelectedId(null);
-  };
+  const [runs, setRuns] = useState<Run[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [baseId, setBaseId] = useState(initialBase ?? '');
+  const [candId, setCandId] = useState(initialCand ?? '');
+  const [diffs, setDiffs] = useState<DiffRow[]>([]);
+  const [isComparing, setIsComparing] = useState(false);
 
-  const loadData = React.useCallback(() => {
-    if (!effectiveBaseline || !effectiveCandidate) return;
-    setIsLoading(true);
-    setLoadError(null);
-    setSelectedId(null);
-    Promise.all([loadResultsForRun(effectiveBaseline), loadResultsForRun(effectiveCandidate)])
-      .then(([br, cr]) => {
-        setBaseResults(br);
-        setCandResults(cr);
-        setComputedRows(computeDiffRows(effectiveBaseline, effectiveCandidate));
-      })
-      .catch((err: unknown) => {
-        const msg = String(err);
-        logWarn("Compare", "Compare failed", msg);
-        setLoadError(msg);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [effectiveBaseline, effectiveCandidate]);
-
-  React.useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const diffs = computedRows;
-  const filtered = React.useMemo(() => {
-    return diffs.filter((d) => {
-      if (searchText && !d.name.toLowerCase().includes(searchText.toLowerCase())) return false;
-      if (activeFilter && activeFilter !== "total" && d.state !== activeFilter) return false;
-      return true;
+  useEffect(() => {
+    loadRuns().then(r => {
+      setRuns(r);
+      setLoading(false);
+      if (!baseId && r.length > 0) setBaseId(r[0].id);
+      if (!candId && r.length > 1) setCandId(r[1].id);
     });
-  }, [diffs, searchText, activeFilter]);
+  }, []);
 
-  const selectedDiff = selectedId ? filtered.find(d => d.id === selectedId) ?? null : null;
-  const selectedBaseResult = selectedDiff ? (baseResults.find(r => r.name === selectedDiff.name) ?? null) : null;
-  const selectedCandResult = selectedDiff ? (candResults.find(r => r.name === selectedDiff.name) ?? null) : null;
-
-  const handleRowClick = (row: DiffRow) => {
-    setSelectedId(prev => prev === row.id ? null : row.id);
+  const handleCompare = async () => {
+    if (!baseId || !candId) return;
+    setIsComparing(true);
+    try {
+      const allResults = await loadAllResults();
+      const baseResults = allResults[baseId] ?? [];
+      const candResults = allResults[candId] ?? [];
+      const diffRows = computeDiff(baseResults, candResults);
+      setDiffs(diffRows);
+    } finally {
+      setIsComparing(false);
+    }
   };
 
-  const handleFilter = (filter: string | null) => {
-    setActiveFilter(prev => prev === filter ? null : filter);
-    setSelectedId(null);
-  };
+  const summary = useMemo(() => {
+    const regressions = diffs.filter(d => d.change === 'REGRESSED').length;
+    const fixed = diffs.filter(d => d.change === 'FIXED').length;
+    const unchanged = diffs.filter(d => d.change === 'UNCHANGED').length;
+    return { regressions, fixed, unchanged };
+  }, [diffs]);
 
-  if (initState.error || loadError) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: 24 }}>
-        <div className="glass-panel glow-border-red" style={{ padding: 40, textAlign: "center", maxWidth: 480, borderRadius: "var(--proof-radius-lg)" }}>
-          <AlertCircle size={48} style={{ color: "var(--proof-red)", marginBottom: 20, display: "block", margin: "0 auto" }} />
-          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 12, color: "var(--proof-text)" }}>DATA SYNC ERROR</h2>
-          <p style={{ color: "var(--proof-text-secondary)", marginBottom: 24, lineHeight: 1.6 }}>
-            {String(initState.error || loadError || "An unexpected error occurred while loading forensic data.")}
-          </p>
-          <button 
-            className="proof-btn proof-btn-primary" 
-            onClick={() => loadData()}
-            style={{ minWidth: 160 }}
-          >
-            <RefreshCcw size={18} />
-            RETRY SYNC
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="p-8 text-zinc-400">Loading…</div>;
 
   return (
-    <div style={{ padding: "24px 32px", margin: "0 auto", position: "relative" }}>
-      {/* Background Gradient */}
-      <div style={{ 
-        position: "absolute", 
-        top: 0, 
-        left: 0, 
-        right: 0, 
-        height: "40vh", 
-        background: "linear-gradient(to bottom, var(--proof-blue-glow), transparent)", 
-        opacity: 0.15, 
-        pointerEvents: "none",
-        zIndex: 0
-      }} />
-
-      <div style={{ marginBottom: 40, display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-            <GitCompare size={24} style={{ color: "var(--proof-blue)" }} />
-            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text-secondary)", letterSpacing: "2px", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>
-              Analysis Engine
-            </span>
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div className="space-y-4">
+        <h1 className="text-lg font-semibold text-zinc-100">Compare Runs</h1>
+        
+        <div className="flex items-end gap-4">
+          <div className="flex-1">
+            <label className="block text-sm text-zinc-400 mb-2">Baseline (Before)</label>
+            <select
+              value={baseId}
+              onChange={e => setBaseId(e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded px-3 py-2"
+            >
+              <option value="">Select baseline run…</option>
+              {[...runs].sort((a, b) => b.started.localeCompare(a.started)).map(r => (
+                <option key={r.id} value={r.id}>
+                  {r.label} ({r.env}) - {new Date(r.started).toLocaleDateString()}
+                </option>
+              ))}
+            </select>
           </div>
-          <h1 style={{ 
-            fontSize: 42, 
-            fontWeight: 900, 
-            margin: 0, 
-            letterSpacing: "-1.5px", 
-            fontFamily: "var(--font-sans)",
-            background: "linear-gradient(to right, var(--proof-blue), var(--proof-purple))",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent"
-          }}>
-            FORENSIC COMPARE
-          </h1>
-          {(effectiveBaseline && effectiveCandidate) && (
-            <div style={{ 
-              marginTop: 8, 
-              color: "var(--proof-text-secondary)", 
-              fontFamily: "var(--font-mono)", 
-              fontSize: 13,
-              display: "flex",
-              alignItems: "center",
-              gap: 8
-            }}>
-              <span style={{ color: "var(--proof-blue)" }}>{effectiveBaseline.substring(0, 8)}</span>
-              <span style={{ opacity: 0.5 }}>VS</span>
-              <span style={{ color: "var(--proof-purple)" }}>{effectiveCandidate.substring(0, 8)}</span>
-            </div>
-          )}
-        </div>
-      </div>
 
-      <div style={{ 
-        display: "grid", 
-        gridTemplateColumns: "1fr auto 1fr", 
-        gap: 32, 
-        marginBottom: 48, 
-        alignItems: "center",
-        position: "relative",
-        zIndex: 1
-      }}>
-        <div className="glass-panel" style={{ padding: 2, borderRadius: "var(--proof-radius-lg)" }}>
-          <div style={{ padding: 20 }}>
-            <CompareRunSelector
-              runs={envRuns}
-              value={effectiveBaseline}
-              onChange={(v) => { setBaseline(v); setSelectedId(null); }}
-              label="Baseline (Before)"
-              labelColor="var(--proof-text-secondary)"
-              accentColor="var(--proof-blue)"
-            />
+          <div className="flex-1">
+            <label className="block text-sm text-zinc-400 mb-2">Candidate (After)</label>
+            <select
+              value={candId}
+              onChange={e => setCandId(e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm rounded px-3 py-2"
+            >
+              <option value="">Select candidate run…</option>
+              {[...runs].sort((a, b) => b.started.localeCompare(a.started)).map(r => (
+                <option key={r.id} value={r.id}>
+                  {r.label} ({r.env}) - {new Date(r.started).toLocaleDateString()}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
 
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
           <button
-            onClick={swapRuns}
-            className="glass-panel"
-            style={{ 
-              width: 48,
-              height: 48,
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer", 
-              border: "1px solid var(--proof-blue)",
-              boxShadow: "0 0 15px var(--proof-blue-glow)",
-              transition: "all 0.2s ease",
-              background: "var(--proof-surface-2)"
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = "rotate(180deg)";
-              e.currentTarget.style.boxShadow = "0 0 25px var(--proof-blue-glow)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = "rotate(0deg)";
-              e.currentTarget.style.boxShadow = "0 0 15px var(--proof-blue-glow)";
-            }}
+            onClick={handleCompare}
+            disabled={!baseId || !candId || isComparing}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-700 disabled:cursor-not-allowed text-zinc-100 text-sm rounded font-semibold transition-colors"
           >
-            <ArrowLeftRight size={20} style={{ color: "var(--proof-blue)" }} />
+            {isComparing ? 'Comparing…' : 'Compare'}
           </button>
-          <span style={{ fontSize: 10, fontWeight: 800, color: "var(--proof-text-muted)", letterSpacing: "1px" }}>VS</span>
-        </div>
-
-        <div className="glass-panel" style={{ padding: 2, borderRadius: "var(--proof-radius-lg)" }}>
-          <div style={{ padding: 20 }}>
-            <CompareRunSelector
-              runs={envRuns}
-              value={effectiveCandidate}
-              onChange={(v) => { setCandidate(v); setSelectedId(null); }}
-              label="Candidate (After)"
-              labelColor="var(--proof-text-secondary)"
-              accentColor="var(--proof-purple)"
-            />
-          </div>
         </div>
       </div>
 
-      <div style={{ 
-        height: 1, 
-        width: "100%", 
-        background: "linear-gradient(to right, transparent, var(--proof-border), transparent)", 
-        marginBottom: 48 
-      }} />
-
-      {isLoading ? (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 80 }}>
-          <div className="animate-spin" style={{ width: 40, height: 40, border: "3px solid var(--proof-surface-3)", borderTopColor: "var(--proof-blue)", borderRadius: "50%", marginBottom: 20 }} />
-          <span style={{ color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)", fontSize: 14 }}>COMPUTING DELTAS...</span>
-        </div>
-      ) : (
+      {diffs.length > 0 && (
         <>
-          {diffs.length > 0 && (
-            <CompareRunsHeader
-              diffs={diffs}
-              baseResults={baseResults}
-              candResults={candResults}
-              activeFilter={activeFilter}
-              onFilter={handleFilter}
-            />
-          )}
+          <div className="text-xs text-zinc-400">
+            {summary.regressions} regressions · {summary.fixed} fixed · {summary.unchanged} unchanged
+          </div>
 
-          {/* Main content: list + optional side panel */}
-          <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-            {/* Diff table */}
-            <div className="glass-panel" style={{ flex: 1, display: "flex", flexDirection: "column", borderRadius: "var(--proof-radius-lg)", overflow: "hidden", border: "1px solid var(--proof-border-strong)", minWidth: 0 }}>
-              <div style={{ padding: "20px 24px", background: "rgba(255,255,255,0.02)", borderBottom: "1px solid var(--proof-border-strong)", display: "flex", gap: 16, alignItems: "center" }}>
-                <div style={{ position: "relative", flex: 1, maxWidth: 400 }}>
-                  <input
-                    className="proof-input"
-                    placeholder="FILTER BY TEST SIGNAL..."
-                    value={searchText}
-                    onChange={e => setSearchText(e.target.value)}
-                    style={{ 
-                      fontFamily: "var(--font-mono)", 
-                      paddingLeft: 36,
-                      height: 42,
-                      fontSize: 13,
-                      background: "var(--proof-bg)"
-                    }}
-                  />
-                  <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.5 }}>
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                </div>
-                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
-                  {activeFilter && (
-                    <button
-                      onClick={() => handleFilter(null)}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 6,
-                        padding: "4px 10px", borderRadius: 6,
-                        border: "1px solid var(--proof-border)",
-                        background: "var(--proof-surface-2)",
-                        color: "var(--proof-text-secondary)",
-                        cursor: "pointer", fontSize: 11, fontFamily: "var(--font-mono)",
-                        fontWeight: 700
-                      }}
-                    >
-                      <X size={12} /> CLEAR FILTER
-                    </button>
-                  )}
-                  <span style={{ fontSize: 12, color: "var(--proof-text-muted)", fontFamily: "var(--font-mono)" }}>
-                    {filtered.length} RESULTS
-                  </span>
-                </div>
-              </div>
-              <div style={{ 
-                display: "grid", 
-                gridTemplateColumns: "1fr 140px 140px 140px", 
-                padding: "14px 24px", 
-                background: "var(--proof-surface-3)",
-                borderBottom: "1px solid var(--proof-border-strong)", 
-                fontFamily: "var(--font-mono)", 
-                fontSize: 11, 
-                fontWeight: 700,
-                color: "var(--proof-text-secondary)",
-                letterSpacing: "1px"
-              }}>
-                <span>TEST SIGNAL</span>
-                <span>BASELINE</span>
-                <span>CANDIDATE</span>
-                <span>DELTA</span>
-              </div>
-              <div style={{ minHeight: 200 }}>
-                {filtered.length === 0 ? (
-                  <div style={{ padding: 60, textAlign: "center", color: "var(--proof-text-muted)" }}>
-                    <div style={{ fontSize: 14, fontFamily: "var(--font-mono)" }}>NO MATCHING RESULTS FOUND</div>
-                  </div>
-                ) : (
-                  filtered.map((row, i) => {
-                    const isSelected = selectedId === row.id;
-                    return (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: Math.min(i * 0.03, 0.5) }}
-                        key={row.name}
-                        onClick={() => handleRowClick(row)}
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "1fr 140px 140px 140px",
-                          padding: "16px 24px",
-                          borderBottom: "1px solid var(--proof-border-light)",
-                          borderLeft: isSelected
-                            ? `4px solid var(--proof-blue)`
-                            : row.state === 'regression'
-                              ? "4px solid var(--proof-red)"
-                              : row.state === 'fixed'
-                                ? "4px solid var(--proof-green)"
-                                : "4px solid transparent",
-                          alignItems: "center",
-                          background: isSelected
-                            ? "rgba(0,196,255,0.06)"
-                            : row.state === 'regression'
-                              ? "rgba(255,51,85,0.03)"
-                              : row.state === 'fixed'
-                                ? "rgba(0,229,160,0.03)"
-                                : "transparent",
-                          cursor: "pointer",
-                          transition: "all 0.15s ease",
-                          outline: isSelected ? "none" : undefined,
-                        }}
-                        whileHover={{ 
-                          background: isSelected ? "rgba(0,196,255,0.08)" : "var(--proof-hover)",
-                          x: isSelected ? 0 : 2
-                        }}
-                      >
-                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: isSelected ? "var(--proof-blue)" : "var(--proof-text)", fontWeight: isSelected ? 700 : 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", paddingRight: 8 }}>
-                          {row.name}
+          <div className="rounded-lg border border-zinc-800 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-zinc-900 border-b border-zinc-800">
+                <tr>
+                  {['Name', 'Category', 'Baseline', 'Candidate', 'Duration Δ', 'Change'].map(h => (
+                    <th key={h} className="px-4 py-2 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800">
+                {diffs.map(d => {
+                  let rowClass = '';
+                  if (d.change === 'REGRESSED') rowClass = 'bg-red-950/20 border-l-2 border-l-red-600';
+                  else if (d.change === 'FIXED') rowClass = 'bg-emerald-950/20 border-l-2 border-l-emerald-600';
+                  else if (d.change === 'NEW' || d.change === 'REMOVED') rowClass = 'bg-zinc-900';
+                  
+                  return (
+                    <tr key={d.name} className={`hover:bg-zinc-800/50 transition-colors ${rowClass}`}>
+                      <td className="px-4 py-2 text-zinc-100 font-mono text-xs">{d.name}</td>
+                      <td className="px-4 py-2 text-zinc-400 text-xs">{d.category}</td>
+                      <td className="px-4 py-2">
+                        {d.baseStatus ? <StatusBadge status={d.baseStatus} /> : <span className="text-zinc-500 text-xs">-</span>}
+                      </td>
+                      <td className="px-4 py-2">
+                        {d.candStatus ? <StatusBadge status={d.candStatus} /> : <span className="text-zinc-500 text-xs">-</span>}
+                      </td>
+                      <td className="px-4 py-2 text-xs font-mono">
+                        {d.baseDur !== null && d.candDur !== null ? (
+                          <span className={d.candDur - d.baseDur > 0 ? 'text-red-400' : 'text-emerald-400'}>
+                            {d.candDur - d.baseDur > 0 ? '+' : ''}{d.candDur - d.baseDur}ms
+                          </span>
+                        ) : (
+                          <span className="text-zinc-500">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-xs">
+                        <span className={
+                          d.change === 'REGRESSED' ? 'text-red-400 font-semibold' :
+                          d.change === 'FIXED' ? 'text-emerald-400 font-semibold' :
+                          'text-zinc-400'
+                        }>
+                          {d.change}
                         </span>
-                        <div>
-                          <span className={`proof-badge ${row.baseStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`} style={{ minWidth: 64, justifyContent: "center" }}>
-                            {row.baseStatus}
-                          </span>
-                        </div>
-                        <div>
-                          <span className={`proof-badge ${row.candStatus === "PASS" ? "proof-badge-pass" : "proof-badge-fail"}`} style={{ minWidth: 64, justifyContent: "center" }}>
-                            {row.candStatus}
-                          </span>
-                        </div>
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: 8, 
-                          fontFamily: "var(--font-mono)", 
-                          fontWeight: 700,
-                          color: row.durCand - row.durBase > 20 ? "var(--proof-red)" : row.durCand - row.durBase < -20 ? "var(--proof-green)" : "var(--proof-text-muted)" 
-                        }}>
-                          {row.durCand - row.durBase > 0 ? "+" : ""}{row.durCand - row.durBase}ms
-                        </div>
-                      </motion.div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-            {/* Side panel */}
-            <AnimatePresence>
-              {selectedDiff && (
-                <motion.div
-                  key="side-panel"
-                  initial={{ opacity: 0, x: 40, width: 0 }}
-                  animate={{ opacity: 1, x: 0, width: 480 }}
-                  exit={{ opacity: 0, x: 40, width: 0 }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
-                  style={{ flexShrink: 0, overflow: "hidden" }}
-                >
-                  <CompareSidePanel
-                    diff={selectedDiff}
-                    diffs={filtered}
-                    selectedId={selectedId!}
-                    onSelect={(id) => setSelectedId(id)}
-                    navigate={navigate}
-                    baseResult={selectedBaseResult}
-                    candResult={selectedCandResult}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </>
       )}

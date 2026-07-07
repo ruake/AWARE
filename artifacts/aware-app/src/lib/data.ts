@@ -1,163 +1,23 @@
-export type {
-  Run,
-  TestResult,
-  TestDetail,
-  TestRunPoint,
-  DiffRow,
-  TestCase,
-  TestSuite,
-  TestTag,
-  TestChangeLogEntry,
-  PromotionDecision,
-  Predicate,
-  FilmstripConfig,
-  TestStats,
-  TestCaseFilter,
-  SuiteNode,
-  TestPriority,
-  TestSeverity,
-  TestStatus,
-  SchedulerStatus,
-  SchedulerSuiteStatus,
-  SchedulerDispatch,
-  SchedulerSummary,
-} from "./types";
+import type { Run, TestResult } from '@/lib/types';
 
-export type { RunFrequency } from "./runs";
+let runsCache: Run[] | null = null;
+let resultsCache: Record<string, TestResult[]> | null = null;
 
-export { loadFromStorage } from "./store";
+export async function loadRuns(): Promise<Run[]> {
+  if (runsCache) return runsCache;
+  const res = await fetch(`${import.meta.env.BASE_URL}data/runs.json`);
+  runsCache = await res.json();
+  return runsCache!;
+}
 
-export {
-  RUNS,
-  getRuns,
-  subscribeToRuns,
-  getRunIndex,
-  getRunById,
-  DIFF_ROWS,
-  getDiffRows,
-  subscribeToDiffRows,
-  computeDiffRows,
-  computeTestDetailForName,
-  ENV_SUMMARY,
-  getEnvSummary,
-  PASS_RATE_CHART,
-  getPassRateChart,
-  ENV_PASS_RATE_CHART,
-  getEnvPassRateChart,
-  PER_ENV_PASS_RATE,
-  getPerEnvPassRate,
-  getTestResultsForRun,
-  getRunsByEnv,
-  computeRunFrequency,
-  recomputeAll,
-  loadRuns,
-} from "./runs";
+export async function loadResults(runId: string): Promise<TestResult[]> {
+  const all = await loadAllResults();
+  return all[runId] ?? [];
+}
 
-export {
-  loadResultsForRun,
-  loadAllResults,
-  getTestDetailsAsync,
-  getCachedResults,
-} from "./runsLoader";
-
-export {
-  getTestCases,
-  getTestCaseById,
-  getTestChangelog,
-  computeTestStats,
-  getTestCasesByFilter,
-  subscribeToTestCases,
-} from "./testCases";
-
-export {
-  getTestSuites,
-  getTestSuiteById,
-  buildSuiteTree,
-  getSuiteTree,
-  subscribeToTestSuites,
-  loadTestSuites,
-} from "./testSuites";
-
-export {
-  getPromotionDecision,
-  getAllPromotionDecisions,
-  loadPromotions,
-  subscribeToPromotions,
-} from "./promotions";
-
-export { getTestCasesBySuiteId } from "./operations";
-
-export {
-  ENVS,
-  CATEGORIES,
-  PRIORITIES,
-  SEVERITIES,
-  STATUSES,
-  OWNERS,
-  TAG_COLORS,
-  CATEGORY_COLORS,
-  TEST_TAGS,
-  TEST_NAMES,
-} from "./constants";
-
-export { navTo, copyToClipboard, showToast, repo } from "./nav";
-
-export { useSyncedUrlState } from "./urlState";
-
-export {
-  getEnvConfigs,
-  getEnvLabels,
-  getEnvConfig,
-  getEnvConfigById,
-  getEnvByTierAndNetwork,
-  envIdToLabel,
-  labelToEnvId,
-} from "./envConfig";
-
-export {
-  getAutoDiscoveredTests,
-  getAutoDiscoverySummary,
-  loadAutoDiscoveredTests,
-  subscribeToAutoTests,
-} from "./testDiscovery";
-
-export {
-  getSchedulerStatus,
-  refreshSchedulerStatus,
-  subscribeToSchedulerStatus,
-  loadSchedulerStatus,
-} from "./schedulerStatus";
-
-export { PROMOTION_GATE_THRESHOLD } from "./ciConfig";
-
-export { loadAllData, getDataInitState, subscribeToDataInit } from "./initData";
-
-export { bus, TypedEventBus } from "./eventBus";
-export type { EventName, EventPayload } from "./eventBus";
-
-export { LRUCache, memoize } from "./memo";
-
-export { StateMachine, InvalidTransitionError } from "./stateMachine";
-
-export { getImageSource, preloadImage, revokeAllImages, isExternalImage } from "./images";
-
-export {
-  getSelectedEnvIds,
-  getSelectedEnvSnapshot,
-  setSelectedEnvIds,
-  toggleSelectedEnvId,
-  subscribeToSelectedEnv,
-} from "./selectedEnv";
-
-export {
-  getSelectedSuiteIds,
-  getSelectedSuiteSnapshot,
-  setSelectedSuiteIds,
-  toggleSelectedSuiteId,
-  subscribeToSelectedSuites,
-  subscribeToFilters,
-  getLayoutSettings,
-  getLayoutSnapshot,
-  setLayoutSettings,
-  subscribeToLayout,
-} from "./filters";
+export async function loadAllResults(): Promise<Record<string, TestResult[]>> {
+  if (resultsCache) return resultsCache;
+  const res = await fetch(`${import.meta.env.BASE_URL}data/test-results.json`);
+  resultsCache = await res.json();
+  return resultsCache!;
+}
