@@ -90,14 +90,7 @@ html { scroll-behavior: smooth; }
   --proof-orange-border: rgba(251, 146, 60, 0.2);
   --proof-orange-glow: rgba(251, 146, 60, 0.3);
 
-  /* Status overrides for compatibility */
-  --proof-fail: var(--proof-red);
-  --proof-fail-bg: var(--proof-red-bg);
-  --proof-cyan: var(--proof-blue);
-  --proof-pink: var(--proof-red);
-
-  /* Glow effects */
-  --proof-glow-cyan: 0 0 24px rgba(66, 133, 244, 0.2);
+  /* Glow effects (used sparingly — only for RUNNING status) */
   --proof-glow-green: 0 0 24px rgba(52, 168, 83, 0.2);
   --proof-glow-red: 0 0 24px rgba(234, 67, 53, 0.2);
   --proof-glow-amber: 0 0 24px rgba(251, 188, 5, 0.2);
@@ -145,21 +138,6 @@ html { scroll-behavior: smooth; }
   --proof-glass: rgba(9, 13, 20, 0.8);
   --proof-subtle-bg: rgba(255, 255, 255, 0.05);
   --proof-hover: rgba(255, 255, 255, 0.08);
-
-  /* Emerald – success/pass indicator */
-  --proof-emerald: #34A853;
-  --proof-emerald-bg: rgba(52, 168, 83, 0.12);
-  --proof-emerald-border: rgba(52, 168, 83, 0.25);
-
-  /* Indigo – info/highlight */
-  --proof-indigo: #818cf8;
-  --proof-indigo-bg: rgba(129, 140, 248, 0.1);
-  --proof-indigo-border: rgba(129, 140, 248, 0.2);
-
-  /* Teal – accent/info */
-  --proof-teal: #00c4ff;
-  --proof-teal-bg: rgba(0, 196, 255, 0.1);
-  --proof-teal-border: rgba(0, 196, 255, 0.2);
 
   /* Grey – neutral border/text */
   --proof-grey: #64748b;
@@ -235,15 +213,6 @@ html { scroll-behavior: smooth; }
   --proof-hover: rgba(0, 0, 0, 0.06);
 
   --proof-surface-3: #eef2f6;
-  --proof-emerald: #34A853;
-  --proof-emerald-bg: rgba(52, 168, 83, 0.1);
-  --proof-emerald-border: rgba(52, 168, 83, 0.2);
-  --proof-indigo: #6366f1;
-  --proof-indigo-bg: rgba(99, 102, 241, 0.1);
-  --proof-indigo-border: rgba(99, 102, 241, 0.2);
-  --proof-teal: #0d9488;
-  --proof-teal-bg: rgba(13, 148, 136, 0.1);
-  --proof-teal-border: rgba(13, 148, 136, 0.2);
   --proof-grey: #94a3b8;
   --proof-grey-bg: rgba(148, 163, 184, 0.1);
   --proof-blue-hover: #3b77e0;
@@ -284,6 +253,13 @@ html { scroll-behavior: smooth; }
   --color-gcp-yellow-border-val: rgba(249, 171, 0, 0.2);
   --color-gcp-border-strong-val: rgba(0, 0, 0, 0.2);
   --color-gcp-purple-val: #7c3aed;
+
+  --proof-blue-glow: rgba(66, 133, 244, 0.2);
+
+  /* Glow effects — lighter for light theme */
+  --proof-glow-green: 0 0 20px rgba(52, 168, 83, 0.15);
+  --proof-glow-red: 0 0 20px rgba(234, 67, 53, 0.15);
+  --proof-glow-amber: 0 0 20px rgba(251, 188, 5, 0.15);
 }
 
 html, body {
@@ -304,11 +280,11 @@ html, body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(66, 133, 244, 0.25);
+  background: color-mix(in srgb, var(--proof-blue) 25%, transparent);
   border-radius: var(--proof-radius-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(66, 133, 244, 0.4);
+  background: color-mix(in srgb, var(--proof-blue) 40%, transparent);
 }
 
 /* Text Selection */
@@ -339,8 +315,8 @@ html, body {
 }
 
 .glow-border-cyan {
-  box-shadow: var(--proof-glow-cyan);
-  border-color: rgba(0, 196, 255, 0.3);
+  box-shadow: 0 0 24px rgba(66, 133, 244, 0.2);
+  border-color: rgba(66, 133, 244, 0.3);
 }
 
 .glow-border-red {
@@ -524,18 +500,13 @@ html, body {
   }
 }
 
-/* Animations */
+/* Animations — consolidate: only fade-in (opacity) and fade-up (opacity + 10px Y) */
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-up {
+@keyframes fade-up {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
@@ -591,21 +562,11 @@ html, body {
   50% { opacity: 1; }
 }
 
-@keyframes page-enter {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 @media (max-width: 640px) {
   .proof-page { --proof-page-px: 12px; --proof-page-py: 16px; }
 }
 @media (min-width: 641px) and (max-width: 1024px) {
   .proof-page { --proof-page-px: 20px; --proof-page-py: 24px; }
-}
-
-@keyframes proof-slide-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes toast-progress {
@@ -629,7 +590,7 @@ html, body {
 }
 
 .animate-fade-in { animation: fade-in var(--proof-transition) forwards; }
-.animate-slide-up { animation: slide-up var(--proof-transition) forwards; }
+.animate-fade-up { animation: fade-up var(--proof-transition) forwards; }
 .animate-scale-in { animation: scale-in var(--proof-transition) forwards; }
 .animate-spin { animation: spin 1s linear infinite; }
 .animate-shimmer {
@@ -661,48 +622,7 @@ html, body {
   gap: 0.25rem;
 }
 
-/* Alternate button naming (proof-button-*) as alias — actual CSS rules */
-.proof-button-primary {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--proof-radius-md);
-  font-weight: 500; transition: all var(--proof-transition);
-  cursor: pointer; border: 1px solid transparent; font-size: 0.875rem;
-  background: var(--proof-blue); color: #fff;
-}
-.proof-button-primary:hover { background: var(--proof-blue-bright); box-shadow: 0 0 12px var(--proof-blue-glow); }
-.proof-button-ghost {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--proof-radius-md);
-  font-weight: 500; transition: all var(--proof-transition);
-  cursor: pointer; border: 1px solid transparent; font-size: 0.875rem;
-  background: transparent; color: var(--proof-text);
-}
-.proof-button-ghost:hover { background: var(--proof-surface-hover); }
-.proof-button-sm {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 0.25rem; padding: 0.25rem 0.625rem; border-radius: var(--proof-radius-md);
-  font-weight: 500; transition: all var(--proof-transition);
-  cursor: pointer; border: 1px solid transparent; font-size: 0.75rem;
-  background: transparent; color: var(--proof-text);
-}
-.proof-button-sm:hover { background: var(--proof-surface-hover); }
-.proof-button-xs {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 0.25rem; padding: 0.125rem 0.5rem; border-radius: var(--proof-radius-md);
-  font-weight: 500; transition: all var(--proof-transition);
-  cursor: pointer; border: 1px solid transparent; font-size: 0.6875rem;
-  background: transparent; color: var(--proof-text);
-}
-.proof-button-xs:hover { background: var(--proof-surface-hover); }
-/* Combined proof-button (base) */
-.proof-button {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--proof-radius-md);
-  font-weight: 500; transition: all var(--proof-transition);
-  cursor: pointer; border: 1px solid transparent; font-size: 0.875rem;
-  background: transparent; color: var(--proof-text);
-}
-.proof-button:hover { background: var(--proof-surface-hover); }
+
 
 /* Table classes used by FilterableTable */
 .proof-th {
@@ -1015,14 +935,6 @@ html, body {
   border-color: var(--proof-blue-border);
   backdrop-filter: blur(8px);
 }
-
-/* ── Stagger delay extensions (7–12) ─────────────── */
-.proof-stagger-7 { animation-delay: 0.35s; }
-.proof-stagger-8 { animation-delay: 0.40s; }
-.proof-stagger-9 { animation-delay: 0.45s; }
-.proof-stagger-10 { animation-delay: 0.50s; }
-.proof-stagger-11 { animation-delay: 0.55s; }
-.proof-stagger-12 { animation-delay: 0.60s; }
 
 /* ── Glow intensity scales ───────────────────────── */
 .proof-glow-sm {

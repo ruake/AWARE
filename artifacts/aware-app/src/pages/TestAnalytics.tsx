@@ -6,15 +6,8 @@ import { loadRuns, PASS_RATE_CHART, RUNS } from "@/lib/runs";
 import type { Run } from "@/lib/types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { fadeUp, staggerContainer, fadeIn } from "@/lib/motion";
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-  return debouncedValue;
-}
+import { useDebounce } from "@/hooks/useDebounce";
+import { PageWrapper } from '@/components/PageWrapper';
 
 const PassRateMiniChart = memo(function PassRateMiniChart({ data }: { data: { label: string; passRate: number }[] }) {
   return (
@@ -171,7 +164,8 @@ export default function TestAnalytics() {
   if (loading) return <LoadingSpinner label="Loading telemetry…" />;
 
   return (
-    <div style={{ padding: "24px", maxWidth: "1600px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>
+    <PageWrapper className="proof-page">
+      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* Page Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <div>
@@ -404,6 +398,7 @@ export default function TestAnalytics() {
         </div>
         <RunFrequencyChart data={frequencyData} />
       </motion.div>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }

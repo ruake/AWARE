@@ -94,7 +94,7 @@ export default function Dashboard() {
   if (loading) return <LoadingSpinner label="Loading telemetry…" />;
 
   return (
-    <PageWrapper className="px-6 py-6 space-y-8">
+    <PageWrapper className="proof-page space-y-8">
       {/* Property Status Bar */}
       <motion.div
         initial={{ opacity: 0, y: -6 }}

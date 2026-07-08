@@ -373,7 +373,7 @@ export default function Compare() {
   }
 
   return (
-    <PageWrapper className="px-6 py-6 space-y-6">
+    <PageWrapper className="proof-page space-y-6">
       {/* Run selector area */}
       <div className="space-y-5">
         <div className="flex items-center gap-3">

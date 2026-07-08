@@ -74,7 +74,7 @@ export default function Runs() {
   if (loading) return <LoadingSpinner label="Loading runs…" />;
 
   return (
-    <PageWrapper className="px-6 py-6 space-y-5 relative">
+    <PageWrapper className="proof-page space-y-5 relative">
       {/* Decorative gradient accent bar */}
       <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-gcp-blue via-gcp-blue/40 via-gcp-blue/10 to-transparent rounded-t-lg" />
 
