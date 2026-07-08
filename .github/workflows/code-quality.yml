@@ -44,6 +44,8 @@ jobs:
         run: pnpm run format
       - name: TypeScript check
         run: pnpm run typecheck
+      - name: Unit tests
+        run: pnpm test -- --run
 
   audit:
     name: Dependency Audit

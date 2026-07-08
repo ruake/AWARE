@@ -2,8 +2,8 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
-    "types": ["node"]
+    "allowJs": true,
+    "checkJs": false
   },
-  "include": ["src"]
+  "include": ["./package.json"]
 }
