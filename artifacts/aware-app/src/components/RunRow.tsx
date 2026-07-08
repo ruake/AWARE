@@ -1,36 +1,22 @@
 import React from 'react';
 import { Link } from 'wouter';
+import { motion } from 'framer-motion';
 import { StatusBadge } from '@/components/StatusBadge';
+import { envBadgeClass } from '@/lib/envStyles';
+import { relativeTime } from '@/lib/utils';
 import type { Run } from '@/lib/types';
-
-const ENV_STYLE: Record<string, string> = {
-  QA:   'bg-gcp-yellow/15 text-gcp-yellow-light border border-gcp-yellow/25',
-  UAT:  'bg-gcp-blue/15 text-gcp-blue-light border border-gcp-blue/25',
-  PROD: 'bg-gcp-green/15 text-gcp-green-light border border-gcp-green/25',
-};
-
-function relativeTime(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const min = Math.floor(diff / 60000);
-  if (min < 60) return `${min}m ago`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}h ago`;
-  return `${Math.floor(hr / 24)}d ago`;
-}
 
 export const RunRow = React.memo(function RunRow({ run }: { run: Run }) {
   return (
     <tr className="group hover:bg-gcp-elevated/40 transition-colors">
       <td className="px-4 py-3">
-        <Link href={`/runs/${run.id}`}>
-          <a className="group-hover:text-gcp-blue transition-colors">
-            <div className="font-mono text-xs text-gcp-text">{run.id}</div>
-            <div className="text-xs text-gcp-text-muted mt-0.5">{run.label}</div>
-          </a>
+        <Link href={`/runs/${run.id}`} className="group-hover:text-gcp-blue transition-colors">
+          <div className="font-mono text-xs text-gcp-text">{run.id}</div>
+          <div className="text-xs text-gcp-text-muted mt-0.5">{run.label}</div>
         </Link>
       </td>
       <td className="px-4 py-3">
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${ENV_STYLE[run.env] ?? ''}`}>
+        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${envBadgeClass(run.env)}`}>
           {run.env}
         </span>
       </td>
@@ -41,9 +27,11 @@ export const RunRow = React.memo(function RunRow({ run }: { run: Run }) {
             {run.passPct}%
           </span>
           <div className="w-16 h-1.5 rounded-full bg-gcp-elevated overflow-hidden">
-            <div
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${run.passPct}%` }}
+              transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.1 }}
               className={`h-full rounded-full transition-all ${run.passPct >= 95 ? 'bg-gcp-green' : run.passPct >= 80 ? 'bg-gcp-yellow' : 'bg-gcp-red'}`}
-              style={{ width: `${run.passPct}%` }}
             />
           </div>
         </div>

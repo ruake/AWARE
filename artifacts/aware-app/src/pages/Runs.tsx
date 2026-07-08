@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState, useDeferredValue, useTransition } from 'react';
 import { useSearch } from 'wouter';
 import { Search, List } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { loadRuns } from '@/lib/data';
 import type { Env, Run, RunStatus } from '@/lib/types';
 import { RunRow } from '@/components/RunRow';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { PageWrapper } from '@/components/PageWrapper';
 import { useSort, sortData, SortHeader } from '@/lib/sortableTable';
+import { fadeDown, fastStagger, fadeUp } from '@/lib/motion';
 
 const PAGE_SIZE = 25;
 
@@ -67,17 +71,10 @@ export default function Runs() {
     PROD: runs.filter(r => r.env === 'PROD').length,
   }), [runs]);
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-6 h-6 border-2 border-gcp-blue/30 border-t-gcp-blue rounded-full animate-spin" />
-        <span className="text-sm text-gcp-text-muted">Loading runs…</span>
-      </div>
-    </div>
-  );
+  if (loading) return <LoadingSpinner label="Loading runs…" />;
 
   return (
-    <div className="px-6 py-6 space-y-5">
+    <PageWrapper className="px-6 py-6 space-y-5">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gcp-blue/10 border border-gcp-blue/20">
@@ -90,7 +87,12 @@ export default function Runs() {
       </div>
 
       {/* Filter bar */}
-      <div className="flex items-center gap-4 flex-wrap">
+      <motion.div 
+        variants={fadeDown} 
+        initial="hidden" 
+        animate="visible"
+        className="flex items-center gap-4 flex-wrap"
+      >
         {/* Env toggles */}
         <div className="flex items-center gap-1.5">
           {(['ALL', 'QA', 'UAT', 'PROD'] as const).map(e => (
@@ -128,7 +130,7 @@ export default function Runs() {
             className="w-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-sm rounded-md pl-8 pr-3 py-1.5 placeholder:text-gcp-text-muted focus:outline-none focus:border-gcp-blue/50 focus:ring-1 focus:ring-gcp-blue/20 transition-colors"
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats strip */}
       <div className="text-xs text-gcp-text-muted flex items-center gap-4">
@@ -139,7 +141,12 @@ export default function Runs() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-gcp-border overflow-hidden">
+      <motion.div 
+        variants={fadeUp} 
+        initial="hidden" 
+        animate="visible"
+        className="rounded-lg border border-gcp-border overflow-hidden"
+      >
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gcp-surface/80 border-b border-gcp-border">
@@ -153,9 +160,14 @@ export default function Runs() {
               <SortHeader label="Status" sortKey="status" currentSort={sort} onToggle={toggle} />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gcp-border/70">
+          <motion.tbody 
+            variants={fastStagger} 
+            initial="hidden" 
+            animate="visible"
+            className="divide-y divide-gcp-border/70"
+          >
             {paged.map(r => <RunRow key={r.id} run={r} />)}
-          </tbody>
+          </motion.tbody>
         </table>
         {deferredSorted.length === 0 && (
           <div className="py-16 text-center">
@@ -168,7 +180,12 @@ export default function Runs() {
         )}
         {/* Pagination */}
         {pageCount > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gcp-border bg-gcp-surface/50">
+          <motion.div 
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="flex items-center justify-between px-4 py-3 border-t border-gcp-border bg-gcp-surface/50"
+          >
             <span className="text-xs text-gcp-text-muted">Page {page} of {pageCount} · {deferredSorted.length} items</span>
             <div className="flex items-center gap-1">
               <button onClick={() => setPage(1)} disabled={page === 1} className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors">«</button>
@@ -181,9 +198,9 @@ export default function Runs() {
               <button onClick={() => setPage(p => p + 1)} disabled={page === pageCount} className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors">›</button>
               <button onClick={() => setPage(pageCount)} disabled={page === pageCount} className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors">»</button>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </PageWrapper>
   );
 }

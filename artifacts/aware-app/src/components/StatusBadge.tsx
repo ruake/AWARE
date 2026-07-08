@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import type { RunStatus } from '@/lib/types';
 
 const CONFIG: Record<string, { dot: string; text: string; bg: string; border: string }> = {
@@ -13,9 +14,18 @@ const CONFIG: Record<string, { dot: string; text: string; bg: string; border: st
 export const StatusBadge = React.memo(function StatusBadge({ status, size = 'md' }: { status: RunStatus | string; size?: 'sm' | 'md' }) {
   const c = CONFIG[status] ?? CONFIG.PENDING;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono font-semibold ${c.bg} ${c.border} ${size === 'sm' ? 'text-[10px]' : 'text-xs'} ${c.text}`}>
-      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${c.dot}`} />
+    <motion.span 
+      initial={{ opacity: 0, scale: 0.85 }} 
+      animate={{ opacity: 1, scale: 1 }} 
+      transition={{ duration: 0.15, ease: 'easeOut' }}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded border font-mono font-semibold ${c.bg} ${c.border} ${size === 'sm' ? 'text-[10px]' : 'text-xs'} ${c.text}`}
+    >
+      <motion.span 
+        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${c.dot}`}
+        animate={status === 'RUNNING' ? { opacity: [1, 0.35, 1] } : undefined}
+        transition={status === 'RUNNING' ? { repeat: Infinity, duration: 1.4, ease: 'easeInOut' } : undefined}
+      />
       {status}
-    </span>
+    </motion.span>
   );
 });

@@ -1,19 +1,17 @@
 import React, { useEffect, useMemo, useState, useDeferredValue, useTransition } from 'react';
 import { useParams, Link } from 'wouter';
 import { ChevronDown, ChevronRight, CheckCircle2, XCircle, Clock, ArrowRight, Search, ExternalLink, Cookie, FileText } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { collapseHeight, fastStagger, fadeUp } from '@/lib/motion';
+import { envStatusClass } from '@/lib/envStyles';
 import { loadRuns, loadResults, loadTestCases, getTestCaseById } from '@/lib/data';
 import { getGitHubUrl } from '@/lib/utils';
 import type { Run, TestResult, TestCase } from '@/lib/types';
 import { StatusBadge } from '@/components/StatusBadge';
+import { PageWrapper } from '@/components/PageWrapper';
 import { useSort, sortData, SortHeader } from '@/lib/sortableTable';
 
 const PAGE_SIZE = 50;
-
-const ENV_STYLE: Record<string, string> = {
-  QA:   'bg-gcp-yellow/15 text-gcp-yellow-light border border-gcp-yellow/25',
-  UAT:  'bg-gcp-blue/15 text-gcp-blue-light border border-gcp-blue/25',
-  PROD: 'bg-gcp-green/15 text-gcp-green-light border border-gcp-green/25',
-};
 
 const CollapsibleSection = React.memo(function CollapsibleSection({
   icon: Icon,
@@ -44,11 +42,20 @@ const CollapsibleSection = React.memo(function CollapsibleSection({
         </div>
         {open ? <ChevronDown size={14} className="text-gcp-text-muted" /> : <ChevronRight size={14} className="text-gcp-text-muted" />}
       </button>
-      {open && (
-        <div className="px-4 pb-4 max-h-64 overflow-y-auto">
-          {children}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            variants={collapseHeight}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="px-4 pb-4 max-h-64 overflow-y-auto"
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 });
@@ -296,9 +303,7 @@ export default function RunDetail() {
       <div className="px-6 py-6 space-y-4">
         <div className="text-gcp-text-secondary space-y-4">
           <p>Run not found</p>
-          <Link href="/runs">
-            <a className="text-gcp-blue hover:text-gcp-blue-light transition-colors">← Back to Runs</a>
-          </Link>
+          <Link href="/runs" className="text-gcp-blue hover:text-gcp-blue-light transition-colors">← Back to Runs</Link>
         </div>
       </div>
     );
@@ -308,22 +313,20 @@ export default function RunDetail() {
   const barColor = run.passPct >= 95 ? 'bg-gcp-green' : run.passPct >= 80 ? 'bg-gcp-yellow' : 'bg-gcp-red';
 
   return (
-    <div className="flex flex-col min-h-screen bg-gcp-bg text-gcp-text">
+    <PageWrapper className="flex flex-col min-h-screen bg-gcp-bg text-gcp-text">
       {/* Back link */}
       <div className="px-6 py-4 border-b border-gcp-border">
-        <Link href="/runs">
-          <a className="text-xs text-gcp-text-secondary hover:text-gcp-text transition-colors flex items-center gap-1.5">
-            <span>←</span>
-            <span>Runs</span>
-            <span className="text-gcp-text-muted">›</span>
-            <span className="font-mono">{run.id}</span>
-          </a>
+        <Link href="/runs" className="text-xs text-gcp-text-secondary hover:text-gcp-text transition-colors flex items-center gap-1.5">
+          <span>←</span>
+          <span>Runs</span>
+          <span className="text-gcp-text-muted">›</span>
+          <span className="font-mono">{run.id}</span>
         </Link>
       </div>
 
       {/* Run header stat chips */}
       <div className="px-6 py-5 bg-gcp-surface border-b border-gcp-border flex items-center gap-4 flex-wrap">
-        <span className={`px-2.5 py-1 rounded-md text-xs font-mono font-semibold ${ENV_STYLE[run.env]}`}>
+        <span className={`px-2.5 py-1 rounded-md text-xs font-mono font-semibold ${envStatusClass(run.env)}`}>
           {run.env}
         </span>
         <div className="flex items-center gap-2">
@@ -398,11 +401,17 @@ export default function RunDetail() {
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gcp-text-muted" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gcp-border/70">
+            <motion.tbody
+              className="divide-y divide-gcp-border/70"
+              variants={page === 1 ? fastStagger : undefined}
+              initial="hidden"
+              animate="visible"
+            >
               {paged.length > 0 ? (
                 paged.map(result => (
                   <React.Fragment key={result.id}>
-                    <tr
+                    <motion.tr
+                      variants={page === 1 ? fadeUp : undefined}
                       onClick={() => setExpandedId(expandedId === result.id ? null : result.id)}
                       className={`cursor-pointer transition-colors ${result.status === 'FAIL' ? 'bg-gcp-red/10' : ''} hover:bg-gcp-elevated/40`}
                     >
@@ -437,7 +446,7 @@ export default function RunDetail() {
                           className={`transition-transform ${expandedId === result.id ? 'rotate-180' : ''}`}
                         />
                       </td>
-                    </tr>
+                    </motion.tr>
                     {expandedId === result.id && (
                       <tr className="bg-gcp-surface/50 border-b border-gcp-border">
                         <td colSpan={5} className="px-6 py-4">
@@ -463,7 +472,7 @@ export default function RunDetail() {
                   </td>
                 </tr>
               )}
-            </tbody>
+            </motion.tbody>
           </table>
 
           {/* Pagination */}
@@ -523,6 +532,6 @@ export default function RunDetail() {
           )}
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

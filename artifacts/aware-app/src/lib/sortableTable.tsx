@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ArrowUp, ArrowDown, Search } from 'lucide-react';
 
 export type SortDir = 'asc' | 'desc';
@@ -19,18 +19,34 @@ export function useSort(initialKey: string, initialDir: SortDir = 'desc') {
   return { sort, toggle, setSort };
 }
 
-export function sortData<T>(data: T[], sort: SortState, accessors: Record<string, (item: T) => string | number>): T[] {
-  return useMemo(() => {
-    const fn = accessors[sort.key];
-    if (!fn) return data;
-    return [...data].sort((a, b) => {
-      const va = fn(a);
-      const vb = fn(b);
-      const cmp = va < vb ? -1 : va > vb ? 1 : 0;
-      return sort.dir === 'asc' ? cmp : -cmp;
-    });
-  }, [data, sort.key, sort.dir, accessors]);
+export function sortItems<T>(
+  data: T[],
+  sort: SortState,
+  accessors: Record<string, (item: T) => string | number>,
+): T[] {
+  const fn = accessors[sort.key];
+  if (!fn) return data;
+  return [...data].sort((a, b) => {
+    const va = fn(a);
+    const vb = fn(b);
+    const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+    return sort.dir === 'asc' ? cmp : -cmp;
+  });
 }
+
+export function useSortData<T>(
+  data: T[],
+  sort: SortState,
+  accessors: Record<string, (item: T) => string | number>,
+): T[] {
+  return React.useMemo(
+    () => sortItems(data, sort, accessors),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data, sort.key, sort.dir],
+  );
+}
+
+export { useSortData as sortData };
 
 export function SortHeader({
   label,

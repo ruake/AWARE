@@ -1,10 +1,14 @@
 import { memo, useEffect, useDeferredValue, useMemo, useState } from 'react';
 import { BarChart3, AlertTriangle, TrendingUp, Globe } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { loadRuns } from '@/lib/data';
 import type { Run } from '@/lib/types';
 import { EnvTile } from '@/components/EnvTile';
 import { RunRow } from '@/components/RunRow';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { PageWrapper } from '@/components/PageWrapper';
 import { useSort, sortData, SortHeader } from '@/lib/sortableTable';
+import { staggerContainer, slowStagger, fadeUp, scaleIn } from '@/lib/motion';
 
 const KpiCard = memo(function KpiCard({ icon: Icon, label, value, sub, color }: {
   icon: React.ElementType; label: string; value: string | number; sub?: string;
@@ -76,37 +80,58 @@ export default function Dashboard() {
     (!envFilter || r.env.toLowerCase().includes(envFilter.toLowerCase()))
   );
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-6 h-6 border-2 border-gcp-blue/30 border-t-gcp-blue rounded-full animate-spin" />
-        <span className="text-sm text-gcp-text-muted">Loading telemetry…</span>
-      </div>
-    </div>
-  );
+  if (loading) return <LoadingSpinner label="Loading telemetry…" />;
 
   return (
-    <div className="px-6 py-6 space-y-8">
+    <PageWrapper className="px-6 py-6 space-y-8">
       {/* KPI row */}
-      <div className="grid grid-cols-4 gap-4">
-        <KpiCard icon={BarChart3}     label="Total Runs"      value={kpis.totalRuns}    color="sky"     />
-        <KpiCard icon={AlertTriangle} label="Total Failures"  value={kpis.totalFailures} color="rose"    sub={kpis.totalFailures > 0 ? 'across all runs' : 'clean run history'} />
-        <KpiCard icon={TrendingUp}    label="Avg Pass Rate"   value={`${kpis.avgPass}%`} color="emerald" />
-        <KpiCard icon={Globe}         label="Environments"    value={3}                  color="amber"   sub="QA · UAT · PROD" />
-      </div>
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-4 gap-4"
+      >
+        <motion.div variants={fadeUp}>
+          <KpiCard icon={BarChart3}     label="Total Runs"      value={kpis.totalRuns}    color="sky"     />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <KpiCard icon={AlertTriangle} label="Total Failures"  value={kpis.totalFailures} color="rose"    sub={kpis.totalFailures > 0 ? 'across all runs' : 'clean run history'} />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <KpiCard icon={TrendingUp}    label="Avg Pass Rate"   value={`${kpis.avgPass}%`} color="emerald" />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <KpiCard icon={Globe}         label="Environments"    value={3}                  color="amber"   sub="QA · UAT · PROD" />
+        </motion.div>
+      </motion.div>
 
       {/* Env tiles */}
       <div>
         <h2 className="text-xs font-semibold uppercase tracking-widest text-gcp-text-muted mb-3">Environment Health</h2>
-        <div className="grid grid-cols-3 gap-4">
-          <EnvTile env="QA"   runs={byEnv.QA} />
-          <EnvTile env="UAT"  runs={byEnv.UAT} />
-          <EnvTile env="PROD" runs={byEnv.PROD} />
-        </div>
+        <motion.div
+          variants={slowStagger}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-3 gap-4"
+        >
+          <motion.div variants={scaleIn}>
+            <EnvTile env="QA"   runs={byEnv.QA} />
+          </motion.div>
+          <motion.div variants={scaleIn}>
+            <EnvTile env="UAT"  runs={byEnv.UAT} />
+          </motion.div>
+          <motion.div variants={scaleIn}>
+            <EnvTile env="PROD" runs={byEnv.PROD} />
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* Recent runs */}
-      <div>
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+      >
         <h2 className="text-xs font-semibold uppercase tracking-widest text-gcp-text-muted mb-3">Recent Runs</h2>
         <div className="rounded-lg border border-gcp-border overflow-hidden">
           <table className="w-full text-sm">
@@ -127,7 +152,7 @@ export default function Dashboard() {
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </PageWrapper>
   );
 }

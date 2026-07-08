@@ -1,10 +1,14 @@
 import React, { useEffect, useMemo, useState, useRef, useTransition } from 'react';
 import { useSearch } from 'wouter';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingDown, TrendingUp, Minus, Plus, ChevronDown, CheckCircle2, XCircle, ExternalLink, Check } from 'lucide-react';
 import { loadRuns, loadAllResults, loadTestCases, getTestCaseById } from '@/lib/data';
 import { getGitHubUrl } from '@/lib/utils';
+import { dropDown, fastStagger, fadeUp } from '@/lib/motion';
+import { envSelectClass } from '@/lib/envStyles';
 import type { Run, TestResult } from '@/lib/types';
 import { StatusBadge } from '@/components/StatusBadge';
+import { PageWrapper } from '@/components/PageWrapper';
 import { useSort, sortData, SortHeader } from '@/lib/sortableTable';
 
 type DiffRow = {
@@ -40,13 +44,6 @@ function CompositeSelect({
   const sorted = useMemo(() => [...runs].sort((a, b) => b.started.localeCompare(a.started)), [runs]);
   const selected = runs.find(r => r.id === value);
 
-  const envColor = (env: string) => {
-    if (env === 'QA') return 'bg-gcp-blue/20 text-gcp-blue-light border-gcp-blue/30';
-    if (env === 'UAT') return 'bg-gcp-yellow/20 text-gcp-yellow-light border-gcp-yellow/30';
-    if (env === 'PROD') return 'bg-gcp-green/20 text-gcp-green-light border-gcp-green/30';
-    return 'bg-gcp-text-muted/20 text-gcp-text-secondary border-gcp-text-muted/30';
-  };
-
   return (
     <div className="relative" ref={ref}>
       <label className="block text-xs font-semibold uppercase tracking-widest text-gcp-text-muted mb-2">{label}</label>
@@ -56,7 +53,7 @@ function CompositeSelect({
       >
         {selected ? (
           <div className="flex items-center gap-2 min-w-0">
-            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border flex-shrink-0 ${envColor(selected.env)}`}>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border flex-shrink-0 ${envSelectClass(selected.env)}`}>
               {selected.env}
             </span>
             <span className="truncate">{selected.label}</span>
@@ -69,33 +66,43 @@ function CompositeSelect({
         )}
         <ChevronDown size={14} className={`text-gcp-text-muted flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
-      {open && (
-        <div className="absolute z-50 mt-1 w-full bg-gcp-elevated border border-gcp-border-soft rounded-md shadow-lg max-h-72 overflow-y-auto">
-          {sorted.map(r => {
-            const isSelected = r.id === value;
-            return (
-              <button
-                key={r.id}
-                onClick={() => { onChange(r.id); setOpen(false); }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors hover:bg-gcp-surface/60 border-b border-gcp-border/30 last:border-b-0 ${
-                  isSelected ? 'bg-gcp-blue/10' : ''
-                }`}
-              >
-                <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border flex-shrink-0 ${envColor(r.env)}`}>
-                  {r.env}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-gcp-text truncate">{r.label}</div>
-                  <div className="text-gcp-text-muted text-[11px]">
-                    {r.suiteId.replace('suite_', '')} · {new Date(r.started).toLocaleDateString()} {new Date(r.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="dropdown"
+            variants={dropDown}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            style={{ transformOrigin: 'top' }}
+            className="absolute z-50 mt-1 w-full bg-gcp-elevated border border-gcp-border-soft rounded-md shadow-lg max-h-72 overflow-y-auto"
+          >
+            {sorted.map(r => {
+              const isSelected = r.id === value;
+              return (
+                <button
+                  key={r.id}
+                  onClick={() => { onChange(r.id); setOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors hover:bg-gcp-surface/60 border-b border-gcp-border/30 last:border-b-0 ${
+                    isSelected ? 'bg-gcp-blue/10' : ''
+                  }`}
+                >
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border flex-shrink-0 ${envSelectClass(r.env)}`}>
+                    {r.env}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-gcp-text truncate">{r.label}</div>
+                    <div className="text-gcp-text-muted text-[11px]">
+                      {r.suiteId.replace('suite_', '')} · {new Date(r.started).toLocaleDateString()} {new Date(r.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
                   </div>
-                </div>
-                {isSelected && <Check size={14} className="text-gcp-blue flex-shrink-0" />}
-              </button>
-            );
-          })}
-        </div>
-      )}
+                  {isSelected && <Check size={14} className="text-gcp-blue flex-shrink-0" />}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -331,7 +338,7 @@ export default function Compare() {
   }
 
   return (
-    <div className="px-6 py-6 space-y-6">
+    <PageWrapper className="px-6 py-6 space-y-6">
       {/* Run selector area */}
       <div className="space-y-4">
         <h1 className="text-xl font-semibold tracking-tight text-gcp-text">Compare Runs</h1>
@@ -489,10 +496,16 @@ export default function Compare() {
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gcp-text-muted" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gcp-border/70">
+            <motion.tbody
+              variants={fastStagger}
+              initial="hidden"
+              animate="visible"
+              className="divide-y divide-gcp-border/70"
+            >
               {paged.map(d => (
                 <React.Fragment key={d.name}>
-                  <tr
+                  <motion.tr
+                    variants={fadeUp}
                     onClick={() => setExpandedId(expandedId === d.name ? null : d.name)}
                     className={`cursor-pointer transition-colors hover:bg-gcp-elevated/40 ${
                       d.change === 'REGRESSED' ? 'bg-gcp-red/10' : d.change === 'FIXED' ? 'bg-gcp-green/10' : ''
@@ -539,7 +552,7 @@ export default function Compare() {
                     <td className="px-4 py-3 text-gcp-text-muted">
                       <ChevronDown size={14} className={`transition-transform ${expandedId === d.name ? 'rotate-180' : ''}`} />
                     </td>
-                  </tr>
+                  </motion.tr>
                   {expandedId === d.name && (
                     <tr className="bg-gcp-surface/50">
                       <td colSpan={6} className="px-6 py-4 border-b border-gcp-border">
@@ -549,7 +562,7 @@ export default function Compare() {
                   )}
                 </React.Fragment>
               ))}
-            </tbody>
+            </motion.tbody>
           </table>
 
           {filtered.length === 0 && (
@@ -621,6 +634,6 @@ export default function Compare() {
           )}
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }

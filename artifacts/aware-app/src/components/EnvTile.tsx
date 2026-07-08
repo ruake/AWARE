@@ -1,23 +1,16 @@
 import { memo } from 'react';
 import { Link } from 'wouter';
+import { motion } from 'framer-motion';
 import { Server, FlaskConical, TestTube2 } from 'lucide-react';
 import type { Env, Run } from '@/lib/types';
 import { StatusBadge } from '@/components/StatusBadge';
+import { relativeTime } from '@/lib/utils';
 
 const ENV_CONFIG = {
   QA:   { icon: FlaskConical, label: 'Quality Assurance', accent: 'border-t-gcp-yellow/60',  iconBg: 'bg-gcp-yellow/10',  iconColor: 'text-gcp-yellow' },
   UAT:  { icon: TestTube2,    label: 'User Acceptance',   accent: 'border-t-gcp-blue/60',     iconBg: 'bg-gcp-blue/10',    iconColor: 'text-gcp-blue' },
   PROD: { icon: Server,       label: 'Production',        accent: 'border-t-gcp-green/60', iconBg: 'bg-gcp-green/10',iconColor: 'text-gcp-green' },
 };
-
-function relativeTime(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const min = Math.floor(diff / 60000);
-  if (min < 60) return `${min}m ago`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}h ago`;
-  return `${Math.floor(hr / 24)}d ago`;
-}
 
 export const EnvTile = memo(function EnvTile({ env, runs }: { env: Env; runs: Run[] }) {
   const cfg = ENV_CONFIG[env];
@@ -29,8 +22,15 @@ export const EnvTile = memo(function EnvTile({ env, runs }: { env: Env; runs: Ru
   const barColor = avgPass === null ? 'bg-gcp-border' : avgPass >= 95 ? 'bg-gcp-green' : avgPass >= 80 ? 'bg-gcp-yellow' : 'bg-gcp-red';
 
   return (
-    <Link href={`/runs?env=${env}`}>
-      <a className={`block rounded-lg border border-gcp-border border-t-2 ${cfg.accent} bg-gcp-surface p-5 hover:bg-gcp-elevated/60 transition-colors cursor-pointer`}>
+    <motion.div
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+    >
+      <Link
+        href={`/runs?env=${env}`}
+        className={`block rounded-lg border border-gcp-border border-t-2 ${cfg.accent} bg-gcp-surface p-5 hover:bg-gcp-elevated/60 transition-colors cursor-pointer`}
+      >
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-gcp-text-muted mb-1">{cfg.label}</div>
@@ -45,7 +45,12 @@ export const EnvTile = memo(function EnvTile({ env, runs }: { env: Env; runs: Ru
 
         {/* Progress bar */}
         <div className="w-full h-1.5 rounded-full bg-gcp-elevated mb-4 overflow-hidden">
-          <div className={`h-full rounded-full ${barColor}`} style={{ width: `${avgPass ?? 0}%` }} />
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${avgPass ?? 0}%` }}
+            transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.15 }}
+            className={`h-full rounded-full ${barColor}`}
+          />
         </div>
 
         <div className="flex items-center justify-between">
@@ -55,7 +60,7 @@ export const EnvTile = memo(function EnvTile({ env, runs }: { env: Env; runs: Ru
           </div>
           {latest && <StatusBadge status={latest.status} size="sm" />}
         </div>
-      </a>
-    </Link>
+      </Link>
+    </motion.div>
   );
 });

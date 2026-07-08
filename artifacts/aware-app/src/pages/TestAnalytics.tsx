@@ -1,8 +1,11 @@
 import { useState, useMemo, useDeferredValue, useTransition, memo, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { BarChart2, TrendingUp, TrendingDown, Activity, Zap, Download, AlertCircle, Search, Globe } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { getRuns } from "@/lib/runsLoader";
 import { PASS_RATE_CHART } from "@/lib/runs";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { fadeUp, staggerContainer, fadeIn } from "@/lib/motion";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -195,9 +198,14 @@ export default function TestAnalytics() {
       </div>
 
       {/* Top Metrics Row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+      <motion.div 
+        variants={staggerContainer} 
+        initial="hidden" 
+        animate="visible"
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}
+      >
         {/* Global Pass Rate */}
-        <div className="glass-panel" style={{ padding: 24, borderRadius: "var(--proof-radius-lg)", position: "relative", overflow: "hidden" }}>
+        <motion.div variants={fadeUp} className="glass-panel" style={{ padding: 24, borderRadius: "var(--proof-radius-lg)", position: "relative", overflow: "hidden" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
             <div>
               <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Global Pass Rate</div>
@@ -221,10 +229,10 @@ export default function TestAnalytics() {
             </div>
           </div>
           <PassRateMiniChart data={last10} />
-        </div>
+        </motion.div>
 
         {/* Failure Rate */}
-        <div className="glass-panel" style={{ padding: 24, borderRadius: "var(--proof-radius-lg)", position: "relative", overflow: "hidden" }}>
+        <motion.div variants={fadeUp} className="glass-panel" style={{ padding: 24, borderRadius: "var(--proof-radius-lg)", position: "relative", overflow: "hidden" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
             <div>
               <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Failure Rate</div>
@@ -237,10 +245,10 @@ export default function TestAnalytics() {
             </div>
           </div>
           <FailureMiniChart data={last10} />
-        </div>
+        </motion.div>
 
         {/* Run Velocity */}
-        <div className="glass-panel" style={{ padding: 24, borderRadius: "var(--proof-radius-lg)", position: "relative", overflow: "hidden" }}>
+        <motion.div variants={fadeUp} className="glass-panel" style={{ padding: 24, borderRadius: "var(--proof-radius-lg)", position: "relative", overflow: "hidden" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
             <div>
               <div style={{ fontSize: 11, color: "var(--proof-text-secondary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Run Velocity</div>
@@ -253,11 +261,17 @@ export default function TestAnalytics() {
             </div>
           </div>
           <VelocityMiniChart data={frequencyData} />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Category Distribution */}
-      <div className="glass-panel" style={{ padding: 24, borderRadius: "var(--proof-radius-lg)" }}>
+      <motion.div 
+        variants={fadeUp} 
+        initial="hidden" 
+        animate="visible" 
+        className="glass-panel" 
+        style={{ padding: 24, borderRadius: "var(--proof-radius-lg)" }}
+      >
         <div style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
           <Globe size={16} style={{ color: "var(--proof-blue)" }} />
           ENVIRONMENT DISTRIBUTION
@@ -277,16 +291,27 @@ export default function TestAnalytics() {
             );
           })}
         </div>
-      </div>
+      </motion.div>
 
       {/* Flakiness Section */}
-      <div className="glass-panel" style={{ padding: 24, borderRadius: "var(--proof-radius-lg)" }}>
+      <motion.div 
+        variants={fadeUp} 
+        initial="hidden" 
+        animate="visible" 
+        className="glass-panel" 
+        style={{ padding: 24, borderRadius: "var(--proof-radius-lg)" }}
+      >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em", display: "flex", alignItems: "center", gap: 8 }}>
             <Activity size={16} style={{ color: "var(--proof-purple)" }} />
             Flakiness Index & Instability Report
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <motion.div 
+            variants={fadeIn} 
+            initial="hidden" 
+            animate="visible" 
+            style={{ display: "flex", alignItems: "center", gap: 12 }}
+          >
             <div style={{ position: "relative" }}>
               <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--proof-text-muted)", pointerEvents: "none" }} />
               <input
@@ -310,7 +335,7 @@ export default function TestAnalytics() {
             <div style={{ color: "var(--proof-text-secondary)", fontSize: 11 }}>
               Total Analyzed: {filteredRuns.length} runs
             </div>
-          </div>
+          </motion.div>
         </div>
 
         <div style={{ border: "1px solid var(--proof-border)", borderRadius: "var(--proof-radius-md)", overflow: "hidden" }}>
@@ -327,7 +352,7 @@ export default function TestAnalytics() {
               {isPending ? (
                 <tr>
                   <td colSpan={4} style={{ padding: "64px 24px", textAlign: "center" }}>
-                    <div style={{ fontSize: 13, color: "var(--proof-text-secondary)" }}>Updating...</div>
+                    <LoadingSpinner label="Updating analytics…" />
                   </td>
                 </tr>
               ) : (
@@ -359,16 +384,22 @@ export default function TestAnalytics() {
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
 
       {/* Run Frequency Section */}
-      <div className="glass-panel" style={{ padding: 24, borderRadius: "var(--proof-radius-lg)" }}>
+      <motion.div 
+        variants={fadeUp} 
+        initial="hidden" 
+        animate="visible" 
+        className="glass-panel" 
+        style={{ padding: 24, borderRadius: "var(--proof-radius-lg)" }}
+      >
         <div style={{ fontSize: 12, fontWeight: 700, color: "var(--proof-text)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}>
           <Zap size={16} style={{ color: "var(--proof-blue)" }} />
           RUN FREQUENCY
         </div>
         <RunFrequencyChart data={frequencyData} />
-      </div>
+      </motion.div>
     </div>
   );
 }

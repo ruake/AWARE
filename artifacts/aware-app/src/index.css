@@ -1,6 +1,19 @@
 @import url("https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;600;700&family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.will-transform { will-change: transform; }
+
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
