@@ -1,0 +1,813 @@
+[
+  {
+    "id": "tr_run_20260708_mrbfj5xh_0",
+    "name": "/ returns 200 via Akamai CDN",
+    "status": "PASS",
+    "duration": 953,
+    "category": "General",
+    "suite": "HTTP CDN Health Checks",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org/",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:05 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_1",
+    "name": "/en returns 200 via Akamai CDN",
+    "status": "FAIL",
+    "duration": 938,
+    "category": "General",
+    "suite": "HTTP CDN Health Checks",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org/en",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "233",
+          "content-type": "text/html",
+          "date": "Wed, 08 Jul 2026 01:59:06 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Expected HTTP 200, got 404"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_2",
+    "name": "/robots.txt returns 200 via Akamai CDN",
+    "status": "PASS",
+    "duration": 228,
+    "category": "General",
+    "suite": "HTTP CDN Health Checks",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org/robots.txt",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "30",
+          "content-type": "text/plain",
+          "date": "Wed, 08 Jul 2026 01:59:06 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_3",
+    "name": "/sitemap.xml returns 200 via Akamai CDN",
+    "status": "FAIL",
+    "duration": 226,
+    "category": "General",
+    "suite": "HTTP CDN Health Checks",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org/sitemap.xml",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "233",
+          "content-type": "text/html",
+          "date": "Wed, 08 Jul 2026 01:59:06 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Expected HTTP 200, got 404"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_4",
+    "name": "non-existent path returns 404 via Akamai CDN",
+    "status": "PASS",
+    "duration": 507,
+    "category": "General",
+    "suite": "HTTP CDN Health Checks",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org/nonexistent-test-path-xyz",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "233",
+          "content-type": "text/html",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_5",
+    "name": "all CDN health checks passed (3/5)",
+    "status": "FAIL",
+    "duration": 0,
+    "category": "General",
+    "suite": "HTTP CDN Health Checks",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 0,
+        "headers": {}
+      },
+      "assertions": []
+    },
+    "error": "2 checks failed"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_6",
+    "name": "homepage has x-cache header",
+    "status": "FAIL",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Missing CDN header: x-cache"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_7",
+    "name": "homepage has x-akamai-transformed header",
+    "status": "FAIL",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Missing CDN header: x-akamai-transformed"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_8",
+    "name": "homepage has x-akamai-request-id header",
+    "status": "FAIL",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Missing CDN header: x-akamai-request-id"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_9",
+    "name": "homepage has server header",
+    "status": "PASS",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_10",
+    "name": "homepage has vary header",
+    "status": "FAIL",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Missing CDN header: vary"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_11",
+    "name": "homepage has age header",
+    "status": "FAIL",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Missing CDN header: age"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_12",
+    "name": "homepage has strict-transport-security security header",
+    "status": "FAIL",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Missing security header: strict-transport-security"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_13",
+    "name": "homepage has x-content-type-options security header",
+    "status": "FAIL",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Missing security header: x-content-type-options"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_14",
+    "name": "homepage has x-frame-options security header",
+    "status": "FAIL",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Missing security header: x-frame-options"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_15",
+    "name": "homepage has content-security-policy security header",
+    "status": "FAIL",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Missing security header: content-security-policy"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_16",
+    "name": "server header does not expose version",
+    "status": "FAIL",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "Server header may expose version: gunicorn/19.9.0"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_17",
+    "name": "/en has valid Content-Type via Akamai CDN",
+    "status": "PASS",
+    "duration": 227,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org/en",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "233",
+          "content-type": "text/html",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_18",
+    "name": "/robots.txt has valid Content-Type via Akamai CDN",
+    "status": "PASS",
+    "duration": 226,
+    "category": "General",
+    "suite": "HTTP CDN Headers",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org/robots.txt",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "30",
+          "content-type": "text/plain",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_19",
+    "name": "Akamai CDN serves cached content (X-Cache present)",
+    "status": "FAIL",
+    "duration": 228,
+    "category": "General",
+    "suite": "HTTP CDN Cache",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:07 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "No X-Cache header on first request"
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_20",
+    "name": "served from edge with Age header",
+    "status": "PASS",
+    "duration": 229,
+    "category": "General",
+    "suite": "HTTP CDN Cache",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:08 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_21",
+    "name": "response has Cache-Control directive",
+    "status": "FAIL",
+    "duration": 229,
+    "category": "General",
+    "suite": "HTTP CDN Cache",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:08 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    },
+    "error": "No cache directive in Cache-Control: "
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_22",
+    "name": "/ responds within 3000ms via Akamai CDN",
+    "status": "PASS",
+    "duration": 228,
+    "category": "General",
+    "suite": "HTTP CDN Performance",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org/",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:08 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_23",
+    "name": "/en responds within 3000ms via Akamai CDN",
+    "status": "PASS",
+    "duration": 263,
+    "category": "General",
+    "suite": "HTTP CDN Performance",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org/en",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "233",
+          "content-type": "text/html",
+          "date": "Wed, 08 Jul 2026 01:59:08 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_24",
+    "name": "/robots.txt responds within 3000ms via Akamai CDN",
+    "status": "PASS",
+    "duration": 226,
+    "category": "General",
+    "suite": "HTTP CDN Performance",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org/robots.txt",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "30",
+          "content-type": "text/plain",
+          "date": "Wed, 08 Jul 2026 01:59:09 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_25",
+    "name": "all Akamai CDN pages respond under 3s (3/3)",
+    "status": "PASS",
+    "duration": 0,
+    "category": "General",
+    "suite": "HTTP CDN Performance",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 0,
+        "headers": {}
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_26",
+    "name": "response includes Date header via Akamai CDN",
+    "status": "PASS",
+    "duration": 229,
+    "category": "General",
+    "suite": "HTTP CDN Performance",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:09 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  },
+  {
+    "id": "tr_run_20260708_mrbfj5xh_27",
+    "name": "response includes Content-Length header via Akamai CDN",
+    "status": "PASS",
+    "duration": 229,
+    "category": "General",
+    "suite": "HTTP CDN Performance",
+    "assertions": [],
+    "evidence": {
+      "request": {
+        "method": "GET",
+        "url": "https://httpbin.org",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-credentials": "true",
+          "access-control-allow-origin": "*",
+          "connection": "keep-alive",
+          "content-length": "9593",
+          "content-type": "text/html; charset=utf-8",
+          "date": "Wed, 08 Jul 2026 01:59:09 GMT",
+          "server": "gunicorn/19.9.0"
+        }
+      },
+      "assertions": []
+    }
+  }
+]

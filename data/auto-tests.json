@@ -1,0 +1,2189 @@
+[
+  {
+    "id": "http_0",
+    "name": "Target URL resolves with valid HTTP status",
+    "description": "Target URL resolves with valid HTTP status",
+    "testType": "pytest",
+    "category": "http",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "http"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_continuous",
+      "suite_smoke",
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod",
+      "suite_edgeworker"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_http_status.py::TestHTTPStatus::test_url_resolves",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Target URL resolves with valid HTTP status",
+    "documentation": "Target URL resolves with valid HTTP status",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_http_status.py::TestHTTPStatus::test_url_resolves",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "http_1",
+    "name": "Response time under 2 seconds",
+    "description": "Response time under 2 seconds",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_http_status.py::TestHTTPStatus::test_response_time_under_2s",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Response time under 2 seconds",
+    "documentation": "Response time under 2 seconds",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_http_status.py::TestHTTPStatus::test_response_time_under_2s",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "http_2",
+    "name": "HTTPS connection without SSL errors",
+    "description": "HTTPS connection without SSL errors",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_continuous",
+      "suite_smoke",
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_http_status.py::TestHTTPStatus::test_no_ssl_errors",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "HTTPS connection without SSL errors",
+    "documentation": "HTTPS connection without SSL errors",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_http_status.py::TestHTTPStatus::test_no_ssl_errors",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "http_3",
+    "name": "Content-Type header present on responses",
+    "description": "Content-Type header present on responses",
+    "testType": "pytest",
+    "category": "http",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "http"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_http_status.py::TestHTTPStatus::test_content_type_present",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Content-Type header present on responses",
+    "documentation": "Content-Type header present on responses",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_http_status.py::TestHTTPStatus::test_content_type_present",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "http_4",
+    "name": "HTTP/2 protocol negotiation via ALPN",
+    "description": "HTTP/2 protocol negotiation via ALPN",
+    "testType": "pytest",
+    "category": "http",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "http"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_continuous",
+      "suite_smoke",
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_http_status.py::TestHTTPStatus::test_http2_supported",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "HTTP/2 protocol negotiation via ALPN",
+    "documentation": "HTTP/2 protocol negotiation via ALPN",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_http_status.py::TestHTTPStatus::test_http2_supported",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "http_5",
+    "name": "Redirect chain has no loops and stays within limits",
+    "description": "Redirect chain has no loops and stays within limits",
+    "testType": "pytest",
+    "category": "http",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "http"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_http_status.py::TestHTTPStatus::test_redirect_chain_valid",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Redirect chain has no loops and stays within limits",
+    "documentation": "Redirect chain has no loops and stays within limits",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_http_status.py::TestHTTPStatus::test_redirect_chain_valid",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "http_6",
+    "name": "Valid JSON response parses without error",
+    "description": "Valid JSON response parses without error",
+    "testType": "pytest",
+    "category": "http",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "http"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_http_status.py::TestHTTPStatus::test_valid_json",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Valid JSON response parses without error",
+    "documentation": "Valid JSON response parses without error",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_http_status.py::TestHTTPStatus::test_valid_json",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "http_7",
+    "name": "No 5xx server errors returned",
+    "description": "No 5xx server errors returned",
+    "testType": "pytest",
+    "category": "http",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "http"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_continuous",
+      "suite_smoke",
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod",
+      "suite_edgeworker"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_http_status.py::TestHTTPStatus::test_no_server_errors",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "No 5xx server errors returned",
+    "documentation": "No 5xx server errors returned",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_http_status.py::TestHTTPStatus::test_no_server_errors",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "http_8",
+    "name": "Gzip compression enabled on responses",
+    "description": "Gzip compression enabled on responses",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_http_status.py::TestHTTPStatus::test_compression_enabled",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Gzip compression enabled on responses",
+    "documentation": "Gzip compression enabled on responses",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_http_status.py::TestHTTPStatus::test_compression_enabled",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "sec_0",
+    "name": "TLS 1.2 or higher is enforced",
+    "description": "TLS 1.2 or higher is enforced",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_continuous",
+      "suite_smoke",
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_tls_version",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "TLS 1.2 or higher is enforced",
+    "documentation": "TLS 1.2 or higher is enforced",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_security.py::TestSecurityHeaders::test_tls_version",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "sec_1",
+    "name": "No server errors from security endpoints",
+    "description": "No server errors from security endpoints",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_continuous",
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_no_server_errors",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "No server errors from security endpoints",
+    "documentation": "No server errors from security endpoints",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_security.py::TestSecurityHeaders::test_no_server_errors",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "sec_2",
+    "name": "CORS headers present on API endpoints",
+    "description": "CORS headers present on API endpoints",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_cors_headers",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "CORS headers present on API endpoints",
+    "documentation": "CORS headers present on API endpoints",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_security.py::TestSecurityHeaders::test_cors_headers",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "sec_3",
+    "name": "X-Frame-Options header set to DENY or SAMEORIGIN",
+    "description": "X-Frame-Options header set to DENY or SAMEORIGIN",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_no_clickjacking",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "X-Frame-Options header set to DENY or SAMEORIGIN",
+    "documentation": "X-Frame-Options header set to DENY or SAMEORIGIN",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_security.py::TestSecurityHeaders::test_no_clickjacking",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "sec_4",
+    "name": "No internal IP addresses leaked in headers",
+    "description": "No internal IP addresses leaked in headers",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_smoke",
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_no_internal_ips",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "No internal IP addresses leaked in headers",
+    "documentation": "No internal IP addresses leaked in headers",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_security.py::TestSecurityHeaders::test_no_internal_ips",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "sec_5",
+    "name": "X-Content-Type-Options set to nosniff",
+    "description": "X-Content-Type-Options set to nosniff",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_content_type_options",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "X-Content-Type-Options set to nosniff",
+    "documentation": "X-Content-Type-Options set to nosniff",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_security.py::TestSecurityHeaders::test_content_type_options",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "sec_6",
+    "name": "HSTS header with max-age >= 1 year",
+    "description": "HSTS header with max-age >= 1 year",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_smoke",
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_strict_transport_security",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "HSTS header with max-age >= 1 year",
+    "documentation": "HSTS header with max-age >= 1 year",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_security.py::TestSecurityHeaders::test_strict_transport_security",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "sec_7",
+    "name": "Referrer-Policy header with strict value",
+    "description": "Referrer-Policy header with strict value",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_referrer_policy",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Referrer-Policy header with strict value",
+    "documentation": "Referrer-Policy header with strict value",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_security.py::TestSecurityHeaders::test_referrer_policy",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "sec_8",
+    "name": "Cookies set with Secure and HttpOnly flags",
+    "description": "Cookies set with Secure and HttpOnly flags",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_secure_cookies",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Cookies set with Secure and HttpOnly flags",
+    "documentation": "Cookies set with Secure and HttpOnly flags",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_security.py::TestSecurityHeaders::test_secure_cookies",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "sec_9",
+    "name": "Content-Security-Policy header present",
+    "description": "Content-Security-Policy header present",
+    "testType": "pytest",
+    "category": "security",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "security"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_security.py::TestSecurityHeaders::test_csp_header",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Content-Security-Policy header present",
+    "documentation": "Content-Security-Policy header present",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_security.py::TestSecurityHeaders::test_csp_header",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "perf_0",
+    "name": "TTFB under 500ms for CDN endpoint",
+    "description": "TTFB under 500ms for CDN endpoint",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_nightly_prod",
+      "suite_performance"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestTimeToFirstByte::test_ttfb_under_500ms",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "TTFB under 500ms for CDN endpoint",
+    "documentation": "TTFB under 500ms for CDN endpoint",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_performance.py::TestTimeToFirstByte::test_ttfb_under_500ms",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "perf_1",
+    "name": "1MB file downloads within reasonable time",
+    "description": "1MB file downloads within reasonable time",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_nightly_prod",
+      "suite_performance"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestTimeToFirstByte::test_download_speed",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "1MB file downloads within reasonable time",
+    "documentation": "1MB file downloads within reasonable time",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_performance.py::TestTimeToFirstByte::test_download_speed",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "perf_2",
+    "name": "TCP connection establishment under 200ms",
+    "description": "TCP connection establishment under 200ms",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_nightly_prod",
+      "suite_performance"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestTimeToFirstByte::test_connection_time",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "TCP connection establishment under 200ms",
+    "documentation": "TCP connection establishment under 200ms",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_performance.py::TestTimeToFirstByte::test_connection_time",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "perf_3",
+    "name": "HTTP keep-alive connection reuse works",
+    "description": "HTTP keep-alive connection reuse works",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_nightly_prod",
+      "suite_performance"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestTimeToFirstByte::test_keep_alive",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "HTTP keep-alive connection reuse works",
+    "documentation": "HTTP keep-alive connection reuse works",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_performance.py::TestTimeToFirstByte::test_keep_alive",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "perf_4",
+    "name": "Average of 10 sequential requests under 1s",
+    "description": "Average of 10 sequential requests under 1s",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_nightly_prod",
+      "suite_performance"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestConcurrentRequests::test_multiple_sequential_requests",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Average of 10 sequential requests under 1s",
+    "documentation": "Average of 10 sequential requests under 1s",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_performance.py::TestConcurrentRequests::test_multiple_sequential_requests",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "perf_5",
+    "name": "5 concurrent requests all succeed",
+    "description": "5 concurrent requests all succeed",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_nightly_prod",
+      "suite_performance"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestConcurrentRequests::test_concurrent_requests",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "5 concurrent requests all succeed",
+    "documentation": "5 concurrent requests all succeed",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_performance.py::TestConcurrentRequests::test_concurrent_requests",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "perf_6",
+    "name": "Gzip compression actively reduces payload size",
+    "description": "Gzip compression actively reduces payload size",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_nightly_prod",
+      "suite_performance"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCompressionAndCaching::test_compression_active",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Gzip compression actively reduces payload size",
+    "documentation": "Gzip compression actively reduces payload size",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_performance.py::TestCompressionAndCaching::test_compression_active",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "perf_7",
+    "name": "CDN cache improves response time on repeat request",
+    "description": "CDN cache improves response time on repeat request",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_nightly_prod",
+      "suite_performance"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCompressionAndCaching::test_cache_improves_response_time",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "CDN cache improves response time on repeat request",
+    "documentation": "CDN cache improves response time on repeat request",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_performance.py::TestCompressionAndCaching::test_cache_improves_response_time",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "perf_8",
+    "name": "Response headers do not exceed 8KB",
+    "description": "Response headers do not exceed 8KB",
+    "testType": "pytest",
+    "category": "performance",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "performance"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_nightly_prod",
+      "suite_performance"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_performance.py::TestCompressionAndCaching::test_response_size_headers",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Response headers do not exceed 8KB",
+    "documentation": "Response headers do not exceed 8KB",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_performance.py::TestCompressionAndCaching::test_response_size_headers",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "geo_0",
+    "name": "Base endpoint is reachable",
+    "description": "Base endpoint is reachable",
+    "testType": "pytest",
+    "category": "geo-match",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_continuous",
+      "suite_smoke",
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod",
+      "suite_edgeworker"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::TestGeoRouting::test_base_endpoint_reachable",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Base endpoint is reachable",
+    "documentation": "Base endpoint is reachable",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_geo_matching.py::TestGeoRouting::test_base_endpoint_reachable",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "geo_1",
+    "name": "DNS resolves to multiple IP addresses",
+    "description": "DNS resolves to multiple IP addresses",
+    "testType": "pytest",
+    "category": "geo-match",
+    "priority": "P0",
+    "severity": "critical",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::TestGeoRouting::test_dns_resolves_to_multiple_ips",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "DNS resolves to multiple IP addresses",
+    "documentation": "DNS resolves to multiple IP addresses",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_geo_matching.py::TestGeoRouting::test_dns_resolves_to_multiple_ips",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "geo_2",
+    "name": "Different HTTP endpoints return 200",
+    "description": "Different HTTP endpoints return 200",
+    "testType": "pytest",
+    "category": "geo-match",
+    "priority": "P1",
+    "severity": "major",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::TestGeoRouting::test_different_endpoints_return_200",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Different HTTP endpoints return 200",
+    "documentation": "Different HTTP endpoints return 200",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_geo_matching.py::TestGeoRouting::test_different_endpoints_return_200",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "geo_3",
+    "name": "Response routed from multiple regional IPs",
+    "description": "Response routed from multiple regional IPs",
+    "testType": "pytest",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::TestGeoRouting::test_response_from_multiple_regions",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "Response routed from multiple regional IPs",
+    "documentation": "Response routed from multiple regional IPs",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_geo_matching.py::TestGeoRouting::test_response_from_multiple_regions",
+    "repoStatus": "synced"
+  },
+  {
+    "id": "geo_4",
+    "name": "DNS fallback resolves correctly",
+    "description": "DNS fallback resolves correctly",
+    "testType": "pytest",
+    "category": "geo-match",
+    "priority": "P2",
+    "severity": "minor",
+    "status": "active",
+    "tags": [
+      "geo-match"
+    ],
+    "owner": "auto@discovery",
+    "suiteIds": [
+      "suite_regression_qa",
+      "suite_regression_uat",
+      "suite_nightly_prod"
+    ],
+    "automated": true,
+    "scriptPath": "tests/test_geo_matching.py::TestGeoRouting::test_dns_fallback_resolves",
+    "preconditions": "httpbin.org must be reachable",
+    "expectedBehavior": "DNS fallback resolves correctly",
+    "documentation": "DNS fallback resolves correctly",
+    "relatedTestIds": [],
+    "requestHeaders": {},
+    "cookies": {},
+    "expectedStatus": 200,
+    "captureResponseHeaders": [],
+    "filmstrip": {
+      "enabled": false,
+      "threshold": 0,
+      "region": "",
+      "ignoreAreas": [],
+      "mode": "screenshot",
+      "captureOnFailure": false,
+      "maxFrames": 3
+    },
+    "predicates": [],
+    "config": {},
+    "assertions": [
+      {
+        "id": "assert_status_200",
+        "type": "statusCode",
+        "field": "status",
+        "expected": "200",
+        "operator": "equals",
+        "description": "Response returns 200 OK"
+      }
+    ],
+    "version": 1,
+    "changelog": [
+      {
+        "version": 1,
+        "timestamp": "2026-07-07T00:00:00Z",
+        "author": "system",
+        "summary": "Initial seed",
+        "changes": [
+          "Created"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-07T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z",
+    "githubPath": "tests/test_geo_matching.py::TestGeoRouting::test_dns_fallback_resolves",
+    "repoStatus": "synced"
+  }
+]

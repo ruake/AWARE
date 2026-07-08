@@ -1,0 +1,322 @@
+[
+  {
+    "id": "suite_continuous",
+    "name": "Continuous — QA / Staging",
+    "description": "Continuous — QA / Staging — httpbin.org",
+    "parentId": null,
+    "testIds": [
+      "http_0",
+      "http_2",
+      "http_4",
+      "http_7",
+      "sec_0",
+      "sec_1",
+      "geo_0"
+    ],
+    "envIds": [
+      "qa_staging"
+    ],
+    "runners": [
+      "playwright",
+      "pytest"
+    ],
+    "config": {
+      "target": "ALL",
+      "environment": "All",
+      "parallelism": 4,
+      "retries": 1,
+      "failFast": false,
+      "timeoutMinutes": 30
+    },
+    "tags": [
+      "httpbin"
+    ],
+    "schedule": "*/30 * * * *",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z"
+  },
+  {
+    "id": "suite_smoke",
+    "name": "Smoke — All Environments",
+    "description": "Smoke — All Environments — httpbin.org",
+    "parentId": null,
+    "testIds": [
+      "http_0",
+      "http_2",
+      "http_4",
+      "http_7",
+      "sec_0",
+      "sec_4",
+      "sec_6",
+      "geo_0"
+    ],
+    "envIds": [
+      "qa_staging",
+      "qa_prod",
+      "uat_staging",
+      "uat_prod",
+      "prod_staging",
+      "prod_prod"
+    ],
+    "runners": [
+      "playwright",
+      "pytest"
+    ],
+    "config": {
+      "target": "ALL",
+      "environment": "All",
+      "parallelism": 4,
+      "retries": 1,
+      "failFast": false,
+      "timeoutMinutes": 30
+    },
+    "tags": [
+      "httpbin"
+    ],
+    "schedule": null,
+    "createdAt": "2026-07-01T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z"
+  },
+  {
+    "id": "suite_regression_qa",
+    "name": "Full Regression — QA",
+    "description": "Full Regression — QA — httpbin.org",
+    "parentId": null,
+    "testIds": [
+      "http_0",
+      "http_1",
+      "http_2",
+      "http_3",
+      "http_4",
+      "http_5",
+      "http_6",
+      "http_7",
+      "http_8",
+      "sec_0",
+      "sec_1",
+      "sec_2",
+      "sec_3",
+      "sec_4",
+      "sec_5",
+      "sec_6",
+      "sec_7",
+      "sec_8",
+      "sec_9",
+      "geo_0",
+      "geo_1",
+      "geo_2",
+      "geo_3",
+      "geo_4"
+    ],
+    "envIds": [
+      "qa_staging",
+      "qa_prod"
+    ],
+    "runners": [
+      "playwright",
+      "pytest"
+    ],
+    "config": {
+      "target": "ALL",
+      "environment": "All",
+      "parallelism": 4,
+      "retries": 1,
+      "failFast": false,
+      "timeoutMinutes": 30
+    },
+    "tags": [
+      "httpbin"
+    ],
+    "schedule": "0 */2 * * *",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z"
+  },
+  {
+    "id": "suite_regression_uat",
+    "name": "Full Regression — UAT",
+    "description": "Full Regression — UAT — httpbin.org",
+    "parentId": null,
+    "testIds": [
+      "http_0",
+      "http_1",
+      "http_2",
+      "http_3",
+      "http_4",
+      "http_5",
+      "http_6",
+      "http_7",
+      "http_8",
+      "sec_0",
+      "sec_1",
+      "sec_2",
+      "sec_3",
+      "sec_4",
+      "sec_5",
+      "sec_6",
+      "sec_7",
+      "sec_8",
+      "sec_9",
+      "geo_0",
+      "geo_1",
+      "geo_2",
+      "geo_3",
+      "geo_4"
+    ],
+    "envIds": [
+      "uat_staging",
+      "uat_prod"
+    ],
+    "runners": [
+      "playwright",
+      "pytest"
+    ],
+    "config": {
+      "target": "ALL",
+      "environment": "All",
+      "parallelism": 4,
+      "retries": 1,
+      "failFast": false,
+      "timeoutMinutes": 30
+    },
+    "tags": [
+      "httpbin"
+    ],
+    "schedule": "0 6 * * *",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z"
+  },
+  {
+    "id": "suite_nightly_prod",
+    "name": "Nightly Regression — PROD",
+    "description": "Nightly Regression — PROD — httpbin.org",
+    "parentId": null,
+    "testIds": [
+      "http_0",
+      "http_1",
+      "http_2",
+      "http_3",
+      "http_4",
+      "http_5",
+      "http_6",
+      "http_7",
+      "http_8",
+      "sec_0",
+      "sec_1",
+      "sec_2",
+      "sec_3",
+      "sec_4",
+      "sec_5",
+      "sec_6",
+      "sec_7",
+      "sec_8",
+      "sec_9",
+      "perf_0",
+      "perf_1",
+      "perf_2",
+      "perf_3",
+      "perf_4",
+      "perf_5",
+      "perf_6",
+      "perf_7",
+      "perf_8",
+      "geo_0",
+      "geo_1",
+      "geo_2",
+      "geo_3",
+      "geo_4"
+    ],
+    "envIds": [
+      "prod_staging",
+      "prod_prod"
+    ],
+    "runners": [
+      "playwright",
+      "pytest"
+    ],
+    "config": {
+      "target": "ALL",
+      "environment": "All",
+      "parallelism": 4,
+      "retries": 1,
+      "failFast": false,
+      "timeoutMinutes": 30
+    },
+    "tags": [
+      "httpbin"
+    ],
+    "schedule": "0 2 * * *",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z"
+  },
+  {
+    "id": "suite_performance",
+    "name": "Performance Benchmarks",
+    "description": "Performance Benchmarks — httpbin.org",
+    "parentId": null,
+    "testIds": [
+      "perf_0",
+      "perf_1",
+      "perf_2",
+      "perf_3",
+      "perf_4",
+      "perf_5",
+      "perf_6",
+      "perf_7",
+      "perf_8"
+    ],
+    "envIds": [
+      "qa_prod",
+      "uat_prod",
+      "prod_prod"
+    ],
+    "runners": [
+      "playwright"
+    ],
+    "config": {
+      "target": "ALL",
+      "environment": "All",
+      "parallelism": 4,
+      "retries": 1,
+      "failFast": false,
+      "timeoutMinutes": 30
+    },
+    "tags": [
+      "httpbin"
+    ],
+    "schedule": "0 4 * * 1",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z"
+  },
+  {
+    "id": "suite_edgeworker",
+    "name": "EdgeWorker Unit Tests",
+    "description": "EdgeWorker Unit Tests — httpbin.org",
+    "parentId": null,
+    "testIds": [
+      "geo_0",
+      "http_0",
+      "http_7"
+    ],
+    "envIds": [
+      "qa_staging",
+      "uat_staging"
+    ],
+    "runners": [
+      "pytest"
+    ],
+    "config": {
+      "target": "ALL",
+      "environment": "All",
+      "parallelism": 4,
+      "retries": 1,
+      "failFast": false,
+      "timeoutMinutes": 30
+    },
+    "tags": [
+      "httpbin"
+    ],
+    "schedule": null,
+    "createdAt": "2026-07-01T00:00:00Z",
+    "updatedAt": "2026-07-07T00:00:00Z"
+  }
+]
