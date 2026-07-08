@@ -1,33 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'wouter';
-import { LayoutDashboard, History, GitCompareArrows, BarChart3, Sun, Moon, Activity, Search } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SPRING } from '@/lib/motion';
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "wouter";
+import {
+  LayoutDashboard,
+  History,
+  GitCompareArrows,
+  BarChart3,
+  Sun,
+  Moon,
+  Activity,
+  Search,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { SPRING } from "@/lib/motion";
 
 const NAV = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { label: 'Runs', href: '/runs', icon: History },
-  { label: 'Compare', href: '/compare', icon: GitCompareArrows },
-  { label: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { label: "Dashboard", href: "/", icon: LayoutDashboard },
+  { label: "Runs", href: "/runs", icon: History },
+  { label: "Compare", href: "/compare", icon: GitCompareArrows },
+  { label: "Analytics", href: "/analytics", icon: BarChart3 },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [loc] = useLocation();
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
-    const stored = localStorage.getItem('aware-theme');
-    if (stored === 'light' || stored === 'dark') {
+    const stored = localStorage.getItem("aware-theme");
+    if (stored === "light" || stored === "dark") {
       setTheme(stored);
-      document.documentElement.classList.toggle('light', stored === 'light');
+      document.documentElement.classList.toggle("light", stored === "light");
     }
   }, []);
 
   const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
+    const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
-    document.documentElement.classList.toggle('light', next === 'light');
-    localStorage.setItem('aware-theme', next);
+    document.documentElement.classList.toggle("light", next === "light");
+    localStorage.setItem("aware-theme", next);
   };
 
   return (
@@ -52,21 +61,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Activity size={13} className="text-gcp-blue" />
           </div>
           <div>
-            <span className="font-mono font-bold text-xs tracking-[0.18em] text-gcp-text block leading-tight">A.W.A.R.E.</span>
-            <span className="text-[9px] tracking-[0.12em] font-mono block leading-tight text-gcp-text-muted">PROOF</span>
+            <span className="font-mono font-bold text-xs tracking-[0.18em] text-gcp-text block leading-tight">
+              A.W.A.R.E.
+            </span>
+            <span className="text-[9px] tracking-[0.12em] font-mono block leading-tight text-gcp-text-muted">
+              PROOF
+            </span>
           </div>
         </div>
 
         {/* Nav */}
         <nav className="flex items-stretch h-full flex-1">
-          {NAV.map(n => {
-            const active = n.href === '/' ? loc === '/' : loc.startsWith(n.href);
+          {NAV.map((n) => {
+            const active = n.href === "/" ? loc === "/" : loc.startsWith(n.href);
             return (
               <Link
                 key={n.href}
                 href={n.href}
                 className={`relative flex items-center gap-1.5 px-3.5 text-xs font-medium transition-colors h-full
-                  ${active ? 'text-gcp-text' : 'text-gcp-text-secondary hover:text-gcp-text hover:bg-gcp-elevated/60'}`}
+                  ${active ? "text-gcp-text" : "text-gcp-text-secondary hover:text-gcp-text hover:bg-gcp-elevated/60"}`}
               >
                 <n.icon size={13} />
                 {n.label}
@@ -91,10 +104,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             className="flex items-center justify-center w-7 h-7 rounded-md bg-gcp-elevated/60 hover:bg-gcp-elevated border border-gcp-border transition-colors text-gcp-text-secondary hover:text-gcp-text"
             aria-label="Toggle theme"
           >
-            {theme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
+            {theme === "dark" ? <Sun size={12} /> : <Moon size={12} />}
           </motion.button>
           <span className="text-[10px] font-mono text-gcp-text-muted px-2 py-1 rounded bg-gcp-elevated/60 backdrop-blur-sm border border-gcp-border-strong shadow-sm">
-            v{import.meta.env.VITE_APP_VERSION || '0.1'}
+            v{import.meta.env.VITE_APP_VERSION || "0.1"}
           </span>
         </div>
       </motion.header>

@@ -1,15 +1,21 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React from "react";
+import { motion } from "framer-motion";
 
-export const SectionHeader = React.memo(function SectionHeader({ title, subtitle, action }: {
-  title: string; subtitle?: string; action?: React.ReactNode;
+export const SectionHeader = React.memo(function SectionHeader({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: React.ReactNode;
 }) {
   return (
-    <motion.div 
+    <motion.div
       className="mb-5 flex items-center justify-between"
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
     >
       <div>
         <div className="flex items-center gap-3">

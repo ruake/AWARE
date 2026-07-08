@@ -14,7 +14,7 @@ export function isExternalImage(frame: FilmstripFrame): boolean {
 }
 
 export async function preloadImage(src: string): Promise<string> {
-  if (src.startsWith('data:') || src.startsWith('blob:')) return src;
+  if (src.startsWith("data:") || src.startsWith("blob:")) return src;
   if (blobCache.has(src)) return blobCache.get(src)!;
   const res = await fetch(src);
   if (!res.ok) throw new Error(`Failed to load image: ${res.statusText}`);
@@ -40,8 +40,8 @@ export function revokeAllImages(): void {
 }
 
 export function dataUriToBlob(dataUri: string): Blob {
-  const [header, data] = dataUri.split(',');
-  const mime = header.match(/:(.*?);/)?.[1] || 'image/png';
+  const [header, data] = dataUri.split(",");
+  const mime = header.match(/:(.*?);/)?.[1] || "image/png";
   const bytes = atob(data);
   const arr = new Uint8Array(bytes.length);
   for (let i = 0; i < bytes.length; i++) {
@@ -66,7 +66,7 @@ export async function getImageDimensions(src: string): Promise<{ width: number; 
 
 export function canvasToDataUri(
   canvas: HTMLCanvasElement,
-  format: 'image/png' | 'image/jpeg' = 'image/png',
+  format: "image/png" | "image/jpeg" = "image/png",
   quality?: number,
 ): string {
   return canvas.toDataURL(format, quality);
@@ -76,7 +76,7 @@ export async function resizeImage(
   src: string,
   maxWidth: number,
   maxHeight: number,
-  format: 'image/png' | 'image/jpeg' = 'image/png',
+  format: "image/png" | "image/jpeg" = "image/png",
   quality?: number,
 ): Promise<string> {
   const img = await loadImage(src);
@@ -89,10 +89,10 @@ export async function resizeImage(
     width = Math.round(width * (maxHeight / height));
     height = maxHeight;
   }
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext("2d")!;
   ctx.drawImage(img, 0, 0, width, height);
   return canvas.toDataURL(format, quality);
 }

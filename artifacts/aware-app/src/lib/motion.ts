@@ -1,7 +1,7 @@
-import type { Variants, Transition } from 'framer-motion';
+import type { Variants, Transition } from "framer-motion";
 
 export const SPRING: Transition = {
-  type: 'spring',
+  type: "spring",
   stiffness: 400,
   damping: 30,
 };
@@ -49,7 +49,7 @@ export const slideInLeft: Variants = {
 export const dropDown: Variants = {
   hidden: { opacity: 0, y: -6, scaleY: 0.95 },
   visible: { opacity: 1, y: 0, scaleY: 1, transition: EASE_OUT },
-  exit:   { opacity: 0, y: -4, scaleY: 0.96, transition: { duration: 0.14 } },
+  exit: { opacity: 0, y: -4, scaleY: 0.96, transition: { duration: 0.14 } },
 };
 
 export const staggerContainer: Variants = {
@@ -83,15 +83,25 @@ export const slowStagger: Variants = {
 };
 
 export const collapseHeight: Variants = {
-  hidden:  { height: 0, opacity: 0, overflow: 'hidden' },
-  visible: { height: 'auto', opacity: 1, overflow: 'hidden', transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] } },
-  exit:    { height: 0, opacity: 0, overflow: 'hidden', transition: { duration: 0.18, ease: [0.4, 0, 1, 1] } },
+  hidden: { height: 0, opacity: 0, overflow: "hidden" },
+  visible: {
+    height: "auto",
+    opacity: 1,
+    overflow: "hidden",
+    transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
+  },
+  exit: {
+    height: 0,
+    opacity: 0,
+    overflow: "hidden",
+    transition: { duration: 0.18, ease: [0.4, 0, 1, 1] },
+  },
 };
 
 export const PRESS_SCALE = { scale: 0.98 };
 
 export const pageTransition: Variants = {
-  hidden:  { opacity: 0, y: 6 },
+  hidden: { opacity: 0, y: 6 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] } },
-  exit:    { opacity: 0, y: -4, transition: { duration: 0.15 } },
+  exit: { opacity: 0, y: -4, transition: { duration: 0.15 } },
 };

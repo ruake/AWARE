@@ -1,14 +1,14 @@
-import type { Run, TestResult, TestCase } from '@/lib/types';
+import type { Run, TestResult, TestCase } from "@/lib/types";
 
 export function buildSystemPrompt(
   runs: Run[],
   results: TestResult[],
-  testCases: Record<string, TestCase>
+  testCases: Record<string, TestCase>,
 ): string {
   const totalRuns = runs.length;
-  const passRuns = runs.filter(r => r.status === 'PASS').length;
+  const passRuns = runs.filter((r) => r.status === "PASS").length;
   const totalTests = results.length;
-  
+
   return `You are PROOF (A.W.A.R.E.) AI Copilot — an expert assistant for analyzing CDN test observability data.
 
 Current system state:

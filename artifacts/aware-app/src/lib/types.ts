@@ -1,5 +1,5 @@
-export type RunStatus = 'PASS' | 'FAIL' | 'PARTIAL' | 'RUNNING' | 'PENDING' | 'ERROR';
-export type Env = 'QA' | 'UAT' | 'PROD';
+export type RunStatus = "PASS" | "FAIL" | "PARTIAL" | "RUNNING" | "PENDING" | "ERROR";
+export type Env = "QA" | "UAT" | "PROD";
 
 export interface Run {
   id: string;
@@ -23,7 +23,7 @@ export interface TestResult {
   testCaseId: string;
   runId: string;
   name: string;
-  status: 'PASS' | 'FAIL';
+  status: "PASS" | "FAIL";
   duration: number;
   category: string;
   suite: string;
@@ -44,7 +44,7 @@ export interface TestCase {
   githubPath?: string;
   docstring?: string;
   markers?: string[];
-  fileType?: 'pytest' | 'playwright';
+  fileType?: "pytest" | "playwright";
   description?: string;
   status?: string;
   priority?: string;
@@ -68,12 +68,12 @@ export interface ChangeLogEntry {
 export interface DiffRow {
   id: string;
   name: string;
-  baseStatus: 'PASS' | 'FAIL';
-  candStatus: 'PASS' | 'FAIL';
+  baseStatus: "PASS" | "FAIL";
+  candStatus: "PASS" | "FAIL";
   durBase: number;
   durCand: number;
   category: string;
-  state: 'regression' | 'fixed' | 'duration' | 'unchanged' | 'fishy';
+  state: "regression" | "fixed" | "duration" | "unchanged" | "fishy";
   baseResult?: TestResult;
   candResult?: TestResult;
 }

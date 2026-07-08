@@ -1,16 +1,16 @@
-import React from 'react';
-import { Link, Switch, Route, Router as WouterRouter, useLocation } from 'wouter';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Layout } from '@/components/Layout';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { ArrowLeft, SearchX } from 'lucide-react';
+import React from "react";
+import { Link, Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { AnimatePresence, motion } from "framer-motion";
+import { Layout } from "@/components/Layout";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ArrowLeft, SearchX } from "lucide-react";
 
-const Dashboard = React.lazy(() => import('@/pages/Dashboard'));
-const Runs = React.lazy(() => import('@/pages/Runs'));
-const RunDetail = React.lazy(() => import('@/pages/RunDetail'));
-const Compare = React.lazy(() => import('@/pages/Compare'));
-const TestAnalytics = React.lazy(() => import('@/pages/TestAnalytics'));
+const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
+const Runs = React.lazy(() => import("@/pages/Runs"));
+const RunDetail = React.lazy(() => import("@/pages/RunDetail"));
+const Compare = React.lazy(() => import("@/pages/Compare"));
+const TestAnalytics = React.lazy(() => import("@/pages/TestAnalytics"));
 
 function NotFound() {
   return (
@@ -42,7 +42,7 @@ function NotFound() {
 
 function AppRoutes() {
   const [loc] = useLocation();
-  const basePath = '/' + (loc.split('/')[1] || '');
+  const basePath = "/" + (loc.split("/")[1] || "");
 
   return (
     <Layout>
@@ -66,7 +66,7 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
       <AppRoutes />
     </WouterRouter>
   );

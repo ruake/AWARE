@@ -14,5 +14,5 @@ export function linkify(text: string): string {
 }
 
 export function stripLinks(html: string): string {
-  return html.replace(/<[^>]*>/g, '');
+  return html.replace(/<[^>]*>/g, "");
 }

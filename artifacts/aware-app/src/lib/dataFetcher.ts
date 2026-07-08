@@ -1,11 +1,11 @@
-const DEV_BASE = '/data/';
-const PROD_BASE = 'https://raw.githubusercontent.com/ruake/AWARE/data/';
+const DEV_BASE = "/data/";
+const PROD_BASE = "https://raw.githubusercontent.com/ruake/AWARE/data/";
 
 const cache = new Map<string, { data: unknown; expiry: number }>();
 const CACHE_TTL = 60_000;
 
 function isDev(): boolean {
-  return import.meta.env.DEV || window.location.hostname === 'localhost';
+  return import.meta.env.DEV || window.location.hostname === "localhost";
 }
 
 function dataBase(): string {
@@ -21,18 +21,18 @@ async function fetchWithRetry(url: string, signal: AbortSignal, retries = 2): Pr
       return res;
     } catch (err) {
       if (attempt === retries || signal.aborted) throw err;
-      if (err instanceof TypeError && err.message === 'Failed to fetch') {
-        await new Promise(r => setTimeout(r, delays[attempt]));
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        await new Promise((r) => setTimeout(r, delays[attempt]));
         continue;
       }
       throw err;
     }
   }
-  throw new Error('fetchWithRetry exhausted');
+  throw new Error("fetchWithRetry exhausted");
 }
 
 export async function fetchJson<T>(path: string): Promise<T> {
-  const url = `${dataBase()}${path.replace(/^\//, '')}`;
+  const url = `${dataBase()}${path.replace(/^\//, "")}`;
 
   const cached = cache.get(url);
   if (cached && Date.now() < cached.expiry) {
@@ -44,7 +44,7 @@ export async function fetchJson<T>(path: string): Promise<T> {
 
   try {
     const res = await fetchWithRetry(url, controller.signal);
-    const data = await res.json() as T;
+    const data = (await res.json()) as T;
     cache.set(url, { data, expiry: Date.now() + CACHE_TTL });
     return data;
   } finally {

@@ -1,4 +1,4 @@
-import { fetchJson } from '@/lib/dataFetcher';
+import { fetchJson } from "@/lib/dataFetcher";
 
 export interface SchedulerSuite {
   id: string;
@@ -37,7 +37,7 @@ let _loaded = false;
 export async function loadSchedulerStatus(): Promise<void> {
   if (_loaded) return;
   try {
-    _status = await fetchJson<SchedulerStatus>('scheduler-status.json');
+    _status = await fetchJson<SchedulerStatus>("scheduler-status.json");
   } catch {
     _status = null;
   }

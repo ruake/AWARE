@@ -1,19 +1,18 @@
-import React, { useState, useCallback } from 'react';
-import { ArrowUp, ArrowDown, Search } from 'lucide-react';
+import React, { useState, useCallback } from "react";
+import { ArrowUp, ArrowDown, Search } from "lucide-react";
 
-export type SortDir = 'asc' | 'desc';
+export type SortDir = "asc" | "desc";
 
 export interface SortState {
   key: string;
   dir: SortDir;
 }
 
-export function useSort(initialKey: string, initialDir: SortDir = 'desc') {
+export function useSort(initialKey: string, initialDir: SortDir = "desc") {
   const [sort, setSort] = useState<SortState>({ key: initialKey, dir: initialDir });
   const toggle = useCallback((key: string) => {
-    setSort(prev => prev.key === key
-      ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
-      : { key, dir: 'asc' }
+    setSort((prev) =>
+      prev.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" },
     );
   }, []);
   return { sort, toggle, setSort };
@@ -30,7 +29,7 @@ export function sortItems<T>(
     const va = fn(a);
     const vb = fn(b);
     const cmp = va < vb ? -1 : va > vb ? 1 : 0;
-    return sort.dir === 'asc' ? cmp : -cmp;
+    return sort.dir === "asc" ? cmp : -cmp;
   });
 }
 
@@ -69,21 +68,27 @@ export function SortHeader({
 }) {
   const active = currentSort.key === sortKey;
   return (
-    <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gcp-text-muted ${className ?? ''}`}>
+    <th
+      className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gcp-text-muted ${className ?? ""}`}
+    >
       <button
         onClick={() => onToggle(sortKey)}
         className={`flex items-center gap-1.5 transition-colors group ${
-          active ? 'text-gcp-text' : 'hover:text-gcp-text'
+          active ? "text-gcp-text" : "hover:text-gcp-text"
         }`}
       >
         <span>{label}</span>
-        <span className={`transition-colors ${
-          active
-            ? 'text-gcp-blue'
-            : 'text-gcp-text-muted/50 group-hover:text-gcp-text-muted'
-        }`}>
+        <span
+          className={`transition-colors ${
+            active ? "text-gcp-blue" : "text-gcp-text-muted/50 group-hover:text-gcp-text-muted"
+          }`}
+        >
           {active ? (
-            currentSort.dir === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />
+            currentSort.dir === "asc" ? (
+              <ArrowUp size={12} />
+            ) : (
+              <ArrowDown size={12} />
+            )
           ) : (
             <ArrowUp size={12} className="opacity-0 group-hover:opacity-40" />
           )}
@@ -91,13 +96,16 @@ export function SortHeader({
       </button>
       {onFilterChange && (
         <div className="relative mt-1.5">
-          <Search size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-gcp-text-muted/60" />
+          <Search
+            size={10}
+            className="absolute left-2 top-1/2 -translate-y-1/2 text-gcp-text-muted/60"
+          />
           <input
             type="text"
-            value={filterValue ?? ''}
-            onChange={e => onFilterChange(e.target.value)}
+            value={filterValue ?? ""}
+            onChange={(e) => onFilterChange(e.target.value)}
             placeholder={filterPlaceholder ?? `Filter ${label.toLowerCase()}…`}
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             className="w-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-[11px] rounded-md pl-6 pr-2 py-1.5 placeholder:text-gcp-text-muted/40 focus:outline-none focus:border-gcp-blue/60 focus:shadow-[0_0_0_2px_rgba(66,133,244,0.12)] transition-all"
           />
         </div>
@@ -125,11 +133,14 @@ export function FilterHeader({
       {children}
       {onFilterChange && (
         <div className="relative mt-1.5">
-          <Search size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-gcp-text-muted/60" />
+          <Search
+            size={10}
+            className="absolute left-2 top-1/2 -translate-y-1/2 text-gcp-text-muted/60"
+          />
           <input
             type="text"
-            value={filterValue ?? ''}
-            onChange={e => onFilterChange(e.target.value)}
+            value={filterValue ?? ""}
+            onChange={(e) => onFilterChange(e.target.value)}
             placeholder={filterPlaceholder ?? `Filter ${label.toLowerCase()}…`}
             className="w-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-[11px] rounded-md pl-6 pr-2 py-1.5 placeholder:text-gcp-text-muted/40 focus:outline-none focus:border-gcp-blue/60 focus:shadow-[0_0_0_2px_rgba(66,133,244,0.12)] transition-all"
           />

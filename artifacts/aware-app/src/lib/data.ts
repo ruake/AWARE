@@ -1,8 +1,8 @@
-import type { Run, TestResult, TestCase, TestSuite } from '@/lib/types';
-import { fetchJson } from '@/lib/dataFetcher';
-import { getTestSuites as _getTestSuites } from '@/lib/testSuites';
-import { getAutoDiscoveredTests } from '@/lib/testDiscovery';
-import { subscribeToTestCases, subscribeToTestSuites } from '@/lib/store';
+import type { Run, TestResult, TestCase, TestSuite } from "@/lib/types";
+import { fetchJson } from "@/lib/dataFetcher";
+import { getTestSuites as _getTestSuites } from "@/lib/testSuites";
+import { getAutoDiscoveredTests } from "@/lib/testDiscovery";
+import { subscribeToTestCases, subscribeToTestSuites } from "@/lib/store";
 
 let runsCache: Run[] | null = null;
 let resultsCache: Record<string, TestResult[]> | null = null;
@@ -23,7 +23,7 @@ subscribeToTestCases(() => {
 
 export async function loadRuns(): Promise<Run[]> {
   if (runsCache) return runsCache;
-  runsCache = await fetchJson<Run[]>('runs.json');
+  runsCache = await fetchJson<Run[]>("runs.json");
   RUNS.length = 0;
   RUNS.push(...runsCache);
   return runsCache;
@@ -37,7 +37,7 @@ export async function loadResults(runId: string): Promise<TestResult[]> {
 export async function loadAllResults(): Promise<Record<string, TestResult[]>> {
   if (resultsCache) return resultsCache;
   try {
-    resultsCache = await fetchJson<Record<string, TestResult[]>>('test-results.json');
+    resultsCache = await fetchJson<Record<string, TestResult[]>>("test-results.json");
   } catch {
     resultsCache = {};
   }
@@ -54,7 +54,7 @@ export async function loadTestCases(): Promise<Record<string, TestCase>> {
     _testCasesSnapshot = Object.values(existing);
     return testCasesCache;
   }
-  testCasesCache = await fetchJson<Record<string, TestCase>>('auto-tests.json');
+  testCasesCache = await fetchJson<Record<string, TestCase>>("auto-tests.json");
   _testCasesSnapshot = Object.values(testCasesCache);
   return testCasesCache;
 }

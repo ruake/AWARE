@@ -1,12 +1,12 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FileCode } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import { FileCode } from "lucide-react";
 
 export function YamlPreview({ content, title }: { content: string; title?: string }) {
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 4 }} 
-      animate={{ opacity: 1, y: 0 }} 
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
       className="overflow-hidden rounded-xl border border-gcp-border/60 shadow-lg shadow-black/20"
     >

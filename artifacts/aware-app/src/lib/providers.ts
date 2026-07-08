@@ -1,4 +1,4 @@
-export type LLMProvider = 'openai' | 'webllm' | 'chrome';
+export type LLMProvider = "openai" | "webllm" | "chrome";
 
 export interface ProviderConfig {
   provider: LLMProvider;
@@ -7,13 +7,13 @@ export interface ProviderConfig {
   endpoint?: string;
 }
 
-const STORAGE_KEY = 'aware-llm-config';
+const STORAGE_KEY = "aware-llm-config";
 
 export function getProviderConfig(): ProviderConfig {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
   } catch {
-    return { provider: 'openai', model: 'gpt-4o-mini' };
+    return { provider: "openai", model: "gpt-4o-mini" };
   }
 }
 

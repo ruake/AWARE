@@ -1,9 +1,9 @@
-import type { LLMConfig } from '@/lib/types';
-import type { ProviderConfig } from '@/lib/providers';
+import type { LLMConfig } from "@/lib/types";
+import type { ProviderConfig } from "@/lib/providers";
 
 const DEFAULT_CONFIG: LLMConfig = {
-  provider: 'chrome',
-  model: 'gemini-nano',
+  provider: "chrome",
+  model: "gemini-nano",
   temperature: 0.7,
   maxTokens: 2048,
 };
@@ -25,20 +25,24 @@ export function resetLLMConfig(): void {
 
 function getEndpoint(provider: string, config: ProviderConfig): string {
   switch (provider) {
-    case 'openai':
-      return config.endpoint || 'https://api.openai.com/v1/chat/completions';
-    case 'webllm':
-      return 'webllm://local';
-    case 'chrome':
-      return 'chrome-ai://local';
+    case "openai":
+      return config.endpoint || "https://api.openai.com/v1/chat/completions";
+    case "webllm":
+      return "webllm://local";
+    case "chrome":
+      return "chrome-ai://local";
     default:
-      return 'https://api.openai.com/v1/chat/completions';
+      return "https://api.openai.com/v1/chat/completions";
   }
 }
 
-async function callOpenAI(prompt: string, config: LLMConfig, providerConfig: ProviderConfig): Promise<string> {
+async function callOpenAI(
+  prompt: string,
+  config: LLMConfig,
+  providerConfig: ProviderConfig,
+): Promise<string> {
   if (!providerConfig.apiKey) {
-    return 'OpenAI API key not configured. Please set your API key in settings.';
+    return "OpenAI API key not configured. Please set your API key in settings.";
   }
   return `[OpenAI ${config.model}]: ${prompt}`;
 }
@@ -58,13 +62,13 @@ export function getProvider(config?: LLMConfig): { complete: (prompt: string) =>
   return {
     complete: async (prompt: string): Promise<string> => {
       switch (provider) {
-        case 'openai': {
-          const { getProviderConfig } = await import('@/lib/providers');
+        case "openai": {
+          const { getProviderConfig } = await import("@/lib/providers");
           return callOpenAI(prompt, cfg, getProviderConfig());
         }
-        case 'webllm':
+        case "webllm":
           return callWebLLM(prompt, cfg);
-        case 'chrome':
+        case "chrome":
           return callChromeAI(prompt, cfg);
         default:
           return `Echo: ${prompt}`;
@@ -74,5 +78,5 @@ export function getProvider(config?: LLMConfig): { complete: (prompt: string) =>
 }
 
 export function clearChatHistory(): void {
-  localStorage.removeItem('aware-chat-history');
+  localStorage.removeItem("aware-chat-history");
 }

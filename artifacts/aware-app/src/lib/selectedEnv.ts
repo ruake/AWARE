@@ -7,23 +7,25 @@ export function getSelectedEnvIds(): string[] {
 
 export function setSelectedEnvIds(ids: string[]): void {
   _envIds = ids;
-  localStorage.setItem('aware-selected-env-v2', JSON.stringify(ids));
-  _listeners.forEach(fn => fn());
+  localStorage.setItem("aware-selected-env-v2", JSON.stringify(ids));
+  _listeners.forEach((fn) => fn());
 }
 
 export function toggleSelectedEnvId(id: string): void {
   if (_envIds.includes(id)) {
-    _envIds = _envIds.filter(e => e !== id);
+    _envIds = _envIds.filter((e) => e !== id);
   } else {
     _envIds = [..._envIds, id];
   }
-  localStorage.setItem('aware-selected-env-v2', JSON.stringify(_envIds));
-  _listeners.forEach(fn => fn());
+  localStorage.setItem("aware-selected-env-v2", JSON.stringify(_envIds));
+  _listeners.forEach((fn) => fn());
 }
 
 export function subscribeToSelectedEnv(cb: () => void): () => void {
   _listeners.add(cb);
-  return () => { _listeners.delete(cb); };
+  return () => {
+    _listeners.delete(cb);
+  };
 }
 
 export function getSelectedEnvSnapshot(): { envIds: string[] } {

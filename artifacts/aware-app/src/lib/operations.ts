@@ -1,11 +1,11 @@
-import type { TestCase, TestSuite } from './types';
+import type { TestCase, TestSuite } from "./types";
 
-const TC_STORAGE_KEY = 'aware_test_cases_v2';
-const TS_STORAGE_KEY = 'aware_test_suites_v2';
+const TC_STORAGE_KEY = "aware_test_cases_v2";
+const TS_STORAGE_KEY = "aware_test_suites_v2";
 
 export function getLocalTestCases(): Record<string, TestCase> {
   try {
-    return JSON.parse(localStorage.getItem(TC_STORAGE_KEY) || '{}');
+    return JSON.parse(localStorage.getItem(TC_STORAGE_KEY) || "{}");
   } catch {
     return {};
   }
@@ -25,7 +25,7 @@ export function deleteLocalTestCase(id: string): void {
 
 export function getLocalTestSuites(): Record<string, TestSuite> {
   try {
-    return JSON.parse(localStorage.getItem(TS_STORAGE_KEY) || '{}');
+    return JSON.parse(localStorage.getItem(TS_STORAGE_KEY) || "{}");
   } catch {
     return {};
   }

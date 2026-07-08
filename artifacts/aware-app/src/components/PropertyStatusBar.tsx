@@ -1,27 +1,27 @@
-import { memo } from 'react';
-import { motion } from 'framer-motion';
-import { Shield, Server, Globe } from 'lucide-react';
-import { getEnvConfigs } from '@/lib/envConfig';
+import { memo } from "react";
+import { motion } from "framer-motion";
+import { Shield, Server, Globe } from "lucide-react";
+import { getEnvConfigs } from "@/lib/envConfig";
 
 const TIER_CONFIG = {
-  QA:   { icon: Shield, label: 'QA',   bar: 'bg-gcp-yellow',  bg: 'bg-gcp-yellow/8' },
-  UAT:  { icon: Globe,  label: 'UAT',  bar: 'bg-gcp-blue',    bg: 'bg-gcp-blue/8' },
-  PROD: { icon: Server, label: 'PROD', bar: 'bg-gcp-green',   bg: 'bg-gcp-green/8' },
+  QA: { icon: Shield, label: "QA", bar: "bg-gcp-yellow", bg: "bg-gcp-yellow/8" },
+  UAT: { icon: Globe, label: "UAT", bar: "bg-gcp-blue", bg: "bg-gcp-blue/8" },
+  PROD: { icon: Server, label: "PROD", bar: "bg-gcp-green", bg: "bg-gcp-green/8" },
 };
 
 const NET_COLORS: Record<string, string> = {
-  staging: 'bg-gcp-text-muted',
-  production: 'bg-gcp-blue',
+  staging: "bg-gcp-text-muted",
+  production: "bg-gcp-blue",
 };
 
 const SEGMENT_LABELS: Record<string, string> = {
-  staging: 'Staging',
-  production: 'Production',
+  staging: "Staging",
+  production: "Production",
 };
 
 export const PropertyStatusBar = memo(function PropertyStatusBar() {
   const configs = getEnvConfigs();
-  const tiers = ['QA', 'UAT', 'PROD'] as const;
+  const tiers = ["QA", "UAT", "PROD"] as const;
 
   return (
     <div className="rounded-xl border border-gcp-border bg-gcp-surface p-4">
@@ -29,7 +29,7 @@ export const PropertyStatusBar = memo(function PropertyStatusBar() {
         {tiers.map((tier, ti) => {
           const cfg = TIER_CONFIG[tier];
           const Icon = cfg.icon;
-          const tierConfigs = configs.filter(c => c.target === tier);
+          const tierConfigs = configs.filter((c) => c.target === tier);
           return (
             <motion.div
               key={tier}
@@ -42,25 +42,31 @@ export const PropertyStatusBar = memo(function PropertyStatusBar() {
                 <div className="flex items-center justify-center w-6 h-6 rounded-md bg-gcp-elevated border border-gcp-border-soft">
                   <Icon size={12} className="text-gcp-text-secondary" />
                 </div>
-                <span className="text-xs font-semibold tracking-wider text-gcp-text">{cfg.label}</span>
+                <span className="text-xs font-semibold tracking-wider text-gcp-text">
+                  {cfg.label}
+                </span>
               </div>
               <div className="flex gap-1.5">
-                {tierConfigs.map(ec => {
+                {tierConfigs.map((ec) => {
                   const isActive = ec.active !== false;
-                  const netColor = NET_COLORS[ec.network] || 'bg-gcp-text-muted';
+                  const netColor = NET_COLORS[ec.network] || "bg-gcp-text-muted";
                   return (
                     <div
                       key={ec.id}
                       className={`flex-1 rounded px-2 py-1.5 text-[10px] leading-tight border transition-all ${
                         isActive
-                          ? 'border-gcp-border-strong bg-gcp-elevated/60'
-                          : 'border-gcp-border-soft bg-transparent opacity-50'
+                          ? "border-gcp-border-strong bg-gcp-elevated/60"
+                          : "border-gcp-border-soft bg-transparent opacity-50"
                       }`}
-                      title={`${ec.label}${!isActive ? ' (inactive)' : ''}`}
+                      title={`${ec.label}${!isActive ? " (inactive)" : ""}`}
                     >
                       <div className="flex items-center gap-1 mb-1">
-                        <span className={`w-1.5 h-1.5 rounded-full ${isActive ? netColor : 'bg-gcp-text-muted'}`} />
-                        <span className="font-medium text-gcp-text-secondary">{SEGMENT_LABELS[ec.network] || ec.network}</span>
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${isActive ? netColor : "bg-gcp-text-muted"}`}
+                        />
+                        <span className="font-medium text-gcp-text-secondary">
+                          {SEGMENT_LABELS[ec.network] || ec.network}
+                        </span>
                       </div>
                       <div className="flex gap-0.5">
                         {isActive ? (

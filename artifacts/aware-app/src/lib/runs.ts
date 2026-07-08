@@ -1,6 +1,6 @@
-import type { Run, TestResult, DiffRow } from '@/lib/types';
-import type { Env } from '@/lib/types';
-import { fetchJson } from '@/lib/dataFetcher';
+import type { Run, TestResult, DiffRow } from "@/lib/types";
+import type { Env } from "@/lib/types";
+import { fetchJson } from "@/lib/dataFetcher";
 
 const _resultsCache = new Map<string, TestResult[]>();
 
@@ -22,7 +22,7 @@ let _resultsLoaded = false;
 
 export async function loadAllTestResults(): Promise<void> {
   if (_resultsLoaded) return;
-  const all = await fetchJson<Record<string, TestResult[]>>('test-results.json');
+  const all = await fetchJson<Record<string, TestResult[]>>("test-results.json");
   for (const [runId, results] of Object.entries(all)) {
     _resultsCache.set(runId, results);
   }
@@ -35,10 +35,7 @@ export function areResultsLoaded(): boolean {
 
 export async function loadRuns(): Promise<void> {
   if (RUNS.length > 0) return;
-  const [runsData] = await Promise.all([
-    fetchJson<Run[]>('runs.json'),
-    loadAllTestResults(),
-  ]);
+  const [runsData] = await Promise.all([fetchJson<Run[]>("runs.json"), loadAllTestResults()]);
   RUNS.length = 0;
   RUNS.push(...runsData);
   _snapshot = computeSnapshot();
@@ -46,11 +43,11 @@ export async function loadRuns(): Promise<void> {
 
 export function getRunsByEnv(envIds?: string[]): Run[] {
   if (!envIds || envIds.length === 0) return [...RUNS];
-  return RUNS.filter(r => envIds.includes(r.envId));
+  return RUNS.filter((r) => envIds.includes(r.envId));
 }
 
 export function getRunById(id: string): Run | undefined {
-  return RUNS.find(r => r.id === id);
+  return RUNS.find((r) => r.id === id);
 }
 
 export function getTestResultsForRun(runId: string): TestResult[] {
@@ -77,18 +74,18 @@ export function computeDiffRows(baseRunId: string, candRunId: string): DiffRow[]
     const base = pair.base;
     const cand = pair.cand;
 
-    const baseStatus = base?.status ?? 'FAIL';
-    const candStatus = cand?.status ?? 'FAIL';
+    const baseStatus = base?.status ?? "FAIL";
+    const candStatus = cand?.status ?? "FAIL";
     const baseDur = base?.duration ?? 0;
     const candDur = cand?.duration ?? 0;
 
-    let state: DiffRow['state'] = 'unchanged';
-    if (baseStatus === 'PASS' && candStatus === 'FAIL') {
-      state = 'regression';
-    } else if (baseStatus === 'FAIL' && candStatus === 'PASS') {
-      state = 'fixed';
+    let state: DiffRow["state"] = "unchanged";
+    if (baseStatus === "PASS" && candStatus === "FAIL") {
+      state = "regression";
+    } else if (baseStatus === "FAIL" && candStatus === "PASS") {
+      state = "fixed";
     } else if (base && cand && Math.abs(candDur - baseDur) / Math.max(baseDur, 1) > 0.5) {
-      state = 'duration';
+      state = "duration";
     }
 
     rows.push({
@@ -98,7 +95,7 @@ export function computeDiffRows(baseRunId: string, candRunId: string): DiffRow[]
       candStatus,
       durBase: baseDur,
       durCand: candDur,
-      category: base?.category ?? cand?.category ?? '',
+      category: base?.category ?? cand?.category ?? "",
       state,
       baseResult: base,
       candResult: cand,
@@ -164,13 +161,19 @@ function downsamplePoints<T>(points: T[], maxPoints: number): T[] {
 
 function computeSnapshot(): Snapshot {
   // Precompute timestamps to avoid repeated Date() calls in sort comparator
-  const withTime = RUNS.map(r => ({ run: r, time: new Date(r.started).getTime() }));
+  const withTime = RUNS.map((r) => ({ run: r, time: new Date(r.started).getTime() }));
   withTime.sort((a, b) => a.time - b.time);
 
   // Single pass over all runs to build all aggregates
-  const envStats = new Map<string, { total: number; passed: number; failed: number; passPctSum: number }>();
+  const envStats = new Map<
+    string,
+    { total: number; passed: number; failed: number; passPctSum: number }
+  >();
   const envChartData = new Map<string, PassRatePoint[]>();
-  const testMap = new Map<string, { statuses: string[]; durations: number[]; category: string; lastRun: string; name: string }>();
+  const testMap = new Map<
+    string,
+    { statuses: string[]; durations: number[]; category: string; lastRun: string; name: string }
+  >();
 
   for (const { run } of withTime) {
     let stat = envStats.get(run.env);
@@ -180,8 +183,8 @@ function computeSnapshot(): Snapshot {
     }
     stat.total++;
     stat.passPctSum += run.passPct;
-    if (run.status === 'PASS') stat.passed++;
-    else if (run.status === 'FAIL') stat.failed++;
+    if (run.status === "PASS") stat.passed++;
+    else if (run.status === "FAIL") stat.failed++;
 
     let points = envChartData.get(run.env);
     if (!points) {
@@ -199,7 +202,7 @@ function computeSnapshot(): Snapshot {
     for (const tr of results) {
       let entry = testMap.get(tr.testCaseId);
       if (!entry) {
-        entry = { statuses: [], durations: [], category: tr.category, lastRun: '', name: tr.name };
+        entry = { statuses: [], durations: [], category: tr.category, lastRun: "", name: tr.name };
         testMap.set(tr.testCaseId, entry);
       }
       entry.statuses.push(tr.status);
@@ -238,7 +241,7 @@ function computeSnapshot(): Snapshot {
     const total = entry.statuses.length;
     let passCount = 0;
     for (const s of entry.statuses) {
-      if (s === 'PASS') passCount++;
+      if (s === "PASS") passCount++;
     }
     const failCount = total - passCount;
     const transitions = total - 1;
@@ -277,7 +280,8 @@ export async function loadRunsWithResults(): Promise<void> {
 
 export const ENV_SUMMARY = (): EnvSummary[] => _snapshot?.ENV_SUMMARY ?? [];
 export const PASS_RATE_CHART = (): PassRatePoint[] => _snapshot?.PASS_RATE_CHART ?? [];
-export const ENV_PASS_RATE_CHART = (): Record<string, PassRatePoint[]> => _snapshot?.ENV_PASS_RATE_CHART ?? {};
+export const ENV_PASS_RATE_CHART = (): Record<string, PassRatePoint[]> =>
+  _snapshot?.ENV_PASS_RATE_CHART ?? {};
 export const PER_ENV_PASS_RATE = (): Record<string, number> => _snapshot?.PER_ENV_PASS_RATE ?? {};
 export const TEST_DETAILS = (): TestDetail[] => _snapshot?.TEST_DETAILS ?? [];
 

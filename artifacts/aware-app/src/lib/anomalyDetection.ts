@@ -1,5 +1,5 @@
-import type { Run, TestResult, AnomalyBanner } from '@/lib/types';
-import { RUNS, getTestResultsForRun } from '@/lib/runs';
+import type { Run, TestResult, AnomalyBanner } from "@/lib/types";
+import { RUNS, getTestResultsForRun } from "@/lib/runs";
 
 export interface AnomalyResult {
   testId: string;
@@ -8,7 +8,7 @@ export interface AnomalyResult {
   passRate: number;
   avgPassRate: number;
   anomalous: boolean;
-  direction: 'up' | 'down' | null;
+  direction: "up" | "down" | null;
 }
 
 export interface DurationAnomaly {
@@ -26,7 +26,7 @@ export interface DurationAnomaly {
 export function detectPassRateAnomaly(
   currentPassRate: number,
   history: number[],
-  threshold: number = 2
+  threshold: number = 2,
 ): { zScore: number; anomalous: boolean } {
   if (history.length < 3) return { zScore: 0, anomalous: false };
   const mean = history.reduce((s, v) => s + v, 0) / history.length;
@@ -39,7 +39,9 @@ export function detectPassRateAnomaly(
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function detectAnomalies(): DurationAnomaly[] {
-  const recentRuns = [...RUNS].filter(r => Date.now() - new Date(r.started).getTime() < SEVEN_DAYS_MS);
+  const recentRuns = [...RUNS].filter(
+    (r) => Date.now() - new Date(r.started).getTime() < SEVEN_DAYS_MS,
+  );
   if (recentRuns.length < 3) return [];
 
   const testDurations = new Map<string, number[]>();
@@ -57,19 +59,20 @@ export function detectAnomalies(): DurationAnomaly[] {
   for (const [testId, durations] of testDurations) {
     if (durations.length < 3) continue;
     const mean = durations.reduce((a, b) => a + b, 0) / durations.length;
-    const stdDev = Math.sqrt(durations.reduce((s, v) => s + (v - mean) ** 2, 0) / durations.length) || 1;
+    const stdDev =
+      Math.sqrt(durations.reduce((s, v) => s + (v - mean) ** 2, 0) / durations.length) || 1;
     const latest = durations[durations.length - 1];
     const zScore = (latest - mean) / stdDev;
 
     if (zScore > 1.5) {
-      let severity = 'low';
-      if (zScore > 3) severity = 'critical';
-      else if (zScore > 2.5) severity = 'high';
-      else if (zScore > 2) severity = 'medium';
+      let severity = "low";
+      if (zScore > 3) severity = "critical";
+      else if (zScore > 2.5) severity = "high";
+      else if (zScore > 2) severity = "medium";
 
       results.push({
         testId,
-        metric: 'latency',
+        metric: "latency",
         zScore,
         severity,
         message: `Latency anomaly detected for test ${testId} (z=${zScore.toFixed(2)})`,
