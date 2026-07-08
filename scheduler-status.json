@@ -1,82 +1,27 @@
 {
-  "lastRun": null,
-  "lastRunBy": null,
+  "lastRun": "2026-07-08T15:41:34.933Z",
+  "lastRunBy": "ruake",
   "status": "healthy",
   "suites": [
     {
       "id": "suite_continuous",
-      "name": "Continuous — QA / Staging (Every 10min)",
+      "name": "Continuous — QA / Staging (Every 30min)",
       "schedule": "*/30 * * * *",
       "scheduleDesc": "Every 30 minutes",
       "due": false,
-      "lastDispatched": null,
+      "lastDispatched": "2026-07-08T15:41:34.933Z",
       "lastConclusion": null,
       "lastRunUrl": null,
       "activeRuns": 0,
       "status": "idle",
-      "nextDue": null,
-      "environments": ["qa_staging"],
-      "runners": ["playwright", "pytest"]
-    },
-    {
-      "id": "suite_regression_qa",
-      "name": "Full Regression — QA (Staging + Production)",
-      "schedule": "0 */2 * * *",
-      "scheduleDesc": "Every 2 hours",
-      "due": false,
-      "lastDispatched": null,
-      "lastConclusion": null,
-      "lastRunUrl": null,
-      "activeRuns": 0,
-      "status": "idle",
-      "nextDue": null,
-      "environments": ["qa_staging", "qa_prod"],
-      "runners": ["playwright", "pytest"]
-    },
-    {
-      "id": "suite_regression_uat",
-      "name": "Full Regression — UAT (Staging + Production)",
-      "schedule": "0 6 * * *",
-      "scheduleDesc": "Daily at 06:00 UTC",
-      "due": false,
-      "lastDispatched": null,
-      "lastConclusion": null,
-      "lastRunUrl": null,
-      "activeRuns": 0,
-      "status": "idle",
-      "nextDue": null,
-      "environments": ["uat_staging", "uat_prod"],
-      "runners": ["playwright", "pytest"]
-    },
-    {
-      "id": "suite_nightly_prod",
-      "name": "Nightly Regression — PROD (Staging + Production)",
-      "schedule": "0 2 * * *",
-      "scheduleDesc": "Daily at 02:00 UTC",
-      "due": false,
-      "lastDispatched": null,
-      "lastConclusion": null,
-      "lastRunUrl": null,
-      "activeRuns": 0,
-      "status": "idle",
-      "nextDue": null,
-      "environments": ["prod_staging", "prod_prod"],
-      "runners": ["playwright", "pytest"]
-    },
-    {
-      "id": "suite_performance",
-      "name": "Performance Benchmarks",
-      "schedule": "0 4 * * 1",
-      "scheduleDesc": "Weekly on Monday at 04:00 UTC",
-      "due": false,
-      "lastDispatched": null,
-      "lastConclusion": null,
-      "lastRunUrl": null,
-      "activeRuns": 0,
-      "status": "idle",
-      "nextDue": null,
-      "environments": ["qa_prod", "uat_prod", "prod_prod"],
-      "runners": ["playwright"]
+      "nextDue": "2026-07-08T16:00:34.933Z",
+      "environments": [
+        "QA / Staging"
+      ],
+      "runners": [
+        "playwright",
+        "pytest"
+      ]
     },
     {
       "id": "suite_smoke",
@@ -84,14 +29,87 @@
       "schedule": null,
       "scheduleDesc": null,
       "due": false,
-      "lastDispatched": null,
+      "lastDispatched": "2026-07-08T15:41:34.933Z",
+      "lastConclusion": "FAIL",
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "failed",
+      "nextDue": null,
+      "environments": [
+        "QA / Staging",
+        "QA / Production",
+        "UAT / Staging",
+        "UAT / Production",
+        "PROD / Staging",
+        "PROD / Production"
+      ],
+      "runners": [
+        "playwright",
+        "pytest"
+      ]
+    },
+    {
+      "id": "suite_regression_qa",
+      "name": "Full Regression — QA (Staging + Production)",
+      "schedule": "0 */2 * * *",
+      "scheduleDesc": "Every 2 hours",
+      "due": false,
+      "lastDispatched": "2026-07-08T15:41:34.933Z",
       "lastConclusion": null,
       "lastRunUrl": null,
       "activeRuns": 0,
       "status": "idle",
-      "nextDue": null,
-      "environments": ["qa_staging", "qa_prod", "uat_staging", "uat_prod", "prod_staging", "prod_prod"],
-      "runners": ["playwright", "pytest"]
+      "nextDue": "2026-07-08T16:00:34.933Z",
+      "environments": [
+        "QA / Staging",
+        "QA / Production"
+      ],
+      "runners": [
+        "playwright",
+        "pytest"
+      ]
+    },
+    {
+      "id": "suite_regression_uat",
+      "name": "Full Regression — UAT (Staging + Production)",
+      "schedule": "0 6 * * *",
+      "scheduleDesc": "Daily 06:00 UTC",
+      "due": false,
+      "lastDispatched": "2026-07-08T15:41:34.933Z",
+      "lastConclusion": null,
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "idle",
+      "nextDue": "2026-07-09T06:00:34.933Z",
+      "environments": [
+        "UAT / Staging",
+        "UAT / Production"
+      ],
+      "runners": [
+        "playwright",
+        "pytest"
+      ]
+    },
+    {
+      "id": "suite_nightly_prod",
+      "name": "Nightly Regression — PROD (Staging + Production)",
+      "schedule": "0 2 * * *",
+      "scheduleDesc": "Daily 02:00 UTC",
+      "due": false,
+      "lastDispatched": "2026-07-08T15:41:34.933Z",
+      "lastConclusion": null,
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "idle",
+      "nextDue": "2026-07-09T02:00:34.933Z",
+      "environments": [
+        "PROD / Staging",
+        "PROD / Production"
+      ],
+      "runners": [
+        "playwright",
+        "pytest"
+      ]
     },
     {
       "id": "suite_edgeworker",
@@ -99,20 +117,46 @@
       "schedule": null,
       "scheduleDesc": null,
       "due": false,
-      "lastDispatched": null,
+      "lastDispatched": "2026-07-08T15:41:34.933Z",
       "lastConclusion": null,
       "lastRunUrl": null,
       "activeRuns": 0,
       "status": "idle",
       "nextDue": null,
-      "environments": ["qa_staging", "uat_staging"],
-      "runners": ["pytest"]
+      "environments": [
+        "QA / Staging",
+        "UAT / Staging"
+      ],
+      "runners": [
+        "pytest"
+      ]
+    },
+    {
+      "id": "suite_performance",
+      "name": "Performance Benchmarks",
+      "schedule": "0 4 * * 1",
+      "scheduleDesc": "Monday 04:00 UTC",
+      "due": false,
+      "lastDispatched": "2026-07-08T15:41:34.933Z",
+      "lastConclusion": null,
+      "lastRunUrl": null,
+      "activeRuns": 0,
+      "status": "idle",
+      "nextDue": "2026-07-13T04:00:34.933Z",
+      "environments": [
+        "QA / Production",
+        "UAT / Production",
+        "PROD / Production"
+      ],
+      "runners": [
+        "playwright"
+      ]
     }
   ],
   "recentDispatches": [],
   "summary": {
     "total": 7,
-    "scheduled": 4,
+    "scheduled": 5,
     "due": 0,
     "dispatched": 0,
     "running": 0
