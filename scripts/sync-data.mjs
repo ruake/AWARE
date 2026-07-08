@@ -79,6 +79,13 @@ function main() {
 
   sh(`git fetch origin ${DATA_BRANCH}:${DATA_BRANCH} 2>/dev/null || true`);
 
+  // ── Read source files into memory BEFORE switching branches ──────────
+  const payload = new Map();
+  for (const f of files) {
+    payload.set(f, readFileSync(join(DATA_SRC, f)));
+  }
+
+  // ── Switch to data branch and clean it ───────────────────────────────
   try {
     sh(`git checkout -f ${DATA_BRANCH}`);
   } catch {
@@ -88,13 +95,10 @@ function main() {
   // Remove ALL tracked files — the data branch should ONLY contain data files
   sh("git rm -rf . --quiet", { allowFail: true });
 
-  // ── Copy data files ──────────────────────────────────────────────────
+  // ── Write data files ─────────────────────────────────────────────────
   let changed = 0;
-  for (const f of files) {
-    const src = join(DATA_SRC, f);
+  for (const [f, content] of payload) {
     const dst = join(ROOT, f);
-    const content = readFileSync(src);
-
     let skip = false;
     if (existsSync(dst)) {
       const existing = readFileSync(dst);
@@ -102,7 +106,6 @@ function main() {
         skip = true;
       }
     }
-
     if (skip) {
       console.log(`  = ${f} (unchanged)`);
     } else {
