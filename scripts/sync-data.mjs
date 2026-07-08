@@ -144,8 +144,11 @@ function main() {
   if (!hasChanges) {
     console.log("\n  ℹ No data changes to commit");
   } else {
-    const stats = sh(`git diff --cached --stat`).split("\n").filter(Boolean).slice(0, 10).join("\n    ");
-    console.log(`\n  Changes:\n    ${stats}`);
+    const stats = sh(`git diff --cached --stat`, { allowFail: true });
+    if (stats) {
+      const lines = stats.split("\n").filter(Boolean).slice(0, 10).join("\n    ");
+      console.log(`\n  Changes:\n    ${lines}`);
+    }
     sh(`git commit -m "sync: update data files from main [skip ci]"`);
     if (TOKEN) {
       const remote = `https://x-access-token:${TOKEN}@github.com/${process.env.GITHUB_REPOSITORY || "ruake/AWARE"}.git`;
