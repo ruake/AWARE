@@ -1,8 +1,41 @@
-# DEPRECATED — replaced by deploy-site.yml
-# Intentionally inert: only manual dispatch, does nothing.
-on: workflow_dispatch
+# Deploy to GitHub Pages — AWARE dashboard
+# Build status: ![Deploy](https://github.com/${{ github.repository }}/actions/workflows/deploy.yml/badge.svg)
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
 jobs:
-  noop:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - run: "true"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm run typecheck
+        working-directory: artifacts/aware-app
+      - name: Unit Tests
+        run: pnpm run test
+        working-directory: artifacts/aware-app
+      - name: Build
+        run: pnpm run build
+        working-directory: artifacts/aware-app
+        env:
+          BASE_PATH: /AWARE/
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: artifacts/aware-app/dist/public

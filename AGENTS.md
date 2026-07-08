@@ -8,6 +8,7 @@
 - **Live**: https://ruake.github.io/AWARE | **Repo**: https://github.com/ruake/AWARE
 
 ## Commands
+
 ```bash
 cd artifacts/aware-app
 pnpm install
@@ -42,17 +43,6 @@ pnpm verify                 # typecheck + lint + format + test (full pre-commit 
 - **Primary**: `recharts` — `LineChart`, `AreaChart`, `BarChart`, `ResponsiveContainer` etc.
 - **Legacy**: `react-google-charts` — only in `GoogleCharts.tsx` wrapper; do not use for new work
 
-### Data Layer (runtime-fetch)
-- All seed data in `data/*.json` — **fetched at runtime** from `raw.githubusercontent.com/ruake/AWARE/data/`
-- `src/lib/dataFetcher.ts` — `fetchJson<T>(path)` resolves URLs for dev (`/data/`) vs production (`raw.githubusercontent.com/.../data/`)
-- Data init: `src/lib/initData.ts` — `loadAllData()` is called in `App.tsx` before rendering; shows loading state until complete
-- Each data module (`runs.ts`, `testSuites.ts`, `promotions.ts`, `schedulerStatus.ts`, `testDiscovery.ts`) exposes both:
-  - A synchronous getter (`getXxx()`) that returns the current (possibly empty) state
-  - An async `loadXxx()` that fetches from the `data` GitHub branch and populates the store
-- `RUNS` and `DIFF_ROWS` in `runs.ts` are `let` bindings reassigned after fetch
-- Env config: `getEnvConfigs()` / `saveEnvConfigs()` with localStorage key `aware-env-configs-v3`
-- `_snapshot` caching in stores for stable `useSyncExternalStore` references
-
 ### State
 - No Redux/Zustand — custom pub/sub model in `src/lib/data.ts`
 - `@tanstack/react-query` for async patterns
@@ -65,6 +55,39 @@ pnpm verify                 # typecheck + lint + format + test (full pre-commit 
 - `src/lib/ai/useCases.ts` — 20+ analysis skill definitions
 - `src/lib/ai/dataQueries.ts` — the ONLY sanctioned way for AI code to read app data
 - `src/lib/chatStorage.ts` — localStorage-backed threaded chat history
+
+## Data Layer (runtime-fetch)
+- All seed data in `data/*.json` — **fetched at runtime** from `raw.githubusercontent.com/ruake/AWARE/data/`
+- `src/lib/dataFetcher.ts` — `fetchJson<T>(path)` resolves URLs for dev (`/data/`) vs production (`raw.githubusercontent.com/.../data/`)
+- Data init: `src/lib/initData.ts` — `loadAllData()` is called in `App.tsx` before rendering; shows loading state until complete
+- Each data module (`runs.ts`, `testSuites.ts`, `promotions.ts`, `schedulerStatus.ts`, `testDiscovery.ts`) exposes both:
+  - A synchronous getter (`getXxx()`) that returns the current (possibly empty) state
+  - An async `loadXxx()` that fetches from the `data` GitHub branch and populates the store
+- `RUNS` and `DIFF_ROWS` in `runs.ts` are `let` bindings reassigned after fetch
+- Env config: `getEnvConfigs()` / `saveEnvConfigs()` with localStorage key `aware-env-configs-v3`
+- `_snapshot` caching in stores for stable `useSyncExternalStore` references
+
+### Data Files & Counts
+- `data/auto-tests.json` — auto-discovered tests (`ad_*` pytest + `pw_*` Playwright); no separate test-cases.json
+- `data/test-suites.json` — suites referencing `ad_*` and `pw_*` IDs
+- `data/runs.json` — seed CI runs (`env: "QA"|"UAT"|"PROD"`)
+- `data/diff-rows.json` — seed diff rows
+- `data/test-results.json` — `Record<runId, TestResult[]>`
+- `data/promotions.json` — promotion history
+- All fetched at runtime from `raw.githubusercontent.com/ruake/AWARE/data/<file>.json` (branch = `data`)
+
+### Data Contract
+- `TestResult.evidence` is **REQUIRED** — never omit in seed data or `record-run.mjs` output
+- `TestResult.assertions` **REQUIRED** — use `[]` (empty array), never omit
+- `validate-data.mjs` runs as prebuild — build fails on schema violations
+- `Run.env` uses `"QA"` | `"UAT"` | `"PROD"` — never old "production"/"staging" strings
+
+## Test Discovery
+- **Orchestrator**: `scripts/discover-all.mjs` → merges pytest + Playwright → `auto-tests.json`
+- **pytest** (`discover-tests.py`): Python AST parses `test_*.py` for function names, docstrings, markers
+- **Playwright** (`discover-playwright.mjs`): parses `.spec.ts`/`.test.ts` for `test()` + `test.describe()`
+- Filmstrip/screenshot config preserved across re-discovery runs (matched on `scriptPath`)
+- **App integration**: `src/lib/testDiscovery.ts` — `getAutoDiscoveredTests()` + `getAutoDiscoverySummary()`
 
 ## Environment Model (3 tiers × 2 networks = 6 envs)
 | ID | Label | Target | Network |
@@ -80,20 +103,38 @@ pnpm verify                 # typecheck + lint + format + test (full pre-commit 
 - Promotion gate: UAT regression ≥ 95% pass rate required before PROD property activation
 - `PropertyStatusBar` is always visible on the Dashboard; reads from `getEnvConfigs()`
 
+## Component Conventions
+
+### AWARE Domain Components (`src/components/aware/`)
+- Use inline `style={{}}` with `var(--proof-*)` CSS custom properties
+- Never use Tailwind CSS classes
+- Import icons from `lucide-react`
+- Wrap with `ErrorBoundary` for resilience
+- Follow existing naming: PascalCase, `.tsx` extension
+
+### UI Primitives (`src/components/ui/`)
+- Built with shadcn/radix + Tailwind CSS 4
+- Each component has a single `.tsx` file plus optional types
+- Use `cn()` utility from `clsx` + `tailwind-merge` for className merging
+
+### Pages (`src/pages/`)
+- All pages are `React.lazy()` loaded in `App.tsx`
+- Use inline styles (same as aware/ components), not Tailwind
+- Each page fetches data via the pub/sub stores or `@tanstack/react-query`
+
 ## File Layout
 ```
 artifacts/aware-app/src/
 ├── lib/
-│   ├── types.ts           # ALL type interfaces (Run, TestResult, TestCase, TestSuite, DiffRow, PromotionDecision, LLM types, error classes)
+│   ├── types.ts           # ALL type interfaces (Run, TestResult, TestCase, TestSuite, DiffRow, PromotionDecision, LLM types)
 │   ├── runs.ts            # RUNS[], ENV_SUMMARY, chart data exports, flakiness computation
-│   ├── data.ts            # barrel + mutable stores (testCases, testSuites) + subscriptions
+│   ├── data.ts            # barrel + mutable stores + subscriptions
 │   ├── dataFetcher.ts     # Runtime fetch: raw.githubusercontent.com (prod) or /data/ (dev)
 │   ├── initData.ts        # loadAllData() — orchestrates all async data loading before render
 │   ├── envConfig.ts       # EnvironmentConfig store with localStorage override
 │   ├── ciConfig.ts        # CI config generation (generateCiConfigYaml, downloadCiConfig)
 │   ├── anomalyDetection.ts # test-level Z-score (7-day window, detectAnomalies)
 │   ├── anomaly.ts         # run-level Z-score
-│   ├── llm.ts             # LLM provider abstraction
 │   ├── ai/                # context.ts, prompts.ts, useCases.ts, analyzer.ts, dataQueries.ts
 │   ├── store.ts, nav.ts, urlState.ts, constants.ts, utils.ts
 │   └── chatStorage.ts, notifications.ts, skills.ts, operations.ts, providers.ts
@@ -122,12 +163,12 @@ artifacts/aware-app/src/
 │   ├── useTestData.ts     # Subscribes to test cases + suites
 │   └── use-mobile.tsx, use-toast.ts
 ├── data/
-│   ├── auto-tests.json    # Auto-discovered tests (ad_* pytest + pw_* Playwright)
-│   ├── test-suites.json   # Suite definitions (referencing ad_* and pw_* IDs)
-│   ├── runs.json          # Seed CI run records
-│   ├── diff-rows.json     # Pre-computed compare diffs
-│   ├── test-results.json  # TestResult[] keyed by runId
-│   ├── promotions.json    # Promotion decision history
+│   ├── auto-tests.json
+│   ├── test-suites.json
+│   ├── runs.json
+│   ├── diff-rows.json
+│   ├── test-results.json
+│   ├── promotions.json
 │   └── schemas/           # JSON Schema for validation
 ├── App.tsx                # wouter Router, QueryClientProvider, all route definitions
 ├── main.tsx               # React 19 entry point
@@ -135,39 +176,67 @@ artifacts/aware-app/src/
 └── _group.css             # Group layout utilities
 ```
 
-## Data Files & Counts
-- `data/auto-tests.json` — auto-discovered tests (`ad_*` pytest + `pw_*` Playwright); no separate test-cases.json
-- `data/test-suites.json` — suites referencing `ad_*` and `pw_*` IDs
-- `data/runs.json` — seed CI runs (`env: "QA"|"UAT"|"PROD"`)
-- `data/diff-rows.json` — seed diff rows
-- `data/test-results.json` — `Record<runId, TestResult[]>`
-- `data/promotions.json` — promotion history
-- **No separate test-cases.json** — all test cases come from auto-discovery
-- All fetched at runtime from `raw.githubusercontent.com/ruake/AWARE/data/<file>.json` (branch = `data`)
+## GitHub Actions Workflows
 
-## Data Contract
-- `TestResult.evidence` is **REQUIRED** — never omit in seed data or `record-run.mjs` output
-- `TestResult.assertions` **REQUIRED** — use `[]` (empty array), never omit
-- `validate-data.mjs` runs as prebuild — build fails on schema violations
-- `Run.env` uses `"QA"` | `"UAT"` | `"PROD"` — never old "production"/"staging" strings
+### Workflow files (`.github/workflows/`)
 
-## Test Discovery
-- **Orchestrator**: `scripts/discover-all.mjs` → merges pytest + Playwright → `auto-tests.json`
-- **pytest** (`discover-tests.py`): Python AST parses `test_*.py` for function names, docstrings, markers
-- **Playwright** (`discover-playwright.mjs`): parses `.spec.ts`/`.test.ts` for `test()` + `test.describe()`
-- Filmstrip/screenshot config preserved across re-discovery runs (matched on `scriptPath`)
-- **App integration**: `src/lib/testDiscovery.ts` — `getAutoDiscoveredTests()` + `getAutoDiscoverySummary()`
+| File | Trigger | What it does |
+|------|---------|-------------|
+| `deploy.yml` | Push to `main`, `workflow_dispatch` | Typecheck → unit tests → build → deploy to GitHub Pages |
+| `scheduler.yml` | Cron `*/15 * * * *`, `workflow_dispatch` | Runs `scripts/scheduler.mjs` — evaluates suite schedules and dispatches `run-tests.yml` |
+| `run-tests.yml` | `workflow_dispatch`, `repository_dispatch` | Playwright + pytest parallel jobs across all 6 envs; records results via `record-run.mjs` |
+| `sync-data-branches.yml` | Push to `main` (data/config paths), `workflow_dispatch` | Pushes seed data to orphan `data` branch |
+| `validate-config.yml` | Push/PR to `main` (config paths) | Validates `config/*.yml` against schemas |
+| `code-quality.yml` | Push/PR to `main` | ESLint, typecheck, pnpm audit, CodeQL |
+| `ci.yml` | Push/PR | Full CI pipeline (typecheck, test, lint) |
+| `controller.yml` | `repository_dispatch` | For controller-based multi-env orchestration |
+| `sync-data.yml` | Schedule | Periodic data sync |
+| `validate.yml` | Push/PR | Config + data validation |
+| `job-playwright.yml` | Called by `run-tests.yml` | Reusable Playwright job |
+| `job-pytest.yml` | Called by `run-tests.yml` | Reusable pytest job |
+| `test-output.yml` | `workflow_run` | Process test artifacts |
 
-## GitHub Actions Workflows (`.github/workflows/`)
-- `deploy.yml` — validate data → typecheck → unit tests → E2E → discover:tests → build → GitHub Pages; commits run data to `data` branch
-- `run-tests.yml` — Akamai CDN regression: Playwright + pytest parallel jobs across all 6 envs; reads `config/*.yml`; commits results to `data` branch
-- `scheduler.yml` — every 15 min cron evaluates suites and dispatches `run-tests.yml`; commits runs + status to `data` branch
-- `sync-data-branches.yml` — pushes seed data to `data` branch + extracted data to dedicated branches
+### Controller / Reconciler Pattern (Kubernetes-inspired)
+
+Run status management follows a K8s-style controller pattern:
+
+- **`scripts/lib/reconciler.mjs`** — base `Reconciler` class with `start()`/`stop()`/`reconcile()` loop; `ResourceReconciler` for list-reconcile workloads
+- **`scripts/lib/runStatus.mjs`** — Run conditions (`Dispatched`, `WorkflowRunning`, `Completed`, `Passed`, `Reconciled`) with `True`/`False`/`Unknown` status
+- **`scripts/lib/ghApi.mjs`** — Facade over `gh` CLI for `listWorkflowRuns()`, `getWorkflowRun()`, `dispatchWorkflow()`, `findLatestDispatch()`
+- **`scripts/scheduler.mjs`** — Main controller: Reconcile (poll GH) → Dispatch (cron eval) → GC (stale cleanup) → Persist → Commit
+- **`scripts/record-run.mjs`** — Creates/updates runs with full conditions; called by CI via env vars (`AWARE_SUITE`, `AWARE_ENV`, `PASS_PCT`, etc.)
+
+Flow: `scheduler.mjs` dispatches GH workflow → `run-tests.yml` runs tests → `record-run.mjs` records result → scheduler poll picks up completed status → GC cleans stale entries >24h.
 
 ## Config-as-Code (`config/`)
 - `config/akamai-config.yml` — property metadata, EdgeWorker IDs, runner settings, notifications
 - `config/environments.yml` — all 6 environment definitions; read by `run-tests.yml`
 - `config/test-suites.yml` — suite schedules, parallelism, env assignments; read by CI
+
+## Test Structure
+
+### Vitest Unit Tests
+- Framework: Vitest 4.x with happy-dom
+- Config: `artifacts/aware-app/vitest.config.ts`
+- Run: `pnpm test` (or `pnpm test:watch`)
+- Location: `*`.test.ts` alongside source files under `src/`
+- Coverage: `@vitest/coverage-v8` (run with `--coverage`)
+- Testing Libraries: `@testing-library/react`, `@testing-library/dom`, `@testing-library/jest-dom`, `@testing-library/user-event`
+
+### Playwright E2E Tests
+- Run: `pnpm test:e2e`
+- Config: `artifacts/aware-app/playwright.config.ts`
+- Specs: `*.spec.ts` in `artifacts/aware-app/e2e/`
+
+### CDN Regression Tests (pytest)
+- Location: `tests/` (repo root)
+- Run by: `run-tests.yml` workflow
+- Python HTTP validators for Akamai CDN property testing
+
+## Git
+- **Always run `gh auth setup-git` before `git push origin`** to configure GitHub token-based auth
+- Commits to `data` branch include `[skip ci]` to prevent recursive workflow triggers
+- The `data` branch is an orphan branch — never merged into `main`
 
 ## Gotchas
 - Inline `style={{}}` ONLY for AWARE components — never Tailwind className on pages/domain components
@@ -175,7 +244,7 @@ artifacts/aware-app/src/
 - `navTo()` is full-page nav; use `useLocation()` for SPA navigation
 - `import.meta.env.BASE_URL` = `/` dev, `/AWARE/` production
 - `"packageManager": "pnpm@10.26.1"` in `package.json` required for CI
-- `getTestSuites()` and `getTestCases()` use `_snapshot` caching for stable external store refs
+- `getTestSuites()` and `getTestCases()` use `_snapshot` caching for stable `useSyncExternalStore` refs
 - TestAnalytics `tr_` ID resolution: `tr_{runIdx}_{resultIdx}` rewrites to matching test case ID
 - localStorage key for env config is `aware-env-configs-v3` (v2 is silently ignored)
 - `ENV_COLOR_MAP` in `runs.ts` has both new short forms (`QA`) and legacy long forms for backward compat
@@ -183,58 +252,8 @@ artifacts/aware-app/src/
 - Data is fetched at runtime from `raw.githubusercontent.com/ruake/AWARE/data/<file>` (`data` branch) — never imported statically
 - `src/lib/dataFetcher.ts` auto-detects dev vs prod: dev uses `/data/` (Vite static serve), prod uses raw GitHub URL
 - `RUNS` and `DIFF_ROWS` are `let` bindings — mutated by `loadRuns()` before the app renders via `DataGate` in `App.tsx`
-- The `data` branch is an orphan branch containing only data files at root (`runs.json`, `scheduler-status.json`, etc.)
+- The `data` branch is an orphan branch containing only data files at root
 - Scheduler and test workflows push run data to the `data` branch, not `main`
-- Commits to `data` branch include `[skip ci]` to prevent recursive workflow triggers
-
-## Fixes Applied (June 2026 Audit)
-
-### CSS Variables Added to `index.css`
-The following `--proof-*` CSS variables were missing (rendered as transparent):
-- `--proof-surface-3` — layer between surface-2 and surface-hover
-- `--proof-emerald`, `--proof-emerald-bg`, `--proof-emerald-border` — success/pass indicators
-- `--proof-indigo`, `--proof-indigo-bg`, `--proof-indigo-border` — info/highlight
-- `--proof-teal`, `--proof-teal-bg`, `--proof-teal-border` — accent/info
-- `--proof-grey`, `--proof-grey-bg` — neutral border/text
-- `--proof-blue-hover` — interactive element hover
-- `--proof-sidebar-bg`, `--proof-editor-bg`, `--proof-title-bar-bg`, `--proof-activity-bar-bg`, `--proof-status-bar-bg` — console IDE theming
-- `--proof-hover-light`, `--proof-text-tertiary`, `--proof-overlay`
-
-### @keyframes Added
-`blink`, `slide-down`, `copilotFadeIn`, `modelConfigFadeIn`, `progressPulse`, `page-enter`, `proof-slide-up`
-
-### CSS Classes Added
-`.proof-btn-sm`, `.proof-btn-xs`, `.proof-button-primary` (alias), `.proof-button-sm`, `.proof-button-xs`, `.proof-th`, `.proof-td`, `.proof-tr`, `.proof-progress-track`, `.proof-progress-bar`, `.proof-live-dot`, `.proof-live-dot-warning`, `.proof-live-dot-error`, `.proof-select`, `.proof-skeleton`, `.proof-badge-healthy`, `.proof-badge-critical`, `.proof-truncate`
-
-### Dead Modules Removed
-`src/lib/builders/`, `src/lib/jobs/`, `src/lib/loaders/`, `src/lib/machines/`, `src/lib/commands/` — all had zero external imports. Barrel exports from `data.ts` removed. Corresponding test file `commandBus.test.ts` deleted (tested dead code).
-
-### Bug Fixes
-1. **`lib/urlState.ts`** — `_location` added to `useMemo` deps so URL params reflect cross-component `navigate()` calls
-2. **`lib/testSuites.ts`, `lib/schedulerStatus.ts`, `lib/promotions.ts`** — retry-block pattern: `_loaded = true` moved after `await fetchJson()` so network failures allow retry
-3. **`pages/Compare.tsx`** — swap double-inversion removed (`swapped` state deleted; URL swap alone is correct); `window.location.href` replaced with wouter `navigate()`
-4. **`pages/Copilot.tsx`** — `$\{...\}` → `${...}` in template literals (escaped backslashes prevented evaluation); `proof-button-primary` → `proof-btn-primary`
-5. **`lib/linkify.ts`** — `run_\S+` → `run_[\w-]+` to prevent greedy match across punctuation
-6. **`components/console/ConsoleShell.tsx`** — duplicate `RouteAnnouncer` removed (App.tsx already has one); `--proof-emerald` refs replaced with `--proof-blue`/`--proof-green`
-7. **`components/console/EnvSelector.tsx`, `components/console/SuiteSelector.tsx`** — invalid `role="searchbox"` on `<input>` removed (implicit `type="search"` is correct)
-8. **Outline accessibility** — `outline: "none"` removed from inline styles across 24 component files (CSS `*:focus-visible` rule in `index.css` provides proper focus rings)
-
-## Git
-- **Always run `gh auth setup-git` before `git push origin`** to configure GitHub token-based auth
-
-## Controller / Reconciler Pattern (Kubernetes-inspired)
-
-Run status management follows a K8s-style controller pattern:
-
-- **`scripts/lib/reconciler.mjs`** — base `Reconciler` class with `start()`/`stop()`/`reconcile()` loop; `ResourceReconciler` for list-reconcile workloads.
-- **`scripts/lib/runStatus.mjs`** — Run conditions (`Dispatched`, `WorkflowRunning`, `Completed`, `Passed`, `Reconciled`) with `True`/`False`/`Unknown` status. `deriveRunStatus()` computes the overall status from conditions. GC pass marks stale RUNNING entries as `ERROR`.
-- **`scripts/lib/ghApi.mjs`** — Facade over `gh` CLI for `listWorkflowRuns()`, `getWorkflowRun()`, `dispatchWorkflow()`, `findLatestDispatch()`.
-- **`scripts/scheduler.mjs`** — Main controller with phases: Reconcile (poll GH) → Dispatch (cron eval + dispatch) → GC (stale cleanup) → Persist → Commit.
-- **`scripts/record-run.mjs`** — Updates or creates runs with full conditions. Called by CI via env vars (`AWARE_SUITE`, `AWARE_ENV`, `PASS_PCT`, etc.)
-- **Run types** in `src/lib/types.ts` have `conditions?: RunCondition[]` and `workflowRunId?: number`.
-- All runs use conditions (even non-scheduler runs) for consistent status tracking across CI and scheduler.
-
-Flow: `scheduler.mjs` (reconciler) dispatches GH workflow → `run-tests.yml` runs tests → `record-run.mjs` records result with conditions → scheduler poll phase picks up completed status → GC cleans stale entries >24h.
 
 ## Skills (Specialist Agents)
 Load a skill by reading its `SKILL.md` before starting work in that domain:

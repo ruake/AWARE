@@ -379,9 +379,9 @@ async function validateAgainstTypeScript(envCfg) {
   const tsSource = readFileSync(tsPath, "utf-8");
 
   // Extract all id/label pairs from the ENV_CONFIGS array using regex.
-  // The TS file has a consistent format: each env entry has `id: "xxx"` and `label: "xxx"`
-  const idPattern = /id:\s*"([^"]+)"/g;
-  const labelPattern = /label:\s*"([^"]+)"/g;
+  // The TS file has a consistent format: each env entry has `id: "xxx"` or `id: 'xxx'`
+  const idPattern = /id:\s*['"]([^'"]+)['"]/g;
+  const labelPattern = /label:\s*['"]([^'"]+)['"]/g;
 
   const tsIds = [];
   const tsLabels = [];

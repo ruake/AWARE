@@ -1,51 +1,31 @@
-# =============================================================================
-# A.W.A.R.E. — Akamai Property & CDN Configuration
-# All tests target https://www.akamai.com/
-# Central config consumed by both CI and the observability dashboard.
-# =============================================================================
-
 project:
   name: A.W.A.R.E.
   fullName: Akamai Web Analytics Regression Engine
   description: >
-    CDN test observability dashboard for Playwright + pytest suites running via
-    GitHub Actions across QA, UAT, and PROD Akamai edges — staging and
-    production networks.
+    CDN test observability dashboard running HTTP protocol tests
+    against httpbin.org across QA, UAT, and PROD environments.
   team: platform-engineering
-  repoUrl: https://github.com/your-org/aware
+  repoUrl: https://github.com/ruake/AWARE
   slackChannel: "#cdn-alerts"
 
-# Akamai properties tracked by A.W.A.R.E.
 properties:
-  - name: www.akamai.com
-    contractId: ctr_XXXXXXXX
-    groupId: grp_XXXXXXXX
-    cpcode: "1234567"
-    edgeHostname: www.akamai.com.edgekey.net
-    # Active property version per environment tier
-    # Each tier also has staging + production network variants
+  - name: httpbin.org
+    contractId: ctr_00000000
+    groupId: grp_00000000
+    cpcode: "0000000"
+    edgeHostname: httpbin.org
     activeVersions:
-      qa: 52
-      uat: 51
-      prod: 50
+      qa: 1
+      uat: 1
+      prod: 1
     promotionGate:
-      minPassRate: 95           # % pass rate required to promote (UAT → PROD)
+      minPassRate: 95
       requiredSuites:
         - suite_smoke
         - suite_regression_uat
 
-# EdgeWorker configuration
-edgeworkers:
-  - id: "12345"
-    name: locale-splitter
-    description: Routes requests to locale-specific origins based on Accept-Language
-    bundlePath: edgeworkers/locale-splitter/
-    activeVersions:
-      qa: "3.2.1"
-      uat: "3.2.0"
-      prod: "3.1.4"
+edgeworkers: []
 
-# Test runner settings
 runners:
   playwright:
     version: "^1.60.0"
@@ -54,7 +34,7 @@ runners:
     baseTimeout: 30000
     retries: 2
     workers: 4
-    baseUrl: https://www.akamai.com
+    baseUrl: https://httpbin.org
     reportDir: reports/playwright/
 
   pytest:
@@ -62,14 +42,13 @@ runners:
     markers:
       - smoke
       - regression
-      - edgeworker
       - performance
+      - security
     timeout: 60
     workers: 4
-    baseUrl: https://www.akamai.com
+    baseUrl: https://httpbin.org
     reportDir: reports/pytest/
 
-# Notification settings
 notifications:
   slack:
     enabled: true

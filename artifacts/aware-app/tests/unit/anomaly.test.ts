@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 vi.mock("@/lib/data", () => ({
-  RUNS: [],
+  RUNS: [] as any[],
 }));
 
 import { RUNS } from "@/lib/data";
@@ -62,8 +62,6 @@ describe("computeAnomalyScores", () => {
   });
 
   it("flags 'pass-rate-drop' when passRateZ > 2", () => {
-    // Need enough runs so z-score of the outlier exceeds 2:
-    // 5 runs @ 100 + 1 run @ 40 → z ≈ 2.24
     (RUNS as Run[]).push(
       makeRun({ id: "r1", passPct: 100 }),
       makeRun({ id: "r2", passPct: 100 }),
@@ -78,7 +76,6 @@ describe("computeAnomalyScores", () => {
   });
 
   it("flags 'slow-run' when durationZ > 2", () => {
-    // 5 runs @ 100000ms + 1 run @ 500000ms → z ≈ 2.24
     (RUNS as Run[]).push(
       makeRun({ id: "r1", durationMs: 100000 }),
       makeRun({ id: "r2", durationMs: 100000 }),
@@ -172,5 +169,15 @@ describe("getLatestAnomalies", () => {
     }
     const result = getLatestAnomalies(0);
     expect(result.length).toBeLessThanOrEqual(5);
+  });
+
+  it("returns empty array when threshold is not met", () => {
+    (RUNS as Run[]).push(
+      makeRun({ id: "r1", passPct: 97, durationMs: 300000, failures: 0 }),
+      makeRun({ id: "r2", passPct: 97, durationMs: 300000, failures: 0 }),
+      makeRun({ id: "r3", passPct: 97, durationMs: 300000, failures: 0 }),
+    );
+    const result = getLatestAnomalies(0.99);
+    expect(result).toHaveLength(0);
   });
 });

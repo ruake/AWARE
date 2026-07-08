@@ -22,6 +22,14 @@ describe("cn", () => {
   it("filters out falsy values", () => {
     expect(cn("a", undefined, null, "", "b")).toBe("a b");
   });
+
+  it("filters out boolean false", () => {
+    expect(cn("a", false, "b")).toBe("a b");
+  });
+
+  it("handles all falsy values", () => {
+    expect(cn(undefined, null, false, "")).toBe("");
+  });
 });
 
 describe("cleanScriptPath", () => {
@@ -51,6 +59,21 @@ describe("cleanScriptPath", () => {
     const tc: TestCase = {} as TestCase;
     expect(cleanScriptPath(tc)).toBe("");
   });
+
+  it("strips leading ./ from path", () => {
+    const tc: TestCase = { scriptPath: "./tests/feature/test.ts" } as TestCase;
+    expect(cleanScriptPath(tc)).toBe("tests/feature/test.ts");
+  });
+
+  it("strips leading slash from path", () => {
+    const tc: TestCase = { scriptPath: "/absolute/path/test.ts" } as TestCase;
+    expect(cleanScriptPath(tc)).toBe("absolute/path/test.ts");
+  });
+
+  it("handles null githubPath gracefully", () => {
+    const tc: TestCase = { githubPath: undefined, scriptPath: "tests/test.ts" } as TestCase;
+    expect(cleanScriptPath(tc)).toBe("tests/test.ts");
+  });
 });
 
 describe("getGitHubUrl", () => {
@@ -59,7 +82,7 @@ describe("getGitHubUrl", () => {
       githubPath: "tests/feature/test_spec.ts",
     } as TestCase;
     expect(getGitHubUrl(tc)).toBe(
-      "https://github.com/ruake/AWARE/blob/main/artifacts/aware-app/tests/feature/test_spec.ts",
+      "https://github.com/ruake/AWARE/blob/main/tests/feature/test_spec.ts",
     );
   });
 
@@ -68,7 +91,7 @@ describe("getGitHubUrl", () => {
       scriptPath: "tests/other/test_spec.ts",
     } as TestCase;
     expect(getGitHubUrl(tc)).toBe(
-      "https://github.com/ruake/AWARE/blob/main/artifacts/aware-app/tests/other/test_spec.ts",
+      "https://github.com/ruake/AWARE/blob/main/tests/other/test_spec.ts",
     );
   });
 
@@ -77,14 +100,17 @@ describe("getGitHubUrl", () => {
       scriptPath: "tests/deep/test_spec.ts::test_fn",
     } as TestCase;
     expect(getGitHubUrl(tc)).toBe(
-      "https://github.com/ruake/AWARE/blob/main/artifacts/aware-app/tests/deep/test_spec.ts",
+      "https://github.com/ruake/AWARE/blob/main/tests/deep/test_spec.ts",
     );
   });
 
-  it("returns URL with empty path when no path available", () => {
+  it("returns null when no path is available", () => {
     const tc: TestCase = {} as TestCase;
-    expect(getGitHubUrl(tc)).toBe(
-      "https://github.com/ruake/AWARE/blob/main/artifacts/aware-app/",
-    );
+    expect(getGitHubUrl(tc)).toBeNull();
+  });
+
+  it("returns null for null/undefined inputs", () => {
+    expect(getGitHubUrl(null as unknown as TestCase)).toBeNull();
+    expect(getGitHubUrl(undefined as unknown as TestCase)).toBeNull();
   });
 });

@@ -12,7 +12,7 @@ vi.mock("@/lib/envConfig", () => ({
 
 import { getTestSuites, getTestCases } from "@/lib/data";
 import { getEnvConfigs } from "@/lib/envConfig";
-import { generateCiConfig } from "@/lib/ciConfig";
+import { generateCiConfig, generateCiConfigYaml, downloadCiConfig } from "@/lib/ciConfig";
 import type { EnvConfig } from "@/lib/envConfig";
 
 function makeSuite(id: string, testIds: string[]): TestSuite {
@@ -176,5 +176,39 @@ describe("generateCiConfig", () => {
     config.environments.forEach((env) => {
       expect(env.ips).toBeUndefined();
     });
+  });
+});
+
+describe("generateCiConfigYaml", () => {
+  it("returns a string starting with YAML comment", () => {
+    const yaml = generateCiConfigYaml();
+    expect(yaml).toContain("# CI Config generated");
+  });
+
+  it("includes version from config", () => {
+    const yaml = generateCiConfigYaml();
+    expect(yaml).toContain("version:");
+  });
+
+  it("includes suite names", () => {
+    const yaml = generateCiConfigYaml();
+    expect(yaml).toContain("Suite suite_a");
+    expect(yaml).toContain("Suite suite_b");
+  });
+});
+
+describe("downloadCiConfig", () => {
+  beforeEach(() => {
+    vi.stubGlobal("URL", { createObjectURL: vi.fn(() => "blob:test"), revokeObjectURL: vi.fn() });
+    document.body.innerHTML = "";
+    const mockClick = vi.fn();
+    vi.stubGlobal("document", {
+      ...document,
+      createElement: vi.fn(() => ({ href: "", download: "", click: mockClick })),
+    });
+  });
+
+  it("does not throw", () => {
+    expect(() => downloadCiConfig()).not.toThrow();
   });
 });

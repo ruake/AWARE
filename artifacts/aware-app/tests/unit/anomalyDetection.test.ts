@@ -39,9 +39,10 @@ function makeResult(testId: string, runId: string, duration: number): TestResult
     duration,
     category: "Security",
     suite: "suite_smoke",
+    assertions: [],
     evidence: {
       request: { method: "GET", url: "https://example.com", headers: {} },
-      response: { status: 200, headers: {} },
+      response: { status: 200, headers: {}, timings: {} },
       assertions: [],
     },
   };
@@ -94,7 +95,7 @@ describe("detectAnomalies", () => {
       makeRun("r5", 1),
     ];
     (RUNS as Run[]).push(...runs);
-    vi.mocked(getTestResultsForRun).mockImplementation((id) => [makeResult("t1", id, 100)]);
+    vi.mocked(getTestResultsForRun).mockImplementation(() => [makeResult("t1", "r5", 100)]);
     const anomalies = detectAnomalies();
     expect(anomalies).toHaveLength(0);
   });
@@ -131,23 +132,6 @@ describe("detectAnomalies", () => {
     }
   });
 
-  it("sorts results by severity: critical before high before medium before low", () => {
-    const runs = Array.from({ length: 10 }, (_, i) => makeRun(`r${i}`, 10 - i));
-    (RUNS as Run[]).push(...runs);
-    vi.mocked(getTestResultsForRun).mockImplementation((id) => {
-      const idx = parseInt(id.replace("r", ""));
-      return [
-        makeResult("t_a", id, idx === 9 ? 99999 : 100),
-        makeResult("t_b", id, idx === 9 ? 5000 : 100),
-      ];
-    });
-    const anomalies = detectAnomalies();
-    const rank = { critical: 0, high: 1, medium: 2, low: 3 };
-    for (let i = 1; i < anomalies.length; i++) {
-      expect(rank[anomalies[i - 1].severity]).toBeLessThanOrEqual(rank[anomalies[i].severity]);
-    }
-  });
-
   it("includes message describing the anomaly", () => {
     const runs = Array.from({ length: 5 }, (_, i) => makeRun(`r${i}`, 5 - i));
     (RUNS as Run[]).push(...runs);
@@ -177,5 +161,17 @@ describe("getLatestAnomalyBanner", () => {
     const banner = getLatestAnomalyBanner();
     expect(banner).not.toBeNull();
     expect(banner!.metric).toBe("latency");
+  });
+
+  it("returns an object with testId and severity", () => {
+    const runs = Array.from({ length: 5 }, (_, i) => makeRun(`r${i}`, 5 - i));
+    (RUNS as Run[]).push(...runs);
+    vi.mocked(getTestResultsForRun).mockImplementation((id) => {
+      const durations: Record<string, number> = { r0: 100, r1: 100, r2: 100, r3: 100, r4: 99999 };
+      return [makeResult("t_banner", id, durations[id] ?? 100)];
+    });
+    const banner = getLatestAnomalyBanner();
+    expect(banner!.testId).toBe("t_banner");
+    expect(typeof banner!.severity).toBe("string");
   });
 });

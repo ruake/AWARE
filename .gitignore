@@ -51,3 +51,9 @@ artifacts/aware-app/test-results/
 # Replit
 .cache/
 .local/
+
+# environment
+.env
+
+# data
+public/data/

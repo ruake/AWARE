@@ -1,8 +1,24 @@
-# DEPRECATED — replaced by controller.yml (cron reconciler)
-# Intentionally inert: only manual dispatch, does nothing.
-on: workflow_dispatch
+name: Scheduler
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
 jobs:
-  noop:
+  scheduler:
     runs-on: ubuntu-latest
     steps:
-      - run: "true"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run Scheduler
+        run: node scripts/scheduler.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,8 +1,200 @@
-# DEPRECATED — replaced by controller.yml + job-playwright.yml + job-pytest.yml
-# Intentionally inert: only manual dispatch, does nothing.
-on: workflow_dispatch
+# =============================================================================
+# Run CDN Regression Tests — pytest + Playwright CI runner
+#
+# Executes CDN regression tests against all Akamai environment+network
+# combinations defined in config/environments.yml. Records results to
+# the data branch using the data-writer action (single-writer pattern).
+#
+# Called by:
+#   - workflow_dispatch  — manual trigger (single env)
+#   - repository_dispatch — from controller/scheduler (all 6 envs)
+# =============================================================================
+
+name: Run CDN Regression Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Test suite ID"
+        required: false
+        default: "full-regression"
+      environment:
+        description: "Environment"
+        required: true
+        type: choice
+        options:
+          - qa_staging
+          - qa_prod
+          - uat_staging
+          - uat_prod
+          - prod_staging
+          - prod_prod
+  repository_dispatch:
+    types: [run-tests]
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "10.26.1"
+  PYTHON_VERSION: "3.12"
+
+permissions:
+  contents: write
+  statuses: write
+
 jobs:
-  noop:
+  # ── Setup ─────────────────────────────────────────────────────────────────
+  # Reads config/environments.yml and builds the strategy matrix.
+  # For workflow_dispatch: single env. For repository_dispatch: all 6 envs.
+  # ───────────────────────────────────────────────────────────────────────────
+  setup:
+    name: "Setup matrix"
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+      suite: ${{ steps.get-suite.outputs.suite }}
     steps:
-      - run: "true"
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: mikefarah/yq@v4.44.1
+
+      - id: get-suite
+        run: |
+          SUITE="${{ github.event.inputs.suite || 'full-regression' }}"
+          echo "suite=$SUITE" >> "$GITHUB_OUTPUT"
+
+      - id: build-matrix
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.environment }}" ]; then
+            ENV_ID="${{ github.event.inputs.environment }}"
+            MATRIX=$(yq -o=json -I=0 '[.environments[] | select(.id == strenv(ENV_ID)) | {env_id: .id, label: .label, target: .target, network: .network, base_url: .baseUrl}]' config/environments.yml)
+          else
+            MATRIX=$(yq -o=json -I=0 '[.environments[] | {env_id: .id, label: .label, target: .target, network: .network, base_url: .baseUrl}]' config/environments.yml)
+          fi
+          echo "matrix={\"include\":$MATRIX}" >> "$GITHUB_OUTPUT"
+
+  # ── pytest ────────────────────────────────────────────────────────────────
+  pytest:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    name: "pytest — ${{ matrix.env_id }}"
+    env:
+      AWARE_SUITE: ${{ needs.setup.outputs.suite }}
+      AWARE_ENV: ${{ matrix.label }}
+      AWARE_TARGET: ${{ matrix.target }}
+      AWARE_NETWORK: ${{ matrix.network }}
+      BASE_URL: ${{ matrix.base_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: artifacts/aware-app/tests/requirements.txt
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f artifacts/aware-app/tests/requirements.txt ]; then
+            pip install -r artifacts/aware-app/tests/requirements.txt
+          else
+            pip install pytest requests
+          fi
+
+      - name: Run pytest
+        id: run
+        working-directory: artifacts/aware-app
+        continue-on-error: true
+        run: |
+          mkdir -p test-results
+          python -m pytest tests/ -v --tb=short 2>&1 | tee test-results/pytest-output.txt
+
+      - name: Parse pytest results
+        id: parse
+        run: |
+          FILE="artifacts/aware-app/test-results/pytest-output.txt"
+          PASSED=0; FAILED=0
+          if [ -f "$FILE" ]; then
+            SUMMARY=$(grep -oP '=\s+\d+\s+passed.*?\d+\s+(failed|error).*?=' "$FILE" 2>/dev/null || true)
+            if [ -n "$SUMMARY" ]; then
+              PASSED=$(echo "$SUMMARY" | grep -oP '\d+(?=\s+passed)' | tail -1)
+              FAILED=$(echo "$SUMMARY" | grep -oP '\d+(?=\s+(failed|error))' | tail -1)
+            fi
+          fi
+          TOTAL=$((PASSED + FAILED))
+          PCT=100
+          [ "$TOTAL" -gt 0 ] && PCT=$(( (PASSED * 100) / TOTAL ))
+          echo "pass_pct=$PCT" >> "$GITHUB_OUTPUT"
+          echo "failures=$FAILED" >> "$GITHUB_OUTPUT"
+          echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
+
+      - name: Record results
+        env:
+          PASS_PCT: ${{ steps.parse.outputs.pass_pct }}
+          FAILURES: ${{ steps.parse.outputs.failures }}
+        run: node scripts/record-run.mjs
+
+      - name: Commit to data branch
+        uses: ./.github/actions/data-writer
+        with:
+          files: "artifacts/aware-app/data/runs.json artifacts/aware-app/data/test-results.json"
+          dest-paths: "runs.json test-results.json"
+          commit-message: "run: ${{ needs.setup.outputs.suite }} ${{ matrix.env_id }} (pytest) [skip ci]"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Playwright ────────────────────────────────────────────────────────────
+  playwright:
+    needs: [setup, pytest]
+    if: always()
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    name: "playwright — ${{ matrix.env_id }}"
+    env:
+      AWARE_SUITE: ${{ needs.setup.outputs.suite }}
+      AWARE_ENV: ${{ matrix.label }}
+      AWARE_TARGET: ${{ matrix.target }}
+      AWARE_NETWORK: ${{ matrix.network }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node ${{ env.NODE_VERSION }} + pnpm ${{ env.PNPM_VERSION }}
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          working-dir: artifacts/aware-app
+
+      - name: Install Playwright browsers
+        working-directory: artifacts/aware-app
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Run Playwright tests
+        id: run
+        working-directory: artifacts/aware-app
+        continue-on-error: true
+        run: |
+          mkdir -p test-results
+          pnpm test:e2e:ci --reporter=json >test-results/playwright-results.json 2>&1 || true
+
+      - name: Record Playwright results
+        run: node artifacts/aware-app/scripts/record-run.mjs artifacts/aware-app/test-results/playwright-results.json
+        continue-on-error: true
+
+      - name: Commit to data branch
+        uses: ./.github/actions/data-writer
+        with:
+          files: "artifacts/aware-app/data/runs.json artifacts/aware-app/data/test-results.json"
+          dest-paths: "runs.json test-results.json"
+          commit-message: "run: ${{ needs.setup.outputs.suite }} ${{ matrix.env_id }} (playwright) [skip ci]"
+          github-token: ${{ secrets.GITHUB_TOKEN }}

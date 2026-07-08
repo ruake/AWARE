@@ -1,26 +1,24 @@
+import os
 import pytest
+import requests
 from typing import Generator
+
+BASE_URL = os.environ.get("AWARE_TARGET_URL", "https://httpbin.org")
+
+
+@pytest.fixture(scope="session")
+def base_url() -> str:
+    return BASE_URL
+
+
+@pytest.fixture(scope="session")
+def session() -> requests.Session:
+    s = requests.Session()
+    s.verify = True
+    s.headers.update({"User-Agent": "AWARE-test/1.0"})
+    return s
 
 
 @pytest.fixture
 def api_client() -> Generator[str, None, None]:
-    """Provide a configured API client base URL."""
-    yield "https://api.example.com"
-
-
-@pytest.fixture
-def auth_headers(api_client: str) -> dict[str, str]:
-    """Provide authentication headers for API requests."""
-    return {
-        "Authorization": "Bearer test-token-123",
-        "Content-Type": "application/json",
-    }
-
-
-@pytest.fixture
-def geo_hint(request: pytest.FixtureRequest) -> str:
-    """Return geo hint based on the test's marker or parameter."""
-    marker = request.node.get_closest_marker("geo")
-    if marker:
-        return marker.args[0] if marker.args else "us-east"
-    return "us-east"
+    yield BASE_URL

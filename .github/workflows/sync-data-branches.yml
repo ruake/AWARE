@@ -1,8 +1,29 @@
-# DEPRECATED — replaced by sync-data.yml
-# Intentionally inert: only manual dispatch, does nothing.
-on: workflow_dispatch
+name: Sync Data Branches
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'artifacts/aware-app/data/**'
+      - 'config/**'
+  workflow_dispatch:
+
 jobs:
-  noop:
+  sync-data:
     runs-on: ubuntu-latest
     steps:
-      - run: "true"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Sync data branch
+        run: node scripts/init-data-branch.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

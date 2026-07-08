@@ -1,8 +1,8 @@
 # A.W.A.R.E. — Akamai Web Analytics Regression Engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Config Validation](https://github.com/your-org/aware/actions/workflows/validate-config.yml/badge.svg)](https://github.com/your-org/aware/actions/workflows/validate-config.yml)
-[![Deploy](https://github.com/your-org/aware/actions/workflows/deploy.yml/badge.svg)](https://github.com/your-org/aware/actions/workflows/deploy.yml)
+[![Deploy](https://github.com/ruake/AWARE/actions/workflows/deploy.yml/badge.svg)](https://github.com/ruake/AWARE/actions/workflows/deploy.yml)
+[![Scheduler](https://github.com/ruake/AWARE/actions/workflows/scheduler.yml/badge.svg)](https://github.com/ruake/AWARE/actions/workflows/scheduler.yml)
 
 **A.W.A.R.E.** is a CDN test observability dashboard for Playwright + pytest suites running via GitHub Actions across **QA**, **UAT**, and **PROD** Akamai edge environments. Fork it, edit three config files, push — and your static dashboard is live with automated test runs, data recording, and a promotion gate.
 
@@ -10,143 +10,183 @@
 
 ---
 
-## Fork & Configure in 5 minutes
+## Quick Start
 
-> **See [SETUP.md](SETUP.md) for the complete guide.**
+```bash
+git clone https://github.com/ruake/AWARE.git
+cd AWARE/artifacts/aware-app
+pnpm install
+pnpm dev
+```
+
+Open http://localhost:5173
+
+### One-time fork configuration
 
 1. **Fork** this repo
-2. Edit `config/akamai-config.yml` — your property name, contract/group IDs, CP code
+2. Edit `config/akamai-config.yml` — property name, contract/group IDs, CP code
 3. Edit `config/environments.yml` — your 6 environments (QA/UAT/PROD × staging/production)
-4. Edit `config/test-suites.yml` — your suites, schedules, and runners
+4. Edit `config/test-suites.yml` — suites, schedules, runners
 5. Enable GitHub Pages (Settings → Pages → Source: GitHub Actions)
 6. Push — everything else is automated
 
 ---
 
-## What you get automatically
+## Architecture
 
-| Capability | How |
-|------------|-----|
-| Static dashboard on GitHub Pages | `deploy.yml` — builds + deploys on every push to `main` |
-| Config validation on every push | `validate-config.yml` — blocks merges on invalid config |
-| Scheduled test runs | `scheduler.yml` — every 15 min, dispatches suites per cron schedule |
-| Run data recording | `record-run.mjs` — writes JSON to the `data` branch after each run |
-| Promotion gate | `run-tests.yml` — blocks UAT → PROD if pass rate < 95% |
-| Code quality checks | `code-quality.yml` — lint, typecheck, audit, CodeQL |
+AWARE combines a static React SPA (GitHub Pages) with a CI/CD engine (GitHub Actions) that runs CDN property tests on a schedule and records results to an orphan `data` branch:
+
+```
+config/*.yml ──► GitHub Actions ──► Playwright + pytest ──► data/ branch ──► SPA (runtime fetch)
+```
+
+| Component | Role |
+|-----------|------|
+| **config/** | YAML source of truth for environments, suites, Akamai property metadata |
+| **GitHub Actions** | Scheduler (cron), test runner, data recording, deploy, data sync |
+| **tests/** | Playwright E2E specs and pytest HTTP validators |
+| **artifacts/aware-app/** | React 19 SPA — static dashboard deployed to GitHub Pages |
+| **data/** (branch) | Orphan branch holding `runs.json`, `test-results.json`, `auto-tests.json`, etc. |
+
+### Environment Model (3 tiers × 2 networks = 6 envs)
+
+| ID | Label | Target | Network |
+|----|-------|--------|---------|
+| `qa_staging` | QA / Staging | QA | staging |
+| `qa_prod` | QA / Production | QA | production |
+| `uat_staging` | UAT / Staging | UAT | staging |
+| `uat_prod` | UAT / Production | UAT | production |
+| `prod_staging` | PROD / Staging | PROD | staging |
+| `prod_prod` | PROD / Production | PROD | production |
+
+A promotion gate enforces ≥95% UAT pass rate before PROD property activation.
 
 ---
 
-## Dashboard pages
-
-| Page | Route | Description |
-|------|-------|-------------|
-| Dashboard | `/` | Pass-rate KPIs, Akamai property status (all 6 envs), anomaly banners, heatmap |
-| Runs | `/runs` | Full run history with env/suite filtering and side panel |
-| Run Detail | `/runs/:runId` | Test results + HTTP evidence viewer |
-| Compare | `/compare` | Side-by-side diff; surfaces regressions and fixes |
-| Analytics | `/analytics` | Pass-rate trends, category heatmaps, flakiness scores |
-| Suites | `/suites` | Suite hierarchy manager; maps to `config/test-suites.yml` |
-| AI Copilot | `/copilot` | AI-assisted test analysis and generation (OpenAI / WebLLM / mock) |
-| CI Pipeline | `/ci` | GitHub Actions status and AWARE config YAML download |
-| Tests | `/tests` | Test case CRUD, bulk actions, import/export |
-
----
-
-## Tech stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Language | TypeScript 5.9 (strict) |
 | Frontend | React 19, Vite 7, Tailwind CSS 4 |
-| Charts | Google Charts + Recharts |
+| Charts | Recharts (primary), react-google-charts (legacy) |
 | Routing | wouter |
-| LLM | Mock · OpenAI-compatible · WebLLM (WebGPU) |
-| Package manager | pnpm workspaces |
+| Testing | Vitest (unit), Playwright (E2E), pytest (CDN validation) |
+| LLM | Mock · OpenAI-compatible · WebLLM (WebGPU) · window.ai |
+| Package manager | pnpm 10.26.1 |
 | CI/CD | GitHub Actions → GitHub Pages |
+| 3D Visualization | Three.js (PoPGlobe) |
 
 ---
 
-## Local development
+## Available Scripts
 
-```bash
-pnpm install
-pnpm --filter @workspace/aware-app run dev
-```
+Run from `artifacts/aware-app/`:
 
-Open http://localhost:5000
-
-### Validate your config locally
-
-```bash
-node scripts/validate-config.mjs
-```
-
-### Build for production
-
-```bash
-BASE_PATH=/aware pnpm --filter @workspace/aware-app run build
-```
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Dev server at :5173 (host 0.0.0.0) |
+| `pnpm build` | Validate data → Vite build → `dist/public/` |
+| `pnpm typecheck` | `tsc --noEmit` |
+| `pnpm test` | Vitest unit tests |
+| `pnpm test:e2e` | Playwright browser tests |
+| `pnpm discover:tests` | Python AST + Playwright discovery → `auto-tests.json` |
+| `pnpm validate:data` | JSON Schema validation for all data files |
+| `pnpm lint` | ESLint |
+| `pnpm format` | Prettier check |
+| `pnpm verify` | typecheck + lint + format + test (pre-commit hook) |
 
 ---
 
-## Config files
+## Dashboard Pages
 
-| File | Purpose |
-|------|---------|
-| `config/akamai-config.yml` | Property metadata, EdgeWorker versions, promotion gate thresholds |
-| `config/environments.yml` | 6 Akamai environments (QA/UAT/PROD × staging/production networks) |
-| `config/test-suites.yml` | Suite definitions, cron schedules, runners, parallelism |
-
-These files are the **single source of truth** — both GitHub Actions and the dashboard read them directly.
-
----
-
-## Environment variables
-
-Copy `.env.example` for local development. For GitHub Actions, add secrets at Settings → Secrets → Actions.
-
-| Variable | Default | Required |
-|----------|---------|----------|
-| `BASE_PATH` | `/` | No — set to `/aware` for GitHub Pages |
-| `PORT` | `5000` | No |
-| `VITE_LLM_PROVIDER` | `mock` | No — set to `openai` for AI Copilot |
-| `VITE_LLM_API_KEY` | — | No — OpenAI key for Copilot |
-| `SLACK_WEBHOOK_URL` | — | No — failure notifications |
-| `PAGERDUTY_ROUTING_KEY` | — | No — PROD alerts |
+| Page | Route | Description |
+|------|-------|-------------|
+| Dashboard | `/` | Pass-rate KPIs, property status bar (6 envs), anomaly alerts, heatmap |
+| Runs | `/runs` | Filterable run history with detail side panel |
+| Run Detail | `/runs/:runId` | Test results + HTTP evidence viewer |
+| Compare | `/compare` | Baseline vs candidate diff (regressions and fixes) |
+| Test Analytics | `/analytics` | Pass-rate trends, category heatmaps, flakiness leaderboard |
+| Test Manager | `/tests` | Test case CRUD, bulk actions, import/export |
+| Test Suite Manager | `/suites` | Hierarchical suite tree + YAML preview |
+| AI Copilot | `/copilot` | AI-assisted analysis (OpenAI / WebLLM / Chrome AI) |
+| Pulse | `/pulse` | Live status feed |
+| CI Pipeline | `/ci` | Workflow status + YAML config download |
+| Test Documentation | `/docs/:testId` | Per-test doc viewer |
+| Search | `/search` | Fuse.js full-text search |
 
 ---
 
-## Project structure
+## GitHub Actions Workflows
+
+| Workflow | File | Schedule | Purpose |
+|----------|------|----------|---------|
+| Deploy | `deploy.yml` | Push to `main` | Typecheck → test → build → Pages deploy |
+| Scheduler | `scheduler.yml` | Every 15 min | Cron eval + suite dispatch via `scripts/scheduler.mjs` |
+| Run Tests | `run-tests.yml` | Dispatched | Playwright + pytest across all 6 envs |
+| Sync Data | `sync-data-branches.yml` | Push to `main` | Push seed data to orphan `data` branch |
+| Validate Config | `validate-config.yml` | Push/PR | Validate YAML config files |
+| Code Quality | `code-quality.yml` | Push/PR | Lint, typecheck, audit, CodeQL |
+
+---
+
+## Project Structure
 
 ```
 config/                          ← edit these three files to configure AWARE
-├── akamai-config.yml            property + EdgeWorker + promotion gate
-├── environments.yml             6 target environments
-└── test-suites.yml              suites, schedules, runners
-
-scripts/
-├── validate-config.mjs          config validator (CI + local)
-├── init-data-branch.mjs         one-time data branch bootstrap
-├── scheduler.mjs                cron-based suite dispatcher
-└── record-run.mjs               writes run results to data branch
+├── akamai-config.yml
+├── environments.yml
+└── test-suites.yml
 
 .github/workflows/
-├── validate-config.yml          blocks on invalid config (push/PR)
-├── deploy.yml                   build + deploy to GitHub Pages
+├── deploy.yml                   Build + deploy to GitHub Pages
+├── scheduler.yml                Every-15-min orchestrator
 ├── run-tests.yml                Playwright + pytest execution engine
-├── scheduler.yml                every-15-min orchestrator
-└── code-quality.yml             lint, typecheck, audit, CodeQL
+├── sync-data-branches.yml       Seed data sync
+├── validate-config.yml          Config validation
+└── code-quality.yml             Lint + typecheck + audit
+
+scripts/
+├── scheduler.mjs                Cron-based suite dispatcher
+├── record-run.mjs               Write run results to data branch
+├── init-data-branch.mjs         One-time data branch bootstrap
+├── reconcile-runs.mjs           K8s-style run status reconciler
+├── discover-all.mjs             Test discovery orchestrator
+├── discover-tests.py            Python AST parser
+├── discover-playwright.mjs      Playwright spec parser
+└── lib/                         Reconciler, runStatus, ghApi utilities
 
 artifacts/aware-app/
-├── src/                         React 19 + Vite 7 SPA
-│   ├── pages/                   Dashboard, Runs, Compare, Analytics, …
-│   ├── components/              aware/ domain + ui/ shadcn components
-│   └── lib/                     data layer, types, LLM, CI config
-├── data/                        seed JSON (runs, test-results, suites)
-└── scripts/                     validate-data.mjs, record-run.mjs, …
+├── src/
+│   ├── pages/                   12+ pages (React.lazy)
+│   ├── components/
+│   │   ├── aware/               Domain components (inline style + --proof-* CSS vars)
+│   │   └── ui/                  shadcn/radix primitives (Tailwind CSS 4)
+│   ├── lib/                     Types, store, data fetcher, AI, charts, CI config
+│   ├── hooks/                   useTestData, useSimpleToast, etc.
+│   └── data/                    Seed JSON + JSON Schemas
+├── vite.config.ts
+└── package.json
 ```
 
 ---
+
+## Environment Variables
+
+| Variable | Default | Required | Description |
+|----------|---------|----------|-------------|
+| `BASE_PATH` | `/` | No | Set to `/AWARE/` for GitHub Pages |
+| `PORT` | `5173` | No | Dev server port |
+| `OPENAI_API_KEY` | — | No | Server-side OpenAI proxy for Copilot |
+| `GITHUB_TOKEN` | — | Yes (CI) | For scheduler and data branch operations |
+
+---
+
+## Links
+
+- **Live dashboard:** https://ruake.github.io/AWARE
+- **Repository:** https://github.com/ruake/AWARE
+- **Issue tracker:** https://github.com/ruake/AWARE/issues
 
 ## License
 

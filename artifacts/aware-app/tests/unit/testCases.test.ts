@@ -5,10 +5,6 @@ vi.mock("@/lib/testDiscovery", () => ({
   getAutoDiscoveredTests: vi.fn(),
 }));
 
-vi.mock("@/lib/store", () => ({
-  subscribeToTestCases: vi.fn(() => () => {}),
-}));
-
 import { getAutoDiscoveredTests } from "@/lib/testDiscovery";
 import { getTestCasesByFilter, getTestCaseById, getTestChangelog, computeTestStats } from "@/lib/testCases";
 
@@ -38,7 +34,7 @@ const TC3 = makeTestCase({ id: "tc3", name: "Geo-match routing", category: "Geo-
 const TC4 = makeTestCase({ id: "tc4", name: "TLS enforcement", category: "Security", description: "Validates TLS 1.3", tags: ["tls", "security"], priority: "high", status: "active", version: 3 });
 
 beforeEach(() => {
-  vi.mocked(getAutoDiscoveredTests).mockReturnValue([TC1, TC2, TC3, TC4]);
+  vi.mocked(getAutoDiscoveredTests).mockReturnValue({ tc1: TC1, tc2: TC2, tc3: TC3, tc4: TC4 });
 });
 
 describe("getTestCasesByFilter", () => {
@@ -111,6 +107,11 @@ describe("getTestCasesByFilter", () => {
     const result = getTestCasesByFilter({ search: "nonexistent_xyz", status: "", priority: "", category: "", tags: [], suiteId: "" });
     expect(result).toHaveLength(0);
   });
+
+  it("returns empty array for tag with no matches", () => {
+    const result = getTestCasesByFilter({ search: "", status: "", priority: "", category: "", tags: ["nonexistent-tag"], suiteId: "" });
+    expect(result).toHaveLength(0);
+  });
 });
 
 describe("getTestCaseById", () => {
@@ -134,7 +135,7 @@ describe("getTestChangelog", () => {
         { version: 2, date: "2026-02-01", author: "bob", message: "Updated" },
       ],
     });
-    vi.mocked(getAutoDiscoveredTests).mockReturnValue([withLog]);
+    vi.mocked(getAutoDiscoveredTests).mockReturnValue({ tc_log: withLog });
     const log = getTestChangelog("tc_log");
     expect(log).toHaveLength(2);
     expect(log[0].version).toBe(2);
@@ -143,6 +144,13 @@ describe("getTestChangelog", () => {
 
   it("returns empty array for unknown test id", () => {
     expect(getTestChangelog("no-such-id")).toEqual([]);
+  });
+
+  it("returns empty array for test with no changelog", () => {
+    const noLog = makeTestCase({ id: "tc_nolog" });
+    delete noLog.changelog;
+    vi.mocked(getAutoDiscoveredTests).mockReturnValue({ tc_nolog: noLog });
+    expect(getTestChangelog("tc_nolog")).toEqual([]);
   });
 });
 
@@ -190,7 +198,7 @@ describe("computeTestStats", () => {
   });
 
   it("returns zeros for empty test list", () => {
-    vi.mocked(getAutoDiscoveredTests).mockReturnValue([]);
+    vi.mocked(getAutoDiscoveredTests).mockReturnValue({});
     const stats = computeTestStats();
     expect(stats.total).toBe(0);
     expect(stats.automated).toBe(0);

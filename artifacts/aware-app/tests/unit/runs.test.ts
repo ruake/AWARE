@@ -1,12 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { RUNS, getRunsByEnv, getRunById, computeDiffRows } from "@/lib/runs";
+import { describe, it, expect, beforeEach } from "vitest";
+import { RUNS, getRunsByEnv, getRunById, computeDiffRows, setCachedResults, clearResultsCache } from "@/lib/runs";
 import type { Run, TestResult } from "@/lib/types";
-
-vi.mock("@/lib/runsLoader", () => ({
-  getCachedResults: vi.fn(),
-}));
-
-import { getCachedResults } from "@/lib/runsLoader";
 
 const mockRun1: Run = {
   id: "run_001", label: "Run 1", suiteId: "suite_a", envId: "qa_staging",
@@ -104,19 +98,17 @@ describe("computeDiffRows", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    clearResultsCache();
   });
 
   it("returns empty array when both result sets are empty", () => {
-    vi.mocked(getCachedResults).mockReturnValueOnce([]);
-    vi.mocked(getCachedResults).mockReturnValueOnce([]);
     const rows = computeDiffRows("run_001", "run_002");
     expect(rows).toEqual([]);
   });
 
   it("marks PASS→FAIL as regression", () => {
-    vi.mocked(getCachedResults).mockReturnValueOnce([baseResultPass]);
-    vi.mocked(getCachedResults).mockReturnValueOnce([{ ...candResultPass, status: "FAIL" }]);
+    setCachedResults("run_001", [baseResultPass]);
+    setCachedResults("run_002", [{ ...candResultPass, status: "FAIL" }]);
     const rows = computeDiffRows("run_001", "run_002");
     expect(rows).toHaveLength(1);
     expect(rows[0].state).toBe("regression");
@@ -125,8 +117,8 @@ describe("computeDiffRows", () => {
   });
 
   it("marks FAIL→PASS as fixed", () => {
-    vi.mocked(getCachedResults).mockReturnValueOnce([baseResultFail]);
-    vi.mocked(getCachedResults).mockReturnValueOnce([{ ...candResultFail, status: "PASS" }]);
+    setCachedResults("run_001", [baseResultFail]);
+    setCachedResults("run_002", [{ ...candResultFail, status: "PASS" }]);
     const rows = computeDiffRows("run_001", "run_002");
     expect(rows).toHaveLength(1);
     expect(rows[0].state).toBe("fixed");
@@ -135,24 +127,23 @@ describe("computeDiffRows", () => {
   });
 
   it("marks same status with large duration diff as duration", () => {
-    vi.mocked(getCachedResults).mockReturnValueOnce([{ ...baseResultPass, duration: 100 }]);
-    vi.mocked(getCachedResults).mockReturnValueOnce([{ ...candResultPass, duration: 200 }]);
+    setCachedResults("run_001", [{ ...baseResultPass, duration: 100 }]);
+    setCachedResults("run_002", [{ ...candResultPass, duration: 200 }]);
     const rows = computeDiffRows("run_001", "run_002");
     expect(rows).toHaveLength(1);
     expect(rows[0].state).toBe("duration");
   });
 
   it("marks same status with small duration diff as unchanged", () => {
-    vi.mocked(getCachedResults).mockReturnValueOnce([{ ...baseResultPass, duration: 100 }]);
-    vi.mocked(getCachedResults).mockReturnValueOnce([{ ...candResultPass, duration: 105 }]);
+    setCachedResults("run_001", [{ ...baseResultPass, duration: 100 }]);
+    setCachedResults("run_002", [{ ...candResultPass, duration: 105 }]);
     const rows = computeDiffRows("run_001", "run_002");
     expect(rows).toHaveLength(1);
     expect(rows[0].state).toBe("unchanged");
   });
 
   it("handles test present in base but missing in candidate", () => {
-    vi.mocked(getCachedResults).mockReturnValueOnce([baseResultPass]);
-    vi.mocked(getCachedResults).mockReturnValueOnce([]);
+    setCachedResults("run_001", [baseResultPass]);
     const rows = computeDiffRows("run_001", "run_002");
     expect(rows).toHaveLength(1);
     expect(rows[0].baseStatus).toBe("PASS");
@@ -161,8 +152,7 @@ describe("computeDiffRows", () => {
   });
 
   it("handles test present in candidate but missing in base", () => {
-    vi.mocked(getCachedResults).mockReturnValueOnce([]);
-    vi.mocked(getCachedResults).mockReturnValueOnce([candResultPass]);
+    setCachedResults("run_002", [candResultPass]);
     const rows = computeDiffRows("run_001", "run_002");
     expect(rows).toHaveLength(1);
     expect(rows[0].baseStatus).toBe("FAIL");
@@ -171,8 +161,8 @@ describe("computeDiffRows", () => {
   });
 
   it("merges results from both runs by name", () => {
-    vi.mocked(getCachedResults).mockReturnValueOnce([baseResultPass, baseResultFail]);
-    vi.mocked(getCachedResults).mockReturnValueOnce([candResultPass, { ...candResultFail, status: "FAIL" }]);
+    setCachedResults("run_001", [baseResultPass, baseResultFail]);
+    setCachedResults("run_002", [candResultPass, { ...candResultFail, status: "FAIL" }]);
     const rows = computeDiffRows("run_001", "run_002");
     expect(rows).toHaveLength(2);
   });

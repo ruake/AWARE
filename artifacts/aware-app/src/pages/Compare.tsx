@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef, useTransition } from 'react';
 import { useSearch } from 'wouter';
-import { TrendingDown, TrendingUp, Minus, Plus, ChevronDown, CheckCircle2, XCircle } from 'lucide-react';
-import { loadRuns, loadAllResults } from '@/lib/data';
+import { TrendingDown, TrendingUp, Minus, Plus, ChevronDown, CheckCircle2, XCircle, ExternalLink, Check } from 'lucide-react';
+import { loadRuns, loadAllResults, loadTestCases, getTestCaseById } from '@/lib/data';
+import { getGitHubUrl } from '@/lib/utils';
 import type { Run, TestResult } from '@/lib/types';
 import { StatusBadge } from '@/components/StatusBadge';
+import { useSort, sortData, SortHeader } from '@/lib/sortableTable';
 
 type DiffRow = {
   name: string;
@@ -12,6 +14,91 @@ type DiffRow = {
   candResult: TestResult | null;
   change: 'REGRESSED' | 'FIXED' | 'UNCHANGED' | 'NEW' | 'REMOVED';
 };
+
+function CompositeSelect({
+  runs,
+  value,
+  onChange,
+  label,
+}: {
+  runs: Run[];
+  value: string;
+  onChange: (id: string) => void;
+  label: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const sorted = useMemo(() => [...runs].sort((a, b) => b.started.localeCompare(a.started)), [runs]);
+  const selected = runs.find(r => r.id === value);
+
+  const envColor = (env: string) => {
+    if (env === 'QA') return 'bg-gcp-blue/20 text-gcp-blue-light border-gcp-blue/30';
+    if (env === 'UAT') return 'bg-gcp-yellow/20 text-gcp-yellow-light border-gcp-yellow/30';
+    if (env === 'PROD') return 'bg-gcp-green/20 text-gcp-green-light border-gcp-green/30';
+    return 'bg-gcp-text-muted/20 text-gcp-text-secondary border-gcp-text-muted/30';
+  };
+
+  return (
+    <div className="relative" ref={ref}>
+      <label className="block text-xs font-semibold uppercase tracking-widest text-gcp-text-muted mb-2">{label}</label>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between gap-2 bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-sm rounded-md px-3 py-2 hover:border-gcp-blue/50 focus:outline-none focus:border-gcp-blue/50 focus:ring-1 focus:ring-gcp-blue/20 transition-colors"
+      >
+        {selected ? (
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border flex-shrink-0 ${envColor(selected.env)}`}>
+              {selected.env}
+            </span>
+            <span className="truncate">{selected.label}</span>
+            <span className="text-gcp-text-muted text-xs flex-shrink-0 ml-auto">
+              {new Date(selected.started).toLocaleDateString()}
+            </span>
+          </div>
+        ) : (
+          <span className="text-gcp-text-muted">Select {label.toLowerCase()}…</span>
+        )}
+        <ChevronDown size={14} className={`text-gcp-text-muted flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1 w-full bg-gcp-elevated border border-gcp-border-soft rounded-md shadow-lg max-h-72 overflow-y-auto">
+          {sorted.map(r => {
+            const isSelected = r.id === value;
+            return (
+              <button
+                key={r.id}
+                onClick={() => { onChange(r.id); setOpen(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors hover:bg-gcp-surface/60 border-b border-gcp-border/30 last:border-b-0 ${
+                  isSelected ? 'bg-gcp-blue/10' : ''
+                }`}
+              >
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border flex-shrink-0 ${envColor(r.env)}`}>
+                  {r.env}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-gcp-text truncate">{r.label}</div>
+                  <div className="text-gcp-text-muted text-[11px]">
+                    {r.suiteId.replace('suite_', '')} · {new Date(r.started).toLocaleDateString()} {new Date(r.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+                {isSelected && <Check size={14} className="text-gcp-blue flex-shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function computeDiff(base: TestResult[], cand: TestResult[]): DiffRow[] {
   const byName = (arr: TestResult[]) => new Map(arr.map(t => [t.name, t]));
@@ -39,10 +126,10 @@ function computeDiff(base: TestResult[], cand: TestResult[]): DiffRow[] {
   });
 }
 
-function AssertionBlock({ result, side }: { result: TestResult | null; side: 'left' | 'right' }) {
+const AssertionBlock = React.memo(function AssertionBlock({ result, side }: { result: TestResult | null; side: 'left' | 'right' }) {
   if (!result) {
     return (
-      <div className="text-center py-4 text-zinc-600 text-xs">
+      <div className="text-center py-4 text-gcp-text-muted text-xs">
         —
       </div>
     );
@@ -52,21 +139,21 @@ function AssertionBlock({ result, side }: { result: TestResult | null; side: 'le
   return (
     <div className="space-y-2 text-xs">
       {assertions.length === 0 ? (
-        <div className="text-zinc-600">No assertions</div>
+        <div className="text-gcp-text-muted">No assertions</div>
       ) : (
         assertions.map((a, i) => (
           <div key={i} className="flex items-start gap-2">
             {a.pass ? (
-              <CheckCircle2 size={14} className="text-emerald-400 flex-shrink-0 mt-0.5" />
+              <CheckCircle2 size={14} className="text-gcp-green flex-shrink-0 mt-0.5" />
             ) : (
-              <XCircle size={14} className="text-rose-400 flex-shrink-0 mt-0.5" />
+              <XCircle size={14} className="text-gcp-red flex-shrink-0 mt-0.5" />
             )}
             <div className="flex-1 min-w-0">
-              <div className="text-zinc-300 break-words">{a.label}</div>
+              <div className="text-gcp-text-secondary break-words">{a.label}</div>
               {!a.pass && (
-                <div className="text-zinc-600 mt-1 space-y-0.5">
-                  {a.expected && <div>Expected: <span className="font-mono text-zinc-500">{a.expected}</span></div>}
-                  {a.actual && <div>Actual: <span className="font-mono text-zinc-500">{a.actual}</span></div>}
+                <div className="text-gcp-text-muted mt-1 space-y-0.5">
+                  {a.expected && <div>Expected: <span className="font-mono text-gcp-text-muted">{a.expected}</span></div>}
+                  {a.actual && <div>Actual: <span className="font-mono text-gcp-text-muted">{a.actual}</span></div>}
                 </div>
               )}
             </div>
@@ -75,9 +162,9 @@ function AssertionBlock({ result, side }: { result: TestResult | null; side: 'le
       )}
     </div>
   );
-}
+});
 
-function DiffPanel({ diff }: { diff: DiffRow }) {
+const DiffPanel = React.memo(function DiffPanel({ diff }: { diff: DiffRow }) {
   const baseReq = diff.baseResult?.evidence?.request;
   const baseResp = diff.baseResult?.evidence?.response;
   const candReq = diff.candResult?.evidence?.request;
@@ -88,21 +175,21 @@ function DiffPanel({ diff }: { diff: DiffRow }) {
       {/* Baseline */}
       <div>
         <div className="mb-4">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Baseline Assertions</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-gcp-text-muted mb-2">Baseline Assertions</h4>
           <AssertionBlock result={diff.baseResult} side="left" />
         </div>
 
         {baseReq && (
           <div className="mb-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Request</h4>
-            <div className="space-y-2 text-zinc-300">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-gcp-text-muted mb-2">Request</h4>
+            <div className="space-y-2 text-gcp-text-secondary">
               <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 bg-zinc-700 text-zinc-300 rounded font-mono text-[10px] font-semibold">{baseReq.method}</span>
-                <span className="font-mono text-[11px] truncate text-zinc-400">{baseReq.url}</span>
+                <span className="px-1.5 py-0.5 bg-gcp-border text-gcp-text-secondary rounded font-mono text-[10px] font-semibold">{baseReq.method}</span>
+                <span className="font-mono text-[11px] truncate text-gcp-text-secondary">{baseReq.url}</span>
               </div>
               {baseResp && (
                 <div className="flex items-center gap-2">
-                  <span className={`px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold ${baseResp.status >= 200 && baseResp.status < 300 ? 'bg-emerald-500/20 text-emerald-400' : baseResp.status >= 400 && baseResp.status < 500 ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                  <span className={`px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold ${baseResp.status >= 200 && baseResp.status < 300 ? 'bg-gcp-green/20 text-gcp-green' : baseResp.status >= 400 && baseResp.status < 500 ? 'bg-gcp-yellow/20 text-gcp-yellow' : 'bg-gcp-red/20 text-gcp-red'}`}>
                     {baseResp.status}
                   </span>
                 </div>
@@ -115,21 +202,21 @@ function DiffPanel({ diff }: { diff: DiffRow }) {
       {/* Candidate */}
       <div>
         <div className="mb-4">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Candidate Assertions</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-gcp-text-muted mb-2">Candidate Assertions</h4>
           <AssertionBlock result={diff.candResult} side="right" />
         </div>
 
         {candReq && (
           <div className="mb-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Request</h4>
-            <div className="space-y-2 text-zinc-300">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-gcp-text-muted mb-2">Request</h4>
+            <div className="space-y-2 text-gcp-text-secondary">
               <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 bg-zinc-700 text-zinc-300 rounded font-mono text-[10px] font-semibold">{candReq.method}</span>
-                <span className="font-mono text-[11px] truncate text-zinc-400">{candReq.url}</span>
+                <span className="px-1.5 py-0.5 bg-gcp-border text-gcp-text-secondary rounded font-mono text-[10px] font-semibold">{candReq.method}</span>
+                <span className="font-mono text-[11px] truncate text-gcp-text-secondary">{candReq.url}</span>
               </div>
               {candResp && (
                 <div className="flex items-center gap-2">
-                  <span className={`px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold ${candResp.status >= 200 && candResp.status < 300 ? 'bg-emerald-500/20 text-emerald-400' : candResp.status >= 400 && candResp.status < 500 ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                  <span className={`px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold ${candResp.status >= 200 && candResp.status < 300 ? 'bg-gcp-green/20 text-gcp-green' : candResp.status >= 400 && candResp.status < 500 ? 'bg-gcp-yellow/20 text-gcp-yellow' : 'bg-gcp-red/20 text-gcp-red'}`}>
                     {candResp.status}
                   </span>
                 </div>
@@ -140,11 +227,15 @@ function DiffPanel({ diff }: { diff: DiffRow }) {
       </div>
     </div>
   );
-}
+});
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 25;
 
 export default function Compare() {
+  const [isPending, startTransition] = useTransition();
+  const { sort, toggle } = useSort('change', 'asc');
+  const [colNameFilter, setColNameFilter] = useState('');
+  const [colCatFilter, setColCatFilter] = useState('');
   const search = useSearch();
   const params = new URLSearchParams(search);
   const initialBase = params.get('base');
@@ -161,7 +252,7 @@ export default function Compare() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    loadRuns().then(r => {
+    Promise.all([loadRuns(), loadTestCases()]).then(([r]) => {
       setRuns(r);
       setLoading(false);
       if (!baseId && r.length > 0) setBaseId(r[0].id);
@@ -208,11 +299,22 @@ export default function Compare() {
   useEffect(() => setPage(1), [changeFilter]);
 
   const filtered = useMemo(() => {
-    return diffs.filter(d => changeFilter === 'ALL' || d.change === changeFilter);
-  }, [diffs, changeFilter]);
+    return diffs.filter(d => {
+      if (changeFilter !== 'ALL' && d.change !== changeFilter) return false;
+      if (colNameFilter && !d.name.toLowerCase().includes(colNameFilter.toLowerCase())) return false;
+      if (colCatFilter && !d.category.toLowerCase().includes(colCatFilter.toLowerCase())) return false;
+      return true;
+    });
+  }, [diffs, changeFilter, colNameFilter, colCatFilter]);
 
-  const pageCount = Math.ceil(filtered.length / PAGE_SIZE);
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const sorted = sortData(filtered, sort, {
+    name: d => d.name.toLowerCase(),
+    category: d => d.category.toLowerCase(),
+    change: d => d.change,
+  });
+
+  const pageCount = Math.ceil(sorted.length / PAGE_SIZE);
+  const paged = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const baseRun = runs.find(r => r.id === baseId);
   const candRun = runs.find(r => r.id === candId);
@@ -221,8 +323,8 @@ export default function Compare() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-6 h-6 border-2 border-sky-500/30 border-t-sky-500 rounded-full animate-spin" />
-          <span className="text-sm text-zinc-500">Loading runs…</span>
+          <div className="w-6 h-6 border-2 border-gcp-blue/30 border-t-sky-500 rounded-full animate-spin" />
+          <span className="text-sm text-gcp-text-muted">Loading runs…</span>
         </div>
       </div>
     );
@@ -232,16 +334,16 @@ export default function Compare() {
     <div className="px-6 py-6 space-y-6">
       {/* Run selector area */}
       <div className="space-y-4">
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-100">Compare Runs</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-gcp-text">Compare Runs</h1>
 
         <div className="grid grid-cols-2 gap-4 items-end">
           {/* Baseline */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-2">Baseline (Before)</label>
+            <label className="block text-xs font-semibold uppercase tracking-widest text-gcp-text-muted mb-2">Baseline (Before)</label>
             <select
               value={baseId}
               onChange={e => setBaseId(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700/50 text-zinc-100 text-sm rounded-md px-3 py-2 placeholder:text-zinc-600 focus:outline-none focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/20 transition-colors"
+              className="w-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-sm rounded-md px-3 py-2 placeholder:text-gcp-text-muted focus:outline-none focus:border-gcp-blue/50 focus:ring-1 focus:ring-gcp-blue/20 transition-colors"
             >
               <option value="">Select baseline run…</option>
               {[...runs].sort((a, b) => b.started.localeCompare(a.started)).map(r => (
@@ -254,11 +356,11 @@ export default function Compare() {
 
           {/* Candidate */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-2">Candidate (After)</label>
+            <label className="block text-xs font-semibold uppercase tracking-widest text-gcp-text-muted mb-2">Candidate (After)</label>
             <select
               value={candId}
               onChange={e => setCandId(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700/50 text-zinc-100 text-sm rounded-md px-3 py-2 placeholder:text-zinc-600 focus:outline-none focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/20 transition-colors"
+              className="w-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-sm rounded-md px-3 py-2 placeholder:text-gcp-text-muted focus:outline-none focus:border-gcp-blue/50 focus:ring-1 focus:ring-gcp-blue/20 transition-colors"
             >
               <option value="">Select candidate run…</option>
               {[...runs].sort((a, b) => b.started.localeCompare(a.started)).map(r => (
@@ -274,7 +376,7 @@ export default function Compare() {
           <button
             onClick={handleSwap}
             disabled={!baseId || !candId}
-            className="px-3 py-2 rounded-md text-xs font-semibold bg-zinc-800 border border-zinc-700/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-2 rounded-md text-xs font-semibold bg-gcp-elevated border border-gcp-border-soft text-gcp-text-secondary hover:text-gcp-text hover:bg-gcp-elevated/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             ⇄ Swap
           </button>
@@ -282,47 +384,75 @@ export default function Compare() {
           <button
             onClick={handleCompare}
             disabled={!baseId || !candId || isComparing}
-            className="px-4 py-2 bg-sky-500 hover:bg-sky-600 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white text-sm rounded-md font-semibold transition-colors"
+            className="px-4 py-2 bg-gcp-blue hover:bg-gcp-blue-hover disabled:bg-gcp-border disabled:cursor-not-allowed text-white text-sm rounded-md font-semibold transition-colors"
           >
             {isComparing ? 'Comparing…' : 'Compare'}
           </button>
         </div>
       </div>
 
-      {/* Summary cards */}
+      {/* Summary cards (CTA) */}
       {diffs.length > 0 && (
         <div className="grid grid-cols-4 gap-4">
-          <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 p-4 flex items-center gap-3">
-            <TrendingDown size={20} className="text-rose-400 flex-shrink-0" />
+          <button
+            onClick={() => startTransition(() => setChangeFilter(changeFilter === 'REGRESSED' ? 'ALL' : 'REGRESSED'))}
+            className={`rounded-lg border p-4 flex items-center gap-3 text-left transition-all ${
+              changeFilter === 'REGRESSED'
+                ? 'bg-gcp-red/15 border-gcp-red/40 ring-1 ring-gcp-red/30'
+                : 'bg-gcp-red/10 border-gcp-red/20 hover:bg-gcp-red/15 hover:border-gcp-red/30'
+            }`}
+          >
+            <TrendingDown size={20} className="text-gcp-red flex-shrink-0" />
             <div>
-              <div className="text-2xl font-bold text-rose-400">{summary.regressions}</div>
-              <div className="text-xs text-rose-400/70 font-medium">Regressions</div>
+              <div className="text-2xl font-bold text-gcp-red">{summary.regressions}</div>
+              <div className="text-xs text-gcp-red/70 font-medium">Regressions</div>
             </div>
-          </div>
+          </button>
 
-          <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-4 flex items-center gap-3">
-            <TrendingUp size={20} className="text-emerald-400 flex-shrink-0" />
+          <button
+            onClick={() => startTransition(() => setChangeFilter(changeFilter === 'FIXED' ? 'ALL' : 'FIXED'))}
+            className={`rounded-lg border p-4 flex items-center gap-3 text-left transition-all ${
+              changeFilter === 'FIXED'
+                ? 'bg-gcp-green/15 border-gcp-green/40 ring-1 ring-gcp-green/30'
+                : 'bg-gcp-green/10 border-gcp-green/20 hover:bg-gcp-green/15 hover:border-gcp-green/30'
+            }`}
+          >
+            <TrendingUp size={20} className="text-gcp-green flex-shrink-0" />
             <div>
-              <div className="text-2xl font-bold text-emerald-400">{summary.fixed}</div>
-              <div className="text-xs text-emerald-400/70 font-medium">Fixed</div>
+              <div className="text-2xl font-bold text-gcp-green">{summary.fixed}</div>
+              <div className="text-xs text-gcp-green/70 font-medium">Fixed</div>
             </div>
-          </div>
+          </button>
 
-          <div className="rounded-lg bg-zinc-800 border border-zinc-700 p-4 flex items-center gap-3">
-            <Minus size={20} className="text-zinc-400 flex-shrink-0" />
+          <button
+            onClick={() => startTransition(() => setChangeFilter(changeFilter === 'UNCHANGED' ? 'ALL' : 'UNCHANGED'))}
+            className={`rounded-lg border p-4 flex items-center gap-3 text-left transition-all ${
+              changeFilter === 'UNCHANGED'
+                ? 'bg-gcp-blue/15 border-gcp-blue/40 ring-1 ring-gcp-blue/30'
+                : 'bg-gcp-elevated border-gcp-border hover:bg-gcp-elevated/50 hover:border-gcp-border-soft'
+            }`}
+          >
+            <Minus size={20} className="text-gcp-text-secondary flex-shrink-0" />
             <div>
-              <div className="text-2xl font-bold text-zinc-300">{summary.unchanged}</div>
-              <div className="text-xs text-zinc-500 font-medium">Unchanged</div>
+              <div className="text-2xl font-bold text-gcp-text-secondary">{summary.unchanged}</div>
+              <div className="text-xs text-gcp-text-muted font-medium">Unchanged</div>
             </div>
-          </div>
+          </button>
 
-          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-4 flex items-center gap-3">
-            <Plus size={20} className="text-amber-400 flex-shrink-0" />
+          <button
+            onClick={() => startTransition(() => setChangeFilter(changeFilter === 'NEW' ? 'ALL' : 'NEW'))}
+            className={`rounded-lg border p-4 flex items-center gap-3 text-left transition-all ${
+              changeFilter === 'NEW'
+                ? 'bg-gcp-yellow/15 border-gcp-yellow/40 ring-1 ring-gcp-yellow/30'
+                : 'bg-gcp-yellow/10 border-gcp-yellow/20 hover:bg-gcp-yellow/15 hover:border-gcp-yellow/30'
+            }`}
+          >
+            <Plus size={20} className="text-gcp-yellow flex-shrink-0" />
             <div>
-              <div className="text-2xl font-bold text-amber-400">{summary.newOrRemoved}</div>
-              <div className="text-xs text-amber-400/70 font-medium">New / Removed</div>
+              <div className="text-2xl font-bold text-gcp-yellow">{summary.newOrRemoved}</div>
+              <div className="text-xs text-gcp-yellow/70 font-medium">New / Removed</div>
             </div>
-          </div>
+          </button>
         </div>
       )}
 
@@ -335,8 +465,8 @@ export default function Compare() {
               onClick={() => setChangeFilter(f)}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors border ${
                 changeFilter === f
-                  ? 'bg-sky-500/20 text-sky-300 border-sky-500/30'
-                  : 'bg-zinc-800 text-zinc-400 border-zinc-700/50 hover:text-zinc-200 hover:bg-zinc-700/50'
+                  ? 'bg-gcp-blue/20 text-gcp-blue-light border-gcp-blue/30'
+                  : 'bg-gcp-elevated text-gcp-text-secondary border-gcp-border-soft hover:text-gcp-text hover:bg-gcp-elevated/50'
               }`}
             >
               {f === 'ALL' ? 'All Changes' : f}
@@ -347,49 +477,72 @@ export default function Compare() {
 
       {/* Results table */}
       {diffs.length > 0 && (
-        <div className="rounded-lg border border-zinc-800 overflow-hidden">
+        <div className="rounded-lg border border-gcp-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-zinc-900/80 border-b border-zinc-800">
-                {['Name', 'Category', 'Baseline', 'Candidate', 'Change', ''].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">{h}</th>
-                ))}
+              <tr className="bg-gcp-surface/80 border-b border-gcp-border">
+                <SortHeader label="Name" sortKey="name" currentSort={sort} onToggle={toggle} filterValue={colNameFilter} onFilterChange={setColNameFilter} />
+                <SortHeader label="Category" sortKey="category" currentSort={sort} onToggle={toggle} filterValue={colCatFilter} onFilterChange={setColCatFilter} />
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gcp-text-muted">Baseline</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gcp-text-muted">Candidate</th>
+                <SortHeader label="Change" sortKey="change" currentSort={sort} onToggle={toggle} />
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gcp-text-muted" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800/70">
+            <tbody className="divide-y divide-gcp-border/70">
               {paged.map(d => (
                 <React.Fragment key={d.name}>
                   <tr
                     onClick={() => setExpandedId(expandedId === d.name ? null : d.name)}
-                    className={`cursor-pointer transition-colors hover:bg-zinc-800/40 ${
-                      d.change === 'REGRESSED' ? 'bg-rose-950/10' : d.change === 'FIXED' ? 'bg-emerald-950/10' : ''
+                    className={`cursor-pointer transition-colors hover:bg-gcp-elevated/40 ${
+                      d.change === 'REGRESSED' ? 'bg-gcp-red/10' : d.change === 'FIXED' ? 'bg-gcp-green/10' : ''
                     }`}
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-100">{d.name}</td>
-                    <td className="px-4 py-3 text-xs text-zinc-400">{d.category}</td>
                     <td className="px-4 py-3">
-                      {d.baseResult ? <StatusBadge status={d.baseResult.status} size="sm" /> : <span className="text-xs text-zinc-500">—</span>}
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs text-gcp-text">{d.name}</span>
+                        {(() => {
+                          const result = d.baseResult ?? d.candResult;
+                          const tc = result ? getTestCaseById(result.testCaseId) : undefined;
+                          const url = tc ? getGitHubUrl(tc) : null;
+                          return url ? (
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              className="text-gcp-text-muted hover:text-gcp-blue transition-colors flex-shrink-0"
+                            >
+                              <ExternalLink size={12} />
+                            </a>
+                          ) : null;
+                        })()}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gcp-text-secondary">{d.category}</td>
+                    <td className="px-4 py-3">
+                      {d.baseResult ? <StatusBadge status={d.baseResult.status} size="sm" /> : <span className="text-xs text-gcp-text-muted">—</span>}
                     </td>
                     <td className="px-4 py-3">
-                      {d.candResult ? <StatusBadge status={d.candResult.status} size="sm" /> : <span className="text-xs text-zinc-500">—</span>}
+                      {d.candResult ? <StatusBadge status={d.candResult.status} size="sm" /> : <span className="text-xs text-gcp-text-muted">—</span>}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs font-semibold ${
-                        d.change === 'REGRESSED' ? 'text-rose-400' :
-                        d.change === 'FIXED' ? 'text-emerald-400' :
-                        d.change === 'NEW' || d.change === 'REMOVED' ? 'text-amber-400' :
-                        'text-zinc-400'
+                        d.change === 'REGRESSED' ? 'text-gcp-red' :
+                        d.change === 'FIXED' ? 'text-gcp-green' :
+                        d.change === 'NEW' || d.change === 'REMOVED' ? 'text-gcp-yellow' :
+                        'text-gcp-text-secondary'
                       }`}>
                         {d.change}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-zinc-500">
+                    <td className="px-4 py-3 text-gcp-text-muted">
                       <ChevronDown size={14} className={`transition-transform ${expandedId === d.name ? 'rotate-180' : ''}`} />
                     </td>
                   </tr>
                   {expandedId === d.name && (
-                    <tr className="bg-zinc-900/50">
-                      <td colSpan={6} className="px-6 py-4 border-b border-zinc-800">
+                    <tr className="bg-gcp-surface/50">
+                      <td colSpan={6} className="px-6 py-4 border-b border-gcp-border">
                         <DiffPanel diff={d} />
                       </td>
                     </tr>
@@ -401,10 +554,10 @@ export default function Compare() {
 
           {filtered.length === 0 && (
             <div className="py-16 text-center">
-              <div className="text-zinc-600 text-sm">No changes match the current filter</div>
+              <div className="text-gcp-text-muted text-sm">No changes match the current filter</div>
               <button
-                onClick={() => setChangeFilter('ALL')}
-                className="mt-3 text-xs text-sky-400 hover:text-sky-300 transition-colors"
+                onClick={() => startTransition(() => setChangeFilter('ALL'))}
+                className="mt-3 text-xs text-gcp-blue hover:text-gcp-blue-light transition-colors"
               >
                 Clear filter
               </button>
@@ -413,22 +566,22 @@ export default function Compare() {
 
           {/* Pagination */}
           {pageCount > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-zinc-800 bg-zinc-900/50">
-              <span className="text-xs text-zinc-500">
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gcp-border bg-gcp-surface/50">
+              <span className="text-xs text-gcp-text-muted">
                 Page {page} of {pageCount} · {filtered.length} items
               </span>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setPage(1)}
                   disabled={page === 1}
-                  className="px-2 py-1 text-xs text-zinc-400 hover:text-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-zinc-800 transition-colors"
+                  className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors"
                 >
                   «
                 </button>
                 <button
                   onClick={() => setPage(p => p - 1)}
                   disabled={page === 1}
-                  className="px-2 py-1 text-xs text-zinc-400 hover:text-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-zinc-800 transition-colors"
+                  className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors"
                 >
                   ‹
                 </button>
@@ -441,8 +594,8 @@ export default function Compare() {
                       onClick={() => setPage(p)}
                       className={`px-2 py-1 text-xs rounded transition-colors ${
                         p === page
-                          ? 'bg-sky-500/20 text-sky-400 font-semibold'
-                          : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
+                          ? 'bg-gcp-blue/20 text-gcp-blue font-semibold'
+                          : 'text-gcp-text-secondary hover:text-gcp-text hover:bg-gcp-elevated'
                       }`}
                     >
                       {p}
@@ -452,14 +605,14 @@ export default function Compare() {
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={page === pageCount}
-                  className="px-2 py-1 text-xs text-zinc-400 hover:text-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-zinc-800 transition-colors"
+                  className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors"
                 >
                   ›
                 </button>
                 <button
                   onClick={() => setPage(pageCount)}
                   disabled={page === pageCount}
-                  className="px-2 py-1 text-xs text-zinc-400 hover:text-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-zinc-800 transition-colors"
+                  className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors"
                 >
                   »
                 </button>

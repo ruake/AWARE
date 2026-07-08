@@ -11,7 +11,6 @@ vi.mock("@/lib/store", () => ({
 }));
 
 import { fetchJson } from "@/lib/dataFetcher";
-import { loadTestSuites, getTestSuites, getTestSuiteById, buildSuiteTree } from "@/lib/testSuites";
 
 function makeSuite(overrides: Partial<TestSuite> & { id: string }): TestSuite {
   return {
@@ -28,8 +27,9 @@ function makeSuite(overrides: Partial<TestSuite> & { id: string }): TestSuite {
 }
 
 describe("testSuites", () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.resetModules();
+    vi.mocked(fetchJson).mockReset();
   });
 
   describe("getTestSuiteById", () => {
@@ -125,6 +125,46 @@ describe("testSuites", () => {
       expect(tree).toHaveLength(2);
       expect(tree.find((n) => n.suite.id === "r1")!.children).toHaveLength(1);
       expect(tree.find((n) => n.suite.id === "r2")!.children).toHaveLength(2);
+    });
+
+    it("handles three levels of nesting", async () => {
+      const suites = [
+        makeSuite({ id: "root", parentId: null }),
+        makeSuite({ id: "child", parentId: "root" }),
+        makeSuite({ id: "grandchild", parentId: "child" }),
+      ];
+      vi.mocked(fetchJson).mockResolvedValue(suites);
+      const { loadTestSuites: load, buildSuiteTree: buildTree } = await import("@/lib/testSuites");
+      await load();
+      const tree = buildTree();
+      expect(tree[0].depth).toBe(0);
+      expect(tree[0].children[0].depth).toBe(1);
+      expect(tree[0].children[0].children[0].depth).toBe(2);
+    });
+  });
+
+  describe("loadTestSuites", () => {
+    it("loads suites from fetchJson", async () => {
+      const suites = [makeSuite({ id: "s1" })];
+      vi.mocked(fetchJson).mockResolvedValue(suites);
+      const { loadTestSuites: load, getTestSuites: get } = await import("@/lib/testSuites");
+      await load();
+      expect(get()).toHaveLength(1);
+    });
+
+    it("is idempotent - only calls fetchJson once", async () => {
+      vi.mocked(fetchJson).mockResolvedValue([]);
+      const { loadTestSuites: load } = await import("@/lib/testSuites");
+      await load();
+      await load();
+      expect(fetchJson).toHaveBeenCalledTimes(1);
+    });
+
+    it("handles fetch failure gracefully", async () => {
+      vi.mocked(fetchJson).mockRejectedValue(new Error("Network error"));
+      const { loadTestSuites: load, getTestSuites: get } = await import("@/lib/testSuites");
+      await load();
+      expect(get()).toEqual([]);
     });
   });
 });

@@ -2,12 +2,54 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import fs from "fs";
 import type { Plugin } from "vite";
-import type { IncomingMessage, ServerResponse } from "node:http";
 
 const port = process.env.PORT ? Number(process.env.PORT) : 5173;
 const basePath = process.env.BASE_PATH || "/";
+const isReplit = process.env.REPL_ID !== undefined;
+
+function copyPublicDataPlugin(): Plugin {
+  return {
+    name: "copy-public-data",
+    buildStart() {
+      const root = path.resolve(import.meta.dirname);
+      const dataDir = path.resolve(root, "data");
+      const publicDataDir = path.resolve(root, "public/data");
+      const schemaDir = path.resolve(dataDir, "schemas");
+      const publicSchemaDir = path.resolve(publicDataDir, "schemas");
+
+      if (!fs.existsSync(dataDir)) {
+        console.warn("[copy-public-data] data/ directory not found, skipping");
+        return;
+      }
+
+      fs.mkdirSync(publicDataDir, { recursive: true });
+      fs.mkdirSync(publicSchemaDir, { recursive: true });
+
+      const entries = fs.readdirSync(dataDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.name === "schemas") continue;
+        if (entry.isFile() && entry.name.endsWith(".json")) {
+          const src = path.resolve(dataDir, entry.name);
+          const dest = path.resolve(publicDataDir, entry.name);
+          fs.cpSync(src, dest, { recursive: true });
+          console.log(`  ✓ ${entry.name} → public/data/${entry.name}`);
+        }
+      }
+
+      const schemaEntries = fs.readdirSync(schemaDir, { withFileTypes: true });
+      for (const entry of schemaEntries) {
+        if (entry.isFile()) {
+          const src = path.resolve(schemaDir, entry.name);
+          const dest = path.resolve(publicSchemaDir, entry.name);
+          fs.cpSync(src, dest, { recursive: true });
+          console.log(`  ✓ schemas/${entry.name} → public/data/schemas/${entry.name}`);
+        }
+      }
+    },
+  };
+}
 
 function aiProxyPlugin(): Plugin {
   return {
@@ -15,7 +57,7 @@ function aiProxyPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use(
         "/api/ai/chat",
-        (req: IncomingMessage, res: ServerResponse) => {
+        (req, res) => {
           if (req.method === "OPTIONS") {
             res.setHeader("Access-Control-Allow-Origin", "*");
             res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -108,11 +150,17 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
-    aiProxyPlugin(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
+    copyPublicDataPlugin(),
+    ...(isReplit
       ? [
+          aiProxyPlugin(),
+        ]
+      : []),
+    ...(isReplit
+      ? [
+          await import("@replit/vite-plugin-runtime-error-modal").then((m) =>
+            m.default(),
+          ),
           await import("@replit/vite-plugin-cartographer").then((m) =>
             m.cartographer({
               root: path.resolve(import.meta.dirname, ".."),

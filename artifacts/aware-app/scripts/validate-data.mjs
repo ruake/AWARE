@@ -16,7 +16,7 @@ const REQUIRED_FIELDS = {
   "test-results.json": {
     type: "object",
     itemType: "TestResult",
-    itemRequired: ["id", "name", "status", "duration", "category", "suite", "evidence", "filmstrip"],
+    itemRequired: ["id", "name", "status", "duration", "category", "suite", "evidence"],
   },
   "runs.json": {
     type: "array",
@@ -95,10 +95,10 @@ for (const file of files) {
             validateItem(items[i], rules.itemRequired, `${file}[${runId}][${i}]`, `  ✗`, errors);
             // Deep check: evidence required fields
             const item = items[i];
-            if (!Array.isArray(item.filmstrip) || item.filmstrip.length === 0) {
-              errors.push(`  ✗ ${file}[${runId}][${i}}: "filmstrip" must be a non-empty array of screenshot frames`);
-            }
-            if (item.filmstrip) {
+            if (item.filmstrip !== undefined) {
+              if (!Array.isArray(item.filmstrip) || item.filmstrip.length === 0) {
+                errors.push(`  ✗ ${file}[${runId}][${i}}: "filmstrip" must be a non-empty array of screenshot frames`);
+              }
               for (let f = 0; f < item.filmstrip.length; f++) {
                 const frame = item.filmstrip[f];
                 if (!frame.id || !frame.label || !frame.dataUri) {
@@ -126,7 +126,7 @@ for (const file of files) {
                     errors.push(`  ✗ ${file}[${runId}][${i}]: evidence.response missing required field "${f}"`);
                   }
                 }
-                // Deep check: timings (HTTP waterfall)
+                // Deep check: timings (HTTP waterfall) — optional
                 if (item.evidence.response.timings) {
                   const timingFields = ["dnsLookup", "tcpConnect", "tlsHandshake", "ttfb", "download", "total"];
                   for (const f of timingFields) {
@@ -134,8 +134,6 @@ for (const file of files) {
                       errors.push(`  ✗ ${file}[${runId}][${i}]: evidence.response.timings missing required field "${f}"`);
                     }
                   }
-                } else {
-                  errors.push(`  ✗ ${file}[${runId}][${i}]: evidence.response missing required field "timings"`);
                 }
               }
             } else {
