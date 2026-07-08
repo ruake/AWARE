@@ -143,7 +143,12 @@ function main() {
     const stats = sh(`git diff --cached --stat`).split("\n").filter(Boolean).slice(0, 10).join("\n    ");
     console.log(`\n  Changes:\n    ${stats}`);
     sh(`git commit -m "sync: update data files from main [skip ci]"`);
-    sh(`git push origin ${DATA_BRANCH}`);
+    if (TOKEN) {
+      const remote = `https://x-access-token:${TOKEN}@github.com/${process.env.GITHUB_REPOSITORY || "ruake/AWARE"}.git`;
+      sh(`git push "${remote}" ${DATA_BRANCH}`);
+    } else {
+      sh(`git push origin ${DATA_BRANCH}`);
+    }
     console.log(`\n✓ Synced ${changed} files to "${DATA_BRANCH}" branch`);
   }
 
