@@ -23,7 +23,7 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Sync data branch
-        run: node scripts/init-data-branch.mjs
+      - name: Sync data to data branch
+        run: node scripts/sync-data.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
