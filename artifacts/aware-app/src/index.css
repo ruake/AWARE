@@ -42,6 +42,8 @@ html { scroll-behavior: smooth; }
   --color-gcp-yellow-light: var(--color-gcp-yellow-light-val);
   --color-gcp-yellow-bg: var(--color-gcp-yellow-bg-val);
   --color-gcp-yellow-border: var(--color-gcp-yellow-border-val);
+  --color-gcp-border-strong: var(--color-gcp-border-strong-val);
+  --color-gcp-purple: var(--color-gcp-purple-val);
 }
 
 *,
@@ -201,6 +203,8 @@ html { scroll-behavior: smooth; }
   --color-gcp-yellow-light-val: #fcc934;
   --color-gcp-yellow-bg-val: rgba(251, 188, 5, 0.12);
   --color-gcp-yellow-border-val: rgba(251, 188, 5, 0.25);
+  --color-gcp-border-strong-val: rgba(255, 255, 255, 0.2);
+  --color-gcp-purple-val: #a78bfa;
 }
 
 .light {
@@ -278,6 +282,8 @@ html { scroll-behavior: smooth; }
   --color-gcp-yellow-light-val: #fbbc04;
   --color-gcp-yellow-bg-val: rgba(249, 171, 0, 0.1);
   --color-gcp-yellow-border-val: rgba(249, 171, 0, 0.2);
+  --color-gcp-border-strong-val: rgba(0, 0, 0, 0.2);
+  --color-gcp-purple-val: #7c3aed;
 }
 
 html, body {
@@ -320,9 +326,9 @@ html, body {
 
 /* Utility Classes */
 .glass-panel {
-  background: rgba(9, 13, 20, 0.8);
+  background: var(--proof-glass);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--proof-border);
 }
 
 .metric-number {
@@ -788,4 +794,265 @@ html, body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ── Glass Card ────────────────────────────────── */
+.proof-glass-card {
+  background: var(--proof-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--proof-border);
+  border-radius: var(--proof-radius-lg);
+}
+
+/* ── Gradient Text ──────────────────────────────── */
+.proof-gradient-text {
+  background: linear-gradient(135deg, var(--proof-blue), var(--proof-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Status Bar ─────────────────────────────────── */
+.proof-env-bar {
+  display: flex;
+  gap: 4px;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.proof-env-bar-segment {
+  flex: 1;
+  border-radius: 2px;
+  transition: background 0.3s ease, opacity 0.3s ease;
+}
+
+/* ── Property Status Bar (Dashboard top) ────────── */
+.proof-property-bar {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--proof-radius-lg);
+  background: var(--proof-surface);
+  border: 1px solid var(--proof-border);
+}
+.proof-property-env {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--proof-radius-md);
+  background: var(--proof-surface-2);
+  transition: all 0.2s ease;
+}
+.proof-property-env:hover {
+  background: var(--proof-surface-hover);
+  transform: translateY(-1px);
+}
+.proof-property-env-active {
+  border-left: 3px solid var(--proof-green);
+}
+.proof-property-env-inactive {
+  border-left: 3px solid var(--proof-text-muted);
+  opacity: 0.6;
+}
+
+/* ── Stagger animation helpers ──────────────────── */
+.proof-stagger-1 { animation-delay: 0.05s; }
+.proof-stagger-2 { animation-delay: 0.10s; }
+.proof-stagger-3 { animation-delay: 0.15s; }
+.proof-stagger-4 { animation-delay: 0.20s; }
+.proof-stagger-5 { animation-delay: 0.25s; }
+.proof-stagger-6 { animation-delay: 0.30s; }
+
+/* ── Stat Value ─────────────────────────────────── */
+.proof-stat-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+/* ── Section Divider ────────────────────────────── */
+.proof-section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--proof-border), transparent);
+  margin: 0;
+  border: none;
+}
+
+/* ── Badge dot (live/status indicators) ─────────── */
+.proof-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.proof-badge-dot-pass { background: var(--proof-green); }
+.proof-badge-dot-fail { background: var(--proof-red); }
+.proof-badge-dot-warn { background: var(--proof-yellow); }
+.proof-badge-dot-info { background: var(--proof-blue); }
+.proof-badge-dot-muted { background: var(--proof-text-muted); }
+
+/* ── Hover card lift ────────────────────────────── */
+.proof-card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.proof-card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--proof-shadow-md);
+}
+
+/* ── Empty state ────────────────────────────────── */
+.proof-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  gap: 12px;
+  color: var(--proof-text-muted);
+  text-align: center;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════════════ */
+/* NEW UTILITIES — ADDITIONS ONLY (do not modify anything above)                      */
+/* ════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Glow Card (accepts --glow-color variable) ──── */
+.proof-glow-card {
+  background: var(--proof-surface);
+  border: 1px solid var(--proof-border);
+  border-radius: var(--proof-radius-lg);
+  box-shadow: 0 0 20px var(--glow-color, transparent), var(--proof-shadow-sm);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.proof-glow-card:hover {
+  box-shadow: 0 0 30px var(--glow-color, transparent), var(--proof-shadow-md);
+}
+
+/* ── Enhanced Glass Card (24px blur + inner shadow) ─── */
+.proof-glass-card-enhanced {
+  background: var(--proof-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--proof-border);
+  border-radius: var(--proof-radius-lg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--proof-shadow-sm);
+}
+
+/* ── Gradient Flow Animation ────────────────────── */
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-flow {
+  background: linear-gradient(135deg, var(--proof-blue), var(--proof-purple), var(--proof-teal));
+  background-size: 200% 200%;
+  animation: gradient-flow 4s ease infinite;
+}
+
+/* ── Gradient Text (blue to purple-bright) ──────── */
+.proof-text-gradient {
+  background: linear-gradient(90deg, var(--proof-blue), var(--proof-purple-bright));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Accent Bar (2px gradient top border) ────────── */
+.proof-accent-bar {
+  position: relative;
+}
+.proof-accent-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--proof-blue), var(--proof-purple));
+  border-radius: var(--proof-radius-lg) var(--proof-radius-lg) 0 0;
+  pointer-events: none;
+}
+
+/* ── Row Glow (table row hover with left-border accent) ─── */
+.proof-row-glow {
+  transition: background var(--proof-transition), box-shadow var(--proof-transition);
+  box-shadow: inset 2px 0 0 0 transparent;
+}
+.proof-row-glow:hover {
+  background: var(--proof-hover);
+  box-shadow: inset 2px 0 0 0 var(--proof-blue);
+}
+
+/* ── Filter Buttons (glass style) ────────────────── */
+.proof-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--proof-radius-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: var(--proof-subtle-bg);
+  color: var(--proof-text-secondary);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--proof-transition);
+}
+.proof-filter-btn:hover {
+  background: var(--proof-hover);
+  color: var(--proof-text);
+}
+.proof-filter-btn-active {
+  background: var(--proof-blue-bg);
+  color: var(--proof-blue);
+  border-color: var(--proof-blue-border);
+  backdrop-filter: blur(8px);
+}
+
+/* ── Stagger delay extensions (7–12) ─────────────── */
+.proof-stagger-7 { animation-delay: 0.35s; }
+.proof-stagger-8 { animation-delay: 0.40s; }
+.proof-stagger-9 { animation-delay: 0.45s; }
+.proof-stagger-10 { animation-delay: 0.50s; }
+.proof-stagger-11 { animation-delay: 0.55s; }
+.proof-stagger-12 { animation-delay: 0.60s; }
+
+/* ── Glow intensity scales ───────────────────────── */
+.proof-glow-sm {
+  box-shadow: 0 0 6px var(--glow-color, var(--proof-blue-glow));
+}
+.proof-glow-md {
+  box-shadow: 0 0 14px var(--glow-color, var(--proof-blue-glow));
+}
+.proof-glow-lg {
+  box-shadow: 0 0 24px var(--glow-color, var(--proof-blue-glow));
+}
+
+/* ── Pulse Ring (for status indicators) ──────────── */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 var(--ring-color, var(--proof-blue-glow)); }
+  70% { box-shadow: 0 0 0 6px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* ── Badge Glow (soft glow in status color) ──────── */
+.proof-badge-glow {
+  box-shadow: 0 0 8px var(--glow-color, var(--proof-blue-glow));
+}
+
+/* ── Breathe animation (for loading spinner scale) ─ */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
 }

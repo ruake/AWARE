@@ -2,8 +2,8 @@ import { useState, useMemo, useDeferredValue, useTransition, memo, useEffect, us
 import { motion } from "framer-motion";
 import { BarChart2, TrendingUp, TrendingDown, Activity, Zap, Download, AlertCircle, Search, Globe } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
-import { getRuns } from "@/lib/runsLoader";
-import { PASS_RATE_CHART } from "@/lib/runs";
+import { loadRuns, PASS_RATE_CHART, RUNS } from "@/lib/runs";
+import type { Run } from "@/lib/types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { fadeUp, staggerContainer, fadeIn } from "@/lib/motion";
 
@@ -100,11 +100,13 @@ const RunFrequencyChart = memo(function RunFrequencyChart({ data }: { data: { na
 });
 
 export default function TestAnalytics() {
-  const rawRuns = getRuns();
-  const rawPassRateData = PASS_RATE_CHART();
+  const [runs, setRuns] = useState<Run[]>([]);
+  const [loading, setLoading] = useState(true);
+  const passRateData = useDeferredValue(PASS_RATE_CHART());
 
-  const runs = useDeferredValue(rawRuns);
-  const passRateData = useDeferredValue(rawPassRateData);
+  useEffect(() => {
+    loadRuns().then(() => { setRuns([...RUNS]); setLoading(false); });
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -165,6 +167,8 @@ export default function TestAnalytics() {
       setSearchQuery(value);
     });
   }, []);
+
+  if (loading) return <LoadingSpinner label="Loading telemetry…" />;
 
   return (
     <div style={{ padding: "24px", maxWidth: "1600px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" }}>

@@ -8,12 +8,11 @@ import { RunRow } from '@/components/RunRow';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { PageWrapper } from '@/components/PageWrapper';
 import { useSort, sortData, SortHeader } from '@/lib/sortableTable';
-import { fadeDown, fastStagger, fadeUp } from '@/lib/motion';
+import { fadeDown, fastStagger, fadeUp, scaleIn } from '@/lib/motion';
 
 const PAGE_SIZE = 25;
 
 export default function Runs() {
-  // read initial env from URL
   const search = useSearch();
   const params = new URLSearchParams(search);
   const initialEnv = (params.get('env') as Env | null) ?? 'ALL';
@@ -74,46 +73,62 @@ export default function Runs() {
   if (loading) return <LoadingSpinner label="Loading runs…" />;
 
   return (
-    <PageWrapper className="px-6 py-6 space-y-5">
+    <PageWrapper className="px-6 py-6 space-y-5 relative">
+      {/* Decorative gradient accent bar */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-gcp-blue via-gcp-blue/40 via-gcp-blue/10 to-transparent rounded-t-lg" />
+
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gcp-blue/10 border border-gcp-blue/20">
-          <List size={14} className="text-gcp-blue" />
+        <motion.div
+          variants={scaleIn}
+          initial="hidden"
+          animate="visible"
+          className="flex items-center justify-center w-10 h-10 rounded-xl bg-gcp-blue-bg border border-gcp-blue-border shadow-[0_0_14px_rgba(66,133,244,0.18)]"
+        >
+          <List size={16} className="text-gcp-blue" />
+        </motion.div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-gcp-text">Runs</h1>
+          <p className="text-xs text-gcp-text-muted mt-0.5">Test execution history across environments</p>
         </div>
-        <h1 className="text-xl font-semibold tracking-tight text-gcp-text">Runs</h1>
-        <span className="ml-1 px-2 py-0.5 rounded-full bg-gcp-elevated text-gcp-text-secondary text-xs font-mono">
+        <motion.span
+          variants={scaleIn}
+          initial="hidden"
+          animate="visible"
+          className="ml-auto px-2.5 py-1 rounded-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text-secondary text-xs font-mono tabular-nums"
+        >
           {runs.length}
-        </span>
+        </motion.span>
       </div>
 
       {/* Filter bar */}
-      <motion.div 
-        variants={fadeDown} 
-        initial="hidden" 
+      <motion.div
+        variants={fadeDown}
+        initial="hidden"
         animate="visible"
         className="flex items-center gap-4 flex-wrap"
       >
-        {/* Env toggles */}
-        <div className="flex items-center gap-1.5">
+        {/* Env toggles — glass container */}
+        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-gcp-elevated/40 backdrop-blur-sm border border-gcp-border-soft/50">
           {(['ALL', 'QA', 'UAT', 'PROD'] as const).map(e => (
             <button key={e} onClick={() => startTransition(() => setEnvFilter(e as Env | 'ALL'))}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors border ${
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 border ${
                 envFilter === e
-                  ? 'bg-gcp-blue/20 text-gcp-blue-light border-gcp-blue/30'
-                  : 'bg-gcp-elevated text-gcp-text-secondary border-gcp-border-soft hover:text-gcp-text hover:bg-gcp-elevated/50'
+                  ? 'bg-gcp-blue/20 text-gcp-blue-light border-gcp-blue/40 shadow-[0_0_8px_rgba(66,133,244,0.22)]'
+                  : 'bg-transparent text-gcp-text-secondary border-transparent hover:text-gcp-text hover:bg-gcp-elevated/60'
               }`}>{e === 'ALL' ? 'All Envs' : e}
             </button>
           ))}
         </div>
 
-        {/* Status toggles */}
-        <div className="flex items-center gap-1.5">
+        {/* Status toggles — glass container */}
+        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-gcp-elevated/40 backdrop-blur-sm border border-gcp-border-soft/50">
           {(['ALL', 'PASS', 'FAIL', 'PARTIAL'] as const).map(s => (
             <button key={s} onClick={() => startTransition(() => setStatusFilter(s as RunStatus | 'ALL'))}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors border ${
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 border ${
                 statusFilter === s
-                  ? 'bg-gcp-blue/20 text-gcp-blue-light border-gcp-blue/30'
-                  : 'bg-gcp-elevated text-gcp-text-secondary border-gcp-border-soft hover:text-gcp-text hover:bg-gcp-elevated/50'
+                  ? 'bg-gcp-blue/20 text-gcp-blue-light border-gcp-blue/40 shadow-[0_0_8px_rgba(66,133,244,0.22)]'
+                  : 'bg-transparent text-gcp-text-secondary border-transparent hover:text-gcp-text hover:bg-gcp-elevated/60'
               }`}>{s === 'ALL' ? 'All Status' : s}
             </button>
           ))}
@@ -121,35 +136,41 @@ export default function Runs() {
 
         {/* Search */}
         <div className="relative flex-1 max-w-sm">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gcp-text-muted" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gcp-text-muted pointer-events-none" />
           <input
             type="text"
             placeholder="Search run ID, suite, build…"
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
-            className="w-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-sm rounded-md pl-8 pr-3 py-1.5 placeholder:text-gcp-text-muted focus:outline-none focus:border-gcp-blue/50 focus:ring-1 focus:ring-gcp-blue/20 transition-colors"
+            className="w-full bg-gcp-elevated/70 backdrop-blur-sm border border-gcp-border-soft text-gcp-text text-sm rounded-lg pl-9 pr-3 py-2 placeholder:text-gcp-text-muted/60 focus:outline-none focus:border-gcp-blue/50 focus:ring-2 focus:ring-gcp-blue/15 focus:shadow-[0_0_10px_rgba(66,133,244,0.1)] transition-all duration-200"
           />
         </div>
       </motion.div>
 
       {/* Stats strip */}
-      <div className="text-xs text-gcp-text-muted flex items-center gap-4">
-        <span className="text-gcp-text-secondary font-medium">{deferredSorted.length} of {runs.length} runs</span>
-        <span>QA: {counts.QA}</span>
-        <span>UAT: {counts.UAT}</span>
-        <span>PROD: {counts.PROD}</span>
-      </div>
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+        className="text-xs flex items-center gap-5 px-3 py-2 rounded-lg bg-gcp-elevated/30 border border-gcp-border-soft/30"
+      >
+        <span className="text-gcp-text-secondary font-medium tabular-nums">{deferredSorted.length} of {runs.length} runs</span>
+        <span className="text-gcp-text-muted/40">|</span>
+        <span className="text-gcp-text-muted">QA: <span className="text-gcp-text-secondary font-mono tabular-nums">{counts.QA}</span></span>
+        <span className="text-gcp-text-muted">UAT: <span className="text-gcp-text-secondary font-mono tabular-nums">{counts.UAT}</span></span>
+        <span className="text-gcp-text-muted">PROD: <span className="text-gcp-text-secondary font-mono tabular-nums">{counts.PROD}</span></span>
+      </motion.div>
 
       {/* Table */}
-      <motion.div 
-        variants={fadeUp} 
-        initial="hidden" 
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
         animate="visible"
-        className="rounded-lg border border-gcp-border overflow-hidden"
+        className="rounded-xl border border-gcp-border overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
       >
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-gcp-surface/80 border-b border-gcp-border">
+            <tr className="bg-gradient-to-r from-gcp-blue-bg/80 via-gcp-surface to-gcp-surface border-b border-gcp-border">
               <SortHeader label="Run / Label" sortKey="label" currentSort={sort} onToggle={toggle} filterValue={colLabelFilter} onFilterChange={setColLabelFilter} />
               <SortHeader label="Env" sortKey="env" currentSort={sort} onToggle={toggle} filterValue={colEnvFilter} onFilterChange={setColEnvFilter} filterPlaceholder="Filter env…" />
               <SortHeader label="Suite" sortKey="suite" currentSort={sort} onToggle={toggle} filterValue={colSuiteFilter} onFilterChange={setColSuiteFilter} />
@@ -160,9 +181,9 @@ export default function Runs() {
               <SortHeader label="Status" sortKey="status" currentSort={sort} onToggle={toggle} />
             </tr>
           </thead>
-          <motion.tbody 
-            variants={fastStagger} 
-            initial="hidden" 
+          <motion.tbody
+            variants={fastStagger}
+            initial="hidden"
             animate="visible"
             className="divide-y divide-gcp-border/70"
           >
@@ -170,33 +191,46 @@ export default function Runs() {
           </motion.tbody>
         </table>
         {deferredSorted.length === 0 && (
-          <div className="py-16 text-center">
-            <div className="text-gcp-text-muted text-sm">No runs match the current filters</div>
-            <button onClick={() => startTransition(() => { setEnvFilter('ALL'); setStatusFilter('ALL'); setSearchInput(''); setQuery(''); setColLabelFilter(''); setColEnvFilter(''); setColSuiteFilter(''); })}
-              className="mt-3 text-xs text-gcp-blue hover:text-gcp-blue-light transition-colors">
-              Clear filters
-            </button>
-          </div>
-        )}
-        {/* Pagination */}
-        {pageCount > 1 && (
-          <motion.div 
+          <motion.div
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="flex items-center justify-between px-4 py-3 border-t border-gcp-border bg-gcp-surface/50"
+            className="py-20 flex flex-col items-center justify-center gap-3"
           >
-            <span className="text-xs text-gcp-text-muted">Page {page} of {pageCount} · {deferredSorted.length} items</span>
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gcp-blue-bg border border-gcp-blue-border">
+              <List size={20} className="text-gcp-blue/60" />
+            </div>
+            <div className="text-gcp-text-muted text-sm font-medium">No runs match the current filters</div>
+            <p className="text-gcp-text-muted/50 text-xs">Try adjusting your search or filter criteria</p>
+            <button onClick={() => startTransition(() => { setEnvFilter('ALL'); setStatusFilter('ALL'); setSearchInput(''); setQuery(''); setColLabelFilter(''); setColEnvFilter(''); setColSuiteFilter(''); })}
+              className="mt-1 px-4 py-1.5 text-xs font-semibold text-gcp-blue bg-gcp-blue-bg border border-gcp-blue-border rounded-lg hover:bg-gcp-blue/20 hover:shadow-[0_0_8px_rgba(66,133,244,0.15)] transition-all duration-200">
+              Clear filters
+            </button>
+          </motion.div>
+        )}
+        {/* Pagination */}
+        {pageCount > 1 && (
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="flex items-center justify-between px-4 py-3 border-t border-gcp-border bg-gradient-to-r from-gcp-surface/80 via-gcp-surface/50 to-gcp-surface/80"
+          >
+            <span className="text-xs text-gcp-text-muted tabular-nums">Page {page} of {pageCount} · {deferredSorted.length} items</span>
             <div className="flex items-center gap-1">
-              <button onClick={() => setPage(1)} disabled={page === 1} className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors">«</button>
-              <button onClick={() => setPage(p => p - 1)} disabled={page === 1} className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors">‹</button>
+              <button onClick={() => setPage(1)} disabled={page === 1} className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated hover:shadow-[0_0_6px_rgba(66,133,244,0.1)] transition-all duration-200">«</button>
+              <button onClick={() => setPage(p => p - 1)} disabled={page === 1} className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated hover:shadow-[0_0_6px_rgba(66,133,244,0.1)] transition-all duration-200">‹</button>
               {Array.from({length: Math.min(5, pageCount)}, (_, i) => {
                 const start = Math.max(1, Math.min(page - 2, pageCount - 4));
                 const p = start + i;
-                return <button key={p} onClick={() => setPage(p)} className={`px-2 py-1 text-xs rounded transition-colors ${p === page ? 'bg-gcp-blue/20 text-gcp-blue font-semibold' : 'text-gcp-text-secondary hover:text-gcp-text hover:bg-gcp-elevated'}`}>{p}</button>;
+                return <button key={p} onClick={() => setPage(p)} className={`px-2.5 py-1.5 text-xs rounded-md transition-all duration-200 ${
+                  p === page
+                    ? 'bg-gradient-to-b from-gcp-blue/25 to-gcp-blue/15 text-gcp-blue-light font-semibold shadow-[0_0_8px_rgba(66,133,244,0.2)]'
+                    : 'text-gcp-text-secondary hover:text-gcp-text hover:bg-gcp-elevated hover:shadow-[0_0_6px_rgba(66,133,244,0.08)]'
+                }`}>{p}</button>;
               })}
-              <button onClick={() => setPage(p => p + 1)} disabled={page === pageCount} className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors">›</button>
-              <button onClick={() => setPage(pageCount)} disabled={page === pageCount} className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gcp-elevated transition-colors">»</button>
+              <button onClick={() => setPage(p => p + 1)} disabled={page === pageCount} className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated hover:shadow-[0_0_6px_rgba(66,133,244,0.1)] transition-all duration-200">›</button>
+              <button onClick={() => setPage(pageCount)} disabled={page === pageCount} className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated hover:shadow-[0_0_6px_rgba(66,133,244,0.1)] transition-all duration-200">»</button>
             </div>
           </motion.div>
         )}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, RefreshCw, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface Props { children: React.ReactNode; fallback?: React.ReactNode; }
@@ -25,53 +26,79 @@ export class ErrorBoundary extends React.Component<Props, State> {
       const { error, showStack } = this.state;
 
       return (
-        <div className="flex items-start justify-center min-h-64 pt-16 px-6">
-          <div className="w-full max-w-lg rounded-xl border border-gcp-red/30 bg-gcp-red/5 p-6 space-y-4">
+        <div className="flex min-h-64 items-start justify-center px-6 pt-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="w-full max-w-lg space-y-4 rounded-xl border border-gcp-red/25 bg-gcp-surface/60 p-6 shadow-xl shadow-black/30 backdrop-blur-md"
+          >
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gcp-red/15 border border-gcp-red/25 flex-shrink-0">
-                <AlertTriangle size={16} className="text-gcp-red" />
-              </div>
+              <motion.div 
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-gcp-red/25 bg-gcp-red/15"
+                animate={{ boxShadow: ['0 0 0px rgba(234,67,53,0)', '0 0 16px rgba(234,67,53,0.3)', '0 0 0px rgba(234,67,53,0)'] }}
+                transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
+              >
+                <AlertTriangle size={18} className="text-gcp-red" />
+              </motion.div>
               <div>
                 <div className="text-sm font-semibold text-gcp-red">Something went wrong</div>
-                <div className="text-xs text-gcp-text-muted mt-0.5">
+                <div className="mt-0.5 text-xs text-gcp-text-muted">
                   An unexpected error occurred in this section.
                 </div>
               </div>
             </div>
 
             {error?.message && (
-              <div className="rounded-lg bg-gcp-bg/60 border border-gcp-border px-4 py-3">
-                <p className="text-xs font-mono text-gcp-text-secondary break-all">{error.message}</p>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="overflow-hidden rounded-lg border border-gcp-border/50 bg-gcp-bg/60 px-4 py-3"
+              >
+                <p className="break-all font-mono text-xs text-gcp-text-secondary">{error.message}</p>
+              </motion.div>
             )}
 
             {error?.stack && (
               <div>
-                <button
+                <motion.button
                   onClick={this.toggleStack}
-                  className="flex items-center gap-1.5 text-xs text-gcp-text-muted hover:text-gcp-text transition-colors"
+                  className="flex cursor-pointer items-center gap-1.5 text-xs text-gcp-text-muted transition-colors hover:text-gcp-text"
+                  whileHover={{ x: 2 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   {showStack
                     ? <ChevronDown size={12} />
                     : <ChevronRight size={12} />}
                   {showStack ? 'Hide' : 'Show'} stack trace
-                </button>
-                {showStack && (
-                  <pre className="mt-2 rounded-lg bg-gcp-bg border border-gcp-border p-3 text-[10px] font-mono text-gcp-text-muted overflow-x-auto max-h-48 overflow-y-auto">
-                    {error.stack}
-                  </pre>
-                )}
+                </motion.button>
+                <AnimatePresence initial={false}>
+                  {showStack && (
+                    <motion.pre
+                      key="stack"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      className="mt-2 max-h-48 overflow-auto overflow-x-hidden rounded-lg border border-gcp-border/50 bg-gcp-bg p-3 font-mono text-[10px] text-gcp-text-muted"
+                    >
+                      {error.stack}
+                    </motion.pre>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
-            <button
+            <motion.button
               onClick={this.reload}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gcp-blue text-white text-xs font-semibold hover:bg-gcp-blue-hover transition-colors"
+              className="flex cursor-pointer items-center gap-2 rounded-lg bg-gcp-blue px-4 py-2 text-xs font-semibold text-white transition-all duration-200"
+              whileHover={{ scale: 1.03, boxShadow: '0 0 20px rgba(66,133,244,0.4)' }}
+              whileTap={{ scale: 0.97 }}
             >
               <RefreshCw size={12} />
               Reload page
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         </div>
       );
     }

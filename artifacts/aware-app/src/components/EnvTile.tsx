@@ -12,6 +12,13 @@ const ENV_CONFIG = {
   PROD: { icon: Server,       label: 'Production',        accent: 'border-t-gcp-green/60', iconBg: 'bg-gcp-green/10',iconColor: 'text-gcp-green' },
 };
 
+function glowForPass(avg: number | null): string {
+  if (avg === null) return 'rgba(110,118,135,0.2)';
+  if (avg >= 95) return 'rgba(52,168,83,0.4)';
+  if (avg >= 80) return 'rgba(251,188,5,0.4)';
+  return 'rgba(234,67,53,0.4)';
+}
+
 export const EnvTile = memo(function EnvTile({ env, runs }: { env: Env; runs: Run[] }) {
   const cfg = ENV_CONFIG[env];
   const Icon = cfg.icon;
@@ -23,33 +30,34 @@ export const EnvTile = memo(function EnvTile({ env, runs }: { env: Env; runs: Ru
 
   return (
     <motion.div
-      whileHover={{ y: -2 }}
+      whileHover={{ y: -3 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
       <Link
         href={`/runs?env=${env}`}
-        className={`block rounded-lg border border-gcp-border border-t-2 ${cfg.accent} bg-gcp-surface p-5 hover:bg-gcp-elevated/60 transition-colors cursor-pointer`}
+        className={`group relative block overflow-hidden rounded-xl border border-gcp-border border-t-2 ${cfg.accent} bg-gcp-surface p-5 transition-all duration-200 hover:bg-gcp-elevated/50 hover:backdrop-blur-sm cursor-pointer`}
+        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
       >
-        <div className="flex items-start justify-between mb-4">
+        <div className="mb-4 flex items-start justify-between">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-widest text-gcp-text-muted mb-1">{cfg.label}</div>
+            <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-widest text-gcp-text-muted">{cfg.label}</div>
             <div className="text-3xl font-bold tabular-nums tracking-tight">
-              <span className={passColor}>{avgPass !== null ? `${avgPass}%` : 'N/A'}</span>
+              <span className={passColor} style={avgPass !== null ? { textShadow: `0 0 24px currentColor` } : undefined}>{avgPass !== null ? `${avgPass}%` : 'N/A'}</span>
             </div>
           </div>
-          <div className={`flex items-center justify-center w-9 h-9 rounded-lg ${cfg.iconBg} border border-gcp-border-soft`}>
-            <Icon size={16} className={cfg.iconColor} />
+          <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-gcp-border-soft ${cfg.iconBg} transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg`}>
+            <Icon size={18} className={cfg.iconColor} />
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="w-full h-1.5 rounded-full bg-gcp-elevated mb-4 overflow-hidden">
+        <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-gcp-elevated">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${avgPass ?? 0}%` }}
             transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.15 }}
             className={`h-full rounded-full ${barColor}`}
+            style={{ boxShadow: `0 0 8px ${glowForPass(avgPass)}` }}
           />
         </div>
 

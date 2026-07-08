@@ -72,10 +72,16 @@ export function SortHeader({
     <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gcp-text-muted ${className ?? ''}`}>
       <button
         onClick={() => onToggle(sortKey)}
-        className="flex items-center gap-1.5 hover:text-gcp-text transition-colors group"
+        className={`flex items-center gap-1.5 transition-colors group ${
+          active ? 'text-gcp-text' : 'hover:text-gcp-text'
+        }`}
       >
         <span>{label}</span>
-        <span className="text-gcp-text-muted/50 group-hover:text-gcp-text-muted transition-colors">
+        <span className={`transition-colors ${
+          active
+            ? 'text-gcp-blue'
+            : 'text-gcp-text-muted/50 group-hover:text-gcp-text-muted'
+        }`}>
           {active ? (
             currentSort.dir === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />
           ) : (
@@ -92,7 +98,7 @@ export function SortHeader({
             onChange={e => onFilterChange(e.target.value)}
             placeholder={filterPlaceholder ?? `Filter ${label.toLowerCase()}…`}
             onClick={e => e.stopPropagation()}
-            className="w-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-[11px] rounded pl-6 pr-2 py-1 placeholder:text-gcp-text-muted/50 focus:outline-none focus:border-gcp-blue/50 transition-colors"
+            className="w-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-[11px] rounded-md pl-6 pr-2 py-1.5 placeholder:text-gcp-text-muted/40 focus:outline-none focus:border-gcp-blue/60 focus:shadow-[0_0_0_2px_rgba(66,133,244,0.12)] transition-all"
           />
         </div>
       )}
@@ -125,7 +131,7 @@ export function FilterHeader({
             value={filterValue ?? ''}
             onChange={e => onFilterChange(e.target.value)}
             placeholder={filterPlaceholder ?? `Filter ${label.toLowerCase()}…`}
-            className="w-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-[11px] rounded pl-6 pr-2 py-1 placeholder:text-gcp-text-muted/50 focus:outline-none focus:border-gcp-blue/50 transition-colors"
+            className="w-full bg-gcp-elevated border border-gcp-border-soft text-gcp-text text-[11px] rounded-md pl-6 pr-2 py-1.5 placeholder:text-gcp-text-muted/40 focus:outline-none focus:border-gcp-blue/60 focus:shadow-[0_0_0_2px_rgba(66,133,244,0.12)] transition-all"
           />
         </div>
       )}

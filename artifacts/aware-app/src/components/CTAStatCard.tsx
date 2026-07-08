@@ -14,18 +14,21 @@ export function CTAStatCard({ icon: Icon, label, value, trend, color }: {
   const c = colorMap[color] || colorMap.blue;
   return (
     <motion.div
-      className={`rounded-lg border p-4 ${c}`}
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
-      whileHover={{ y: -2, boxShadow: '0 6px 20px rgba(0,0,0,0.25)' }}
+      className={`relative overflow-hidden rounded-xl border p-5 ${c} bg-gcp-surface/60 backdrop-blur-md`}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      whileHover={{ y: -4, boxShadow: '0 8px 30px rgba(0,0,0,0.35)' }}
       whileTap={{ scale: 0.98 }}
     >
-      <div className="flex items-center gap-3">
-        <Icon size={20} />
-        <div>
-          <div className="text-2xl font-bold">{value}</div>
-          <div className="text-xs opacity-70">{label}</div>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-current to-transparent opacity-40" />
+      <div className="flex items-center gap-4">
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-gcp-border-soft bg-gcp-bg/50">
+          <Icon size={18} />
+        </div>
+        <div className="min-w-0">
+          <div className="text-2xl font-bold tabular-nums tracking-tight" style={{ textShadow: '0 0 20px currentColor' }}>{value}</div>
+          <div className="mt-0.5 truncate text-xs opacity-70">{label}</div>
         </div>
       </div>
     </motion.div>

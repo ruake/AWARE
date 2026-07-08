@@ -6,14 +6,17 @@ export const SectionHeader = React.memo(function SectionHeader({ title, subtitle
 }) {
   return (
     <motion.div 
-      className="flex items-center justify-between mb-4"
-      initial={{ opacity: 0, x: -6 }}
-      animate={{ opacity: 1, x: 0 }}
+      className="mb-5 flex items-center justify-between"
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
     >
       <div>
-        <h2 className="text-sm font-semibold text-gcp-text">{title}</h2>
-        {subtitle && <p className="text-xs text-gcp-text-muted mt-0.5">{subtitle}</p>}
+        <div className="flex items-center gap-3">
+          <h2 className="text-sm font-semibold text-gcp-text">{title}</h2>
+          <div className="h-0.5 w-12 rounded-full bg-gradient-to-r from-gcp-blue/40 to-transparent" />
+        </div>
+        {subtitle && <p className="mt-1 text-xs text-gcp-text-muted">{subtitle}</p>}
       </div>
       {action && <div>{action}</div>}
     </motion.div>
