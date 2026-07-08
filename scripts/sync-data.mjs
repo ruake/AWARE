@@ -84,8 +84,9 @@ function main() {
   } catch {
     console.error(`✗ Could not checkout "${DATA_BRANCH}". Creating orphan...`);
     sh(`git checkout --orphan ${DATA_BRANCH}`);
-    sh("git rm -rf . --quiet", { allowFail: true });
   }
+  // Remove ALL tracked files — the data branch should ONLY contain data files
+  sh("git rm -rf . --quiet", { allowFail: true });
 
   // ── Copy data files ──────────────────────────────────────────────────
   let changed = 0;
