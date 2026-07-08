@@ -1,8 +1,0 @@
-uploads = []
-generated = []
-
-[[outputs]]
-id = "orGeH4RGXIZAcaJCvLJOQ"
-uri = "file://plan.md"
-type = "text"
-title = "PROOF — State-of-the-Art Upgrade Plan"
