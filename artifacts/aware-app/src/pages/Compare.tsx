@@ -8,6 +8,7 @@ import { dropDown, fastStagger, fadeUp, scaleIn, fadeIn } from '@/lib/motion';
 import { envSelectClass } from '@/lib/envStyles';
 import type { Run, TestResult } from '@/lib/types';
 import { StatusBadge } from '@/components/StatusBadge';
+import { Pagination } from '@/components/Pagination';
 import { PageWrapper } from '@/components/PageWrapper';
 import { useSort, sortData, SortHeader } from '@/lib/sortableTable';
 
@@ -694,61 +695,7 @@ export default function Compare() {
             </motion.div>
           )}
 
-          {/* Pagination */}
-          {pageCount > 1 && (
-            <div className="flex items-center justify-between px-4 py-3.5 border-t border-gcp-border/60 bg-gcp-surface/50 backdrop-blur-sm">
-              <span className="text-xs text-gcp-text-muted">
-                Page {page} of {pageCount} · {filtered.length} items
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setPage(1)}
-                  disabled={page === 1}
-                  className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-gcp-elevated/70 hover:border-gcp-blue/20 transition-all duration-150 border border-transparent"
-                >
-                  «
-                </button>
-                <button
-                  onClick={() => setPage(p => p - 1)}
-                  disabled={page === 1}
-                  className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-gcp-elevated/70 hover:border-gcp-blue/20 transition-all duration-150 border border-transparent"
-                >
-                  ‹
-                </button>
-                {Array.from({ length: Math.min(5, pageCount) }, (_, i) => {
-                  const start = Math.max(1, Math.min(page - 2, pageCount - 4));
-                  const p = start + i;
-                  return (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className={`px-2.5 py-1.5 text-xs rounded-lg font-semibold transition-all duration-150 border ${
-                        p === page
-                          ? 'bg-gcp-blue/20 text-gcp-blue border-gcp-blue/30 shadow-sm shadow-gcp-blue/10'
-                          : 'text-gcp-text-secondary hover:text-gcp-text hover:bg-gcp-elevated/70 border-transparent hover:border-gcp-blue/20'
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={page === pageCount}
-                  className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-gcp-elevated/70 hover:border-gcp-blue/20 transition-all duration-150 border border-transparent"
-                >
-                  ›
-                </button>
-                <button
-                  onClick={() => setPage(pageCount)}
-                  disabled={page === pageCount}
-                  className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-lg hover:bg-gcp-elevated/70 hover:border-gcp-blue/20 transition-all duration-150 border border-transparent"
-                >
-                  »
-                </button>
-              </div>
-            </div>
-          )}
+          <Pagination page={page} pageCount={pageCount} total={filtered.length} onPageChange={setPage} />
         </div>
       )}
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { type LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { EASE_OUT, PRESS_SCALE } from '@/lib/motion';
 
 export function CTAStatCard({ icon: Icon, label, value, trend, color }: {
   icon: LucideIcon; label: string; value: string | number; trend?: 'up' | 'down'; color: string;
@@ -17,9 +18,9 @@ export function CTAStatCard({ icon: Icon, label, value, trend, color }: {
       className={`relative overflow-hidden rounded-xl border p-5 ${c} bg-gcp-surface/60 backdrop-blur-md`}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
+      transition={EASE_OUT}
       whileHover={{ y: -4, boxShadow: '0 8px 30px rgba(0,0,0,0.35)' }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={PRESS_SCALE}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-current to-transparent opacity-40" />
       <div className="flex items-center gap-4">

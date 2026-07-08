@@ -88,6 +88,8 @@ export const collapseHeight: Variants = {
   exit:    { height: 0, opacity: 0, overflow: 'hidden', transition: { duration: 0.18, ease: [0.4, 0, 1, 1] } },
 };
 
+export const PRESS_SCALE = { scale: 0.98 };
+
 export const pageTransition: Variants = {
   hidden:  { opacity: 0, y: 6 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] } },

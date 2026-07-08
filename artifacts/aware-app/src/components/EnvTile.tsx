@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { Server, FlaskConical, TestTube2 } from 'lucide-react';
 import type { Env, Run } from '@/lib/types';
 import { StatusBadge } from '@/components/StatusBadge';
+import { passRateColor } from '@/lib/envStyles';
+import { EASE_OUT, PRESS_SCALE } from '@/lib/motion';
 import { relativeTime } from '@/lib/utils';
 
 const ENV_CONFIG = {
@@ -12,26 +14,21 @@ const ENV_CONFIG = {
   PROD: { icon: Server,       label: 'Production',        accent: 'border-t-gcp-green/60', iconBg: 'bg-gcp-green/10',iconColor: 'text-gcp-green' },
 };
 
-function glowForPass(avg: number | null): string {
-  if (avg === null) return 'rgba(110,118,135,0.2)';
-  if (avg >= 95) return 'rgba(52,168,83,0.4)';
-  if (avg >= 80) return 'rgba(251,188,5,0.4)';
-  return 'rgba(234,67,53,0.4)';
-}
-
 export const EnvTile = memo(function EnvTile({ env, runs }: { env: Env; runs: Run[] }) {
   const cfg = ENV_CONFIG[env];
   const Icon = cfg.icon;
   const sorted = [...runs].sort((a, b) => b.started.localeCompare(a.started));
   const latest = sorted[0];
   const avgPass = runs.length ? Math.round(runs.reduce((s, r) => s + r.passPct, 0) / runs.length) : null;
-  const passColor = avgPass === null ? 'text-gcp-text-muted' : avgPass >= 95 ? 'text-gcp-green' : avgPass >= 80 ? 'text-gcp-yellow' : 'text-gcp-red';
-  const barColor = avgPass === null ? 'bg-gcp-border' : avgPass >= 95 ? 'bg-gcp-green' : avgPass >= 80 ? 'bg-gcp-yellow' : 'bg-gcp-red';
+  const pc = avgPass !== null ? passRateColor(avgPass) : null;
+  const passColor = pc?.text ?? 'text-gcp-text-muted';
+  const barColor = pc?.bar ?? 'bg-gcp-border';
+  const glow = pc?.glow ?? 'rgba(110,118,135,0.2)';
 
   return (
     <motion.div
       whileHover={{ y: -3 }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={PRESS_SCALE}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
       <Link
@@ -57,7 +54,7 @@ export const EnvTile = memo(function EnvTile({ env, runs }: { env: Env; runs: Ru
             animate={{ width: `${avgPass ?? 0}%` }}
             transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.15 }}
             className={`h-full rounded-full ${barColor}`}
-            style={{ boxShadow: `0 0 8px ${glowForPass(avgPass)}` }}
+            style={{ boxShadow: `0 0 8px ${glow}` }}
           />
         </div>
 

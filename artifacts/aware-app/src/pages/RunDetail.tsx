@@ -3,11 +3,12 @@ import { useParams, Link } from 'wouter';
 import { ChevronDown, ChevronRight, CheckCircle2, XCircle, Clock, ArrowRight, Search, ExternalLink, Cookie, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { collapseHeight, fastStagger, fadeUp, scaleIn, slideInRight } from '@/lib/motion';
-import { envStatusClass } from '@/lib/envStyles';
+import { envBadgeClass, passRateColor } from '@/lib/envStyles';
 import { loadRuns, loadResults, loadTestCases, getTestCaseById } from '@/lib/data';
 import { getGitHubUrl } from '@/lib/utils';
 import type { Run, TestResult, TestCase } from '@/lib/types';
 import { StatusBadge } from '@/components/StatusBadge';
+import { Pagination } from '@/components/Pagination';
 import { PageWrapper } from '@/components/PageWrapper';
 import { useSort, sortData, SortHeader } from '@/lib/sortableTable';
 
@@ -375,9 +376,10 @@ export default function RunDetail() {
     );
   }
 
-  const passColor = run.passPct >= 95 ? 'text-gcp-green' : run.passPct >= 80 ? 'text-gcp-yellow' : 'text-gcp-red';
-  const barColor = run.passPct >= 95 ? 'bg-gcp-green' : run.passPct >= 80 ? 'bg-gcp-yellow' : 'bg-gcp-red';
-  const glowColor = run.passPct >= 95 ? 'rgba(52,168,83,0.3)' : run.passPct >= 80 ? 'rgba(251,188,5,0.3)' : 'rgba(234,67,53,0.3)';
+  const pc = passRateColor(run.passPct);
+  const passColor = pc.text;
+  const barColor = pc.bar;
+  const glowColor = pc.glow;
 
   return (
     <PageWrapper className="flex flex-col min-h-screen bg-gcp-bg text-gcp-text">
@@ -408,7 +410,7 @@ export default function RunDetail() {
         transition={{ duration: 0.2 }}
         className="px-6 py-5 bg-gcp-surface border-b border-gcp-border flex items-center gap-4 flex-wrap glass-panel rounded-none"
       >
-        <span className={`px-3 py-1.5 rounded-md text-xs font-mono font-semibold ${envStatusClass(run.env)} shadow-sm`}>
+        <span className={`px-3 py-1.5 rounded-md text-xs font-mono font-semibold ${envBadgeClass(run.env)} shadow-sm`}>
           {run.env}
         </span>
         <div className="flex items-center gap-3">
@@ -636,69 +638,7 @@ export default function RunDetail() {
             </motion.tbody>
           </table>
 
-          {/* Pagination */}
-          {pageCount > 1 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="flex items-center justify-between px-4 py-3 border-t border-gcp-border bg-gcp-surface/40 backdrop-blur-sm"
-            >
-              <span className="text-xs text-gcp-text-muted">
-                Page <span className="font-mono tabular-nums text-gcp-text-secondary font-medium">{page}</span> of{' '}
-                <span className="font-mono tabular-nums text-gcp-text-secondary font-medium">{pageCount}</span>
-                <span className="mx-1.5 text-gcp-border/50">·</span>
-                <span className="font-mono tabular-nums text-gcp-text-secondary font-medium">{deferredSorted.length}</span> items
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setPage(1)}
-                  disabled={page === 1}
-                  className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated/60 transition-all duration-150 disabled:hover:bg-transparent"
-                >
-                  «
-                </button>
-                <button
-                  onClick={() => setPage(p => p - 1)}
-                  disabled={page === 1}
-                  className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated/60 transition-all duration-150 disabled:hover:bg-transparent"
-                >
-                  ‹
-                </button>
-                {Array.from({ length: Math.min(5, pageCount) }, (_, i) => {
-                  const start = Math.max(1, Math.min(page - 2, pageCount - 4));
-                  const p = start + i;
-                  return (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className={`px-2.5 py-1 text-xs rounded-md transition-all duration-150 ${
-                        p === page
-                          ? 'bg-gcp-blue/20 text-gcp-blue-light font-semibold border border-gcp-blue/30 shadow-sm shadow-gcp-blue/10'
-                          : 'text-gcp-text-secondary hover:text-gcp-text hover:bg-gcp-elevated/60 border border-transparent'
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={page === pageCount}
-                  className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated/60 transition-all duration-150 disabled:hover:bg-transparent"
-                >
-                  ›
-                </button>
-                <button
-                  onClick={() => setPage(pageCount)}
-                  disabled={page === pageCount}
-                  className="px-2 py-1 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated/60 transition-all duration-150 disabled:hover:bg-transparent"
-                >
-                  »
-                </button>
-              </div>
-            </motion.div>
-          )}
+          <Pagination page={page} pageCount={pageCount} total={deferredSorted.length} onPageChange={setPage} />
         </motion.div>
       </motion.div>
     </PageWrapper>

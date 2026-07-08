@@ -2,11 +2,12 @@ import React from 'react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { StatusBadge } from '@/components/StatusBadge';
-import { envBadgeClass } from '@/lib/envStyles';
+import { envBadgeClass, passRateColor } from '@/lib/envStyles';
 import { relativeTime } from '@/lib/utils';
 import type { Run } from '@/lib/types';
 
 export const RunRow = React.memo(function RunRow({ run }: { run: Run }) {
+  const pc = passRateColor(run.passPct);
   return (
     <motion.tr 
       className="group relative transition-colors hover:bg-gcp-elevated/40"
@@ -31,7 +32,7 @@ export const RunRow = React.memo(function RunRow({ run }: { run: Run }) {
       <td className="px-4 py-3 font-mono text-xs text-gcp-text-secondary">{run.suiteId.replace('suite_', '')}</td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className={`text-sm font-semibold tabular-nums ${run.passPct >= 95 ? 'text-gcp-green' : run.passPct >= 80 ? 'text-gcp-yellow' : 'text-gcp-red'}`}
+          <span className={`text-sm font-semibold tabular-nums ${pc.text}`}
             style={{ textShadow: '0 0 12px currentColor' }}>
             {run.passPct}%
           </span>
@@ -40,8 +41,8 @@ export const RunRow = React.memo(function RunRow({ run }: { run: Run }) {
               initial={{ width: 0 }}
               animate={{ width: `${run.passPct}%` }}
               transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.1 }}
-              className={`h-full rounded-full transition-all ${run.passPct >= 95 ? 'bg-gcp-green' : run.passPct >= 80 ? 'bg-gcp-yellow' : 'bg-gcp-red'}`}
-              style={{ boxShadow: `0 0 6px ${run.passPct >= 95 ? 'rgba(52,168,83,0.4)' : run.passPct >= 80 ? 'rgba(251,188,5,0.4)' : 'rgba(234,67,53,0.4)'}` }}
+              className={`h-full rounded-full transition-all ${pc.bar}`}
+              style={{ boxShadow: `0 0 6px ${pc.glow}` }}
             />
           </div>
         </div>

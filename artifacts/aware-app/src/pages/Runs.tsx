@@ -6,6 +6,7 @@ import { loadRuns } from '@/lib/data';
 import type { Env, Run, RunStatus } from '@/lib/types';
 import { RunRow } from '@/components/RunRow';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Pagination } from '@/components/Pagination';
 import { PageWrapper } from '@/components/PageWrapper';
 import { useSort, sortData, SortHeader } from '@/lib/sortableTable';
 import { fadeDown, fastStagger, fadeUp, scaleIn } from '@/lib/motion';
@@ -208,32 +209,7 @@ export default function Runs() {
             </button>
           </motion.div>
         )}
-        {/* Pagination */}
-        {pageCount > 1 && (
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            className="flex items-center justify-between px-4 py-3 border-t border-gcp-border bg-gradient-to-r from-gcp-surface/80 via-gcp-surface/50 to-gcp-surface/80"
-          >
-            <span className="text-xs text-gcp-text-muted tabular-nums">Page {page} of {pageCount} · {deferredSorted.length} items</span>
-            <div className="flex items-center gap-1">
-              <button onClick={() => setPage(1)} disabled={page === 1} className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated hover:shadow-[0_0_6px_rgba(66,133,244,0.1)] transition-all duration-200">«</button>
-              <button onClick={() => setPage(p => p - 1)} disabled={page === 1} className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated hover:shadow-[0_0_6px_rgba(66,133,244,0.1)] transition-all duration-200">‹</button>
-              {Array.from({length: Math.min(5, pageCount)}, (_, i) => {
-                const start = Math.max(1, Math.min(page - 2, pageCount - 4));
-                const p = start + i;
-                return <button key={p} onClick={() => setPage(p)} className={`px-2.5 py-1.5 text-xs rounded-md transition-all duration-200 ${
-                  p === page
-                    ? 'bg-gradient-to-b from-gcp-blue/25 to-gcp-blue/15 text-gcp-blue-light font-semibold shadow-[0_0_8px_rgba(66,133,244,0.2)]'
-                    : 'text-gcp-text-secondary hover:text-gcp-text hover:bg-gcp-elevated hover:shadow-[0_0_6px_rgba(66,133,244,0.08)]'
-                }`}>{p}</button>;
-              })}
-              <button onClick={() => setPage(p => p + 1)} disabled={page === pageCount} className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated hover:shadow-[0_0_6px_rgba(66,133,244,0.1)] transition-all duration-200">›</button>
-              <button onClick={() => setPage(pageCount)} disabled={page === pageCount} className="px-2.5 py-1.5 text-xs text-gcp-text-secondary hover:text-gcp-text disabled:opacity-30 disabled:cursor-not-allowed rounded-md hover:bg-gcp-elevated hover:shadow-[0_0_6px_rgba(66,133,244,0.1)] transition-all duration-200">»</button>
-            </div>
-          </motion.div>
-        )}
+        <Pagination page={page} pageCount={pageCount} total={deferredSorted.length} onPageChange={setPage} />
       </motion.div>
     </PageWrapper>
   );
