@@ -149,12 +149,12 @@ function main() {
       const lines = stats.split("\n").filter(Boolean).slice(0, 10).join("\n    ");
       console.log(`\n  Changes:\n    ${lines}`);
     }
-    sh(`git commit -m "sync: update data files from main [skip ci]"`);
+    sh(`git commit -m "sync: update data files from main [skip ci]"`, { maxBuffer: 50 * 1024 * 1024 });
     if (TOKEN) {
       const remote = `https://x-access-token:${TOKEN}@github.com/${process.env.GITHUB_REPOSITORY || "ruake/AWARE"}.git`;
-      sh(`git push "${remote}" ${DATA_BRANCH}`);
+      sh(`git push "${remote}" ${DATA_BRANCH}`, { maxBuffer: 50 * 1024 * 1024 });
     } else {
-      sh(`git push origin ${DATA_BRANCH}`);
+      sh(`git push origin ${DATA_BRANCH}`, { maxBuffer: 50 * 1024 * 1024 });
     }
     console.log(`\n✓ Synced ${changed} files to "${DATA_BRANCH}" branch`);
   }
