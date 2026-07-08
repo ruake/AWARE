@@ -127,6 +127,12 @@ function main() {
     console.log("  + README.md (created)");
   }
 
+  // ── Configure git identity for CI ────────────────────────────────────
+  const gitUser = sh("git config user.name", { allowFail: true });
+  const gitEmail = sh("git config user.email", { allowFail: true });
+  if (!gitUser) sh('git config user.name "AWARE Bot"');
+  if (!gitEmail) sh('git config user.email "bot@aware.dev"');
+
   // ── Commit & push ────────────────────────────────────────────────────
   sh(`git add -A`);
   const hasChanges = sh(`git diff --cached --quiet`, { allowFail: true }) === null;
