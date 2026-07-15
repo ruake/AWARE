@@ -1,20 +1,20 @@
 [
   {
-    "id": "suite_regression_qa-20260715T220141",
+    "id": "suite_regression_qa-20260715T220155",
     "suite": "suite_regression_qa",
     "env": "QA",
-    "envLabel": "QA / Staging",
+    "envLabel": "QA / Production",
     "tier": "QA",
-    "network": "staging",
-    "started": "2026-07-15T22:01:41Z",
-    "duration": 3781,
+    "network": "production",
+    "started": "2026-07-15T22:01:55Z",
+    "duration": 4985,
     "passed": 0,
     "failed": 0,
     "total": 0,
     "passPct": 0,
     "failures": 0,
     "runnerType": "pytest",
-    "ghRunId": "29453955698"
+    "ghRunId": "29453959594"
   },
   {
     "id": "run_20260708_mrbfk2ep",
