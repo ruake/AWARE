@@ -1,22 +1,5 @@
 [
   {
-    "id": "suite_continuous-20260822T190209",
-    "suite": "suite_continuous",
-    "env": "QA",
-    "envLabel": "QA / Staging",
-    "tier": "QA",
-    "network": "staging",
-    "started": "2026-08-22T19:02:09Z",
-    "duration": 0,
-    "passed": 0,
-    "failed": 0,
-    "total": 0,
-    "passPct": 0,
-    "failures": 0,
-    "runnerType": "playwright",
-    "ghRunId": "32592442444"
-  },
-  {
     "id": "run_20260708_mrbfk2ep",
     "label": "suite_smoke — PROD / Production",
     "suiteId": "suite_smoke",
