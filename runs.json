@@ -1,12 +1,12 @@
 [
   {
-    "id": "suite_continuous-20261015T000143",
-    "suite": "suite_continuous",
+    "id": "suite_regression_qa-20261015T000153",
+    "suite": "suite_regression_qa",
     "env": "QA",
     "envLabel": "QA / Staging",
     "tier": "QA",
     "network": "staging",
-    "started": "2026-10-15T00:01:43Z",
+    "started": "2026-10-15T00:01:53Z",
     "duration": 0,
     "passed": 0,
     "failed": 0,
@@ -14,7 +14,7 @@
     "passPct": 0,
     "failures": 0,
     "runnerType": "playwright",
-    "ghRunId": "38657486023"
+    "ghRunId": "38657502546"
   },
   {
     "id": "run_20260708_mrbfk2ep",
