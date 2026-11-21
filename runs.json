@@ -1,5 +1,22 @@
 [
   {
+    "id": "suite_continuous-20261121T020104",
+    "suite": "suite_continuous",
+    "env": "QA",
+    "envLabel": "QA / Staging",
+    "tier": "QA",
+    "network": "staging",
+    "started": "2026-11-21T02:01:04Z",
+    "duration": 5590,
+    "passed": 1,
+    "failed": 1,
+    "total": 2,
+    "passPct": 50,
+    "failures": 1,
+    "runnerType": "pytest",
+    "ghRunId": "44853434629"
+  },
+  {
     "id": "run_20260708_mrbfk2ep",
     "label": "suite_smoke — PROD / Production",
     "suiteId": "suite_smoke",
